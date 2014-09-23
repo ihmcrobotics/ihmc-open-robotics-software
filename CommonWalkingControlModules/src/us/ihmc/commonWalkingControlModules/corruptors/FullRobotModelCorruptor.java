@@ -70,7 +70,7 @@ public class FullRobotModelCorruptor
          final RigidBody lowerArm = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getSuccessor();
          createMassAndCoMOffsetCorruptors(lowerArmName, lowerArm);
          
-         String handName = sidePrefix + "Hane";
+         String handName = sidePrefix + "Hand";
          final RigidBody hand = fullRobotModel.getHand(robotSide);
          createMassAndCoMOffsetCorruptors(handName, hand);
      }
