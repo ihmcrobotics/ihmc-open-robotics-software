@@ -34,10 +34,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final OriginAndPointFrame pointTrackingFrame;
    private final YoGraphicReferenceFrame pointTrackingFrameFiz;
 
-   private enum HeadTrackingMode
-   {
-      ORIENTATION, POINT
-   }
+   private enum HeadTrackingMode {ORIENTATION, POINT}
 
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
 
@@ -58,18 +55,21 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
     */
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
-         HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+           HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(momentumBasedController, headOrientationExpressedInFrame, headOrientationControllerParameters, null, parentRegistry, yoGraphicsListRegistry);
    }
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
-         HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+           HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController
-            .getTwistCalculator(), momentumBasedController.getControlDT(), gains, parentRegistry);
+      super("head", new RigidBody[]
+      {
+      }, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[]
+      {
+      }, momentumBasedController.getTwistCalculator(), momentumBasedController.getControlDT(), gains, parentRegistry);
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       this.head = fullRobotModel.getHead();
@@ -112,26 +112,28 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       switch (headTrackingMode.getEnumValue())
       {
-      case ORIENTATION:
-      {
-         orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
-         orientationToTrack.getFrameOrientationIncludingFrame(orientationToPack);
+         case ORIENTATION :
+         {
+            orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
+            orientationToTrack.getFrameOrientationIncludingFrame(orientationToPack);
 
-         break;
+            break;
+         }
+
+         case POINT :
+         {
+            pointTrackingFrame.update();
+            pointTrackingFrameFiz.update();
+
+            orientationToPack.setToZero(pointTrackingFrame);
+
+            break;
+         }
+
+         default :
+            throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
 
-      case POINT:
-      {
-         pointTrackingFrame.update();
-         pointTrackingFrameFiz.update();
-
-         orientationToPack.setToZero(pointTrackingFrame);
-         break;
-      }
-
-      default:
-         throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
-      }
       orientationToPack.changeFrame(worldFrame);
 
       enforceLimits(orientationToPack);
@@ -141,7 +143,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    {
       ReferenceFrame initialReferenceFrame = orientation.getReferenceFrame();
 
-      //Limit pitch with respect to the chest frame
+      // Limit pitch with respect to the chest frame
       {
          orientation.changeFrame(chestFrame);
          double[] yawPitchRoll = orientation.getYawPitchRoll();
@@ -150,7 +152,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          orientation.setYawPitchRoll(yawPitchRoll);
       }
 
-      //Limit roll and yaw
+      // Limit roll and yaw
       {
          orientation.changeFrame(getJacobian().getBaseFrame());
 

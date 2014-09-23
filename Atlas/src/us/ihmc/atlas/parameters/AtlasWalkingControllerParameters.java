@@ -32,8 +32,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double neck_pitch_lower_limit = -0.602139; //-0.610865;    // -math.pi/2.0;
    private final double head_yaw_limit = Math.PI / 4.0;
    private final double head_roll_limit = Math.PI / 4.0;
-   private final double pelvis_pitch_upper_limit = 0.0;
-   private final double pelvis_pitch_lower_limit = -0.35; //-math.pi / 6.0;
+   private final double pelvis_pitch_upper_limit = 0.4;
+   private final double pelvis_pitch_lower_limit = -0.1; //-math.pi / 6.0;
 
    private final double  min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
 
