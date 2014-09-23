@@ -1,0 +1,6 @@
+<launch>
+	<param name="robot_description" command="$(find xacro)/xacro.py $(find lidar_to_point_cloud_transformer)/test/sphere.urdf" />
+	<node name="sphere" pkg='lidar_to_point_cloud_transformer' type="lidar_to_point_cloud_transformer-test" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find lidar_to_point_cloud_transformer)/test/sphere.rviz" />
+</launch>
+

@@ -14,6 +14,7 @@
 
 // PCL
 #include <pcl_ros/transforms.h>
+#include <pcl/common/io.h>
 
 using namespace std;
 using namespace ros;

@@ -18,7 +18,6 @@
 // PCL
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
 
 namespace lidar_to_point_cloud_transformer {
 
