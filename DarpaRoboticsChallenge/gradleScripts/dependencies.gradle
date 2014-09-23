@@ -1,5 +1,6 @@
 evaluationDependsOn(':IHMCUtilities')
 evaluationDependsOn(':CommonWalkingControlModules')
+evaluationDependsOn(':IHMCCommunication')
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -64,4 +65,5 @@ dependencies {
 
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
+	testCompile project(':IHMCCommunication').sourceSets.test.output
 }
