@@ -6,6 +6,7 @@ import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardControllerListene
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
+import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -26,7 +27,7 @@ public class RemoteAtlasVisualizer
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
 //      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
 
-      SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
       scsYoVariablesUpdatedListener.addButton("setWristForceSensorsToZero", 1.0);
       
