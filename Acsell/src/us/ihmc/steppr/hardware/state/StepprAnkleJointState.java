@@ -9,9 +9,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class StepprAnkleJointState
 {
+   private final StepprAnkleAngleCalculator interpolator = new StepprAnkleInterpolator();
+
    private final StepprJointState ankleY = new AnkleY();
    private final StepprJointState ankleX = new AnkleX();
-   
+
    private final StepprActuatorState leftActuator;
    private final StepprActuatorState rightActuator;
 
@@ -25,52 +27,43 @@ public class StepprAnkleJointState
    private final DoubleYoVariable qd_x;
    private final DoubleYoVariable tau_x;
 
-   // For testing purposes
-   private final DenseMatrix64F wrongMatrix = new DenseMatrix64F(2, 2);
-
-   private final DenseMatrix64F actuatorState = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F jointState = new DenseMatrix64F(2, 1);
-
    public StepprAnkleJointState(RobotSide robotSide, StepprActuatorState rightActuator, StepprActuatorState leftActuator, YoVariableRegistry parentRegistry)
    {
       this.leftActuator = leftActuator;
       this.rightActuator = rightActuator;
 
-      this.registry = new YoVariableRegistry(robotSide.getCamelCaseNameForStartOfExpression() + "Ankle");
+      String name = robotSide.getCamelCaseNameForStartOfExpression() + "Ankle";
+      this.registry = new YoVariableRegistry(name);
 
-      this.q_y = new DoubleYoVariable("q_y", registry);
-      this.qd_y = new DoubleYoVariable("qd_y", registry);
-      this.tau_y = new DoubleYoVariable("tau_y", registry);
-
-      this.q_x = new DoubleYoVariable("q_x", registry);
-      this.qd_x = new DoubleYoVariable("qd_x", registry);
-      this.tau_x = new DoubleYoVariable("tau_x", registry);
-
-      wrongMatrix.set(0, 0, 0.5);
-      wrongMatrix.set(0, 1, -0.5);
-      wrongMatrix.set(1, 0, 0.5);
-      wrongMatrix.set(1, 1, 0.5);
       
+      this.q_y = new DoubleYoVariable(name + "_q_y", registry);
+      this.qd_y = new DoubleYoVariable(name + "_qd_y", registry);
+      this.tau_y = new DoubleYoVariable(name + "_tau_y", registry);
+
+      this.q_x = new DoubleYoVariable(name + "_q_x", registry);
+      this.qd_x = new DoubleYoVariable(name + "_qd_x", registry);
+      this.tau_x = new DoubleYoVariable(name + "_tau_x", registry);
+
       parentRegistry.addChild(registry);
    }
 
    public void update()
    {
-      actuatorState.set(0, 0, rightActuator.getMotorPosition());
-      actuatorState.set(1, 0, leftActuator.getMotorPosition());
+      interpolator.updateAnkleState(rightActuator.getMotorPosition(), leftActuator.getMotorPosition(), rightActuator.getMotorVelocity(),
+            leftActuator.getMotorVelocity());
 
-      // The next line is fecal matter
-      CommonOps.mult(wrongMatrix, actuatorState, jointState);
+      this.q_x.set(interpolator.getQAnkleX());
+      this.q_y.set(interpolator.getQAnkleY());
 
-      this.q_y.set(jointState.get(0, 0));
-      this.q_x.set(jointState.get(1, 0));
+      this.qd_x.set(interpolator.getQdAnkleX());
+      this.qd_y.set(interpolator.getQdAnkleY());
    }
-   
+
    public StepprJointState ankleY()
    {
       return ankleY;
    }
-   
+
    public StepprJointState ankleX()
    {
       return ankleX;

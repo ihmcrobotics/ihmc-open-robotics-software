@@ -21,9 +21,11 @@ public class StepprLinearTransmissionJointState implements StepprJointState
       this.ratio = ratio;
       this.actuator = actuator;
 
-      this.q = new DoubleYoVariable("q", registry);
-      this.qd = new DoubleYoVariable("qd", registry);
-      this.tau = new DoubleYoVariable("tau", registry);
+      this.q = new DoubleYoVariable(name + "_q", registry);
+      this.qd = new DoubleYoVariable(name + "_qd", registry);
+      this.tau = new DoubleYoVariable(name + "_tau", registry);
+      
+      parentRegistry.addChild(registry);
    }
 
    @Override

@@ -1,21 +1,27 @@
 package us.ihmc.steppr.hardware.state;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.StandardProtocolFamily;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
+import java.nio.channels.MembershipKey;
 
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
 public class UDPStepprStateReader extends RealtimeThread
 {
    private final StepprState state;
    private final StepprStateProcessor stateProcessor;
 
-   private final InetSocketAddress receiveAddress = new InetSocketAddress(11303);
    private DatagramChannel receiveChannel;
+   private MembershipKey receiveKey; 
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
 
    private volatile boolean requestStop = false;
@@ -28,7 +34,7 @@ public class UDPStepprStateReader extends RealtimeThread
       this.state = state;
       this.stateProcessor = stateProcessor;
       
-      receiveBuffer.order(ByteOrder.BIG_ENDIAN);
+      receiveBuffer.order(ByteOrder.LITTLE_ENDIAN);
       
    }
    
@@ -58,6 +64,10 @@ public class UDPStepprStateReader extends RealtimeThread
             receiveChannel.receive(receiveBuffer);
             receiveBuffer.flip();
             
+            if(receiveBuffer.remaining() != 1048)
+            {
+               continue;
+            }
             
             long currentTime = RealtimeThread.getCurrentMonotonicClockTime();
             if(state.update(receiveBuffer, currentTime))
@@ -83,15 +93,26 @@ public class UDPStepprStateReader extends RealtimeThread
    
    private void connect() throws IOException
    {
-      receiveChannel = DatagramChannel.open();
+      
+      NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(StepprNetworkParameters.CONTROL_COMPUTER_HOST));
+      System.out.println("Binding to interface: " + iface);
+      
+      InetSocketAddress receiveAddress = new InetSocketAddress(StepprNetworkParameters.UDP_MULTICAST_STATE_PORT);
+      
+      receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET)
+            .setOption(StandardSocketOptions.SO_REUSEADDR, true)
+            .bind(receiveAddress);
       receiveChannel.socket().setReceiveBufferSize(65535);
-      receiveChannel.socket().bind(receiveAddress);
+      
+      InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
+      receiveKey = receiveChannel.join(group, iface);
    }
 
    private void disconnect()
    {
       try
       {
+         receiveKey.drop();
          receiveChannel.close();
       }
       catch (IOException e)
