@@ -36,8 +36,6 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
 	compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
-	compile group: 'org.jeromq', name: 'jeromq', version: '0.2.0'
-	//compile group: 'org.zeromq', name: 'jeromq', version: '0.3.0'
 	compile group: 'us.ihmc.thirdparty', name: 'jeromq', version: '0.3.4'
 	
 	compile project(':IHMCRealtime')
@@ -65,5 +63,4 @@ dependencies {
 
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
-	testCompile project(':IHMCCommunication').sourceSets.test.output
 }
