@@ -1,5 +1,5 @@
 evaluationDependsOn(':DarpaRoboticsChallenge')
-evaluationDependsOn(':CommonWalkingContolModules')
+evaluationDependsOn(':CommonWalkingControlModules')
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
