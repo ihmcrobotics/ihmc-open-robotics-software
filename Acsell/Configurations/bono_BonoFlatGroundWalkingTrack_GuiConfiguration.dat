@@ -34,6 +34,7 @@
 
 <Graph Array Window Size>0</Graph Array Window Size>
 
+
 <Extra Panels>
 <Main Viewport>
 Plotter,
@@ -41,9 +42,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.863267956956039</Camera X>
- <Camera Y>1.5920773673772315</Camera Y>
- <Camera Z>0.8859872797237686</Camera Z>
+ <Camera X>4.4418087941336655</Camera X>
+ <Camera Y>2.011549096734309</Camera Y>
+ <Camera Z>1.4922664694727614</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -67,8 +68,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.11596149805533695</Fix X>
-<Fix Y>0.6411394066457405</Fix Y>
-<Fix Z>0.3037997479865997</Fix Z>
+<Fix X>0.46217693946428895</Fix X>
+<Fix Y>0.7791299807738872</Fix Y>
+<Fix Z>0.9059785851059112</Fix Z>
 </Fix Position>
 </Canvas 1>
