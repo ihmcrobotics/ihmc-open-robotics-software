@@ -4,8 +4,65 @@ apply from: 'gradleScripts/util.gradle'
 sourceCompatibility = 1.7
 version = '1.0'
 
+configurations {
+	sshAntTask
+}
+
+buildscript {
+  repositories {
+      mavenCentral() 
+  }  
+  dependencies {
+      classpath "org.apache.maven.wagon:wagon-ssh:2.7" 
+  }
+}
+
 setupDefaultDirectoryStructure()
 
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
+
+
+jar {
+	List depend = []
+	configurations.runtime.each {
+		depend.add('lib/' + it.name)
+	}
+	manifest {		
+		attributes('Created-By': 'IHMC Gradle Build Script', 'Implementation-Vendor': 'IHMC', 'Class-Path': depend.join(' '))
+	}
+}
+
+task print_dependencies() {
+    configurations.compile.files.each { file ->
+        println "$file.name -> $file.path"
+    }
+}
+
+task publish(dependsOn: assemble) {
+
+	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://localhost/home/jesper/acsell")
+	def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo() 
+	auth.userName = 'jesper'
+	auth.password = 'jps901'
+	def hosts = new org.apache.maven.wagon.providers.ssh.knownhost.NullKnownHostProvider()
+	hosts.setHostKeyChecking("no")
+	
+	
+	println configurations.compile
+	
+	doLast {
+		def wagon = new org.apache.maven.wagon.providers.ssh.jsch.ScpWagon() 
+		wagon.setKnownHostsProvider(hosts)
+		wagon.connect(rep, auth)
+		
+		configurations.runtime.each 
+		{
+			wagon.put(it, "lib/" + it.name)
+		}
+		
+		wagon.put(jar.archivePath, jar.archiveName)
+	}
+	 
+}
