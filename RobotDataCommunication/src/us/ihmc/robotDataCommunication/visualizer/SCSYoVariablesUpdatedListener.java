@@ -197,4 +197,9 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    {
       displayOneInNPackets = val;
    }
+
+   public void updateGraphsLessFrequently(boolean enable, int numberOfTicksBeforeUpdatingGraphs)
+   {
+      scs.setFastSimulate(enable, numberOfTicksBeforeUpdatingGraphs);
+   }
 }
