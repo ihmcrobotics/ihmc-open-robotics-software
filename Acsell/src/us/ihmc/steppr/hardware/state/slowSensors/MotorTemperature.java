@@ -7,9 +7,9 @@ public class MotorTemperature implements StepprSlowSensor
 {
    private final DoubleYoVariable motorTemperature;
    
-   public MotorTemperature(YoVariableRegistry parentRegistry)
+   public MotorTemperature(String name, YoVariableRegistry parentRegistry)
    {
-      motorTemperature = new DoubleYoVariable("motorTemperature", parentRegistry);
+      motorTemperature = new DoubleYoVariable(name + "MotorTemperature", parentRegistry);
    }
 
    @Override

@@ -7,9 +7,9 @@ public class BusVoltage implements StepprSlowSensor
 {
    private final DoubleYoVariable busVoltage;
    
-   public BusVoltage(YoVariableRegistry parentRegistry)
+   public BusVoltage(String name, YoVariableRegistry parentRegistry)
    {
-      busVoltage = new DoubleYoVariable("busVoltage", parentRegistry);
+      busVoltage = new DoubleYoVariable(name + "BusVoltage", parentRegistry);
    }
 
    @Override

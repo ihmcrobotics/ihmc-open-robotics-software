@@ -10,7 +10,7 @@ public enum StepprActuator
    LEFT_HIP_X("leftHipXActuator", 2.286),
    
    RIGHT_ANKLE_RIGHT("rightAnkleRightActuator", 1.152),
-   RIGHT_ANKLE_LEFT("rightAnklerightActuator", 1.152),
+   RIGHT_ANKLE_LEFT("rightAnkleLeftActuator", 1.152),
    RIGHT_KNEE("rightKneeActuator", 2.286),
    RIGHT_HIP_Y("rightHipYActuator", 0.893),
    RIGHT_HIP_Z("rightHipZActuator", 0.702),

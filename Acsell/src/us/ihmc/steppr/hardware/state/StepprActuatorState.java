@@ -50,40 +50,40 @@ public class StepprActuatorState
    {
       this.registry = new YoVariableRegistry(name);
       this.motorKt = motorKt;
-      this.microControllerTime = new LongYoVariable("microControllerTime", registry);
+      this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
 
-      this.rawEncoder = new IntegerYoVariable("rawEncoder", registry);
-      this.rawPhaseACurrent = new IntegerYoVariable("rawPhaseACurrent", registry);
-      this.rawPhaseBCurrent = new IntegerYoVariable("rawPhaseBCurrent", registry);
-      this.rawPhaseCCurrent = new IntegerYoVariable("rawPhaseCCurrent", registry);
+      this.rawEncoder = new IntegerYoVariable(name + "RawEncoder", registry);
+      this.rawPhaseACurrent = new IntegerYoVariable(name + "RawPhaseACurrent", registry);
+      this.rawPhaseBCurrent = new IntegerYoVariable(name + "RawPhaseBCurrent", registry);
+      this.rawPhaseCCurrent = new IntegerYoVariable(name + "RawPhaseCCurrent", registry);
 
-      this.inphaseCompositeStatorCurrent = new DoubleYoVariable("inphaseCompositeStatorCurrent", registry);
-      this.quadratureCompositeStatorCurrent = new DoubleYoVariable("quadtratureCompositeStatorCurrent", registry);
-      this.controlTarget = new DoubleYoVariable("controlTarget", registry);
-      this.inphaseControlEffort = new DoubleYoVariable("inphaseControlEffort", registry);
-      this.quadratureControlEffort = new DoubleYoVariable("quadratureControlEffort", registry);
-      this.motorEncoder = new DoubleYoVariable("motorEncoder", registry);
-      this.estimatedTorqueStrainGauge0 = new DoubleYoVariable("estimatedTorqueStrainGauge0", registry);
-      this.estimatedTorqueStrainGauge1 = new DoubleYoVariable("estimatedTorqueStrainGauge1", registry);
+      this.inphaseCompositeStatorCurrent = new DoubleYoVariable(name + "InphaseCompositeStatorCurrent", registry);
+      this.quadratureCompositeStatorCurrent = new DoubleYoVariable(name + "QuadtratureCompositeStatorCurrent", registry);
+      this.controlTarget = new DoubleYoVariable(name + "ControlTarget", registry);
+      this.inphaseControlEffort = new DoubleYoVariable(name + "InphaseControlEffort", registry);
+      this.quadratureControlEffort = new DoubleYoVariable(name + "QuadratureControlEffort", registry);
+      this.motorEncoder = new DoubleYoVariable(name + "MotorEncoder", registry);
+      this.estimatedTorqueStrainGauge0 = new DoubleYoVariable(name + "EstimatedTorqueStrainGauge0", registry);
+      this.estimatedTorqueStrainGauge1 = new DoubleYoVariable(name + "EstimatedTorqueStrainGauge1", registry);
 
-      this.motorVelocityEstimate = new DoubleYoVariable("motorVelocityEstimate", registry);
+      this.motorVelocityEstimate = new DoubleYoVariable(name + "MotorVelocityEstimate", registry);
 
-      this.lastReceivedControlID = new LongYoVariable("lastReceivedControlID", registry);
+      this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
 
-      this.halSensors = new IntegerYoVariable("haslSensors", registry);
-      this.controlMode = new IntegerYoVariable("controlMode", registry);
+      this.halSensors = new IntegerYoVariable(name + "HalSensors", registry);
+      this.controlMode = new IntegerYoVariable(name + "ControlMode", registry);
 
-      createSlowSensors();
+      createSlowSensors(name);
 
       parentRegistry.addChild(registry);
    }
 
-   private void createSlowSensors()
+   private void createSlowSensors(String name)
    {
-      slowSensors[0] = new MotorTemperature(registry);
-      slowSensors[1] = new mcbTemperature1(registry);
-      slowSensors[2] = new BusVoltage(registry);
-      slowSensors[3] = new mcbTemperature2(registry);
+      slowSensors[0] = new MotorTemperature(name, registry);
+      slowSensors[1] = new mcbTemperature1(name, registry);
+      slowSensors[2] = new BusVoltage(name, registry);
+      slowSensors[3] = new mcbTemperature2(name, registry);
    }
 
    public void update(ByteBuffer buffer) throws IOException
@@ -144,7 +144,7 @@ public class StepprActuatorState
       int calculatedChecksum = 0;
       for(int i = 0; i < checksumOffset; i++)
       {
-         calculatedChecksum += buffer.get() & 0xFF;
+         calculatedChecksum = (calculatedChecksum + (buffer.get() & 0xFF)) & 0xFF;
       }
       
       int checksum = buffer.get() & 0xFF;

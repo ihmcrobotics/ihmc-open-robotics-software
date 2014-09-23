@@ -85,6 +85,12 @@ public class StepprState
          }
          powerDistributionState.update(buffer);
          xsens.update(buffer);
+         
+         for(StepprJoint joint : StepprJoint.values)
+         {
+            jointStates.get(joint).update();
+         }
+         
          return true;
          
       }
