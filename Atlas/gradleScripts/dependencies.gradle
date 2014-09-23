@@ -1,4 +1,6 @@
 evaluationDependsOn(':DarpaRoboticsChallenge')
+evaluationDependsOn(':CommonWalkingContolModules')
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
@@ -27,6 +29,7 @@ dependencies {
     compile project(':CommonAvatarInterfaces')
     compile project(':DarpaRoboticsChallenge')
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
+    testCompile project(':CommonWalkingControlModules').sourceSets.test.output
     compile project(':Graphics3DAdapter')
     compile project(':IHMCROSTools')
     compile project(':ImageProcessing')
