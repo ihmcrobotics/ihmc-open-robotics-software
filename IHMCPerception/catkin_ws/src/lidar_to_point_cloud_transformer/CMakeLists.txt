@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(lidar_to_point_cloud_transformer)
 
+set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
 ## Find catkin macros and libraries
@@ -58,6 +59,7 @@ add_executable(
   src/lidar_to_point_cloud_transformer_node.cpp
   src/LidarToPointCloudTransformer.cpp
   src/PointCloudAssembler.cpp
+  src/RobotSelfFilter.cpp
 )
 
 ## Specify libraries to link a library or executable target against
@@ -65,3 +67,10 @@ target_link_libraries(
   ${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
+
+
+
+# Add gtest based cpp test target and link libraries
+find_package(rostest REQUIRED)
+add_rostest_gtest(${PROJECT_NAME}-test test/sphere.test test/RobotSelfFilter_test.cpp src/RobotSelfFilter.cpp)
+target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})

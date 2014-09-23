@@ -1,0 +1,5 @@
+<launch>
+	<param name="robot_description" command="$(find xacro)/xacro.py $(find lidar_to_point_cloud_transformer)/test/sphere.urdf" />
+	<test test-name="sphere" pkg='lidar_to_point_cloud_transformer' type="lidar_to_point_cloud_transformer-test" />
+</launch>
+

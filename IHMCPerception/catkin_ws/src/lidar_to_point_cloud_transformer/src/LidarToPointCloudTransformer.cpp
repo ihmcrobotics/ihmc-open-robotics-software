@@ -11,8 +11,6 @@
 // ROS
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/LaserScan.h>
-#include <geometric_shapes/shape_operations.h>
-#include <tf_conversions/tf_eigen.h>
 
 
 
@@ -27,111 +25,6 @@ using namespace ros;
 
 
 
-RobotSelfFilter::RobotSelfFilter()
-{
-        robot_model_loader.reset(new robot_model_loader::RobotModelLoader("/Atlas/robot_description"));
-        shape_mask_.reset(new ShapeMask());
-        shape_mask_->setTransformCallback(boost::bind(&RobotSelfFilter::getShapeTransform, this, _1, _2));
-        addAllLinksToShapeMask();
-
-};
-
-void RobotSelfFilter::addAllLinksToShapeMask()
-{
-        const std::vector<const robot_model::LinkModel*> &links = robot_model_loader->getModel()->getLinkModelsWithCollisionGeometry();
-//		robot_model_loader->getModel()->getLinkModels(); //no-collision links
-          for (std::size_t i = 0 ; i < links.size() ; ++i)
-          {
-            ROS_INFO_STREAM("link " << i << " " <<  links[i]->getName() << " shapes " << links[i]->getShapes().size());
-            std::vector<shapes::ShapeConstPtr> shapes = links[i]->getShapes(); // copy shared ptrs
-            for (std::size_t j = 0 ; j < shapes.size() ; ++j)
-            {
-              ROS_INFO_STREAM("shape " << j << " " << shapes::shapeStringName(&*shapes[j]) );
-              // merge mesh vertices up to 0.1 mm apart
-              if (shapes[j]->type == shapes::MESH)
-              {
-                shapes::Mesh *m = static_cast<shapes::Mesh*>(shapes[j]->clone());
-                m->mergeVertices(1e-4);
-                shapes[j].reset(m);
-              }
-
-              ShapeHandle h=shape_mask_->addShape(shapes[j], scale, padding);
-              if (h)
-                link_shape_handles_[links[i]].push_back(std::make_pair(h, j));
-            }
-          }
-};
-
-bool RobotSelfFilter::getShapeTransform(ShapeHandle h, Eigen::Affine3d &transform) const
-{
-  ShapeTransformCache::const_iterator it = transformCache.find(h);
-  if (it == transformCache.end())
-  {
-    ROS_ERROR("Internal error. Shape filter handle %u not found", h);
-    return false;
-  }
-  transform = it->second;
-
-  return true;
-};
-
-
-void RobotSelfFilter::filterPointClould(const pcl::PointCloud<pcl::PointXYZI> & source_cloud, pcl::PointCloud<pcl::PointXYZI>& filtered_cloud)
-{
-        std::vector<int> mask_;
-        const Eigen::Vector3d dummy_sensor_origin;
-        const double min_range_=0.0;
-
-        //convert XYZI to XYZ
-        pcl::PointCloud<pcl::PointXYZ> tmp;
-        pcl::copyPointCloud(source_cloud, tmp);
-
-        //obtain in/out mask
-        shape_mask_->maskContainment(tmp, dummy_sensor_origin, min_range_, max_range_, mask_);
-
-        //insert selected ones
-        pcl::PointCloud<pcl::PointXYZI>::const_iterator cloud_it = source_cloud.begin();
-        for(vector<int>::iterator mask_it=mask_.begin(); mask_it!=mask_.end(); mask_it++)
-        {
-        	if(*mask_it==ShapeMask::OUTSIDE)
-        		filtered_cloud.push_back(*cloud_it);
-        	cloud_it++;
-        }
-
-        if(filtered_cloud.header.frame_id.empty())
-        	filtered_cloud.header.frame_id = source_cloud.header.frame_id;
-
-        if(filtered_cloud.header.frame_id != source_cloud.header.frame_id)
-        	ROS_ERROR("filterPointCloud: source_cloud/filtered_cloud frame_id mismatch");
-};
-
-
-
-/*
- * refer planning_scene_monitor::PlanningSceneMonitor::getShapeTransformCache
- */
-bool RobotSelfFilter::updateShapeTransformCache(const std::string &target_frame, const ros::Time &target_time)
-{
-  try
-  {
-          boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
-        for (LinkShapeHandles::const_iterator it = link_shape_handles_.begin() ; it != link_shape_handles_.end(); ++it)
-        {
-          tf::StampedTransform tr;
-          tfListener.lookupTransform(target_frame, it->first->getName(), target_time, tr);
-          Eigen::Affine3d ttr;
-          tf::transformTFToEigen(tr, ttr);
-          for (std::size_t j = 0 ; j < it->second.size() ; ++j)
-                transformCache[it->second[j].first] = ttr * it->first->getCollisionOriginTransforms()[it->second[j].second];
-        }
-  }
-  catch (tf::TransformException& ex)
-  {
-    ROS_ERROR_THROTTLE(1, "Transform error: %s", ex.what());
-    return false;
-  }
-  return true;
-};
 
 
 namespace lidar_to_point_cloud_transformer {
@@ -140,9 +33,9 @@ namespace lidar_to_point_cloud_transformer {
 
 LidarToPointCloudTransformer::LidarToPointCloudTransformer(ros::NodeHandle& nodeHandle)
     : nodeHandle_(nodeHandle),
-
       pointCloudAssembler_(tfListener_),
-      laserScanFilterChain_("sensor_msgs::LaserScan")
+      laserScanFilterChain_("sensor_msgs::LaserScan"),
+      selfFilter(std::string("/Atlas/robot_description"), 0.10)
 {
   readParameters();
   laserScanSubscriber_ = nodeHandle_.subscribe(laserScanTopic_, laserScanSubscriptionQueueSize_, &LidarToPointCloudTransformer::laserScanCallback, this);
@@ -150,14 +43,8 @@ LidarToPointCloudTransformer::LidarToPointCloudTransformer(ros::NodeHandle& node
   filteredPointCloudPublisher_ = nodeHandle.advertise<sensor_msgs::PointCloud2>("filtered_point_cloud",1);
   assembledPointCloudPublisher_ = nodeHandle_.advertise<sensor_msgs::PointCloud2>("assembled_lidar_point_cloud", 1);
   initialize();
-  selfFilter.reset(new RobotSelfFilter());
 }
 
-
-
-LidarToPointCloudTransformer::~LidarToPointCloudTransformer() {
-
-}
 
 bool LidarToPointCloudTransformer::readParameters() {
   nodeHandle_.param("laser_scan_topic", laserScanTopic_, string("scan"));
@@ -212,8 +99,8 @@ void LidarToPointCloudTransformer::laserScanCallback(const sensor_msgs::LaserSca
 
   // Robot self filter.
   pcl::PointCloud<pcl::PointXYZI>::Ptr pointCloudFiltered(new pcl::PointCloud<pcl::PointXYZI>());
-  selfFilter->updateShapeTransformCache(pointCloud->header.frame_id, scantime);
-  selfFilter->filterPointClould(*pointCloud, *pointCloudFiltered);
+  //selfFilter.updateShapeTransformCache(pointCloud->header.frame_id, scantime);
+  selfFilter.filterPointClould(*pointCloud, *pointCloudFiltered);
   filteredPointCloudPublisher_.publish(pointCloudFiltered);
 
   // Publish laser scan as point cloud.
