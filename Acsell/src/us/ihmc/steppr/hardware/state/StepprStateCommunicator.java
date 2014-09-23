@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.steppr.hardware.StepprJoint;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -27,8 +28,11 @@ public class StepprStateCommunicator implements StepprStateProcessor
 
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
       UDPStepprStateReader reader = new UDPStepprStateReader(priority, state, communicator);
+      
+      variableServer.start();
       reader.start();
-
+      
+      ThreadTools.sleepForever();
    }
 
    private final RobotVisualizer visualizer;
