@@ -9,7 +9,7 @@ public enum HumanoidSpinePose
     * Spine angles are as follows:
     * 
     * 1 - waist rotator (negative torso right / positive torso left) min: 0.0 max: 0.0 
-    * 2 - waist extensor (negative back / positive forward) min: -0.06 max: 0.1
+    * 2 - waist extensor (negative forward / positive back) min: -0.06 max: 0.1
     * 3 - waist lateral extensor (negative lean left / positive lean right) min: -0.1  max: 0.1
     * 
     * @return armAngles
@@ -25,13 +25,13 @@ public enum HumanoidSpinePose
          case TURN_RIGHT:
             return new double[]{-0.1, -0.06, 0.0};
          case LEAN_FORWARD_A_LOT:
-            return new double[]{0.0, 0.3, 0.0};
-         case LEAN_BACKWARD_A_LOT:
             return new double[]{0.0, -0.3, 0.0};
+         case LEAN_BACKWARD_A_LOT:
+            return new double[]{0.0, 0.3, 0.0};
          case LEAN_FORWARD:
-            return new double[]{0.0, 0.1, 0.0};
-         case LEAN_BACKWARD:
             return new double[]{0.0, -0.1, 0.0};
+         case LEAN_BACKWARD:
+            return new double[]{0.0, 0.1, 0.0};
          case LEAN_LEFT:
             return new double[]{0.0, -0.06, 0.1};
          case LEAN_RIGHT:
