@@ -158,12 +158,6 @@ public class DiagnosticsWhenHangingHelper
       
       totalMass.set(centerOfMassCalculator.getTotalMass());
       
-//      if (totalMass.getName().contains("RightHip"))
-//      {
-//         System.out.println("setting " + totalMass.getName() + " to " + totalMass.getDoubleValue());
-//         System.out.println(totalMass.getClass().getName() + "@" + Integer.toHexString(totalMass.hashCode()));
-//      }
-      
       forceVector.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -9.81 * totalMass.getDoubleValue());
       forceVector.changeFrame(jointAxis.getReferenceFrame());
       
@@ -176,6 +170,16 @@ public class DiagnosticsWhenHangingHelper
       
       estimatedTorque.set(rCrossFVector.dot(jointAxis));
       if (isSpineJoint) estimatedTorque.mul(-1.0);
+   }
+   
+   public void addOffsetToEstimatedTorque()
+   {
+      estimatedTorque.add(torqueOffset);
+   }
+
+   public DoubleYoVariable getTorqueOffsetVariable()
+   {
+      return torqueOffset;
    }
 
 
