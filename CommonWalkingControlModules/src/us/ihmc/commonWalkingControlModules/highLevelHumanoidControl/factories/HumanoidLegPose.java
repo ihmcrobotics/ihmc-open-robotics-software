@@ -2,66 +2,63 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 public enum HumanoidLegPose
 {
-   STAND_PREP, LEG_TWO, LEG_THREE, LEG_THREE_B, LEG_THREE_C, LEG_THREE_D, LEG_FOUR, LEG_FOUR_B, LEG_FOUR_C, LEG_FOUR_D, LEG_FIVE, LEG_SIX, 
-   LEG_NINE, LEG_TEN, LEG_ELEVEN, LEG_TWELVE, LEG_THIRTEEN, LEG_FOURTEEN, LEG_FIFTEEN, LEG_SIXTEEN, LEG_SEVENTEEN, 
-   LEG_EIGHTEEN, LEG_NINTEEN, LEG_TWENTY, LEG_TWENTY_B;
+   STAND_PREP, THIGHS_BACK_AND_STRAIGHT_A_LITTLE, THIGHS_BACK_AND_STRAIGHT_MORE, THIGHS_BACK_AND_STRAIGHT_A_LOT, SUPERMAN, SUPERMAN_BENT_KNEES, THIGHS_FORWARD_A_LITTLE_SLIGHLY_BENT_KNEES, THIGHS_UP_STRAIGHT_KNEES, THIGHS_UP_BENT_KNEES, THIGHS_UP_BENT_KNEES_MORE, STAND_PREP_HIPS_OUT_A_BIT, HIPS_OUT_A_BIT_ROTATED_OUT, 
+   LEGS_STRAIGHT_KNEES_FULLY_BENT, STAND_PREP_LEGS_OUT_AND_FORWARD, LEGS_OUT_FORWARD_WITH_BENT_KNEES, RELAXED_SLIGHTLY_BENT_KNEES, HIPS_OUT_MORE_SLIGHTLY_BENT_KNEES, STAND_PREP_HIPS_OUT_A_LITTLE, HIPS_IN_A_LOT;
  
-   
+   /**
+    * Leg angles are as follows:
+    * 
+    * 1 - hip rotator (negative out / positive in) min: -0.15 max: 0.0
+    * 2 - hip adductor (negative out / positive in) min: -0.3 max: 0.06
+    * 3 - hip extensor (negative forward / positive back) min: -1.5 max: 1.0
+    * 4 - knee extensor (negative back / positive forward) min: -1.7 max: -0.3
+    * 5 - ankle extensor (negative up / positive down) min: 0.0 max: 0.0
+    * 6 - ankle adductor (negative in / positive out) min: 0.0 max: 0.0
+    * 
+    * @return legAngles
+    */
    public double[] getLegJointAngles()
    {
       switch (this)
       {
          case STAND_PREP:
             return new double[]{0.0, 0.0, -0.25, -0.7, 0.0, 0.0};
-         case LEG_TWO:
+         case THIGHS_BACK_AND_STRAIGHT_A_LITTLE:
             return new double[]{0.0, 0.0, 0.0, -0.7, 0.0, 0.0};
-         case LEG_THREE:
+         case THIGHS_BACK_AND_STRAIGHT_MORE:
             return new double[]{0.0, 0.0, 0.8, -0.7, 0.0, 0.0};
-         case LEG_THREE_B:
+         case THIGHS_BACK_AND_STRAIGHT_A_LOT:
             return new double[]{0.0, 0.0, 1.0, -0.5, 0.0, 0.0};
-         case LEG_THREE_C:
+         case SUPERMAN:
             return new double[]{0.0, 0.0, 1.0, -1.0, 0.0, 0.0};
-         case LEG_THREE_D:
+         case SUPERMAN_BENT_KNEES:
             return new double[]{0.0, 0.0, 1.0, -1.5, 0.0, 0.0};
-         case LEG_FOUR:
+         case THIGHS_FORWARD_A_LITTLE_SLIGHLY_BENT_KNEES:
             return new double[]{0.0, 0.0, -0.5, -0.8, 0.0, 0.0};
-         case LEG_FOUR_B:
+         case THIGHS_UP_STRAIGHT_KNEES:
             return new double[]{0.0, 0.0, -1.5, -0.3, 0.0, 0.0};
-         case LEG_FOUR_C:
+         case THIGHS_UP_BENT_KNEES:
             return new double[]{0.0, 0.0, -1.5, -1.0, 0.0, 0.0};
-         case LEG_FOUR_D:
+         case THIGHS_UP_BENT_KNEES_MORE:
             return new double[]{0.0, 0.0, -1.5, -1.3, 0.0, 0.0};
-         case LEG_FIVE:
+         case STAND_PREP_HIPS_OUT_A_BIT:
             return new double[]{0.0, -0.2, -0.5, -0.8, 0.0, 0.0};
-         case LEG_SIX:
+         case HIPS_OUT_A_BIT_ROTATED_OUT:
             return new double[]{-0.15, -0.2, -0.5, -0.8, 0.0, 0.0};
-         case LEG_NINE:
+         case LEGS_STRAIGHT_KNEES_FULLY_BENT:
            return new double[]{0.0, -0.2, -0.5, -1.7, 0.0, 0.0};
-         case LEG_TEN:
+         case STAND_PREP_LEGS_OUT_AND_FORWARD:
            return new double[]{0.0, -0.2, -0.5, -0.7, 0.0, 0.0};
-         case LEG_ELEVEN:
+         case LEGS_OUT_FORWARD_WITH_BENT_KNEES:
            return new double[]{0.0, -0.2, -0.5, -1.0, 0.0, 0.0};
-         case LEG_TWELVE:
-           return new double[]{0.0, -0.2, -0.5, -0.7, 0.0, 0.0};
-         case LEG_THIRTEEN:
-           return new double[]{0.0, -0.2, -0.5, -1.7, 0.0, 0.0};
-         case LEG_FOURTEEN:
+         case RELAXED_SLIGHTLY_BENT_KNEES:
            return new double[]{0.0, -0.2, 0.0, -0.7, 0.0, 0.0};
-         case LEG_FIFTEEN:
+         case HIPS_OUT_MORE_SLIGHTLY_BENT_KNEES:
            return new double[]{0.0, -0.3, 0.0, -0.7, 0.0, 0.0};
-         case LEG_SIXTEEN:
+         case STAND_PREP_HIPS_OUT_A_LITTLE:
            return new double[]{0.0, -0.1, 0.0, -0.7, 0.0, 0.0};
-         case LEG_SEVENTEEN:
-            return new double[]{0.0, -0.1, 0.0, -0.7, 0.0, 0.0};
-         case LEG_EIGHTEEN:
-            return new double[]{0.0, -0.1, 0.0, -0.7, 0.0, 0.0};
-         case LEG_NINTEEN:
-            return new double[]{0.0, -0.1, 0.0, -0.7, 0.0, 0.0};
-         case LEG_TWENTY:
-            return new double[]{0.0, 0.3, 0.0, -0.7, 0.0, 0.0};
-         case LEG_TWENTY_B:
-            return new double[]{0.0, -0.3, 0.0, -0.7, 0.0, 0.0};
-
+         case HIPS_IN_A_LOT:
+            return new double[]{0.0, 0.06, 0.0, -0.7, 0.0, 0.0};
 
          default:
             throw new RuntimeException("Shouldn't get here!");
