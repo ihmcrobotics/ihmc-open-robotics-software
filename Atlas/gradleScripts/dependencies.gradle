@@ -14,6 +14,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.18'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.18'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
+    compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.0'
     compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.6.+'
     compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
     compile group: 'org.apache.ant', name: 'ant', version: '1.9.0'
