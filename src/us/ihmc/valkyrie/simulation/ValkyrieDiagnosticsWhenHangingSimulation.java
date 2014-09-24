@@ -51,8 +51,8 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
          
          ArrayList<Vector3d> attachmentLocations = new ArrayList<Vector3d>();
              
-         attachmentLocations.add(new Vector3d(0.0, 0.3, 0.5));
-         attachmentLocations.add(new Vector3d(0.0, -0.3, 0.5));
+         attachmentLocations.add(new Vector3d(0.0, 0.15, 0.412));
+         attachmentLocations.add(new Vector3d(0.0, -0.15, 0.412));
          
          double updateDT = 0.0001;
          VirtualHoist virtualHoist = new VirtualHoist(joint, robot, attachmentLocations, updateDT);
