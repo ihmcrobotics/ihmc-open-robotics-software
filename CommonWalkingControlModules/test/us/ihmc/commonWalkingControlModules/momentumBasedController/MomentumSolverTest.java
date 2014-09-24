@@ -584,7 +584,7 @@ public class MomentumSolverTest
       // solve again using the desiredMomentumRate, check if we also get the right pelvis acceleration back again
       solver.solve(desiredMomentumRate);
       checkTaskSpaceAcceleration(rootJoint, twistCalculator, jacobian, spatialAcceleration, 1e-9, false);
-      checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 4e-8);
+      checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 1e-4);
 
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, DT, desiredMomentumRate, 1e-4);
    }
