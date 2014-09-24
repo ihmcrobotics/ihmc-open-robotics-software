@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.EnumMap;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -106,6 +107,17 @@ public class StepprState
    public StepprJointState getJointState(StepprJoint joint)
    {
       return jointStates.get(joint);
+   }
+   
+   public void updateRawSensorData(StepprJoint joint, RawJointSensorDataHolder dataHolder)
+   {
+      StepprJointState stepprJointState = jointStates.get(joint);
+      dataHolder.setQ_raw(stepprJointState.getQ());
+      dataHolder.setQd_raw(stepprJointState.getQd());
+      for(int i = 0; i < stepprJointState.getNumberOfActuators(); i++)
+      {
+         dataHolder.setMotorAngle(i, stepprJointState.getMotorAngle(i));
+      }
    }
    
    public StepprXSensState getXSensState()

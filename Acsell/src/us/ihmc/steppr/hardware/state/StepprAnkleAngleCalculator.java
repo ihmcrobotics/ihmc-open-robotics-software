@@ -12,4 +12,10 @@ public interface StepprAnkleAngleCalculator
 
    public double getQdAnkleY();
 
+   public void calculateDesiredTau(double motorAngleRight, double motorAngleLeft, double tauDesiredAnkleX, double tauDesiredAnkleY);
+   
+   public double getTauRightActuator();
+   
+   public double getTauLeftActuator();
+
 }

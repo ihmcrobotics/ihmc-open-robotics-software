@@ -11,6 +11,8 @@ public class StepprLinearTransmissionJointState implements StepprJointState
 
    private final double ratio;
 
+   private double motorAngle;
+   
    private final DoubleYoVariable q;
    private final DoubleYoVariable qd;
    private final DoubleYoVariable tau;
@@ -49,9 +51,23 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    @Override
    public void update()
    {
-      q.set(actuator.getMotorPosition() / ratio);
+      
+      motorAngle = actuator.getMotorPosition();
+      q.set(motorAngle / ratio);
       qd.set(actuator.getMotorVelocity() / ratio);
       tau.set(actuator.getMotorTorque() * ratio);
+   }
+
+   @Override
+   public int getNumberOfActuators()
+   {
+      return 1;
+   }
+
+   @Override
+   public double getMotorAngle(int actuator)
+   {
+      return motorAngle;
    }
 
 }

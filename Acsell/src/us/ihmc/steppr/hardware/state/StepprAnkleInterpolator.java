@@ -1,6 +1,5 @@
 package us.ihmc.steppr.hardware.state;
 
-import cern.colt.Arrays;
 
 public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 {
@@ -58,19 +57,6 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 
    }
 
-   //with the previously defined Jacobian inverse transpose and desired ankle torques, determine the motor torques
-   private void sendAnkleCommand(double m1, double m2, double X_torque_des, double Y_torque_des)
-   {
-      double[] Jit = new double[4];
-      JacobianInverseTranspose(Jit, m1, m2);
-
-      double m1Command = (Jit[0] * X_torque_des + Jit[1] * Y_torque_des) / N; //this is desired torque at motor 1
-      double m2Command = (Jit[2] * X_torque_des + Jit[3] * Y_torque_des) / N; //this is desired torque at motor 2
-
-      //todo send commands
-
-   }
-
    public static void twobytwoInverseTranspose(double JToPack[], double Jit[])
    {
 
@@ -84,6 +70,8 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    private final double[] Jit = new double[4];
    private double qAnkleX, qAnkleY;
    private double qdAnkleX, qdAnkleY;
+   
+   private double tauRightActuator, tauLeftActuator;
 
    @Override
    public void updateAnkleState(double motorAngleRight, double motorAngleLeft, double motorVelocityRight, double motorVelocityLeft)
@@ -120,6 +108,28 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    public double getQdAnkleY()
    {
       return qdAnkleY;
+   }
+
+   @Override
+   public void calculateDesiredTau(double motorAngleRight, double motorAngleLeft, double tauDesiredAnkleX, double tauDesiredAnkleY)
+   {
+      JacobianInverseTranspose(Jit, motorAngleRight, motorAngleLeft);
+      tauRightActuator = (Jit[0] * tauDesiredAnkleX + Jit[1] * tauDesiredAnkleY) / N; //this is desired torque at motor 1
+      tauLeftActuator = (Jit[2] * tauDesiredAnkleX + Jit[3] * tauDesiredAnkleY) / N; //this is desired torque at motor 2
+
+      
+   }
+
+   @Override
+   public double getTauRightActuator()
+   {
+      return tauRightActuator;
+   }
+
+   @Override
+   public double getTauLeftActuator()
+   {
+      return tauLeftActuator;
    }
 
 }
