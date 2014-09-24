@@ -1,4 +1,4 @@
-package us.ihmc.steppr.hardware.state;
+package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
@@ -9,26 +9,36 @@ import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprSetup;
+import us.ihmc.steppr.hardware.command.StepprCommand;
+import us.ihmc.steppr.hardware.command.StepprJointCommand;
+import us.ihmc.steppr.hardware.state.StepprJointState;
+import us.ihmc.steppr.hardware.state.StepprState;
+import us.ihmc.steppr.hardware.state.StepprStateProcessor;
+import us.ihmc.steppr.hardware.state.StepprXSensState;
+import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-public class StepprStateCommunicator implements StepprStateProcessor
+public class StepprSingleThreadedController implements StepprStateProcessor
 {
 
-   public static void main(String[] args)
+   public static void startController(StepprController stepprController)
    {
       StepprSetup.startStreamingData();
       
-      YoVariableRegistry registry = new YoVariableRegistry("viz");
-      StepprState state = new StepprState(registry);
+      YoVariableRegistry registry = new YoVariableRegistry("steppr");
+      
+      StepprState state = new StepprState(registry);      
       YoVariableServer variableServer = new YoVariableServer(5555, 0.01);
 
       StepprSetup stepprSetup = new StepprSetup(variableServer);
-      StepprStateCommunicator communicator = new StepprStateCommunicator(state, variableServer, registry);
+      StepprSingleThreadedController communicator = new StepprSingleThreadedController(state, variableServer, stepprController, registry);
 
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
       UDPStepprStateReader reader = new UDPStepprStateReader(priority, state, communicator);
@@ -42,14 +52,21 @@ public class StepprStateCommunicator implements StepprStateProcessor
 
    private final RobotVisualizer visualizer;
    private final StepprState state;
+   private final StepprController controller;
+   private final StepprCommand command;
+   
    private final SixDoFJoint rootJoint;
    private final Quat4d rotation = new Quat4d();
    private final EnumMap<StepprJoint, OneDoFJoint> jointMap = new EnumMap<>(StepprJoint.class);
+   private final RawJointSensorDataHolderMap rawSensors;
 
-   public StepprStateCommunicator(StepprState state, RobotVisualizer visualizer, YoVariableRegistry registry)
+   private StepprSingleThreadedController(StepprState state, RobotVisualizer visualizer, StepprController stepprController, YoVariableRegistry registry)
    {
       this.state = state;
       this.visualizer = visualizer;
+      
+      this.command = new StepprCommand(registry);
+      this.controller = stepprController;
 
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -65,6 +82,14 @@ public class StepprStateCommunicator implements StepprStateProcessor
          jointMap.put(joint, oneDoFJoint);
       }
 
+      this.rawSensors = new RawJointSensorDataHolderMap(fullRobotModel);
+      this.controller.setFullRobotModel(fullRobotModel);
+      
+      if(controller.getYoVariableRegistry() != null)
+      {
+         registry.addChild(controller.getYoVariableRegistry());
+      }
+      
       if (visualizer != null)
       {
          visualizer.setMainRegistry(registry, fullRobotModel, null);
@@ -79,16 +104,30 @@ public class StepprStateCommunicator implements StepprStateProcessor
       {
          StepprJointState jointState = state.getJointState(joint);
          OneDoFJoint oneDoFJoint = jointMap.get(joint);
+         RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
 
          oneDoFJoint.setQ(jointState.getQ());
          oneDoFJoint.setQd(jointState.getQd());
+         state.updateRawSensorData(joint, rawSensor);
+         
       }
 
       StepprXSensState xSensState = state.getXSensState();
       xSensState.getQuaternion(rotation);
       rootJoint.setRotation(rotation);
-
       rootJoint.updateFramesRecursively();
+      
+      controller.doControl();
+      
+      
+      for (StepprJoint joint : StepprJoint.values)
+      {
+         OneDoFJoint oneDoFJoint = jointMap.get(joint);
+         RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
+         
+         StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
+         jointCommand.setTauDesired(oneDoFJoint.getTau(), rawSensor);
+      }
 
       if (visualizer != null)
       {
@@ -96,9 +135,10 @@ public class StepprStateCommunicator implements StepprStateProcessor
       }
    }
 
+
    @Override
    public void initialize(long timestamp)
    {
-
+      controller.initialize();
    }
 }

@@ -403,6 +403,8 @@ public class StepprSetup extends RealtimeThread
             logicPowerState = PowerState.IDLE;
          }
          break;
+      default:
+         throw new RuntimeException("Should not get here");
       }
       
       

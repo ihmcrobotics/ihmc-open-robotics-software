@@ -12,7 +12,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JToggleButton;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -21,6 +20,7 @@ import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.PlaybackListener;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class StepprDashboard extends JPanel implements PlaybackListener
 {
@@ -31,7 +31,27 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    private final EnumMap<StepprActuator, YoVariable> motorTemperatures = new EnumMap<>(StepprActuator.class);
    private final EnumMap<StepprActuator, YoVariable> motorEncoders = new EnumMap<>(StepprActuator.class);
 
-   public StepprDashboard(YoVariableHolder yoVariableHolder)
+   public static void createDashboard(final SimulationConstructionSet scs, YoVariableHolder registry)
+   {
+      StepprDashboard stepprDashboard = new StepprDashboard(registry);
+      scs.addExtraJpanel(stepprDashboard, "Dashboard");
+      scs.attachPlaybackListener(stepprDashboard);
+      
+      JButton showDashboard = new JButton("Show dashboard");
+      showDashboard.addActionListener(new ActionListener()
+      {
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            scs.getStandardSimulationGUI().selectPanel("Dashboard");
+         }
+      });
+      
+      scs.addButton(showDashboard);
+   }
+   
+   private StepprDashboard(YoVariableHolder yoVariableHolder)
    {
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 

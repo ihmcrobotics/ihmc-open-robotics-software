@@ -1,8 +1,5 @@
 package us.ihmc.steppr.hardware.state;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -27,6 +24,8 @@ public class StepprAnkleJointState
    private final DoubleYoVariable qd_x;
    private final DoubleYoVariable tau_x;
 
+   private double motorAngle[] = new double[2];
+   
    public StepprAnkleJointState(RobotSide robotSide, StepprActuatorState rightActuator, StepprActuatorState leftActuator, YoVariableRegistry parentRegistry)
    {
       this.leftActuator = leftActuator;
@@ -49,7 +48,10 @@ public class StepprAnkleJointState
 
    public void update()
    {
-      interpolator.updateAnkleState(rightActuator.getMotorPosition(), leftActuator.getMotorPosition(), rightActuator.getMotorVelocity(),
+      motorAngle[0] = rightActuator.getMotorPosition();
+      motorAngle[1] = leftActuator.getMotorPosition();
+      
+      interpolator.updateAnkleState(motorAngle[0], motorAngle[1], rightActuator.getMotorVelocity(),
             leftActuator.getMotorVelocity());
 
       this.q_x.set(interpolator.getQAnkleX());
@@ -96,6 +98,18 @@ public class StepprAnkleJointState
          StepprAnkleJointState.this.update();
       }
 
+      @Override
+      public int getNumberOfActuators()
+      {
+         return 2;
+      }
+
+      @Override
+      public double getMotorAngle(int actuator)
+      {
+         return motorAngle[actuator];
+      }
+
    }
 
    private class AnkleX implements StepprJointState
@@ -123,6 +137,18 @@ public class StepprAnkleJointState
       public void update()
       {
          // State is already updated by ankle Y.
+      }
+
+      @Override
+      public int getNumberOfActuators()
+      {
+         return 2;
+      }
+
+      @Override
+      public double getMotorAngle(int actuator)
+      {
+         return motorAngle[actuator];
       }
 
    }
