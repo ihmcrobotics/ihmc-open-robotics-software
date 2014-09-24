@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import org.ros.message.Time;
 import org.ros.time.WallTimeProvider;
 
-import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosJointStatePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
 
-public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfigurationData>
+public class RosRobotJointStatePublisher implements ObjectConsumer<RobotConfigurationData>
 {
    private final RosJointStatePublisher jointStatePublisher;
    private final WallTimeProvider wallTime;
@@ -29,11 +29,11 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
 
       rosMainNode.attachPublisher("/" + rosNameSpace + "/joint_states", jointStatePublisher);
-      fieldComputer.attachListener(DRCJointConfigurationData.class, this);
+      fieldComputer.attachListener(RobotConfigurationData.class, this);
    }
 
    @Override
-   public void consumeObject(DRCJointConfigurationData object)
+   public void consumeObject(RobotConfigurationData object)
    {
       if (rosMainNode.isStarted())
       {
@@ -47,7 +47,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
       }
    }
 
-   private void updateNameList(DRCJointConfigurationData object)
+   private void updateNameList(RobotConfigurationData object)
    {
       String[] jointNames = object.getJointNames();
       for (int i = 0; i < jointNames.length; i++)
