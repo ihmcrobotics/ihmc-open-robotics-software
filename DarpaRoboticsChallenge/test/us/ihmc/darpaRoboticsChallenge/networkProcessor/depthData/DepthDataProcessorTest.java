@@ -50,7 +50,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       jmeLidarScanVisualizer = new JMELidarScanVisualizer();
       
       DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(),
-            new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
+            new DRCWallAtDistanceEnvironment(WALL_DISTANCE),"",true,true);
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
       drcSimulationTestHelper.addNetStateListener(this);
       drcSimulationTestHelper.addConsumer(SparseLidarScanPacket.class, new LidarConsumer());
