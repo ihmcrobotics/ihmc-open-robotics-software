@@ -102,61 +102,61 @@ public class FullRobotModelCorruptor
       // Joint Calibration offset errors:
       RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
       LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
+      ArmJointName[] armJointNames = robotSpecificJointNames.getArmJointNames();
+      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
       
       for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : legJointNames)
          {
             RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getLegJoint(robotSide, legJointName);
-            final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
-            final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
+            String offsetName = robotSide + legJointName.getCamelCaseNameForMiddleOfExpression() + "Offset";
 
-            final Transform3d preCorruptionTransform = new Transform3d();
+            createJointAngleCorruptor(oneDoFJoint, offsetName);
+         }
+         
+         for (ArmJointName armJointName : armJointNames)
+         {
+            RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getArmJoint(robotSide, armJointName);
+            String offsetName = robotSide + armJointName.getCamelCaseNameForMiddleOfExpression() + "Offset";
 
-            final DoubleYoVariable offset = new DoubleYoVariable(robotSide + legJointName.getCamelCaseNameForMiddleOfExpression() + "Offset", registry);
-
-            VariableChangedListener legJointOffsetChangedListener = new VariableChangedListener()
-            {
-               @Override
-               public void variableChanged(YoVariable<?> v)
-               {
-                  AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
-                  preCorruptionTransform.set(axisAngle);
-                  frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
-               }
-            };
-            offset.addVariableChangedListener(legJointOffsetChangedListener);
-            variableChangedListeners.add(legJointOffsetChangedListener);
+            createJointAngleCorruptor(oneDoFJoint, offsetName);
          }
       }
-
-      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
 
       for (SpineJointName spineJointName : spineJointNames)
       {
          RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getSpineJoint(spineJointName);
-         final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
-         final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
+         String offsetName = spineJointName.getCamelCaseNameForStartOfExpression() + "Offset";
 
-         final Transform3d preCorruptionTransform = new Transform3d();
-
-         final DoubleYoVariable offset = new DoubleYoVariable(spineJointName.getCamelCaseNameForStartOfExpression() + "Offset", registry);
-
-         VariableChangedListener spineJointOffsetChangedListener = new VariableChangedListener()
-         {
-            @Override
-            public void variableChanged(YoVariable<?> v)
-            {
-               AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
-               preCorruptionTransform.set(axisAngle);
-               frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
-            }
-         };
-         offset.addVariableChangedListener(spineJointOffsetChangedListener);
-         variableChangedListeners.add(spineJointOffsetChangedListener);
+         createJointAngleCorruptor(oneDoFJoint, offsetName);
       }
 
       parentRegistry.addChild(registry);
+   }
+
+
+   private void createJointAngleCorruptor(RevoluteJoint oneDoFJoint, String offsetName)
+   {
+      final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
+      final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
+
+      final Transform3d preCorruptionTransform = new Transform3d();
+
+      final DoubleYoVariable offset = new DoubleYoVariable(offsetName, registry);
+
+      VariableChangedListener jointOffsetChangedListener = new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
+            preCorruptionTransform.set(axisAngle);
+            frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
+         }
+      };
+      offset.addVariableChangedListener(jointOffsetChangedListener);
+      variableChangedListeners.add(jointOffsetChangedListener);
    }
 
 
