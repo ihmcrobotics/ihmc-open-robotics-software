@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFramesVisualizer;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
@@ -223,7 +223,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
           
         }
 
-        CommonWalkingReferenceFramesVisualizer referenceFramesVisualizer = new CommonWalkingReferenceFramesVisualizer(referenceFramesForController, yoGraphicsListRegistry);
+        CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFramesForController, yoGraphicsListRegistry);
         modularRobotController.addRobotController(referenceFramesVisualizer);
       }
       
