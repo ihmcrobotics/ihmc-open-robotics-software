@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -47,7 +47,7 @@ public class JointConfigurationGatherer
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
-   public void packEstimatorJoints(long timestamp, DRCJointConfigurationData jointConfigurationData)
+   public void packEstimatorJoints(long timestamp, RobotConfigurationData jointConfigurationData)
    {
       if (jointConfigurationData == null)
       {

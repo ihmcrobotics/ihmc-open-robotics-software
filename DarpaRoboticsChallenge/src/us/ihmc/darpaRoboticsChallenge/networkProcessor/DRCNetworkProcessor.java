@@ -5,11 +5,11 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
+import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
@@ -30,7 +30,7 @@ public class DRCNetworkProcessor
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final SDFFullRobotModel fullRobotModel;
-   private final DRCRobotDataReceiver drcRobotDataReceiver;
+   private final RobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
    private final DepthDataFilter lidarFilter;
    
@@ -74,11 +74,11 @@ public class DRCNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
-      drcRobotDataReceiver = new DRCRobotDataReceiver(fullRobotModel);
+      drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel);
       RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
       lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
       
-      this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
+      this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
       this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
       {
          @Override

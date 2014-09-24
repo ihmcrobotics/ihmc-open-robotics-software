@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -220,7 +220,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private static class State
    {
       public final RobotPoseData poseData;
-      public final DRCJointConfigurationData jointData;
+      public final RobotConfigurationData jointData;
 
       public static final Builder<State> builder = new Builder<State>()
       {
@@ -234,7 +234,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       public State()
       {
          poseData = new RobotPoseData();
-         jointData = new DRCJointConfigurationData();
+         jointData = new RobotConfigurationData();
       }
    }
 }

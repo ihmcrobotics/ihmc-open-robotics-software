@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
-import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -26,14 +26,14 @@ public class ArmCalibrationHelper implements DRCStereoListener
    private double imageFov;
    private final DRCRobotJointMap jointMap;
 
-   private DRCJointConfigurationData lastJointConfigurationData;
+   private RobotConfigurationData lastJointConfigurationData;
 
    public ArmCalibrationHelper(ObjectCommunicator fieldComputerClient, DRCNetworkProcessorNetworkingManager networkingManager,
          DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
       networkingManager.getControllerCommandHandler().setArmCalibrationHelper(this);
-      fieldComputerClient.attachListener(DRCJointConfigurationData.class, new JointAngleConsumer());
+      fieldComputerClient.attachListener(RobotConfigurationData.class, new JointAngleConsumer());
       startPeriodicRecording();
    }
    
@@ -80,10 +80,10 @@ public class ArmCalibrationHelper implements DRCStereoListener
 
    }
 
-   private class JointAngleConsumer implements ObjectConsumer<DRCJointConfigurationData>
+   private class JointAngleConsumer implements ObjectConsumer<RobotConfigurationData>
    {
       @Override
-      public void consumeObject(DRCJointConfigurationData object)
+      public void consumeObject(RobotConfigurationData object)
       {
          lock.lock();
          lastJointConfigurationData = object;
