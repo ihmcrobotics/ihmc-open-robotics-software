@@ -30,7 +30,7 @@ dependencies {
 	compile group: 'tablelayout', name: 'TableLayout', version: '20050920'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx', version: '1.0.1'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet', version: '1.0.1'
-	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet-platform', version: '1.0.1'
+	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
 
 	compile group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
 	compile group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
