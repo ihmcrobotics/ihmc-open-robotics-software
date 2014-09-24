@@ -30,6 +30,7 @@ dependencies {
 	compile group: 'tablelayout', name: 'TableLayout', version: '20050920'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx', version: '1.0.0'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.0.0'
+	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.0.0'
 
 	compile group: 'org.easytesting', name: 'fest-assert', version: '1.4'
 	compile group: 'org.easytesting', name: 'fest-reflect', version: '1.4.1'
