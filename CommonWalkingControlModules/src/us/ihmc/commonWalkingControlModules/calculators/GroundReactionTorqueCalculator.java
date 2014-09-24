@@ -27,15 +27,15 @@ public class GroundReactionTorqueCalculator
 
    private final SideDependentList<YoFramePoint> groundTauStart = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> groundTau = new SideDependentList<YoFrameVector>();
-   private final CommonHumanoidReferenceFrames commonWalkingReferenceFrames;
+   private final CommonHumanoidReferenceFrames commonHumanoidReferenceFrames;
    
    private final SideDependentList<ArrayList<GroundContactPoint>> contactPointList;
    
-   public GroundReactionTorqueCalculator(SideDependentList<ArrayList<GroundContactPoint>> contactPointList, CommonHumanoidReferenceFrames commonWalkingReferenceFrames, YoVariableRegistry parentRegistry,
+   public GroundReactionTorqueCalculator(SideDependentList<ArrayList<GroundContactPoint>> contactPointList, CommonHumanoidReferenceFrames commonHumanoidReferenceFrames, YoVariableRegistry parentRegistry,
            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactPointList = new SideDependentList<ArrayList<GroundContactPoint>>(contactPointList);
-      this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
+      this.commonHumanoidReferenceFrames = commonHumanoidReferenceFrames;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -76,7 +76,7 @@ public class GroundReactionTorqueCalculator
 
    public FrameVector getGroundReactionTorque(RobotSide robotSide)
    {
-      ReferenceFrame ankleZupFrame =  commonWalkingReferenceFrames.getAnkleZUpFrame(robotSide);
+      ReferenceFrame ankleZupFrame =  commonHumanoidReferenceFrames.getAnkleZUpFrame(robotSide);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       FrameVector ret = new FrameVector(ankleZupFrame, 0.0, 0.0, 0.0);
