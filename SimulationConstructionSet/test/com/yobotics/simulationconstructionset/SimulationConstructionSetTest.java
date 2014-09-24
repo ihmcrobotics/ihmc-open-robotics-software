@@ -2,9 +2,11 @@ package com.yobotics.simulationconstructionset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.awt.AWTException;
 
+import org.fest.swing.exception.ActionFailedException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -229,48 +231,55 @@ public class SimulationConstructionSetTest
    @Test
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {
-      FallingBrickRobot robot = new FallingBrickRobot();
+      try
+      {
+         FallingBrickRobot robot = new FallingBrickRobot();
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.setDT(0.0001, 100);
-      scs.setFrameMaximized();
-      scs.startOnAThread();
-      scs.setSimulateDuration(2.0);
+         SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+         scs.setDT(0.0001, 100);
+         scs.setFrameMaximized();
+         scs.startOnAThread();
+         scs.setSimulateDuration(2.0);
 
-      ThreadTools.sleep(2000);
-      SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
+         ThreadTools.sleep(2000);
+         SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
 
-      testFixture.closeAllGraphArrayWindows();
+         testFixture.closeAllGraphArrayWindows();
 
-      testFixture.selectNewGraphWindowMenu();
-      testFixture.selectNewGraphWindowMenu();
+         testFixture.selectNewGraphWindowMenu();
+         testFixture.selectNewGraphWindowMenu();
 
-      testFixture.focusNthGraphArrayWindow(0);
-      testFixture.clickNewGraphButton();
+         testFixture.focusNthGraphArrayWindow(0);
+         testFixture.clickNewGraphButton();
 
-      testFixture.focusMainSCSWindow();
-      testFixture.selectSearchTab();
-      testFixture.deleteSearchText();
-      testFixture.enterSearchText("q_");
-      testFixture.selectVariableInSearchTab("q_z");
+         testFixture.focusMainSCSWindow();
+         testFixture.selectSearchTab();
+         testFixture.deleteSearchText();
+         testFixture.enterSearchText("q_");
+         testFixture.selectVariableInSearchTab("q_z");
 
-      testFixture.focusNthGraphArrayWindow(0);
-      testFixture.middleClickInEmptyGraph();
+         testFixture.focusNthGraphArrayWindow(0);
+         testFixture.middleClickInEmptyGraph();
 
-      testFixture.focusMainSCSWindow();
-      testFixture.selectSearchTab();
-      testFixture.deleteSearchText();
-      testFixture.enterSearchText("q_");
-      testFixture.selectVariableInSearchTab("q_y");
+         testFixture.focusMainSCSWindow();
+         testFixture.selectSearchTab();
+         testFixture.deleteSearchText();
+         testFixture.enterSearchText("q_");
+         testFixture.selectVariableInSearchTab("q_y");
 
-      testFixture.focusNthGraphArrayWindow(1);
-      testFixture.clickNewGraphButton();
-      testFixture.middleClickInEmptyGraph();
+         testFixture.focusNthGraphArrayWindow(1);
+         testFixture.clickNewGraphButton();
+         testFixture.middleClickInEmptyGraph();
 
-      testFixture.closeAndDispose();
-      scs.closeAndDispose();
-      scs = null;
-      testFixture = null;
+         testFixture.closeAndDispose();
+         scs.closeAndDispose();
+         scs = null;
+         testFixture = null;
+      }
+      catch (ActionFailedException e)
+      {
+         fail(e.getMessage());
+      }
    }
    
    @Ignore
