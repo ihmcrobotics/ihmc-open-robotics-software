@@ -5,6 +5,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'mosek', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
 	compile group: 'us.ihmc.thirdparty', name: 'joptimizer', version: '3.3.0-jdk5'
+        compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2'
 	
 	compile project(':IHMCUtilities')
 }
