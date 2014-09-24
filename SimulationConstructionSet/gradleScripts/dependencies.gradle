@@ -32,10 +32,7 @@ dependencies {
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.0.0'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.0.0'
 
-	compile group: 'org.easytesting', name: 'fest-assert', version: '1.4'
-	compile group: 'org.easytesting', name: 'fest-reflect', version: '1.4.1'
 	compile group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
-	compile group: 'org.easytesting', name: 'fest-util', version: '1.2.1'
 	compile group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
 	
 	compile project(':IHMCUtilities')
