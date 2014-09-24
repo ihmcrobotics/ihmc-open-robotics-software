@@ -263,7 +263,7 @@ public class FootstepDataTest
             status = FootstepStatus.Status.COMPLETED;
          }
 
-         FootstepStatus footstepStatus = new FootstepStatus(status);
+         FootstepStatus footstepStatus = new FootstepStatus(status, i);
          sentFootstepStatus.add(footstepStatus);
          queueBasedStreamingDataProducer.queueDataToSend(footstepStatus);
       }

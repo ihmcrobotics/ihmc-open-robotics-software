@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 
 public class FootstepPathCoordinator implements FootstepProvider
@@ -30,6 +31,8 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final GlobalDataProducer footstepStatusDataProducer;
    private Footstep stepInProgress = null;
+
+   private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
 
    private final BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator;
    private final DesiredFootstepCalculatorFootstepProviderWrapper desiredFootstepCalculatorFootstepProviderWrapper;
@@ -54,6 +57,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       desiredFootstepCalculatorFootstepProviderWrapper = new DesiredFootstepCalculatorFootstepProviderWrapper(
             blindWalkingToDestinationDesiredFootstepCalculator, registry);
       desiredFootstepCalculatorFootstepProviderWrapper.setWalk(true);
+      currentFootstepIndex.set(-1);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -202,7 +206,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       if (footstepStatusDataProducer != null)
       {
-         FootstepStatus footstepStatus = new FootstepStatus(status);
+         FootstepStatus footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue());
          footstepStatusDataProducer.queueDataToSend(footstepStatus);
       }
    }
@@ -238,6 +242,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       if (stepInProgress != null)
       {
          notifyConsumersOfStatus(FootstepStatus.Status.COMPLETED);
+         currentFootstepIndex.increment();
       }
    }
 
@@ -255,6 +260,7 @@ public class FootstepPathCoordinator implements FootstepProvider
 
       footstepQueue.clear();
       footstepQueue.addAll(footsteps);
+      currentFootstepIndex.set(0);
 
       if (DEBUG)
       {
