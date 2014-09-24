@@ -33,3 +33,4 @@ root.remotemain.viz.Steppr.back_mby*false*false
 root.remotemain.viz.Steppr.back_lbx*false*false
 root.remotemain.viz.Steppr.leftAnkle*false*false
 root.remotemain.viz.Steppr.rightAnkle*false*false
+root.remotemain.StepprSetup*false*false

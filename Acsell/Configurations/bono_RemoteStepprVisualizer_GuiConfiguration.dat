@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.viz.Steppr.rightAnkle.rightAnkle_qd_y</Variables>
+		<Variables>root.remotemain.viz.Steppr.leftAnkle.leftAnkle_q_y</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,9 +37,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.viz.Steppr.rightAnkle.rightAnkle_qd_x</Variables>
+		<Variables>root.remotemain.viz.Steppr.leftAnkle.leftAnkle_q_x</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.viz.Steppr.torsoXActuator.torsoXActuatorQuadtratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -66,9 +90,9 @@ Dashboard,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>5.287990976864486</Camera X>
+ <Camera Y>-2.541130440182878</Camera Y>
+ <Camera Z>0.5714427220915135</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -92,8 +116,8 @@ Dashboard,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>1.0334170990827187</Fix X>
+<Fix Y>-0.18168183161689822</Fix Y>
+<Fix Z>-0.11320384062693445</Fix Z>
 </Fix Position>
 </Canvas 1>
