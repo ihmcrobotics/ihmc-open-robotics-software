@@ -75,7 +75,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
    // Constructors
    public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
-         CouplingRegistry couplingRegistry, CommonHumanoidReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
+         CouplingRegistry couplingRegistry, CommonHumanoidReferenceFrames commonHumanoidReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
          YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
@@ -91,8 +91,8 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       stepDistance.set(Math.sqrt((stanceWidth.getDoubleValue() * stanceWidth.getDoubleValue())
             + (stanceLength.getDoubleValue() * stanceLength.getDoubleValue())));
 
-      ReferenceFrame leftAnkleZUpFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT);
-      ReferenceFrame rightAnkleZUpFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT);
+      ReferenceFrame leftAnkleZUpFrame = commonHumanoidReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT);
+      ReferenceFrame rightAnkleZUpFrame = commonHumanoidReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT);
 
       footZUpFrames = new SideDependentList<ReferenceFrame>(leftAnkleZUpFrame, rightAnkleZUpFrame);
 

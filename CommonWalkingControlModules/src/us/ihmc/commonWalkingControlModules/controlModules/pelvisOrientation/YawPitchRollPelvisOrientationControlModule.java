@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 public class YawPitchRollPelvisOrientationControlModule implements PelvisOrientationControlModule
 {
    private final ProcessedSensorsInterface processedSensors;
-   private final CommonHumanoidReferenceFrames commonWalkingReferenceFrames;
+   private final CommonHumanoidReferenceFrames commonHumanoidReferenceFrames;
    private final YoVariableRegistry registry = new YoVariableRegistry("OrientationController");
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -43,10 +43,10 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 
    private final DoubleYoVariable NxExtra = new DoubleYoVariable("NxExtra", registry);
 
-   public YawPitchRollPelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames commonWalkingReferenceFrames,YoVariableRegistry parentRegistry, double controlDT)
+   public YawPitchRollPelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames commonHumanoidReferenceFrames,YoVariableRegistry parentRegistry, double controlDT)
    {
       this.processedSensors = processedSensors;
-      this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
+      this.commonHumanoidReferenceFrames = commonHumanoidReferenceFrames;
       parentRegistry.addChild(registry);
       
       double breakFrequencyInHertz = 200.0;
@@ -59,7 +59,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 
    public FrameVector computePelvisTorque(RobotSide supportLeg, FrameOrientation desiredPelvisOrientation)
    {
-      ReferenceFrame spineRollFrame = commonWalkingReferenceFrames.getPelvisFrame();
+      ReferenceFrame spineRollFrame = commonHumanoidReferenceFrames.getPelvisFrame();
 
       double[] desiredYawPitchRoll = getDesiredYawPitchRollInWorldFrame(desiredPelvisOrientation);
       double desiredYaw = desiredYawPitchRoll[0];
