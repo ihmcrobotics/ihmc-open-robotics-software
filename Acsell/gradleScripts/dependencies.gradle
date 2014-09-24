@@ -6,7 +6,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
-	compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-core', version: 'x'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.+'
 	
 	
 	//testCompile project(':CommonWalkingControlModules').sourceSets.test.output
