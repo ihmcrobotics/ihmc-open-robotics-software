@@ -60,6 +60,8 @@ public class StepprSingleThreadedController implements StepprStateProcessor
    private final EnumMap<StepprJoint, OneDoFJoint> jointMap = new EnumMap<>(StepprJoint.class);
    private final RawJointSensorDataHolderMap rawSensors;
 
+   private boolean initialized = false;
+   
    private StepprSingleThreadedController(StepprState state, RobotVisualizer visualizer, StepprController stepprController, YoVariableRegistry registry)
    {
       this.state = state;
@@ -116,6 +118,11 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       xSensState.getQuaternion(rotation);
       rootJoint.setRotation(rotation);
       rootJoint.updateFramesRecursively();
+      if(!initialized)
+      {
+         controller.initialize();
+         initialized = true;
+      }
       
       controller.doControl();
       
@@ -139,6 +146,6 @@ public class StepprSingleThreadedController implements StepprStateProcessor
    @Override
    public void initialize(long timestamp)
    {
-      controller.initialize();
+      
    }
 }

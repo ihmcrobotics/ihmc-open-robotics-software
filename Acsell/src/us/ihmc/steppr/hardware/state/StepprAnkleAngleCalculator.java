@@ -17,5 +17,7 @@ public interface StepprAnkleAngleCalculator
    public double getTauRightActuator();
    
    public double getTauLeftActuator();
+   
+   public double getRatio();
 
 }

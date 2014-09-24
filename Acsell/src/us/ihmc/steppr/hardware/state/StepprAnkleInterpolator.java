@@ -132,4 +132,10 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       return tauLeftActuator;
    }
 
+   @Override
+   public double getRatio()
+   {
+      return N;
+   }
+
 }

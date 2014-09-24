@@ -1,10 +1,5 @@
 package us.ihmc.steppr.hardware.visualization;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
