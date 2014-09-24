@@ -11,7 +11,7 @@ public enum HumanoidArmPose
     * 1 - shoulder extensor (negative forward / positive back) min: 0.3 max: 0.6
     * 2 - shoulder adductor (negative out / positive in) min: -1.3 max: -0.4
     * 3 - elbow supinator (negative out / positive in) min: 0.05 max: 0.5
-    * 4 - elbow extensor (negative up / positive down) min: -1.7 max: -0.5
+    * 4 - elbow extensor (negative up / positive down) min: -1.7 max: -0.9
     * 
     * @return armAngles
     */
@@ -34,7 +34,7 @@ public enum HumanoidArmPose
          case LARGER_CHICKEN_WINGS:
             return new double[]{0.3, -1.0, 0.05, -1.7};
          case ARMS_OUT_EXTENDED:
-            return new double[]{0.3, -1.0, 0.05, -0.5};
+            return new double[]{0.3, -1.0, 0.05, -0.9};
          case FLYING:
             return new double[]{0.3, -1.2, 0.05, -0.4};
          case FLYING_SUPPINATE_IN:

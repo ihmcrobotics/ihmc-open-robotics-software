@@ -25,13 +25,13 @@ public enum HumanoidSpinePose
          case TURN_RIGHT:
             return new double[]{-0.1, -0.06, 0.0};
          case LEAN_FORWARD_A_LOT:
-            return new double[]{0.0, -0.3, 0.0};
-         case LEAN_BACKWARD_A_LOT:
-            return new double[]{0.0, 0.3, 0.0};
-         case LEAN_FORWARD:
             return new double[]{0.0, -0.1, 0.0};
-         case LEAN_BACKWARD:
+         case LEAN_BACKWARD_A_LOT:
             return new double[]{0.0, 0.1, 0.0};
+         case LEAN_FORWARD:
+            return new double[]{0.0, -0.05, 0.0};
+         case LEAN_BACKWARD:
+            return new double[]{0.0, 0.05, 0.0};
          case LEAN_LEFT:
             return new double[]{0.0, -0.06, 0.1};
          case LEAN_RIGHT:
