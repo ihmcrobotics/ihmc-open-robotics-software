@@ -4,7 +4,7 @@ dependencies {
 	testCompile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
 	compile group: 'us.ihmc.thirdparty', name: 'mosek', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+	compile group: 'us.ihmc.thirdparty', name: 'joptimizer', version: '3.3.0-jdk5'
 	
-	compile project(':JOptimizer')
 	compile project(':IHMCUtilities')
 }
