@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
