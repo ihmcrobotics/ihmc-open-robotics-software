@@ -4,7 +4,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
-	compile group: 'us.ihmc.thirdparty.jme3', name: 'jbullet', version: 'x'
+	compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
