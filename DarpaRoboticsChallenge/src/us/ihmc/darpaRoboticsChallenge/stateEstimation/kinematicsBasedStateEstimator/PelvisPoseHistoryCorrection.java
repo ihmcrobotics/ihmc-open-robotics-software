@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -15,6 +14,7 @@ import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -22,6 +22,7 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -35,10 +36,12 @@ public class PelvisPoseHistoryCorrection
 
    private final AtomicSettableTimestampProvider timestampProvider;
 
-   private final ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber;
+   private ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber;
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
    private final YoVariableRegistry registry;
+   
+   private static final double DEFAULT_BREAK_FREQUENCY = 0.015;
    
    private final TimeStampedTransform3D[] errorBuffer = new TimeStampedTransform3D[3];
    private int bufferIndex = 0;
@@ -88,6 +91,7 @@ public class PelvisPoseHistoryCorrection
    private final DoubleYoVariable seNonProcessedPelvisPitch;
    private final DoubleYoVariable seNonProcessedPelvisRoll;
    private final DoubleYoVariable seNonProcessedPelvisYaw;
+   private final LongYoVariable seNonProcessedPelvisTimeStamp;
    
    private final YoFramePoint correctedPelvisPosition;
    private final YoFrameQuaternion correctedPelvisQuaternion;
@@ -97,6 +101,13 @@ public class PelvisPoseHistoryCorrection
 
    private final DoubleYoVariable interpolationAlphaFilterAlphaValue;
 
+   public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
+         final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+         AtomicSettableTimestampProvider timestampProvider)
+   {
+      this(inverseDynamicsStructure, null, dt, parentRegistry, pelvisBufferSize, timestampProvider);
+   }
+   
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
          ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
          AtomicSettableTimestampProvider timestampProvider)
@@ -114,10 +125,10 @@ public class PelvisPoseHistoryCorrection
       }
       
       stateEstimatorPelvisPoseBuffer = new TimeStampedPelvisPoseBuffer(pelvisBufferSize);
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(0.05, dt);
+      
       interpolationAlphaFilterAlphaValue = new DoubleYoVariable("interpolationAlphaFilterAlphaValue", registry);
       interpolationAlphaFilterBreakFrequency = new DoubleYoVariable("interpolationAlphaFilterBreakFrequency", registry);
-      interpolationAlphaFilterBreakFrequency.set(alpha);
+      interpolationAlphaFilter = new AlphaFilteredYoVariable("PelvisErrorCorrectionAlphaFilter", registry, interpolationAlphaFilterAlphaValue);
       
       interpolationAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
@@ -129,7 +140,7 @@ public class PelvisPoseHistoryCorrection
          }
       });
       
-      interpolationAlphaFilter = new AlphaFilteredYoVariable("PelvisErrorCorrectionAlphaFilter", registry, interpolationAlphaFilterAlphaValue);
+      interpolationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
       confidenceFactor = new DoubleYoVariable("PelvisErrorCorrectionConfidenceFactor", registry);
 
       externalPelvisPosition = new YoFramePoint("newExternalPelvis_position", ReferenceFrame.getWorldFrame(), registry);
@@ -161,6 +172,7 @@ public class PelvisPoseHistoryCorrection
       seNonProcessedPelvisYaw = new DoubleYoVariable("seNonProcessedPelvis_yaw", registry);
       seNonProcessedPelvisPitch = new DoubleYoVariable("seNonProcessedPelvis_pitch", registry);
       seNonProcessedPelvisRoll = new DoubleYoVariable("seNonProcessedPelvis_roll", registry);
+      seNonProcessedPelvisTimeStamp = new LongYoVariable("seNonProcessedPelvis_timestamp", registry);
       
       correctedPelvisPosition = new YoFramePoint("correctedPelvis_position", ReferenceFrame.getWorldFrame(), registry);
       correctedPelvisQuaternion = new YoFrameQuaternion("correctedPelvis_quaternion", ReferenceFrame.getWorldFrame(), registry);
@@ -176,21 +188,24 @@ public class PelvisPoseHistoryCorrection
     */
    public void doControl()
    {
-      if (externalPelvisPoseSubscriber.hasNewPose())
+      if (externalPelvisPoseSubscriber != null)
       {
-         processNewPacket();
+         if (externalPelvisPoseSubscriber.hasNewPose())
+         {
+            processNewPacket();
+         }
+
+         rootJointFrame.getTransformToParent(pelvisPose);
+         interpolationAlphaFilter.update(confidenceFactor.getDoubleValue());
+
+         addPelvisePoseToPelvisBuffer();
+         updateNonProcessedYoVariables();
+         calculateCorrectedPelvisPose();
+         updateProcessedYoVariables();
+
+         rootJoint.setPositionAndRotation(pelvisPose);
+         rootJointFrame.update();
       }
-      
-      rootJointFrame.getTransformToParent(pelvisPose);
-      interpolationAlphaFilter.update(confidenceFactor.getDoubleValue());
-      
-      addPelvisePoseToPelvisBuffer();
-      updateNonProcessedYoVariables();
-      calculateCorrectedPelvisPose();
-      updateProcessedYoVariables();
-      
-      rootJoint.setPositionAndRotation(pelvisPose);
-      rootJointFrame.update();
    }
    
    private void calculateCorrectedPelvisPose()
@@ -234,14 +249,15 @@ public class PelvisPoseHistoryCorrection
 
    private void addPelvisePoseToPelvisBuffer()
    {
-      stateEstimatorPelvisPoseBuffer.put(pelvisPose, timestampProvider.getTimestamp());
+      long timeStamp = timestampProvider.getTimestamp();
+      seNonProcessedPelvisTimeStamp.set(timeStamp);
+      stateEstimatorPelvisPoseBuffer.put(pelvisPose, timeStamp);
    }
 
    private void processNewPacket()
    {
       StampedPosePacket newPacket = externalPelvisPoseSubscriber.getNewExternalPose();
       TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
-      
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {
          Transform3d newPelvisPose = timeStampedExternalPose.getTransform3D();
@@ -420,5 +436,10 @@ public class PelvisPoseHistoryCorrection
             }
          }
       });
+   }
+
+   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+   {
+      this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
    }
 }

@@ -57,7 +57,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
-         ExternalPelvisPoseSubscriberInterface externalPelvisSubscriber, AtomicSettableTimestampProvider timestampProvider)
+         AtomicSettableTimestampProvider timestampProvider)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
@@ -66,7 +66,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
-      this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, externalPelvisSubscriber,
+      this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
             stateEstimatorParameters.getEstimatorDT(), registry, 1000, timestampProvider);
 
       List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
@@ -255,5 +255,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void initializeOrientationEstimateToMeasurement()
    {
       // Do nothing
+   }
+
+   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+   {
+      pelvisPoseHistoryCorrection.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 }

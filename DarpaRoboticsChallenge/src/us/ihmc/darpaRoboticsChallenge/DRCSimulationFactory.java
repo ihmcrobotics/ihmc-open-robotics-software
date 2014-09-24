@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
+import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -226,5 +227,10 @@ public class DRCSimulationFactory
    public TimestampProvider getTimeStampProvider()
    {
       return simulatedDRCRobotTimeProvider;
+   }
+   
+   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externelPelvisCorrectorSubscriber)
+   {
+      drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externelPelvisCorrectorSubscriber);
    }
 }

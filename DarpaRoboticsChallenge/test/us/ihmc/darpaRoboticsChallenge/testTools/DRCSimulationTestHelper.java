@@ -130,6 +130,11 @@ public class DRCSimulationTestHelper
    {
       return scs;
    }
+   
+   public DRCSimulationFactory getDRCSimulationFactory()
+   {
+      return drcSimulationFactory;
+   }
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
    {

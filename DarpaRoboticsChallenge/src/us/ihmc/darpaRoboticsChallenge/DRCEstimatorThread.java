@@ -13,9 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
-import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
-import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -106,7 +104,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, robotModel, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParamaters, forceSensorDataHolderForEstimator, yoGraphicsListRegistry, estimatorRegistry, dataProducer, timestampProvider);
+               contactPointParamaters, forceSensorDataHolderForEstimator, yoGraphicsListRegistry, estimatorRegistry, timestampProvider);
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
@@ -144,7 +142,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel, yoGraphicsListRegistry);
       }
    }
-
+   
    @Override
    public void initialize()
    {
@@ -201,7 +199,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public static DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry, GlobalDataProducer dataProducer, AtomicSettableTimestampProvider timestampProvider)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry, AtomicSettableTimestampProvider timestampProvider)
    {
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
@@ -229,17 +227,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          footSwitchesForEstimator.put(robotSide, wrenchBasedFootSwitchForEstimator);
       }
       
-      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = null;
-      
-      if (dataProducer != null)
-      {
-         externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
-         dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
-      }
-      
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, yoGraphicsListRegistry, externalPelvisPoseSubscriber, timestampProvider);
+            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, yoGraphicsListRegistry, timestampProvider);
 
       return drcStateEstimator;
    }
@@ -259,5 +249,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
       drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+   }
+   
+   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+   {
+      drcStateEstimator.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 }
