@@ -28,6 +28,7 @@ public class StepprPDJointController implements StepprController
          controllers.add(new PDController(joint.getName(), registry));
          desiredPositions.add(new DoubleYoVariable(joint.getName() + "_q_d", registry));
          desiredVelocities.add(new DoubleYoVariable(joint.getName() + "_qd_d", registry));
+         tauFFs.add(new DoubleYoVariable(joint.getName() + "_tau_ff", registry));
       }
 
    }
@@ -66,4 +67,9 @@ public class StepprPDJointController implements StepprController
       return registry;
    }
 
+   
+   public static void main(String[] args)
+   {
+      StepprSingleThreadedController.startController(new StepprPDJointController());
+   }
 }

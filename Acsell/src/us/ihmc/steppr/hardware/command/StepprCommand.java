@@ -39,6 +39,8 @@ public class StepprCommand
             jointCommands.get(StepprJoint.RIGHT_ANKLE_X), StepprActuator.RIGHT_ANKLE_RIGHT.getKt(), StepprActuator.RIGHT_ANKLE_LEFT.getKt(), registry);
       actuatorCommands.put(StepprActuator.RIGHT_ANKLE_LEFT, rightAnkle.leftActuatorCommand());
       actuatorCommands.put(StepprActuator.RIGHT_ANKLE_RIGHT, rightAnkle.rightActuatorCommand());
+      
+      parentRegistry.addChild(registry);
    }
 
    public void write(ByteBuffer target, int controlID)

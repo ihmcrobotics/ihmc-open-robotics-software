@@ -19,7 +19,7 @@ public enum StepprJoint
    
    TORSO_Z("back_ubz", 120, StepprActuator.TORSO_Z),
    TORSO_Y("back_mby", 120, StepprActuator.TORSO_Y),
-   TORSO_X("back_lbx", 120, StepprActuator.TORSO_Z);
+   TORSO_X("back_lbx", 120, StepprActuator.TORSO_X);
    
    
    public static final StepprJoint[] values = values();

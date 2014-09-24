@@ -29,6 +29,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("StepprPDSliderBoard");
    private final EnumYoVariable<StepprJoint> selectedJoint = new EnumYoVariable<>("selectedJoint", sliderBoardRegistry, StepprJoint.class);
 
+   private final BooleanYoVariable selectedJoint_enabled = new BooleanYoVariable("selectedJoint_enabled", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_q = new DoubleYoVariable("selectedJoint_q", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_qd = new DoubleYoVariable("selectedJoint_qd", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_tau = new DoubleYoVariable("selectedJoint_tau", sliderBoardRegistry);
@@ -40,6 +41,8 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
    private final DoubleYoVariable selectedJoint_kd = new DoubleYoVariable("selectedJoint_kd", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_tauFF = new DoubleYoVariable("selectedJoint_tauFF", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
+   
+   private volatile boolean started = false;
 
    private final EnumMap<StepprJoint, JointVariables> allJointVariables = new EnumMap<>(StepprJoint.class);
 
@@ -62,11 +65,20 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          JointVariables variables = new JointVariables(joint, registry);
 
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(joint.getSdfName());
+         sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
-         sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -oneDoFJoint.getVelocityLimit(), oneDoFJoint.getVelocityLimit());
+         sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);
          sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 100);
          sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 1);
-         sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -oneDoFJoint.getTorqueLimit(), oneDoFJoint.getTorqueLimit());
+         
+         if(Double.isNaN(oneDoFJoint.getTorqueLimit()) || Double.isInfinite(oneDoFJoint.getTorqueLimit()))
+         {
+            sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -10, 10);            
+         }
+         else
+         {
+            sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -oneDoFJoint.getTorqueLimit(), oneDoFJoint.getTorqueLimit());
+         }
          sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 1);
 
          sliderBoardConfigurationManager.setButton(1, variables.enabled);
@@ -88,6 +100,8 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
 
       StepprDashboard.createDashboard(scs, registry);
       super.start();
+      
+      started = true;
    }
 
    private class JointVariables
@@ -135,32 +149,32 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          switch (joint)
          {
          case LEFT_ANKLE_X:
-            stateNameSpace = "StepprState.LeftAnkle";
-            qStateVariable = "LeftAnkle_q_x";
-            qdStateVariable = "LeftAnkle_qd_x";
-            tauStateVariable = "LeftAnkle_tau_x";
+            stateNameSpace = "Steppr.leftAnkle";
+            qStateVariable = "leftAnkle_q_x";
+            qdStateVariable = "leftAnkle_qd_x";
+            tauStateVariable = "leftAnkle_tau_x";
             break;
          case LEFT_ANKLE_Y:
-            stateNameSpace = "StepprState.LeftAnkle";
-            qStateVariable = "LeftAnkle_q_y";
-            qdStateVariable = "LeftAnkle_qd_y";
-            tauStateVariable = "LeftAnkle_tau_y";
+            stateNameSpace = "Steppr.leftAnkle";
+            qStateVariable = "leftAnkle_q_y";
+            qdStateVariable = "leftAnkle_qd_y";
+            tauStateVariable = "leftAnkle_tau_y";
             break;
          case RIGHT_ANKLE_X:
-            stateNameSpace = "StepprState.RightAnkle";
-            qStateVariable = "RightAnkle_q_x";
-            qdStateVariable = "RightAnkle_qd_x";
-            tauStateVariable = "RightAnkle_tau_x";
+            stateNameSpace = "Steppr.rightAnkle";
+            qStateVariable = "rightAnkle_q_x";
+            qdStateVariable = "rightAnkle_qd_x";
+            tauStateVariable = "rightAnkle_tau_x";
             break;
          case RIGHT_ANKLE_Y:
-            stateNameSpace = "StepprState.RightAnkle";
-            qStateVariable = "RightAnkle_q_y";
-            qdStateVariable = "RightAnkle_qd_y";
-            tauStateVariable = "RightAnkle_tau_y";
+            stateNameSpace = "Steppr.rightAnkle";
+            qStateVariable = "rightAnkle_q_y";
+            qdStateVariable = "rightAnkle_qd_y";
+            tauStateVariable = "rightAnkle_tau_y";
             break;
 
          default:
-            stateNameSpace = "StepprState." + prefix;
+            stateNameSpace = "Steppr." + prefix;
             qStateVariable = prefix + "_q";
             qdStateVariable = prefix + "_qd";
             tauStateVariable = prefix + "_tau";
@@ -168,12 +182,12 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          q = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qStateVariable);
          qd = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qdStateVariable);
          tau = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, tauStateVariable);
-
+         
          q_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_q_d");
          qd_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_qd_d");
+         tauFF = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_tau_ff");
          kp = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kp_" + prefix);
          kd = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kd_" + prefix);
-         tauFF = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kd_" + prefix);
          damping = (DoubleYoVariable) variableHolder.getVariable(namespace, prefix + "Damping");
 
          tau_d = (DoubleYoVariable) variableHolder.getVariable(namespace, prefix + "TauDesired");
@@ -182,6 +196,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
 
       public void update()
       {
+         selectedJoint_enabled.set(enabled.getBooleanValue());
          selectedJoint_q.set(q.getDoubleValue());
          selectedJoint_qd.set(qd.getDoubleValue());
          selectedJoint_tau.set(tau.getDoubleValue());
@@ -198,7 +213,11 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
    @Override
    public void indexChanged(int newIndex, double newTime)
    {
-      allJointVariables.get(selectedJoint.getEnumValue()).update();
+      if(started)
+      {
+         StepprJoint joint = selectedJoint.getEnumValue();
+         allJointVariables.get(joint).update();
+      }
    }
 
    public static void main(String[] args)

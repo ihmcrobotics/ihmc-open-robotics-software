@@ -24,6 +24,8 @@ public class StepprJointCommand
       this.damping = new DoubleYoVariable(name + "Damping", registry);
       this.numberOfActuators = numberOfActuators;
       this.motorAngles = new double[numberOfActuators];
+      
+      parentRegistry.addChild(registry);
    }
       
    public void setTauDesired(double tau, RawJointSensorDataHolder rawSensorData)

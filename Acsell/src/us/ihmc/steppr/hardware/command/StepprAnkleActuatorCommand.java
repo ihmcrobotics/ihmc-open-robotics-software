@@ -39,11 +39,8 @@ public class StepprAnkleActuatorCommand
       rightActuatorCommand.setTauDesired(ankleCalculator.getTauRightActuator());
       leftActuatorCommand.setTauDesired(ankleCalculator.getTauLeftActuator());
       
-      // Misuse torque calculation for damping calculation
-      ankleCalculator.calculateDesiredTau(0, 0, ankleX.getDamping(), ankleY.getDamping());
-      
-      rightActuatorCommand.setTauDesired(ankleCalculator.getTauRightActuator());
-      leftActuatorCommand.setTauDesired(ankleCalculator.getTauLeftActuator());
+      rightActuatorCommand.setDamping(ankleY.getDamping() / ankleCalculator.getRatio());
+      leftActuatorCommand.setDamping(ankleY.getDamping() / ankleCalculator.getRatio());
       
    }
    
