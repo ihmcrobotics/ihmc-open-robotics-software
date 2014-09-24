@@ -12,6 +12,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -26,7 +27,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    private static final long serialVersionUID = -5987765792397743483L;
 
    private JTable table;
-   
+
    private final EnumMap<StepprActuator, YoVariable> motorTemperatures = new EnumMap<>(StepprActuator.class);
    private final EnumMap<StepprActuator, YoVariable> motorEncoders = new EnumMap<>(StepprActuator.class);
 
@@ -34,8 +35,76 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    {
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "<", "q", ">" },
-            StepprActuator.values.length);
+      createLogicButtons(yoVariableHolder);
+      createMotorButtons(yoVariableHolder);
+
+      createTable(yoVariableHolder);
+
+   }
+
+   private void createLogicButtons(YoVariableHolder yoVariableHolder)
+   {
+      JPanel logicPanel = new JPanel();
+      logicPanel.setLayout(new BoxLayout(logicPanel, BoxLayout.X_AXIS));
+      final YoVariable logicPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "logicPowerStateRequest");
+      JButton logicPowerOn = new JButton("Logic power on");
+      logicPowerOn.addActionListener(new ActionListener()
+      {
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            logicPowerStateRequest.setValueFromDouble(1.0);
+         }
+      });
+      JButton logicPowerOff = new JButton("Logic power off");
+      logicPowerOff.addActionListener(new ActionListener()
+      {
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            logicPowerStateRequest.setValueFromDouble(-1);
+         }
+      });
+      logicPanel.add(logicPowerOn);
+      logicPanel.add(logicPowerOff);
+      add(logicPanel);
+   }
+
+   private void createMotorButtons(YoVariableHolder yoVariableHolder)
+   {
+      JPanel motorPanel = new JPanel();
+      motorPanel.setLayout(new BoxLayout(motorPanel, BoxLayout.X_AXIS));
+      final YoVariable motorPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "motorPowerStateRequest");
+      JButton motorPowerOn = new JButton("Motor power on");
+      motorPowerOn.addActionListener(new ActionListener()
+      {
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            motorPowerStateRequest.setValueFromDouble(1.0);
+         }
+      });
+      JButton motorPowerOff = new JButton("Motor power off");
+      motorPowerOff.addActionListener(new ActionListener()
+      {
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            motorPowerStateRequest.setValueFromDouble(-1);
+         }
+      });
+      motorPanel.add(motorPowerOn);
+      motorPanel.add(motorPowerOff);
+      add(motorPanel);
+   }
+
+   private void createTable(YoVariableHolder yoVariableHolder)
+   {
+      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "<", "q", ">" }, StepprActuator.values.length);
       table = new JTable(tableModel);
       table.setFillsViewportHeight(true);
       table.getColumn("<").setCellRenderer(new NudgeRenderer(true));
@@ -43,14 +112,13 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       table.getColumn(">").setCellRenderer(new NudgeRenderer(false));
       table.getColumn(">").setCellEditor(new NudgeEditor(1));
 
-      
       int row = 0, col = 0;
       for (StepprActuator actuator : StepprActuator.values)
       {
          YoVariable<?> nudgeVariable = yoVariableHolder.getVariable("StepprSetup", actuator.getName() + "Nudge");
          motorEncoders.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorEncoder"));
          motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorTemperature"));
-         
+
          table.setValueAt(actuator.getName(), row, col);
 
          col++;
@@ -61,23 +129,22 @@ public class StepprDashboard extends JPanel implements PlaybackListener
 
          table.setValueAt("<", row, col);
          ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, nudgeVariable);
-         
+
          col++;
 
          table.setValueAt(0, row, col);
-         
+
          col++;
-         
+
          table.setValueAt(">", row, col);
          ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, nudgeVariable);
-         
+
          col = 0;
          row++;
       }
-      
+
       JScrollPane tableScroller = new JScrollPane(table);
       add(tableScroller);
-      
    }
 
    @Override
@@ -87,29 +154,30 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       for (StepprActuator actuator : StepprActuator.values)
       {
          table.setValueAt(motorTemperatures.get(actuator).getValueAsDouble(), row, 1);
-         table.setValueAt(String.format("%.3f",motorEncoders.get(actuator).getValueAsDouble()), row, 3);
+         table.setValueAt(String.format("%.3f", motorEncoders.get(actuator).getValueAsDouble()), row, 3);
          row++;
       }
-      
+
    }
 
    @Override
    public void play(double realTimeRate)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    @Override
    public void stop()
    {
       // TODO Auto-generated method stub
-      
+
    }
-   
+
    private class NudgeRenderer extends JButton implements TableCellRenderer
    {
       private final boolean decrease;
+
       public NudgeRenderer(boolean decrease)
       {
          this.decrease = decrease;
@@ -120,19 +188,19 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       {
          setForeground(table.getForeground());
          setBackground(UIManager.getColor("Button.background"));
-         if(decrease)
+         if (decrease)
          {
             setText("<");
          }
          else
          {
-            setText(">");            
+            setText(">");
          }
 
          return this;
       }
    }
-   
+
    private class NudgeEditor extends DefaultCellEditor
    {
       protected JButton button;
@@ -140,7 +208,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       private final int direction;
       private boolean isPushed;
       private int rowClicked;
-      
+
       private YoVariable[] yoVariables = new YoVariable[StepprActuator.values.length];
 
       public NudgeEditor(int direction)
@@ -187,7 +255,6 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       {
          if (isPushed)
          {
-            System.out.println("PUSHED " + rowClicked + " " + direction);
             yoVariables[rowClicked].setValueFromDouble(direction);
          }
 

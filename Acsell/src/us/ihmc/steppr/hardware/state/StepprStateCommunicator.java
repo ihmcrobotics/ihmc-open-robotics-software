@@ -21,11 +21,13 @@ public class StepprStateCommunicator implements StepprStateProcessor
 
    public static void main(String[] args)
    {
+      StepprSetup.startStreamingData();
+      
       YoVariableRegistry registry = new YoVariableRegistry("viz");
       StepprState state = new StepprState(registry);
       YoVariableServer variableServer = new YoVariableServer(5555, 0.01);
 
-      StepprSetup stepprSetup = new StepprSetup(registry);
+      StepprSetup stepprSetup = new StepprSetup(variableServer);
       StepprStateCommunicator communicator = new StepprStateCommunicator(state, variableServer, registry);
 
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
