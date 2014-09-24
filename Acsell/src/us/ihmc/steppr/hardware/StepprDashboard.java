@@ -47,6 +47,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       int row = 0, col = 0;
       for (StepprActuator actuator : StepprActuator.values)
       {
+         YoVariable<?> nudgeVariable = yoVariableHolder.getVariable("StepprSetup", actuator.getName() + "Nudge");
          motorEncoders.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorEncoder"));
          motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorTemperature"));
          
@@ -59,7 +60,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          col++;
 
          table.setValueAt("<", row, col);
-         ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, null);
+         ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, nudgeVariable);
          
          col++;
 
@@ -68,7 +69,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          col++;
          
          table.setValueAt(">", row, col);
-         ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, null);
+         ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, nudgeVariable);
          
          col = 0;
          row++;
@@ -76,6 +77,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       
       JScrollPane tableScroller = new JScrollPane(table);
       add(tableScroller);
+      
    }
 
    @Override
@@ -85,7 +87,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       for (StepprActuator actuator : StepprActuator.values)
       {
          table.setValueAt(motorTemperatures.get(actuator).getValueAsDouble(), row, 1);
-         table.setValueAt(motorEncoders.get(actuator).getValueAsDouble(), row, 3);
+         table.setValueAt(String.format("%.3f",motorEncoders.get(actuator).getValueAsDouble()), row, 3);
          row++;
       }
       
@@ -186,6 +188,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          if (isPushed)
          {
             System.out.println("PUSHED " + rowClicked + " " + direction);
+            yoVariables[rowClicked].setValueFromDouble(direction);
          }
 
          isPushed = false;
