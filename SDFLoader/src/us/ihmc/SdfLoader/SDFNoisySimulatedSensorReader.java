@@ -6,7 +6,7 @@ import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorReader
@@ -23,7 +23,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    private final Quat4d rotationFilter = new Quat4d();
    private final Vector3d positionFilter = new Vector3d();
 
-   public SDFNoisySimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
+   public SDFNoisySimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       super(robot, fullRobotModel, referenceFrames);
    }

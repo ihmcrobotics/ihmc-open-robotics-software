@@ -19,12 +19,12 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerat
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -57,7 +57,7 @@ public class OptimalSwingSubController implements SwingSubController
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final CouplingRegistry couplingRegistry;
    private final ProcessedSensorsInterface processedSensors;
    private final ProcessedOutputsInterface processedOutputs;
@@ -124,7 +124,7 @@ public class OptimalSwingSubController implements SwingSubController
    private final BooleanYoVariable useUpperBodyPositionEstimation = new BooleanYoVariable("useUpperBodyPositionEstimation", registry);
 
    public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
-         CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
+         CommonHumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
          SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry, SwingParameters swingParameters, LegTorqueData legTorqueData,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, DesiredHeadingControlModule desiredHeadingControlModule,
          SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoGraphicsListRegistry yoGraphicsListRegistry,

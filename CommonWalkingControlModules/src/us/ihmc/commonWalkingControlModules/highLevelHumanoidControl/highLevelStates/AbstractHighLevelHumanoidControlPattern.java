@@ -16,10 +16,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
@@ -47,7 +47,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;
    protected final double gravity;
-   protected final CommonWalkingReferenceFrames referenceFrames;
+   protected final CommonHumanoidReferenceFrames referenceFrames;
 
    protected final TwistCalculator twistCalculator;
 

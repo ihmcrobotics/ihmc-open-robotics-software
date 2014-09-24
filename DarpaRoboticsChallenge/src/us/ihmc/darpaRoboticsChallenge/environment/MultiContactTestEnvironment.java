@@ -11,7 +11,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -20,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -46,7 +46,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
 
-      CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup);
+      CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup);
       SDFPerfectSimulatedSensorReader sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReader(robotForEnvironmentSetup,
                                                                                 fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();
@@ -57,7 +57,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup, invisibleContactablePlaneHandContactPointTransforms);
    }
 
-   private CombinedTerrainObject3D createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel, SideDependentList<Transform3d> invisibleContactablePlaneHandContactPointTransforms)
+   private CombinedTerrainObject3D createCombinedTerrainObject(CommonHumanoidReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel, SideDependentList<Transform3d> invisibleContactablePlaneHandContactPointTransforms)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       for (RobotSide robotSide : footContactSides)

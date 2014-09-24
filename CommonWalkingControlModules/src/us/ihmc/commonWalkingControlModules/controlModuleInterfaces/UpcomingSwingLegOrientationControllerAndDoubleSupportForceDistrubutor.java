@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -28,7 +28,7 @@ public class UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubut
    private final DoubleYoVariable footYawError = new DoubleYoVariable("footYawError", registry);
    private final DoubleYoVariable footYawKp = new DoubleYoVariable("footYawKp", registry);
 
-   public UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubutor(CommonWalkingReferenceFrames referenceFrames, double footForward,
+   public UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubutor(CommonHumanoidReferenceFrames referenceFrames, double footForward,
          CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = referenceFrames.getPelvisFrame();

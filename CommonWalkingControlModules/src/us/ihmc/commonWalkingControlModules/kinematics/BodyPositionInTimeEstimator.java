@@ -3,11 +3,11 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -35,7 +35,7 @@ public class BodyPositionInTimeEstimator
    private final YoFrameVector currentUpperBodyVelocity;
    private final YoFrameVector estimatedUpperBodyVelocity;
    
-   public BodyPositionInTimeEstimator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+   public BodyPositionInTimeEstimator(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames,
          DesiredHeadingControlModule desiredHeadingControlModule,
          CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {

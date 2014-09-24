@@ -17,8 +17,8 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -53,7 +53,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    protected final SwingSubController swingSubController;
    protected final UpperBodySubController upperBodySubController;
    
-   protected final CommonWalkingReferenceFrames referenceFrames;
+   protected final CommonHumanoidReferenceFrames referenceFrames;
 
    protected final LowerBodyTorques lowerBodyTorques;
    protected final UpperBodyTorques upperBodyTorques = new UpperBodyTorques();
@@ -91,7 +91,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
    public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, FullRobotModel fullRobotModel, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
-           SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonWalkingReferenceFrames referenceFrames,
+           SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonHumanoidReferenceFrames referenceFrames,
            YoVariableRegistry controllerRegistry, RobotSide initialLoadingLeg)
    {
       this.name = name;

@@ -16,9 +16,9 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesir
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -30,7 +30,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class HighLevelHumanoidControllerFactoryHelper
 {
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
-         WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
+         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
       BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = new BlindWalkingToDestinationDesiredFootstepCalculator(
@@ -47,7 +47,7 @@ public class HighLevelHumanoidControllerFactoryHelper
    }
 
    public static ComponentBasedDesiredFootstepCalculator getDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
+         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
          ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
    {
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator;

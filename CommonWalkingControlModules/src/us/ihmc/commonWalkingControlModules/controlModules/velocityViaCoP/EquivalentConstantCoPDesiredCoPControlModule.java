@@ -4,10 +4,10 @@ import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalc
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -30,7 +30,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("EquivalentConstantCoPVelocityViaCoPControlModule");
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
 
@@ -46,7 +46,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
    private final double controlDT;
 
 
-   public EquivalentConstantCoPDesiredCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
+   public EquivalentConstantCoPDesiredCoPControlModule(CommonHumanoidReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
            CouplingRegistry couplingRegistry, double controlDT, YoVariableRegistry parentRegistry,
            YoGraphicsListRegistry yoGraphicsListRegistry)
    {

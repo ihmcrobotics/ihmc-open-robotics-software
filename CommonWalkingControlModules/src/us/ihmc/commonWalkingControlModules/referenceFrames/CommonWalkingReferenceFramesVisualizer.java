@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -17,7 +18,7 @@ public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotC
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
-   public CommonWalkingReferenceFramesVisualizer(CommonWalkingReferenceFrames referenceFrames,
+   public CommonWalkingReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String vizName = referenceFrames.getClass().getSimpleName();

@@ -6,8 +6,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -35,14 +35,14 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    private final DoubleYoVariable percentIn = new DoubleYoVariable("percentIn", registry);
 
    private final FramePoint footLocationTemp = new FramePoint();
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final DoubleYoVariable alphaDeltaFootPosition = new DoubleYoVariable("alphaDeltaFootPosition", registry);
    private final AlphaFilteredYoFrameVector deltaFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("deltaFootPosition", "", registry,
          alphaDeltaFootPosition, worldFrame);
    private final Vector3d deltaVectorTemp = new Vector3d();
 
-   public SmoothICPComputer2D(CommonWalkingReferenceFrames referenceFrames, double dt, double doubleSupportFirstStepFraction,
+   public SmoothICPComputer2D(CommonHumanoidReferenceFrames referenceFrames, double dt, double doubleSupportFirstStepFraction,
          int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(dt, doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, parentRegistry, yoGraphicsListRegistry);

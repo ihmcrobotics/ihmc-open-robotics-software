@@ -6,10 +6,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
@@ -34,7 +34,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 {
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ToeOffVirtualToePointCalculator");
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final CouplingRegistry couplingRegistry;
    private final SideDependentList<FramePoint> footPoints = new SideDependentList<FramePoint>();
    private final SideDependentList<FramePoint[]> toePoints = new SideDependentList<FramePoint[]>();
@@ -52,7 +52,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
    private final double footLength;
 
-   public ToeOffVirtualToePointCalculator(CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, double footForward, double footBack,
+   public ToeOffVirtualToePointCalculator(CommonHumanoidReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, double footForward, double footBack,
          double footWidth, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       SimpleDesiredCapturePointCalculator.USEUPCOMINGSWINGTOEASSWEETSPOT = true; // TODO: AAAAAAAAAAAAAAAAAAAARRRRRRRRRRRRRGHHHHHHHHHHHHHHHH

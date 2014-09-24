@@ -7,11 +7,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -86,7 +86,7 @@ public class FeetManager
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
 
       this.footSwitches = momentumBasedController.getFootSwitches();
-      CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -16,7 +16,7 @@ public class DoNothingBipedFeetUpdater implements BipedFeetUpdater
 
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedFeetUpdater");
 
-   public DoNothingBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
+   public DoNothingBipedFeetUpdater(CommonHumanoidReferenceFrames referenceFrames, double footForward, double footBack,
            YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();

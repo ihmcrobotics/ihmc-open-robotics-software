@@ -16,12 +16,12 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerat
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.JointSpaceTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -49,7 +49,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    private final YoVariableRegistry registry;
    private final FullRobotModel fullRobotModel;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final BodyPositionInTimeEstimator bodyPositionInTimeEstimator;
    private final JointSpaceTrajectoryGenerator jointSpaceTrajectoryGenerator;
    private final CouplingRegistry couplingRegistry;
@@ -98,7 +98,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final YoFrameVector positionInSupportLegAnkleZUp;
 
    public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
-         FullRobotModel fullRobotModel, SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
+         FullRobotModel fullRobotModel, SideDependentList<FootSwitchInterface> footSwitches, CommonHumanoidReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator,
          DesiredHeadingControlModule desiredHeadingControlModule, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry,

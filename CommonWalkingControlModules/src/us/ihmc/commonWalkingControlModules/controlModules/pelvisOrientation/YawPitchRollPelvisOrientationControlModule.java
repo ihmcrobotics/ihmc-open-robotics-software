@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 public class YawPitchRollPelvisOrientationControlModule implements PelvisOrientationControlModule
 {
    private final ProcessedSensorsInterface processedSensors;
-   private final CommonWalkingReferenceFrames commonWalkingReferenceFrames;
+   private final CommonHumanoidReferenceFrames commonWalkingReferenceFrames;
    private final YoVariableRegistry registry = new YoVariableRegistry("OrientationController");
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -43,7 +43,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 
    private final DoubleYoVariable NxExtra = new DoubleYoVariable("NxExtra", registry);
 
-   public YawPitchRollPelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames commonWalkingReferenceFrames,YoVariableRegistry parentRegistry, double controlDT)
+   public YawPitchRollPelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames commonWalkingReferenceFrames,YoVariableRegistry parentRegistry, double controlDT)
    {
       this.processedSensors = processedSensors;
       this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;

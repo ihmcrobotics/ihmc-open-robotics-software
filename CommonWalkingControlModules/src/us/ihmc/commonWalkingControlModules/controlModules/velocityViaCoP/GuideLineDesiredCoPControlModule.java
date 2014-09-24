@@ -7,11 +7,11 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalc
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -39,7 +39,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry("GuideLineVelocityViaCoPControlModule");
 
    private final double controlDT;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final CapturePointCenterOfPressureControlModule capturePointCenterOfPressureControlModule;
    private final GuideLineCalculator guideLineCalculator;
    private final ProcessedSensorsInterface processedSensors;
@@ -66,7 +66,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
    private final BooleanYoVariable lastTickDoubleSupport = new BooleanYoVariable("lastTickDoubleSupport", registry);
 
    public GuideLineDesiredCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
-         CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
+         CommonHumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
          GuideLineCalculator guideLineCalculator, CapturePointCenterOfPressureControlModule capturePointCenterOfPressureControlModule)
    {
       this.controlDT = controlDT;

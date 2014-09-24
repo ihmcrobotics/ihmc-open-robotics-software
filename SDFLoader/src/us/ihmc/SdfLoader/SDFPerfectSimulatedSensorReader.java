@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.utilities.math.geometry.Transform3d;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -25,18 +25,18 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
    private final String name;
    private final SDFRobot robot;
    private final SixDoFJoint rootJoint;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
    
    
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), referenceFrames);
    }
    
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, CommonWalkingReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, CommonHumanoidReferenceFrames referenceFrames)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;

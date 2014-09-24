@@ -8,10 +8,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -75,7 +75,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
    // Constructors
    public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
-         CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
+         CouplingRegistry couplingRegistry, CommonHumanoidReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
          YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);

@@ -12,10 +12,10 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerat
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -38,7 +38,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
 
    private final ProcessedSensorsInterface processedSensors;
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
    private final CouplingRegistry couplingRegistry;
    private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> desiredYoLegJointPositions =
@@ -65,7 +65,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
 
 
    public CraigPage300SwingLegTorqueControlOnlyModule(LegJointName[] legJointNames, ProcessedSensorsInterface processedSensors,
-           CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
+           CommonHumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
            SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoVariableRegistry parentRegistry,
            GUISetterUpperRegistry guiSetterUpperRegistry)
    {

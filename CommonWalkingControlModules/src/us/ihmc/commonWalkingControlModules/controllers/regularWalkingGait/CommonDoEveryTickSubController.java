@@ -15,10 +15,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -27,7 +27,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CommonDoEveryTickSubController implements DoEveryTickSubController
 {
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final BipedFootInterface leftFoot;
    private final BipedFootInterface rightFoot;
@@ -47,7 +47,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private double initialDesiredHeading;
    private final ProcessedSensorsInterface processedSensors;
 
-   public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot,
+   public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames, BipedFootInterface leftFoot,
          BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, Updatable footPolygonVisualizer,
          DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
          DesiredFootstepCalculator desiredFootstepCalculator, DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,

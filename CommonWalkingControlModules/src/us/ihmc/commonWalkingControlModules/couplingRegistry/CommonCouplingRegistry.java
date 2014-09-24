@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.couplingRegistry;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -48,7 +48,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private BipedSupportPolygons bipedSupportPolygons;
 
-   private CommonWalkingReferenceFrames referenceFrames;
+   private CommonHumanoidReferenceFrames referenceFrames;
 
    private Wrench desiredUpperBodyWrench;
  
@@ -65,7 +65,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
   
    private EnumYoVariable<RobotSide> upcomingSupportLeg = new EnumYoVariable<RobotSide>("upcomingSupportLeg", registry, RobotSide.class);
 
-   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonCouplingRegistry(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -85,12 +85,12 @@ public class CommonCouplingRegistry implements CouplingRegistry
       }
    }
 
-   public void setReferenceFrames(CommonWalkingReferenceFrames referenceFrames)
+   public void setReferenceFrames(CommonHumanoidReferenceFrames referenceFrames)
    {
       this.referenceFrames = referenceFrames;
    }
 
-   public CommonWalkingReferenceFrames getReferenceFrames()
+   public CommonHumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
    }

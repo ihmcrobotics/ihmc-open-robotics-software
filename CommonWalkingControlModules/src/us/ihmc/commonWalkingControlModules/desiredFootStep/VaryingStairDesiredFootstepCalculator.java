@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -26,7 +26,7 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
 
 
    public VaryingStairDesiredFootstepCalculator(VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet,
-           CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+           CommonHumanoidReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, referenceFrames, desiredHeadingControlModule, parentRegistry);
       this.groundProfile = groundProfile;

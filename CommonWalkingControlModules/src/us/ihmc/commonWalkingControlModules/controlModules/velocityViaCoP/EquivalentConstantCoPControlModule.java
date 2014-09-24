@@ -5,9 +5,9 @@ import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalc
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -23,7 +23,7 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("EquivalentConstantCoPVelocityViaCoPControlModule");
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
 
@@ -33,7 +33,7 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
    private final DoubleYoVariable guideLineKp = new DoubleYoVariable("guideLineKp", registry);
 
 
-   public EquivalentConstantCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
+   public EquivalentConstantCoPControlModule(CommonHumanoidReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
            CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;

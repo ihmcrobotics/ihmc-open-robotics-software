@@ -9,8 +9,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.math.MatrixTools;
@@ -46,7 +46,7 @@ public class StanceFullLegJacobian
     * @param robotSpecificJointNames robot specific joint names
     * @param footHeight height of the origin of the foot frame above the sole of the foot
     */
-   public StanceFullLegJacobian(RigidBody pelvis, RigidBody foot, RobotSide robotSide, CommonWalkingReferenceFrames frames,
+   public StanceFullLegJacobian(RigidBody pelvis, RigidBody foot, RobotSide robotSide, CommonHumanoidReferenceFrames frames,
                                 RobotSpecificJointNames robotSpecificJointNames, double footHeight)
    {
       this.robotSide = robotSide;

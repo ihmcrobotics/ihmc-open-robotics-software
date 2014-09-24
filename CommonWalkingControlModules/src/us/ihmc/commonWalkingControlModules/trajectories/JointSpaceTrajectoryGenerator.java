@@ -9,12 +9,12 @@ import us.ihmc.commonWalkingControlModules.kinematics.SwingLegAnglesAtEndOfStepE
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerations;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -54,7 +54,7 @@ public class JointSpaceTrajectoryGenerator
 
    private final DoubleYoVariable[] heightOfViaPoints;
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final FrameOrientation intermediateOrientation;
    private final SideDependentList<LegJointPositions> intermediatePositions;
 
@@ -96,7 +96,7 @@ public class JointSpaceTrajectoryGenerator
    private final BooleanYoVariable useEstimatedJointVelocitiesAtEndOfStep;
    
 
-   public JointSpaceTrajectoryGenerator(String name, int maximumNumberOfViaPoints, CommonWalkingReferenceFrames referenceFrames,
+   public JointSpaceTrajectoryGenerator(String name, int maximumNumberOfViaPoints, CommonHumanoidReferenceFrames referenceFrames,
          LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry,
          BodyPositionInTimeEstimator bodyPositionInTimeEstimator, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, YoVariableRegistry parentRegistry)
    {

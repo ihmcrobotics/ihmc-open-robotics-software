@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -18,11 +18,11 @@ public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
    private final String name;
    private final YoVariableRegistry registry;
    private final RobotSide robotSide;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameOrientation orientation;
 
-   public BodyOrientationEstimatorThroughStanceLeg(RobotSide robotSide, CommonWalkingReferenceFrames referenceFrames)
+   public BodyOrientationEstimatorThroughStanceLeg(RobotSide robotSide, CommonHumanoidReferenceFrames referenceFrames)
    {
       this.name = robotSide + getClass().getSimpleName();
       this.registry = new YoVariableRegistry(name);

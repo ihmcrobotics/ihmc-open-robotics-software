@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -27,11 +27,11 @@ public class GroundReactionTorqueCalculator
 
    private final SideDependentList<YoFramePoint> groundTauStart = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> groundTau = new SideDependentList<YoFrameVector>();
-   private final CommonWalkingReferenceFrames commonWalkingReferenceFrames;
+   private final CommonHumanoidReferenceFrames commonWalkingReferenceFrames;
    
    private final SideDependentList<ArrayList<GroundContactPoint>> contactPointList;
    
-   public GroundReactionTorqueCalculator(SideDependentList<ArrayList<GroundContactPoint>> contactPointList, CommonWalkingReferenceFrames commonWalkingReferenceFrames, YoVariableRegistry parentRegistry,
+   public GroundReactionTorqueCalculator(SideDependentList<ArrayList<GroundContactPoint>> contactPointList, CommonHumanoidReferenceFrames commonWalkingReferenceFrames, YoVariableRegistry parentRegistry,
            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactPointList = new SideDependentList<ArrayList<GroundContactPoint>>(contactPointList);

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point2d;
 
@@ -12,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.robotSide.RobotSide;
@@ -69,7 +69,7 @@ public class PushRecoveryControlModule
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final StateMachine<?> stateMachine;
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
    private final PushRecoveryICPPlanner pushRecoveryICPPlanner;

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
@@ -9,9 +9,9 @@ public class CommonWalkingReferenceFramesUpdater implements SensorProcessor
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final CommonWalkingReferenceFrames refrenceFrames;
+   private final CommonHumanoidReferenceFrames refrenceFrames;
 
-   public CommonWalkingReferenceFramesUpdater(CommonWalkingReferenceFrames refrenceFrames)
+   public CommonWalkingReferenceFramesUpdater(CommonHumanoidReferenceFrames refrenceFrames)
    {
       this.refrenceFrames = refrenceFrames;
    }

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -25,7 +25,7 @@ public class StraightLineGroundTrajectoryGenerator implements GroundTrajectoryGe
    
    private final DoubleYoVariable absoluteYOffsetForViaPoints; 
    
-   public StraightLineGroundTrajectoryGenerator(String name, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public StraightLineGroundTrajectoryGenerator(String name, CommonHumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);      
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();

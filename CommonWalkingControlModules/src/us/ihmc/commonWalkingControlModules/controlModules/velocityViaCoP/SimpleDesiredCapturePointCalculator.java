@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -23,7 +23,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DesiredCapturePointCalculator");
    private final CouplingRegistry couplingRegistry;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final double controlDT;
    private final double footForward;
    
@@ -50,7 +50,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    
    private final DoubleYoVariable icpCurrentPositionOnMotionPolygon = new DoubleYoVariable("icpCurrentPositionOnMotionPolygon", registry);
 
-   public SimpleDesiredCapturePointCalculator(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames, double footForward, double controlDT,
+   public SimpleDesiredCapturePointCalculator(CouplingRegistry couplingRegistry, CommonHumanoidReferenceFrames referenceFrames, double footForward, double controlDT,
            YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;

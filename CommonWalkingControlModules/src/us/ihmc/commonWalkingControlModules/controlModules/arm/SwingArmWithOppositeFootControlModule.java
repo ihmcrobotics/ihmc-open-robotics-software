@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.arm;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -12,13 +12,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class SwingArmWithOppositeFootControlModule extends PDArmControlModule
 {
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ReferenceFrame> armAttachmentFrames;
    private final ArmJointName[] armJointNames;
    private final double armLength;
    private final double swingMultiplier;
 
-   public SwingArmWithOppositeFootControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, double controlDT, SideDependentList<ReferenceFrame> armAttachmentFrames, ArmJointName[] armJointNames, double armLength, double swingMultiplier, YoVariableRegistry parentRegistry)
+   public SwingArmWithOppositeFootControlModule(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames, double controlDT, SideDependentList<ReferenceFrame> armAttachmentFrames, ArmJointName[] armJointNames, double armLength, double swingMultiplier, YoVariableRegistry parentRegistry)
    {
       super(processedSensors, controlDT, parentRegistry);
       this.referenceFrames = referenceFrames;

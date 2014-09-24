@@ -8,12 +8,12 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.kinematics.AnkleVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -41,7 +41,7 @@ import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
 public class ChangingEndpointSwingSubController implements SwingSubController
 {
    private final ProcessedSensorsInterface processedSensors;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final CouplingRegistry couplingRegistry;
 
    private final DesiredFootstepCalculator desiredFootstepCalculator;
@@ -126,7 +126,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final double controlDT;
    private RobotSide swingSide;
 
-   public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+   public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames,
          CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry,
          SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
