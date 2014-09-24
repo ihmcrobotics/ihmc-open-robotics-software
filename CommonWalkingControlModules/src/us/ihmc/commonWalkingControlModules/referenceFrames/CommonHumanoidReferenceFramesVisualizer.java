@@ -11,14 +11,14 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
-public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotController
+public class CommonHumanoidReferenceFramesVisualizer implements Updatable, RobotController
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
-   public CommonWalkingReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames,
+   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String vizName = referenceFrames.getClass().getSimpleName();
