@@ -16,6 +16,8 @@ public class RawJointSensorDataHolder
    private double psi_pos_raw;
    private double motorCurrent;
    private double commandedMotorCurrent;
+   
+   private double[] motorAngles = new double[2]; // Increase if we get more motors/joint
 
    public RawJointSensorDataHolder(String name)
    {
@@ -45,6 +47,11 @@ public class RawJointSensorDataHolder
       setUsesOutputEncoderQd(source.isUseOutputEncoderQd());
       setMotorCurrent(source.getMotorCurrent());
       setCommandedMotorCurrent(source.getCommandedMotorCurrent());
+      
+      for (int i = 0; i < motorAngles.length; i++)
+      {
+         setMotorAngle(i, source.getMotorAngle(i));
+      }
    }
 
    public boolean isUseOutputEncoderQ()
@@ -176,5 +183,15 @@ public class RawJointSensorDataHolder
    public void setCommandedMotorCurrent(double commandedMotorCurrent)
    {
       this.commandedMotorCurrent = commandedMotorCurrent;
+   }
+   
+   public void setMotorAngle(int motor, double angle)
+   {
+      motorAngles[motor] = angle;
+   }
+   
+   public double getMotorAngle(int motor)
+   {
+      return motorAngles[motor];
    }
 }

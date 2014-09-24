@@ -241,9 +241,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       return rootJoint;
    }
 
-   public Collection<OneDegreeOfFreedomJoint> getOneDoFJoints()
+   public OneDegreeOfFreedomJoint[] getOneDoFJoints()
    {
-      return oneDoFJoints.values();
+      return oneDoFJoints.values().toArray(new OneDegreeOfFreedomJoint[oneDoFJoints.size()]);
    }
    
    private void addForceSensors(SDFJointHolder joint)
