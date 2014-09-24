@@ -7,9 +7,9 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -148,7 +148,7 @@ public class ContactableBodiesFactory
       return thighContactableBodies;
    }
 
-   public SideDependentList<ContactablePlaneBody> createFootContactableBodies(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
+   public SideDependentList<ContactablePlaneBody> createFootContactableBodies(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       if (footContactPoints == null)
          return null;

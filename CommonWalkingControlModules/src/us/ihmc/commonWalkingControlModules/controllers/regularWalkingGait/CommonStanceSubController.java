@@ -10,10 +10,10 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHead
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.sensorProcessing.stateEstimation.LegToTrustForVelocityWriteOnly;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -32,7 +32,7 @@ public class CommonStanceSubController implements StanceSubController
 {
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
    private final DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule;
    private final BalanceSupportControlModule balanceSupportControlModule;
@@ -58,7 +58,7 @@ public class CommonStanceSubController implements StanceSubController
    private final double footWidth;
 
    public CommonStanceSubController(ProcessedSensorsInterface processedSensors, CouplingRegistry couplingRegistry,
-                                    CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
+                                    CommonHumanoidReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
                                     DesiredVelocityControlModule desiredVelocityControlModule,
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,

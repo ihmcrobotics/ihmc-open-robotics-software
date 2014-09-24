@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -114,7 +114,7 @@ public class VariousWalkingManagers
          HeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
-      CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
 
       ReferenceFrame headOrientationExpressedInFrame;
       if (desiredHeadOrientationProvider != null)

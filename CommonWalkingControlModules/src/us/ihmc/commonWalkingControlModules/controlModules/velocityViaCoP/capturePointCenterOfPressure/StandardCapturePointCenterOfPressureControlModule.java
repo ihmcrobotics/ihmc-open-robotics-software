@@ -5,10 +5,10 @@ import java.awt.Color;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -34,7 +34,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 public class StandardCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
 {
-   private final CommonWalkingReferenceFrames yoboticsBipedReferenceFrames;
+   private final CommonHumanoidReferenceFrames yoboticsBipedReferenceFrames;
    private final double controlDT;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("CapturePointCenterOfPressureController");
@@ -96,7 +96,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    // Reference frames:
    ReferenceFrame bodyZUp, midFeetZUp, world;
 
-   public StandardCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
+   public StandardCapturePointCenterOfPressureControlModule(double controlDT, CommonHumanoidReferenceFrames referenceFrames,
          YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;

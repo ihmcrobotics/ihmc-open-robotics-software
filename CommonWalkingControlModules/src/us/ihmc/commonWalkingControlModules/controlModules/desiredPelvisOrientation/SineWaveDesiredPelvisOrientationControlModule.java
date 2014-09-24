@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientation;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -14,7 +14,7 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule
 {
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final ProcessedSensorsInterface processedSensors;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("SineWaveOrientation");
@@ -34,7 +34,7 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       
    private final AlphaFilteredYoFrameVector orientationVector;
    
-   public SineWaveDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors, YoVariableRegistry parentRegistry)
+   public SineWaveDesiredPelvisOrientationControlModule(CommonHumanoidReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;

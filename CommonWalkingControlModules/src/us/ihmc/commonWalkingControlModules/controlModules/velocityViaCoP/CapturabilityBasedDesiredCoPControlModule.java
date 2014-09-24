@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalc
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -28,13 +28,13 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
    private final CapturabilityBasedDesiredCoPVisualizer visualizer;
 
    private final CouplingRegistry couplingRegistry;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    public CapturabilityBasedDesiredCoPControlModule(UseGuideLineDecider guideLineOrCapturePointSingleSupportDecider,
          DesiredCapturePointCalculator desiredCapturePointCalculator,
          DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule, GuideLineCalculator guideLineCalculator,
          GuideLineToDesiredCoPControlModule guideLineToDesiredCoPControlModule, DesiredCenterOfPressureFilter desiredCenterOfPressureFilter,
-         CapturabilityBasedDesiredCoPVisualizer visualizer, CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames)
+         CapturabilityBasedDesiredCoPVisualizer visualizer, CouplingRegistry couplingRegistry, CommonHumanoidReferenceFrames referenceFrames)
    {
       this.guideLineOrCapturePointSingleSupportDecider = guideLineOrCapturePointSingleSupportDecider;
       this.desiredCapturePointCalculator = desiredCapturePointCalculator;

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
@@ -31,7 +31,7 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    private final DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
    public DesiredJointAccelerationCalculatorInWorldFrame(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
-           CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide, YoVariableRegistry parentRegistry)
+           CommonHumanoidReferenceFrames referenceFrames, RobotSide robotSide, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName());
       swingLegJacobian.getRobotSide().checkRobotSideMatch(robotSide);

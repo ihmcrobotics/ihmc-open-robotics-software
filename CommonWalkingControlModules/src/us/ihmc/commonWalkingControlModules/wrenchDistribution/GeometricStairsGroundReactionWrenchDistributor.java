@@ -12,9 +12,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commonWalkingControlModules.controlModules.LegStrengthCalculatorTools;
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
@@ -55,7 +55,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private final FramePoint2d centerOfPressure2d;
    private final FrameVector up;
 
-   public GeometricStairsGroundReactionWrenchDistributor(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+   public GeometricStairsGroundReactionWrenchDistributor(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<? extends ContactablePlaneBody> bipedFeet, double totalMass, YoGraphicsListRegistry yoGraphicsListRegistry,
            YoVariableRegistry parentRegistry)
    {

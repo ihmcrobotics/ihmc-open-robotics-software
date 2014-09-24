@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientat
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -17,7 +17,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
 public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule
 {
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final ReferenceFrame desiredHeadingFrame;
 
@@ -32,7 +32,7 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
    
    private final BooleanYoVariable useTwistScale = new BooleanYoVariable("useTwistScale", registry);
 
-   public SimpleDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, double controlDT,
+   public SimpleDesiredPelvisOrientationControlModule(CommonHumanoidReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, double controlDT,
            YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;

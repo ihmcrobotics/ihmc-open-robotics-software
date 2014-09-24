@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.List;
 
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -11,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
@@ -34,7 +34,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final ReferenceFrame referenceFrame;
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private static final int numberOfCoefficients = 6;
 
@@ -61,7 +61,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    private final DoubleYoVariable deltaZ = new DoubleYoVariable("deltaZ", registry);
 
    public FlatThenPolynomialCoMHeightTrajectoryGenerator(double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
-         ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
+         ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet, CommonHumanoidReferenceFrames referenceFrames,
          double nominalHeightAboveGround, double initialHeightAboveGround, YoVariableRegistry parentRegistry)
    {
       this.gravityZ = gravityZ;

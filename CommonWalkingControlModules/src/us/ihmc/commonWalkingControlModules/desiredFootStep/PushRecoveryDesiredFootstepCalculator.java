@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -20,7 +20,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("PushRecoveryDesiredStepLocationCalcualtor");
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final CouplingRegistry couplingRegistry;
 
    private final SideDependentList<YoFramePoint> stepPositions = new SideDependentList<YoFramePoint>();
@@ -30,7 +30,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
    public PushRecoveryDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
-           CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
+           CommonHumanoidReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
       this.referenceFrames = referenceFrames;

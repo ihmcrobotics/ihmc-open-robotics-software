@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -31,7 +31,7 @@ public class FootOrientationControlModule
 
    private final YoMinimumJerkTrajectory minimumJerkTrajectory;
    private final ProcessedSensorsInterface processedSensors;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final ReferenceFrame desiredHeadingFrame;
 
@@ -41,7 +41,7 @@ public class FootOrientationControlModule
    private final FrameOrientation desiredFootOrientation;
 
 
-   public FootOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+   public FootOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames,
            DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       minimumJerkTrajectory = new YoMinimumJerkTrajectory("footOrientation", registry);

@@ -4,8 +4,8 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
@@ -56,7 +56,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    //TODO: 110523: Clean this up and make it better. ComVelocity control line is still hackish.
 
-   public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
+   public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonHumanoidReferenceFrames referenceFrames,
            YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, ReferenceFrame desiredHeadingFrame)
    {
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();

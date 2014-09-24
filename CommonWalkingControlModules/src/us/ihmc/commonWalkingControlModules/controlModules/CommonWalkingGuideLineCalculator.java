@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -32,7 +32,7 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
 
 //   private final double footLength, footBack;
 
-   public CommonWalkingGuideLineCalculator(CommonWalkingReferenceFrames referenceFrames, BooleanYoVariable onFinalStep, YoVariableRegistry parentRegistry)
+   public CommonWalkingGuideLineCalculator(CommonHumanoidReferenceFrames referenceFrames, BooleanYoVariable onFinalStep, YoVariableRegistry parentRegistry)
    {
 //      this.footLength = footLength;
 //      this.footBack = footBack;

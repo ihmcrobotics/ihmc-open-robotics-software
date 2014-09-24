@@ -5,10 +5,10 @@ import java.awt.Color;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -36,7 +36,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredCapturePointToDesiredCoPControlModule");
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final ProcessedSensorsInterface processedSensors;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
@@ -60,7 +60,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    private final YoFramePoint2d desiredCoPBeforeProjection = new YoFramePoint2d("desiredCoPBeforeProjection", "", world, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    
-   public SpeedControllingDesiredCoPCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+   public SpeedControllingDesiredCoPCalculator(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames,
            YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.processedSensors = processedSensors;

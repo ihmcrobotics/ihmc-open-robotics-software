@@ -8,9 +8,9 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
@@ -49,7 +49,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
 
    private FrameGeometry2dPlotter plotter;
 
-   public GeometricVirtualToePointCalculator(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+   public GeometricVirtualToePointCalculator(CommonHumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(parentRegistry, yoGraphicsListRegistry);
@@ -114,7 +114,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       }
    }
 
-   public void setFramesToComputeIn(CommonWalkingReferenceFrames referenceFrames)
+   public void setFramesToComputeIn(CommonHumanoidReferenceFrames referenceFrames)
    {
       setFramesToComputeIn(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getAnkleZUpReferenceFrames());
    }

@@ -27,12 +27,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.frictionModels.FrictionModel;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.MathTools;
@@ -77,7 +77,7 @@ public class MomentumBasedController
    private final ReferenceFrame centerOfMassFrame;
    private final FullRobotModel fullRobotModel;
    private final CenterOfMassJacobian centerOfMassJacobian;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
    private final SideDependentList<ContactablePlaneBody> feet, hands, thighs;
@@ -152,7 +152,7 @@ public class MomentumBasedController
    private final DoubleYoVariable footCoPOffsetX, footCoPOffsetY;
    private final EnumYoVariable<RobotSide> footUnderCoPControl;   
 
-   public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
+   public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
@@ -837,7 +837,7 @@ public class MomentumBasedController
       return upcomingSupportLeg;
    }
 
-   public CommonWalkingReferenceFrames getReferenceFrames()
+   public CommonHumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
    }

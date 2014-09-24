@@ -11,9 +11,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -80,11 +80,11 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private SpineTorques spineTorques = new SpineTorques();
 
-	private final CommonWalkingReferenceFrames referenceFrames;
+	private final CommonHumanoidReferenceFrames referenceFrames;
 
 	public SpineJointLungingControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry,
 			InverseDynamicsCalculator spineJointIDCalc, RigidBody chest, EnumMap<SpineJointName, RevoluteJoint> spineRevoluteJointList,
-			CommonWalkingReferenceFrames referenceFrames, double maxHipTorque)
+			CommonHumanoidReferenceFrames referenceFrames, double maxHipTorque)
 	{
 		this.robotMass = processedSensors.getTotalMass();
 		this.gravity = processedSensors.getGravityInWorldFrame().getZ();

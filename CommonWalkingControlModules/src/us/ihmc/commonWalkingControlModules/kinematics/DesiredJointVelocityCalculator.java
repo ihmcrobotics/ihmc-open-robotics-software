@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -12,7 +12,7 @@ public class DesiredJointVelocityCalculator
    private final SwingFullLegJacobian swingFullLegJacobian;
    private final ReferenceFrame swingFootFrame;
 
-   public DesiredJointVelocityCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+   public DesiredJointVelocityCalculator(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames,
            SwingFullLegJacobian swingLegJacobian)
    {
       this.processedSensors = processedSensors;

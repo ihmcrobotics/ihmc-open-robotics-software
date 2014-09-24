@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -14,14 +14,14 @@ public class DoubleAndSingleSupportDurationUpdater
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final DoubleYoVariable doubleSupportFraction = new DoubleYoVariable("doubleSupportFraction", registry);
    private final DoubleYoVariable stepInPlaceCycleDuration = new DoubleYoVariable("stepInPlaceCycleDuration", registry);
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", registry);
 
-   public DoubleAndSingleSupportDurationUpdater(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public DoubleAndSingleSupportDurationUpdater(CommonHumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);

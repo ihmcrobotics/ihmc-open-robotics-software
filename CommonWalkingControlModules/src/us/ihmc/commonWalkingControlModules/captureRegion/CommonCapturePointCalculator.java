@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculator;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -47,7 +47,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
    private final boolean useWorldFrame;
 
-   public CommonCapturePointCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, boolean useWorldFrame,
+   public CommonCapturePointCalculator(ProcessedSensorsInterface processedSensors, CommonHumanoidReferenceFrames referenceFrames, boolean useWorldFrame,
            YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.processedSensors = processedSensors;

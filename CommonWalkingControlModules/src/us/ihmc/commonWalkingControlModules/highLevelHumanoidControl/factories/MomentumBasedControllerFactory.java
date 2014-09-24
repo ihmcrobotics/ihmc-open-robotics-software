@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -33,6 +32,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -112,7 +112,7 @@ public class MomentumBasedControllerFactory implements HumanoidControllerFactory
     * @see us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory#getController(us.ihmc.utilities.humanoidRobot.model.FullRobotModel, us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames, double, double, us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable, us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry, us.ihmc.utilities.screwTheory.TwistCalculator, us.ihmc.utilities.screwTheory.CenterOfMassJacobian, us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder, us.ihmc.utilities.io.streamingData.GlobalDataProducer, us.ihmc.utilities.screwTheory.InverseDynamicsJoint)
     */
    @Override
-   public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity,
+   public RobotController getController(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, GlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)

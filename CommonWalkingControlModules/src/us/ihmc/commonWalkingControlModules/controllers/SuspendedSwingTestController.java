@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.DoEver
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SwingSubController;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -24,7 +24,7 @@ public class SuspendedSwingTestController implements RobotController
    protected final DoEveryTickSubController doEveryTickSubController;
    protected final SwingSubController swingSubController;
 
-   protected final CommonWalkingReferenceFrames referenceFrames;
+   protected final CommonHumanoidReferenceFrames referenceFrames;
 
    protected final LowerBodyTorques lowerBodyTorques;
    protected final ProcessedOutputsInterface processedOutputs;
@@ -48,7 +48,7 @@ public class SuspendedSwingTestController implements RobotController
    }
 
    public SuspendedSwingTestController(RobotSpecificJointNames robotJointNames, DoubleYoVariable time, ProcessedOutputsInterface processedOutputs,
-         DoEveryTickSubController doEveryTickSubController, SwingSubController swingSubController, CommonWalkingReferenceFrames referenceFrames,
+         DoEveryTickSubController doEveryTickSubController, SwingSubController swingSubController, CommonHumanoidReferenceFrames referenceFrames,
          YoVariableRegistry controllerRegistry)
    {
       this.robotJointNames = robotJointNames;

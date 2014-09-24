@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -55,7 +55,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	private final CouplingRegistry couplingRegistry;
 	private final ProcessedSensorsInterface processedSensors;
-	private final CommonWalkingReferenceFrames referenceFrames;
+	private final CommonHumanoidReferenceFrames referenceFrames;
 
 	private final ArmControlModule armControlModule;
 	private final SpineLungingControlModule spineControlModule;
@@ -118,7 +118,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 
 	public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
-			CommonWalkingReferenceFrames referenceFrames, double controlDT, RigidBody chest, ArmControlModule armControlModule,
+			CommonHumanoidReferenceFrames referenceFrames, double controlDT, RigidBody chest, ArmControlModule armControlModule,
 			SpineLungingControlModule spineControlModule, YoVariableRegistry parentRegistry,
 			YoGraphicsListRegistry yoGraphicsListRegistry)
 	{
