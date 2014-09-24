@@ -7,6 +7,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.25.+'
 	
 	compile project(':IHMCUtilities')
+	compile project(':IHMCYoUtilities')
 	compile project(':Graphics3DAdapter')
 	
 }
