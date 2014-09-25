@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Subscriber<T> {
 
-  private static final Log log = LogFactory.getLog(DefaultPublisher.class);
+  private static final Log log = LogFactory.getLog(DefaultSubscriber.class);
 
   /**
    * The maximum delay before shutdown will begin even if all
