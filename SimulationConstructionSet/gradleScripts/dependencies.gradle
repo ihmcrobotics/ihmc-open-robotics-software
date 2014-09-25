@@ -27,7 +27,6 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
 	compile group: 'us.ihmc.thirdparty', name: 'filedrop', version: 'x'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
-	compile group: 'tablelayout', name: 'TableLayout', version: '20050920'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx', version: '1.0.1'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet', version: '1.0.1'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
