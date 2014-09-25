@@ -321,20 +321,20 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>156076715185</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CONNECT</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>157261025143</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>163588583330</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>170476448690</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.01372</heightOffset>
@@ -629,10 +629,10 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>272508625025</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>297931789193</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1000,15 +1000,15 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>557972779298</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>562484674395</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>566988645969</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.00392</heightOffset>
@@ -1102,10 +1102,10 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>600108754812</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>605212665859</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.004900000000000001</heightOffset>
@@ -1234,10 +1234,10 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>659213183751</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>664204706280</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
@@ -1597,15 +1597,15 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>876412819139</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>880068874523</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>883827076361</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1715,15 +1715,15 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>907876824132</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>911676965829</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>924031597391</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1949,25 +1949,25 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>1042550204643</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>1046469045567</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>1048804812156</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>1051948947727</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>1057150205611</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.08232</heightOffset>

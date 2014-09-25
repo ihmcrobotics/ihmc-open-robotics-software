@@ -316,10 +316,10 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>219445910428</long>
-  <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  <us.ihmc.communication.packets.manipulation.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>CRUSH</fingerState>
-  </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
+  </us.ihmc.communication.packets.manipulation.FingerStatePacket>
   <long>230169067427</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
