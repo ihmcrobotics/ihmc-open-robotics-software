@@ -1,15 +1,12 @@
 package us.ihmc.utilities.ros;
 
-import  us.ihmc.utilities.ThreadTools;
-
-import java.net.URI;
-
-import org.jboss.netty.channel.ChannelException;
-import org.ros.exception.RosRuntimeException;
+import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
+
+import us.ihmc.utilities.ThreadTools;
 
 ;
 
@@ -54,56 +51,60 @@ public class RosServiceClient<T extends Message, S extends Message>
          throw new RuntimeException("RosServiceClient is not registered with RosMainNode");
       }
    }
+   
+
+   public void call(T request, ServiceResponseListener<S> response)
+   {
+      final int DEFAULT_RETRY=20;
+      call(request, response, DEFAULT_RETRY);
+   }
 
    /**
     * @param request
     * @param response
     */
-   public void call(T request, ServiceResponseListener<S> response)
+   public void call(T request, ServiceResponseListener<S> response, int retry)
    {
       checkInitialized();
-//      if(!client.isConnected())
-//      {
-//              client.shutdown();
-//              //locate URI
-//              connectedNode.getLog().info("re-connecting to service " + attachedServiceName);
-//
-//              for(int i=0;;i++)
-//              {
-//                 
-//                 if(i>10)
-//                 {
-//                    connectedNode.getLog().error("Tried for 50 seconds ... bailing out");
-//                    throw new RuntimeException("Tried for 50 seconds ... bailing out");
-//                 }
-//                 else
-//                 {
-//                    connectedNode.getLog().error("Attempt " + i +" to reconnect to serive"  );
-//                 }
-//                 
-//                 
-//                 URI serviceURI = connectedNode.lookupServiceUri(attachedServiceName);
-//                 if (serviceURI != null)
-//                 {
-//                    try
-//                    {
-//                       client.connect(serviceURI);
-//                       break;
-//                    }
-//                    catch (RosRuntimeException | ChannelException e)
-//                    {
-//                       connectedNode.getLog().error("connecting to " + serviceURI + " error:" + e.getMessage());
-//                       e.printStackTrace();
-//                    }
-//                 }
-//                 else
-//                 {
-//                    connectedNode.getLog().error("waiting for service " + attachedServiceName + " to be ready");
-//                 }
-//
-//                 ThreadTools.sleep(5000); //wait for some socket to close due to timeout
-//              }
-//      }
+  
+
+      if(!client.isConnected())
+      {
+                client.shutdown();      
+      
+              //locate URI
+              connectedNode.getLog().info("re-connecting to service " + attachedServiceName);
+
+              for(int i=0;;i++)
+              {
+                 
+                 if(i>retry)
+                 {
+                    connectedNode.getLog().error("Tried for " + retry + " times ... bailing out");
+                    throw new RuntimeException("Tried for " + retry + " times... bailing out");
+                 }
+                 else
+                 {
+                    connectedNode.getLog().error("Attempt " + i +" to reconnect to service"  );
+                 }
+                 
+                 
+                 /** Approach 1, simpler but slower 
+                  * 
+                  */
+                      try
+                      {
+                         client = connectedNode.newServiceClient(attachedServiceName, getRequestType());
+                         break;
+                      }
+                      catch (ServiceNotFoundException e)
+                      {
+                         e.printStackTrace();
+                      }                      
+
+                 ThreadTools.sleep(3000); //wait for some socket to close due to timeout
+              }
+      }
       client.call(request, response);
 
    }
