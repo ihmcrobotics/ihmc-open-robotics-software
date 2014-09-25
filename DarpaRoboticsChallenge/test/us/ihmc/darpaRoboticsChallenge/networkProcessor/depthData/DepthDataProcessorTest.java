@@ -64,7 +64,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       assertTrue(success);
       
       System.out.println("Scans consumed: " + numberOfLidarScansConsumed);
-      assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 100);
+      assertTrue("Lidar scans are not being received; numberOfLidarScansConsumed = " + numberOfLidarPointsConsumed, numberOfLidarScansConsumed > 100);
       
       System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: "
             + ((double) errorQueue.size() / numberOfLidarPointsConsumed) + " less than .05");
