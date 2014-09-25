@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorat
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
@@ -42,7 +43,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGener
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
@@ -200,6 +200,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
 
    private final BooleanYoVariable doneFinishingSingleSupportTransfer = new BooleanYoVariable("doneFinishingSingleSupportTransfer", registry);
+   private final BooleanYoVariable footstepListHasBeenUpdated = new BooleanYoVariable("footstepListHasBeenUpdated", registry);
    private final BooleanYoVariable stayInTransferWalkingState = new BooleanYoVariable("stayInTransferWalkingState", registry);
 
    private final BooleanYoVariable ecmpBasedToeOffHasBeenInitialized = new BooleanYoVariable("ecmpBasedToeOffHasBeenInitialized", registry);
@@ -504,6 +505,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (doneFinishingSingleSupportTransfer.getBooleanValue() || (estimatedTimeRemainingForState < 0.02))
          {
             upcomingFootstepList.checkForFootsteps(readyToGrabNextFootstep, upcomingSupportLeg, feet);
+            footstepListHasBeenUpdated.set(true);
          }
 
          initializeICPPlannerIfNecessary();
@@ -784,6 +786,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          icpStandOffsetX.set(0.0);
          icpStandOffsetY.set(0.0);
+         footstepListHasBeenUpdated.set(false);
 
          desiredECMPinSupportPolygon.set(false);
          feetManager.reset();
@@ -1310,10 +1313,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          boolean isNotExploringFoothold = !footExplorationControlModule.isControllingSwingFoot();
          boolean isNextFootstepNull = upcomingFootstepList.getNextFootstep() == null;
+         // This is to fix a bug occuring for instance when doing transfer to right side and receiving a right footstep the walking would do a left footstep instead.
+         boolean isNextFootstepForThisSide = true;
+         if (footstepListHasBeenUpdated.getBooleanValue())
+         {
+            isNextFootstepForThisSide = isNextFootstepNull || FootstepUtils.getSideFromFootstep(upcomingFootstepList.getNextFootstep(), feet) != robotSide;
+         }
+         else
+         {
+            boolean isNextNextFootstepNull = upcomingFootstepList.getNextNextFootstep() == null;
+            isNextFootstepForThisSide = isNextNextFootstepNull || FootstepUtils.getSideFromFootstep(upcomingFootstepList.getNextNextFootstep(), feet) != robotSide;
+         }
          boolean isSupportLegNull = supportLeg.getEnumValue() == null;
-         boolean noMoreFootsteps = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull;
+         boolean noMoreFootstepsForThisSide = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull || !isNextFootstepForThisSide;
          boolean noMoreFootPoses = footPoseProvider == null || !footPoseProvider.checkForNewPose(robotSide.getOppositeSide());
-         boolean readyToStopWalking = noMoreFootsteps && noMoreFootPoses && (isSupportLegNull || super.checkCondition()) && isNotExploringFoothold;
+         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootPoses && (isSupportLegNull || super.checkCondition()) && isNotExploringFoothold;
          return readyToStopWalking;
       }
    }
