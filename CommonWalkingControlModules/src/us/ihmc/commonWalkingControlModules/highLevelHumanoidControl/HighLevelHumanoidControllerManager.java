@@ -51,7 +51,6 @@ public class HighLevelHumanoidControllerManager implements RobotController
       this.registry.addChild(momentumBasedController.getYoVariableRegistry());
    }
 
-   @SuppressWarnings("unchecked")
    private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry)
    {
       StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelState", "switchTimeName", HighLevelState.class, yoTime, registry);
@@ -105,7 +104,6 @@ public class HighLevelHumanoidControllerManager implements RobotController
       stateMachine.doAction();
    }
    
-   @SuppressWarnings("unchecked")
    public void addHighLevelBehavior(HighLevelBehavior highLevelBehavior, boolean transitionRequested)
    {
       // Enable transition between every existing state of the state machine
