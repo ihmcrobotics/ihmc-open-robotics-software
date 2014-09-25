@@ -1,6 +1,6 @@
 package us.ihmc.steppr.hardware.controllers;
 
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class StepprStateCommunicator implements StepprController
@@ -12,19 +12,19 @@ public class StepprStateCommunicator implements StepprController
    }
 
    @Override
-   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       // Do nothing
    }
 
    @Override
-   public void initialize()
+   public void initialize(long timestamp)
    {
       // Do nothing
    }
 
    @Override
-   public void doControl()
+   public void doControl(long timestamp)
    {
       // Do nothing
    }
@@ -33,6 +33,12 @@ public class StepprStateCommunicator implements StepprController
    public YoVariableRegistry getYoVariableRegistry()
    {
       return null;
+   }
+
+   @Override
+   public boolean turnOutputOn()
+   {
+      return false;
    }
 
 }

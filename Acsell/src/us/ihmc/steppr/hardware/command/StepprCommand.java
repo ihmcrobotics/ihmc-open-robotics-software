@@ -60,5 +60,21 @@ public class StepprCommand
    {
       return jointCommands.get(joint);
    }
+   
+   public void enableActuators()
+   {
+      for (StepprActuator actuator : StepprActuator.values)
+      {
+         actuatorCommands.get(actuator).enable();
+      }
+   }
+   
+   public void disableActuators()
+   {
+      for (StepprActuator actuator : StepprActuator.values)
+      {
+         actuatorCommands.get(actuator).disable();
+      }      
+   }
 
 }

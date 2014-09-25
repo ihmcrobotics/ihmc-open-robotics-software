@@ -15,7 +15,7 @@ public class MotorTemperature implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      motorTemperature.set(value);
+      motorTemperature.set(ADCTemperatureSensorConversion.toTemperature(value));
    }
    
 }

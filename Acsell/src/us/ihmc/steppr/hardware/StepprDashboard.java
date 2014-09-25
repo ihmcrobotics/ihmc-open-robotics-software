@@ -173,7 +173,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       int row = 0;
       for (StepprActuator actuator : StepprActuator.values)
       {
-         table.setValueAt(motorTemperatures.get(actuator).getValueAsDouble(), row, 1);
+         table.setValueAt(String.format("%.1f", motorTemperatures.get(actuator).getValueAsDouble()), row, 1);
          table.setValueAt(String.format("%.3f", motorEncoders.get(actuator).getValueAsDouble()), row, 3);
          row++;
       }

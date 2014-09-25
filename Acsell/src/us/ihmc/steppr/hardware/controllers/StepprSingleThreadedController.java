@@ -126,12 +126,16 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       rootJoint.updateFramesRecursively();
       if(!initialized)
       {
-         controller.initialize();
+         controller.initialize(timestamp);
          initialized = true;
       }
       
-      controller.doControl();
+      controller.doControl(timestamp);
       
+      if(controller.turnOutputOn())
+      {
+         command.enableActuators();
+      }
       
       for (StepprJoint joint : StepprJoint.values)
       {
@@ -140,6 +144,7 @@ public class StepprSingleThreadedController implements StepprStateProcessor
          
          StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
          jointCommand.setTauDesired(oneDoFJoint.getTau(), rawSensor);
+         jointCommand.setDamping(oneDoFJoint.getKd());
       }
 
       outputWriter.write();

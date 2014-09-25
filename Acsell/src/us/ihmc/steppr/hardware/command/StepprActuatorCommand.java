@@ -37,7 +37,7 @@ public abstract class StepprActuatorCommand
       {
          target.put((byte) 3);
          target.putFloat((float) (tauDesired.getDoubleValue() / kt));
-         target.putFloat((float) damping.getDoubleValue());
+         target.putFloat((float) (damping.getDoubleValue() / kt));
          target.putFloat(0f);
          target.putInt(controlID);
       }

@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -17,10 +17,11 @@ public class StepprPDJointController implements StepprController
    private final ArrayList<DoubleYoVariable> desiredPositions = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> desiredVelocities = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> tauFFs = new ArrayList<>();
+   private final ArrayList<DoubleYoVariable> damping = new ArrayList<>();
    
 
    @Override
-   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
@@ -29,12 +30,13 @@ public class StepprPDJointController implements StepprController
          desiredPositions.add(new DoubleYoVariable(joint.getName() + "_q_d", registry));
          desiredVelocities.add(new DoubleYoVariable(joint.getName() + "_qd_d", registry));
          tauFFs.add(new DoubleYoVariable(joint.getName() + "_tau_ff", registry));
+         damping.add(new DoubleYoVariable(joint.getName() + "_damping", registry));
       }
 
    }
 
    @Override
-   public void initialize()
+   public void initialize(long timestamp)
    {
       for(int i = 0; i < controllers.size(); i++)
       {
@@ -45,7 +47,7 @@ public class StepprPDJointController implements StepprController
    }
 
    @Override
-   public void doControl()
+   public void doControl(long timestamp)
    {
       for(int i = 0; i < controllers.size(); i++)
       {
@@ -58,6 +60,7 @@ public class StepprPDJointController implements StepprController
          double tau = controller.compute(joint.getQ(), q_d, joint.getQd(), qd_d) + tauFF;
          
          joint.setTau(tau);
+         joint.setKd(damping.get(i).getDoubleValue());
       }
    }
 
@@ -71,5 +74,11 @@ public class StepprPDJointController implements StepprController
    public static void main(String[] args)
    {
       StepprSingleThreadedController.startController(new StepprPDJointController());
+   }
+
+   @Override
+   public boolean turnOutputOn()
+   {
+      return false;
    }
 }

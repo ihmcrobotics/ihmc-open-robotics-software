@@ -17,6 +17,7 @@ import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
@@ -426,14 +427,32 @@ public class StepprSetup extends RealtimeThread
                .setOption(StandardSocketOptions.IP_MULTICAST_IF, iface);
          channel.join(group, iface);
    
-         ByteBuffer command = ByteBuffer.allocate(5);
-         command.put((byte) 1);
-         command.put((byte) 0);
-         command.put((byte) 1);
-         command.put((byte) 1);
-         command.put((byte) 0);
+         ThreadTools.sleep(100);
+         
+         ByteBuffer command = ByteBuffer.allocate(11);
+         
+         // Canonical command, does not work for now
+//         command.put((byte) 1);
+//         command.put((byte) 0);
+//         command.put((byte) 1);
+//         command.put((byte) 1);
+//         command.put((byte) 0);
+         // This should work
+         command.put((byte) 0x04);
+         command.put((byte) 0x00);
+         command.put((byte) 0x01);
+         command.put((byte) 0x01);
+         command.put((byte) 0x06);
+         command.put((byte) 0x00);
+         command.put((byte) 0xff);
+         command.put((byte) 0x03);
+         command.put((byte) 0xe8);
+         command.put((byte) 0x03);
+         command.put((byte) 0x00);
+         
+         
          command.flip();
-         channel.send(command, streamAddress);
+         System.out.println("Send command of " + channel.send(command, streamAddress) + " bytes");
          channel.close();
          
       }

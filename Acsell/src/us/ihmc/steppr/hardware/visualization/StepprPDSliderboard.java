@@ -211,9 +211,9 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          q_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_q_d");
          qd_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_qd_d");
          tauFF = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_tau_ff");
+         damping = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_damping");
          kp = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kp_" + prefix);
          kd = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", "kd_" + prefix);
-         damping = (DoubleYoVariable) variableHolder.getVariable(namespace, prefix + "Damping");
 
          tau_d = (DoubleYoVariable) variableHolder.getVariable(namespace, prefix + "TauDesired");
 
