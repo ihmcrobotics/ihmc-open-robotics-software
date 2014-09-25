@@ -129,7 +129,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   public void connect(URI uri) {
     Preconditions.checkNotNull(uri, "URI must be specified.");
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
-    Preconditions.checkState(tcpClient == null, "Already connected once.");
+//    Preconditions.checkState(tcpClient == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
     handshakeLatch.reset();
     tcpClient = tcpClientManager.connect(toString(), address);
@@ -170,5 +170,10 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   
   public T newMessage() {
     return messageFactory.newFromType(serviceDeclaration.getType());
+  }
+  
+  @Override
+  public boolean isConnected() {
+    return tcpClient.getChannel().isConnected();
   }
 }

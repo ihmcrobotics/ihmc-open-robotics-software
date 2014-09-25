@@ -65,4 +65,6 @@ public interface ServiceClient<T, S> {
    * @return a new request message
    */
   T newMessage();
+
+  boolean isConnected();
 }

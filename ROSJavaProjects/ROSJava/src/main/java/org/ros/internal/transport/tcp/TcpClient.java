@@ -111,10 +111,15 @@ public class TcpClient {
     }
     return channel;
   }
+  
+  public Channel getChannel() {
+     return channel;
+  }
 
   public ChannelFuture write(ChannelBuffer buffer) {
     Preconditions.checkNotNull(channel);
     Preconditions.checkNotNull(buffer);
     return channel.write(buffer);
   }
+  
 }

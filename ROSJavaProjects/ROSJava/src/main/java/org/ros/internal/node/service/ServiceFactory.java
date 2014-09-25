@@ -131,13 +131,15 @@ public class ServiceFactory {
     synchronized (mutex) {
       if (serviceManager.hasClient(name)) {
         serviceClient = (DefaultServiceClient<T, S>) serviceManager.getClient(name);
-      } else {
-        serviceClient =
-            DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
-                messageFactory, executorService);
-        serviceManager.addClient(serviceClient);
-        createdNewClient = true;
+        if(serviceClient.isConnected()){
+           return serviceClient;
+        }
       }
+      serviceClient =
+          DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
+              messageFactory, executorService);
+      serviceManager.addClient(serviceClient);
+      createdNewClient = true;
     }
 
     if (createdNewClient) {

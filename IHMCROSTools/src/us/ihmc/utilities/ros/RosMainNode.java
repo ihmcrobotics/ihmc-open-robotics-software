@@ -19,6 +19,8 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import us.ihmc.utilities.ThreadTools;
+
 public class RosMainNode implements NodeMain
 {
    private final LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new LinkedHashMap<String,
@@ -39,6 +41,10 @@ public class RosMainNode implements NodeMain
 
    private final String graphName;
    private ParameterTree parameters;
+   
+   private boolean isShutdownInProgress=false;
+   
+   NodeMainExecutor nodeMainExecutor=null;
   
   
    public RosMainNode(URI masterURI, String graphName)
@@ -145,14 +151,26 @@ public class RosMainNode implements NodeMain
       for (Entry<String, RosServiceClient<? extends Message, ? extends Message>> entry : clients.entrySet())
       {
          final RosServiceClient<? extends Message, ? extends Message> rosServiceClient = entry.getValue();
-         try
+         
+         for(int i=0;!isShutdownInProgress;i++)
          {
-            ServiceClient client = connectedNode.newServiceClient(entry.getKey(), rosServiceClient.getRequestType());
-            rosServiceClient.setServiceClient(client);
-         }
-         catch (ServiceNotFoundException e)
-         {
-            throw new RuntimeException(e);
+                 try
+                 {
+                    ServiceClient client = connectedNode.newServiceClient(entry.getKey(), rosServiceClient.getRequestType());
+                    rosServiceClient.setServiceClient(client,connectedNode, entry.getKey());
+                    break;
+                 }
+                 catch (ServiceNotFoundException e)
+                 {
+                    connectedNode.getLog().info(getClass().getSimpleName()+":Waiting for service "+ entry.getKey() + " (check spelling/service provider)... attempt "+i);
+                    ThreadTools.sleep(5000);
+                    
+                    if(i>10)
+                    {
+                       connectedNode.getLog().error(getClass().getSimpleName()+ ": waited 50 seconds, bailing out ...");
+                       throw new RuntimeException(e);
+                    }
+                 }
          }
       }
       
@@ -165,9 +183,11 @@ public class RosMainNode implements NodeMain
       
    }
    
+   
 
    public void onShutdown(Node node)
    {
+      isShutdownInProgress = true;
    }
 
    public void onShutdownComplete(Node node)
@@ -186,8 +206,13 @@ public class RosMainNode implements NodeMain
    public void execute()
    {
       NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(masterURI);
-      NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+      nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
       nodeMainExecutor.execute(this, nodeConfiguration);
+   }
+   
+   public void shutdown()
+   {
+      nodeMainExecutor.shutdown();
    }
 
 }
