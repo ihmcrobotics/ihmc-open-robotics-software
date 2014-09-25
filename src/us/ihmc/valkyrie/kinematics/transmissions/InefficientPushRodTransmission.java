@@ -110,7 +110,6 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    // actuatorData[1] = j6 (leftSide)
    // LeftLeg has reflect = +1
    // RightLeg has reflect = -1
-   private int count = 0;
    
    @Override
    public void actuatorToJointEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
@@ -148,21 +147,6 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
 
       topJointInterface.setEffort(reflectTop * topJointTorque);
       bottomJointInterface.setEffort(reflectBottom * bottomJointTorque);
-      
-      if (count == 0)
-      {
-         System.out.println("\n\ntopJointInterface.getName() = " + topJointInterface.getName());
-         System.out.println("bottomJointInterface.getName() = " + bottomJointInterface.getName());
-         
-         System.out.println("leftTurboDriver.getNodePath() = " + leftTurboDriver.getNodePath());
-         System.out.println("rightTurboDriver.getNodePath() = " + rightTurboDriver.getNodePath());
-
-         System.out.println("reflectBottom = " + reflectBottom);
-         System.out.println("reflectTop = " + reflectTop);
-         
-         count++;
-      }
-      
    }
 
    @Override
@@ -208,6 +192,25 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
 
       rightTurboDriver.setEffortCommand(rightJointForce);
       leftTurboDriver.setEffortCommand(leftJointForce);
+   }
+   
+   public double[] jointToActuatorEffortAtZero(double[] jointTorques)
+   {
+      double topJointAngle = 0.0;
+      double bottomJointAngle = 0.0;
+
+      double topJointTorque = reflectTop * jointTorques[0];
+      double bottomJointTorque = reflectBottom * jointTorques[1];
+
+      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
+      invertMatrix(jacobian, jacobianInverse);
+      double leftJointForce = jacobianInverse[0][0] * topJointTorque + jacobianInverse[0][1] * bottomJointTorque;
+      double rightJointForce = jacobianInverse[1][0] * topJointTorque + jacobianInverse[1][1] * bottomJointTorque;
+
+      checkInfinity(leftJointForce);
+      checkInfinity(rightJointForce);
+
+      return new double[]{rightJointForce, leftJointForce};
    }
 
    @Override
