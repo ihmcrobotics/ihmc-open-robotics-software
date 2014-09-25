@@ -5,13 +5,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
-public class CommonWalkingReferenceFramesUpdater implements SensorProcessor
+public class CommonHumanoidReferenceFramesUpdater implements SensorProcessor
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final CommonHumanoidReferenceFrames refrenceFrames;
 
-   public CommonWalkingReferenceFramesUpdater(CommonHumanoidReferenceFrames refrenceFrames)
+   public CommonHumanoidReferenceFramesUpdater(CommonHumanoidReferenceFrames refrenceFrames)
    {
       this.refrenceFrames = refrenceFrames;
    }
