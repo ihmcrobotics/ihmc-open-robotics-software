@@ -172,7 +172,6 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     return messageFactory.newFromType(serviceDeclaration.getType());
   }
   
-  @Override
   public boolean isConnected() {
     return tcpClient.getChannel().isConnected();
   }
