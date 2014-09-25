@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.awt.AWTException;
 
 import org.fest.swing.exception.ActionFailedException;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -22,9 +23,20 @@ import com.yobotics.simulationconstructionset.gui.SimulationGUITestFixture;
 
 public class SimulationConstructionSetTest
 {
+   private boolean isGradleBuild()
+   {
+      if (System.getProperty("bamboo.gradle").contains("yes"))
+      {
+         return true;
+      }
+
+      return false;
+   }
+
    @Test
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
+      Assume.assumeTrue(!isGradleBuild());
       FallingBrickRobot robot = new FallingBrickRobot();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
@@ -231,6 +243,7 @@ public class SimulationConstructionSetTest
    @Test
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {
+      Assume.assumeTrue(!isGradleBuild());
       try
       {
          FallingBrickRobot robot = new FallingBrickRobot();
@@ -286,6 +299,7 @@ public class SimulationConstructionSetTest
    @Test
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
+      Assume.assumeTrue(!isGradleBuild());
       FallingBrickRobot robot = new FallingBrickRobot();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
@@ -316,6 +330,7 @@ public class SimulationConstructionSetTest
    @Test
    public void testSimulationConstructionSetMovieGenerationUsingGUITestFixture() throws AWTException
    {
+      Assume.assumeTrue(!isGradleBuild());
       FallingBrickRobot robot = new FallingBrickRobot();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
