@@ -22,4 +22,5 @@ dependencies {
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
 	compile project(':RobotDataCommunication')
+	compile project(':IHMCRealtime')
 }
