@@ -30,7 +30,7 @@ public class StepprCommand
          }
       }
 
-      StepprAnkleActuatorCommand leftAnkle = new StepprAnkleActuatorCommand("LeftAnkleCommand", jointCommands.get(StepprJoint.LEFT_ANKLE_Y),
+      StepprAnkleActuatorCommand leftAnkle = new StepprAnkleActuatorCommand("leftAnkleCommand", jointCommands.get(StepprJoint.LEFT_ANKLE_Y),
             jointCommands.get(StepprJoint.LEFT_ANKLE_X), StepprActuator.LEFT_ANKLE_RIGHT.getKt(), StepprActuator.LEFT_ANKLE_LEFT.getKt(), registry);
       actuatorCommands.put(StepprActuator.LEFT_ANKLE_LEFT, leftAnkle.leftActuatorCommand());
       actuatorCommands.put(StepprActuator.LEFT_ANKLE_RIGHT, leftAnkle.rightActuatorCommand());

@@ -15,6 +15,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.command.StepprCommand;
 import us.ihmc.steppr.hardware.command.StepprJointCommand;
+import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
 import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.hardware.state.StepprStateProcessor;
@@ -55,6 +56,8 @@ public class StepprSingleThreadedController implements StepprStateProcessor
    private final StepprController controller;
    private final StepprCommand command;
    
+   private final UDPStepprOutputWriter outputWriter;
+   
    private final SixDoFJoint rootJoint;
    private final Quat4d rotation = new Quat4d();
    private final EnumMap<StepprJoint, OneDoFJoint> jointMap = new EnumMap<>(StepprJoint.class);
@@ -69,6 +72,7 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       
       this.command = new StepprCommand(registry);
       this.controller = stepprController;
+      this.outputWriter =  new UDPStepprOutputWriter(command);
 
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -96,6 +100,8 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       {
          visualizer.setMainRegistry(registry, fullRobotModel, null);
       }
+      
+      outputWriter.connect();
 
    }
 
@@ -136,6 +142,8 @@ public class StepprSingleThreadedController implements StepprStateProcessor
          jointCommand.setTauDesired(oneDoFJoint.getTau(), rawSensor);
       }
 
+      outputWriter.write();
+      
       if (visualizer != null)
       {
          visualizer.update(timestamp, 0);

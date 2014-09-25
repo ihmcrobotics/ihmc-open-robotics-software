@@ -18,7 +18,7 @@ public class StepprLinearTransmissionActuatorCommand extends StepprActuatorComma
    public void update()
    {
       setTauDesired(jointCommand.getTauDesired() / ratio);
-      setDamping(jointCommand.getDamping() / ratio);
+      setDamping(jointCommand.getDamping() / (ratio * ratio));
    }
 
 }

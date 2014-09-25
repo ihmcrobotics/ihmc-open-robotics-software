@@ -41,7 +41,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
    private final DoubleYoVariable selectedJoint_kd = new DoubleYoVariable("selectedJoint_kd", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_tauFF = new DoubleYoVariable("selectedJoint_tauFF", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
-   
+
    private volatile boolean started = false;
 
    private final EnumMap<StepprJoint, JointVariables> allJointVariables = new EnumMap<>(StepprJoint.class);
@@ -68,18 +68,18 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);
-         sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 100);
-         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 1);
-         
-         if(Double.isNaN(oneDoFJoint.getTorqueLimit()) || Double.isInfinite(oneDoFJoint.getTorqueLimit()))
+         sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 1000);
+         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 10);
+
+         if (Double.isNaN(oneDoFJoint.getTorqueLimit()) || Double.isInfinite(oneDoFJoint.getTorqueLimit()))
          {
-            sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -10, 10);            
+            sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -30, 30);
          }
          else
          {
             sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -oneDoFJoint.getTorqueLimit(), oneDoFJoint.getTorqueLimit());
          }
-         sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 1);
+         sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 10);
 
          sliderBoardConfigurationManager.setButton(1, variables.enabled);
          sliderBoardConfigurationManager.saveConfiguration(joint.toString());
@@ -100,7 +100,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
 
       StepprDashboard.createDashboard(scs, registry);
       super.start();
-      
+
       started = true;
    }
 
@@ -135,8 +135,33 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
             {
                for (StepprActuator actuator : joint.getActuators())
                {
-                  BooleanYoVariable actEnabled = (BooleanYoVariable) variableHolder.getVariable("StepprCommand." + actuator.getName(), actuator.getName()
-                        + "Enabled");
+                  String namespace;
+                  String variable;
+                  switch (actuator)
+                  {
+                  case LEFT_ANKLE_RIGHT:
+                     namespace = "StepprCommand.leftAnkleCommand.leftAnkleCommandRightActuator";
+                     variable = "leftAnkleCommandRightActuatorEnabled";
+                     break;
+                  case LEFT_ANKLE_LEFT:
+                     namespace = "StepprCommand.leftAnkleCommand.leftAnkleCommandLeftActuator";
+                     variable = "leftAnkleCommandLeftActuatorEnabled";
+                     break;
+                  case RIGHT_ANKLE_RIGHT:
+                     namespace = "StepprCommand.rightAnkleCommand.rightAnkleCommandRightActuator";
+                     variable = "rightAnkleCommandRightActuatorEnabled";
+                     break;
+                  case RIGHT_ANKLE_LEFT:
+                     namespace = "StepprCommand.rightAnkleCommand.rightAnkleCommandLeftActuator";
+                     variable = "rightAnkleCommandLeftActuatorEnabled";
+                     break;
+                  default:
+                     namespace = "StepprCommand." + actuator.getName();
+                     variable = actuator.getName() + "Enabled";
+                     break;
+                  }
+                  
+                  BooleanYoVariable actEnabled = (BooleanYoVariable) variableHolder.getVariable(namespace, variable);
                   actEnabled.set(enabled.getBooleanValue());
                }
             }
@@ -182,7 +207,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          q = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qStateVariable);
          qd = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qdStateVariable);
          tau = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, tauStateVariable);
-         
+
          q_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_q_d");
          qd_d = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_qd_d");
          tauFF = (DoubleYoVariable) variableHolder.getVariable("StepprPDJointController", prefix + "_tau_ff");
@@ -213,7 +238,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
    @Override
    public void indexChanged(int newIndex, double newTime)
    {
-      if(started)
+      if (started)
       {
          StepprJoint joint = selectedJoint.getEnumValue();
          allJointVariables.get(joint).update();
