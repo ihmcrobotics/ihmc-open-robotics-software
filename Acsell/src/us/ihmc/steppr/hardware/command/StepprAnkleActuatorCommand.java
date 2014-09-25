@@ -39,8 +39,8 @@ public class StepprAnkleActuatorCommand
       rightActuatorCommand.setTauDesired(ankleCalculator.getTauRightActuator());
       leftActuatorCommand.setTauDesired(ankleCalculator.getTauLeftActuator());
       
-      rightActuatorCommand.setDamping(ankleY.getDamping() / ankleCalculator.getRatio());
-      leftActuatorCommand.setDamping(ankleY.getDamping() / ankleCalculator.getRatio());
+      rightActuatorCommand.setDamping(ankleY.getDamping() / (ankleCalculator.getRatio() * ankleCalculator.getRatio()));
+      leftActuatorCommand.setDamping(ankleY.getDamping() / (ankleCalculator.getRatio() * ankleCalculator.getRatio()));
       
    }
    
