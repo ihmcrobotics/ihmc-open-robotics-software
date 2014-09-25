@@ -715,6 +715,9 @@ bool Mapper::setMode(ethzasl_icp_mapper::SetMode::Request &req, ethzasl_icp_mapp
 	localizing = req.localize;
 	mapping = req.map;
 	
+	res.map = req.map;
+	res.localize = req.localize;
+
 	return true;
 }
 
