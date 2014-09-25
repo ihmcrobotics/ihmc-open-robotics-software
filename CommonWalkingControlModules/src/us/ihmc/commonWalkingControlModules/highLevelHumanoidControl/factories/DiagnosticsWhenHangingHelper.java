@@ -118,7 +118,7 @@ public class DiagnosticsWhenHangingHelper
    {
       appliedTorque.set(feedbackCorrectionTorque + estimatedTorque.getDoubleValue()); 
       
-      if (adaptTorqueOffset && (Math.abs(appliedTorque.getDoubleValue()) < 4.0))
+      if (adaptTorqueOffset && (Math.abs(appliedTorque.getDoubleValue()) < 10.0))
       {
          torqueOffset.sub(feedbackCorrectionTorque * torqueCorrectionAlpha.getDoubleValue());
          
@@ -185,6 +185,11 @@ public class DiagnosticsWhenHangingHelper
    public DoubleYoVariable getTorqueOffsetVariable()
    {
       return torqueOffset;
+   }
+   
+   public double getTorqueOffset()
+   {
+      return torqueOffset.getDoubleValue();
    }
 
 
