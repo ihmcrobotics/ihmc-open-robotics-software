@@ -1,6 +1,8 @@
 package us.ihmc.SdfLoader;
 
 import us.ihmc.utilities.math.geometry.Transform3d;
+
+import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
@@ -23,13 +25,21 @@ public class SDFConversionsHelper
 
    }
    
-
    public static Vector3d stringToVector3d(String vector)
    {
       String[] vecString = vector.split("\\s+");
       Vector3d vector3d = new Vector3d(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]), Double.parseDouble(vecString[2]));
       return vector3d;
    }
+   
+   public static Color3f stringToColor(String color)
+   {
+      String[] vecString = color.split("\\s+");
+      Color3f color3f = new Color3f(Float.parseFloat(vecString[0]), Float.parseFloat(vecString[1]), Float.parseFloat(vecString[2]));
+      return color3f;
+   }
+
+
    
    public static Vector2d stringToVector2d(String xy)
    {

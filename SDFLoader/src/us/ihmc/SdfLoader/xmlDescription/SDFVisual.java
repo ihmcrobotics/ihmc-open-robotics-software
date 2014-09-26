@@ -95,6 +95,12 @@ public class SDFVisual implements AbstractSDFMesh
    public static class SDFMaterial
    {
       private SDFScript script;
+      
+      private String lighting;
+      private String ambient;
+      private String diffuse;
+      private String specular;
+      private String emissive;
 
 
       public SDFScript getScript()
@@ -108,6 +114,61 @@ public class SDFVisual implements AbstractSDFMesh
          this.script = script;
       }
       
+      public String getLighting()
+      {
+         return lighting;
+      }
+
+      public String getAmbient()
+      {
+         return ambient;
+      }
+
+      public String getDiffuse()
+      {
+         return diffuse;
+      }
+
+      public String getSpecular()
+      {
+         return specular;
+      }
+
+      public String getEmissive()
+      {
+         return emissive;
+      }
+
+      @XmlElement(name = "lighting")
+      public void setLighting(String lighting)
+      {
+         this.lighting = lighting;
+      }
+
+      @XmlElement(name = "ambient")
+      public void setAmbient(String ambient)
+      {
+         this.ambient = ambient;
+      }
+
+      @XmlElement(name = "diffuse")
+      public void setDiffuse(String diffuse)
+      {
+         this.diffuse = diffuse;
+      }
+
+      @XmlElement(name = "specular")
+      public void setSpecular(String specular)
+      {
+         this.specular = specular;
+      }
+
+      @XmlElement(name = "emissive")
+      public void setEmissive(String emissive)
+      {
+         this.emissive = emissive;
+      }
+
       public static class SDFScript
       {
          private List<String> uri;
