@@ -211,7 +211,10 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
          }
       });
-      videoFiles.setSelectedIndex(1);
+      if(multiPlayer.getVideos().length > 0)
+      {
+         videoFiles.setSelectedIndex(1);
+      }
 
       add(videoFiles);
 //    timePanel.add(new JSeparator(JSeparator.VERTICAL));
