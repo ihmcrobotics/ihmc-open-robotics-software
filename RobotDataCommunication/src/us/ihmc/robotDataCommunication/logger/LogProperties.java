@@ -38,7 +38,8 @@ public abstract class LogProperties extends Properties
       }
       else
       {
-         return new String[] { "video" };
+//         return new String[] { "video" };
+         return new String[] {};
       }
    }
    
