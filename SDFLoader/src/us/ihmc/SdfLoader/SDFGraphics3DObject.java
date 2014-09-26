@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.utilities.math.geometry.Transform3d;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
@@ -25,6 +26,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
 import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 
 
@@ -93,6 +95,17 @@ public class SDFGraphics3DObject extends Graphics3DObject
                   String name = sdfVisual.getMaterial().getScript().getName();
                   
                   appearance = new SDFAppearance(resourceUrls, name, resourceDirectories);
+               }
+               else
+               {  
+                  System.out.println("Creating material from SDF");
+                  YoAppearanceMaterial mat = new YoAppearanceMaterial();
+                  
+                  mat.setAmbientColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getAmbient()));
+                  mat.setDiffuseColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getDiffuse()));
+                  mat.setSpecularColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getSpecular()));
+                  
+                  appearance = mat;
                }
             }
             

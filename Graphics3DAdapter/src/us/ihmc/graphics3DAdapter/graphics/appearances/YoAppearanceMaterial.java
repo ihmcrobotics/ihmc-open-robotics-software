@@ -58,6 +58,11 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
    {
       return ambientColor;
    }
+   
+   public void setAmbientColor(Color3f color3f)
+   {
+      ambientColor.set(color3f);
+   }
 
    public void setDiffuseColor(Color3f color3f)
    {
