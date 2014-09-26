@@ -9,6 +9,7 @@ import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -16,6 +17,7 @@ import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.command.StepprCommand;
 import us.ihmc.steppr.hardware.command.StepprJointCommand;
 import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
+import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.hardware.state.StepprStateProcessor;
@@ -45,8 +47,11 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       UDPStepprStateReader reader = new UDPStepprStateReader(priority, state, communicator);
       
       variableServer.start();
+      YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, stepprController.getClass().getSimpleName());
+      
       stepprSetup.start();
       reader.start();
+      
       
       ThreadTools.sleepForever();
    }

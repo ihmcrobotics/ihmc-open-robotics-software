@@ -17,8 +17,8 @@ public enum StepprActuator
    RIGHT_HIP_X("rightHipXActuator", 2.286, 1, 6),
    
    TORSO_X("torsoXActuator", 0.398, 2, 1),
-   TORSO_Y("torsoYActuator", 0.45, 2, 1),
-   TORSO_Z("torsoZActuator", 0.316, 2, 1)
+   TORSO_Y("torsoYActuator", 0.45, 2, 2),
+   TORSO_Z("torsoZActuator", 0.316, 2, 3)
    ;
    public static final StepprActuator[] values = values();
    

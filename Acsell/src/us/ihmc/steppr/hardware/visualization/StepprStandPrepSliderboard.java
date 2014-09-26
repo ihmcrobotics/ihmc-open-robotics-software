@@ -49,6 +49,7 @@ public class StepprStandPrepSliderboard extends SCSYoVariablesUpdatedListener im
    {
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
+      YoVariable<?> crouch = registry.getVariable("StepprStandPrep", "crouch");
       for (StepprStandPrepSetpoints setpoint : StepprStandPrepSetpoints.values)
       {
          StandPrepVariables variables = new StandPrepVariables(setpoint, registry);
@@ -60,6 +61,7 @@ public class StepprStandPrepSliderboard extends SCSYoVariablesUpdatedListener im
          sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 100 * aJoint.getRatio() * aJoint.getRatio());
          sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 1 * aJoint.getRatio() * aJoint.getRatio());
          sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 5 * aJoint.getRatio() * aJoint.getRatio());
+         sliderBoardConfigurationManager.setSlider(7, crouch, 0, 1);
 
          sliderBoardConfigurationManager.saveConfiguration(setpoint.toString());
 

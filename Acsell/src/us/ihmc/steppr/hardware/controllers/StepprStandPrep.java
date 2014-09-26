@@ -42,8 +42,10 @@ public class StepprStandPrep implements StepprController
    private final BooleanYoVariable startStandprep = new BooleanYoVariable("startStandprep", registry);
    private final EnumYoVariable<StandPrepState> standPrepState = new EnumYoVariable<>("standPrepState", registry, StandPrepState.class);
 
+   private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
+
    private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
-   
+
    @Override
    public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
@@ -84,39 +86,39 @@ public class StepprStandPrep implements StepprController
    @Override
    public void doControl(long timestamp)
    {
-      switch(standPrepState.getEnumValue())
+      switch (standPrepState.getEnumValue())
       {
       case WAIT:
-         if(startStandprep.getBooleanValue())
+         if (startStandprep.getBooleanValue())
          {
             standPrepState.set(StandPrepState.INITIALIZE);
          }
          break;
-         
+
       case INITIALIZE:
          initialTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
          trajectory.setCubic(0.0, trajectoryTime, 0.0, 0.0, 1.0, 0.0);
-         
+
          for (StepprJoint joint : StepprJoint.values)
          {
             initialPositions.put(joint, joints.get(joint).getQ());
-         }     
+         }
          standPrepState.set(StandPrepState.EXECUTE);
          enableOutput.set(true);
          break;
-         
+
       case EXECUTE:
          double timeInTrajectory = MathTools.clipToMinMax(TimeTools.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
-         
+
          for (StepprStandPrepSetpoints jointGroup : StepprStandPrepSetpoints.values)
          {
             double setpoint = desiredPositions.get(jointGroup).getDoubleValue();
             double kp = kps.get(jointGroup).getDoubleValue();
             double kd = kds.get(jointGroup).getDoubleValue();
             double damping = dampingValues.get(jointGroup).getDoubleValue();
-            
+
             for (int i = 0; i < jointGroup.getJoints().length; i++)
             {
                StepprJoint joint = jointGroup.getJoints()[i];
@@ -127,24 +129,40 @@ public class StepprStandPrep implements StepprController
                {
                   reflectedSetpoint *= jointGroup.getReflectRight();
                }
-               
+
                double initialPosition = initialPositions.get(joint);
-               
+
                double qDesired = initialPosition + (reflectedSetpoint - initialPosition) * positionScale;
+
+               switch (jointGroup)
+               {
+               case KNEE:
+                  qDesired += crouch.getDoubleValue();
+                  break;
+               case HIP_Y:
+                  qDesired -= 0.5 * crouch.getDoubleValue();
+                  break;
+               case ANKLE_Y:
+                  qDesired -= 0.5 * crouch.getDoubleValue();
+                  break;
+               default:
+                  break;
+               }
+
                double qdDesired = 0;
                controller.setProportionalGain(kp);
                controller.setDerivativeGain(kd);
                double tau = controller.compute(oneDoFJoint.getQ(), qDesired, oneDoFJoint.getQd(), qdDesired);
                oneDoFJoint.setTau(tau);
                oneDoFJoint.setKd(damping);
-               
+
             }
          }
          break;
       }
-      
+
    }
-   
+
    @Override
    public boolean turnOutputOn()
    {
