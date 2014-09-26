@@ -25,6 +25,13 @@
         </geometry>
       </collision>
       <visual name='pelvis_visual'>
+       <material>
+        	<lighting>1</lighting>
+        	<ambient>0.1 0 0 1</ambient>
+        	<diffuse>1 0 0 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -85,6 +92,13 @@
       </collision>
       <visual name='ltorso_visual'>
         <pose>0 0 0 0 -0 0</pose>
+                <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -137,6 +151,13 @@
         </geometry>
       </collision>
       <visual name='mtorso_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0.1 0 0 1</ambient>
+        	<diffuse>1 0 0 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -190,6 +211,13 @@
         </geometry>
       </collision>
       <visual name='utorso_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0.1 0 0 1</ambient>
+        	<diffuse>1 0 0 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -243,6 +271,13 @@
         </geometry>
       </collision>
       <visual name='l_uglut_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -296,6 +331,13 @@
         </geometry>
       </collision>
       <visual name='l_lglut_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -352,7 +394,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 1 1</ambient>
+        	<ambient>0 0 0.1 1</ambient>
         	<diffuse>0 0 1 1</diffuse>
         	<specular>1 1 1 1</specular>
         	<emmisive>0 0 1 1</emmisive>
@@ -488,6 +530,13 @@
 -->
       <visual name='l_lleg_visual'>
         <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -497,6 +546,13 @@
       </visual>
       <visual name='l_lleg_visual_ll_ankle_pulley'>
         <pose>0 0.099055 -0.0889 -8.6023e-17 0.01726 -8.8988e-17</pose>
+                <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -516,7 +572,15 @@
       </visual>
 -->
       <visual name='l_lleg_visual_lr_ankle_pulley'>
+      
         <pose>0 -0.09876 -0.0889 -8.6154e-17 0.018311 -8.9078e-17</pose>
+                <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -580,6 +644,13 @@
         </geometry>
       </collision>
       <visual name='l_talus_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -633,6 +704,13 @@
         </geometry>
       </collision>
       <visual name='l_foot_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -900,6 +978,13 @@
         </geometry>
       </collision>
       <visual name='r_uglut_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -953,6 +1038,13 @@
         </geometry>
       </collision>
       <visual name='r_lglut_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1006,6 +1098,13 @@
         </geometry>
       </collision>
       <visual name='r_uleg_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1137,6 +1236,13 @@
       </collision>
 -->
       <visual name='r_lleg_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1146,6 +1252,13 @@
         </geometry>
       </visual>
       <visual name='r_lleg_visual_rl_ankle_pulley'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>-0.0008366 0.098654 -0.088896 -1.6567e-16 0.026671 9.0419e-17</pose>
         <geometry>
           <mesh>
@@ -1166,6 +1279,13 @@
       </visual>
 -->
       <visual name='r_lleg_visual_rr_ankle_pulley'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>-0.0008366 -0.099162 -0.088896 -4.859e-17 0.026961 5.7481e-17</pose>
         <geometry>
           <mesh>
@@ -1231,6 +1351,13 @@
       </collision>
       <visual name='r_talus_visual'>
         <pose>0 0 0 0 -0 0</pose>
+                <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1284,6 +1411,13 @@
       </collision>
       <visual name='r_foot_visual'>
         <pose>0 0 0 0 -0 0</pose>
+                <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1336,6 +1470,13 @@
         </geometry>
       </collision>
       <visual name='rl_ankle_pulley_visual'>
+              <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
