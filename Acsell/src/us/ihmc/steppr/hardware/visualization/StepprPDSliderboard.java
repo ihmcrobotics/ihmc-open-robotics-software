@@ -68,18 +68,18 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);
-         sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 1000);
-         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 10);
+         sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 100 * joint.getRatio() * joint.getRatio());
+         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 1 * joint.getRatio() * joint.getRatio());
 
          if (Double.isNaN(oneDoFJoint.getTorqueLimit()) || Double.isInfinite(oneDoFJoint.getTorqueLimit()))
          {
-            sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -30, 30);
+            sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -50, 50);
          }
          else
          {
             sliderBoardConfigurationManager.setSlider(5, variables.tauFF, -oneDoFJoint.getTorqueLimit(), oneDoFJoint.getTorqueLimit());
          }
-         sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 10);
+         sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 5 * joint.getRatio() * joint.getRatio());
 
          sliderBoardConfigurationManager.setButton(1, variables.enabled);
          sliderBoardConfigurationManager.saveConfiguration(joint.toString());
