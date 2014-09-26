@@ -127,7 +127,7 @@ public class StepprSingleThreadedController implements StepprStateProcessor
 
       StepprXSensState xSensState = state.getXSensState();
       xSensState.getQuaternion(rotation);
-      rootJoint.setRotation(rotation);
+//      rootJoint.setRotation(rotation);
       rootJoint.updateFramesRecursively();
       if(!initialized)
       {
