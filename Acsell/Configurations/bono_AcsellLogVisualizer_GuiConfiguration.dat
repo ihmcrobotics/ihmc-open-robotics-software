@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.standPrepState</Variables>
+		<Variables>root.loggedmain.steppr.StepprCommand.r_leg_kny.r_leg_knyTauDesired,root.loggedmain.steppr.StepprCommand.rightKneeActuator.rightKneeActuatorTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJointPair</Variables>
+		<Variables>root.loggedmain.steppr.StepprCommand.l_leg_kny.l_leg_knyTauDesired,root.loggedmain.steppr.StepprCommand.leftKneeActuator.leftKneeActuatorTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_q_d</Variables>
+		<Variables>root.loggedmain.steppr.Steppr.leftKneeActuator.leftKneeActuatorMotorTemperature</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
+		<Variables>root.loggedmain.steppr.Steppr.rightKneeActuator.rightKneeActuatorMotorTemperature</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_kp</Variables>
+		<Variables>root.loggedmain.steppr.StepprStandPrep.positionError_l_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
+		<Variables>root.loggedmain.steppr.StepprStandPrep.positionError_r_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.rightKneeActuator.rightKneeActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftKneeActuator.leftKneeActuatorMotorTemperature</Variables>
+		<Variables>root.loggedmain.steppr.Steppr.stateCollectionStartTime</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.crouch</Variables>
+		<Variables>root.loggedmain.steppr.Steppr.leftKneeActuator.leftKneeActuatorControlTarget</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.r_leg_kny.r_leg_kny_q</Variables>
+		<Variables>root.loggedmain.steppr.Steppr.rightKneeActuator.rightKneeActuatorControlTarget</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -120,106 +120,27 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprCommand.rightKneeActuator.rightKneeActuatorTauDesired,root.remotemain.steppr.StepprCommand.leftKneeActuator.leftKneeActuatorTauDesired</Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorTemperature</Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
-<Entry Boxes>rightKneeActuatorEnabled,selectedJointPair,startStandprep</Entry Boxes>
+<Entry Boxes></Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>3905.0, 617.0</WindowLocation>
-<WindowSize>804.0, 545.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.kp_l_leg_lax</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.kp_l_leg_uay</Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.positionError_l_leg_lax</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.positionError_l_leg_uay</Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window1>
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>
-Dashboard,
+
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera Y>-14.689627403773493</Camera Y>
+ <Camera Z>1.5793084935848996</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
