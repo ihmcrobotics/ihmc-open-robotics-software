@@ -162,12 +162,12 @@ public class RosMainNode implements NodeMain
                  }
                  catch (ServiceNotFoundException e)
                  {
-                    connectedNode.getLog().info(getClass().getSimpleName()+":Waiting for service "+ entry.getKey() + " (check spelling/service provider)... attempt "+i);
+                    System.err.println(getClass().getSimpleName()+":Waiting for service "+ entry.getKey() + " (check spelling/service provider)... attempt "+i);
                     ThreadTools.sleep(5000);
                     
                     if(i>10)
                     {
-                       connectedNode.getLog().error(getClass().getSimpleName()+ ": waited 50 seconds, bailing out ...");
+                       System.err.println(getClass().getSimpleName()+ ": waited 50 seconds, bailing out ...");
                        throw new RuntimeException(e);
                     }
                  }
