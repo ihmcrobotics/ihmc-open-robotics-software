@@ -350,6 +350,13 @@
       </collision>
       <visual name='l_uleg_visual'>
         <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
