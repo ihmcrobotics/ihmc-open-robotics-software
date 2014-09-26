@@ -10,7 +10,7 @@ public enum StepprStandPrepSetpoints
    HIP_X(0.12, 6858, 0, 228.6, -1, StepprJoint.LEFT_HIP_X, StepprJoint.RIGHT_HIP_X),
    HIP_Z(0, 758.16, 0, 4, -1, StepprJoint.LEFT_HIP_Z, StepprJoint.RIGHT_HIP_Z),
    HIP_Y(-0.24, 1786, 0, 89.3, 1, StepprJoint.LEFT_HIP_Y, StepprJoint.RIGHT_HIP_Y),
-   KNEE(0.45, 2930, 0, 146.3, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y),
+   KNEE(0.45, 2930, 0, 75, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y),
    ANKLE_X(0, 10, 0, 41.5, -1, StepprJoint.LEFT_ANKLE_X, StepprJoint.RIGHT_ANKLE_X),
    ANKLE_Y(-0.258, 1300, 0, 41.5, 1, StepprJoint.LEFT_ANKLE_Y, StepprJoint.RIGHT_ANKLE_Y);
 
