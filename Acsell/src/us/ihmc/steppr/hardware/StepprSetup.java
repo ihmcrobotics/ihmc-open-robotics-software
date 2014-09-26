@@ -160,6 +160,10 @@ public class StepprSetup extends RealtimeThread
       {
          return;
       }
+      if(receiveBuffer.remaining() < length)
+      {
+         return;
+      }
       int index = receiveBuffer.get() & 0xFF;
       @SuppressWarnings("unused")
       int format = receiveBuffer.get() & 0xFF;

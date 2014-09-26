@@ -8,11 +8,11 @@ public enum StepprStandPrepSetpoints
    TORSO_Y(0, 19440, 0, 648, 1, StepprJoint.TORSO_Y),
    TORSO_X(0, 17193, 0, 573.12, 1, StepprJoint.TORSO_X),
    HIP_X(0.12, 6858, 0, 228.6, -1, StepprJoint.LEFT_HIP_X, StepprJoint.RIGHT_HIP_X),
-   HIP_Z(0, 758.16, 0, 25.272, -1, StepprJoint.LEFT_HIP_Z, StepprJoint.RIGHT_HIP_Z),
+   HIP_Z(0, 758.16, 0, 4, -1, StepprJoint.LEFT_HIP_Z, StepprJoint.RIGHT_HIP_Z),
    HIP_Y(-0.24, 1786, 0, 89.3, 1, StepprJoint.LEFT_HIP_Y, StepprJoint.RIGHT_HIP_Y),
    KNEE(0.45, 2930, 0, 146.3, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y),
-   ANKLE_X(0, 350, 0, 41.5, -1, StepprJoint.LEFT_ANKLE_X, StepprJoint.RIGHT_ANKLE_X),
-   ANKLE_Y(0, 1300, 0, 41.5, 1, StepprJoint.LEFT_ANKLE_Y, StepprJoint.RIGHT_ANKLE_Y);
+   ANKLE_X(0, 10, 0, 41.5, -1, StepprJoint.LEFT_ANKLE_X, StepprJoint.RIGHT_ANKLE_X),
+   ANKLE_Y(-0.258, 1300, 0, 41.5, 1, StepprJoint.LEFT_ANKLE_Y, StepprJoint.RIGHT_ANKLE_Y);
 
    public static final StepprStandPrepSetpoints[] values = values();
 
