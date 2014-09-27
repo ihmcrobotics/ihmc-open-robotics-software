@@ -42,10 +42,10 @@ task print_dependencies() {
 
 task publish(dependsOn: assemble) {
 
-	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://localhost/home/jesper/acsell")
+	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.20/root/acsell")
 	def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo() 
-	auth.userName = 'jesper'
-	auth.password = 'jps901'
+	auth.userName = 'root'
+	auth.password = 'unknownpw'
 	def hosts = new org.apache.maven.wagon.providers.ssh.knownhost.NullKnownHostProvider()
 	hosts.setHostKeyChecking("no")
 	
@@ -62,7 +62,14 @@ task publish(dependsOn: assemble) {
 			wagon.put(it, "lib/" + it.name)
 		}
 		
-		wagon.put(jar.archivePath, jar.archiveName)
+//		def scriptDir = new File("scripts")
+//		def scriptDirCollection = files { scriptDir.listFiles() }
+//		scriptDirCollection.each
+//		{
+//			wagon.put(it, it.name)
+//		}
+		
+		wagon.put(jar.archivePath, "StepprController.jar")
 	}
 	 
 }
