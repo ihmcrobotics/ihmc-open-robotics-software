@@ -20,7 +20,9 @@ public enum VideoSettings
    BLACKMAGIC_1080P30_TRIPOD("Tripod", 0, 9, false, VideoIn.SDI),
    CANON_XA25_720P("Tripod", 0, 14, false, VideoIn.SDI),
    MARSHALL_CV330_720P("GorillaPod", 1, 15, false, VideoIn.SDI),
-   MARSHALL_CV330_1080P("GorillaPod", 1, 9, false, VideoIn.SDI);
+   MARSHALL_CV330_1080P("GorillaPod", 1, 9, false, VideoIn.SDI),
+   SANDIA_CV330_0("Sandia1", 0, 9, false, VideoIn.SDI),
+   SANDIA_CV330_1("Sandia2", 1, 9, false, VideoIn.SDI);
    
    
    
