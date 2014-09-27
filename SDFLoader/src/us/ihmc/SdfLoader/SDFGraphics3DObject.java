@@ -98,7 +98,6 @@ public class SDFGraphics3DObject extends Graphics3DObject
                }
                else
                {  
-                  System.out.println("Creating material from SDF");
                   YoAppearanceMaterial mat = new YoAppearanceMaterial();
                   
                   mat.setAmbientColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getAmbient()));
