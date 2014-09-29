@@ -3,7 +3,7 @@ package us.ihmc.valkyrie;
 import java.io.InputStream;
 import java.net.URI;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -91,7 +91,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
-         Transform3d transform = new Transform3d();
+         RigidBodyTransform transform = new RigidBodyTransform();
          if (forceSensorNames.equals("LeftAnkle"))
          {
             transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
