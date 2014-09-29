@@ -1,6 +1,6 @@
 package us.ihmc.acsell.initialSetup;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -20,7 +20,7 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
    private double groundZ;
    private double initialYaw;
-   private final Transform3d rootToWorld = new Transform3d();
+   private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
    private final Vector3d offset = new Vector3d();
    private final Quat4d rotation = new Quat4d();
 

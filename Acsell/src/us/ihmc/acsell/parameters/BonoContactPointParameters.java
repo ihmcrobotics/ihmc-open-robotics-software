@@ -6,7 +6,7 @@ import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footWidth;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -28,17 +28,17 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    private final double pelvisBoxSizeX = 0.100000;
    private final double pelvisBoxSizeY = 0.150000;
    private final double pelvisBoxSizeZ = 0.200000;
-   private final Transform3d pelvisContactPointTransform = new Transform3d();
+   private final RigidBodyTransform pelvisContactPointTransform = new RigidBodyTransform();
    private final List<Point2d> pelvisContactPoints = new ArrayList<Point2d>();
-   private final Transform3d pelvisBackContactPointTransform = new Transform3d();
+   private final RigidBodyTransform pelvisBackContactPointTransform = new RigidBodyTransform();
    private final List<Point2d> pelvisBackContactPoints = new ArrayList<Point2d>();
    private final Vector3d chestBoxOffset = new Vector3d(0.044600, 0.000000, 0.186900);
    private final double chestBoxSizeX = 0.318800;
    private final double chestBoxSizeY = 0.240000;
    private final double chestBoxSizeZ = 0.316200;
-   private final Transform3d chestBackContactPointTransform = new Transform3d();
+   private final RigidBodyTransform chestBackContactPointTransform = new RigidBodyTransform();
    private final List<Point2d> chestBackContactPoints = new ArrayList<Point2d>();
-   private final SideDependentList<Transform3d> thighContactPointTransforms = new SideDependentList<Transform3d>();
+   private final SideDependentList<RigidBodyTransform> thighContactPointTransforms = new SideDependentList<RigidBodyTransform>();
    private final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<ArrayList<Point2d>>();
@@ -81,7 +81,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         Transform3d thighContactPointTransform = new Transform3d();
+         RigidBodyTransform thighContactPointTransform = new RigidBodyTransform();
          double pitch = Math.PI / 2.0;
          thighContactPointTransform.setEuler(new Vector3d(0.0, pitch, 0.0));
          thighContactPointTransform.setTranslation(new Vector3d(-0.1179, robotSide.negateIfRightSide(0.02085), -0.08));
@@ -107,7 +107,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
       for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         Transform3d ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
+         RigidBodyTransform ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
 
          ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<Pair<String, Point2d>>();
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
@@ -139,7 +139,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public Transform3d getPelvisContactPointTransform()
+   public RigidBodyTransform getPelvisContactPointTransform()
    {
       return pelvisContactPointTransform;
    }
@@ -151,7 +151,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public Transform3d getPelvisBackContactPointTransform()
+   public RigidBodyTransform getPelvisBackContactPointTransform()
    {
       return pelvisBackContactPointTransform;
    }
@@ -163,7 +163,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public Transform3d getChestBackContactPointTransform()
+   public RigidBodyTransform getChestBackContactPointTransform()
    {
       return chestBackContactPointTransform;
    }
@@ -175,7 +175,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public SideDependentList<Transform3d> getThighContactPointTransforms()
+   public SideDependentList<RigidBodyTransform> getThighContactPointTransforms()
    {
       return thighContactPointTransforms;
    }
@@ -205,7 +205,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public SideDependentList<Transform3d> getHandContactPointTransforms()
+   public SideDependentList<RigidBodyTransform> getHandContactPointTransforms()
    {
       return null;
    }
