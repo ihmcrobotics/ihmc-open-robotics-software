@@ -40,20 +40,20 @@ public class DRCNetworkProcessor
     */
    public DRCNetworkProcessor(URI rosUri, DRCRobotModel robotModel)
    {
-      this(rosUri, null, null, robotModel);
+      this(rosUri, null, null, robotModel, false);
    }
    
    public DRCNetworkProcessor(LocalObjectCommunicator objectCommunicator, DRCRobotModel robotModel)
    {
-      this(null, objectCommunicator, null, robotModel);
+      this(null, objectCommunicator, null, robotModel, false);
    }
 
    public DRCNetworkProcessor(LocalObjectCommunicator scsCommunicator, ObjectCommunicator drcNetworkObjectCommunicator, DRCRobotModel robotModel)
    {
-      this(null, scsCommunicator, drcNetworkObjectCommunicator, robotModel);
+      this(null, scsCommunicator, drcNetworkObjectCommunicator, robotModel, false);
    }
    
-   public DRCNetworkProcessor(URI rosUri, LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldComputerClient, DRCRobotModel robotModel)
+   public DRCNetworkProcessor(URI rosUri, LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldComputerClient, DRCRobotModel robotModel, boolean startTestbedAlignment)
    {
       if (fieldComputerClient == null)
       {
@@ -88,10 +88,12 @@ public class DRCNetworkProcessor
          }
       });
 
-      NetworkProcessorTestbedAlignment testbed = new NetworkProcessorTestbedAlignment(networkingManager);
-      networkingManager.getControllerCommandHandler().setTestbed(testbed);
-      new Thread(testbed).start();
-      
+      if (startTestbedAlignment)
+      {
+         NetworkProcessorTestbedAlignment testbed = new NetworkProcessorTestbedAlignment(networkingManager);
+         networkingManager.getControllerCommandHandler().setTestbed(testbed);
+         new Thread(testbed).start();
+      }
       setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel.getPhysicalProperties());
       connect();
    }

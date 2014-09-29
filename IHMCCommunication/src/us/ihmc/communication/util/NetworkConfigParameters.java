@@ -3,6 +3,8 @@ package us.ihmc.communication.util;
 public class NetworkConfigParameters
 {
    public static final boolean USE_BEHAVIORS_MODULE = true;
+
+   public static final boolean ENABLE_TESTBED_ALIGNMENT = false;
    
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
    public static final int NETWORK_PROCESSOR_TO_UI_TCP_PORT = 4897;
