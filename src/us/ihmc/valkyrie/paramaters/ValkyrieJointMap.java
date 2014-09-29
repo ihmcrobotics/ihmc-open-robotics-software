@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -297,13 +297,13 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Transform3d getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
       return ValkyriePhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 
    @Override
-   public Transform3d getHandControlFrameToWristTransform(RobotSide robotSide)
+   public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
       if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
          return ValkyriePhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
