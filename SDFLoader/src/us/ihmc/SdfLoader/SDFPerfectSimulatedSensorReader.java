@@ -2,7 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
@@ -82,7 +82,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
       return getName();
    }
 
-   private Transform3d temporaryRootToWorldTransform = new Transform3d();
+   private RigidBodyTransform temporaryRootToWorldTransform = new RigidBodyTransform();
 
    public void read()
    {
@@ -141,7 +141,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
       }
    }
 
-   protected void packRootTransform(SDFRobot robot, Transform3d transformToPack)
+   protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
    {
       robot.getRootJointToWorldTransform(transformToPack);
    }

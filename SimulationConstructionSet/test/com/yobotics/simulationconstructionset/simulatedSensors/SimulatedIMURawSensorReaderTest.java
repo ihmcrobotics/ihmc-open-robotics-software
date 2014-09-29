@@ -2,7 +2,7 @@ package com.yobotics.simulationconstructionset.simulatedSensors;
 
 import static org.junit.Assert.assertEquals;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -34,7 +34,7 @@ public class SimulatedIMURawSensorReaderTest
    private final Vector3d actualAngularVelocity = new Vector3d();
    
    private final AxisAngle4d randomBodyAxisAngle = new AxisAngle4d();
-   private final Transform3d randomTransformBodyToWorld = new Transform3d();
+   private final RigidBodyTransform randomTransformBodyToWorld = new RigidBodyTransform();
    private final FrameVector randomLinearVelocity = new FrameVector((ReferenceFrame) null);
    private final FrameVector randomAngularVelocity = new FrameVector((ReferenceFrame) null);
    private final FrameVector randomLinearAcceleration = new FrameVector((ReferenceFrame) null);
@@ -50,8 +50,8 @@ public class SimulatedIMURawSensorReaderTest
    private final AxisAngle4d jointToIMURotation = new AxisAngle4d(2.0*(Math.random()-0.5), 2.0*(Math.random()-0.5), 2.0*(Math.random()-0.5), Math.random()*2.0*Math.PI);
    //private final AxisAngle4d jointToIMURotation = new AxisAngle4d(0.0, 0.0, 0.0, 0.0); // for debugging
 
-   private final Transform3d transformIMUToJoint = new Transform3d();
-   private final Transform3d transformJointToIMU = new Transform3d();
+   private final RigidBodyTransform transformIMUToJoint = new RigidBodyTransform();
+   private final RigidBodyTransform transformJointToIMU = new RigidBodyTransform();
    private ReferenceFrame imuFrame;
 
    public static final double GRAVITY = (2.0 * Math.random() - 1) * 15.0; // random gravity between -15 and +15 m/s^2
@@ -109,7 +109,7 @@ public class SimulatedIMURawSensorReaderTest
       //randomBodyAxisAngle.set(0.0, 0.0, 0.0, 0.0); // for debugging
       
       randomTransformBodyToWorld.set(randomBodyAxisAngle);
-      Transform3d transform = new Transform3d();
+      RigidBodyTransform transform = new RigidBodyTransform();
       transform.set(randomBodyAxisAngle);
    }
    
@@ -311,7 +311,7 @@ public class SimulatedIMURawSensorReaderTest
       public FullRobotModel()
       {
          worldFrame = ReferenceFrame.getWorldFrame();
-         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
+         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
 
          elevator = new RigidBody("elevator", elevatorFrame);
 
@@ -322,7 +322,7 @@ public class SimulatedIMURawSensorReaderTest
          bodyFrame = rootJoint.getFrameAfterJoint();
       }
 
-      public void update(Transform3d transformBodyToWorld, FrameVector linearVelocity, FrameVector angularVelocity, FrameVector linearAcceleration, FrameVector angularAcceleration)
+      public void update(RigidBodyTransform transformBodyToWorld, FrameVector linearVelocity, FrameVector angularVelocity, FrameVector linearAcceleration, FrameVector angularAcceleration)
       {
          // Update Body Pose
          rootJoint.setPositionAndRotation(transformBodyToWorld); // TODO correct?
@@ -389,13 +389,13 @@ public class SimulatedIMURawSensorReaderTest
       private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, Vector3d offset, String frameName)
       {
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
-         Transform3d transformToParent = new Transform3d();
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
          transformToParent.set(offset);
          ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
          return beforeJointFrame;
       }
       
-      private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, Transform3d transformToParent, String frameName)
+      private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, RigidBodyTransform transformToParent, String frameName)
       {
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
          ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);

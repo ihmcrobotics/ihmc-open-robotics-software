@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -356,7 +356,7 @@ public class WalkOnTheEdgesManager
       edgeToAnkle = new Vector3d(ankleToEdge);
       edgeToAnkle.negate();
 
-      Transform3d tempTransform = new Transform3d();
+      RigidBodyTransform tempTransform = new RigidBodyTransform();
       oldOrientation.getTransform3D(tempTransform);
       tempTransform.transform(ankleToEdge);
       newOrientation.getTransform3D(tempTransform);

@@ -6,7 +6,7 @@ import georegression.struct.se.Se3_F64;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 
 import us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3D;
@@ -21,10 +21,10 @@ public class WheelRotationEstimator extends IcpCloud3D
    private List<Point3D_F64> tempPoints = new ArrayList<Point3D_F64>();
    private Point3d tempPoint = new Point3d();
    private double bestFitFraction = 0.0;
-   private Transform3d tempTransformFromCurrentToRotary = new Transform3d();
-   private Transform3d tempInverseTransformFromCurrentToRotary = new Transform3d();
-   private Transform3d tempTransformFromRotaryToTemplate = new Transform3d();
-   private Transform3d bestTransformFromCurrentToTemplate = new Transform3d();
+   private RigidBodyTransform tempTransformFromCurrentToRotary = new RigidBodyTransform();
+   private RigidBodyTransform tempInverseTransformFromCurrentToRotary = new RigidBodyTransform();
+   private RigidBodyTransform tempTransformFromRotaryToTemplate = new RigidBodyTransform();
+   private RigidBodyTransform bestTransformFromCurrentToTemplate = new RigidBodyTransform();
    private Se3_F64 georegressionBestTransformFromCurrentToTemplate = new Se3_F64();
    private double outerRadiusLimit = CarLocalizerTransformKeeper.BOUNDING_OUTER_WHEEL_RADIUS - 0.015;
    private int[] polarTemplateHistogram;

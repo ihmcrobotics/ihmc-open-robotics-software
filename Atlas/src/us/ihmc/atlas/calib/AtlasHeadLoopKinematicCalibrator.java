@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -76,7 +76,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    public static final RobotSide activeSide = useLeftArm ? RobotSide.LEFT : RobotSide.RIGHT;
 
-   Transform3d targetToEE = new Transform3d();
+   RigidBodyTransform targetToEE = new RigidBodyTransform();
 
    protected final Map<String, Double> qbias = new HashMap<>();
 
@@ -201,7 +201,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private void updateBoard(int index)
    {
       //update camera pose display
-      Transform3d imageToCamera = new Transform3d(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
+      RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
       FramePose poseLeftCamera = new FramePose(cameraImageFrame);
@@ -210,7 +210,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       //update board
       Map<String, Object> mEntry = metaData.get(index);
-      Transform3d targetToCamera = new Transform3d((Transform3d) mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
+      RigidBodyTransform targetToCamera = new RigidBodyTransform((RigidBodyTransform) mEntry.get(TARGET_TO_CAMERA_KEY)); //in camera frame
 //      System.out.println("Original Rot\n"+targetToCamera);
 
       //update
@@ -223,7 +223,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //image update
       BufferedImage work = renderEEinImage(cameraImageFrame, (BufferedImage) mEntry.get(CAMERA_IMAGE_KEY));
 
-      Transform3d kinematicsTargetToCamera = computeKinematicsTargetToCamera(cameraImageFrame);
+      RigidBodyTransform kinematicsTargetToCamera = computeKinematicsTargetToCamera(cameraImageFrame);
       renderCalibrationPoints(kinematicsTargetToCamera, work);
 
       iiDisplay.setImage(work);
@@ -260,7 +260,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       return work;
    }
 
-   private Transform3d computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame)
+   private RigidBodyTransform computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame)
    {
 
 //      DenseMatrix64F rotY = RotationMatrixGenerator.rotY(Math.PI/2,null);
@@ -281,7 +281,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      leftEEtoCamera.changeFrame(cameraImageFrame);
    }
 
-   private void renderCalibrationPoints(Transform3d targetToCamera, BufferedImage output)
+   private void renderCalibrationPoints(RigidBodyTransform targetToCamera, BufferedImage output)
    {
 
       Graphics2D g2 = output.createGraphics();
@@ -451,7 +451,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       mEntry.put(CHESSBOARD_DETECTIONS_KEY, detections);
 
       //copy Translation and Rotation
-      Transform3d transform = new Transform3d();
+      RigidBodyTransform transform = new RigidBodyTransform();
       Vector3D_F64 T = targetToCamera.T;
       transform.setTranslation(new Vector3d(T.x, T.y, T.z));
 

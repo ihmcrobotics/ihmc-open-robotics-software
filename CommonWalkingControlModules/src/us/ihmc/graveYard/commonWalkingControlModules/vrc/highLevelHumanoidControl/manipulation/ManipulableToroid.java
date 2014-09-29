@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -159,7 +159,7 @@ public class ManipulableToroid
       }
 
       @Override
-      protected void updateTransformToParent(Transform3d transformToParent)
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
          yAxis.set(0.0, 0.0, 1.0);
          xAxis.cross(yAxis, zAxis);
@@ -193,9 +193,9 @@ public class ManipulableToroid
          update();
       }
 
-      public void set(Transform3d toroidToWorldTransform)
+      public void set(RigidBodyTransform toroidToWorldTransform)
       {
-         toroidToWorldTransform.getRotationScale(rotationMatrix);
+         toroidToWorldTransform.getRotation(rotationMatrix);
          rotationMatrix.getColumn(2, zAxis);
          toroidToWorldTransform.get(origin);
          update();

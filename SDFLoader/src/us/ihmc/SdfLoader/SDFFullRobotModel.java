@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -71,7 +71,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
-   private final HashMap<String, Transform3d> lidarBaseToSensorTransform = new HashMap<String, Transform3d>();
+   private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
    private final ArrayList<OneDoFJoint> lidarJoints = new ArrayList<>();
 
@@ -89,7 +89,7 @@ public class SDFFullRobotModel implements FullRobotModel
       /*
        * Create root object
        */
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       elevator = new RigidBody("elevator", elevatorFrame);
       rootJoint = new SixDoFJoint(rootLink.getName(), elevator, elevatorFrame);
       if (!rootLink.getName().equals(sdfJointNameMap.getPelvisName()))
@@ -135,12 +135,12 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for(RobotSide robotSide : RobotSide.values)
       {
-         Transform3d soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
+         RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame); 
 
-         Transform3d handControlFrameToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
+         RigidBodyTransform handControlFrameToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
          if (handControlFrameToWristTransform != null)
          {
             ReferenceFrame handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM), handControlFrameToWristTransform);
@@ -164,7 +164,7 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          for (SDFSensor sensor : child.getSensors())
          {
-            Transform3d pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
+            RigidBodyTransform pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
             if ("imu".equals(sensor.getType()))
             {
                final IMU imu = sensor.getImu();
@@ -188,7 +188,7 @@ public class SDFFullRobotModel implements FullRobotModel
                   ReferenceFrame sensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName(), joint.getFrameAfterJoint(), pose);
                   for(Camera camera : cameras)
                   {
-                     Transform3d cameraTransform = SDFConversionsHelper.poseToTransform(camera.getPose()); 
+                     RigidBodyTransform cameraTransform = SDFConversionsHelper.poseToTransform(camera.getPose()); 
 
                      ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName() + "_" + camera.getName(), sensorFrame, cameraTransform);
                      cameraFrames.put(cameraFrame.getName(), cameraFrame);
@@ -227,7 +227,7 @@ public class SDFFullRobotModel implements FullRobotModel
       Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
       Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
 
-      Transform3d visualTransform = new Transform3d();
+      RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
 
 
@@ -514,7 +514,7 @@ public class SDFFullRobotModel implements FullRobotModel
       return lidarBaseFrames.get(name);
    }
 
-   public Transform3d getLidarBaseToSensorTransform(String name)
+   public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return lidarBaseToSensorTransform.get(name);
    }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -890,7 +890,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private class UpdateInverseKinematicsListener implements VariableChangedListener
    {
-      private final Transform3d desiredTransform = new Transform3d();
+      private final RigidBodyTransform desiredTransform = new RigidBodyTransform();
 
       public void variableChanged(YoVariable<?> v)
       {

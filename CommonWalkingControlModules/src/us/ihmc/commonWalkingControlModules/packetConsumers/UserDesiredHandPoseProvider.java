@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
@@ -44,7 +44,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
    private final FullRobotModel fullRobotModel;
 
-   public UserDesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<Transform3d> desiredHandPosesWithRespectToChestFrame, YoVariableRegistry parentRegistry)
+   public UserDesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();

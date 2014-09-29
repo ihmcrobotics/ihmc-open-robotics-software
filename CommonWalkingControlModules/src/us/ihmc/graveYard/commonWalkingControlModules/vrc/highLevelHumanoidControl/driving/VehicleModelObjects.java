@@ -1,6 +1,6 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -14,7 +14,7 @@ public interface VehicleModelObjects
 {
    FramePose getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject);
 
-   Transform3d getTransform(VehicleObject vehicleObject);
+   RigidBodyTransform getTransform(VehicleObject vehicleObject);
 
    double getHandBrakeEngagedAngle();
 

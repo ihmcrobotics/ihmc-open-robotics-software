@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -41,7 +41,7 @@ public class DepthDataFilter
 
    // Adjustment which is applied to LIDAR points.  Must be applied while points are still in LIDAR frame.  Allows users correct for errors
    // See DRCManualLidarTransform and DRCLidarVisualizationManager. This is a bit of a hack but less likely to have unintended consequences.
-   Transform3d worldToCorrected = new Transform3d();
+   RigidBodyTransform worldToCorrected = new RigidBodyTransform();
 
    public DepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel)
    {
@@ -58,7 +58,7 @@ public class DepthDataFilter
       quadTree.setOctree(octree);
    }
 
-   public void setWorldToCorrected(Transform3d adjustment) {
+   public void setWorldToCorrected(RigidBodyTransform adjustment) {
       this.worldToCorrected.set(adjustment);
    }
 
@@ -138,7 +138,7 @@ public class DepthDataFilter
       return send;
    }
    
-   public boolean addPoint(Point3d point, Transform3d transform)
+   public boolean addPoint(Point3d point, RigidBodyTransform transform)
    {
       Point3d sensorOrigin = new Point3d();
       transform.transform(sensorOrigin);
@@ -198,7 +198,7 @@ public class DepthDataFilter
    
    public Point3d getMidFootPoint() 
    {
-      Transform3d temp = new Transform3d();
+      RigidBodyTransform temp = new RigidBodyTransform();
       Point3d left = new Point3d();
       Point3d avg = new Point3d();
 
@@ -228,7 +228,7 @@ public class DepthDataFilter
 
    public double getAngleToPelvis(Point3d point, Point3d lidarOrigin)
    {
-      Transform3d tf = new Transform3d();
+      RigidBodyTransform tf = new RigidBodyTransform();
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
       Point3d tfPoint = new Point3d(point);
       tf.transform(tfPoint);
@@ -238,7 +238,7 @@ public class DepthDataFilter
 
    private boolean isAheadOfPelvis(Point3d point)
    {
-      Transform3d tf = new Transform3d();
+      RigidBodyTransform tf = new RigidBodyTransform();
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
       Point3d tfPoint = new Point3d(point);
       tf.transform(tfPoint);
@@ -321,7 +321,7 @@ public class DepthDataFilter
       return parameters;
    }
 
-   public FilteredPointCloudPacket filterAndTransformPointCloud(PointCloudPacket pointCloud, Transform3d transformToWorld)
+   public FilteredPointCloudPacket filterAndTransformPointCloud(PointCloudPacket pointCloud, RigidBodyTransform transformToWorld)
    {
       Point3d[] points = pointCloud.getPoints();
       ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();

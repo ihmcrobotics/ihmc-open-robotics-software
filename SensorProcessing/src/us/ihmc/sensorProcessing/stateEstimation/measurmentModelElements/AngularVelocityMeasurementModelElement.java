@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -37,7 +37,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
 
    // temp stuff
    private final Twist tempTwist = new Twist();
-   private final Transform3d tempTransform = new Transform3d();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix3d tempMatrix = new Matrix3d();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector angularVelocityResidual;

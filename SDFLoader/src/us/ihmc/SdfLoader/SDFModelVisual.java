@@ -2,7 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
@@ -20,19 +20,19 @@ public class SDFModelVisual extends Graphics3DObject
       resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
       
-      Transform3d modelTransform = generalizedSDFRobotModel.getTransformToRoot();
+      RigidBodyTransform modelTransform = generalizedSDFRobotModel.getTransformToRoot();
       for(SDFLinkHolder link : rootLinks)
       {  
          recursivelyAddLinks(link, modelTransform, useCollisionMeshes);
       }
    }
    
-   private void recursivelyAddLinks(SDFLinkHolder link, Transform3d modelTransform, boolean useCollisionMeshes)
+   private void recursivelyAddLinks(SDFLinkHolder link, RigidBodyTransform modelTransform, boolean useCollisionMeshes)
    {
       if(link.getVisuals() != null)
       {
          
-         Transform3d transformToModel = new Transform3d(modelTransform);
+         RigidBodyTransform transformToModel = new RigidBodyTransform(modelTransform);
          transformToModel.mul(link.getTransformFromModelReferenceFrame());
          
          

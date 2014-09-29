@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -24,7 +24,7 @@ public class PelvisPoseNoiseGenerator
    private final ReferenceFrame rootJointFrame;
    
    private final Random random = new Random();
-   private final Transform3d pelvisPose = new Transform3d();
+   private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
    private final Matrix3d rotationError = new Matrix3d();
    private final Vector3d translationError = new Vector3d();
    

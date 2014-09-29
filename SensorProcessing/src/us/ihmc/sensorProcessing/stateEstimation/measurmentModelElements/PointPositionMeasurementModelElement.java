@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -31,7 +31,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
    private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
-   private final Transform3d tempTransform = new Transform3d();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix3d tempMatrix = new Matrix3d();
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final Vector3d residualVector = new Vector3d();

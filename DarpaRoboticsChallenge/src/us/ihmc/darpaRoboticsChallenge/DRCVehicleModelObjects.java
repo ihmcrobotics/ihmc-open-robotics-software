@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.EnumMap;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -14,15 +14,15 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class DRCVehicleModelObjects implements VehicleModelObjects
 {
-   private EnumMap<VehicleObject, Transform3d> objectTransforms;
+   private EnumMap<VehicleObject, RigidBodyTransform> objectTransforms;
 
    public DRCVehicleModelObjects()
    {
-      objectTransforms = new EnumMap<VehicleObject, Transform3d>(VehicleObject.class);
+      objectTransforms = new EnumMap<VehicleObject, RigidBodyTransform>(VehicleObject.class);
 
 
       {
-         Transform3d transform3D = new Transform3d();
+         RigidBodyTransform transform3D = new RigidBodyTransform();
          double roll = 0.0;
          double pitch = 0.0;
          double yaw = 0.0;
@@ -39,7 +39,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //-0.038500 0.000000 -0.086000 -3.141592 1.125593 -3.141592
 
          //parent transform
-         Transform3d transform3DfromWorldToParent;
+         RigidBodyTransform transform3DfromWorldToParent;
          {
          double roll = 0.0;
          double pitch = 0.0;
@@ -47,11 +47,11 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          Vector3d translation = new Vector3d(0.630000, 0.100000, 0.580000);
          Matrix3d matrix3d = new Matrix3d();
          RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromWorldToParent = new Transform3d(matrix3d, translation, 1.0);
+            transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
 
          //transform to parent
-         Transform3d transform3DfromParentToChild;
+         RigidBodyTransform transform3DfromParentToChild;
          {
             double roll = -3.141592;
             double pitch = 1.125593;
@@ -59,18 +59,18 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             Vector3d translation = new Vector3d(-0.038500, 0.000000, -0.086000);
             Matrix3d matrix3d = new Matrix3d();
             RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromParentToChild = new Transform3d(matrix3d, translation, 1.0);
+            transform3DfromParentToChild = new RigidBodyTransform(matrix3d, translation);
          }
 
-         Transform3d transform3D = new Transform3d();
+         RigidBodyTransform transform3D = new RigidBodyTransform();
          transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
 
          //Rotate to have the Z axis point out
-         Transform3d finalAdjustment = new Transform3d();
+         RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
          transform3D.mul(finalAdjustment);
 
-         finalAdjustment = new Transform3d();
+         finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
@@ -81,7 +81,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //0.640000 0.270000 0.580000 0.000000 0.000000 0.000000
          //-0.040000 0.000000 -0.086000 -3.141592 1.142593 -3.141592
          //parent transform
-         Transform3d transform3DfromWorldToParent;
+         RigidBodyTransform transform3DfromWorldToParent;
          {
             double roll = 0.0;
             double pitch = 0.0;
@@ -89,11 +89,11 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             Vector3d translation = new Vector3d(0.640000, 0.270000, 0.580000);
             Matrix3d matrix3d = new Matrix3d();
             RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromWorldToParent = new Transform3d(matrix3d, translation, 1.0);
+            transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
 
          //transform to parent
-         Transform3d transform3DfromParentToChild;
+         RigidBodyTransform transform3DfromParentToChild;
          {
             double roll = -3.141592;
             double pitch = 1.142593;
@@ -101,18 +101,18 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             Vector3d translation = new Vector3d(-0.040000, 0.000000, -0.086000);
             Matrix3d matrix3d = new Matrix3d();
             RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromParentToChild = new Transform3d(matrix3d, translation, 1.0);
+            transform3DfromParentToChild = new RigidBodyTransform(matrix3d, translation);
          }
 
-         Transform3d transform3D = new Transform3d();
+         RigidBodyTransform transform3D = new RigidBodyTransform();
          transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
 
          //Rotate to have the Z axis point out
-         Transform3d finalAdjustment = new Transform3d();
+         RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
          transform3D.mul(finalAdjustment);
 
-         finalAdjustment = new Transform3d();
+         finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
@@ -123,7 +123,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //0.340000 0.300000 1.290000 0.000000 -0.870000 0.000000
          //0.000000 0.000000 0.000000 -0.690000 0.000000 -1.570796
 
-         Transform3d transform3DfromWorldToParent;
+         RigidBodyTransform transform3DfromWorldToParent;
          {
             double roll = 0.0;
             double pitch = -0.870000;
@@ -131,11 +131,11 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             Vector3d translation = new Vector3d(0.340000, 0.300000, 1.290000);
             Matrix3d matrix3d = new Matrix3d();
             RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromWorldToParent = new Transform3d(matrix3d, translation, 1.0);
+            transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
-         Transform3d transform3D = new Transform3d(transform3DfromWorldToParent);
+         RigidBodyTransform transform3D = new RigidBodyTransform(transform3DfromWorldToParent);
 
-         Transform3d finalAdjustment = new Transform3d();
+         RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
@@ -186,7 +186,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //0.530000 0.070000 1.050000 0.000000 0.000000 0.000000
          //0.000000 0.000000 0.050000 -0.200000 -0.000000 -1.570796
 
-         Transform3d transform3DfromWorldToParent;
+         RigidBodyTransform transform3DfromWorldToParent;
          {
             double roll = 0.0;
             double pitch = 0.0;
@@ -194,7 +194,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
             Vector3d translation = new Vector3d(0.530000, 0.070000, 1.050000);
             Matrix3d matrix3d = new Matrix3d();
             RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
-            transform3DfromWorldToParent = new Transform3d(matrix3d, translation, 1.0);
+            transform3DfromWorldToParent = new RigidBodyTransform(matrix3d, translation);
          }
 
 //         //transform to parent
@@ -211,7 +211,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
 //         Transform3D transform3D = new Transform3D();
 //         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
-         Transform3d transform3D = new Transform3d(transform3DfromWorldToParent);
+         RigidBodyTransform transform3D = new RigidBodyTransform(transform3DfromWorldToParent);
 
 //         //Rotate to have the Z axis point out
 //         Transform3D finalAdjustment = new Transform3D();
@@ -239,18 +239,18 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          Matrix3d matrix3d = new Matrix3d();
          RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
 
-         Transform3d transform3D = new Transform3d(matrix3d, translation, 1.0);
+         RigidBodyTransform transform3D = new RigidBodyTransform(matrix3d, translation);
 
          //Rotate to have the Z axis point out
-         Transform3d finalAdjustment = new Transform3d();
+         RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
          transform3D.mul(finalAdjustment);
 
-         finalAdjustment = new Transform3d();
+         finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
-         Transform3d adjustmentForSwitch = new Transform3d();
+         RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
          adjustmentForSwitch.setTranslation(new Vector3d(0.0, 0.025, 0.0));
          transform3D.mul(adjustmentForSwitch);
 
@@ -267,18 +267,18 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          Matrix3d matrix3d = new Matrix3d();
          RotationFunctions.setYawPitchRoll(matrix3d, yaw, pitch, roll);
 
-         Transform3d transform3D = new Transform3d(matrix3d, translation, 1.0);
+         RigidBodyTransform transform3D = new RigidBodyTransform(matrix3d, translation);
 
          //Rotate to have the Z axis point out
-         Transform3d finalAdjustment = new Transform3d();
+         RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
          transform3D.mul(finalAdjustment);
 
-         finalAdjustment = new Transform3d();
+         finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.mul(finalAdjustment);
 
-         Transform3d adjustmentForSwitch = new Transform3d();
+         RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
          adjustmentForSwitch.setTranslation(new Vector3d(0.0, -0.025, 0.0));
          transform3D.mul(adjustmentForSwitch);
 
@@ -286,15 +286,15 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
       }
    }
 
-   public Transform3d getTransform(VehicleObject vehicleObject)
+   public RigidBodyTransform getTransform(VehicleObject vehicleObject)
    {
-      return new Transform3d(objectTransforms.get(vehicleObject));
+      return new RigidBodyTransform(objectTransforms.get(vehicleObject));
    }
 
    public FramePose getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject)
    {
       FramePose framePose = new FramePose(vehicleReferenceFrame);
-      Transform3d transform3D = getTransform(vehicleObject);
+      RigidBodyTransform transform3D = getTransform(vehicleObject);
 
       framePose.setPoseIncludingFrame(vehicleReferenceFrame, transform3D);
 

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -33,7 +33,7 @@ public class VirtualChainDataPoint
       {
          ReferenceFrame virtualChainFrame = referenceFrames.get(i);
 
-         Transform3d transform3D = virtualChainFrame.getTransformToDesiredFrame(baseFrame);
+         RigidBodyTransform transform3D = virtualChainFrame.getTransformToDesiredFrame(baseFrame);
 
          Matrix3d rotationMatrix = new Matrix3d();
          transform3D.get(rotationMatrix);

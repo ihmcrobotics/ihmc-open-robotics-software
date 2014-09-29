@@ -2,7 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -44,7 +44,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    }
 
    @Override
-   protected void packRootTransform(SDFRobot robot, Transform3d transformToPack)
+   protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
    {
       super.packRootTransform(robot, transformToPack);
       rotationError.w = 1;
@@ -57,7 +57,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
       positionError.y = rand.nextGaussian() * positionNoiseStd;
       positionError.z = rand.nextGaussian() * positionNoiseStd;
 
-      Transform3d disturbanceTransform = new Transform3d();
+      RigidBodyTransform disturbanceTransform = new RigidBodyTransform();
       if (addNoiseFiltering)
       {
          double alpha = noiseFilterAlpha;
@@ -69,11 +69,11 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
          positionFilter.scale(1 - alpha);
          positionError.scale(alpha);
          positionFilter.add(positionError);
-         disturbanceTransform.set(rotationFilter, positionFilter, 1.0);
+         disturbanceTransform.set(rotationFilter, positionFilter);
       }
       else
       {
-         disturbanceTransform.set(rotationError, positionError, 1.0);
+         disturbanceTransform.set(rotationError, positionError);
       }
 
       transformToPack.mul(disturbanceTransform);

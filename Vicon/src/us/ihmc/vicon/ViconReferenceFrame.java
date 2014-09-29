@@ -1,6 +1,6 @@
 package us.ihmc.vicon;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -16,9 +16,9 @@ public class ViconReferenceFrame extends ReferenceFrame
 
    private final Quat4d bodyToWorldQuaternion = new Quat4d();
    private final Vector3d bodyToWorldTranslation = new Vector3d();
-   private final Transform3d bodyToWorldTransform = new Transform3d();
+   private final RigidBodyTransform bodyToWorldTransform = new RigidBodyTransform();
 
-   public ViconReferenceFrame(String bodyName, ReferenceFrame parentFrame, Transform3d transformToParent, ViconClient viconClient)
+   public ViconReferenceFrame(String bodyName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, ViconClient viconClient)
    {
       super(bodyName.replace(":", "_"), parentFrame, transformToParent, false, false, false);
       this.bodyName = bodyName;
@@ -26,7 +26,7 @@ public class ViconReferenceFrame extends ReferenceFrame
    }
 
    @Override
-   protected void updateTransformToParent(Transform3d transformToParent)
+   protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       QuaternionPose pose = viconClient.getQuaternionPose(bodyName);
       if (pose == null)

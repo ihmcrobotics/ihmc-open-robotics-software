@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.scriptEngine;
 
 import java.util.EnumMap;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -39,7 +39,7 @@ public class HandPoseCalcaulatorFromArmJointAngles
       }
    }
 
-   public FramePose getHandPoseInChestFrame(HandPosePacket handPosePacket, Transform3d wristToHandTansform)
+   public FramePose getHandPoseInChestFrame(HandPosePacket handPosePacket, RigidBodyTransform wristToHandTansform)
    {
       RobotSide robotSide = handPosePacket.getRobotSide();
       int i = -1;

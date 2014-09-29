@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -52,7 +52,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private final Matrix3d rotationFromEstimationToMeasurement = new Matrix3d();
    private final FrameVector omegaEstimationToMeasurement = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector vEstimationToMeasurement = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final Transform3d tempTransform = new Transform3d();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix3d tempMatrix = new Matrix3d();
    private final Vector3d tempVector = new Vector3d();
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -85,7 +85,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       
 //      //TODO: Get to work for more than just left foot frame.
       ReferenceFrame leftFootFrame = bipedFeet.get(RobotSide.LEFT).getSoleFrame();
-      Transform3d transformFromLeftFootPlaneFrameToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());      
+      RigidBodyTransform transformFromLeftFootPlaneFrameToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());      
       
       ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootPlaneFrameToWorldFrame); 
       scriptObjects.addAll(scriptObjectsList);

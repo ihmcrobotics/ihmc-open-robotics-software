@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.controlFlow.AbstractControlFlowElement;
@@ -122,8 +122,8 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    }
 
    private final FrameOrientation tempOrientationEstimatinLink = new FrameOrientation(ReferenceFrame.getWorldFrame());    // worldframe just for initializing
-   private final Transform3d tempEstimationLinkToWorld = new Transform3d();
-   private final Transform3d tempRootJointToWorld = new Transform3d();
+   private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
 
    private void updateRootJointRotation(SixDoFJoint rootJoint, FrameOrientation estimationLinkOrientation, ReferenceFrame estimationFrame)
    {
@@ -137,17 +137,17 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       rootJoint.setRotation(rootJointRotation);
    }
 
-   private void computeEstimationLinkToWorldTransform(Transform3d estimationLinkToWorldToPack, FrameOrientation estimationLinkOrientation)
+   private void computeEstimationLinkToWorldTransform(RigidBodyTransform estimationLinkToWorldToPack, FrameOrientation estimationLinkOrientation)
    {
       // R_{estimation}^{w}
       estimationLinkOrientation.changeFrame(worldFrame);
       estimationLinkOrientation.getTransform3D(estimationLinkToWorldToPack);
    }
 
-   private final Transform3d tempRootJointFrameToEstimationFrame = new Transform3d();
+   private final RigidBodyTransform tempRootJointFrameToEstimationFrame = new RigidBodyTransform();
 
-   private void computeRootJointToWorldTransform(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, Transform3d rootJointToWorldToPack,
-           Transform3d estimationLinkTransform)
+   private void computeRootJointToWorldTransform(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, RigidBodyTransform rootJointToWorldToPack,
+           RigidBodyTransform estimationLinkTransform)
    {
       // H_{root}^{estimation}
       rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(tempRootJointFrameToEstimationFrame, estimationFrame);

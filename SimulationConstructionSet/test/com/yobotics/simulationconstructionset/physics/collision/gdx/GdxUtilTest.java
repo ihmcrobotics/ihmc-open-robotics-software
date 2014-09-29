@@ -2,7 +2,7 @@ package com.yobotics.simulationconstructionset.physics.collision.gdx;
 
 import static org.junit.Assert.assertEquals;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ public class GdxUtilTest
 				9, 10, 11, 12,
 				0, 0, 0, 1};
 
-		Transform3d src = new Transform3d();
+		RigidBodyTransform src = new RigidBodyTransform();
 		Matrix4 dst = new Matrix4();
 
 		src.set(m);
@@ -53,7 +53,7 @@ public class GdxUtilTest
 				13, 14, 15, 1};
 
 		Matrix4 src = new Matrix4();
-		Transform3d dst = new Transform3d();
+		RigidBodyTransform dst = new RigidBodyTransform();
 
 		src.set(m);
 

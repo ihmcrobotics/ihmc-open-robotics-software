@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -22,7 +22,7 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
 
-      ContactableToroidRobot bot = new ContactableToroidRobot("bot", new Transform3d());
+      ContactableToroidRobot bot = new ContactableToroidRobot("bot", new RigidBodyTransform());
 
       Point3d testPoint = new Point3d();
 
@@ -58,7 +58,7 @@ public class ContactableToroidRobotTest
       double delta = 5e-4;
       
       Vector3d randomVector = RandomTools.generateRandomVector(random);
-      Transform3d transform3d = new Transform3d();
+      RigidBodyTransform transform3d = new RigidBodyTransform();
       transform3d.setTranslation(randomVector);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", transform3d);
@@ -97,7 +97,7 @@ public class ContactableToroidRobotTest
       double delta = 5e-4;
       
       Vector3d vector3d = RandomTools.generateRandomVector(random);
-      Transform3d randomTransform = new Transform3d();
+      RigidBodyTransform randomTransform = new RigidBodyTransform();
       randomTransform.setTranslation(vector3d);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", randomTransform);

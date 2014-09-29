@@ -3,7 +3,7 @@ package us.ihmc.SdfLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -17,9 +17,9 @@ public class SDFLinkHolder
 {
    // From SDF File
    private final String name;
-   private final Transform3d transformToModelReferenceFrame;
+   private final RigidBodyTransform transformToModelReferenceFrame;
    private final double mass;
-   private final Transform3d inertialFrameWithRespectToLinkFrame;
+   private final RigidBodyTransform inertialFrameWithRespectToLinkFrame;
    private final Matrix3d inertia;
    
    private double contactKp = 0.0;
@@ -51,7 +51,7 @@ public class SDFLinkHolder
      }
      else
      {
-        inertialFrameWithRespectToLinkFrame = new Transform3d();
+        inertialFrameWithRespectToLinkFrame = new RigidBodyTransform();
         mass = 0.0;
         inertia = new Matrix3d();
      }
@@ -80,7 +80,7 @@ public class SDFLinkHolder
       }
    }
 
-   public Transform3d getTransformFromModelReferenceFrame()
+   public RigidBodyTransform getTransformFromModelReferenceFrame()
    {
       return transformToModelReferenceFrame;
    }
@@ -88,16 +88,16 @@ public class SDFLinkHolder
    public void calculateCoMOffset()
    {
       
-      Transform3d modelFrameToJointFrame = new Transform3d();
+      RigidBodyTransform modelFrameToJointFrame = new RigidBodyTransform();
       if(joint != null)
       {
          modelFrameToJointFrame.set(joint.getTransformFromChildLink()); // H_4^3
       }
-      Transform3d jointFrameToModelFrame = new Transform3d();    // H_3^4
+      RigidBodyTransform jointFrameToModelFrame = new RigidBodyTransform();    // H_3^4
       jointFrameToModelFrame.invert(modelFrameToJointFrame);
-      Transform3d modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame;    // H_4^5
+      RigidBodyTransform modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame;    // H_4^5
       
-      Transform3d jointFrameToInertialFrame = new Transform3d();
+      RigidBodyTransform jointFrameToInertialFrame = new RigidBodyTransform();
       jointFrameToInertialFrame.mul(jointFrameToModelFrame, modelFrameToInertialFrame);
       
       Vector3d CoMOffset = new Vector3d();

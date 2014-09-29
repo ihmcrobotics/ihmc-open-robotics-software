@@ -14,7 +14,7 @@ import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -46,12 +46,12 @@ public class PelvisPoseHistoryCorrection
    private final TimeStampedTransform3D[] errorBuffer = new TimeStampedTransform3D[3];
    private int bufferIndex = 0;
 
-   private final Transform3d interpolatedError = new Transform3d();
-   private final Transform3d previousInterpolatedError = new Transform3d();
-   private final Transform3d interpolatorStartingPosition = new Transform3d();
-   private final Transform3d pelvisPose = new Transform3d();
-   private final Transform3d correctedPelvisPoseWorkingArea = new Transform3d();
-   private final Transform3d tempTransform = new Transform3d();
+   private final RigidBodyTransform interpolatedError = new RigidBodyTransform();
+   private final RigidBodyTransform previousInterpolatedError = new RigidBodyTransform();
+   private final RigidBodyTransform interpolatorStartingPosition = new RigidBodyTransform();
+   private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
+   private final RigidBodyTransform correctedPelvisPoseWorkingArea = new RigidBodyTransform();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private final AlphaFilteredYoVariable interpolationAlphaFilter;
    private final DoubleYoVariable confidenceFactor; // target for alpha filter
@@ -219,10 +219,10 @@ public class PelvisPoseHistoryCorrection
     * Calculates the instantaneous offset for this tick
     * @return
     */
-   private Transform3d getInterpolatedPelvisError()
+   private RigidBodyTransform getInterpolatedPelvisError()
    {
       //first interpolate the total error
-      Transform3d totalError = getTotalError();
+      RigidBodyTransform totalError = getTotalError();
       updateTotalErrorYoVariables(totalError);
 
       transformInterpolationCalculator.computeInterpolation(interpolatorStartingPosition, totalError, interpolatedError,
@@ -237,7 +237,7 @@ public class PelvisPoseHistoryCorrection
     * Returns the difference between the pelvis pose provided by an external source at t with the state estimated pelvis pose at t
     * @return external pelvis pose - state estimator pelvis pose
     */
-   private Transform3d getTotalError()
+   private RigidBodyTransform getTotalError()
    {
       int index = bufferIndex - 1;
       if (index < 0)
@@ -260,7 +260,7 @@ public class PelvisPoseHistoryCorrection
       TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {
-         Transform3d newPelvisPose = timeStampedExternalPose.getTransform3D();
+         RigidBodyTransform newPelvisPose = timeStampedExternalPose.getTransform3D();
          updateExternalPelvisPositionYoVariables(newPelvisPose);
          
          double confidence = newPacket.getConfidenceFactor();
@@ -306,7 +306,7 @@ public class PelvisPoseHistoryCorrection
       long timeStamp = localizationPose.getTimeStamp();
       errorToPack.setTimeStamp(timeStamp);
       TimeStampedTransform3D sePose = stateEstimatorPelvisPoseBuffer.interpolate(timeStamp);
-      Transform3d error = localizationPose.getTransform3D();
+      RigidBodyTransform error = localizationPose.getTransform3D();
       tempTransform.set(sePose.getTransform3D());
       tempTransform.invert();
       error.mul(tempTransform);
@@ -358,7 +358,7 @@ public class PelvisPoseHistoryCorrection
       previousInterpolatedPelvisErrorRoll.set(tempRots[2]);
    }
    
-   private void updateExternalPelvisPositionYoVariables(Transform3d externalPelvisPose)
+   private void updateExternalPelvisPositionYoVariables(RigidBodyTransform externalPelvisPose)
    {
       externalPelvisPose.get(tempVector);
       externalPelvisPose.get(rot);
@@ -371,7 +371,7 @@ public class PelvisPoseHistoryCorrection
       externalPelvisRoll.set(tempRots[2]);
    }
    
-   private void updateTotalErrorYoVariables(Transform3d totalError)
+   private void updateTotalErrorYoVariables(RigidBodyTransform totalError)
    {
       totalError.get(tempVector);
       totalError.get(rot);
@@ -417,7 +417,7 @@ public class PelvisPoseHistoryCorrection
             {
                long midTimeStamp = stateEstimatorPelvisPoseBuffer.getOldestTimestamp()
                      + ((stateEstimatorPelvisPoseBuffer.getNewestTimestamp() - stateEstimatorPelvisPoseBuffer.getOldestTimestamp()) / 2);
-               Transform3d pelvisPose = new Transform3d(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
+               RigidBodyTransform pelvisPose = new RigidBodyTransform(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
 
                TransformTools.rotate(pelvisPose, manualRotationOffsetInRadX.getDoubleValue(), Axis.X);
                TransformTools.rotate(pelvisPose, manualRotationOffsetInRadY.getDoubleValue(), Axis.Y);

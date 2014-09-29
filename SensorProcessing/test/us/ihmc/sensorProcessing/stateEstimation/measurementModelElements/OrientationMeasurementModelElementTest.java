@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -69,7 +69,7 @@ public class OrientationMeasurementModelElementTest
       };
       orientationUpdater.run();
 
-      Transform3d transformFromMeasurementToWorld = measurementFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
+      RigidBodyTransform transformFromMeasurementToWorld = measurementFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
       Matrix3d rotationFromMeasurementToWorld = new Matrix3d();
       transformFromMeasurementToWorld.get(rotationFromMeasurementToWorld);
       orientationMeasurementInputPort.setData(rotationFromMeasurementToWorld);

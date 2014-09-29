@@ -1,6 +1,6 @@
 package us.ihmc.IMUKalmanFilter.TestCases;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -97,7 +97,7 @@ public class TestIMUKalmanFilterRobot extends Robot
       rootJoint.getYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void getTransformFromWorld(Transform3d transform3D)
+   public void getTransformFromWorld(RigidBodyTransform transform3D)
    {
       rootJoint.getTransformToWorld(transform3D);
    }

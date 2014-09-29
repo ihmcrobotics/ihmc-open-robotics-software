@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -27,6 +28,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -156,7 +158,7 @@ public class PushRecoveryControlModule
       private RobotSide swingSide = null;
       private RobotSide transferToSide = null;
 
-      private final Transform3d fromWorldToPelvis = new Transform3d();
+      private final RigidBodyTransform fromWorldToPelvis = new RigidBodyTransform();
       private final Transform3d scaleTransformation = new Transform3d();
       private final FrameConvexPolygon2d reducedSupportPolygon;
       private final ReferenceFrame midFeetZUp;

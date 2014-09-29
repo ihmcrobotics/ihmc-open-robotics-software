@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -132,7 +132,7 @@ public class MomentumSolverTest
    {
       Random random = new Random(44345L);
 
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
       SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
@@ -181,7 +181,7 @@ public class MomentumSolverTest
    public void testTwoFloatingBodiesWithTaskSpaceAcceleration()
    {
       Random random = new Random(12342L);
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
       RigidBody firstBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
@@ -514,7 +514,7 @@ public class MomentumSolverTest
    public void testSubspaces()
    {
       Random random = new Random(12342L);
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
       RigidBody body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);

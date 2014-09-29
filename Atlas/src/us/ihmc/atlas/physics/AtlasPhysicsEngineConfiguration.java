@@ -1,6 +1,6 @@
 package us.ihmc.atlas.physics;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -55,8 +55,8 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       CollisionShapeDescription collisionFoot = factoryShape.createBox(AtlasPhysicalProperties.footLength / 2, AtlasPhysicalProperties.footWidth / 2, 0.05);
 
       //      public static final double ankleHeight = 0.084;
-      Transform3d ankleToSole = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//AtlasPhysicalProperties.ankle_to_sole_frame_tranform;
-      Transform3d soleToAnkle = new Transform3d();
+      RigidBodyTransform ankleToSole = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//AtlasPhysicalProperties.ankle_to_sole_frame_tranform;
+      RigidBodyTransform soleToAnkle = new RigidBodyTransform();
       ankleToSole.invert(soleToAnkle);
 
       factoryShape.addShape(leftLink, soleToAnkle, collisionFoot, false, GROUP_FEET, GROUP_GROUND);

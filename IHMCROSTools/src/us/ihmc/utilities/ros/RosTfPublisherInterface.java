@@ -1,8 +1,8 @@
 package us.ihmc.utilities.ros;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public interface RosTfPublisherInterface
 {
-   public void publish(Transform3d transform3d, long timeStamp, String parentFrame, String childFrame);
+   public void publish(RigidBodyTransform transform3d, long timeStamp, String parentFrame, String childFrame);
 }

@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -30,7 +30,7 @@ public class SimulatedSensorsTestFullRobotModel
    public SimulatedSensorsTestFullRobotModel()
    {
       worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
 
       elevator = new RigidBody("elevator", elevatorFrame);
 
@@ -46,7 +46,7 @@ public class SimulatedSensorsTestFullRobotModel
    public void update(SingleRigidBodyRobot robot)
    {
       // Update Body Pose
-      Transform3d transformToWorld = new Transform3d();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
       robot.getTransformToWorld(transformToWorld);
       rootJoint.setPositionAndRotation(transformToWorld);
       updateFrames();

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import org.junit.Test;
 
@@ -164,7 +164,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       handPose.setPosition(desiredPosition);
       handPose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
-      Transform3d transform = new Transform3d();
+      RigidBodyTransform transform = new RigidBodyTransform();
 
       handPose.getPose(transform);
       randomArmPoseWithForwardKinematics();
@@ -178,7 +178,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       solvingTime.add((long) ((end - start) / 10E6));
    }
 
-   private void solve(Transform3d transform)
+   private void solve(RigidBodyTransform transform)
    {
       successfulSolve = inverseKinematicsCalculator.solve(transform);
 

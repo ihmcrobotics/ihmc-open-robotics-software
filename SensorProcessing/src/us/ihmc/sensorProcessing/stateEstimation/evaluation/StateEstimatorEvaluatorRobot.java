@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -57,7 +57,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
       bodyLink.setLinkGraphics(bodyLinkGraphics);
       rootJoint.setLink(bodyLink);
 
-      Transform3d imu0Offset = new Transform3d();
+      RigidBodyTransform imu0Offset = new RigidBodyTransform();
       Vector3d offsetVector0 = new Vector3d();
       imu0Offset.setTranslation(offsetVector0);
 
@@ -86,7 +86,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          armLink1.setLinkGraphics(armLink1Graphics);
          pinJoint1.setLink(armLink1);
 
-         Transform3d imu1Offset = new Transform3d();
+         RigidBodyTransform imu1Offset = new RigidBodyTransform();
          if (ROTATE_IMU_FRAMES)
          {
             imu1Offset.rotX(Math.PI / 7.0);
@@ -118,7 +118,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          armLink2.setLinkGraphics(armLink2Graphics);
          pinJoint2.setLink(armLink2);
 
-         Transform3d imu2Offset = new Transform3d();
+         RigidBodyTransform imu2Offset = new RigidBodyTransform();
          if (ROTATE_IMU_FRAMES)
          {
             imu2Offset.rotY(Math.PI / 8.0);
@@ -204,7 +204,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
 
       else
       {
-         Transform3d rootJointPostionAndRotation = new Transform3d();
+         RigidBodyTransform rootJointPostionAndRotation = new RigidBodyTransform();
          rootJointPostionAndRotation.rotY(Math.PI*0.9);
          rootJointPostionAndRotation.setTranslation(new Vector3d(0.0, 0.0, 0.4));
          rootJoint.setRotationAndTranslation(rootJointPostionAndRotation);

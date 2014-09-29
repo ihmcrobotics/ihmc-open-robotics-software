@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -100,7 +100,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       setOrientation(orientation);
 
 
-      Link scsRootLink = createLink(rootLink, new Transform3d(), useCollisionMeshes);
+      Link scsRootLink = createLink(rootLink, new RigidBodyTransform(), useCollisionMeshes);
       rootJoint.setLink(scsRootLink);
       addSensors(rootJoint, rootLink);
 
@@ -201,7 +201,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       return rootJoint.getQuaternion();
    }
 
-   public void getRootJointToWorldTransform(Transform3d transform)
+   public void getRootJointToWorldTransform(RigidBodyTransform transform)
    {
       rootJoint.getTransformToWorld(transform);
    }
@@ -275,7 +275,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
       Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
       
-      Transform3d visualTransform = new Transform3d();
+      RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
 
       String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
@@ -429,7 +429,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       }
    }
    
-   private void showCordinateSystem(Joint scsJoint, Transform3d offsetFromLink)
+   private void showCordinateSystem(Joint scsJoint, RigidBodyTransform offsetFromLink)
    {
       if(SHOW_SENSOR_REFERENCE_FRAMES)
       {
@@ -450,9 +450,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       {
          for (Camera camera : cameras)
          {
-            Transform3d linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
-            Transform3d sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
-            Transform3d linkToCamera = new Transform3d();
+            RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
+            RigidBodyTransform sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
+            RigidBodyTransform linkToCamera = new RigidBodyTransform();
             linkToCamera.mul(linkToSensor, sensorToCamera);
             showCordinateSystem(scsJoint,linkToCamera);
             
@@ -479,7 +479,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       
       if (imu != null)
       {
-         Transform3d linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
+         RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
          showCordinateSystem(scsJoint, linkToSensor);
          IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), linkToSensor, this);
          
@@ -564,7 +564,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
          
          LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f);
          
-         Transform3d linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
+         RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
          showCordinateSystem(scsJoint, linkToSensor);
          
          SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
@@ -587,7 +587,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       }
    }
 
-   private Link createLink(SDFLinkHolder link, Transform3d rotationTransform, boolean useCollisionMeshes)
+   private Link createLink(SDFLinkHolder link, RigidBodyTransform rotationTransform, boolean useCollisionMeshes)
    {
       Link scsLink = new Link(link.getName());
       if (useCollisionMeshes)

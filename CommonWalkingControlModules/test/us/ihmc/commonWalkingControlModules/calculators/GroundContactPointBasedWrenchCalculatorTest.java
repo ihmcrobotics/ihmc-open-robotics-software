@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -45,7 +45,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
       
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint, new Transform3d());
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint, new RigidBodyTransform());
       
       
       point0.setForce(new Vector3d(0.0, 0.0, 1.0));
@@ -66,7 +66,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
 
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2, new Transform3d());
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2, new RigidBodyTransform());
       point0.setForce(new Vector3d(-1.0, 1.0, 0.0));
       point1.setForce(new Vector3d(-1.0, 1.0, 0.0));
       
@@ -91,7 +91,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.addRootJoint(joint3);
       robot.update();
       
-      Transform3d transformToJoint = new Transform3d();
+      RigidBodyTransform transformToJoint = new RigidBodyTransform();
       transformToJoint.setTranslation(new Vector3d(-1.0, -1.0, 0.0));
 
       calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint3, transformToJoint);

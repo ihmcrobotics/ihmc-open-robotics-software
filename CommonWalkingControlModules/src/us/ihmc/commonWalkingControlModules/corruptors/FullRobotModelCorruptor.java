@@ -13,7 +13,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -87,7 +87,7 @@ public class FullRobotModelCorruptor
                OneDoFJoint hipYawJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW);
                ReferenceFrame frameBeforeJoint = hipYawJoint.getFrameBeforeJoint();
 
-               Transform3d postCorruptionTransform = new Transform3d();
+               RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
                Vector3d offsetVector = hipYawOffset.getVector3dCopy();
                offsetVector.setY(robotSide.negateIfRightSide(offsetVector.getY()));
                postCorruptionTransform.setTranslation(offsetVector);
@@ -141,7 +141,7 @@ public class FullRobotModelCorruptor
       final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
       final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
 
-      final Transform3d preCorruptionTransform = new Transform3d();
+      final RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
 
       final DoubleYoVariable offset = new DoubleYoVariable(offsetName, registry);
 

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -55,12 +55,12 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
       FrameConvexPolygon2d transferToFootPolygonInSoleFrame = transferToAndNextFootstepsData.getTransferToFootPolygonInSoleFrame();
       RobotSide transferToSide = transferToAndNextFootstepsData.getTransferToSide();
 
-      Transform3d footstepAnkleToWorldTransform = new Transform3d();
+      RigidBodyTransform footstepAnkleToWorldTransform = new RigidBodyTransform();
       getTransformFromPoseToWorld(footstepAnkleToWorldTransform, transferToFootstepAnklePose);
 
       ReferenceFrame footBodyFrame = transferToFootContactablePlaneBody.getFrameAfterParentJoint();
       ReferenceFrame footPlaneFrame = transferToFootContactablePlaneBody.getSoleFrame();
-      Transform3d ankleToSoleTransform = footPlaneFrame.getTransformToDesiredFrame(footBodyFrame);
+      RigidBodyTransform ankleToSoleTransform = footPlaneFrame.getTransformToDesiredFrame(footBodyFrame);
 
       FramePoint2d centroid2d = transferToFootPolygonInSoleFrame.getCentroidCopy();
       FramePoint centroid = centroid2d.toFramePoint();
@@ -82,7 +82,7 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
    }
 
 
-   private static void getTransformFromPoseToWorld(Transform3d poseToWorldTransformToPack, FramePose framePose)
+   private static void getTransformFromPoseToWorld(RigidBodyTransform poseToWorldTransformToPack, FramePose framePose)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       framePose.changeFrame(worldFrame);
