@@ -1,6 +1,6 @@
 package us.ihmc.acsell.controlParameters;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
@@ -20,7 +20,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class BonoWalkingControllerParameters implements WalkingControllerParameters
 {
 
-   private final SideDependentList<Transform3d> handPosesWithRespectToChestFrame = new SideDependentList<Transform3d>();
+   private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    private final boolean runningOnRealRobot;
 
@@ -30,12 +30,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         handPosesWithRespectToChestFrame.put(robotSide, new Transform3d());
+         handPosesWithRespectToChestFrame.put(robotSide, new RigidBodyTransform());
       }
    }
 
    @Override
-   public SideDependentList<Transform3d> getDesiredHandPosesWithRespectToChestFrame()
+   public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
    }
