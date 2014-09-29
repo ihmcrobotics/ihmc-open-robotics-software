@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
@@ -397,9 +397,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
       double width2 = 10;
       double width1 = width2 / 2;
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.setTranslation(new Vector3d(width1 / 2, width1 / 2, -0.5));
-      Transform3d location2 = new Transform3d(location);
+      RigidBodyTransform location2 = new RigidBodyTransform(location);
 
       // location2.setTranslation(new Vector3d(0, 0, -2));
 
@@ -1437,7 +1437,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       double x = xy[0];
       double y = xy[1];
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
@@ -1450,7 +1450,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       double x = xy[0];
       double y = xy[1];
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
@@ -1463,7 +1463,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       double xCenter = centerPoint[0];
       double yCenter = centerPoint[1];
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
@@ -1524,7 +1524,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       double yCenter = centerPoint[1];
 
       // wall
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
@@ -1536,10 +1536,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static void setUpSlopedBox(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, double zCenter, double xLength,
                                       double yLength, double zLength, double slopeRadians, double yawDegrees, AppearanceDefinition app)
    {
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
-      Transform3d tilt = new Transform3d();
+      RigidBodyTransform tilt = new RigidBodyTransform();
       tilt.rotY(-slopeRadians);
       location.mul(tilt);
 
@@ -1566,10 +1566,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       AppearanceDefinition app = cinderBlockAppearance;
 
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
-      Transform3d tilt = new Transform3d();
+      RigidBodyTransform tilt = new RigidBodyTransform();
       tilt.rotY(-cinderBlockTiltRadians);
       location.mul(tilt);
 
@@ -1610,8 +1610,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition app = cinderBlockAppearance;
 
       // wall
-      Transform3d location = new Transform3d();
-      Transform3d setUpright = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
+      RigidBodyTransform setUpright = new RigidBodyTransform();
 
       location.rotZ(Math.toRadians(yawDegrees));
       setUpright.rotX(Math.toRadians(90));
@@ -1639,7 +1639,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
 
-      Transform3d blockSupportLocation = new Transform3d();
+      RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
       blockSupportLocation.rotZ(Math.toRadians(yawDegrees));
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
       blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
@@ -1662,7 +1662,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 //    URL fileURL = DRCDemo01NavigationEnvironment.class.getClassLoader().getResource("Textures/ground2.png");
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
 
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.setTranslation(new Vector3d(0, 0, -0.5));
 
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);

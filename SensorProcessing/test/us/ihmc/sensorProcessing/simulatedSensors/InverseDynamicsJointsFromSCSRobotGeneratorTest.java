@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -433,7 +433,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
          lastFrameOrientationID.set(orientation);
 
-         Transform3d transformToWorld = new Transform3d();
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
          lastJoint.getTransformToWorld(transformToWorld);
          Matrix3d rotationMatrix = new Matrix3d();
          transformToWorld.get(rotationMatrix);

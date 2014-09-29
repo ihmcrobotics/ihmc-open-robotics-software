@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -426,10 +426,10 @@ public class GeometricVirtualToePointCalculatorTest
       return translatedFootPolygon;
    }
 
-   private final Transform3d translate = new Transform3d();
-   private final Transform3d rotate = new Transform3d();
-   private final Transform3d undoTranslate = new Transform3d();
-   private final Transform3d allThree = new Transform3d();
+   private final RigidBodyTransform translate = new RigidBodyTransform();
+   private final RigidBodyTransform rotate = new RigidBodyTransform();
+   private final RigidBodyTransform undoTranslate = new RigidBodyTransform();
+   private final RigidBodyTransform allThree = new RigidBodyTransform();
 
    private FrameConvexPolygon2d rotateFootPolygonAboutCentroid(FrameConvexPolygon2d footPolygon, double rotationAngle)
    {

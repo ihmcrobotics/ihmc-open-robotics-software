@@ -2,7 +2,7 @@ package us.ihmc.atlas;
 
 import java.net.URI;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -92,7 +92,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
       for (String forceSensorNames : AtlasSensorInformation.forceSensorNames)
       {
-         loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new Transform3d());
+         loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
 
       sensorInformation = new AtlasSensorInformation(runningOnRealRobot);

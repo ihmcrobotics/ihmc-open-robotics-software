@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -276,7 +276,7 @@ public class ICPProportionalController
       }
 
       @Override
-      protected void updateTransformToParent(Transform3d transformToParent)
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
          x.set(xAxis.getX(), xAxis.getY(), 0.0);
          z.set(0.0, 0.0, 1.0);

@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
@@ -146,7 +146,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             private static final long serialVersionUID = -1926704435608610401L;
             private final Vector3d copOffset = new Vector3d();
             @Override
-            protected void updateTransformToParent(Transform3d transformToParent)
+            protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
                transformToParent.setIdentity();
                copFilteredInFootFrame.get(copOffset);

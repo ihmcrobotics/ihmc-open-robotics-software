@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -20,43 +20,43 @@ public class ContactableBodiesFactory
 {
    private SideDependentList<String> namesOfJointsBeforeHands = null;
    private SideDependentList<List<Point2d>> handContactPoints = null;
-   private SideDependentList<Transform3d> handContactPointTransforms = null;
+   private SideDependentList<RigidBodyTransform> handContactPointTransforms = null;
 
    private SideDependentList<String> namesOfJointsBeforeThighs = null;
    private SideDependentList<List<Point2d>> thighContactPoints = null;
-   private SideDependentList<Transform3d> thighContactPointTransforms = null;
+   private SideDependentList<RigidBodyTransform> thighContactPointTransforms = null;
 
    private List<Point2d> pelvisContactPoints = null;
-   private Transform3d pelvisContactPointTransform = null;
+   private RigidBodyTransform pelvisContactPointTransform = null;
 
    private List<Point2d> pelvisBackContactPoints = null;
-   private Transform3d pelvisBackContactPointTransform = null;
+   private RigidBodyTransform pelvisBackContactPointTransform = null;
 
    private List<Point2d> chestBackContactPoints = null;
-   private Transform3d chestBackContactPointTransform = null;
+   private RigidBodyTransform chestBackContactPointTransform = null;
 
    private SideDependentList<? extends List<Point2d>> footContactPoints = null;
 
-   public void addPelvisContactParameters(List<Point2d> pelvisContactPoints, Transform3d pelvisContactPointTransform)
+   public void addPelvisContactParameters(List<Point2d> pelvisContactPoints, RigidBodyTransform pelvisContactPointTransform)
    {
       this.pelvisContactPointTransform = pelvisContactPointTransform;
       this.pelvisContactPoints = pelvisContactPoints;
    }
 
-   public void addPelvisBackContactParameters(List<Point2d> pelvisBackContactPoints, Transform3d pelvisBackContactPointTransform)
+   public void addPelvisBackContactParameters(List<Point2d> pelvisBackContactPoints, RigidBodyTransform pelvisBackContactPointTransform)
    {
       this.pelvisBackContactPoints = pelvisBackContactPoints;
       this.pelvisBackContactPointTransform = pelvisBackContactPointTransform;
    }
 
-   public void addChestBackContactParameters(List<Point2d> chestBackContactPoints, Transform3d chestBackContactPointTransform)
+   public void addChestBackContactParameters(List<Point2d> chestBackContactPoints, RigidBodyTransform chestBackContactPointTransform)
    {
       this.chestBackContactPoints = chestBackContactPoints;
       this.chestBackContactPointTransform = chestBackContactPointTransform;
    }
    
    public void addHandContactParameters(SideDependentList<String> namesOfJointsBeforeHands, SideDependentList<List<Point2d>> handContactPoints,
-         SideDependentList<Transform3d> handContactPointTransforms)
+         SideDependentList<RigidBodyTransform> handContactPointTransforms)
    {
       this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
       this.handContactPoints = handContactPoints;
@@ -64,7 +64,7 @@ public class ContactableBodiesFactory
    }
 
    public void addThighContactParameters(SideDependentList<String> namesOfJointsBeforeThighs, SideDependentList<List<Point2d>> thighContactPoints,
-         SideDependentList<Transform3d> thighContactPointTransforms)
+         SideDependentList<RigidBodyTransform> thighContactPointTransforms)
    {
       this.namesOfJointsBeforeThighs = namesOfJointsBeforeThighs;
       this.thighContactPoints = thighContactPoints;
@@ -166,7 +166,7 @@ public class ContactableBodiesFactory
    }
 
    private final static ListOfPointsContactablePlaneBody createListOfPointsContactablePlaneBody(String name, RigidBody body,
-         Transform3d contactPointsTransform, List<Point2d> contactPoints)
+         RigidBodyTransform contactPointsTransform, List<Point2d> contactPoints)
    {
       ReferenceFrame parentFrame = body.getParentJoint().getFrameAfterJoint();
       ReferenceFrame contactPointsFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name, parentFrame, contactPointsTransform);

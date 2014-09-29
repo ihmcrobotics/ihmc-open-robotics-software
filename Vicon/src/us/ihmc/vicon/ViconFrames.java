@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -39,7 +39,7 @@ public class ViconFrames
              */
             private static final long serialVersionUID = 8016047182514159403L;
 
-            protected void updateTransformToParent(Transform3d transformToParent)
+            protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
                setTransformToParent(transformToParent);
             }
@@ -55,7 +55,7 @@ public class ViconFrames
       {
          final String bodyName = modelName;
          System.out.println("adding frame for " + modelName);
-         Transform3d transform3d = new Transform3d();
+         RigidBodyTransform transform3d = new RigidBodyTransform();
          ViconReferenceFrame referenceFrame = new ViconReferenceFrame(modelName, viconWorldFrame, transform3d, viconClient);
          referenceFrames.put(bodyName, referenceFrame);
       }

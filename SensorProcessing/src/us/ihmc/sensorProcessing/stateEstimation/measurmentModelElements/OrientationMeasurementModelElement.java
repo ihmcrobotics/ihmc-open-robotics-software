@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
@@ -31,7 +31,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    // temp stuff:
    private final FrameOrientation orientationOfMeasurementFrameInEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
    private final Matrix3d tempMatrix3d = new Matrix3d();
-   private final Transform3d tempTransform = new Transform3d();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    
    private final Quat4d estimatedOrientationQuaternion = new Quat4d();
    private final Quat4d measurmentFrameToEstimationFrame = new Quat4d();

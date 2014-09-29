@@ -3,7 +3,7 @@ package com.yobotics.simulationconstructionset.physics.collision;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import org.junit.Before;
@@ -171,7 +171,7 @@ public abstract class SCSCollisionDetectorTest
 
       collisionDetector.initialize(check);
 
-      Transform3d offset = new Transform3d();
+      RigidBodyTransform offset = new RigidBodyTransform();
       offset.setTranslation(new Vector3d(0, 0, -1.7));
 
       Link linkA = cube("A", 10, null, 1, 1, 1, 2, 2);
@@ -192,7 +192,7 @@ public abstract class SCSCollisionDetectorTest
       return cube(name, mass, null, radiusX, radiusY, radiusZ, 0xFFFFFFFF, 0xFFFFFFFF);
    }
 
-   public Link cube(String name, double mass, Transform3d shapeToLink, double radiusX, double radiusY, double radiusZ, int collisionGroup, int collisionMask)
+   public Link cube(String name, double mass, RigidBodyTransform shapeToLink, double radiusX, double radiusY, double radiusZ, int collisionGroup, int collisionMask)
    {
       Link ret = new Link(name);
 
@@ -210,9 +210,9 @@ public abstract class SCSCollisionDetectorTest
       return ret;
    }
 
-   private Transform3d translate(double x, double y, double z)
+   private RigidBodyTransform translate(double x, double y, double z)
    {
-      Transform3d ret = new Transform3d();
+      RigidBodyTransform ret = new RigidBodyTransform();
       ret.set(new Vector3d(x, y, z));
 
       return ret;

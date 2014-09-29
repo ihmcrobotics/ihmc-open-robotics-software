@@ -1,10 +1,10 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public interface CameraMountInterface
 {
-   public abstract void getTransformToCamera(Transform3d transformToPack);
+   public abstract void getTransformToCamera(RigidBodyTransform transformToPack);
    public abstract double getFieldOfView();
    public abstract double getClipDistanceNear();
    public abstract double getClipDistanceFar();

@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -49,7 +49,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       pinJointRotation.mul(pinJointZRotation);
 
       Vector3d pinJointLocation = new Vector3d(0.6, 0.0, 0.9);
-      Transform3d pinJointTransform = new Transform3d(pinJointRotation, pinJointLocation, 1.0);
+      RigidBodyTransform pinJointTransform = new RigidBodyTransform(pinJointRotation, pinJointLocation);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform);
       bot.createAvailableContactPoints(0, 30, 1.0 / 15.0, true);

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotSide.RobotSide;
@@ -22,7 +22,7 @@ public class RangeOfStep3d extends FrameEllipsoid3d
    {
       super(rigidBody.getBodyFixedFrame(), 0.5 * sideLength, 0.5 * forwardLength, 0.5 * verticalLength);
 
-      Transform3d offsetTranslation = new Transform3d();
+      RigidBodyTransform offsetTranslation = new RigidBodyTransform();
       offsetTranslation.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(offset), 0.0));
 
       this.applyTransform(offsetTranslation);

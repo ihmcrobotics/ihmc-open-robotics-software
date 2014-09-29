@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.Collection;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -124,11 +124,11 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private final FrameVector tempAngularVelocityEstimationLink = new FrameVector();
    private final Twist tempRelativeTwistOrientationMeasFrameToEstFrame = new Twist();
 
-   private final Transform3d transformFromEstimationFrameToIMUFrame = new Transform3d();
+   private final RigidBodyTransform transformFromEstimationFrameToIMUFrame = new RigidBodyTransform();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   private final Transform3d transformFromIMUToWorld = new Transform3d();
-   private final Transform3d transformFromEstimationToWorld = new Transform3d();
+   private final RigidBodyTransform transformFromIMUToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromEstimationToWorld = new RigidBodyTransform();
    private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
    
    private final double[] estimationFrameYawPitchRoll = new double[3];

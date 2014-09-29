@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
@@ -43,7 +43,7 @@ public class AnkleVelocityCalculator
 
       Vector3d linearVelocity = twistOfFootWithRespectToWorld.getLinearPartCopy();    // linear velocity of ankle origin w.r.t. world, in foot frame
       final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      Transform3d transform_foot_world = footFrame.getTransformToDesiredFrame(worldFrame);
+      RigidBodyTransform transform_foot_world = footFrame.getTransformToDesiredFrame(worldFrame);
       transform_foot_world.transform(linearVelocity);    // linear velocity of ankle origin w.r.t. world, in world frame
 
       return new FrameVector(worldFrame, linearVelocity);

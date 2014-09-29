@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -57,11 +57,11 @@ public class BigStepUpWithHandPlatformEnvironment implements CommonAvatarEnviron
       double xCenter = 0.5;
       double yCenter = 0.4;
       
-      Transform3d location = new Transform3d();
+      RigidBodyTransform location = new RigidBodyTransform();
       location.setTranslation(new Vector3d(xCenter, -yCenter, height/2.0));
       combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
-      location = new Transform3d();
+      location = new RigidBodyTransform();
       location.setTranslation(new Vector3d(xCenter, yCenter, height/2.0));
       combinedTerrainObject.addCylinder(location, height, radius, appearance);
       

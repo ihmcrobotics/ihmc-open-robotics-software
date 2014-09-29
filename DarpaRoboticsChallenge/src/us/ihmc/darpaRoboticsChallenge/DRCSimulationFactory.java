@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -173,7 +173,7 @@ public class DRCSimulationFactory
 
       Joint estimationJoint = simulatedRobot.getPelvisJoint();
 
-      Transform3d estimationLinkTransform3D = estimationJoint.getJointTransform3D();
+      RigidBodyTransform estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();
       estimationLinkTransform3D.get(initialEstimationLinkOrientation);
 

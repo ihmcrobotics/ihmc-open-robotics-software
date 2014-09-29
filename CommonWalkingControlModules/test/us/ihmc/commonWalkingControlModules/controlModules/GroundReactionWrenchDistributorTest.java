@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -389,18 +389,18 @@ public class GroundReactionWrenchDistributorTest
       FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction,
             rightFoot);
 
-      Transform3d leftHandFrameAfterJointTransformInWorld = new Transform3d(); // RandomTools.generateRandomTransform(random)
+      RigidBodyTransform leftHandFrameAfterJointTransformInWorld = new RigidBodyTransform(); // RandomTools.generateRandomTransform(random)
 
       leftHandFrameAfterJointTransformInWorld.setTranslation(new Vector3d(2.0, 2.0, 2.0));
 
-      Transform3d leftHandCylinderFrameTransformInWorld = new Transform3d();
+      RigidBodyTransform leftHandCylinderFrameTransformInWorld = new RigidBodyTransform();
       leftHandCylinderFrameTransformInWorld.setEuler(new Vector3d(Math.PI / 6.0, 0.0, -Math.PI * 0.5));
       leftHandCylinderFrameTransformInWorld.setTranslation(new Vector3d(0.5, 0.75, 1.4));
 
-      Transform3d rightHandFrameAfterJointTransformInWorld = new Transform3d();
+      RigidBodyTransform rightHandFrameAfterJointTransformInWorld = new RigidBodyTransform();
       rightHandFrameAfterJointTransformInWorld.setEuler(new Vector3d(0.0, 0.0, Math.PI / 2));
 
-      Transform3d rightHandCylinderFrameTransformInWorld = new Transform3d();
+      RigidBodyTransform rightHandCylinderFrameTransformInWorld = new RigidBodyTransform();
       rightHandCylinderFrameTransformInWorld.setEuler(new Vector3d(Math.PI / 6.0, 0.0, -Math.PI * 0.5));
       rightHandCylinderFrameTransformInWorld.setTranslation(new Vector3d(0.4, -0.75, 1.4));
 
@@ -444,10 +444,10 @@ public class GroundReactionWrenchDistributorTest
       FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction,
             rightFoot);
 
-      Transform3d leftHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
-      Transform3d leftHandCylinderFrameTransformInWorld = RandomTools.generateRandomTransform(random);
-      Transform3d rightHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
-      Transform3d rightHandCylinderFrameTransformInWorld = RandomTools.generateRandomTransform(random);
+      RigidBodyTransform leftHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
+      RigidBodyTransform leftHandCylinderFrameTransformInWorld = RandomTools.generateRandomTransform(random);
+      RigidBodyTransform rightHandFrameAfterJointTransformInWorld = RandomTools.generateRandomTransform(random);
+      RigidBodyTransform rightHandCylinderFrameTransformInWorld = RandomTools.generateRandomTransform(random);
 
       FramePose[] poses = new FramePose[4];
       CylindricalContactState leftHandContactState = getCylinderContactState("leftHand", leftHandFrameAfterJointTransformInWorld,
@@ -467,7 +467,7 @@ public class GroundReactionWrenchDistributorTest
             yoGraphicsListRegistry, desiredNetSpatialForceVector);
    }
 
-   private YoCylindricalContactState getCylinderContactState(String name, Transform3d afterJointInWorld, Transform3d cylinderInWorld, ReferenceFrame comFrame,
+   private YoCylindricalContactState getCylinderContactState(String name, RigidBodyTransform afterJointInWorld, RigidBodyTransform cylinderInWorld, ReferenceFrame comFrame,
          YoVariableRegistry registry, double coefficientOfFriction, double gripStrength, double cylinderRadius, double halfHandWidth,
          double gripWeaknessFactor, boolean inContact, FramePose[] poses, int index)
    {

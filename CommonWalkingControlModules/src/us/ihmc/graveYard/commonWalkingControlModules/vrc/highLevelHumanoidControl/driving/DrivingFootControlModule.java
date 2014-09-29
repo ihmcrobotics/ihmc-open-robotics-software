@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -125,7 +125,7 @@ public class DrivingFootControlModule
       toePoint = getCenterToePoint(contactablePlaneFoot);
 //      toePoint = getLeftFrontToePoint(contactablePlaneFoot);
       String toePointName = foot.getName() + "ToePoint";
-      Transform3d transform = new Transform3d();
+      RigidBodyTransform transform = new RigidBodyTransform();
       transform.set(toePoint.getVectorCopy());
       toePointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(toePointName, toePoint.getReferenceFrame(), transform);
       this.drivingReferenceFrames = drivingReferenceFrames;

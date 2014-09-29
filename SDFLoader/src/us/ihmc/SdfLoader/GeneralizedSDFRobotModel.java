@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
@@ -21,7 +21,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    private final String name;
    private final ArrayList<String> resourceDirectories;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
-   private final Transform3d transformToRoot;
+   private final RigidBodyTransform transformToRoot;
    private final LinkedHashMap<String, SDFJointHolder> joints = new LinkedHashMap<String, SDFJointHolder>();
    private final LinkedHashMap<String, SDFLinkHolder> links = new LinkedHashMap<String, SDFLinkHolder>();
    
@@ -92,7 +92,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       return rootLinks;
    }
    
-   public Transform3d getTransformToRoot()
+   public RigidBodyTransform getTransformToRoot()
    {
       return transformToRoot;
    }
@@ -137,12 +137,12 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       }
       
       SDFJointHolder joint = joints.get(name);
-      Transform3d visualTransform = new Transform3d();
+      RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
       return new SDFGraphics3DObject(joint.getChild().getVisuals(), resourceDirectories, visualTransform);
    }
 
-   public void addForceSensor(String sensorName, String parentJointName, Transform3d transformToParentJoint)
+   public void addForceSensor(String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
       SDFForceSensor sdfForceSensor = new SDFForceSensor(sensorName, transformToParentJoint);
       joints.get(sensorName).addForceSensor(sdfForceSensor);

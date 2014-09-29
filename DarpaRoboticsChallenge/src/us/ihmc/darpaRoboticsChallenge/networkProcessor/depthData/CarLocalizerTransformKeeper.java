@@ -4,7 +4,7 @@ import georegression.struct.point.Point3D_F64;
 
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -39,62 +39,62 @@ public class CarLocalizerTransformKeeper
    private static final double CAMERA_Y = 0.032262334981346175;
    private static final double CAMERA_Z = 0.8466124223441878;
 
-   private final Transform3d transformToDesiredPelvis = new Transform3d(new double[]
+   private final RigidBodyTransform transformToDesiredPelvis = new RigidBodyTransform(new double[]
    {
       0.9841102754435644, -0.04105097667157578, -0.17274774406834234, -0.06307616753352636, 0.04096992980892717, 0.9991522275780105, -0.004036208288863233,
       0.35943507901629285, 0.17276698358726802, -0.0031053888982297056, 0.9849578295246693, 1.139612394219399, 0.0, 0.0, 0.0, 1.0
    });
-   private final Transform3d inverseTransformToDesiredPelvis = new Transform3d();
+   private final RigidBodyTransform inverseTransformToDesiredPelvis = new RigidBodyTransform();
 
    {
       inverseTransformToDesiredPelvis.invert(transformToDesiredPelvis);
    }
 
-   private final Transform3d transformFromOldBasePelvisToCameraStandard = new Transform3d();
-   private final Transform3d inverseTransformFromOldBasePelvisToCameraStandard = new Transform3d();
+   private final RigidBodyTransform transformFromOldBasePelvisToCameraStandard = new RigidBodyTransform();
+   private final RigidBodyTransform inverseTransformFromOldBasePelvisToCameraStandard = new RigidBodyTransform();
 
    {
       Quat4d tempQuat = new Quat4d(CAMERA_QX, CAMERA_QY, CAMERA_QZ, CAMERA_QW);
       Vector3d tempVector = new Vector3d(CAMERA_X, CAMERA_Y, CAMERA_Z);
-      transformFromOldBasePelvisToCameraStandard.set(tempQuat, tempVector, 1.0);
+      transformFromOldBasePelvisToCameraStandard.set(tempQuat, tempVector);
       inverseTransformFromOldBasePelvisToCameraStandard.invert(transformFromOldBasePelvisToCameraStandard);
    }
 
 
    private static final double OLD_PELVIS_QUATERNION_W = Math.sqrt(1 - OLD_PELVIS_XX * OLD_PELVIS_XX - OLD_PELVIS_YY * OLD_PELVIS_YY
                                                             - OLD_PELVIS_ZZ * OLD_PELVIS_ZZ);
-   private final Transform3d transformFromNewPelvisToOldPelvis = new Transform3d();
-   private final Transform3d inverseTransformFromNewPelvisToOldPelvis = new Transform3d();
-   private final Transform3d transformFromOldBasePelvisToWheel = new Transform3d();
+   private final RigidBodyTransform transformFromNewPelvisToOldPelvis = new RigidBodyTransform();
+   private final RigidBodyTransform inverseTransformFromNewPelvisToOldPelvis = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromOldBasePelvisToWheel = new RigidBodyTransform();
 
    {
       Quat4d rot = new Quat4d(OLD_PELVIS_XX, OLD_PELVIS_YY, OLD_PELVIS_ZZ, OLD_PELVIS_QUATERNION_W);
       Vector3d translation = new Vector3d(OLD_PELVIS_X, OLD_PELVIS_Y, OLD_PELVIS_Z);
-      transformFromNewPelvisToOldPelvis.set(rot, translation, 1.0);
+      transformFromNewPelvisToOldPelvis.set(rot, translation);
       inverseTransformFromNewPelvisToOldPelvis.invert(transformFromNewPelvisToOldPelvis);
    }
 
-   private final Transform3d inverseTransformToWheel = new Transform3d();
+   private final RigidBodyTransform inverseTransformToWheel = new RigidBodyTransform();
    private final Point3d tempPoint = new Point3d();
    private final Vector3d tempVector = new Vector3d();
    private final Vector3d tempVector2 = new Vector3d();
    private final Vector3d tempVector3 = new Vector3d();
-   private final Transform3d transformToWheel = new Transform3d();
+   private final RigidBodyTransform transformToWheel = new RigidBodyTransform();
 
-   public void packTransformFromBasePelvisToWheel(Transform3d transformToPack)
+   public void packTransformFromBasePelvisToWheel(RigidBodyTransform transformToPack)
    {
       transformFromOldBasePelvisToWheel.setEuler(new Vector3d(WHEEL_FRAME_XX, WHEEL_FRAME_YY, WHEEL_FRAME_ZZ));
       transformFromOldBasePelvisToWheel.setTranslation(new Vector3d(WHEEL_FRAME_X, WHEEL_FRAME_Y, WHEEL_FRAME_Z));
       transformToPack.mul(transformFromNewPelvisToOldPelvis, transformFromOldBasePelvisToWheel);
    }
 
-   public void packInverseTransformFromBasePelvisToWheel(Transform3d transformToPack)
+   public void packInverseTransformFromBasePelvisToWheel(RigidBodyTransform transformToPack)
    {
       packTransformFromBasePelvisToWheel(transformToPack);
       transformToPack.invert();
    }
 
-   public void packTransformFromOldBasePelvisToNewBasePelvis(Transform3d transformToPack)
+   public void packTransformFromOldBasePelvisToNewBasePelvis(RigidBodyTransform transformToPack)
    {
       transformToPack.set(inverseTransformFromNewPelvisToOldPelvis);
    }
@@ -120,7 +120,7 @@ public class CarLocalizerTransformKeeper
       applyTransformToPoints(pointsOriginallyInBasePelvisFrame, inverseTransformToWheel);
    }
 
-   public void applyTransformToPoints(List<Point3D_F64> points, Transform3d transformToUse)
+   public void applyTransformToPoints(List<Point3D_F64> points, RigidBodyTransform transformToUse)
    {
       for (int i = 0; i < points.size(); i++)
       {
@@ -130,12 +130,12 @@ public class CarLocalizerTransformKeeper
       }
    }
 
-   boolean isPointNearWheel(double x, double y, double z, Transform3d inverseTransformFromSomeframeToWheel)
+   boolean isPointNearWheel(double x, double y, double z, RigidBodyTransform inverseTransformFromSomeframeToWheel)
    {
       return isPointConservitivelyNearWheel(x, y, z, inverseTransformFromSomeframeToWheel, 0.0);
    }
 
-   public boolean isPointConservitivelyNearWheel(double x, double y, double z, Transform3d inverseTransformFromSomeframeToWheel, double fudgeFactor)
+   public boolean isPointConservitivelyNearWheel(double x, double y, double z, RigidBodyTransform inverseTransformFromSomeframeToWheel, double fudgeFactor)
    {
       tempPoint.set(x, y, z);
       inverseTransformFromSomeframeToWheel.transform(tempPoint);
@@ -188,12 +188,12 @@ public class CarLocalizerTransformKeeper
       return isAboveLowerClipPlane&&isInFrontOfSlantedBack&&!isInTheRobotZone&&!isInLeftArmZone;
    }
 
-   public void packInverseTransformFromOldBasePelvisToStandardCamera(Transform3d inverseTransformFromOldBasePelvisToStandardCameraToPack)
+   public void packInverseTransformFromOldBasePelvisToStandardCamera(RigidBodyTransform inverseTransformFromOldBasePelvisToStandardCameraToPack)
    {
       inverseTransformFromOldBasePelvisToStandardCameraToPack.set(this.inverseTransformFromOldBasePelvisToCameraStandard);
    }
    
-   public void packTransformFromCarToDesiredPelvis(Transform3d transformFromCarToDesiredPelvisToPack)
+   public void packTransformFromCarToDesiredPelvis(RigidBodyTransform transformFromCarToDesiredPelvisToPack)
    {
       transformFromCarToDesiredPelvisToPack.set(this.transformToDesiredPelvis);
    }

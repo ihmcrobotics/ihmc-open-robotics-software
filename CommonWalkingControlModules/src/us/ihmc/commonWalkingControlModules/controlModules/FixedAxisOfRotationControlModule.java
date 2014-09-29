@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -50,7 +50,7 @@ public class FixedAxisOfRotationControlModule
 
    public void initialize(FrameVector axisOfRotation, FramePoint offset)
    {
-      Transform3d bodyToBase = bodyFrame.getTransformToDesiredFrame(baseFrame);
+      RigidBodyTransform bodyToBase = bodyFrame.getTransformToDesiredFrame(baseFrame);
       Vector3d translation = new Vector3d();
       bodyToBase.get(translation);
       this.initialPosition.set(translation);

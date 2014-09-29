@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -102,7 +102,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
 
          MatrixTools.vectorToSkewSymmetricMatrix(skew, force.getVector());
 
-         Transform3d transform = contactState.getFrameAfterParentJoint().getTransformToDesiredFrame(centerOfMassFrame);
+         RigidBodyTransform transform = contactState.getFrameAfterParentJoint().getTransformToDesiredFrame(centerOfMassFrame);
          transform.get(tempMatrix);
          DenseMatrix64F rotationMatrix = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
          MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, rotationMatrix);

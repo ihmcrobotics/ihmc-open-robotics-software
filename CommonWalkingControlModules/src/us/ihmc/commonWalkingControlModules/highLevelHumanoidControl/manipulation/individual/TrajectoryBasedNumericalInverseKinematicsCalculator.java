@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -125,7 +125,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
          private static final long serialVersionUID = -2964609854840695124L;
 
          @Override
-         protected void updateTransformToParent(Transform3d transformToParent)
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             frameToControlPoseOf.getTransformToDesiredFrame(transformToParent, endEffectorFrame);
          }

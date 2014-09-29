@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
@@ -31,7 +31,7 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
    private final FullRobotModel fullRobotModel;
    
-   public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<Transform3d> desiredHandPosesWithRespectToChestFrame)
+   public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame)
    {
       this.fullRobotModel = fullRobotModel;
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();

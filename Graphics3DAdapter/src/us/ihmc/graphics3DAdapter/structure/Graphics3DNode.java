@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -14,6 +15,7 @@ import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class Graphics3DNode
@@ -60,7 +62,7 @@ public class Graphics3DNode
       return transform;
    }
 
-   public synchronized void setTransform(Transform3d transform)
+   public synchronized void setTransform(RigidBodyTransform transform)
    {
       assert(!RotationFunctions.isNaNorInf(transform));
       this.transform.set(transform);
@@ -84,7 +86,7 @@ public class Graphics3DNode
 
    public void translate(double x, double y, double z)
    {
-      Transform3d translator = new Transform3d();
+      RigidBodyTransform translator = new RigidBodyTransform();
       translator.set(new Vector3d(x, y, z));
 
       transform.mul(translator);

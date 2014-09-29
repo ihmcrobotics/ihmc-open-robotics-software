@@ -3,7 +3,7 @@ package us.ihmc.SdfLoader;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotSide.RobotSide;
@@ -46,9 +46,9 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
 
-   public Transform3d getSoleToAnkleFrameTransform(RobotSide robotSide);
+   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
 
-   public Transform3d getHandControlFrameToWristTransform(RobotSide robotSide);
+   public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide);
 
    public boolean isTorqueVelocityLimitsEnabled();
 

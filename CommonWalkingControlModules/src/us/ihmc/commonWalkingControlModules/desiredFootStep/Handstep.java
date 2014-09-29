@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -155,7 +155,7 @@ public class Handstep
       poseReferenceFrame.getPose(pointToPack, quaternionToPack);
    }
 
-   public void getPose(Transform3d transformToPack)
+   public void getPose(RigidBodyTransform transformToPack)
    {
       poseReferenceFrame.getPose(transformToPack);
    }

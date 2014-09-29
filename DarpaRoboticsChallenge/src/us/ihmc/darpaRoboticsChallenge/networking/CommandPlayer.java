@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
@@ -28,7 +28,7 @@ public class CommandPlayer implements TimestampListener
    
    private boolean playingBack = false;
    private boolean playbackNextPacket = false;
-   private Transform3d playbackTransform = new Transform3d();
+   private RigidBodyTransform playbackTransform = new RigidBodyTransform();
    private long startTime = Long.MIN_VALUE; 
    private long nextCommandtimestamp = Long.MIN_VALUE;
    
@@ -41,7 +41,7 @@ public class CommandPlayer implements TimestampListener
       timestampProvider.attachListener(this);
    }
    
-   public void startPlayback(String filename, Transform3d playbackTransform)
+   public void startPlayback(String filename, RigidBodyTransform playbackTransform)
    {
       synchronized (syncObject)
       {

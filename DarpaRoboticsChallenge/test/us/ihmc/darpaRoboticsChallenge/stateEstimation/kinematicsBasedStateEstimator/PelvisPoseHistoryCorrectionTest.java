@@ -35,7 +35,7 @@ import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -281,7 +281,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       boolean success = true;
       FloatingJoint pelvis = robot.getPelvisJoint();
-      Transform3d groundTruthPelvisTransform = new Transform3d();
+      RigidBodyTransform groundTruthPelvisTransform = new RigidBodyTransform();
       Vector3d translation = new Vector3d();
       Matrix3d rotation = new Matrix3d();
       
@@ -357,12 +357,12 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private boolean testTotalErrorWithNoPitchOrRollCorrection(SDFRobot robot, YoVariableRegistry registry, SimulationConstructionSet simulationConstructionSet, ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
       TimeStampedPelvisPoseBuffer pelvisPoseBuffer = new TimeStampedPelvisPoseBuffer(500);
-      Transform3d seNonProcessedPelvisPose = new Transform3d();
+      RigidBodyTransform seNonProcessedPelvisPose = new RigidBodyTransform();
       boolean success = true;
       FloatingJoint pelvis = robot.getPelvisJoint();
-      Transform3d groundTruthPelvisTransform = new Transform3d();
-      Transform3d totalError = new Transform3d();
-      Transform3d tempTransform = new Transform3d();
+      RigidBodyTransform groundTruthPelvisTransform = new RigidBodyTransform();
+      RigidBodyTransform totalError = new RigidBodyTransform();
+      RigidBodyTransform tempTransform = new RigidBodyTransform();
       Vector3d translation = new Vector3d();
       Matrix3d rotation = new Matrix3d();
       
@@ -470,7 +470,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       {
          
          FloatingJoint pelvis = robot.getPelvisJoint();
-         Transform3d pelvisTransform = new Transform3d();
+         RigidBodyTransform pelvisTransform = new RigidBodyTransform();
 
          @Override
          public void run()
@@ -503,7 +503,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       {
          
          FloatingJoint pelvis = robot.getPelvisJoint();
-         Transform3d pelvisTransform = new Transform3d();
+         RigidBodyTransform pelvisTransform = new RigidBodyTransform();
          
          @Override
          public void run()

@@ -5,7 +5,7 @@ import java.awt.Canvas;
 import java.awt.Container;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point3d;
@@ -32,7 +32,7 @@ public class Graphics3DAdapterExampleTwo
       
       Graphics3DNode node1 = new Graphics3DNode("node1", Graphics3DNodeType.JOINT);
       
-      Transform3d transform1 = new Transform3d();
+      RigidBodyTransform transform1 = new RigidBodyTransform();
       transform1.setTranslation(new Vector3d(2.0, 0.0, 0.0));
       node1.setTransform(transform1);
       

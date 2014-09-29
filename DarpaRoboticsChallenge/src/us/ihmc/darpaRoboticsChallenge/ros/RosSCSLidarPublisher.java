@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 
 import org.ros.message.Time;
@@ -71,7 +71,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
    
    private void publishLidarScanFrame(int sensorId, long timestamp)
    {
-      Transform3d spindleRotationTransform = getTransformFromJointAngle(sensorId, timestamp);
+      RigidBodyTransform spindleRotationTransform = getTransformFromJointAngle(sensorId, timestamp);
       if (spindleRotationTransform == null)
       {
          return;
@@ -82,20 +82,20 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
       tfPublisher.publish(spindleRotationTransform, timestamp, sourceFrame, targetFrame);
    }
    
-   private Transform3d getTransformFromJointAngle(int sensorId, long timestamp)
+   private RigidBodyTransform getTransformFromJointAngle(int sensorId, long timestamp)
    {
       String sensorNameInSdf = lidarParameters[sensorId].getSensorNameInSdf();
       FrameVector spindleAxis = fullRobotModel.getLidarJointAxis(sensorNameInSdf);
-      Transform3d lidarBaseFrameTransform = fullRobotModel.getLidarBaseFrame(sensorNameInSdf).getTransformToParent();
+      RigidBodyTransform lidarBaseFrameTransform = fullRobotModel.getLidarBaseFrame(sensorNameInSdf).getTransformToParent();
       double angle = spindleAngleReceiver.interpolate(timestamp);
       if (angle == Double.NaN)
       {
          return null;
       }
       AxisAngle4d spindleRotation = new AxisAngle4d(spindleAxis.getVector(), angle);
-      Transform3d spindleRotationTransform = new Transform3d();
+      RigidBodyTransform spindleRotationTransform = new RigidBodyTransform();
       spindleRotationTransform.set(spindleRotation);
-      Transform3d transform = lidarBaseFrameTransform;
+      RigidBodyTransform transform = lidarBaseFrameTransform;
       transform.mul(spindleRotationTransform);
       return transform;
    }

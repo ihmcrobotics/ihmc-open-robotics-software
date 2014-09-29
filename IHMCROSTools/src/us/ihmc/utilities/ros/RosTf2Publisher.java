@@ -8,7 +8,7 @@ import geometry_msgs.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -36,7 +36,7 @@ public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage> imple
    {
    }
    
-   private Transform getRosTransform(Transform3d transform3d)
+   private Transform getRosTransform(RigidBodyTransform transform3d)
    {
       Transform transform = topicMessageFactory.newFromType(Transform._TYPE);
       Quaternion rot = topicMessageFactory.newFromType(Quaternion._TYPE);
@@ -62,7 +62,7 @@ public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage> imple
       return transform;
    }
    
-   public void publish(Transform3d transform3d, long timeStamp, String parentFrame, String childFrame)
+   public void publish(RigidBodyTransform transform3d, long timeStamp, String parentFrame, String childFrame)
    {
       TransformStamped transformStamped = topicMessageFactory.newFromType(TransformStamped._TYPE);
       Transform transform = getRosTransform(transform3d);

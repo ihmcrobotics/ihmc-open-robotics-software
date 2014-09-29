@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -24,7 +24,7 @@ public class HandstepHelper
    
    public Handstep getDesiredHandstep(RobotSide robotSide, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal, double swingTrajectoryTime)
    {
-      Transform3d transformOne = computeHandstepTransform(true, position, surfaceNormal, rotationAngleAboutNormal);
+      RigidBodyTransform transformOne = computeHandstepTransform(true, position, surfaceNormal, rotationAngleAboutNormal);
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transformOne);
       FrameVector surfaceNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), surfaceNormal);
       
@@ -34,7 +34,7 @@ public class HandstepHelper
       return handstep;
    }
 
-   public static Transform3d computeHandstepTransform(boolean rotateZIntoX, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal)
+   public static RigidBodyTransform computeHandstepTransform(boolean rotateZIntoX, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal)
    {
       surfaceNormal.normalize();
       AxisAngle4d rotationAxisAngle = new AxisAngle4d();
@@ -42,16 +42,16 @@ public class HandstepHelper
 
       AxisAngle4d rotationAboutNormal = new AxisAngle4d(surfaceNormal, rotationAngleAboutNormal);
 
-      Transform3d transformOne = new Transform3d();
+      RigidBodyTransform transformOne = new RigidBodyTransform();
       transformOne.set(rotationAboutNormal);
 
-      Transform3d transformTwo = new Transform3d();
+      RigidBodyTransform transformTwo = new RigidBodyTransform();
       transformTwo.set(rotationAxisAngle);
       transformOne.mul(transformTwo);
 
       if (rotateZIntoX)
       {
-         Transform3d transformThree = new Transform3d();
+         RigidBodyTransform transformThree = new RigidBodyTransform();
          transformThree.rotY(Math.PI/2.0);
          transformOne.mul(transformThree);
       }

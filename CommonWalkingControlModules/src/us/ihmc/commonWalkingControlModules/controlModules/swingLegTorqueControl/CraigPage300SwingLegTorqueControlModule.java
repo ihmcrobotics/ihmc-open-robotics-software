@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl
 
 import java.util.EnumMap;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -146,7 +146,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
 
       // Desired positions
-      Transform3d footToPelvis = computeDesiredTransform(pelvisFrame, desiredFootPosition, desiredFootOrientation);
+      RigidBodyTransform footToPelvis = computeDesiredTransform(pelvisFrame, desiredFootPosition, desiredFootOrientation);
       Twist desiredTwistOfSwingFootWithRespectToWorld = computeDesiredTwist(worldFrame, footFrame, desiredFootVelocity, desiredFootAngularVelocity);
       desiredTwistOfSwingFootWithRespectToWorld.changeFrame(footCoMFrame);
       desiredTwistOfSwingFootWithRespectToWorld.changeBodyFrameNoRelativeTwist(footCoMFrame);
@@ -253,11 +253,11 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       ankleTorqueScale.set(1.0);
    }
 
-   private Transform3d computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, FrameOrientation desiredFootOrientation)
+   private RigidBodyTransform computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, FrameOrientation desiredFootOrientation)
    {
       desiredFootOrientation.changeFrame(pelvisFrame);
       desiredFootPosition.changeFrame(pelvisFrame);
-      Transform3d footToPelvis = createTransform(desiredFootOrientation, desiredFootPosition);
+      RigidBodyTransform footToPelvis = createTransform(desiredFootOrientation, desiredFootPosition);
 
       return footToPelvis;
    }
@@ -288,11 +288,11 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       return desiredAccelerationOfSwingFootWithRespectToWorld;
    }
 
-   private static Transform3d createTransform(FrameOrientation orientation, FramePoint framePoint)
+   private static RigidBodyTransform createTransform(FrameOrientation orientation, FramePoint framePoint)
    {
       orientation.checkReferenceFrameMatch(framePoint);
       Matrix3d rotationMatrix = orientation.getMatrix3dCopy();
-      Transform3d ret = new Transform3d(rotationMatrix, new Vector3d(framePoint.getPoint()), 1.0);
+      RigidBodyTransform ret = new RigidBodyTransform(rotationMatrix, new Vector3d(framePoint.getPoint()));
 
       return ret;
    }

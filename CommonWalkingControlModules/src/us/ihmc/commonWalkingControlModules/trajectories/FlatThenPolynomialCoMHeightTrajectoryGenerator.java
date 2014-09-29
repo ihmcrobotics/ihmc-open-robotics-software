@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.List;
 
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -230,7 +230,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    private double findMinZOfGroundContactPoints(RobotSide robotSide)
    {
       ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);
-      Transform3d footToWorldTransform = contactableBody.getFrameAfterParentJoint().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      RigidBodyTransform footToWorldTransform = contactableBody.getFrameAfterParentJoint().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       FramePoint minZPoint = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, contactableBody, referenceFrame);
       return minZPoint.getZ();
    }
@@ -238,7 +238,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    private double findMaxXOfGroundContactPoints(RobotSide robotSide)
    {
       ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);
-      Transform3d footToWorldTransform = contactableBody.getFrameAfterParentJoint().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      RigidBodyTransform footToWorldTransform = contactableBody.getFrameAfterParentJoint().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       FramePoint maxXPoint = DesiredFootstepCalculatorTools.computeMaxXPointInFrame(footToWorldTransform, contactableBody, referenceFrame);
       return maxXPoint.getX();
    }
@@ -247,7 +247,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    {
       FramePose footstepPose = new FramePose();
       footstep.getPose(footstepPose);
-      Transform3d desiredFootToDesiredHeading = new Transform3d();
+      RigidBodyTransform desiredFootToDesiredHeading = new RigidBodyTransform();
       footstepPose.getPose(desiredFootToDesiredHeading);
 
       List<FramePoint> footPoints = bipedFeet.get(swingSide).getContactPointsCopy();

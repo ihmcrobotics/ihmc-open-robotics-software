@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
@@ -146,7 +146,7 @@ public class Graphics3DObject
       this.graphics3DInstructions.add(instruction);
    }
 
-   public void transform(Transform3d transform)
+   public void transform(RigidBodyTransform transform)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d translation = new Vector3d();

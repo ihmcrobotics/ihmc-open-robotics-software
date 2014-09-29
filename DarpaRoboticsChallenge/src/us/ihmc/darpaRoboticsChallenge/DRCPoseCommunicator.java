@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -31,9 +31,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private ReferenceFrame[] pointCloudFrames;
    private ReferenceFrame[] lidarFrames;
    private ReferenceFrame[] cameraFrames;
-   private Transform3d[] cameraPoses, lidarPoses, pointCloudPoses;
+   private RigidBodyTransform[] cameraPoses, lidarPoses, pointCloudPoses;
 
-   private final Transform3d rootTransform = new Transform3d();
+   private final RigidBodyTransform rootTransform = new RigidBodyTransform();
 
    private final ObjectCommunicator networkProcessorCommunicator;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
@@ -65,39 +65,39 @@ public class DRCPoseCommunicator implements RawOutputWriter
       if(cameraParams != null)
       {
          cameraFrames = new ReferenceFrame[cameraParams.length];
-         cameraPoses = new Transform3d[cameraParams.length];
+         cameraPoses = new RigidBodyTransform[cameraParams.length];
          setupSensorFrames(cameraParams,cameraFrames,cameraPoses,estimatorModel);
       } else {
          cameraFrames = new ReferenceFrame[0];
-         cameraPoses = new Transform3d[0];
+         cameraPoses = new RigidBodyTransform[0];
       }
       
       if(lidarParams != null)
       {
          lidarFrames = new ReferenceFrame[lidarParams.length];
-         lidarPoses = new Transform3d[lidarParams.length];
+         lidarPoses = new RigidBodyTransform[lidarParams.length];
          setupSensorFrames(lidarParams,lidarFrames,lidarPoses,estimatorModel);
       } else {
          lidarFrames = new ReferenceFrame[0];
-         lidarPoses = new Transform3d[0];
+         lidarPoses = new RigidBodyTransform[0];
       }
       
       if(pointCloudParams != null)
       {
          pointCloudFrames = new ReferenceFrame[pointCloudParams.length];
-         pointCloudPoses = new Transform3d[pointCloudParams.length];
+         pointCloudPoses = new RigidBodyTransform[pointCloudParams.length];
          setupSensorFrames(pointCloudParams,pointCloudFrames,pointCloudPoses,estimatorModel);
       } else {
          pointCloudFrames = new ReferenceFrame[0];
-         pointCloudPoses = new Transform3d[0];
+         pointCloudPoses = new RigidBodyTransform[0];
       }
    }
    
-   private void setupSensorFrames(DRCRobotSensorParameters[] params, ReferenceFrame[] referenceFrames, Transform3d[] poses, SDFFullRobotModel sdfRobotModel)
+   private void setupSensorFrames(DRCRobotSensorParameters[] params, ReferenceFrame[] referenceFrames, RigidBodyTransform[] poses, SDFFullRobotModel sdfRobotModel)
    {
       for(int i = 0; i < params.length; i++)
       {
-         poses[i] = new Transform3d();
+         poses[i] = new RigidBodyTransform();
          if(params[i].useRosForTransformFromPoseToSensor())
          {
             referenceFrames[i] = sdfRobotModel.getSensorReferenceFrameByLink(params[i].getPoseFrameForSdf());
@@ -182,7 +182,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       return getName();
    }
 
-   private void upateSensorFrames(ReferenceFrame[] referenceFrames, Transform3d[] targetTransforms)
+   private void upateSensorFrames(ReferenceFrame[] referenceFrames, RigidBodyTransform[] targetTransforms)
    {
       for (int i = 0; i < referenceFrames.length; i++)
       {

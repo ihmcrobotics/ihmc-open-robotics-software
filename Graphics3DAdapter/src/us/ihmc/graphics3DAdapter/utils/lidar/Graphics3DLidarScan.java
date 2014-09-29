@@ -1,6 +1,8 @@
 package us.ihmc.graphics3DAdapter.utils.lidar;
 
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Transform3d;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -73,10 +75,10 @@ public class Graphics3DLidarScan
             }
             else
             {
-               Transform3d pointTransform = new Transform3d();
+               RigidBodyTransform pointTransform = new RigidBodyTransform();
 
                Point3d p = new Point3d(lidarScan.getRange(i) + (SPHERE_RADIUS * 1.1), 0.0, 0.0);
-               Transform3d transform = new Transform3d();
+               RigidBodyTransform transform = new RigidBodyTransform();
                lidarScan.packInterpolatedTransform(i, transform);
                transform.mul(lidarScan.getSweepTransform(i));
                transform.transform(p);
@@ -89,7 +91,7 @@ public class Graphics3DLidarScan
 
          if (showScanRays)
          {
-            Transform3d rayTransform = new Transform3d();
+            RigidBodyTransform rayTransform = new RigidBodyTransform();
             lidarScan.packInterpolatedTransform(i, rayTransform);
             rayTransform.mul(lidarScan.getSweepTransform(i));
             rays[i].setTransform(rayTransform);

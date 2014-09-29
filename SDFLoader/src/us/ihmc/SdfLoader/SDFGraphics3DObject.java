@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -41,10 +41,10 @@ public class SDFGraphics3DObject extends Graphics3DObject
    
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories)
    {
-      this(sdfVisuals, resourceDirectories, new Transform3d());
+      this(sdfVisuals, resourceDirectories, new RigidBodyTransform());
    }
    
-   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories, Transform3d graphicsTransform)
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories, RigidBodyTransform graphicsTransform)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
@@ -58,7 +58,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
             translate(offset);
             rotate(rotation);
             
-            Transform3d visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
+            RigidBodyTransform visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
             Vector3d modelOffset = new Vector3d();
             Matrix3d modelRotation = new Matrix3d();
             visualPose.get(modelRotation, modelOffset);
@@ -210,7 +210,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
    }
    
-   private void addMesh(String mesh, String submesh, boolean centerSubmesh, Transform3d visualPose, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
+   private void addMesh(String mesh, String submesh, boolean centerSubmesh, RigidBodyTransform visualPose, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
    {
 
       // STL files do not have appearances

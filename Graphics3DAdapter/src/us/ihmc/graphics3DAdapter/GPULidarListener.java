@@ -1,8 +1,8 @@
 package us.ihmc.graphics3DAdapter;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public interface GPULidarListener
 {
-   public void scan(float[] scan, Transform3d currentTransform, double time);
+   public void scan(float[] scan, RigidBodyTransform currentTransform, double time);
 }
