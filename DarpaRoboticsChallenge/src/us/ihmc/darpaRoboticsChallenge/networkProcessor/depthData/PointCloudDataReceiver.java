@@ -3,21 +3,20 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
-import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
+import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.producers.RobotPoseBufferListener;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.NetStateListener;
 
 public class PointCloudDataReceiver implements RobotPoseBufferListener, NetStateListener
@@ -27,7 +26,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
    protected volatile AtomicBoolean sendData = new AtomicBoolean(false);
    private final Object commandLock = new Object();
    private final DepthDataFilter lidarDataFilter;
-   private final DRCNetworkProcessorControllerStateHandler controllerStateHandler;
+   private final NetworkProcessorControllerStateHandler controllerStateHandler;
    protected LidarStateCommandListener lidarStateCommandListener = new LidarStateCommandListener();
    private final RobotPoseBuffer robotPoseBuffer;
 

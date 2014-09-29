@@ -2,13 +2,13 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 
+import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -44,13 +44,13 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 class SCSCameraInfoReceiver implements CameraInfoReceiver
 {
    private IntrinsicCameraParametersPacket leftParamPacket=null;
-   private DRCNetworkProcessorControllerStateHandler stateHandler;
+   private NetworkProcessorControllerStateHandler stateHandler;
    private double lastFov=Double.NaN;
    private int numPacket=0;
    private final int numInitialPacketsToIgnore=5;
    private final CameraLogger logger;
 
-   public SCSCameraInfoReceiver(DRCNetworkProcessorControllerStateHandler stateHandler , CameraLogger logger )
+   public SCSCameraInfoReceiver(NetworkProcessorControllerStateHandler stateHandler , CameraLogger logger )
    {
       this.stateHandler = stateHandler;
       this.logger = logger;

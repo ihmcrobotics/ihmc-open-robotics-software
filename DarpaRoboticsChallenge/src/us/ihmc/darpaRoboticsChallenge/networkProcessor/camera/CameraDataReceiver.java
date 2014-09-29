@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -18,6 +17,7 @@ import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoHandler;
 import us.ihmc.graphics3DAdapter.camera.VideoCompressionKey;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class CameraDataReceiver
 {
@@ -97,7 +97,7 @@ public abstract class CameraDataReceiver
       public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
             VideoCompressionKey videoCompressionKey)
       {
-         networkingManager.getControllerStateHandler().sendVideoPacket(
+         networkingManager.getControllerStateHandler().sendSerializableObject(
                new VideoPacket(timeStamp, data, position, orientation, fieldOfView, videoCompressionKey));
       }
 

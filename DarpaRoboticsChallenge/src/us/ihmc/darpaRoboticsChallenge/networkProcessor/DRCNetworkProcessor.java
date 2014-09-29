@@ -84,7 +84,7 @@ public class DRCNetworkProcessor
          @Override
          public void consumeObject(HandJointAnglePacket object)
          {
-            networkingManager.getControllerStateHandler().sendHandJointAnglePacket(object);
+            networkingManager.getControllerStateHandler().sendSerializableObject(object);
          }
       });
 
@@ -108,7 +108,7 @@ public class DRCNetworkProcessor
       }
    }
    
-   public void connect()
+   private void connect()
    {
       try
       {
