@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
@@ -72,5 +73,5 @@ public interface DRCRobotModel
    
    public abstract RobotNetworkParameters getNetworkParameters();
    
-   public abstract HandCommandManager createHandCommandManager(DRCNetworkProcessorControllerStateHandler controllerStateHandler);
+   public abstract HandCommandManager createHandCommandManager(NetworkProcessorControllerStateHandler controllerStateHandler);
 }
