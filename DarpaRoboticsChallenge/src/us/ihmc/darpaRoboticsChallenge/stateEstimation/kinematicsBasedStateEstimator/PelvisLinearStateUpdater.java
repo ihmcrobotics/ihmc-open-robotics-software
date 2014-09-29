@@ -278,7 +278,6 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
    }
    
-   @SuppressWarnings("unchecked")
    private void setupStateMachine()
    {
       TrustBothFeetState trustBothFeetState = new TrustBothFeetState();
@@ -468,7 +467,7 @@ public class PelvisLinearStateUpdater
       public void doAction()
       {
          kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForDoubleSupport(footSwitches);
-         imuDriftCompensator.esimtateDriftIfPossible(true);
+         imuDriftCompensator.esimtateDriftIfPossible(null);
       }
 
       @Override
@@ -497,7 +496,7 @@ public class PelvisLinearStateUpdater
       public void doAction()
       {
          kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(rootJointPosition, footSwitches, trustedSide);
-         imuDriftCompensator.esimtateDriftIfPossible(false);
+         imuDriftCompensator.esimtateDriftIfPossible(trustedSide);
       }
       
       @Override
