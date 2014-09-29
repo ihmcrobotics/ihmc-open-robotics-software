@@ -33,6 +33,8 @@ public class IMUDriftCompensator
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final BooleanYoVariable userForceIMUDriftCompensation = new BooleanYoVariable("userForceIMUDriftCompensation", registry);
+
    private final BooleanYoVariable isIMUDriftCompensationActivated = new BooleanYoVariable("isIMUDriftCompensationActivated", registry);
    private final BooleanYoVariable isIMUDriftYawRateEstimationActivated = new BooleanYoVariable("isIMUDriftYawRateEstimationActivated", registry);
    private final BooleanYoVariable isIMUDriftYawRateEstimated = new BooleanYoVariable("isIMUDriftYawRateEstimated", registry);
@@ -154,7 +156,7 @@ public class IMUDriftCompensator
       if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough)
       {
          isIMUDriftYawRateEstimated.set(true);
-         estimateIMUDriftYaw();
+         estimateIMUDriftYaw(null);
       }
       else
       {
@@ -182,9 +184,30 @@ public class IMUDriftCompensator
          compensateIMUDriftYaw();
    }
 
-   public void esimtateDriftIfPossible(boolean isInDoubleSupport)
+   /**
+    * Estimate the IMU yaw drift if the feet angular velocities are low enough.
+    * @param trustedSide Refers to the foot to trust, set it to null when both feet are trusted.
+    */
+   public void esimtateDriftIfPossible(RobotSide trustedSide)
    {
-      if (!isInDoubleSupport)
+      boolean areBothFeetTrusted = trustedSide == null;
+
+      if (userForceIMUDriftCompensation.getBooleanValue())
+      {
+         isIMUDriftYawRateEstimated.set(true);
+         if (areBothFeetTrusted)
+         {
+            estimateIMUDriftYaw(null);
+         }
+         else
+         {
+            estimateIMUDriftYaw(trustedSide);
+         }
+
+         return;
+      }
+
+      if (!areBothFeetTrusted)
       {
          isIMUDriftYawRateEstimated.set(false);
          return;
@@ -197,7 +220,7 @@ public class IMUDriftCompensator
       if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough() && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
       {
          isIMUDriftYawRateEstimated.set(true);
-         estimateIMUDriftYaw();
+         estimateIMUDriftYaw(null);
       }
       else
       {
@@ -215,9 +238,20 @@ public class IMUDriftCompensator
       return areFeetLoadedEnough;
    }
 
-   private void estimateIMUDriftYaw()
+   /**
+    * Estimate the IMU drift yaw using the leg kinematics.
+    * @param trustedSide Refers to the foot to trust, set it to null when both feet are trusted.
+    */
+   private void estimateIMUDriftYaw(RobotSide trustedSide)
    {
-      imuDriftYawRate.set(footAngularVelocityAverageFiltered.getZ());
+      if (trustedSide == null)
+      {
+         imuDriftYawRate.set(footAngularVelocityAverageFiltered.getZ());
+      }
+      else
+      {
+         imuDriftYawRate.set(footAngularVelocitiesInWorldFilteredZ.get(trustedSide).getDoubleValue());
+      }
       imuDriftYawRateFiltered.update();
 
       imuDriftYawAngle.add(imuDriftYawRateFiltered.getDoubleValue() * estimatorDT);
@@ -233,7 +267,7 @@ public class IMUDriftCompensator
       rootJointAngularVelocity.changeFrame(worldFrame);
       rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());
    }
-   
+
    private final double[] rootJointYawPitchRoll = new double[]{0.0, 0.0, 0.0};
    private final Twist rootJointTwist = new Twist();
    private final FrameVector rootJointAngularVelocity = new FrameVector();
