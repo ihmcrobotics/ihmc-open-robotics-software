@@ -154,7 +154,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
       // H_{root}^{w} = H_{estimation}^{w} * H_{root}^{estimation}
       rootJointToWorldToPack.set(estimationLinkTransform);
-      rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
+      rootJointToWorldToPack.multiply(tempRootJointFrameToEstimationFrame);
    }
 
 // private final Twist tempRootJointTwistExisting = new Twist();

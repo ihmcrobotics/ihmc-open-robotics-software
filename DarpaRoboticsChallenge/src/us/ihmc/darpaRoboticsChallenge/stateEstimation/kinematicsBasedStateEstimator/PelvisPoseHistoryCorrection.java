@@ -211,7 +211,7 @@ public class PelvisPoseHistoryCorrection
    private void calculateCorrectedPelvisPose()
    {
       correctedPelvisPoseWorkingArea.set(getInterpolatedPelvisError());
-      correctedPelvisPoseWorkingArea.mul(pelvisPose);
+      correctedPelvisPoseWorkingArea.multiply(pelvisPose);
       pelvisPose.set(correctedPelvisPoseWorkingArea);
    }
    
@@ -309,7 +309,7 @@ public class PelvisPoseHistoryCorrection
       RigidBodyTransform error = localizationPose.getTransform3D();
       tempTransform.set(sePose.getTransform3D());
       tempTransform.invert();
-      error.mul(tempTransform);
+      error.multiply(tempTransform);
       
       error.get(rotationMatrix);
       RotationFunctions.setYawPitchRoll(rotationMatrix, RotationFunctions.getYaw(rotationMatrix), 0, 0);

@@ -89,7 +89,7 @@ public class Graphics3DNode
       RigidBodyTransform translator = new RigidBodyTransform();
       translator.set(new Vector3d(x, y, z));
 
-      transform.mul(translator);
+      transform.multiply(translator);
    }
    
    public void translateTo(double x, double y, double z)
