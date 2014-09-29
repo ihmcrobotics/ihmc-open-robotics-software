@@ -286,7 +286,7 @@ public class ICPProportionalController
          rotation.setColumn(1, y);
          rotation.setColumn(2, z);
 
-         transformToParent.set(rotation);
+         transformToParent.setRotationAndZeroTranslation(rotation);
       }
    }
 }

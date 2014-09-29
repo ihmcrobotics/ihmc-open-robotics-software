@@ -239,7 +239,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             hipPitchPosition.changeFrame(getParent());
             hipPitchPosition.get(hipPitchToParentFrame);
 
-            transformToParent.set(hipPitchRotationToParentFrame);
+            transformToParent.setRotationAndZeroTranslation(hipPitchRotationToParentFrame);
             transformToParent.setTranslation(hipPitchToParentFrame);
          }
       };
@@ -265,7 +265,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             anklePitchPosition.changeFrame(getParent());
             anklePitchPosition.get(anklePitchToParentFrame);
 
-            transformToParent.set(anklePitchRotationToParentFrame);
+            transformToParent.setRotationAndZeroTranslation(anklePitchRotationToParentFrame);
             transformToParent.setTranslation(anklePitchToParentFrame);
          }
       };

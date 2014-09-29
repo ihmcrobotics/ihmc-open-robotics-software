@@ -85,7 +85,7 @@ public class CarLocalizerTransformKeeper
    {
       transformFromOldBasePelvisToWheel.setEuler(new Vector3d(WHEEL_FRAME_XX, WHEEL_FRAME_YY, WHEEL_FRAME_ZZ));
       transformFromOldBasePelvisToWheel.setTranslation(new Vector3d(WHEEL_FRAME_X, WHEEL_FRAME_Y, WHEEL_FRAME_Z));
-      transformToPack.mul(transformFromNewPelvisToOldPelvis, transformFromOldBasePelvisToWheel);
+      transformToPack.multiply(transformFromNewPelvisToOldPelvis, transformFromOldBasePelvisToWheel);
    }
 
    public void packInverseTransformFromBasePelvisToWheel(RigidBodyTransform transformToPack)

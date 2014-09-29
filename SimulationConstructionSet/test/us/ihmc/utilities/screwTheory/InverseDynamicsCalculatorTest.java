@@ -590,7 +590,7 @@ public class InverseDynamicsCalculatorTest
    {
       ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.set(offset);
+      transformToParent.setTranslationAndIdentityRotation(offset);
       ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
       return beforeJointFrame;

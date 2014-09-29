@@ -178,7 +178,7 @@ public class WheelRotationEstimator extends IcpCloud3D
       {
          Se3_F64 transformFromRotaryToTemplate = super.getReferenceToCurrent();
          GeoregressionConversionTools.setVecmathTransformFromGeoregressionTransform(tempTransformFromRotaryToTemplate, transformFromRotaryToTemplate);
-         bestTransformFromCurrentToTemplate.mul(tempTransformFromCurrentToRotary, tempTransformFromRotaryToTemplate);
+         bestTransformFromCurrentToTemplate.multiply(tempTransformFromCurrentToRotary, tempTransformFromRotaryToTemplate);
       }
    }
 

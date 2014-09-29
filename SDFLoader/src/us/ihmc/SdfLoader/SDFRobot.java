@@ -453,7 +453,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
             RigidBodyTransform sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
             RigidBodyTransform linkToCamera = new RigidBodyTransform();
-            linkToCamera.mul(linkToSensor, sensorToCamera);
+            linkToCamera.multiply(linkToSensor, sensorToCamera);
             showCordinateSystem(scsJoint,linkToCamera);
             
             double fieldOfView = Double.parseDouble(camera.getHorizontalFov());

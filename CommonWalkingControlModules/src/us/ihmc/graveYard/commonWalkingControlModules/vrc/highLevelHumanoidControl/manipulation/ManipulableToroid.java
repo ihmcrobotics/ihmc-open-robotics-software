@@ -178,7 +178,7 @@ public class ManipulableToroid
          if (!RotationFunctions.isRotationProper(rotationMatrix))
             throw new RuntimeException("rotation not proper");
 
-         transformToParent.set(rotationMatrix);
+         transformToParent.setRotationAndZeroTranslation(rotationMatrix);
          transformToParent.setTranslation(origin);
       }
 

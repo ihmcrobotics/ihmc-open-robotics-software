@@ -72,7 +72,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
          ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
          RigidBodyTransform handToWorld = handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          RigidBodyTransform handContactPlaneToWorld = new RigidBodyTransform();
-         handContactPlaneToWorld.mul(handToWorld, invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         handContactPlaneToWorld.multiply(handToWorld, invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
          combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(handContactPlaneToWorld));
       }
 

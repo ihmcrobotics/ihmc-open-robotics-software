@@ -135,11 +135,11 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    
    private void convertOrientationAndSetOnOutputPort()
    {
-      transformFromIMUToWorld.set(orientationInputPort.getData());
+      transformFromIMUToWorld.setRotationAndZeroTranslation(orientationInputPort.getData());
 
       estimationFrame.getTransformToDesiredFrame(transformFromEstimationFrameToIMUFrame, orientationMeasurementFrame);
       
-      transformFromEstimationToWorld.mul(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
+      transformFromEstimationToWorld.multiply(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
       transformFromEstimationToWorld.get(rotationFromEstimationToWorld);
       tempOrientationEstimationFrame.setIncludingFrame(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
       

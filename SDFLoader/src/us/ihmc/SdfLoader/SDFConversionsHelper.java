@@ -65,7 +65,7 @@ public class SDFConversionsHelper
       translationVector.setX(Double.parseDouble(data[0]));
       translationVector.setY(Double.parseDouble(data[1]));
       translationVector.setZ(Double.parseDouble(data[2]));
-      translation.set(translationVector);
+      translation.setTranslationAndIdentityRotation(translationVector);
    
       RigidBodyTransform rotation = new RigidBodyTransform();
       Vector3d eulerAngels = new Vector3d();
@@ -74,7 +74,7 @@ public class SDFConversionsHelper
       eulerAngels.setZ(Double.parseDouble(data[5]));
       rotation.setEuler(eulerAngels);
    
-      ret.mul(translation, rotation);
+      ret.multiply(translation, rotation);
    
       return ret;
    }

@@ -106,13 +106,13 @@ public class PelvisRotationalStateUpdater
    {
       // R_{measurementFrame}^{world}
       imuProcessedOutput.getOrientationMeasurement(orientationMeasurement);
-      transformFromMeasurementFrameToWorld.set(orientationMeasurement);
+      transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
 
       // R_{root}^{measurementFrame}
       rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.mul(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
+      transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
       transformFromRootJointFrameToWorld.get(rotationFromRootJointFrameToWorld);
 
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);

@@ -43,10 +43,10 @@ public class HandstepHelper
       AxisAngle4d rotationAboutNormal = new AxisAngle4d(surfaceNormal, rotationAngleAboutNormal);
 
       RigidBodyTransform transformOne = new RigidBodyTransform();
-      transformOne.set(rotationAboutNormal);
+      transformOne.setRotationAndZeroTranslation(rotationAboutNormal);
 
       RigidBodyTransform transformTwo = new RigidBodyTransform();
-      transformTwo.set(rotationAxisAngle);
+      transformTwo.setRotationAndZeroTranslation(rotationAxisAngle);
       transformOne.multiply(transformTwo);
 
       if (rotateZIntoX)

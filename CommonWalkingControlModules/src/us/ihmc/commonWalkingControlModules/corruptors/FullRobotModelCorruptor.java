@@ -151,7 +151,7 @@ public class FullRobotModelCorruptor
          public void variableChanged(YoVariable<?> v)
          {
             AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
-            preCorruptionTransform.set(axisAngle);
+            preCorruptionTransform.setRotationAndZeroTranslation(axisAngle);
             frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
          }
       };
