@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,6 +18,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -84,6 +86,12 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
+      
+      Point3d center = new Point3d(-10.241987629532595, -0.8330256660954483, 1.0893768421917251);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       
       BambooTools.reportTestFinishedMessage();
       }
