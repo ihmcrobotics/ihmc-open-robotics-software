@@ -66,10 +66,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       rotateZ60Degrees.rotZ(-Math.PI/3.0);
       
       RigidBodyTransform leftTransform = new RigidBodyTransform();
-      leftTransform.mul(translateForwardAndDownOnFoot);
-      leftTransform.mul(rotYBy7dot5);
-      leftTransform.mul(rotateZ60Degrees);
-      leftTransform.mul(rotXByPi);
+      leftTransform.multiply(translateForwardAndDownOnFoot);
+      leftTransform.multiply(rotYBy7dot5);
+      leftTransform.multiply(rotateZ60Degrees);
+      leftTransform.multiply(rotXByPi);
 
       transformFromMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
       transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(leftTransform));
