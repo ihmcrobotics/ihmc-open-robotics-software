@@ -1,0 +1,10 @@
+<launch>
+	<include file="$(find ethzasl_icp_mapper_humanoid)/launch/mapper_humanoid.launch">
+	</include>
+	<include file="$(find lidar_to_point_cloud_transformer)/launch/atlas_simulation_lidar_to_point_cloud_transformer.launch">
+	</include>
+	<include file="$(find foothold_finder)/launch/atlas.launch">
+	</include>
+	<include file="$(find ros_rviz)/display_simulation.launch">
+	</include>
+</launch>
