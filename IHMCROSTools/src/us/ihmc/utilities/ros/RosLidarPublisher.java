@@ -1,5 +1,7 @@
 package us.ihmc.utilities.ros;
 
+import java.util.Arrays;
+
 import org.ros.message.Time;
 
 import std_msgs.Header;
@@ -20,6 +22,9 @@ public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
    {
 
    }
+   
+   
+   private float[] fakeIntensities = null;
 
    public void publish(LidarScan lidarScan, String frameId, Time timestamp)
    {
@@ -39,6 +44,16 @@ public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
       message.setScanTime(parameters.getScanTime());
       message.setRangeMin(parameters.getMinRange());
       message.setRangeMax(parameters.getMaxRange());
+      
+      if(fakeIntensities==null || fakeIntensities.length != parameters.getPointsPerSweep())
+      {
+         fakeIntensities= new float[parameters.getPointsPerSweep()];
+      }
+      float[] ranges = lidarScan.getRanges();
+      for(int i=0;i<ranges.length;i++)
+         fakeIntensities[i] = 1/((ranges[i]*ranges[i])+1e-10f);
+
+      message.setIntensities(fakeIntensities);
       
       message.setRanges(lidarScan.getRanges());
       

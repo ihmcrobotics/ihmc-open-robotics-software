@@ -11,7 +11,6 @@ sensor_msgs
 nav_msgs
 tf
 tf_conversions
-libpointmatcher
 libpointmatcher_ros)
 
 catkin_package(

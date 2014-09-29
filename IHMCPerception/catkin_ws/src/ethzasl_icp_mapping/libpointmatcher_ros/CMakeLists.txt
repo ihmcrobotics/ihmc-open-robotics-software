@@ -21,6 +21,7 @@ nav_msgs
 tf
 tf_conversions
 eigen_conversions
+libpointmatcher
 )
 
 find_package(libpointmatcher REQUIRED)

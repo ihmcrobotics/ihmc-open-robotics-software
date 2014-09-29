@@ -42,7 +42,8 @@ public:
 
 	~RobotSelfFilter(){};
 
-	void filterPointClould(const pcl::PointCloud<pcl::PointXYZI> & source_cloud, pcl::PointCloud<pcl::PointXYZI>& filtered_cloud);
+	void filterPointClould(const pcl::PointCloud<pcl::PointXYZI> & source_cloud, pcl::PointCloud<pcl::PointXYZI>& filtered_cloud,
+				pcl::PointCloud<pcl::PointXYZI>& removed_cloud);
 };
 
 #endif /* ROBOTSELFFILTERS_H_ */
