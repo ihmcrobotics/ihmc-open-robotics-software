@@ -5,6 +5,7 @@ package us.ihmc.darpaRoboticsChallenge;
 @Deprecated
 public class DRCConfigParameters
 {
+   public static final boolean USE_LOGGER = false;
    public static final boolean MAKE_SLIDER_BOARD = false; 
 
    public static final boolean USE_HYDRA = false;
@@ -26,6 +27,7 @@ public class DRCConfigParameters
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
    public static final boolean IS_HEAD_ATTACHED = true;
    public static boolean CALIBRATE_ARM_MODE = false;
+
    
    public static final boolean ALLOW_MODEL_CORRUPTION = false;
    public static final boolean SEND_ROBOT_DATA_TO_ROS = true;
