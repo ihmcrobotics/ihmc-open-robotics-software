@@ -303,6 +303,6 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
 
       // H_{root}^{w} = H_{estimation}^{w} * H_{root}^{estimation}
       rootJointToWorldToPack.set(estimationLinkTransform);
-      rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
+      rootJointToWorldToPack.multiply(tempRootJointFrameToEstimationFrame);
    }
 }

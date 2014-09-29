@@ -76,7 +76,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
          disturbanceTransform.set(rotationError, positionError);
       }
 
-      transformToPack.mul(disturbanceTransform);
+      transformToPack.multiply(disturbanceTransform);
 
    }
 

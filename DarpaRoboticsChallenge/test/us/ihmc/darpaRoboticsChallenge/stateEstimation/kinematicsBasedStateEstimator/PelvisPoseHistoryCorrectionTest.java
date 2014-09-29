@@ -449,7 +449,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
             totalError.set(groundTruthPelvisTransform);
             tempTransform.set(nonProcessedSePose.getTransform3D());
             tempTransform.invert();
-            totalError.mul(tempTransform);
+            totalError.multiply(tempTransform);
             totalError.get(translation);
             totalError.get(rotation);
             

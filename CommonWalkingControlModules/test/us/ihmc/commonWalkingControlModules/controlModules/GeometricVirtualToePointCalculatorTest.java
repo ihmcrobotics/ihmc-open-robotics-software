@@ -447,8 +447,8 @@ public class GeometricVirtualToePointCalculatorTest
       undoTranslate.setTranslation(undoTranslationVector);
 
       allThree.set(translate);
-      allThree.mul(rotate);
-      allThree.mul(undoTranslate);
+      allThree.multiply(rotate);
+      allThree.multiply(undoTranslate);
 
       FrameConvexPolygon2d rotatedLeftFootPolygon = new FrameConvexPolygon2d(footPolygon.getReferenceFrame());
       rotatedLeftFootPolygon.clear();

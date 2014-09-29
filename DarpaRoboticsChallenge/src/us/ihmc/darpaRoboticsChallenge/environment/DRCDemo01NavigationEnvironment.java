@@ -1541,7 +1541,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       RigidBodyTransform tilt = new RigidBodyTransform();
       tilt.rotY(-slopeRadians);
-      location.mul(tilt);
+      location.multiply(tilt);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
@@ -1571,7 +1571,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       RigidBodyTransform tilt = new RigidBodyTransform();
       tilt.rotY(-cinderBlockTiltRadians);
-      location.mul(tilt);
+      location.multiply(tilt);
 
       double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
@@ -1615,7 +1615,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       location.rotZ(Math.toRadians(yawDegrees));
       setUpright.rotX(Math.toRadians(90));
-      location.mul(setUpright);
+      location.multiply(setUpright);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,

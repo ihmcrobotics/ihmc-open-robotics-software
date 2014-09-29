@@ -68,11 +68,11 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          objectTransforms.put(VehicleObject.GAS_PEDAL, transform3D);
       }
@@ -110,11 +110,11 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          objectTransforms.put(VehicleObject.BRAKE_PEDAL, transform3D);
       }
@@ -137,7 +137,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          //transform to parent
 //         Transform3D transform3DfromParentToChild;
@@ -244,15 +244,15 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
          adjustmentForSwitch.setTranslation(new Vector3d(0.0, 0.025, 0.0));
-         transform3D.mul(adjustmentForSwitch);
+         transform3D.multiply(adjustmentForSwitch);
 
          objectTransforms.put(VehicleObject.FNR_SWITCH_F, transform3D);
       }
@@ -272,15 +272,15 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
          finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
-         transform3D.mul(finalAdjustment);
+         transform3D.multiply(finalAdjustment);
 
          RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
          adjustmentForSwitch.setTranslation(new Vector3d(0.0, -0.025, 0.0));
-         transform3D.mul(adjustmentForSwitch);
+         transform3D.multiply(adjustmentForSwitch);
 
          objectTransforms.put(VehicleObject.FNR_SWITCH_R, transform3D);
       }

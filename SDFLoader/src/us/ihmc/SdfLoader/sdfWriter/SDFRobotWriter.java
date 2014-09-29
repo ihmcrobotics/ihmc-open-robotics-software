@@ -290,7 +290,7 @@ public abstract class SDFRobotWriter
       scsLink.getComOffset(com);
 
       RigidBodyTransform comOffset = TransformTools.createTranslationTransform(com);
-      comOffsetInWorld.mul(comOffset);
+      comOffsetInWorld.multiply(comOffset);
 
       sdfInertial.setPose(getPoseFromTransform3D(comOffsetInWorld));
 

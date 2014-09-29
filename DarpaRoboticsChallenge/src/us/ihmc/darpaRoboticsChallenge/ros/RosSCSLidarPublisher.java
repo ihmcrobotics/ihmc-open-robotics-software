@@ -96,7 +96,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
       RigidBodyTransform spindleRotationTransform = new RigidBodyTransform();
       spindleRotationTransform.set(spindleRotation);
       RigidBodyTransform transform = lidarBaseFrameTransform;
-      transform.mul(spindleRotationTransform);
+      transform.multiply(spindleRotationTransform);
       return transform;
    }
 }

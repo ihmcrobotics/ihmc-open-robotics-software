@@ -33,7 +33,7 @@ public class SDFModelVisual extends Graphics3DObject
       {
          
          RigidBodyTransform transformToModel = new RigidBodyTransform(modelTransform);
-         transformToModel.mul(link.getTransformFromModelReferenceFrame());
+         transformToModel.multiply(link.getTransformFromModelReferenceFrame());
          
          
          SDFGraphics3DObject sdfGraphics3DObject;

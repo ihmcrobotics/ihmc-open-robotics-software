@@ -72,7 +72,7 @@ public class RosCameraReceiver extends CameraDataReceiver
                   {
                      return;
                   }
-                  worldToCameraTransform.mul(rosTransformFromHeadBaseToCamera);
+                  worldToCameraTransform.multiply(rosTransformFromHeadBaseToCamera);
                }
                publishCameraWorldPoseForDebugging(worldToCameraTransform,timeStamp);
                updateLeftEyeImage(worldToCameraTransform, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW);

@@ -47,13 +47,13 @@ public class HandstepHelper
 
       RigidBodyTransform transformTwo = new RigidBodyTransform();
       transformTwo.set(rotationAxisAngle);
-      transformOne.mul(transformTwo);
+      transformOne.multiply(transformTwo);
 
       if (rotateZIntoX)
       {
          RigidBodyTransform transformThree = new RigidBodyTransform();
          transformThree.rotY(Math.PI/2.0);
-         transformOne.mul(transformThree);
+         transformOne.multiply(transformThree);
       }
       
       transformOne.setTranslation(new Vector3d(position));
