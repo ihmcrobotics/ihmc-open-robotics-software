@@ -22,11 +22,10 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final StateMachine<HighLevelState> stateMachine;
-   private final HighLevelState[] allHighLevelStateEnums = HighLevelState.values();
    private final HighLevelState initialBehavior;
    private final MomentumBasedController momentumBasedController;
 
-   private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", "", registry, HighLevelState.class, true);
+   private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry, HighLevelState.class, true);
 
    private final DesiredHighLevelStateProvider highLevelStateProvider;
 
@@ -107,7 +106,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public void addHighLevelBehavior(HighLevelBehavior highLevelBehavior, boolean transitionRequested)
    {
       // Enable transition between every existing state of the state machine
-      for (HighLevelState stateEnum : allHighLevelStateEnums)
+      for (HighLevelState stateEnum : HighLevelState.values)
       {
          State<HighLevelState> otherHighLevelState = stateMachine.getState(stateEnum);
          if (otherHighLevelState == null) continue;
