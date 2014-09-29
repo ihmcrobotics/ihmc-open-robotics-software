@@ -152,7 +152,7 @@ public class RosMainNode implements NodeMain
       {
          final RosServiceClient<? extends Message, ? extends Message> rosServiceClient = entry.getValue();
          
-         for(int i=0;!isShutdownInProgress;i++)
+         while(!isShutdownInProgress)
          {
                  try
                  {
@@ -162,14 +162,8 @@ public class RosMainNode implements NodeMain
                  }
                  catch (ServiceNotFoundException e)
                  {
-                    System.err.println(getClass().getSimpleName()+":Waiting for service "+ entry.getKey() + " (check spelling/service provider)... attempt "+i);
-                    ThreadTools.sleep(5000);
-                    
-                    if(i>10)
-                    {
-                       System.err.println(getClass().getSimpleName()+ ": waited 50 seconds, bailing out ...");
-                       throw new RuntimeException(e);
-                    }
+                    System.err.println(getClass().getSimpleName()+":Waiting for service "+ entry.getKey() + " (check spelling/service provider)...");
+                    ThreadTools.sleep(2000);
                  }
          }
       }

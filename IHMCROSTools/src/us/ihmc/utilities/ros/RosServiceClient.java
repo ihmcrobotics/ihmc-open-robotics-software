@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.node.ConnectedNode;
@@ -8,7 +9,6 @@ import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.utilities.ThreadTools;
 
-;
 
 public class RosServiceClient<T extends Message, S extends Message>
 {
@@ -53,58 +53,36 @@ public class RosServiceClient<T extends Message, S extends Message>
    }
    
 
-   public void call(T request, ServiceResponseListener<S> response)
-   {
-      final int DEFAULT_RETRY=20;
-      call(request, response, DEFAULT_RETRY);
-   }
-
    /**
     * @param request
     * @param response
     */
-   public void call(T request, ServiceResponseListener<S> response, int retry)
+   public void call(T request, ServiceResponseListener<S> response)
    {
       checkInitialized();
   
 
-      if(!client.isConnected())
+      if (!client.isConnected() || client == null)
       {
-                client.shutdown();      
-      
-              //locate URI
-              connectedNode.getLog().info("re-connecting to service " + attachedServiceName);
+         if (client != null)
+            client.shutdown();
 
-              for(int i=0;;i++)
-              {
-                 
-                 if(i>retry)
-                 {
-                    connectedNode.getLog().error("Tried for " + retry + " times ... bailing out");
-                    throw new RuntimeException("Tried for " + retry + " times... bailing out");
-                 }
-                 else
-                 {
-                    connectedNode.getLog().error("Attempt " + i +" to reconnect to service"  );
-                 }
-                 
-                 
-                 /** Approach 1, simpler but slower 
-                  * 
-                  */
-                      try
-                      {
-                         client = connectedNode.newServiceClient(attachedServiceName, getRequestType());
-                         break;
-                      }
-                      catch (ServiceNotFoundException e)
-                      {
-                         e.printStackTrace();
-                      }                      
+         //locate URI
+         System.err.println("re-connecting to service " + attachedServiceName);
 
-                 ThreadTools.sleep(3000); //wait for some socket to close due to timeout
-              }
+         try
+         {
+            client = connectedNode.newServiceClient(attachedServiceName, getRequestType());
+         }
+         catch (ServiceNotFoundException e)
+         {
+            System.err.println("rennection failed. Service not found");
+            throw new RosRuntimeException(e);
+         }
+         
+         System.err.println("service re-connected, making call");
       }
+
       client.call(request, response);
 
    }

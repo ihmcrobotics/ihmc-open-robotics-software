@@ -19,9 +19,9 @@ RobotSelfFilter::RobotSelfFilter(
 		const robot_model_loader::RobotModelLoader& model, double padding) :
 		robot_model_loader(model), padding(padding) {
 	shape_mask_.reset(new ShapeMask());
+	addAllLinksToShapeMask();
 	shape_mask_->setTransformCallback(
 			boost::bind(&RobotSelfFilter::getShapeTransform, this, _1, _2));
-	addAllLinksToShapeMask();
 }
 
 void RobotSelfFilter::addAllLinksToShapeMask() {
@@ -44,7 +44,9 @@ void RobotSelfFilter::addAllLinksToShapeMask() {
 
 			ShapeHandle h = shape_mask_->addShape(shapes[j], scale, padding);
 			if (h)
+			{
 				link_shape_handles_[links[i]].push_back(std::make_pair(h, j));
+			}
 		}
 	}
 }
@@ -61,11 +63,35 @@ bool RobotSelfFilter::getShapeTransform(ShapeHandle h,
 
 	return true;
 }
-;
+
+
+
+/*
+ * refer planning_scene_monitor::PlanningSceneMonitor::getShapeTransformCache
+ */
+bool RobotSelfFilter::updateShapeTransformCache(const std::string &target_frame, const ros::Time &target_time) {
+        boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
+        bool ret=true;
+        for (LinkShapeHandles::const_iterator it = link_shape_handles_.begin(); it != link_shape_handles_.end(); ++it) {
+                try {
+                        tf::StampedTransform tr;
+                        tfListener.lookupTransform(target_frame, it->first->getName(), target_time, tr);
+                        Eigen::Affine3d ttr;
+                        tf::transformTFToEigen(tr, ttr);
+                        for (std::size_t j = 0; j < it->second.size(); ++j)
+                        transformCache[it->second[j].first] =
+                        ttr * it->first->getCollisionOriginTransforms()[it->second[j].second];
+                } catch (tf::TransformException& ex) {
+                        ROS_ERROR_THROTTLE(1, "Transform error: %s", ex.what());
+                        ret=false;
+                }
+        }
+        return ret;
+}
 
 void RobotSelfFilter::filterPointClould(
 		const pcl::PointCloud<pcl::PointXYZI> & source_cloud,
-		pcl::PointCloud<pcl::PointXYZI>& filtered_cloud) {
+		pcl::PointCloud<pcl::PointXYZI>& filtered_cloud, pcl::PointCloud<pcl::PointXYZI>& removed_cloud) {
 
 	//update transform cache
 	std_msgs::Header header;
@@ -93,40 +119,11 @@ void RobotSelfFilter::filterPointClould(
 			mask_it != mask_.end(); mask_it++) {
 		if (*mask_it == ShapeMask::OUTSIDE)
 			filtered_cloud.push_back(*cloud_it);
+		else
+			removed_cloud.push_back(*cloud_it);
 		cloud_it++;
 	}
 
-	if (filtered_cloud.header.frame_id.empty())
-		filtered_cloud.header.frame_id = source_cloud.header.frame_id;
-
-	if (filtered_cloud.header.frame_id != source_cloud.header.frame_id)
-		ROS_ERROR(
-				"filterPointCloud: source_cloud/filtered_cloud frame_id mismatch");
-}
-;
-
-/*
- * refer planning_scene_monitor::PlanningSceneMonitor::getShapeTransformCache
- */
-bool RobotSelfFilter::updateShapeTransformCache(const std::string &target_frame,
-		const ros::Time &target_time) {
-	try {
-		boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
-		for (LinkShapeHandles::const_iterator it = link_shape_handles_.begin();
-				it != link_shape_handles_.end(); ++it) {
-			tf::StampedTransform tr;
-			tfListener.lookupTransform(target_frame, it->first->getName(),
-					target_time, tr);
-			Eigen::Affine3d ttr;
-			tf::transformTFToEigen(tr, ttr);
-			for (std::size_t j = 0; j < it->second.size(); ++j)
-				transformCache[it->second[j].first] =
-						ttr
-								* it->first->getCollisionOriginTransforms()[it->second[j].second];
-		}
-	} catch (tf::TransformException& ex) {
-		ROS_ERROR_THROTTLE(1, "Transform error: %s", ex.what());
-		return false;
-	}
-	return true;
+	filtered_cloud.header=source_cloud.header;
+	removed_cloud.header=source_cloud.header;
 }

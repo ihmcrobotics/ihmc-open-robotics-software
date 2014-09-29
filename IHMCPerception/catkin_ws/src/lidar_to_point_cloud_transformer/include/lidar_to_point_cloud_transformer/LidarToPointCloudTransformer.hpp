@@ -103,7 +103,8 @@ class LidarToPointCloudTransformer
   RobotSelfFilter selfFilter;
 
   //! Filtered Point Cloud
-  ros::Publisher filteredPointCloudPublisher_;
+  ros::Publisher filteredKeptPointCloudPublisher_;
+  ros::Publisher filteredRemovedPointCloudPublisher_;
 
   //! Assembled point cloud publisher.
   ros::Publisher assembledPointCloudPublisher_;

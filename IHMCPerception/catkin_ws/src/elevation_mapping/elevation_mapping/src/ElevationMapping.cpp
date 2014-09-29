@@ -172,6 +172,19 @@ void ElevationMapping::runFusionServiceThread()
   }
 }
 
+bool containRGBFiled(std::vector<pcl::PCLPointField>& field)
+{
+	int containRGB=false;
+	for(int i=0;i<field.size();i++)
+		if(field[i].name=="rgb")
+		{
+			containRGB=true;
+			break;
+		}
+	return containRGB;
+}
+
+
 void ElevationMapping::pointCloudCallback(
     const sensor_msgs::PointCloud2& rawPointCloud)
 {
@@ -183,8 +196,31 @@ void ElevationMapping::pointCloudCallback(
   // TODO Double check with http://wiki.ros.org/hydro/Migration
   pcl::PCLPointCloud2 pcl_pc;
   pcl_conversions::toPCL(rawPointCloud, pcl_pc);
+
   PointCloud<PointXYZRGB>::Ptr pointCloud(new PointCloud<PointXYZRGB>);
-  pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
+  if(containRGBFiled(pcl_pc.fields))
+  {
+          pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
+  }
+  else
+  {
+	  PointCloud<PointXYZI>::Ptr pointCloudXYZI(new PointCloud<PointXYZI>);
+      pcl::fromPCLPointCloud2(pcl_pc, *pointCloudXYZI);
+      pointCloud->header   = pointCloudXYZI->header;
+      pointCloud->width    = pointCloudXYZI->width;
+      pointCloud->height   = pointCloudXYZI->height;
+      pointCloud->is_dense = (pointCloudXYZI->is_dense == 1);
+      for(PointCloud<PointXYZI>::iterator it=pointCloudXYZI->begin(); it!=pointCloudXYZI->end(); it++)
+      {
+    	  PointXYZRGB pt;
+    	  pt.x = it->x;
+    	  pt.y = it->y;
+    	  pt.z = it->z;
+    	  pt.r = pt.g = pt.b = std::min<int>(255,(int)255*it->intensity);
+    	  pointCloud->push_back(pt);
+      }
+  }
+
   Time time;
   time.fromNSec(1000 * pointCloud->header.stamp);
 
