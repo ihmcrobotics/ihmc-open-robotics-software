@@ -411,7 +411,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
          
          seNonProcessedQuat4d.set(seNonProcessedPelvisQuaternionX.getDoubleValue(), seNonProcessedPelvisQuaternionY.getDoubleValue(),
                seNonProcessedPelvisQuaternionZ.getDoubleValue(), seNonProcessedPelvisQuaternionS.getDoubleValue());
-         seNonProcessedPelvisPose.set(seNonProcessedQuat4d);
+         seNonProcessedPelvisPose.setRotationAndZeroTranslation(seNonProcessedQuat4d);
          
          seNonProcessedTranslation.setX(seNonProcessedPelvisPositionX.getDoubleValue());
          seNonProcessedTranslation.setY(seNonProcessedPelvisPositionY.getDoubleValue());

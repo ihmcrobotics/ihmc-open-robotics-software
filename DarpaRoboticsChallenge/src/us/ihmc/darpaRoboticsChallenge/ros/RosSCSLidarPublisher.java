@@ -94,7 +94,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
       }
       AxisAngle4d spindleRotation = new AxisAngle4d(spindleAxis.getVector(), angle);
       RigidBodyTransform spindleRotationTransform = new RigidBodyTransform();
-      spindleRotationTransform.set(spindleRotation);
+      spindleRotationTransform.setRotationAndZeroTranslation(spindleRotation);
       RigidBodyTransform transform = lidarBaseFrameTransform;
       transform.multiply(spindleRotationTransform);
       return transform;

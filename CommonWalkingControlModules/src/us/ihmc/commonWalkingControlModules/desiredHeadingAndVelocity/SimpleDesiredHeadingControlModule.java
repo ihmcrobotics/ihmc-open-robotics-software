@@ -143,7 +143,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
          Matrix3d rotation = new Matrix3d();
          rotation.rotZ(desiredHeading.getDoubleValue());
 
-         transformToParent.set(rotation);
+         transformToParent.setRotationAndZeroTranslation(rotation);
       }
    }
 }

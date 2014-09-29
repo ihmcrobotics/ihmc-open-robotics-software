@@ -29,7 +29,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          transform3D.setEuler(new Vector3d(roll, pitch, yaw));
 
          Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
-         transform3D.set(translation);
+         transform3D.setTranslationAndIdentityRotation(translation);
 
          objectTransforms.put(VehicleObject.ORIGIN, transform3D);
       }
@@ -63,7 +63,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          }
 
          RigidBodyTransform transform3D = new RigidBodyTransform();
-         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
+         transform3D.multiply(transform3DfromWorldToParent, transform3DfromParentToChild);
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
@@ -105,7 +105,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          }
 
          RigidBodyTransform transform3D = new RigidBodyTransform();
-         transform3D.mul(transform3DfromWorldToParent, transform3DfromParentToChild);
+         transform3D.multiply(transform3DfromWorldToParent, transform3DfromParentToChild);
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();

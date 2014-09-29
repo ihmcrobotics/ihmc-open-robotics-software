@@ -82,7 +82,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       Matrix3d r0 = new Matrix3d();
       RotationFunctions.setYawPitchRoll(r0, 0.0, Math.PI / 2.0, 0.0);
-      pelvisBackContactPointTransform.set(r0);
+      pelvisBackContactPointTransform.setRotationAndZeroTranslation(r0);
 
       Vector3d t1 = new Vector3d(-pelvisBoxSizeX / 2.0, 0.0, 0.0);
       t1.add(pelvisBoxOffset);
@@ -105,7 +105,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       Matrix3d r1 = new Matrix3d();
       RotationFunctions.setYawPitchRoll(r1, 0.0, Math.PI / 2.0, 0.0);
-      chestBackContactPointTransform.set(r1);
+      chestBackContactPointTransform.setRotationAndZeroTranslation(r1);
 
       Vector3d t2 = new Vector3d(-chestBoxSizeX / 2.0, 0.0, 0.0);
       t2.add(chestBoxOffset);

@@ -36,7 +36,7 @@ public class ViconReferenceFrame extends ReferenceFrame
 
       setDataValid(pose.dataValid);
       bodyToWorldQuaternion.set(pose.qx, pose.qy, pose.qz, pose.qw);
-      bodyToWorldTransform.set(bodyToWorldQuaternion);
+      bodyToWorldTransform.setRotationAndZeroTranslation(bodyToWorldQuaternion);
       bodyToWorldTranslation.set(pose.xPosition, pose.yPosition, pose.zPosition);
       bodyToWorldTransform.setTranslation(bodyToWorldTranslation);
       transformToParent.set(bodyToWorldTransform);

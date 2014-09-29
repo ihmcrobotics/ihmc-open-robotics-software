@@ -181,17 +181,17 @@ public class SDFJointHolder
       RigidBodyTransform modelToParentJoint = new RigidBodyTransform();
       RigidBodyTransform modelToChildJoint = new RigidBodyTransform();
 
-      modelToParentJoint.mul(modelToParentLink, parentLinkToParentJoint);
+      modelToParentJoint.multiply(modelToParentLink, parentLinkToParentJoint);
       
       modelToChildLink.get(linkRotation);
       
-      modelToChildJoint.mul(modelToChildLink, transformFromChildLink);
+      modelToChildJoint.multiply(modelToChildLink, transformFromChildLink);
 
       RigidBodyTransform parentJointToModel = new RigidBodyTransform();
       parentJointToModel.invert(modelToParentJoint);
 
       RigidBodyTransform parentJointToChildJoint = new RigidBodyTransform();
-      parentJointToChildJoint.mul(parentJointToModel, modelToChildJoint);
+      parentJointToChildJoint.multiply(parentJointToModel, modelToChildJoint);
 
       transformToParentJoint = parentJointToChildJoint;
       

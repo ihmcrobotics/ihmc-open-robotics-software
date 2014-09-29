@@ -126,7 +126,7 @@ public class DrivingFootControlModule
 //      toePoint = getLeftFrontToePoint(contactablePlaneFoot);
       String toePointName = foot.getName() + "ToePoint";
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.set(toePoint.getVectorCopy());
+      transform.setTranslationAndIdentityRotation(toePoint.getVectorCopy());
       toePointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(toePointName, toePoint.getReferenceFrame(), transform);
       this.drivingReferenceFrames = drivingReferenceFrames;
       toePointPositionController = new EuclideanPositionController(toePointName, toePointFrame, dt, registry);

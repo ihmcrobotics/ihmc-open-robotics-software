@@ -714,7 +714,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_factor / 4.0);
 
-      t3d.set(rotAxisAngle4d);
+      t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
       t3d.transform(v3d);
 
       if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
@@ -769,7 +769,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_camera_factor / 4.0);
 
-      t3d.set(rotAxisAngle4d);
+      t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
       t3d.transform(v3d);
 
       if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
@@ -1202,7 +1202,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       rotationMatrix.setColumn(1, yAxis);
       rotationMatrix.setColumn(2, zAxis);
 
-      currXform.set(rotationMatrix);
+      currXform.setRotationAndZeroTranslation(rotationMatrix);
       currXform.setTranslation(positionOffset);
 
    }

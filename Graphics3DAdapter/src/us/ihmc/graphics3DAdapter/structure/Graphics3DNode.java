@@ -87,7 +87,7 @@ public class Graphics3DNode
    public void translate(double x, double y, double z)
    {
       RigidBodyTransform translator = new RigidBodyTransform();
-      translator.set(new Vector3d(x, y, z));
+      translator.setTranslationAndIdentityRotation(new Vector3d(x, y, z));
 
       transform.multiply(translator);
    }
@@ -99,7 +99,7 @@ public class Graphics3DNode
    
    public void translateTo(Vector3d translation)
    {
-      transform.set(translation);
+      transform.setTranslationAndIdentityRotation(translation);
    }
 
    public void rotate(double angle, Axis axis)

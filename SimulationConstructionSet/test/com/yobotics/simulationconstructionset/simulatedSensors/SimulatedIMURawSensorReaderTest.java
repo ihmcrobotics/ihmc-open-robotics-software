@@ -108,9 +108,9 @@ public class SimulatedIMURawSensorReaderTest
       randomBodyAxisAngle.set(2.0*(Math.random()-0.5), 2.0*(Math.random()-0.5), 2.0*(Math.random()-0.5), Math.random()*2.0*Math.PI);
       //randomBodyAxisAngle.set(0.0, 0.0, 0.0, 0.0); // for debugging
       
-      randomTransformBodyToWorld.set(randomBodyAxisAngle);
+      randomTransformBodyToWorld.setRotationAndZeroTranslation(randomBodyAxisAngle);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.set(randomBodyAxisAngle);
+      transform.setRotationAndZeroTranslation(randomBodyAxisAngle);
    }
    
    private void generateAppliedVelocity()
@@ -390,7 +390,7 @@ public class SimulatedIMURawSensorReaderTest
       {
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
          RigidBodyTransform transformToParent = new RigidBodyTransform();
-         transformToParent.set(offset);
+         transformToParent.setTranslationAndIdentityRotation(offset);
          ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
          return beforeJointFrame;
       }

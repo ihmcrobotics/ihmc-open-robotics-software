@@ -96,7 +96,7 @@ public class FootstepDataTansformerTest
    {
       Point3d startPoint = new Point3d(2.0, 6.0, 5.0);
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.set(new Vector3d(1.0, 2.0, 3.0));
+      transform3D.setTranslationAndIdentityRotation(new Vector3d(1.0, 2.0, 3.0));
 
       Point3d endPoint = new Point3d();
       transform3D.transform(startPoint, endPoint);

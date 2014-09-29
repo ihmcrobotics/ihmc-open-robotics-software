@@ -213,7 +213,7 @@ public abstract class SCSCollisionDetectorTest
    private RigidBodyTransform translate(double x, double y, double z)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      ret.set(new Vector3d(x, y, z));
+      ret.setTranslationAndIdentityRotation(new Vector3d(x, y, z));
 
       return ret;
    }

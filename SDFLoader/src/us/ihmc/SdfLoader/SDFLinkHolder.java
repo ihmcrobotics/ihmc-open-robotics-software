@@ -98,7 +98,7 @@ public class SDFLinkHolder
       RigidBodyTransform modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame;    // H_4^5
       
       RigidBodyTransform jointFrameToInertialFrame = new RigidBodyTransform();
-      jointFrameToInertialFrame.mul(jointFrameToModelFrame, modelFrameToInertialFrame);
+      jointFrameToInertialFrame.multiply(jointFrameToModelFrame, modelFrameToInertialFrame);
       
       Vector3d CoMOffset = new Vector3d();
       Matrix3d inertialFrameRotation = new Matrix3d();
@@ -114,7 +114,7 @@ public class SDFLinkHolder
 
          inertia.set(inertialFrameRotation);
 //         inertia.set(InertiaTools.rotate(inertialFrameRotation, inertia));
-         inertialFrameWithRespectToLinkFrame.set(MatrixTools.IDENTITY);
+         inertialFrameWithRespectToLinkFrame.setRotationAndZeroTranslation(MatrixTools.IDENTITY);
       }
 
       this.CoMOffset.set(CoMOffset);
