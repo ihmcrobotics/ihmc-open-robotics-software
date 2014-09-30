@@ -39,7 +39,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldCommunicator, RobotPoseBuffer robotPoseBuffer,
                                           DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
    {
-      new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0), scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
+      new SCSCameraDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
 
       new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
            ppsTimestampOffsetProvider, lidarDataFilter);
@@ -64,7 +64,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       DRCRobotCameraParameters cameraParamaters = sensorInformation.getCameraParameters(0);
 
-      new RosCameraReceiver(cameraParamaters, robotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager, ppsTimestampOffsetProvider,null, sensorURI);
+      new RosCameraReceiver(cameraParamaters, robotPoseBuffer, rosMainNode, networkingManager, ppsTimestampOffsetProvider,null, sensorURI);
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(),null);
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
