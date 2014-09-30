@@ -1,13 +1,11 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -33,6 +31,7 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.yobotics.simulationconstructionset.CameraMount;
 import com.yobotics.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
@@ -459,11 +458,12 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
             double clipNear = Double.parseDouble(camera.getClip().getNear());
             double clipFar = Double.parseDouble(camera.getClip().getFar());
-            CameraMount mount = new CameraMount(sensor.getName() + "_" + camera.getName(), linkToCamera, fieldOfView, clipNear, clipFar, this);
+            String cameraName = sensor.getName() + "_" + camera.getName();
+            CameraMount mount = new CameraMount(cameraName, linkToCamera, fieldOfView, clipNear, clipFar, this);
             scsJoint.addCameraMount(mount);
             
             SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
-            this.cameras.put(sensor.getName(), sdfCamera);
+            this.cameras.put(cameraName, sdfCamera);
          }
       }
       else

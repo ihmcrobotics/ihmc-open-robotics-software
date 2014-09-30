@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -17,8 +16,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
-import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosImageSubscriber;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosPoseStampedPublisher;
@@ -32,11 +31,11 @@ public class RosCameraReceiver extends CameraDataReceiver
    private Vector3d position= new Vector3d();
    private Quat4d orientation = new Quat4d();
 
-   public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
+   public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RobotPoseBuffer robotPoseBuffer,
          final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager,
          final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger, URI sensorURI)
    {
-      super(robotPoseBuffer, videoSettings, networkingManager, ppsTimestampOffsetProvider);
+      super(robotPoseBuffer, networkingManager, ppsTimestampOffsetProvider);
 
       this.cameraParameters = cameraParameters;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
@@ -75,7 +74,7 @@ public class RosCameraReceiver extends CameraDataReceiver
                   worldToCameraTransform.multiply(rosTransformFromHeadBaseToCamera);
                }
                publishCameraWorldPoseForDebugging(worldToCameraTransform,timeStamp);
-               updateLeftEyeImage(worldToCameraTransform, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW);
+               updateLeftEyeImage(worldToCameraTransform, image, timeStamp, DRCSensorParameters.DUMMY_FIELD_OF_VIEW);
             }
          }
       };

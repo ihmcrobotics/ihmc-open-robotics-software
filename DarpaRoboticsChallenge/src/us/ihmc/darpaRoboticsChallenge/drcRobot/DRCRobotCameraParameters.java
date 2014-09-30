@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
-import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCRobotCameraParameters implements DRCRobotSensorParameters
 {
@@ -11,15 +10,14 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    private final String rosBaseFrameName;
    private final String sdfPoseFrameName;
    private final int cameraId;
-   private final VideoSettingsH264LowLatency videoSettings;
 
-   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, VideoSettingsH264LowLatency videoSettings, int cameraId)
+   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, int cameraId)
    {
-      this(cameraName,rosTopic,null,poseFrameName,null,null,videoSettings,cameraId);
+      this(cameraName,rosTopic,null,poseFrameName,null,null,cameraId);
    }
 
    public DRCRobotCameraParameters(String cameraName, String rosCameraTopic, String rosInfoTopic, String handOffFrameName, String rosBaseFrameName,
-         String rosEndFrameName, VideoSettingsH264LowLatency videoSettings, int cameraId)
+         String rosEndFrameName, int cameraId)
    {
       this.rosCompressedTopicName = rosCameraTopic;
       this.rosCameraInfoTopicName = rosInfoTopic;
@@ -27,15 +25,9 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
       this.sdfPoseFrameName = handOffFrameName;
       this.rosBaseFrameName = rosBaseFrameName;
       this.rosEndFrameName = rosEndFrameName;
-      this.videoSettings = videoSettings;
       this.cameraId = cameraId;
    }
-
-   public VideoSettingsH264LowLatency getVideoSettings()
-   {
-      return videoSettings;
-   }
-
+   
    public String getRosTopic()
    {
       return rosCompressedTopicName;

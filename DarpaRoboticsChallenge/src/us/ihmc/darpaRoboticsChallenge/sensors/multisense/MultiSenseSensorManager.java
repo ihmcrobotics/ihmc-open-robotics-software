@@ -105,7 +105,7 @@ public class MultiSenseSensorManager
    private void registerCameraReceivers()
    {
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager,
+      cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, rosMainNode, networkingManager,
             ppsTimestampOffsetProvider, logger, sensorURI);
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(), logger);

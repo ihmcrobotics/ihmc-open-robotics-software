@@ -9,14 +9,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.packets.sensing.VideoPacket;
+import us.ihmc.communication.producers.CompressedVideoDataServer;
+import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
-import us.ihmc.graphics3DAdapter.camera.CompressedVideoHandler;
-import us.ihmc.graphics3DAdapter.camera.VideoCompressionKey;
-import us.ihmc.graphics3DAdapter.camera.VideoSettings;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class CameraDataReceiver
@@ -32,14 +31,14 @@ public abstract class CameraDataReceiver
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RigidBodyTransform cameraPose;
 
-   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager,
+   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, final DRCNetworkProcessorNetworkingManager networkingManager,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.robotPoseBuffer = robotPoseBuffer;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.cameraPose = new RigidBodyTransform();
 
-      compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, new VideoPacketHandler(networkingManager));
+      compressedVideoDataServer = new CompressedVideoDataServer(new VideoPacketHandler(networkingManager));
       networkingManager.getControllerCommandHandler().setVideoCommandListener(compressedVideoDataServer);
    }
    
@@ -94,11 +93,10 @@ public abstract class CameraDataReceiver
          this.networkingManager = networkingManager;
       }
 
-      public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView,
-            VideoCompressionKey videoCompressionKey)
+      public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView)
       {
          networkingManager.getControllerStateHandler().sendSerializableObject(
-               new VideoPacket(timeStamp, data, position, orientation, fieldOfView, videoCompressionKey));
+               new VideoPacket(timeStamp, data, position, orientation, fieldOfView));
       }
 
       public void addNetStateListener(CompressedVideoDataServer compressedVideoDataServer)

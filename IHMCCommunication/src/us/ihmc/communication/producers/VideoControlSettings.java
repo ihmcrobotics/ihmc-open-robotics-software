@@ -1,4 +1,5 @@
-package us.ihmc.graphics3DAdapter.camera;
+package us.ihmc.communication.producers;
+
 
 
 
@@ -6,7 +7,10 @@ public interface VideoControlSettings
 {
    public boolean isSendVideo();
    public boolean crop();
-   public VideoCompressionKey getVideoQualitySetting();
+   
+   
+   public int getBandwidthInKbit();
+   public int getHorizontalResolution();
    public int getFps();
    
    public int cropX();
