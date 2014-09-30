@@ -318,7 +318,6 @@ public class FootControlModule
 
    public void doControl()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.update();
       if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
          requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
@@ -359,6 +358,11 @@ public class FootControlModule
       }
 
       return contactPointStates;
+   }
+
+   public void updateLegSingularityModule()
+   {
+      legSingularityAndKneeCollapseAvoidanceControlModule.update();
    }
 
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,

@@ -223,6 +223,11 @@ public class FeetManager
       else
          leadingLegFirst = RobotSide.values;
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footControlModules.get(robotSide).updateLegSingularityModule();
+      }
+
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
       for (RobotSide robotSide : RobotSide.values)
       {
