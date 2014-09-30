@@ -113,8 +113,11 @@ public class ChestOrientationManager
          if (yoControlledAngularAcceleration != null)
          {
             SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
-            spatialAcceleration.packAngularPart(controlledAngularAcceleration);
-            yoControlledAngularAcceleration.set(controlledAngularAcceleration);
+            if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
+            {
+               spatialAcceleration.packAngularPart(controlledAngularAcceleration);
+               yoControlledAngularAcceleration.set(controlledAngularAcceleration);
+            }
          }
 
          momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
