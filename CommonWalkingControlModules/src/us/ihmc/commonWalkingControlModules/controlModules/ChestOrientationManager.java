@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -10,9 +11,11 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
@@ -35,7 +38,8 @@ public class ChestOrientationManager
    private final ReferenceFrame chestOrientationExpressedInFrame;
 
    private final BooleanYoVariable isTrackingOrientation;
-
+   private final YoFrameVector yoControlledAngularAcceleration;
+   
    public ChestOrientationManager(MomentumBasedController momentumBasedController, ChestOrientationControlModule chestOrientationControlModule,
          ChestOrientationProvider chestOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
@@ -61,6 +65,10 @@ public class ChestOrientationManager
                trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
          orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
          orientationTrajectoryGenerator.initialize();
+         
+         ReferenceFrame chestCoMFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
+         yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestCoMFrame, registry);
+
          parentRegistry.addChild(registry);
       }
       else
@@ -73,13 +81,17 @@ public class ChestOrientationManager
          initialOrientationProvider = null;
          finalOrientationProvider = null;
          orientationTrajectoryGenerator = null;
+         yoControlledAngularAcceleration = null;
       }
+      
    }
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
 
+   private final FrameVector controlledAngularAcceleration = new FrameVector();
+   
    public void compute()
    {
       checkForNewDesiredOrientationInformation();
@@ -96,8 +108,16 @@ public class ChestOrientationManager
       if (jacobianId >= 0)
       {
          chestOrientationControlModule.compute();
+         TaskspaceConstraintData taskspaceConstraintData = chestOrientationControlModule.getTaskspaceConstraintData();
+         
+         if (yoControlledAngularAcceleration != null)
+         {
+            SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
+            spatialAcceleration.packAngularPart(controlledAngularAcceleration);
+            yoControlledAngularAcceleration.set(controlledAngularAcceleration);
+         }
 
-         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, chestOrientationControlModule.getTaskspaceConstraintData());
+         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       }
    }
 
