@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.paramaters;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -11,10 +10,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
-import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
-import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
@@ -123,10 +121,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation()
    {
-      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
-      cameraParamaters[0] = new DRCRobotCameraParameters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
-      cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
-      cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParameters(forheadCameraName,forheadCameraTopic,headLinkName,forheadCameraId);
+      cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
+      cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
       pointCloudParamaters[IBEO_ID] = new DRCRobotPointCloudParameters(ibeoSensorName,ibeoTopic,headLinkName,IBEO_ID);
       }
    
