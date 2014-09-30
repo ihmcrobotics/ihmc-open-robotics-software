@@ -52,7 +52,7 @@
       <z>-0.01756957522605161</z>
       <w>0.919358156701898</w>
     </orientation>
-    <trajectoryTime>4.0</trajectoryTime>
+    <trajectoryTime>1.0</trajectoryTime>
     <jointAngles>
       <double>0.3500886920821116</double>
       <double>-1.2944129032258065</double>
@@ -79,7 +79,7 @@
       <z>0.022952384369936258</z>
       <w>0.9235808239986854</w>
     </orientation>
-    <trajectoryTime>4.0</trajectoryTime>
+    <trajectoryTime>1.0</trajectoryTime>
     <jointAngles>
       <double>0.3593015874877812</double>
       <double>1.3773290322580645</double>
@@ -106,7 +106,7 @@
       <z>-0.060215228644631816</z>
       <w>0.9902337589399774</w>
     </orientation>
-    <trajectoryTime>10.0</trajectoryTime>
+    <trajectoryTime>1.0</trajectoryTime>
     <jointAngles>
       <double>0.45242126075325095</double>
       <double>-1.0140531934241634</double>
@@ -133,7 +133,7 @@
       <z>0.06671065168525368</z>
       <w>0.9917315097213402</w>
     </orientation>
-    <trajectoryTime>10.0</trajectoryTime>
+    <trajectoryTime>1.0</trajectoryTime>
     <jointAngles>
       <double>0.462363219330099</double>
       <double>1.18102607123172</double>
