@@ -2,6 +2,8 @@ package us.ihmc.robotDataCommunication.logger;
 
 import gnu.trove.list.array.TLongArrayList;
 
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,23 +11,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.HashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
+import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
+import us.ihmc.codecs.yuv.YUVPicture;
 import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
-
-import com.xuggle.mediatool.IMediaReader;
-import com.xuggle.mediatool.IMediaViewer;
-import com.xuggle.mediatool.IMediaViewer.Mode;
-import com.xuggle.mediatool.ToolFactory;
-import com.xuggle.xuggler.ICodec.Type;
-import com.xuggle.xuggler.IError;
-import com.xuggle.xuggler.IRational;
-import com.xuggle.xuggler.IStream;
 
 public class VideoDataPlayer
 {
@@ -37,13 +33,9 @@ public class VideoDataPlayer
    private long[] videoTimestamps;
    
    private long bmdTimeBaseNum;
-   private long bmdTimeBaseDen;
-   private long ffTimeBaseNum;
-   private long ffTimeBaseDen;
+   private long bmdTimeBaseDen;   
    
-   
-   private final int videoStream;
-   private final IMediaReader reader;
+   private final MP4VideoDemuxer demuxer;
    private final HideableMediaFrame viewer;
    
    
@@ -68,35 +60,16 @@ public class VideoDataPlayer
 
       parseTimestampData(timestampFile);
       
-      reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
-      viewer = new HideableMediaFrame();
-      reader.addListener(viewer.getViewer());
-      reader.open();
-      int videoStream = -1;
-      for(int i = 0; i < reader.getContainer().getNumStreams(); i++)
+      try
       {
-         IStream stream = reader.getContainer().getStream(i);
-         if(stream.getStreamCoder().getCodecType() == Type.CODEC_TYPE_VIDEO)
-         {
-            videoStream = i;
-            break;
-         }
+         demuxer = new MP4VideoDemuxer(videoFile);
       }
-      if(videoStream == -1)
+      catch (IOException e)
       {
-         throw new RuntimeException("Cannot find video stream in " + videoFile.getAbsolutePath());
+         throw new RuntimeException(e);
       }
-      this.videoStream = videoStream;
       
-      
-      IRational timeBase = reader.getContainer().getStream(videoStream).getTimeBase();
-      ffTimeBaseNum = timeBase.getNumerator();
-      ffTimeBaseDen = timeBase.getDenominator();
-      
-      
-      
-      
-      
+      viewer = new HideableMediaFrame(name, demuxer.getWidth(), demuxer.getHeight());
    }
    
 
@@ -118,13 +91,17 @@ public class VideoDataPlayer
          upcomingRobottimestamp = currentlyShowingRobottimestamp;
       }
       
-      int retval = reader.getContainer().seekKeyFrame(videoStream, videoTimestamp, 0);
-      
-      if(retval != 0)
+      try
       {
-         System.err.println(IError.make(retval).getDescription());
+         demuxer.seekToPTS(videoTimestamp);
+         viewer.update(demuxer.getNextFrame());
       }
-      reader.readPacket();
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      
    }
 
    public void setVisible(boolean visible)
@@ -158,7 +135,7 @@ public class VideoDataPlayer
       
       if(hasTimebase)
       {
-         videoTimestamp = (videoTimestamp * bmdTimeBaseNum * ffTimeBaseDen) / (bmdTimeBaseDen * ffTimeBaseNum);
+         videoTimestamp = (videoTimestamp * bmdTimeBaseNum * demuxer.getTimescale()) / (bmdTimeBaseDen);
       }
       
       return videoTimestamp;
@@ -243,7 +220,7 @@ public class VideoDataPlayer
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
       long endVideoTimestamp = getVideoTimestamp(endTimestamp);
       
-      double timebase = reader.getContainer().getStream(videoStream).getTimeBase().getDouble();
+      double timebase = 1.0 / ((double)demuxer.getTimescale());
       
       double startTime = startVideoTimestamp * timebase;
       double endTime = endVideoTimestamp * timebase;
@@ -309,7 +286,7 @@ public class VideoDataPlayer
       
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
       long endVideoTimestamp = getVideoTimestamp(endTimestamp);
-      double timebase = reader.getContainer().getStream(videoStream).getTimeBase().getDouble();
+      double timebase = 1.0 / ((double)demuxer.getTimescale());
       
       double startTime = startVideoTimestamp * timebase;
       double endTime = endVideoTimestamp * timebase;
@@ -336,42 +313,31 @@ public class VideoDataPlayer
       }
    }
    
-   private class HideableMediaFrame 
+   private class HideableMediaFrame extends JFrame
    {
-      private final IMediaViewer mediaViewer;
-      private final HashMap<Integer, JFrame> mFrames;
-      
-      @SuppressWarnings("unchecked")
-      public HideableMediaFrame()
+      private static final long serialVersionUID = -3494797002318746347L;
+      final JLabel label = new JLabel();
+      public HideableMediaFrame(String name, int width, int height)
       {
-         mediaViewer = ToolFactory.makeViewer(Mode.FAST_VIDEO_ONLY, false);
-         Field frames;
-         try
-         {
-            frames = mediaViewer.getClass().getDeclaredField("mFrames");
-            frames.setAccessible(true);
-            mFrames = (HashMap<Integer, JFrame>) frames.get(mediaViewer);
-         }
-         catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
-         {
-            throw new RuntimeException(e);
-         }
-         
+         super(name);
+         label.setPreferredSize(new Dimension(width, height));
+         getContentPane().add(label);
+         pack();
       }
       
-      public IMediaViewer getViewer()
+      public void update(YUVPicture nextFrame)
       {
-         return mediaViewer;
-      }
-      
-      public void setVisible(boolean visible)
-      {
-         for(JFrame frame : mFrames.values())
+         final BufferedImage img = nextFrame.getImage(); 
+         SwingUtilities.invokeLater(new Runnable()
          {
-            frame.setVisible(visible);
-         }
-      }
-      
+            @Override
+            public void run()
+            {
+               ImageIcon icon = new ImageIcon(img);
+               label.setIcon(icon);
+            }
+         });
+      }      
    }
 
    public String getName()
