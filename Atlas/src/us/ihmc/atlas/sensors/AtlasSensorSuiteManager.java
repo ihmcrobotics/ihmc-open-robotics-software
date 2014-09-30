@@ -7,7 +7,12 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.*;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
@@ -54,8 +59,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
       depthDataProcessor.setTestbed(networkingManager.getControllerCommandHandler().getTestbed());
 
-      DRCRobotCameraParameters leftEyeCameraParams = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
-      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, leftEyeCameraParams, scsCommunicator, networkingManager,
+      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager,
             ppsTimestampOffsetProvider);
 
 //      if (sensorInformation.getPointCloudParameters().length > 0)
@@ -149,7 +153,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             ppsTimestampOffsetProvider, sensorURI, multisenseLeftEyeCameraParameters,
             multisenseLidarParameters, multisenseStereoParameters);
 
-      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0).getVideoSettings(), rosMainNode, networkingManager,
+      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
             
 //      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);

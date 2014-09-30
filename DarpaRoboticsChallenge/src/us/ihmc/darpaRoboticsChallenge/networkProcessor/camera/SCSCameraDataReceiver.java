@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
@@ -22,10 +21,10 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 {
    SCSCameraInfoReceiver scsCameraInfoReceiver;
 
-   public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, DRCRobotCameraParameters drcRobotCameraParamaters, ObjectCommunicator scsCommunicator,
+   public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, ObjectCommunicator scsCommunicator,
                                 DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
-      super(robotPoseBuffer, drcRobotCameraParamaters.getVideoSettings(), networkingManager, ppsTimestampOffsetProvider);
+      super(robotPoseBuffer, networkingManager, ppsTimestampOffsetProvider);
       scsCommunicator.attachListener(LocalVideoPacket.class, this);
 
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
