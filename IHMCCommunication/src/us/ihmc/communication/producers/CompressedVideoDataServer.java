@@ -105,7 +105,7 @@ public class CompressedVideoDataServer implements NetStateListener, VideoDataSer
       }
             
       int desiredEvenHorizontalResolution = (desiredHorizontalResolution >> 1) << 1;
-      int desiredVerticalResolution = (bufferedImage.getWidth() * desiredEvenHorizontalResolution) / bufferedImage.getHeight();
+      int desiredVerticalResolution = (bufferedImage.getHeight() * desiredEvenHorizontalResolution) / bufferedImage.getWidth();
       int desiredEvenVerticalResolution = (desiredVerticalResolution >> 1) << 1;
       
       
