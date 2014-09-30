@@ -110,6 +110,46 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    }
 
    @Test
+   public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      DoubleYoVariable offsetHeightAboveGround = (DoubleYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
+      offsetHeightAboveGround.set(0.15);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      offsetHeightAboveGround.set(0.30);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      offsetHeightAboveGround.set(0.50);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+
+      ThreadTools.sleep(2000);
+
+      assertTrue(success);
+
+      Point3d center = new Point3d(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

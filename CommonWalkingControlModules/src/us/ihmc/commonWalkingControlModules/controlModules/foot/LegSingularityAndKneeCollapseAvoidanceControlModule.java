@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
@@ -18,17 +17,18 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -346,22 +346,17 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             yoCorrectedDesiredFootLinearVelocityGraphic.hideGraphicObject();
          }
       }
-   }
-   
-   public void setCheckVelocityForSwingSingularityAvoidance(boolean value)
-   {
-      checkVelocityForSwingSingularityAvoidance.set(value);
-   }
 
-   public double updateAndGetLegLength()
-   {
       anklePosition.setToZero(endEffectorFrame);
       anklePosition.changeFrame(worldFrame);
       yoCurrentFootPosition.set(anklePosition);
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
-      
-      return currentLegLength.getDoubleValue();
+   }
+
+   public void setCheckVelocityForSwingSingularityAvoidance(boolean value)
+   {
+      checkVelocityForSwingSingularityAvoidance.set(value);
    }
 
    public void correctSwingFootTrajectoryForSingularityAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect, FrameVector desiredFootLinearAccelerationToCorrect)
@@ -583,7 +578,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
       comHeightDataToCorrect.setComHeight(desiredCenterOfMassHeightPoint.getReferenceFrame(), heightCorrectedFilteredForSingularityAvoidance.getDoubleValue());
 
-      if (equivalentDesiredHipVelocity.getZ() > 0.0) // Check if desired velocity results in leg extension
+//      if (equivalentDesiredHipVelocity.getZ() > 0.0) // Check if desired velocity results in leg extension
       {
          equivalentDesiredHipVelocity.setZ((1.0 - alphaSupportSingularityAvoidance.getDoubleValue()) * equivalentDesiredHipVelocity.getZ());
          equivalentDesiredHipVelocity.changeFrame(pelvisZUpFrame);
@@ -594,7 +589,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForSingularityAvoidance.getDoubleValue());
       }
 
-      if (equivalentDesiredHipPitchAcceleration.getZ() > 0.0) // Check if desired acceleration results in leg extension
+//      if (equivalentDesiredHipPitchAcceleration.getZ() > 0.0) // Check if desired acceleration results in leg extension
       {
          equivalentDesiredHipPitchAcceleration.setZ((1.0 - alphaSupportSingularityAvoidance.getDoubleValue()) * equivalentDesiredHipPitchAcceleration.getZ());
          equivalentDesiredHipPitchAcceleration.changeFrame(worldFrame);
