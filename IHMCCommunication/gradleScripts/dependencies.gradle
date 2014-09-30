@@ -5,7 +5,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.25.+'
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.1'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.2'
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCYoUtilities')
