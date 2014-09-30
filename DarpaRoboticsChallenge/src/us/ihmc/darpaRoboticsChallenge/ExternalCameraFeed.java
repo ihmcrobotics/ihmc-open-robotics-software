@@ -33,7 +33,6 @@ public class ExternalCameraFeed extends AbstractNodeMain
 	public static final boolean COLOR_IMAGE = true;
 	
 	private boolean showRecordingButtons;
-	private static boolean RECORD = false;
 	
 	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
 	private BufferedImage cameraImage;
@@ -41,7 +40,6 @@ public class ExternalCameraFeed extends AbstractNodeMain
 	private JFrame cameraFrame, recordButtonFrame;
 	private JPanel cameraPanel, recordButtonPanel;
 	private JButton startRecordingButton, stopRecordingButton;
-	private ConcurrentBackgroundVideoExporter cameraVideoExporter;
 
 	private ColorSpace colorSpace;
 	private ColorModel colorModel;
@@ -91,8 +89,6 @@ public class ExternalCameraFeed extends AbstractNodeMain
 				if (cameraFrame.isVisible())
 				{
 					cameraImage = RosTools.bufferedImageFromRosMessageJpeg(colorModel, message);
-					if (RECORD)
-						cameraVideoExporter.pushImage(RosTools.bufferedImageFromRosMessageJpeg(colorModel, message), message.getHeader().getStamp().totalNsecs());
 					cameraPanel.getGraphics().drawImage(cameraImage.getScaledInstance(cameraImage.getWidth(), cameraImage.getHeight(), 0), 0, 0, null);
 				}
 			}
@@ -154,13 +150,10 @@ public class ExternalCameraFeed extends AbstractNodeMain
       {
          public void actionPerformed(ActionEvent e)
          {
-            RECORD = true;
             
             startRecordingButton.setEnabled(false);
             stopRecordingButton.setEnabled(true);
             
-            cameraVideoExporter = new ConcurrentBackgroundVideoExporter(System.getProperty("user.home") + "/" + cameraName);
-            cameraVideoExporter.start(connectedNode.getCurrentTime().totalNsecs());
          }  
       });
       
@@ -168,10 +161,6 @@ public class ExternalCameraFeed extends AbstractNodeMain
       {
          public void actionPerformed(ActionEvent e)
          {
-            RECORD = false;
-            
-            cameraVideoExporter.finish();
-            
             stopRecordingButton.setEnabled(false);
             startRecordingButton.setEnabled(true);
          }  
