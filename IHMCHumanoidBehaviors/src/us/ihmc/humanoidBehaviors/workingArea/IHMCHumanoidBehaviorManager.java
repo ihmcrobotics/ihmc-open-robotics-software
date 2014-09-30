@@ -48,8 +48,7 @@ public class IHMCHumanoidBehaviorManager
       SimpleForwardingBehavior simpleForwardingBehavior = new SimpleForwardingBehavior(communicationBridge);
       simpleForwardingBehavior.attachCommunicationBridge(communicationBridge);
 
-      ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge);
-      scriptBehavior.setFullRobotModel(fullRobotModel);
+      ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime);
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.STOP, simpleForwardingBehavior);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(communicationBridge));
