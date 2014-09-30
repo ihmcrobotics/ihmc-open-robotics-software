@@ -2,7 +2,6 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.6.+'
-	compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
 	
 	compile project(':IHMCUtilities')
 	compile project(':Plotting')

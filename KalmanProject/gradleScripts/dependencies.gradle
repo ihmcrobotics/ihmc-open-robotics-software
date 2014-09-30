@@ -7,7 +7,6 @@ dependencies {
     compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
     compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x' 
     compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'  
-    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'  
       
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')

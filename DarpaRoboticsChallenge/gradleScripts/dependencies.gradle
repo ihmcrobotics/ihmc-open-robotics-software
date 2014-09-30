@@ -8,7 +8,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
-	compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
 	compile group: 'us.ihmc.thirdparty', name: 'hydra', version: 'x'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.+'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.+'
