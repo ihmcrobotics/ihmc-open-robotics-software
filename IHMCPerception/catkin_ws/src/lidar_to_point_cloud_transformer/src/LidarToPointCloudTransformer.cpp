@@ -22,12 +22,10 @@ using namespace ros;
 
 namespace lidar_to_point_cloud_transformer {
 
-const double padding=0.05;
 LidarToPointCloudTransformer::LidarToPointCloudTransformer(
 		ros::NodeHandle& nodeHandle) :
 		nodeHandle_(nodeHandle), pointCloudAssembler_(tfListener_), laserScanFilterChain_(
-				"sensor_msgs::LaserScan"), selfFilter(
-				std::string("/Atlas/robot_description"),padding) {
+				"sensor_msgs::LaserScan")  {
 	readParameters();
 	laserScanSubscriber_ = nodeHandle_.subscribe(laserScanTopic_,
 			laserScanSubscriptionQueueSize_,
@@ -41,7 +39,8 @@ LidarToPointCloudTransformer::LidarToPointCloudTransformer(
 			nodeHandle.advertise<sensor_msgs::PointCloud2>(
 					"removed_point_cloud", 1);
 	assembledPointCloudPublisher_ = nodeHandle_.advertise<
-			sensor_msgs::PointCloud2>("assembled_lidar_point_cloud", 1);
+			sensor_msgs::PointCloud2>("assembled_lidar_point_cloud", padding);
+	selfFilter.reset(new RobotSelfFilter(robotDescription, padding));
 	initialize();
 }
 
@@ -51,6 +50,8 @@ bool LidarToPointCloudTransformer::readParameters() {
 			laserScanSubscriptionQueueSize_, 10);
 	nodeHandle_.param("fixed_frame", fixedFrameId_, string("map"));
 	nodeHandle_.param("target_frame", targetFrameId_, string("scanner"));
+	nodeHandle_.param("filter_robot_description_topic", robotDescription, string("filter_robot_description"));
+	nodeHandle_.param("filter_padding", padding, 0.0);
 
 	double tfLookupTimeoutSeconds;
 	nodeHandle_.param("tf_lookup_timeout_duration", tfLookupTimeoutSeconds,
@@ -108,7 +109,7 @@ void LidarToPointCloudTransformer::laserScanCallback(
 	// Robot self filter.
 	pcl::PointCloud<pcl::PointXYZI>::Ptr pointCloudFilteredKept(new pcl::PointCloud<pcl::PointXYZI>());
 	pcl::PointCloud<pcl::PointXYZI>::Ptr pointCloudFilteredRemoved(new pcl::PointCloud<pcl::PointXYZI>());
-	selfFilter.filterPointClould(*pointCloud, *pointCloudFilteredKept, *pointCloudFilteredRemoved);
+	selfFilter->filterPointClould(*pointCloud, *pointCloudFilteredKept, *pointCloudFilteredRemoved);
 	filteredKeptPointCloudPublisher_.publish(pointCloudFilteredKept);
 	filteredRemovedPointCloudPublisher_.publish(pointCloudFilteredRemoved);
 

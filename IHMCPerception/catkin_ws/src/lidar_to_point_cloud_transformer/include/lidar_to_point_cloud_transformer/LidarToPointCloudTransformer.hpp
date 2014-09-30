@@ -100,7 +100,9 @@ class LidarToPointCloudTransformer
   ros::Publisher pointCloudPublisher_;
 
   //! Point cloud selfFilter
-  RobotSelfFilter selfFilter;
+  boost::shared_ptr<RobotSelfFilter> selfFilter;
+  std::string robotDescription;
+  double padding;
 
   //! Filtered Point Cloud
   ros::Publisher filteredKeptPointCloudPublisher_;
@@ -126,8 +128,6 @@ class LidarToPointCloudTransformer
 
   //! Projection from laser to point cloud.
   laser_geometry::LaserProjection laserProjector_;
-
-
 };
 
 } /* namespace */
