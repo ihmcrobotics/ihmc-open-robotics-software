@@ -108,7 +108,7 @@ bool FootholdFinder::adaptCallback(foothold_finding_msg::AdaptFootholds::Request
 
 bool FootholdFinder::getMap(const Eigen::Vector2d& position, const double sideLength, grid_map::GridMap& map)
 {
-  ROS_INFO("Getting map around postion (%f, %f) with side length %f.", position(0), position(1), sideLength);
+  ROS_INFO("Getting map around position (%f, %f) with side length %f.", position(0), position(1), sideLength);
   // Get map.
   grid_map_msg::GetGridMap serviceCall;
   serviceCall.request.positionX = position(0);
@@ -148,7 +148,6 @@ void FootholdFinder::checkAndAdaptFoothold(grid_map::GridMap& map, foothold_find
   getFootShapeInWorldFrame(pose, footShape);
   if (!checkArea(footShape, map)) {
     foothold.flag = 3; // bad.
-    return;
   }
 
   // Adapt.
@@ -159,6 +158,11 @@ void FootholdFinder::checkAndAdaptFoothold(grid_map::GridMap& map, foothold_find
   adaptedPose.getRotation() = pose.getRotation();
   Eigen::Vector3d normal;
   map.getVector("surface_normal_", index, normal);
+  if (normal.norm() <= 1e-8)
+  {
+	  foothold.flag = 3;
+	  return;
+  }
   matchToSurfaceNormal(normal, adaptedPose.getRotation());
 
   // Fill in data.
@@ -308,11 +312,16 @@ int FootholdFinder::checkFoothold(const grid_map::GridMap& map, const foothold_f
 
 void FootholdFinder::matchToSurfaceNormal(const Eigen::Vector3d& normal, Rotation& rotation)
 {
+	std::cout << "Rotation and normal before adapting: " << rotation << std::endl;
+	std::cout << normal << std::endl;
   Eigen::Vector3d reference = Eigen::Vector3d::UnitZ();
   reference = rotation.getActive().rotate(reference);
   Rotation correction;
   correction.setFromVectors(reference, normal);
+  std::cout << "Correction of adaptation: " << correction << std::endl;
   rotation = rotation * correction;
+	std::cout << "Rotation and normal after adapting: " << rotation << std::endl;
+	std::cout << normal << std::endl;
 }
 
 } /* namespace */
