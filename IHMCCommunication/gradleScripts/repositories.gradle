@@ -1,8 +1,4 @@
 repositories {
-	maven {
-		url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
-	}
-
     /**
      * Maven central repository, local proxy
      */
