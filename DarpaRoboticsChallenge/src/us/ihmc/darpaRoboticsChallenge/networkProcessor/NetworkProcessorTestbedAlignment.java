@@ -11,16 +11,18 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ddogleg.struct.FastQueue;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.packets.sensing.TestbedServerPacket;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -29,7 +31,7 @@ import com.thoughtworks.xstream.XStream;
  *
  * @author Peter Abeles
  */
-public class NetworkProcessorTestbedAlignment implements Runnable
+public class NetworkProcessorTestbedAlignment implements Runnable, ObjectConsumer<TestbedClientPacket>
 {
 
    final List<FastQueue<Point3D_F64>> scans = new ArrayList<>();
@@ -41,7 +43,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
    TestbedAutomaticAlignment testbedFinder;
 
-   DRCNetworkProcessorNetworkingManager networkManager;
+   AbstractNetworkProcessorNetworkingManager networkManager;
 
    boolean justCollectData;
 
@@ -52,7 +54,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
    int totalSaved = 0;
    Point3D_F64 testbedLocation = new Point3D_F64();
 
-   public NetworkProcessorTestbedAlignment(DRCNetworkProcessorNetworkingManager networkManager)
+   public NetworkProcessorTestbedAlignment(AbstractNetworkProcessorNetworkingManager networkManager)
    {
 
       this.networkManager = networkManager;
@@ -229,5 +231,27 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             }
          }
       }
+   }
+
+   public void consumeObject(TestbedClientPacket object)
+   {
+      int value = object.getRequest();
+
+      switch( value ) {
+      case 0:
+         startCollection(false);
+         break;
+         
+      case 1:
+         throw new RuntimeException("Kill not supported yet");
+         
+      case 2:
+         startCollection(true);
+         break;
+         
+      default:
+         throw new RuntimeException("Unknown command: "+value);
+      }
+      
    }
 }

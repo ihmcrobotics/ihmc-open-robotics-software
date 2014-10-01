@@ -11,18 +11,20 @@ import javax.vecmath.Quat4d;
 import org.openh264.RC_MODES;
 import org.openh264.SEncParamExt;
 
-import com.google.code.libyuv.FilterModeEnum;
-
 import us.ihmc.codecs.h264.NALProcessor;
 import us.ihmc.codecs.h264.NALType;
 import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUV420Picture;
+import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoDataServer;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.NetStateListener;
+import us.ihmc.utilities.net.ObjectConsumer;
 
-public class CompressedVideoDataServer implements NetStateListener, VideoDataServer
+import com.google.code.libyuv.FilterModeEnum;
+
+public class CompressedVideoDataServer implements NetStateListener, VideoDataServer, ObjectConsumer<VideoControlPacket>
 {
    private OpenH264Encoder encoder;
 
@@ -202,6 +204,11 @@ public class CompressedVideoDataServer implements NetStateListener, VideoDataSer
       {
          videoEnabled = false;
       }
+   }
+
+   public void consumeObject(VideoControlPacket object)
+   {
+      setVideoControlSettings(object);
    }
 
 }

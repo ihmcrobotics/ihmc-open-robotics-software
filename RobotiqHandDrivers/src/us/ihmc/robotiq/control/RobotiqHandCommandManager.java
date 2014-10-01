@@ -1,22 +1,54 @@
 package us.ihmc.robotiq.control;
 
-import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class RobotiqHandCommandManager extends HandCommandManager
 {
-	public RobotiqHandCommandManager(final NetworkProcessorControllerStateHandler controllerStateHandler)
+   private final AbstractNetworkProcessorNetworkingManager networkManager;
+   
+	public RobotiqHandCommandManager(final AbstractNetworkProcessorNetworkingManager networkManager)
 	{
 		super(RobotiqControlThreadManager.class);
 		
-		server.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
-		{
-			public void consumeObject(HandJointAnglePacket object)
-			{
-				controllerStateHandler.sendSerializableObject(object);
-			}
-		});
+		this.networkManager = networkManager;
+		
+		setupOutboundPacketListeners();
+		
+		setupInboundPacketListeners();
 	}
+
+   protected void setupInboundPacketListeners()
+   {
+      networkManager.getControllerCommandHandler().attachListener(FingerStatePacket.class, new ObjectConsumer<FingerStatePacket>()
+      {
+         public void consumeObject(FingerStatePacket object)
+         {
+            sendHandCommand(object);
+         }
+      });
+      
+      networkManager.getControllerCommandHandler().attachListener(ManualHandControlPacket.class, new ObjectConsumer<ManualHandControlPacket>()
+      {
+         public void consumeObject(ManualHandControlPacket object)
+         {
+            sendHandCommand(object);
+         }
+      });
+   }
+
+   protected void setupOutboundPacketListeners()
+   {
+      server.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
+      {
+         public void consumeObject(HandJointAnglePacket object)
+         {
+            networkManager.getControllerStateHandler().sendSerializableObject(object);
+         }
+      });
+   }
 }

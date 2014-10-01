@@ -7,7 +7,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
+import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataServer;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -15,7 +17,6 @@ import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class CameraDataReceiver
@@ -39,7 +40,7 @@ public abstract class CameraDataReceiver
       this.cameraPose = new RigidBodyTransform();
 
       compressedVideoDataServer = new CompressedVideoDataServer(new VideoPacketHandler(networkingManager));
-      networkingManager.getControllerCommandHandler().setVideoCommandListener(compressedVideoDataServer);
+      networkingManager.getControllerCommandHandler().attachListener(VideoControlPacket.class, compressedVideoDataServer);
    }
    
    protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
@@ -86,9 +87,9 @@ public abstract class CameraDataReceiver
 
    private class VideoPacketHandler implements CompressedVideoHandler
    {
-      private final DRCNetworkProcessorNetworkingManager networkingManager;
+      private final AbstractNetworkProcessorNetworkingManager networkingManager;
 
-      public VideoPacketHandler(DRCNetworkProcessorNetworkingManager networkingManager)
+      public VideoPacketHandler(AbstractNetworkProcessorNetworkingManager networkingManager)
       {
          this.networkingManager = networkingManager;
       }

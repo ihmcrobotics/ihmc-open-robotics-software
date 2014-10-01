@@ -4,6 +4,8 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -57,7 +59,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                           DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
    {
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
-      depthDataProcessor.setTestbed(networkingManager.getControllerCommandHandler().getTestbed());
 
       SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager,
             ppsTimestampOffsetProvider);
@@ -95,9 +96,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
          
          RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
-         networkingManager.getControllerCommandHandler().setFootstepServiceClient(rosFootstepServiceClient);
+         networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-         networkingManager.getControllerCommandHandler().setLocalizationServiceClient(rosLocalizationServiceClient);
+         networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
@@ -127,7 +128,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
-      depthDataProcessor.setTestbed(networkingManager.getControllerCommandHandler().getTestbed());
 
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
       if (RosNativeNetworkProcessor.hasNativeLibrary())
@@ -157,9 +157,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
             
 //      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
+//      networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      networkingManager.getControllerCommandHandler().setLocalizationServiceClient(rosLocalizationServiceClient);
-//      networkingManager.getControllerCommandHandler().setFootstepServiceClient(rosFootstepServiceClient);
+      networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
     
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
