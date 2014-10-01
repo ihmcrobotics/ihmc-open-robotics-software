@@ -13,7 +13,7 @@ import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
@@ -246,7 +246,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(NetworkProcessorControllerStateHandler controllerStateHandler)
+   public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
    {
 	   return null;
    }
