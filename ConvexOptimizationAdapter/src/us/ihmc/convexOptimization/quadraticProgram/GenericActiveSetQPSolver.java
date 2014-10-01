@@ -28,7 +28,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
    public GenericActiveSetQPSolver()
    {
       super();
-      logger.setLevel(Level.INFO);
+      logger.setLevel(Level.OFF);
    }
    
    public void setThreshold(double threshHold)
@@ -220,7 +220,12 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
    }
    
 
+   private void packGradient(DenseMatrix64F gradient0)
+   {
+      gradient0.set(quadraticCostFVector);
+      CommonOps.multAdd(quadraticCostGMatrix, x, gradient0);
  
+   }
    
    /**
     *  solve
@@ -264,8 +269,8 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
       
       
       //gradient0 = G x0+f
-      DenseMatrix64F gradient0 = new DenseMatrix64F(quadraticCostFVector);
-      CommonOps.multAdd(quadraticCostGMatrix, x, gradient0);
+      DenseMatrix64F gradient0 = new DenseMatrix64F(numberOfVariablesToSolve,1);
+      packGradient(gradient0);
       
       // steepestDirection=-Z'gradient
       DenseMatrix64F steepestDirection = new DenseMatrix64F(nullity, 1);
@@ -398,6 +403,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
       }
       int blockingConstraint;
       double size;
+      double projectedStepIntoBlockingConstraint;
       DenseMatrix64F direction;
       STEPTYPE type;
    };
@@ -425,10 +431,12 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
             if(stepSizeToCurrentConstraint> -eps && stepSizeToCurrentConstraint < minStep) //a_i: consider constraint "blocking" us and the smaller one.
             {
                step.blockingConstraint=i;
+               step.projectedStepIntoBlockingConstraint = product.get(i,0);
                minStep = step.size = stepSizeToCurrentConstraint;
             }
          }
       }
+      
    }
 
    public DenseMatrix64F solve(DenseMatrix64F x0)
@@ -447,21 +455,18 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
       Step step = new Step();
       
       DenseMatrix64F finalStep = new DenseMatrix64F(numberOfVariablesToSolve,1);
+      DenseMatrix64F gradient = new DenseMatrix64F(numberOfVariablesToSolve,1);
       
       while(true)
       {
-         System.out.println("iter "+ iteration + " ----------");
-//         System.out.println("x=\n" + x);
-//         System.out.println("ActiveSetA=");
-//         System.out.println(activeSetA);
-//         System.out.println("ActiveSetB=");
-//         System.out.println(activeSetB);
-         System.out.println("Obj= "+ getObjectiveCost(x));
+           logger.info("iter "+ iteration + " ----------");
+
+           logger.info("Obj= "+ getObjectiveCost(x));
 //         System.out.println("------------------");
 
         DenseMatrix64F activeSetLagrangeMultipliers = new DenseMatrix64F(activeSetA.numRows,1);
         step.type=calculateStepDirection(step.direction);
-//        System.out.println("Step:"+step.direction);
+        logger.info("StepDirectionSize="+NormOps.normP2(step.direction));
         if(NormOps.normP2(step.direction)<eps)
         {
            getLagrangeMultipliers(activeSetLagrangeMultipliers);
@@ -469,12 +474,12 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
            double maxInequalityMultiplier = maxIndex<0?Double.NEGATIVE_INFINITY:activeSetLagrangeMultipliers.get(maxIndex,0);
            if(maxInequalityMultiplier<=0)
            {
-                 System.out.println("Optimum reached");
+                 logger.info("Optimum reached");
                  return x;
            }
            else
            {
-              System.out.println("remove constraint "+ maxIndex + " from activeset (" + (maxIndex-activeEqualitySize) +" from active inequality constraint)");
+              logger.info("remove constraint "+ maxIndex + " from activeset (" + (maxIndex-activeEqualitySize) +" from active inequality constraint)");
               removeConstraintFromActiveSet(maxIndex); 
            }
               
@@ -482,19 +487,20 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
         else //step-or-not
         {
           findingBlockingConstraint(step);
+          packGradient(gradient);
           if(step.type==STEPTYPE.NEWTON)
           {
              if (step.size>1.0)
              {
 //              assert(step.blockingConstraint<0);
               finalStep.set(step.direction);
-              System.out.println("make newton step (unblocked), norm="+NormOps.normP2(step.direction));
+              logger.info("make newton step (unblocked), norm="+NormOps.normP2(step.direction));
              }
              else
              {
               CommonOps.scale(step.size, step.direction, finalStep);
               int newConstraint= addConstraintToActiveSet(step.blockingConstraint);
-              System.out.println("make blocked (Newton) step, adding inequality constraint "+ step.blockingConstraint +" into activeset "+ newConstraint);
+              logger.info("make blocked (Newton) step, adding inequality constraint "+ step.blockingConstraint +" into activeset "+ newConstraint + " stepDistanceIntoConstraint " + step.projectedStepIntoBlockingConstraint);
              }
           }
           else if(step.type==STEPTYPE.STEEPEST)
@@ -552,7 +558,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
                 else if(maxStep > (step.size-eps)) //maxStep==step.size (bounded at stepsize)
                 {
                    int newRowInActiveSet = addConstraintToActiveSet(step.blockingConstraint);
-                   System.out.println("make steepest-step until hitting blocking inequality " + step.blockingConstraint + " ( " + newRowInActiveSet + " in activeSet)");
+                   logger.info("make steepest-step until hitting blocking inequality " + step.blockingConstraint + " ( " + newRowInActiveSet + " in activeSet)");
                 }
                 else if(maxStep<eps && step.blockingConstraint<0) //maxStep=zero, unbounded step but not going anyhere.
                 {
@@ -569,11 +575,19 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
           {
              throw new RuntimeException("Unknow step type!");
           } 
+          
+          DenseMatrix64F expectedDescentMatrix = new DenseMatrix64F(1,1);
+          CommonOps.multTransA(finalStep, gradient, expectedDescentMatrix);
+          double expectedDescent = expectedDescentMatrix.get(0);
+          logger.info("Expected Desecent " + expectedDescent);
+          if(expectedDescent > 0)
+          {
+             logger.info("step gain too small");
+             return x;
+          }
+          
 
           CommonOps.add(x, finalStep, x);
-//          System.out.println("StepNorm"+NormOps.normP2(finalStep));
-//          System.out.println("Step:"+finalStep);
-          
         } //step or not
 
         if(iteration>maximumIteration)
