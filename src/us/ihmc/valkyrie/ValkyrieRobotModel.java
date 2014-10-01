@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
@@ -312,7 +312,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(NetworkProcessorControllerStateHandler controllerStateHandler)
+   public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
    {
 	   return null;
    }
