@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidBehaviors.scripting.ScriptEngineSettings;
-import us.ihmc.humanoidBehaviors.scripting.ScriptFileSaver;
+import us.ihmc.humanoidBehaviors.workingArea.behaviors.scripts.engine.ScriptEngineSettings;
+import us.ihmc.humanoidBehaviors.workingArea.behaviors.scripts.engine.ScriptFileSaver;
 import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.TimestampProvider;
