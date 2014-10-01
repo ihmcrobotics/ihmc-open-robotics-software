@@ -26,7 +26,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
          double roll = 0.0;
          double pitch = 0.0;
          double yaw = 0.0;
-         transform3D.setEuler(new Vector3d(roll, pitch, yaw));
+         transform3D.setEuler(roll, pitch, yaw);
 
          Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
          transform3D.setTranslationAndIdentityRotation(translation);
@@ -67,7 +67,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
+         finalAdjustment.setEuler(0.0, Math.PI, 0.0);
          transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();

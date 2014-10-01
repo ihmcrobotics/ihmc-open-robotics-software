@@ -8,9 +8,6 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.Transform3d;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
@@ -31,6 +28,7 @@ import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public class Graphics3DAdapterExampleOne
 {   
@@ -249,7 +247,7 @@ public class Graphics3DAdapterExampleOne
          }
          
          Transform3d transform = new Transform3d();
-         transform.setEuler(new Vector3d(Math.PI/2.0, 0.0, rotation));
+         transform.setEuler(Math.PI/2.0, 0.0, rotation);
          transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
          transform.setScale(scale);
          node.setTransform(transform);

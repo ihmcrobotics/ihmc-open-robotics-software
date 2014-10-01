@@ -3,14 +3,13 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -131,13 +130,11 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       double theta = -Math.PI / 2.0 + Math.atan2(rotationFromRigiBodyToWorld.m20, rotationFromRigiBodyToWorld.m21);
 
       transformFromContactFrameToBodyFrame.setIdentity();
-      Vector3d eulerAngles = new Vector3d(theta, Math.PI / 2.0, 0.0);
-      transformFromContactFrameToBodyFrame.setEuler(eulerAngles);
+      transformFromContactFrameToBodyFrame.setEuler(theta, Math.PI / 2.0, 0.0);
       FramePoint originInBodyFrame = contactableCylinderBody.getCylinderOriginCopy();
       double cylinderRadius = contactableCylinderBody.getCylinderRadius();
-      Vector3d translation = new Vector3d(-cylinderRadius  * Math.cos(theta) + originInBodyFrame .getX(), cylinderRadius * Math.sin(theta)
+      transformFromContactFrameToBodyFrame.setTranslation(-cylinderRadius  * Math.cos(theta) + originInBodyFrame .getX(), cylinderRadius * Math.sin(theta)
             + originInBodyFrame.getY(), originInBodyFrame.getZ());
-      transformFromContactFrameToBodyFrame.setTranslation(translation);
 
       updatableContactFrame.update();
    }
