@@ -2,14 +2,12 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -123,7 +121,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
    private void readAndUpdateRootJointPositionAndOrientation()
    {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      RotationFunctions.assertProper(temporaryRootToWorldTransform);
+      temporaryRootToWorldTransform.normalize();
       rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
    }
 

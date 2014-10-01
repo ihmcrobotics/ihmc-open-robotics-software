@@ -1,15 +1,11 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -65,10 +61,9 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    public FramePose getDesiredFootPose(RobotSide robotSide)
    {
       ReferenceFrame footFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
-      Vector3d position = new Vector3d(userFootPoseX.getDoubleValue(), userFootPoseY.getDoubleValue(), userFootPoseZ.getDoubleValue());
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(position);
+      transform.setTranslation(userFootPoseX.getDoubleValue(), userFootPoseY.getDoubleValue(), userFootPoseZ.getDoubleValue());
       
       
       FramePose framePose = new FramePose(footFrame, transform);

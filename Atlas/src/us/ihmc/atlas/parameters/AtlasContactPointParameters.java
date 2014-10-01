@@ -131,7 +131,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       {
          RigidBodyTransform thighContactPointTransform = new RigidBodyTransform();
          double pitch = Math.PI / 2.0;
-         thighContactPointTransform.setEuler(new Vector3d(0.0, pitch, 0.0));
+         thighContactPointTransform.setEuler(0.0, pitch, 0.0);
          thighContactPointTransform.setTranslation(new Vector3d(-0.1179, robotSide.negateIfRightSide(0.02085), -0.08));
          thighContactPointTransforms.put(robotSide, thighContactPointTransform);
       }
