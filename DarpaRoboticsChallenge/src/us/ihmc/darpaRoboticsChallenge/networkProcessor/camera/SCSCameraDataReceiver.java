@@ -2,13 +2,13 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -22,7 +22,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
    SCSCameraInfoReceiver scsCameraInfoReceiver;
 
    public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, ObjectCommunicator scsCommunicator,
-                                DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+                                AbstractNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       super(robotPoseBuffer, networkingManager, ppsTimestampOffsetProvider);
       scsCommunicator.attachListener(LocalVideoPacket.class, this);

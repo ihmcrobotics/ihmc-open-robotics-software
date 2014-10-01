@@ -8,12 +8,12 @@ import javax.vecmath.Vector3d;
 
 import org.ros.message.Time;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
@@ -32,7 +32,7 @@ public class RosCameraReceiver extends CameraDataReceiver
    private Quat4d orientation = new Quat4d();
 
    public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RobotPoseBuffer robotPoseBuffer,
-         final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager,
+         final RosMainNode rosMainNode, final AbstractNetworkProcessorNetworkingManager networkingManager,
          final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger, URI sensorURI)
    {
       super(robotPoseBuffer, networkingManager, ppsTimestampOffsetProvider);

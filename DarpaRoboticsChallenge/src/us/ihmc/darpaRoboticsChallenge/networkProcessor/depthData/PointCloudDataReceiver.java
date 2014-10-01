@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.NetworkProcessorControllerCommandHandler;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
@@ -16,7 +17,6 @@ import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.producers.RobotPoseBufferListener;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -32,7 +32,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
    protected LidarStateCommandListener lidarStateCommandListener;
    private final RobotPoseBuffer robotPoseBuffer;
 
-   public PointCloudDataReceiver(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel fullRobotModel,
+   public PointCloudDataReceiver(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel fullRobotModel,
          DepthDataFilter lidarDataFilter)
    {
       robotPoseBuffer.addListener(this);
