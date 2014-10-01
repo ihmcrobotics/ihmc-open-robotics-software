@@ -34,8 +34,9 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -139,6 +140,13 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       
       sendPelvisCorrectionPackets = false;
       assertTrue(success);
+      
+      //Note: once Atlas does not fall over, this bounding box test will fail. It needs to be updated with the expected final position
+      Point3d center = new Point3d();
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       
       BambooTools.reportTestFinishedMessage();
    }

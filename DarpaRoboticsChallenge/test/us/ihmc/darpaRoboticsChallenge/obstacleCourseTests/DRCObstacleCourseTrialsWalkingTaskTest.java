@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -22,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 @SuppressWarnings("deprecation")
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
-	private Class<DRCObstacleCourseTrialsWalkingTaskTest> thisClass = DRCObstacleCourseTrialsWalkingTaskTest.class;
+   private Class<DRCObstacleCourseTrialsWalkingTaskTest> thisClass = DRCObstacleCourseTrialsWalkingTaskTest.class;
    private static final boolean KEEP_SCS_UP = false;
 
 
@@ -61,11 +63,12 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    {
       BambooTools.reportTestStartedMessage();
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml"; 
+      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged,
+              showGUI, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -80,20 +83,27 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      
+
+      Point3d center = new Point3d(13.10268850797296, 14.090724695197087, 1.146368436759061);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       BambooTools.reportTestFinishedMessage();
    }
-   
-   //@Test, we don't need step on/off two layer CinderBlocks anymore
+
+   // @Test, we don't need step on/off two layer CinderBlocks anymore
+   //Note: this test will fail because of bounding box that needs to be "tuned"
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml"; 
+      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged,
+              showGUI, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -104,17 +114,22 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       BooleanYoVariable doToeTouchdownIfPossible = (BooleanYoVariable) simulationConstructionSet.getVariable("doToeTouchdownIfPossible");
       doToeTouchdownIfPossible.set(true);
-      
+
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      
+
+      Point3d center = new Point3d();
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    private void setupCameraForWalkingOverCinderBlocks(SimulationConstructionSet scs)
    {
       Point3d cameraFix = new Point3d(13.2664, 13.03, 0.75);
