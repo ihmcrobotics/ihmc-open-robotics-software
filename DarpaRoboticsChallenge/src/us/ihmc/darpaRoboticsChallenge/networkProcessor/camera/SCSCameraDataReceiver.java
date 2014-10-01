@@ -30,7 +30,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
 
       scsCameraInfoReceiver = new SCSCameraInfoReceiver(networkingManager.getControllerStateHandler(),logger);
-      networkingManager.getControllerCommandHandler().setIntrinsicServer(scsCameraInfoReceiver);
+      networkingManager.getControllerCommandHandler().attachListener(CameraInformationPacket.class, scsCameraInfoReceiver);
    }
 
    public void consumeObject(LocalVideoPacket object)
@@ -107,5 +107,10 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
       if( logger != null ) {
          logger.log(img,videoObject.timeStamp);
       }
+   }
+
+   public void consumeObject(CameraInformationPacket object)
+   {
+      processInformationRequest(object);
    }
 }

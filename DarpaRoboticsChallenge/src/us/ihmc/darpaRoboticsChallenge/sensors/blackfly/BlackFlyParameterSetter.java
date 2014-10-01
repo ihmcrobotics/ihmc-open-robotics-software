@@ -6,8 +6,9 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import dynamic_reconfigure.DoubleParameter;
@@ -15,7 +16,7 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 
-public class BlackFlyParameterSetter
+public class BlackFlyParameterSetter implements ObjectConsumer<BlackFlyParameterPacket>
 {
    private static double gain;
    private static double brightness;
@@ -23,15 +24,17 @@ public class BlackFlyParameterSetter
    private static double Shutter;
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> blackFlyClient;
    private RosMainNode rosMainNode;
-   private DRCNetworkProcessorNetworkingManager networkingManager;
+   private AbstractNetworkProcessorNetworkingManager networkingManager;
    private ParameterTree params;
 
-   public BlackFlyParameterSetter(RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager)
+   public BlackFlyParameterSetter(RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager)
    {
       this.rosMainNode = rosMainNode;
       this.networkingManager = networkingManager;
       blackFlyClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("blackfly/set_parameters", blackFlyClient);
+      
+      networkingManager.getControllerCommandHandler().attachListener(BlackFlyParameterPacket.class, this);
    }
 
    public void handleBlackFlyParameters(BlackFlyParameterPacket object)
@@ -195,5 +198,10 @@ public class BlackFlyParameterSetter
             throw new RuntimeException(e);
          }
       });
+   }
+
+   public void consumeObject(BlackFlyParameterPacket object)
+   {
+      handleBlackFlyParameters(object);
    }
 }

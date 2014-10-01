@@ -20,7 +20,7 @@ import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -299,17 +299,17 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(NetworkProcessorControllerStateHandler controllerStateHandler)
+   public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
    {
       if (runningOnRealRobot)
       {
          switch (getHandType())
          {
          case IROBOT:
-            return new IRobotHandCommandManager(controllerStateHandler);
+            return new IRobotHandCommandManager(networkManager);
 
          case ROBOTIQ:
-            return new RobotiqHandCommandManager(controllerStateHandler);
+            return new RobotiqHandCommandManager(networkManager);
 
          default:
             break;

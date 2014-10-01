@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.ros.node.parameter.ParameterTree;
 
+import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -71,7 +72,6 @@ public class MultiSenseSensorManager
       registerLidarReceivers();
       multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, networkingManager);
       setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
-      networkingManager.getControllerCommandHandler().setMultiSenseSensorManager(multiSenseParamaterSetter);
 
    }
 
@@ -110,7 +110,7 @@ public class MultiSenseSensorManager
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(), logger);
 
-      networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
+      networkingManager.getControllerCommandHandler().attachListener(CameraInformationPacket.class, cameraInfoServer);
    }
 
    public void registerCameraListener(ArmCalibrationHelper armCalibrationHelper)

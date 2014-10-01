@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
@@ -91,7 +92,7 @@ public class DRCNetworkProcessor
       if (startTestbedAlignment)
       {
          NetworkProcessorTestbedAlignment testbed = new NetworkProcessorTestbedAlignment(networkingManager);
-         networkingManager.getControllerCommandHandler().setTestbed(testbed);
+         networkingManager.getControllerCommandHandler().attachListener(TestbedClientPacket.class, testbed);
          new Thread(testbed).start();
       }
       setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel.getPhysicalProperties());

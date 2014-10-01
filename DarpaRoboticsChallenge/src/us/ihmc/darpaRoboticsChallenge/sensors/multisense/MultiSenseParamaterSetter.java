@@ -9,9 +9,10 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosDoublePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -23,7 +24,7 @@ import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
 
-public class MultiSenseParamaterSetter
+public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParameterPacket>
 {
    private static double gain;
    private static double motorSpeed;
@@ -35,15 +36,16 @@ public class MultiSenseParamaterSetter
    private static String resolution = new String("1024x544x128");
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private RosMainNode rosMainNode;
-   private DRCNetworkProcessorNetworkingManager networkingManager;
+   private AbstractNetworkProcessorNetworkingManager networkingManager;
    private ParameterTree params;
    
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager)
    {
       this.rosMainNode = rosMainNode;
       this.networkingManager = networkingManager;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);      
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
+      networkingManager.getControllerCommandHandler().attachListener(MultisenseParameterPacket.class, this);;
    }
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode2)
@@ -399,6 +401,11 @@ public class MultiSenseParamaterSetter
                   e.printStackTrace();
                }
             });
+   }
+
+   public void consumeObject(MultisenseParameterPacket object)
+   {
+      handleMultisenseParameters(object);
    }
 
    

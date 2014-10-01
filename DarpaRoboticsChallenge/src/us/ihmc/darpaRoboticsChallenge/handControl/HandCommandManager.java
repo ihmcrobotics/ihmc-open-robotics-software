@@ -36,4 +36,7 @@ public abstract class HandCommandManager
 	{
 	   server.consumeObject(packet);
 	}
+	
+	protected abstract void setupInboundPacketListeners();
+	protected abstract void setupOutboundPacketListeners();
 }

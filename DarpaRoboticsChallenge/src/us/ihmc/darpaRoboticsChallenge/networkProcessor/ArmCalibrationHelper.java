@@ -8,14 +8,15 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-public class ArmCalibrationHelper implements DRCStereoListener
+public class ArmCalibrationHelper implements DRCStereoListener, ObjectConsumer<CalibrateArmPacket>
 {
    private final static String basedir = "/tmp/calibration";
 
@@ -28,11 +29,11 @@ public class ArmCalibrationHelper implements DRCStereoListener
 
    private RobotConfigurationData lastJointConfigurationData;
 
-   public ArmCalibrationHelper(ObjectCommunicator fieldComputerClient, DRCNetworkProcessorNetworkingManager networkingManager,
+   public ArmCalibrationHelper(ObjectCommunicator fieldComputerClient, AbstractNetworkProcessorNetworkingManager networkingManager,
          DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
-      networkingManager.getControllerCommandHandler().setArmCalibrationHelper(this);
+      networkingManager.getControllerCommandHandler().attachListener(CalibrateArmPacket.class, this);
       fieldComputerClient.attachListener(RobotConfigurationData.class, new JointAngleConsumer());
       startPeriodicRecording();
    }
@@ -147,6 +148,11 @@ public class ArmCalibrationHelper implements DRCStereoListener
       {
          lock.unlock();
       }
+   }
+
+   public void consumeObject(CalibrateArmPacket object)
+   {
+      calibrateArm();
    }
 
 }

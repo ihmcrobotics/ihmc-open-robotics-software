@@ -7,7 +7,6 @@ import std_srvs.Empty;
 import std_srvs.EmptyRequest;
 import std_srvs.EmptyResponse;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -16,7 +15,7 @@ import ethz_asl_icp_mapper.SetModeRequest;
 import ethz_asl_icp_mapper.SetModeResponse;
 
 
-public class RosLocalizationServiceClient
+public class RosLocalizationServiceClient implements ObjectConsumer<LocalizationPacket>
 {
    private final RosServiceClient<SetModeRequest, SetModeResponse> localizationClient = new RosServiceClient<SetModeRequest,SetModeResponse>(SetMode._TYPE);
    private final RosServiceClient<EmptyRequest,EmptyResponse> resetClient = new RosServiceClient<EmptyRequest, EmptyResponse>(Empty._TYPE);
@@ -124,6 +123,11 @@ public class RosLocalizationServiceClient
          sendResetReference(object);
       else
          sendLocalizationMessage(object);
+   }
+
+   public void consumeObject(LocalizationPacket object)
+   {
+      processLocalizationPacket(object);
    }
    
 }
