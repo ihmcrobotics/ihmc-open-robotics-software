@@ -14,6 +14,7 @@ dependencies {
 	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 	compile group: 'commons-io', name: 'commons-io', version: '2.4'
 	compile group: 'us.ihmc.thirdparty', name: 'kryonet', version: '2.12'
+	compile group: 'org.apache.sshd', name: 'sshd', version: '0.12.+'
 	
 	compile project(':BambooTools')
 	compile project(':CommonAvatarInterfaces')
