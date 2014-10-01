@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -28,7 +26,6 @@ import org.ejml.ops.MatrixIO;
 import org.ejml.ops.NormOps;
 import org.ejml.ops.RandomMatrices;
 import org.ejml.ops.SingularOps;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -36,8 +33,112 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.test.JUnitTools;
 public class GenericActiveSetQPSolverTest
 {
+   /** 
+    * EJML can't handle these cases earlier before August 2014
+    * So we put these test cases here to check 
+    */
+   @Test 
+   public void choleskyDecompositionAccuracy()
+   {
+      /**
+    pg =
+
+      0.8859500178757540   0.2588001949262530
+      0.2588001949262530   0.0755996834386430
+
+    octave:13> sd
+    sd =
+
+      -1.38777878078145e-17
+      0.00000000000000e+00
+
+    octave:14> [r p]=chol(pg);
+    octave:15> r'\r\sd
+    ans =
+
+      4.41160312094377e-11
+      -1.51022339626802e-10
+
+       */
+      double[][] pgArray= new double[][]{
+                  { 0.885950017875754,  0.258800194926253},
+                  {0.258800194926253,   0.075599683438643}};
+            
+      double[][] sdArray = new double[][]{ {-0.138777878078145e-16},{0.0} };
+           
+
+      DenseMatrix64F pg=new DenseMatrix64F(pgArray);
+      DenseMatrix64F sd=new DenseMatrix64F(sdArray);
+      
+//      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.pseudoInverse(false);
+      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.symmPosDef(pg.numRows);
+      DenseMatrix64F X = new DenseMatrix64F(sd.numRows,1);
+      boolean setASuccess=solver.setA(pg);
+      solver.solve(sd, X);
+      System.out.println("setSucc="+setASuccess + "\nX="+X);
+      
+      DenseMatrix64F violation =new DenseMatrix64F(pg.numRows,1);
+      CommonOps.mult(pg, X, violation);
+      System.out.println("Violation="+violation.get(0));
+      
+      RealMatrix A=new Array2DRowRealMatrix(pgArray);
+      CholeskyDecomposition dec = new CholeskyDecomposition(A,1e-200,1e-200);
+      RealMatrix b = new Array2DRowRealMatrix(sdArray);
+      RealMatrix sol=dec.getSolver().solve(b);
+      
+
+      System.out.println("common-math sol:"+sol);
+      System.out.println("violation:"+A.multiply(sol).subtract(b));
+      
+      
+      // b=rand(2,1);a=rand(2,10);x=quadprog(a'*a,a'*b);0.5*x'*a'*a*x+b'*a*x+0.5*b'*b,qp=a*x+b, backSlash=a*(a\b)-b,[u s v]=svd(a); x=v(:,1:size(s,1))*diag([1./diag(s)])*u'*b;svdx=a*x-b
+         
+   }
    
-   //make sure QRP works as we expected
+
+   @Test
+   public void zeroMatrixSVD(){
+      DenseMatrix64F []testMatrices = new DenseMatrix64F[]{
+            RandomMatrices.createRandom(2, 2, new Random()),
+            new DenseMatrix64F(2,2),
+            new DenseMatrix64F(new double[][]{{1,1},{0,0}})
+      };
+      for(int i=0;i<testMatrices.length;i++)
+      {
+         DenseMatrix64F testMatrix = testMatrices[i];
+          System.out.println("Matrix "+ i + testMatrix);
+          SolvePseudoInverseSvd svdPseudoInverseSolver = new SolvePseudoInverseSvd(testMatrix.numRows, testMatrix.numCols);
+          boolean setAResult=svdPseudoInverseSolver.setA(new DenseMatrix64F(testMatrix));
+          int rank=SingularOps.rank(svdPseudoInverseSolver.getDecomposer(), 1e-10);
+          System.out.println("Singular Values: "+ Arrays.toString(svdPseudoInverseSolver.getDecomposer().getSingularValues()));
+          System.out.println("setA="+setAResult + " rank="+ rank);
+          System.out.println("----------------------------------------------------------------------------------------------------");
+      }
+   }
+   
+   
+   @Test
+   public void errorSVD()
+   {
+      SingularValueDecomposition<DenseMatrix64F> dec = DecompositionFactory.svd(16, 16, true, true, true);
+      DenseMatrix64F m = RandomMatrices.createRandom(16, 16, new Random(64));
+      MatrixIO.print(System.out, m,"%.10e");
+      dec.decompose(m);
+      System.out.println("SVs="+Arrays.toString(dec.getSingularValues()));
+      
+   }
+   
+   @Test
+   public void errorZeroSizeMatrix()
+   {
+      DenseMatrix64F 
+      a=new DenseMatrix64F(10,0),
+      b=new DenseMatrix64F(0,1),
+      c=new DenseMatrix64F(10,1);
+      CommonOps.mult(a, b, c);
+      
+   }
+   
    @Test
    public void matrixRankFromQRDecomositionPivot()
    {
@@ -53,6 +154,9 @@ public class GenericActiveSetQPSolverTest
       assertEquals(1, qrp.getRank());
    }
 
+   /** Basic QP Solver function test
+    * 
+    */
    @Test
    public void consistentColinearEqualityConstraints()
    {
@@ -260,6 +364,9 @@ public class GenericActiveSetQPSolverTest
       
    }
 
+   /**
+    * Randomized Test
+    */
    @Test
    public void testRandomQuadraticCostFunction()
    {
@@ -321,8 +428,6 @@ public class GenericActiveSetQPSolverTest
       }
       
    }
-   
-   
    
    @Test
    public void testSingularQuadraticCostFunction()
@@ -387,6 +492,9 @@ public class GenericActiveSetQPSolverTest
       
    }
    
+   /**
+    * Test problems download from a dataset names QPS 
+    */
    private void testCaseFromQPS(String qpsFileName, GenericActiveSetQPSolver solver) throws FileNotFoundException
    {
         DenseMatrix64F beq=null ;
@@ -458,20 +566,14 @@ public class GenericActiveSetQPSolverTest
         if(offset>0)
            solver.setLinearInequalityConstraints(aggregatedInequalityMatrix, aggregatedInequalityVector);
         
-        solver.displayProblem();
-        try{
-         solver.solve(null);
-        }
-        catch(RuntimeException e)
-        {
-           System.out.println("Solver exceeeded max iteration");
-           e.printStackTrace();
-        }
+//        solver.displayProblem();
+        solver.solve(null);
         DenseMatrix64F solution = solver.getSolution();
         CommonOps.subtract(solution, x, solution);
         System.out.println("File"+qpsFileName);
         double norm=NormOps.normP1(solution);
-        System.out.println("Norm="+ norm);
+        System.out.println("diffNormToMatlabAnswer="+ norm);
+//        assertTrue(norm<1.0f);
    }
    
    @Test
@@ -566,13 +668,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("LOTSCHD.yaml",solver); 
    }
 
-   @Test
-   public void testQPS_GENHS28() throws FileNotFoundException
-   {
-     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     solver.setThreshold(1e-6);
-     testCaseFromQPS("GENHS28.yaml",solver); 
-   }
+
 
    @Test
    public void testQPS_HS118() throws FileNotFoundException
@@ -582,13 +678,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("HS118.yaml",solver); 
    }
    
-   @Test
-   public void testQPS_DUALC1() throws FileNotFoundException
-   {
-     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     solver.setThreshold(1e-5);
-     testCaseFromQPS("DUALC1.yaml",solver); 
-   }
+
 
    @Test
    public void testQPS_DUALC2() throws FileNotFoundException
@@ -626,13 +716,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC5.yaml",solver); 
    }
    
-   @Test
-   public void testQPS_DUALC8() throws FileNotFoundException
-   {
-     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     solver.setThreshold(1e-5);
-     testCaseFromQPS("DUALC8.yaml",solver); 
-   }
+
    
    @Test
    public void testQPS_QPCBLEND() throws FileNotFoundException
@@ -649,26 +733,22 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUAL3.yaml",solver); 
    }
 
-//   @Test //constraint in/out
-   public void testQPS_CVXQP3_S() throws FileNotFoundException
+   @Test
+   public void testQPS_DUALC1() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     solver.setThreshold(1e-6);
-     testCaseFromQPS("CVXQP3_S.yaml",solver); 
+     solver.setThreshold(1e-5);
+     testCaseFromQPS("DUALC1.yaml",solver); 
+   }
+   
+   @Test
+   public void testQPS_DUALC8() throws FileNotFoundException
+   {
+     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
+     solver.setThreshold(1e-5);
+     testCaseFromQPS("DUALC8.yaml",solver); 
    }
 
-//   @Test //end-point gradient descent stock
-   public void testQPS_QPCBOEI1() throws FileNotFoundException
-   {
-     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     testCaseFromQPS("QPCBOEI1.yaml",solver); 
-   }
-//   @Test //end point jumping
-   public void testQPS_QPCBOEI2() throws FileNotFoundException
-   {
-     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     testCaseFromQPS("QPCBOEI2.yaml",solver); 
-   }
    
    @Test
    public void testQPS_PRIMAL1() throws FileNotFoundException
@@ -678,12 +758,7 @@ public class GenericActiveSetQPSolverTest
    }
    
    
-//   @Test //take so long
-   public void testQPS_PRIMALC8() throws FileNotFoundException
-   {
-     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-     testCaseFromQPS("PRIMALC8.yaml",solver); 
-   }
+
    @Test
    public void testQPS_PRIMALC2() throws FileNotFoundException
    {
@@ -703,131 +778,37 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("PRIMALC5.yaml",solver); 
    }
    
-   public void testQPS() throws FileNotFoundException
+   //take about 200s to solve
+   //@Test
+   public void testQPS_PRIMALC8() throws FileNotFoundException
    {
-
-      
-      File projectDirectory = new File(new File("").getAbsolutePath());
-      File yamlQpProblemDirectory = new File(projectDirectory, "/Matlab/YamlQpProblems");
-      File[] yamlQpProblemFileList = yamlQpProblemDirectory.listFiles();
-      
-      
-      for(int i = 0; i < yamlQpProblemFileList.length; i++)
-      {
-         String yamlName=yamlQpProblemFileList[i].getName();
-         System.out.println("yamlName="+yamlName);
-         if(!yamlName.contains("TAME.yaml"))
-            continue;
-         GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
-         testCaseFromQPS(yamlQpProblemFileList[i].getAbsolutePath(), solver);
-      }
+     GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
+     testCaseFromQPS("PRIMALC8.yaml",solver); 
    }
    
-
    
-   @Ignore
-   @Test 
-   public void choleskyDecompositionAccuracy()
-   {
-      /**
-    pg =
+// @Test //constraint in/out
+ public void testQPS_CVXQP3_S() throws FileNotFoundException
+ {
+   GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
+   solver.setThreshold(1e-6);
+   testCaseFromQPS("CVXQP3_S.yaml",solver); 
+ }
 
-      0.8859500178757540   0.2588001949262530
-      0.2588001949262530   0.0755996834386430
+// @Test //end-point gradient descent stock
+ public void testQPS_QPCBOEI1() throws FileNotFoundException
+ {
+   GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
+   testCaseFromQPS("QPCBOEI1.yaml",solver); 
+ }
+// @Test //end point jumping
+ public void testQPS_QPCBOEI2() throws FileNotFoundException
+ {
+   GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
+   testCaseFromQPS("QPCBOEI2.yaml",solver); 
+ } 
+ 
+ 
 
-    octave:13> sd
-    sd =
-
-      -1.38777878078145e-17
-      0.00000000000000e+00
-
-    octave:14> [r p]=chol(pg);
-    octave:15> r'\r\sd
-    ans =
-
-      4.41160312094377e-11
-      -1.51022339626802e-10
-
-       */
-      double[][] pgArray= new double[][]{
-                  { 0.885950017875754,  0.258800194926253},
-                  {0.258800194926253,   0.075599683438643}};
-            
-      double[][] sdArray = new double[][]{ {-0.138777878078145e-16},{0.0} };
-           
-
-      DenseMatrix64F pg=new DenseMatrix64F(pgArray);
-      DenseMatrix64F sd=new DenseMatrix64F(sdArray);
-      
-//      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.pseudoInverse(false);
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.symmPosDef(pg.numRows);
-      DenseMatrix64F X = new DenseMatrix64F(sd.numRows,1);
-      boolean setASuccess=solver.setA(pg);
-      solver.solve(sd, X);
-      System.out.println("setSucc="+setASuccess + "\nX="+X);
-      
-      DenseMatrix64F violation =new DenseMatrix64F(pg.numRows,1);
-      CommonOps.mult(pg, X, violation);
-      System.out.println("Violation="+violation.get(0));
-      
-      RealMatrix A=new Array2DRowRealMatrix(pgArray);
-      CholeskyDecomposition dec = new CholeskyDecomposition(A,1e-200,1e-200);
-      RealMatrix b = new Array2DRowRealMatrix(sdArray);
-      RealMatrix sol=dec.getSolver().solve(b);
-      
-
-      System.out.println("common-math sol:"+sol);
-      System.out.println("violation:"+A.multiply(sol).subtract(b));
-      
-      
-      // b=rand(2,1);a=rand(2,10);x=quadprog(a'*a,a'*b);0.5*x'*a'*a*x+b'*a*x+0.5*b'*b,qp=a*x+b, backSlash=a*(a\b)-b,[u s v]=svd(a); x=v(:,1:size(s,1))*diag([1./diag(s)])*u'*b;svdx=a*x-b
-         
-   }
-   
-
-   @Ignore
-   @Test
-   public void zeroMatrixSVD(){
-      DenseMatrix64F []testMatrices = new DenseMatrix64F[]{
-            RandomMatrices.createRandom(2, 2, new Random()),
-            new DenseMatrix64F(2,2),
-            new DenseMatrix64F(new double[][]{{1,1},{0,0}})
-      };
-      for(int i=0;i<testMatrices.length;i++)
-      {
-         DenseMatrix64F testMatrix = testMatrices[i];
-          System.out.println("Matrix "+ i + testMatrix);
-          SolvePseudoInverseSvd svdPseudoInverseSolver = new SolvePseudoInverseSvd(testMatrix.numRows, testMatrix.numCols);
-          boolean setAResult=svdPseudoInverseSolver.setA(new DenseMatrix64F(testMatrix));
-          int rank=SingularOps.rank(svdPseudoInverseSolver.getDecomposer(), 1e-10);
-          System.out.println("Singular Values: "+ Arrays.toString(svdPseudoInverseSolver.getDecomposer().getSingularValues()));
-          System.out.println("setA="+setAResult + " rank="+ rank);
-          System.out.println("----------------------------------------------------------------------------------------------------");
-      }
-   }
-   
-   @Ignore
-   @Test
-   public void errorSVD()
-   {
-      SingularValueDecomposition<DenseMatrix64F> dec = DecompositionFactory.svd(16, 16, true, true, true);
-      DenseMatrix64F m = RandomMatrices.createRandom(16, 16, new Random(64));
-      MatrixIO.print(System.out, m,"%.10e");
-      dec.decompose(m);
-      System.out.println("SVs="+Arrays.toString(dec.getSingularValues()));
-      
-   }
-   
-   @Ignore
-   public void errorZeroSizeMatrix()
-   {
-      DenseMatrix64F 
-      a=new DenseMatrix64F(10,0),
-      b=new DenseMatrix64F(0,1),
-      c=new DenseMatrix64F(10,1);
-      CommonOps.mult(a, b, c);
-      
-   }
-   
    
 }
