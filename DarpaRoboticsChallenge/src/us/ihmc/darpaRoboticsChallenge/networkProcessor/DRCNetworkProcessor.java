@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
@@ -29,7 +30,7 @@ public class DRCNetworkProcessor
    private final boolean useSimulatedSensors;
    private final ObjectCommunicator fieldComputerClient;
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
-   private final DRCNetworkProcessorNetworkingManager networkingManager;
+   private final AbstractNetworkProcessorNetworkingManager networkingManager;
    private final SDFFullRobotModel fullRobotModel;
    private final RobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;

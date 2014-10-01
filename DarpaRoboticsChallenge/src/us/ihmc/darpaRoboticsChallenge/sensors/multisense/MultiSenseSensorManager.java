@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.ros.node.parameter.ParameterTree;
 
+import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -18,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -29,7 +29,7 @@ public class MultiSenseSensorManager
 
    private final RobotPoseBuffer sharedRobotPoseBuffer;
    private final RosMainNode rosMainNode;
-   private final DRCNetworkProcessorNetworkingManager networkingManager;
+   private final AbstractNetworkProcessorNetworkingManager networkingManager;
    private final RosNativeNetworkProcessor rosNativeNetworkProcessor;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
@@ -53,7 +53,7 @@ public class MultiSenseSensorManager
    private MultiSenseParamaterSetter multiSenseParamaterSetter;
 
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
-         RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
+         RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters)
    {

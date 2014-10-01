@@ -16,7 +16,6 @@ import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class CameraDataReceiver
@@ -32,7 +31,7 @@ public abstract class CameraDataReceiver
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RigidBodyTransform cameraPose;
 
-   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, final DRCNetworkProcessorNetworkingManager networkingManager,
+   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, final AbstractNetworkProcessorNetworkingManager networkingManager,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.robotPoseBuffer = robotPoseBuffer;
