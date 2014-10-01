@@ -130,7 +130,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final AlphaFilteredYoVariable heightVelocityCorrectedFilteredForSingularityAvoidance;
    private final AlphaFilteredYoVariable heightAcceleretionCorrectedFilteredForSingularityAvoidance;
 
-   private final AlphaFilteredYoVariable unachievedSwingTranslationFiltered;   
+   private final DoubleYoVariable yoUnachievedSwingTranslation;
+   private final AlphaFilteredYoVariable unachievedSwingTranslationFiltered;
    private final AlphaFilteredYoVariable unachievedSwingVelocityFiltered; 
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
 
@@ -162,6 +163,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaUnreachableFootstep = new DoubleYoVariable(namePrefix + "AlphaUnreachableFootstep", registry);
       alphaUnreachableFootstep.set(0.25);
       
+      yoUnachievedSwingTranslation = new DoubleYoVariable(namePrefix + "UnachievedSwingTranslation", registry);
       unachievedSwingTranslationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingTranslationFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingVelocityFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingVelocityFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingAccelerationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingAccelerationFiltered", registry, alphaUnreachableFootstep);
@@ -322,18 +324,21 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    {
       virtualLegTangentialFrameHipCentered.update();
       virtualLegTangentialFrameAnkleCentered.update();
-      
+
+      anklePosition.setToZero(endEffectorFrame);
+      anklePosition.changeFrame(worldFrame);
+      yoCurrentFootPosition.set(anklePosition);
+      anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
+      currentLegLength.set(-anklePosition.getZ());
+   }
+
+   public void resetSwingParameters()
+   {
       yoDesiredFootPosition.setToNaN();
       yoCorrectedDesiredFootPosition.setToNaN();
       yoDesiredFootLinearVelocity.setToNaN();
       yoCorrectedDesiredFootLinearVelocity.setToNaN();
 
-      alphaSwingSingularityAvoidance.set(0.0);
-
-      unachievedSwingTranslation.setToZero(unachievedSwingTranslation.getReferenceFrame());
-      unachievedSwingVelocity.setToZero(unachievedSwingVelocity.getReferenceFrame());
-      unachievedSwingAcceleration.setToZero(unachievedSwingAcceleration.getReferenceFrame());
-      
       if (visualize)
       {
          yoDesiredFootPositionGraphic.hideGraphicObject();
@@ -347,11 +352,10 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          }
       }
 
-      anklePosition.setToZero(endEffectorFrame);
-      anklePosition.changeFrame(worldFrame);
-      yoCurrentFootPosition.set(anklePosition);
-      anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
-      currentLegLength.set(-anklePosition.getZ());
+      alphaSwingSingularityAvoidance.set(0.0);
+      unachievedSwingTranslation.setToZero(unachievedSwingTranslation.getReferenceFrame());
+      unachievedSwingVelocity.setToZero(unachievedSwingVelocity.getReferenceFrame());
+      unachievedSwingAcceleration.setToZero(unachievedSwingAcceleration.getReferenceFrame());
    }
 
    public void setCheckVelocityForSwingSingularityAvoidance(boolean value)
@@ -411,6 +415,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       double desiredOrMaxLegLength = - Math.min(desiredLegLength.getDoubleValue(), maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() * maximumLegLength.getDoubleValue());
       double correctedDesiredPositionZ = desiredOrMaxLegLength; //(1.0 - alphaSingularityAvoidance.getDoubleValue()) * desiredFootPosition.getZ() + alphaSingularityAvoidance.getDoubleValue() * desiredOrMaxLegLength;
       unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
+      unachievedSwingTranslation.changeFrame(worldFrame);
+      yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
       desiredFootPosition.setZ(correctedDesiredPositionZ);
       
       correctedDesiredLegLength.set(Math.abs(correctedDesiredPositionZ));
