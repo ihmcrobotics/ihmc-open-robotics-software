@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.sensors;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -67,7 +68,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       new RosCameraReceiver(cameraParamaters, robotPoseBuffer, rosMainNode, networkingManager, ppsTimestampOffsetProvider,null, sensorURI);
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(),null);
-      networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
+      networkingManager.getControllerCommandHandler().attachListener(CameraInformationPacket.class, cameraInfoServer);
 
       new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.IBEO_ID), lidarDataFilter);
 
