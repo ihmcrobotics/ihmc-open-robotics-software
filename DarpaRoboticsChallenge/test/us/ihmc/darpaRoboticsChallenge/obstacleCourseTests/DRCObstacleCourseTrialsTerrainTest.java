@@ -110,7 +110,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
-      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.05, 0.05, 0.005});
+      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.035, 0.035, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.02, 0.01, 0.0}, new double[] {0.2, 0.05, 0.01});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 0.5);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
@@ -202,7 +202,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       assertTrue(success);
 
-      //Val 4.66869431114822, 5.13869854323523, 0.9895389534180602
       Point3d center = new Point3d(4.433273741150176, 5.75375933959496, 0.8417057558698022);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
@@ -363,7 +362,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       assertTrue(success);
 
-      //Val 10.003419446869506, 9.832393478664544, 1.2161804971009575
       Point3d center = new Point3d(10.225031808342184, 10.216934963379252, 0.9057308036043942);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
