@@ -42,10 +42,17 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 //      SpatialForceVector leftFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] { 7.02, -23.79, 3.09, 189.6, 322.5, 1081.0 });
 //      SpatialForceVector rightFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] {-1.12, -2.46, -8.94, 27.54, 3.70, -101.7});
 
-      SpatialForceVector leftFootForceSensorTareOffset_20140903 = new SpatialForceVector(null, new double[] { 7.1, -24.2, 1.96, 187.9, 306.0, 1131.6 });
-      SpatialForceVector rightFootForceSensorTareOffset_20140903 = new SpatialForceVector(null, new double[] { -1.0, -2.7, -10.1, 61.1, 16.3, -143.0 });
+//      SpatialForceVector leftFootForceSensorTareOffset_20140903 = new SpatialForceVector(null, new double[] { 7.1, -24.2, 1.96, 187.9, 306.0, 1131.6 });
+//      SpatialForceVector rightFootForceSensorTareOffset_20140903 = new SpatialForceVector(null, new double[] { -1.0, -2.7, -10.1, 61.1, 16.3, -143.0 });
 
-      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140903, rightFootForceSensorTareOffset_20140903);
+//      SpatialForceVector leftFootForceSensorTareOffset_20140909 = new SpatialForceVector(null, new double[] {6.6, -23.4, 2.2, 193.9, 298.5, 1142});
+//      SpatialForceVector rightFootForceSensorTareOffset_20140909 = new SpatialForceVector(null, new double[] {-1.5, -2.8, -10.8, 66.0, -2.0, -156.0});
+
+      SpatialForceVector leftFootForceSensorTareOffset_20140916 = new SpatialForceVector(null, new double[] {6.98, -24.8, 2.01, 175.0, 313.0, 1102.0});
+      SpatialForceVector rightFootForceSensorTareOffset_20140916 = new SpatialForceVector(null, new double[] {-1.42, -2.89, -11.2, 83.0, -15.0, -138.2});
+
+      
+      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140916, rightFootForceSensorTareOffset_20140916);
    }
 
    public static final SideDependentList<RigidBodyTransform> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
