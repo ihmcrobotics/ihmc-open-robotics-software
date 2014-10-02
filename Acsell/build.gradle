@@ -34,12 +34,6 @@ jar {
 	}
 }
 
-task print_dependencies() {
-    configurations.compile.files.each { file ->
-        println "$file.name -> $file.path"
-    }
-}
-
 task publish(dependsOn: assemble) {
 
 	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.20/root/acsell")
