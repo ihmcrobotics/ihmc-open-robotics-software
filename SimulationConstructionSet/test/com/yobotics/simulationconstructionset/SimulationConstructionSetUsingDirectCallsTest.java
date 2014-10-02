@@ -639,16 +639,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean isGroundVisibleFromSCS2 = stateIfTerrainIsVisible(scs);
       assertTrue(isGroundVisibleFromSCS2);
 
-      CollisionGroup collisionGroup = new CollisionGroup();
-      scs.registerCollisionGroup(collisionGroup);
-      ArrayList<CollisionGroup> collisionGroupFromSCS = scs.getCollisionGroups();
-      assertArrayOfObjectsContainsTheObject(collisionGroupFromSCS, collisionGroup);
-
-      ArrayList<CollisionGroup> arrayListOfCollisionGroup = createArrayListOfCollisionGroup(3);
-      scs.registerCollisionGroups(arrayListOfCollisionGroup);
-      ArrayList<CollisionGroup> collisionGroupFromSCS2 = scs.getCollisionGroups();
-      assertArrayOfObjectsContainsTheArrayOfObject(collisionGroupFromSCS2, arrayListOfCollisionGroup);
-
       ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
       assertArrayOfObjectsContainsTheObject(yoGraphicListRegistriesFromSCS, yoGraphicsListRegistry);
       
@@ -1311,16 +1301,16 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return playCycleListener;
    }
 
-   private ArrayList<CollisionGroup> createArrayListOfCollisionGroup(int numberOfElements)
-   {
-      ArrayList<CollisionGroup> arrayListOfCollisionGroup = new ArrayList<CollisionGroup>();
-      for (int i = 0; i < numberOfElements; i++)
-      {
-         arrayListOfCollisionGroup.add(new CollisionGroup());
-      }
-
-      return arrayListOfCollisionGroup;
-   }
+//   private ArrayList<CollisionGroup> createArrayListOfCollisionGroup(int numberOfElements)
+//   {
+//      ArrayList<CollisionGroup> arrayListOfCollisionGroup = new ArrayList<CollisionGroup>();
+//      for (int i = 0; i < numberOfElements; i++)
+//      {
+//         arrayListOfCollisionGroup.add(new CollisionGroup());
+//      }
+//
+//      return arrayListOfCollisionGroup;
+//   }
 
    private <T> void assertArrayOfObjectsContainsTheArrayOfObject(ArrayList<T> mainArrayList, ArrayList<T> arrayList)
    {

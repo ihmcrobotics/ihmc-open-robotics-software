@@ -7,10 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasDemo03 extends DRCDemo03
 {
@@ -22,35 +19,17 @@ public class AtlasDemo03 extends DRCDemo03
 
    public static void main(String[] args) throws JSAPException
    {
-      // Flag to set robot model
-      JSAP jsap = new JSAP();
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
+      DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, false);
+
+      DRCRobotModel model = null;
+      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
       
-      DRCRobotModel model;
-      try
-      {
-         jsap.registerParameter(robotModel);
+      if (model == null)
+         model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
 
-         JSAPResult config = jsap.parse(args);
+      if (model == null)
+          throw new RuntimeException("No robot model selected");
 
-         if (config.success())
-         {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
-         }
-         else
-         {
-            System.out.println("Enter a robot model.");
-            return;
-         }
-      }
-      catch (Exception e)
-      {
-         System.out.println("Robot model not found");
-         e.printStackTrace();
-         return;
-      }
-     
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
 
