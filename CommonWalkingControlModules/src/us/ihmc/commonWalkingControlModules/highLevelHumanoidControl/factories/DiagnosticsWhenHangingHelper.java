@@ -13,7 +13,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -21,7 +20,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class DiagnosticsWhenHangingHelper
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final OneDoFJoint parentJoint;
    private final boolean isSpineJoint;
@@ -190,6 +189,11 @@ public class DiagnosticsWhenHangingHelper
    public double getTorqueOffset()
    {
       return torqueOffset.getDoubleValue();
+   }
+
+   public void setTorqueOffset(double torqueOffset)
+   {
+      this.torqueOffset.set(torqueOffset);
    }
 
 
