@@ -1204,7 +1204,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       currXform.setRotationAndZeroTranslation(rotationMatrix);
       currXform.setTranslation(positionOffset);
-
+      currXform.normalize();
    }
 
    public void keyPressed(Key key)
