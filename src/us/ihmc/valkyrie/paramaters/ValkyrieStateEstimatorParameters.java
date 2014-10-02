@@ -73,8 +73,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       useTwoPolesForIMUFiltering = false; //true; //runningOnRealRobot;
       doFiniteDifferenceForJointVelocities = false;
 
-      doElasticityCompensation = false;
-      defaultJointStiffness = Double.POSITIVE_INFINITY;
+      doElasticityCompensation = true;
+      defaultJointStiffness = 40000.0; //Double.POSITIVE_INFINITY; 
 
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
             angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
