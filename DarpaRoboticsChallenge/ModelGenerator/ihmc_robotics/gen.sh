@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /opt/ros/groovy/setup.bash
+source /opt/ros/indigo//setup.bash
 export ROS_PACKAGE_PATH=$PWD/../:$ROS_PACKAGE_PATH
 
 #rosrun xacro xacro.py ../atlas_description/robots/atlas_v3.urdf.xacro > atlas_v3.urdf
@@ -22,8 +22,8 @@ do
 	INPUT_SDF=sdf/${INPUT%.urdf.xacro}.sdf
 	echo $INPUT_XACRO to $INPUT_URDF to $INPUT_SDF
 
-	rosrun xacro xacro.py $INPUT_XACRO -o $INPUT_URDF
-	gzsdf print $INPUT_URDF |sed 's/\[\([[:digit:]]\)\]\//_\1_/g' > $INPUT_SDF
+	rosrun xacro xacro.py $INPUT_XACRO |sed 's/\[\([[:digit:]]\)\]\//_\1_/g' > $INPUT_URDF
+	gzsdf print $INPUT_URDF  > $INPUT_SDF
 
 	ROBOT=${INPUT%.urdf.xacro}
 	MODELDIR=$HOME/.gazebo/models/$ROBOT
