@@ -43,9 +43,7 @@ task publish(dependsOn: assemble) {
 	def hosts = new org.apache.maven.wagon.providers.ssh.knownhost.NullKnownHostProvider()
 	hosts.setHostKeyChecking("no")
 	
-	
-	println configurations.compile
-	
+		
 	doLast {
 		def wagon = new org.apache.maven.wagon.providers.ssh.jsch.ScpWagon() 
 		wagon.setKnownHostsProvider(hosts)
