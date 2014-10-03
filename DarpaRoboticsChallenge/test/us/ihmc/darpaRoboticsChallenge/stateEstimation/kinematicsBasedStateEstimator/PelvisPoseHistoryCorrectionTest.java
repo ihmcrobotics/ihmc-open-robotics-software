@@ -141,8 +141,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       sendPelvisCorrectionPackets = false;
       assertTrue(success);
       
-      //Note: once Atlas does not fall over, this bounding box test will fail. It needs to be updated with the expected final position
-      Point3d center = new Point3d();
+      Point3d center = new Point3d(0.6965598483152976, 0.14814849146917242, 0.8455816468141424);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
