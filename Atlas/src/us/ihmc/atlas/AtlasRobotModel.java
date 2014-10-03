@@ -100,7 +100,7 @@ public class AtlasRobotModel implements DRCRobotModel
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters();
       drivingControllerParameters = new AtlasDrivingControllerParameters();
-      networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG);
+      networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
    }
 
    @Override
