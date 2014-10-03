@@ -61,7 +61,7 @@ public class DRCNetworkProcessor
       {
          String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
          if(NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-            kryoIP = "10.66.171.41";
+            kryoIP = NetworkConfigParameters.BEHAVIOR_MODULE_IP;
          
          this.fieldComputerClient = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TCP_PORT,
                new IHMCCommunicationKryoNetClassList());
