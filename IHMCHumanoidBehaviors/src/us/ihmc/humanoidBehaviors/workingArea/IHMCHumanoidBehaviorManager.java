@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.workingArea.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.workingArea.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.workingArea.behaviors.simpleBehaviors.SimpleForwardingBehavior;
 import us.ihmc.humanoidBehaviors.workingArea.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.workingArea.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.workingArea.dispatcher.BehaviorDisptacher;
@@ -31,8 +30,8 @@ public class IHMCHumanoidBehaviorManager
       HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
-      BehaviorDisptacher dispatcher = createDispatcher(fullRobotModel, communicationBridge, robotDataReceiver, desiredBehaviorControlSubscriber,
-            desiredBehaviorSubscriber);
+      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, fullRobotModel, robotDataReceiver, desiredBehaviorControlSubscriber,
+            desiredBehaviorSubscriber, communicationBridge, registry);
 
       createAndRegisterBehaviors(dispatcher, fullRobotModel, yoTime, communicationBridge);
 
@@ -55,26 +54,9 @@ public class IHMCHumanoidBehaviorManager
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel,
          DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
+
       ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
-   }
-
-   /**
-    * Create the BehaviorDispatcher with two default behaviors.
-    * DO NOT modify this when creating a new behavior. Add the new behavior using the createAndRegisterBehaviors method
-    * @return BehaviorDisptacher
-    */
-   private BehaviorDisptacher createDispatcher(FullRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
-         RobotDataReceiver robotDataReceiver, HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
-         HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber)
-   {
-      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, fullRobotModel, robotDataReceiver, desiredBehaviorControlSubscriber,
-            desiredBehaviorSubscriber, communicationBridge, registry);
-      SimpleForwardingBehavior simpleForwardingBehavior = new SimpleForwardingBehavior(communicationBridge);
-      simpleForwardingBehavior.attachCommunicationBridge(communicationBridge);
-
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.STOP, simpleForwardingBehavior);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(communicationBridge));
-      return dispatcher;
    }
 }
