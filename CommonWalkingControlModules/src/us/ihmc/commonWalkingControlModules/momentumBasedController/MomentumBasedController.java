@@ -106,6 +106,10 @@ public class MomentumBasedController
    private final YoFrameVector finalDesiredPelvisAngularAcceleration;
    private final YoFrameVector desiredPelvisForce;
    private final YoFrameVector desiredPelvisTorque;
+   
+   private final FrameVector centroidalMomentumRateSolutionLinearPart;
+   private final YoFrameVector qpOutputCoMAcceleration;
+
 
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
@@ -154,6 +158,8 @@ public class MomentumBasedController
    private final DoubleYoVariable footCoPOffsetX, footCoPOffsetY;
    private final EnumYoVariable<RobotSide> footUnderCoPControl;   
 
+   private final double totalMass;
+   
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
@@ -164,7 +170,8 @@ public class MomentumBasedController
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-
+      totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      
       this.footSwitches = footSwitches;
 
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
@@ -205,6 +212,9 @@ public class MomentumBasedController
       this.finalDesiredPelvisAngularAcceleration = new YoFrameVector("finalDesiredPelvisAngularAcceleration", "", pelvisFrame, registry);
       this.desiredPelvisForce = new YoFrameVector("desiredPelvisForce", "", centerOfMassFrame, registry);
       this.desiredPelvisTorque = new YoFrameVector("desiredPelvisTorque", "", centerOfMassFrame, registry);
+
+      centroidalMomentumRateSolutionLinearPart = new FrameVector(centerOfMassFrame);
+      this.qpOutputCoMAcceleration = new YoFrameVector("qpOutputCoMAcceleration", "", centerOfMassFrame, registry);
 
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
@@ -419,6 +429,11 @@ public class MomentumBasedController
          //throw new RuntimeException(momentumControlModuleException);
       }
 
+      SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
+      centroidalMomentumRateSolution.packLinearPart(centroidalMomentumRateSolutionLinearPart);
+      centroidalMomentumRateSolutionLinearPart.scale(1.0 / totalMass);
+      qpOutputCoMAcceleration.set(centroidalMomentumRateSolutionLinearPart);
+      
       Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
 
       for (RigidBody rigidBody : externalWrenches.keySet())
