@@ -78,7 +78,7 @@ public class ROSMessageGenerator
 		}
 		
 		String messageName = clazz.getSimpleName() + "Message";
-		File messageFile = new File(messageFolder + "\\" + messageName + ".msg");
+		File messageFile = new File((messageFolder + File.separator + messageName + ".msg"));
 
 		if (overwrite || !messageFile.exists())
 		{
