@@ -10,6 +10,16 @@ setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
 
+buildscript {
+  repositories {
+      mavenCentral() 
+  }  
+  dependencies {
+      classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
+  }
+}
+
+apply plugin: 'org.hidetake.ssh'
 
 remotes 
 {
