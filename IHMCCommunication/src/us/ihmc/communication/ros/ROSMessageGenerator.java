@@ -1,14 +1,13 @@
 package us.ihmc.communication.ros;
 
+
+
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream.GetField;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -28,16 +27,16 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.ros.MessageAndServiceInterfaceGenerator;
 
 public class ROSMessageGenerator
 {
-
-	private String messageFolder;
+	
+	private static String messageFolder= ("../ROSJavaBootstrap/ROSMessagesAndServices/ihmc_msgs/msg/").replace("/", File.separator);
 	boolean overwriteSubMessages;
 
-	public ROSMessageGenerator(String messageFolder, Boolean overwriteSubMessages)
+	public ROSMessageGenerator(Boolean overwriteSubMessages)
 	{
-		this.messageFolder = messageFolder;
 		this.overwriteSubMessages = overwriteSubMessages;
 	}
 
@@ -58,19 +57,8 @@ public class ROSMessageGenerator
 		toConvert.add(HeadOrientationPacket.class);
 		toConvert.add(PauseCommand.class);
 		toConvert.add(PelvisPosePacket.class);
-
-
-
-
-		String destination = "us/ihmc/communication/msgs/";
-		String messageFolder = ("generated/" + destination).replace("/", File.separator);
-		File file = new File(messageFolder);
-		if (!file.exists())
-		{
-			file.mkdirs();
-		}
-
-		ROSMessageGenerator messageGenerator = new ROSMessageGenerator(messageFolder, false);
+		
+		ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
 		for (Class clazz : toConvert)
 		{
 			messageGenerator.createNewRosMessage(clazz, true);
@@ -83,7 +71,14 @@ public class ROSMessageGenerator
 		{
 			return "";
 		}
-		String messageName = clazz.getSimpleName();
+		
+		File file = new File(messageFolder);
+		if (!file.exists())
+		{
+			file.mkdirs();
+		}
+		
+		String messageName = clazz.getSimpleName() + "Message";
 		File messageFile = new File(messageFolder + "\\" + messageName + ".msg");
 
 		if (overwrite || !messageFile.exists())
@@ -95,7 +90,7 @@ public class ROSMessageGenerator
 				System.out.println("Message Created: " + messageFile.getName());
 				PrintStream fileStream = new PrintStream(messageFile);
 
-				String outBuffer = "// " + messageName + System.lineSeparator() + System.lineSeparator();
+				String outBuffer = "# " + messageName + System.lineSeparator() + System.lineSeparator();
 
 				Field[] fields = clazz.getFields();
 				for (Field field : fields)
@@ -143,9 +138,10 @@ public class ROSMessageGenerator
 		else if (clazz.isEnum())
 		{
 			Object[] enumList = clazz.getEnumConstants();
+			buffer += "#Options for enum";
 			for (int i = 0; i < enumList.length; i++)
 			{
-				buffer += "uint8";
+				buffer += "# uint8";
 				buffer += " " + enumList[i];
 				buffer += " = " + i + System.lineSeparator();
 			}
@@ -164,6 +160,7 @@ public class ROSMessageGenerator
 		else if (clazz.equals(Quat4d.class)){buffer += "geometry_msgs/Quaternion";}
 		else if (clazz.equals(Point3d.class) || (clazz.equals(Vector3d.class))){buffer += "geometry_msgs/Vector3";}
 		else{
+			//buffer += "ihmc_msg/";
 			buffer += createNewRosMessage(clazz, overwriteSubMessages);
 		}
 		return buffer;
