@@ -9,3 +9,61 @@ setupDefaultDirectoryStructure()
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
+
+
+remotes 
+{
+	valkyrieRealtimeComputer
+	{
+		host = '139.169.44.45'
+		user = 'root'
+		password = 'unknownpw'
+		knownHosts = allowAnyHosts
+	}
+}
+
+jar {
+	List depend = []
+	configurations.runtime.each {
+		depend.add('lib/' + it.name)
+	}
+	manifest {		
+		attributes('Created-By': 'IHMC Gradle Build Script', 'Implementation-Vendor': 'IHMC', 'Class-Path': depend.join(' '))
+	}
+}
+
+task deploy(dependsOn: assemble) {
+	
+	def directory = 'valkyrie'
+
+	doLast {
+		sshexec {
+			session(remotes.atlasRealtimeComputer)
+			{
+				execute("mkdir -p " + directory + "/lib")
+				execute("mkdir -p " + directory + "/Configrations")
+				
+				configurations.runtime.each 
+				{
+					put it, directory + '/lib'
+				}
+				
+				put jar.archivePath, directory + '/ValkyrieController.jar'
+				
+				def scriptDir = new File("launchScripts/")
+				def scriptDirCollection = files { scriptDir.listFiles() }
+				put scriptDirCollection, directory
+				
+				scriptDirCollection.each
+				{
+					execute 'chmod 777 ' + directory + '/' + it.name
+				}
+				
+				put "Configurations/valkyrie_network_config.ini", directory + "/Configurations"
+				
+				
+			}
+			
+		}
+	}
+}
