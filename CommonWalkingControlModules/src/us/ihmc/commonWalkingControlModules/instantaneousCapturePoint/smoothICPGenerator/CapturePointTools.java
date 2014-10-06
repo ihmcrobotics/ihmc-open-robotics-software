@@ -23,7 +23,7 @@ public class CapturePointTools
       arrayToPack.get(0).add(footstepList.get(1));
       arrayToPack.get(0).scale(0.5);
 
-      for (int i = 1; i < numberFootstepsToConsider - 1; i++)
+      for (int i = 1; i < numberFootstepsToConsider; i++)
       {
          arrayToPack.get(i).set(footstepList.get(i));
       }
