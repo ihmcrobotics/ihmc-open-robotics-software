@@ -27,7 +27,6 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.ros.MessageAndServiceInterfaceGenerator;
 
 public class ROSMessageGenerator
 {
