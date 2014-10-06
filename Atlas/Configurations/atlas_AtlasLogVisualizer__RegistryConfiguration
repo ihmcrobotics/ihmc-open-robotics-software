@@ -1,4 +1,5 @@
 root*false*false
+root.atlas*false*false
 root.loggedatlas*false*false
 root.loggedatlas.AtlasControlThread*false*false
 root.loggedatlas.AtlasDispatcherThread*false*false
