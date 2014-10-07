@@ -818,6 +818,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d ecmpLocal = new FramePoint2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
+      private Footstep transferFromDesiredFootstep;
       private Footstep nextFootstep;
       private double captureTime;
 
@@ -975,6 +976,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          footSwitches.get(swingSide).reset();
 
+         transferFromDesiredFootstep = nextFootstep;
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
             nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
@@ -1043,6 +1045,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          icpAndMomentumBasedController.computeCapturePoint();
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+         transferToAndNextFootstepsData.setTransferFromDesiredFootstep(transferFromDesiredFootstep);
          //FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
          supportLeg.set(supportSide);

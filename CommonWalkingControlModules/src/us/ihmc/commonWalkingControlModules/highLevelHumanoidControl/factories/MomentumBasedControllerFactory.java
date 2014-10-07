@@ -178,6 +178,7 @@ public class MomentumBasedControllerFactory implements HumanoidControllerFactory
                                                                                        minimumHeightAboveGround, nominalHeightAboveGround,
                                                                                        maximumHeightAboveGround, doubleSupportPercentageIn, yoTime,
                                                                                        yoGraphicsListRegistry, registry);
+      centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
       
       double icpInFromCenter = 0.006; //0.01;
       double doubleSupportFirstStepFraction = 0.5;

@@ -18,6 +18,7 @@ public class TransferToAndNextFootstepsData
    private FrameConvexPolygon2d transferToFootPolygonInSoleFrame;
    
    private Footstep transferFromFootstep;
+   private Footstep transferFromDesiredFootstep;
    private Footstep transferToFootstep;
    private RobotSide transferToSide;
    
@@ -60,7 +61,17 @@ public class TransferToAndNextFootstepsData
    {
       this.transferToFootstep = transferToFootstep;
    }
-   
+
+   public Footstep getTransferFromDesiredFootstep()
+   {
+      return transferFromDesiredFootstep;
+   }
+
+   public void setTransferFromDesiredFootstep(Footstep previousDesiredFootstep)
+   {
+      this.transferFromDesiredFootstep = previousDesiredFootstep;
+   }
+
    public void setCurrentDesiredICP(FramePoint2d currentICP, FrameVector2d currentICPVelocity) 
    {
       currentDesiredICP = new Point3d(currentICP.getX(), currentICP.getY(), 0.0);
