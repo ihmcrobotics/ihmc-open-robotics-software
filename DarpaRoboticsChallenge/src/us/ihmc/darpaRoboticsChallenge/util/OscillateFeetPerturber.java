@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
+package us.ihmc.darpaRoboticsChallenge.util;
 
 import java.util.List;
 
