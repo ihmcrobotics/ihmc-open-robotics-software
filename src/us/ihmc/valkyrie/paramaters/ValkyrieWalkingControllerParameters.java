@@ -493,40 +493,74 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 40.0 : 200.0;
       double zetaOrientation = runningOnRealRobot ? 0.3 : 0.7;
-      double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
       
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public double getHoldKpXY()
+   public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
    {
-      return 100.0;
+      YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
+
+      double kpXY = 100.0;
+      double kpZ = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.2 : 1.0;
+      double kpXYOrientation = runningOnRealRobot ? 40.0 : 100.0;
+      double kpZOrientation = runningOnRealRobot ? 40.0 : 100.0;
+      double zetaOrientation = runningOnRealRobot ? 0.2 : 1.0;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
    }
 
    @Override
-   public double getHoldKpOrientation()
+   public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
    {
-      if (!runningOnRealRobot) return 100.0;
-      return 40.0;
-   }
+      YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
 
-   @Override
-   public double getHoldZeta()
-   {
-      if (!runningOnRealRobot) return 1.0;
-      return 0.2;
+      double kpXY = 100.0;
+      double kpZ = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
+      double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
+      double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
+      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
    }
 
    @Override
@@ -545,24 +579,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean doPrepareManipulationForLocomotion()
    {
       return true;
-   }
-
-   @Override
-   public double getToeOffKpXY()
-   {
-      return 100.0;
-   }
-
-   @Override
-   public double getToeOffKpOrientation()
-   {
-      return 200.0;
-   }
-
-   @Override
-   public double getToeOffZeta()
-   {
-      return 0.4;
    }
 
    @Override
