@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class PlaneContactStateCommand
 {

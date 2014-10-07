@@ -4,8 +4,6 @@ import java.util.List;
 
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
@@ -24,6 +22,7 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 

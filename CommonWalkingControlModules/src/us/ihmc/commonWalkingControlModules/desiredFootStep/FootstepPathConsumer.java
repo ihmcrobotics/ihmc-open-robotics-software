@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotSide.SideDependentList;
@@ -15,6 +14,7 @@ import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 /**
  * User: Matt
