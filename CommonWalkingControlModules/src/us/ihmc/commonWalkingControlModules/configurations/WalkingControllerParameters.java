@@ -97,6 +97,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getZetaCoMHeight();
 
+   public abstract boolean getCoMHeightDriftCompensation();
+
    public abstract double getTrajectoryTimeHeadOrientation();
 
    public abstract double getKpUpperBody();

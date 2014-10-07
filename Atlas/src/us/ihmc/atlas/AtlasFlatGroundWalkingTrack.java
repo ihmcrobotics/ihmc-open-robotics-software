@@ -6,11 +6,14 @@ import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.OscillateFeetPerturber;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.robotSide.RobotSide;
 
 import com.martiansoftware.jsap.JSAPException;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
@@ -57,8 +60,29 @@ public class AtlasFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
                                     cheatWithGroundHeightAtForFootstep, model);
+      
+      createOscillateFeetPerturber(drcFlatGroundWalkingTrack);
+   }
+
+   private static void createOscillateFeetPerturber(DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
+   {
+      SimulationConstructionSet simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
+      SDFRobot robot = drcFlatGroundWalkingTrack.getDrcSimulation().getRobot();
+      
+      int ticksPerPerturbation = 10;
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.012, 0.011});
+      
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{0.0, 0, 3.3});
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{0.0, 0, 1.3});
+      
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{0.0, 0, 7.3});
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0., 0, 1.11});
+
+      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
    }
 
    private static BumpyGroundProfile createBumpyGroundProfile()

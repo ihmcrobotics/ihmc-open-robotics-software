@@ -358,6 +358,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public boolean getCoMHeightDriftCompensation()
+   {
+      return false;
+   }
+
+   @Override
    public double getDefaultDesiredPelvisPitch()
    {
       return 0.0;

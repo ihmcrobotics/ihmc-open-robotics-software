@@ -13,6 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -76,6 +77,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
    private final YoGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
 
+   private final BooleanYoVariable correctForCoMHeightDrift = new BooleanYoVariable("correctForCoMHeightDrift", registry);
+
    private final BagOfBalls bagOfBalls;
 
    private WalkOnTheEdgesManager walkOnTheEdgesManager;
@@ -96,6 +99,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       offsetHeightAboveGroundPrevValue.set(0.0);
       offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
@@ -197,6 +201,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
 
+   @Override
    public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
       this.walkOnTheEdgesManager = walkOnTheEdgesManager;
@@ -218,6 +223,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       this.maximumHeightAboveGround.set(maximumHeightAboveGround);
    }
 
+   public void setCoMHeightDriftCompensation(boolean activate)
+   {
+      correctForCoMHeightDrift.set(activate);
+   }
+
+   @Override
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
          List<PlaneContactState> contactStates)
    {
@@ -269,6 +280,17 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       FramePoint transferFromContactFramePosition = new FramePoint(transferFromFootstep.getPoseReferenceFrame());
       FramePoint transferToContactFramePosition = new FramePoint(transferToFootstep.getPoseReferenceFrame());
+
+      Footstep transferFromDesiredFootstep = transferToAndNextFootstepsData.getTransferFromDesiredFootstep();
+      if (correctForCoMHeightDrift.getBooleanValue() && transferFromDesiredFootstep != null)
+      {
+         FramePoint transferFromDesiredContactFramePosition = new FramePoint(transferFromDesiredFootstep.getPoseReferenceFrame());
+         transferFromDesiredContactFramePosition.changeFrame(transferFromContactFramePosition.getReferenceFrame());
+         FrameVector fromContactFrameDrift = new FrameVector(transferFromContactFramePosition.getReferenceFrame());
+         fromContactFrameDrift.sub(transferFromContactFramePosition, transferFromDesiredContactFramePosition);
+         fromContactFrameDrift.changeFrame(transferToContactFramePosition.getReferenceFrame());
+         transferToContactFramePosition.setZ(transferToContactFramePosition.getZ() + fromContactFrameDrift.getZ());
+      }
 
       transferFromContactFramePosition.changeFrame(worldFrame);
       transferToContactFramePosition.changeFrame(worldFrame);
@@ -554,6 +576,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final Point2d queryPoint = new Point2d();
    private final Point2d solutionPoint = new Point2d();
 
+   @Override
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       getCenterOfMass2d(queryPoint, centerOfMassHeightInputData.getCenterOfMassFrame());
@@ -624,6 +647,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       getPoint2d(point2dToPack, coM);
    }
 
+   @Override
    public boolean hasBeenInitializedWithNextStep()
    {
       return hasBeenInitializedWithNextStep.getBooleanValue();

@@ -12,7 +12,7 @@ import us.ihmc.robotSide.RobotSide;
 public interface CoMHeightTrajectoryGenerator
 {
    public abstract void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager);
-   
+
    public abstract void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates);
    
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData);
