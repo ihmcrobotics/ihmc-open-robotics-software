@@ -106,8 +106,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
+    	  SCSLidarDataReceiver scsLidarDataReceiver = new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
                sensorInformation.getLidarParameters());
+    	  Thread lidarThread = new Thread(scsLidarDataReceiver);
+    	  lidarThread.start();
          
          if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
          {

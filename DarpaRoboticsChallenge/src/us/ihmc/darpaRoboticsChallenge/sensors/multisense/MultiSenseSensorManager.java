@@ -100,6 +100,8 @@ public class MultiSenseSensorManager
    {
       this.multisenseLidarDataReceiver = new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider,
             sharedRobotPoseBuffer, rosMainNode, lidarParamaters);
+      Thread lidarThread = new Thread(multisenseLidarDataReceiver);
+      lidarThread.start();
    }
 
    private void registerCameraReceivers()
