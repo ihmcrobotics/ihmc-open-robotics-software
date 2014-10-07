@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -10,6 +9,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 

@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 /**
  * User: Matt

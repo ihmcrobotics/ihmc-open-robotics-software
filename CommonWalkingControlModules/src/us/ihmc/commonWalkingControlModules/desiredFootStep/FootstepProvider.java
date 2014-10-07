@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+
 public interface FootstepProvider
 {
    public abstract Footstep poll();

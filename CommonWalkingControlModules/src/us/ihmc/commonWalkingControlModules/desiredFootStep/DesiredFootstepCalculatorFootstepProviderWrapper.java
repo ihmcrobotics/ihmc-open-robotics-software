@@ -4,6 +4,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 
 public class DesiredFootstepCalculatorFootstepProviderWrapper implements FootstepProvider

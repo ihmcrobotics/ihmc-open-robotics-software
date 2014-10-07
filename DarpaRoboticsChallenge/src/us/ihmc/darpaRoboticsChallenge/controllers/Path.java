@@ -2,9 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.userInterface.modifiableObjects.PathActivationLevel;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 public interface Path
 {

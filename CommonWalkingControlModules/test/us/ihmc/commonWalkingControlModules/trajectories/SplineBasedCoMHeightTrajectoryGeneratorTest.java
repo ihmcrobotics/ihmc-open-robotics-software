@@ -15,7 +15,6 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.NonFlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootSpoof;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPoseFinder;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
@@ -28,6 +27,7 @@ import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 public class SplineBasedCoMHeightTrajectoryGeneratorTest
 {
