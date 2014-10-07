@@ -1564,6 +1564,5 @@
       </geometry>
     </collision>
   </link>
-  </gazebo>
 </robot>
 
