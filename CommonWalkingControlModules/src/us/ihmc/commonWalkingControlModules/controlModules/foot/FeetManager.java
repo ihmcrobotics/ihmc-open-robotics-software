@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -19,13 +18,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-
 
 public class FeetManager
 {
@@ -46,24 +42,9 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final DoubleYoVariable holdKpXY = new DoubleYoVariable("holdKpXY", registry);
-   private final DoubleYoVariable holdKpOrientation = new DoubleYoVariable("holdKpOrientation", registry);
-   private final DoubleYoVariable holdZeta = new DoubleYoVariable("holdZeta", registry);
-
-   private final DoubleYoVariable toeOffKpXY = new DoubleYoVariable("toeOffKpXY", registry);
-   private final DoubleYoVariable toeOffKpOrientation = new DoubleYoVariable("toeOffKpOrientation", registry);
-   private final DoubleYoVariable toeOffZeta = new DoubleYoVariable("toeOffZeta", registry);
-
-   private final DoubleYoVariable swingMaxPositionAcceleration = new DoubleYoVariable("swingMaxPositionAcceleration", registry);
-   private final DoubleYoVariable swingMaxPositionJerk = new DoubleYoVariable("swingMaxPositionJerk", registry);
-   private final DoubleYoVariable swingMaxOrientationAcceleration = new DoubleYoVariable("swingMaxOrientationAcceleration", registry);
-   private final DoubleYoVariable swingMaxOrientationJerk = new DoubleYoVariable("swingMaxOrientationJerk", registry);
-
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSwingLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSwingLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg",
-         registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable(
-         "singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg", registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
 
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -74,14 +55,6 @@ public class FeetManager
       singularityEscapeNullspaceMultiplierSupportLeg.set(walkingControllerParameters.getSupportSingularityEscapeMultiplier());
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
 
-      holdKpXY.set(walkingControllerParameters.getHoldKpXY());
-      holdKpOrientation.set(walkingControllerParameters.getHoldKpOrientation());
-      holdZeta.set(walkingControllerParameters.getHoldZeta());
-
-      toeOffKpXY.set(walkingControllerParameters.getToeOffKpXY());
-      toeOffKpOrientation.set(walkingControllerParameters.getToeOffKpOrientation());
-      toeOffZeta.set(walkingControllerParameters.getToeOffZeta());
-
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
 
@@ -91,49 +64,19 @@ public class FeetManager
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
       YoSE3PIDGains swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
+      YoSE3PIDGains holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
+      YoSE3PIDGains toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains, swingTimeProvider, momentumBasedController,
-               registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
+               holdPositionFootControlGains, toeOffFootControlGains, swingTimeProvider, momentumBasedController, registry);
          footControlModule.setParameters(singularityEscapeMultiplierForSwing);
-
-         VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
-         swingGainsChangedListener.variableChanged(null);
 
          footControlModules.put(robotSide, footControlModule);
       }
 
       parentRegistry.addChild(registry);
-   }
-
-   private VariableChangedListener createEndEffectorGainsChangedListener(final FootControlModule endEffectorControlModule)
-   {
-      VariableChangedListener ret = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            endEffectorControlModule.setHoldGains(holdKpXY.getDoubleValue(), holdKpOrientation.getDoubleValue(), holdZeta.getDoubleValue());
-            endEffectorControlModule.setToeOffGains(toeOffKpXY.getDoubleValue(), toeOffKpOrientation.getDoubleValue(), toeOffZeta.getDoubleValue());
-            endEffectorControlModule.setMaxAccelerationAndJerk(swingMaxPositionAcceleration.getDoubleValue(), swingMaxPositionJerk.getDoubleValue(),
-                  swingMaxOrientationAcceleration.getDoubleValue(), swingMaxOrientationJerk.getDoubleValue());
-         }
-      };
-
-      swingMaxPositionAcceleration.addVariableChangedListener(ret);
-      swingMaxPositionJerk.addVariableChangedListener(ret);
-      swingMaxOrientationAcceleration.addVariableChangedListener(ret);
-      swingMaxOrientationJerk.addVariableChangedListener(ret);
-
-      holdKpXY.addVariableChangedListener(ret);
-      holdKpOrientation.addVariableChangedListener(ret);
-      holdZeta.addVariableChangedListener(ret);
-
-      toeOffKpXY.addVariableChangedListener(ret);
-      toeOffKpOrientation.addVariableChangedListener(ret);
-      toeOffZeta.addVariableChangedListener(ret);
-
-      return ret;
    }
 
    public void compute()

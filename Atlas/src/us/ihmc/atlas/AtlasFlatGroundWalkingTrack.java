@@ -6,7 +6,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-//import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.OscillateFeetPerturber;
+import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -20,25 +20,25 @@ import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 public class AtlasFlatGroundWalkingTrack
 {
    private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
-   
+
    private static final boolean USE_BUMPY_GROUND = false;
-   
+   private static final boolean USE_FEET_PERTURBER = false;
+
    public static void main(String[] args) throws JSAPException
    {
-      
+
       DRCRobotModel model = null;
       model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
-      
+
       if (model == null)
          model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
 
       if (model == null)
-          throw new RuntimeException("No robot model selected");
-      
+         throw new RuntimeException("No robot model selected");
+
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
-      
-      
+
       final double groundHeight = 0.0;
       GroundProfile3D groundProfile;
       if (USE_BUMPY_GROUND)
@@ -53,37 +53,38 @@ public class AtlasFlatGroundWalkingTrack
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
-      
+
       double initialYaw = 0.3;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-                                    cheatWithGroundHeightAtForFootstep, model);
-      
-//      createOscillateFeetPerturber(drcFlatGroundWalkingTrack);
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
+            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
+
+      if (USE_FEET_PERTURBER)
+         createOscillateFeetPerturber(drcFlatGroundWalkingTrack);
    }
 
-//   private static void createOscillateFeetPerturber(DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
-//   {
-//      SimulationConstructionSet simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-//      SDFRobot robot = drcFlatGroundWalkingTrack.getDrcSimulation().getRobot();
-//      
-//      int ticksPerPerturbation = 10;
-//      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
-//      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
-//      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.012, 0.011});
-//      
-//      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{0.0, 0, 3.3});
-//      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{0.0, 0, 1.3});
-//      
-//      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{0.0, 0, 7.3});
-//      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0., 0, 1.11});
-//
-//      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
-//   }
+   private static void createOscillateFeetPerturber(DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
+   {
+      SimulationConstructionSet simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
+      SDFRobot robot = drcFlatGroundWalkingTrack.getDrcSimulation().getRobot();
+
+      int ticksPerPerturbation = 10;
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      oscillateFeetPerturber.setTranslationMagnitude(new double[] { 0.01, 0.015, 0.005 });
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] { 0.017, 0.012, 0.011 });
+
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[] { 0.0, 0, 3.3 });
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[] { 0.0, 0, 1.3 });
+
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[] { 0.0, 0, 7.3 });
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] { 0., 0, 1.11 });
+
+      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
+   }
 
    private static BumpyGroundProfile createBumpyGroundProfile()
    {

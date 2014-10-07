@@ -11,6 +11,8 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.SE3PIDController;
 import us.ihmc.yoUtilities.controllers.SE3PIDGains;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -175,6 +177,16 @@ public class RigidBodySpatialAccelerationControlModule
    public void setGains(YoSE3PIDGains gains)
    {
       se3pdController.setGains(gains);
+   }
+
+   public void setPositionGains(YoPositionPIDGains gains)
+   {
+      se3pdController.setPositionGains(gains);
+   }
+
+   public void setOrientationGains(YoOrientationPIDGains gains)
+   {
+      se3pdController.setOrientationGains(gains);
    }
 
    public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)

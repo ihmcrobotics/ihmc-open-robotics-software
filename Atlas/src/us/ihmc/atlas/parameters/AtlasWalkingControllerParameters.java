@@ -4,8 +4,8 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
-
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -505,31 +505,65 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
+
+      double kpXY = 100.0;
+      double kpZ = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.2 : 1.0;
+      double kpXYOrientation = runningOnRealRobot ? 100.0 : 200.0;
+      double kpZOrientation = runningOnRealRobot ? 100.0 : 200.0;
+      double zetaOrientation = runningOnRealRobot ? 0.2 : 1.0;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
+
+      double kpXY = 100.0;
+      double kpZ = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
+      double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
+      double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
+      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
       return 0.12;
    }
    
-   @Override
-   public double getHoldKpXY()
-   {
-      return 100.0;
-   }
-   
-   @Override
-   public double getHoldKpOrientation()
-   {
-      if (!runningOnRealRobot) return 100.0;
-      return 200.0;
-   }
-   
-   @Override
-   public double getHoldZeta()
-   {
-      if (!runningOnRealRobot) return 1.0;
-      return 0.2;
-   }
-
    public double getSwingMaxHeightForPushRecoveryTrajectory()
    {
 	   return 0.15;
@@ -551,24 +585,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public boolean doPrepareManipulationForLocomotion()
    {
       return true;
-   }
-
-   @Override
-   public double getToeOffKpXY()
-   {
-      return 100.0;
-   }
-
-   @Override
-   public double getToeOffKpOrientation()
-   {
-      return 200.0;
-   }
-
-   @Override
-   public double getToeOffZeta()
-   {
-      return 0.4;
    }
 
    @Override
