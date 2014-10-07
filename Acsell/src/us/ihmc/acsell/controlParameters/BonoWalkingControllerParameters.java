@@ -1,8 +1,6 @@
 package us.ihmc.acsell.controlParameters;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
-
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -307,6 +305,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getZetaCoMHeight()
    {
       return 1.0;
+   }
+
+   @Override
+   public boolean getCoMHeightDriftCompensation()
+   {
+      return false;
    }
 
    @Override
