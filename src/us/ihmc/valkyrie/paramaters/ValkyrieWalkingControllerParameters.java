@@ -1,8 +1,6 @@
 package us.ihmc.valkyrie.paramaters;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -361,6 +359,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       if (!runningOnRealRobot) return 1.0;
       return 0.4;
+   }
+
+   @Override
+   public boolean getCoMHeightDriftCompensation()
+   {
+      return true;
    }
 
    @Override
