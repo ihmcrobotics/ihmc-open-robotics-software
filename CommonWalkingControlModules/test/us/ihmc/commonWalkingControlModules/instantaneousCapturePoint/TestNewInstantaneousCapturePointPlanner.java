@@ -55,19 +55,18 @@ public class TestNewInstantaneousCapturePointPlanner
    private ArrayList<YoFramePoint> icpFootCenterCornerPointsViz = null; 
    
    private ArrayList<YoFramePoint> constantCoPsViz = null; 
-   
 
    private YoFramePoint doubleSupportStartICPYoFramePoint = null;
    private YoFramePoint doubleSupportEndICPYoFramePoint = null;
 
    private final double deltaT = 0.001;
 
-   private double doubleSupportFirstStepFraction = 0.5;
-   private double doubleSupportInitialTransferDuration = 1.0;
-   private int numberOfStepsInStepList = 7;
-   private int maxNumberOfConsideredFootsteps = 7;  
+   private double singleSupportDuration = 0.5;
+   private double doubleSupportDuration = 0.2;
+   private double doubleSupportInitialTransferDuration = 0.4;
+   private int numberOfStepsInStepList = 4;
+   private int maxNumberOfConsideredFootsteps = numberOfStepsInStepList;  
    private NewInstantaneousCapturePointPlanner icpPlanner;
-
 
    private YoFrameLineSegment2d icpVelocityLineSegment = null;
 
@@ -108,7 +107,7 @@ public class TestNewInstantaneousCapturePointPlanner
    }
    
    @Test
-   public void testTypicalFourStepExampleWithSuddenStop()
+   public void test1()
    {
       icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps,doubleSupportInitialTransferDuration,
             registry,yoGraphicsListRegistry);
@@ -121,10 +120,6 @@ public class TestNewInstantaneousCapturePointPlanner
       double stepLength = 0.3;
       double halfStepWidth = 0.1;
       boolean startSquaredUp = true;
-
-      double singleSupportDuration = 0.2;
-      double doubleSupportDuration = 0.1;
-      double doubleSupportInitialTransferDuration = 0.4;
 
       double comHeight = 1.0;
       double gravitationalAcceleration = 9.81;
@@ -150,151 +145,91 @@ public class TestNewInstantaneousCapturePointPlanner
       double initialTime = 0.0;
       ArrayList<YoFramePoint> footLocations = getFirstSteps(stepList, maxNumberOfConsideredFootsteps);  
 
-      initialICPPosition.set(footLocations.get(0).getPoint3dCopy());
-      initialICPPosition.add(footLocations.get(1).getPoint3dCopy());
+      initialICPPosition.set(footLocations.get(0));
+      initialICPPosition.add(footLocations.get(1));
       initialICPPosition.scale(0.5);
 
       icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, initialICPPosition, 
-            initialICPVelocity, omega0, initialTime, footLocations);
-      icpPlanner.computeDesiredCapturePointPosition(initialTime);
-      icpPlanner.computeDesiredCapturePointVelocity(initialTime);
-      icpPlanner.computeDesiredCapturePointAcceleration(initialTime);
+              initialICPVelocity, omega0, initialTime, footLocations);
       
-      initialICPPosition.set(icpPlanner.getDesiredCapturePointPosition().getPoint3dCopy());
-      initialICPVelocity.set(icpPlanner.getDesiredCapturePointVelocity().getPoint3dCopy());
-      initialICPAcceleration.set(icpPlanner.getDesiredCapturePointAcceleration().getPoint3dCopy());
-
+      icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialTime);
+      
       if (visualize)
       {
-         for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-         {
-            constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i)); 
-         }
-         
-         for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-         {
-            icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i)); 
-         }
+		  for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
+	      {
+	         footstepYoFramePoints.get(i).set(footLocations.get(i));
+	      }
+		  
+	      for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+	      {
+	         constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i)); 
+	      }
+	     
+	      for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+	      {
+	         icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i)); 
+	      }
       }
 
       simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportInitialTransferDuration, initialTime,
-              deltaT, omega0, initialICPPosition.getPoint3dCopy(), stepList, footLocations);
+              deltaT, omega0, initialICPPosition, stepList, footLocations);
 
       initialTime = initialTime + doubleSupportInitialTransferDuration;
 
       stepList.remove(0);
 
-      stopSignalFlag.set(timeYoVariable.getDoubleValue() >= stopSignalTime.getDoubleValue());
-
-      if (stopSignalFlag.getBooleanValue())
-      {
-         removeAllStepsFromStepListExceptFirstTwo(stepList);
-         footLocations.clear();
-         footLocations.addAll(getFirstSteps(stepList, 4));
-         
-         for (int i = 1; i < footstepYoFramePoints.size(); i++)
-         {
-            footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size())-1));
-         }
-      }
-
-      if (visualize)
-      {
-//         doubleSupportStartICPYoFramePoint.set(icpPlanner.getDoubleSupportStartICP());
-//         doubleSupportEndICPYoFramePoint.set(icpPlanner.getDoubleSupportEndICP());
-//         
-//         for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-//         {
-//            constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-//         }
-         
-         for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-         {
-            icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy()); 
-         }
-      }
-
 //      while (stepList.size() >= 2)
 //      {
-//         footLocations = getFirstSteps(stepList, 4);
-//         
-//         icpPlanner.initializeSingleSupport( singleSupportDuration, doubleSupportDuration, omega0, initialTime,footLocations);
-//
-//         if (visualize)
-//         {
-////            doubleSupportStartICPYoFramePoint.set(icpPlanner.getDoubleSupportStartICP());
-////            doubleSupportEndICPYoFramePoint.set(icpPlanner.getDoubleSupportEndICP());
-//            
-//            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-//            {
-//               constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-//            }
-//            
-//            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-//            {
-//               icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy()); 
-//            }
-//         }
-//
-//         icpPlanner.computeDesiredCapturePointPosition(initialTime);
-//         icpPlanner.computeDesiredCapturePointVelocity(initialTime);
-//         icpPlanner.computeDesiredCapturePointAcceleration(initialTime);
-//         
-//         initialICPPosition = icpPlanner.getDesiredCapturePointPosition();
-//         initialICPVelocity = icpPlanner.getDesiredCapturePointVelocity();
-//         initialICPAcceleration = icpPlanner.getDesiredCapturePointAcceleration();
-//
-//         transferFromFoot = footLocations.get(0).getPoint3dCopy();
-//
-//         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration, initialTime, omega0,
-//                 initialICPPosition.getPoint3dCopy(), transferFromFoot, stepList, footLocations);
-//
-//         initialTime = initialTime + singleSupportDuration;
-//
-//         dummyReferenceFrameList.clear(); 
-//         for (int i = 0; i < footLocations.size(); i++)
-//         {
-//            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
-//         }
-//         
-//         smoothICPComputer.initializeDoubleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, null, null, initialTime);
-//         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
-//
-//
-//         if (visualize)
-//         {
-//            doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
-//            doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
-//            
-//            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-//            {
-//               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-//            }
-//            
-//            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-//            {
-//               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-//               
-//               if (smoothICPComputer.getDoHeelToToeTransfer())
-//               {
-//               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
-//               }
-//            }
-//         }
-//
-//         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportDuration, initialTime, deltaT, omega0,
-//                 initialICPPosition, stepList, footLocations);
-//
-//         initialTime = initialTime + doubleSupportDuration;
+         footLocations = getFirstSteps(stepList, 4);
+
+         icpPlanner.initializeSingleSupport(singleSupportDuration, doubleSupportDuration, omega0, initialTime,footLocations);
+
+         if (visualize)
+         {            
+            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+            {
+               constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+            }
+            
+            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+            {
+               icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy()); 
+            }
+         }
+
+         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialTime);
+         
+         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration, initialTime, omega0,
+                 initialICPPosition, stepList, footLocations);
+
+         initialTime = initialTime + singleSupportDuration;
+         
+         icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, icpPosition, icpVelocity, omega0, 
+        		 initialTime, footLocations);
+         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialTime);
+
+         if (visualize)
+         {  
+            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+            {
+               constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+            }
+         }
+
+         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration, initialTime, deltaT, omega0,
+                 initialICPPosition, stepList, footLocations);
+
+         initialTime = initialTime + doubleSupportDuration;
 //
 //
 //         stepList.remove(0);
 //      }
 
-      double timeToSimulateAtEnd = 1.0;
-      initialICPPosition.set(icpPosition);
-      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, timeToSimulateAtEnd, initialTime, deltaT, omega0,
-              initialICPPosition.getPoint3dCopy(), stepList, footLocations);
+//      double timeToSimulateAtEnd = 1.0;
+//      initialICPPosition.set(icpPosition);
+//      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, timeToSimulateAtEnd, initialTime, deltaT, omega0,
+//              initialICPPosition.getPoint3dCopy(), stepList, footLocations);
 
       if (visualize)
       {
@@ -366,8 +301,10 @@ public class TestNewInstantaneousCapturePointPlanner
       icpArrowTip = new YoFramePoint("icpVelocityTip", "", worldFrame, registry);
       icpVelocityLineSegment = new YoFrameLineSegment2d("icpVelocityForViz", "", worldFrame, registry);
       icpPositionYoFramePoint = new YoFramePoint("icpPositionForViz", "", worldFrame, registry);
+      icpPositionYoFramePoint.setZ(0.5);
       icpVelocityYoFramePoint = new YoFramePoint("icpVelocityForViz", "", worldFrame, registry);
-      cmpPositionYoFramePoint = new YoFramePoint("ecmpPositionForViz", "", worldFrame, registry);
+      cmpPositionYoFramePoint = new YoFramePoint("cmpPositionForViz", "", worldFrame, registry);
+      cmpPositionYoFramePoint.setZ(0.5);
 
       doubleSupportStartICPYoFramePoint = new YoFramePoint("doubleSupportICPStart", "", worldFrame, registry);
       doubleSupportEndICPYoFramePoint = new YoFramePoint("doubleSupportICPEnd", "", worldFrame, registry);
@@ -378,7 +315,7 @@ public class TestNewInstantaneousCapturePointPlanner
       
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
-         YoFramePoint footstepYoFramePoint = pointAndLinePlotter.plotPoint3d("footstep" + i, new Point3d(), YoAppearance.Black(), 0.003);
+         YoFramePoint footstepYoFramePoint = pointAndLinePlotter.plotPoint3d("footstep" + i, new Point3d(), YoAppearance.Black(), 0.009);
          footstepYoFramePoints.add(footstepYoFramePoint);
          
       }
@@ -396,7 +333,7 @@ public class TestNewInstantaneousCapturePointPlanner
          icpFootCenterCornerPointsViz.add(cornerICPFramePoint);
       }
 
-      pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.OrangeRed(), 0.003);
+      pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.Gold(), 0.005);
       pointAndLinePlotter.plotYoFramePoint("cmpPosition", cmpPositionYoFramePoint, YoAppearance.Magenta(), 0.005);
       pointAndLinePlotter.plotLineSegment("icpVelocity", icpVelocityLineSegment, Color.gray);
 
@@ -406,107 +343,53 @@ public class TestNewInstantaneousCapturePointPlanner
       yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
    }
    
-   private void simulateForwardAndCheckSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, Point3d ecmpPositionToPack,
-         NewInstantaneousCapturePointPlanner smoothICPComputer, double singleSupportDuration, double initialTime, double omega0, Point3d initialICPPosition,
-           Point3d transferFromFoot, ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
+   private void simulateForwardAndCheckSingleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack, YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack,
+         NewInstantaneousCapturePointPlanner icpPlanner, double singleSupportDuration, double initialTime, double omega0, YoFramePoint initialICPPosition,
+           ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
    {
-      Point3d previousICPPosition = new Point3d(initialICPPosition);
       for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
       {
-         stopSignalFlag.set(timeYoVariable.getDoubleValue() >= stopSignalTime.getDoubleValue());
-
-         if (stopSignalFlag.getBooleanValue())
-         {
-            removeAllStepsFromStepListExceptFirstTwo(stepList);
-            footLocations.clear();
-            footLocations.addAll(getFirstSteps(stepList, 4));
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-            {
-               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-            }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-            {
-               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getCapturePointCornerPoints().get(i).getFramePointCopy());
-            }
-         }
-
-         icpPlanner.computeDesiredCapturePointPosition(time);
-         icpPlanner.computeDesiredCapturePointVelocity(time);
-         icpPlanner.computeDesiredCapturePointAcceleration(time);
-        
-         icpPositionToPack.set(icpPlanner.getDesiredCapturePointPosition().getPoint3dCopy());
-         icpVelocityToPack.set(icpPlanner.getDesiredCapturePointVelocity().getPoint3dCopy());
-         icpAccelerationToPack.set(icpPlanner.getDesiredCapturePointAcceleration().getPoint3dCopy());
+         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, time);
 
          if (visualize)
          {
-            visualizeICPAndECMP(icpPositionToPack, icpVelocityToPack, ecmpPositionToPack, time);
+            visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition(), icpPlanner.getDesiredCapturePointVelocity(), 
+            		icpPlanner.getConstantCentersOfPressure().get(0), time);
          }
 
-         previousICPPosition.set(icpPositionToPack);
+         initialICPPosition.set(icpPositionToPack);
       }
    }
    
    private void simulateForwardAndCheckDoubleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack, YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack,
-         NewInstantaneousCapturePointPlanner icpPlanner, double doubleSupportDuration, double initialTime, double deltaT, double omega0, Point3d initialICPPosition,
+         NewInstantaneousCapturePointPlanner icpPlanner, double doubleSupportDuration, double initialTime, double deltaT, double omega0, YoFramePoint initialICPPosition,
            ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
    {
       for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
-      {
-         stopSignalFlag.set(timeYoVariable.getDoubleValue() >= stopSignalTime.getDoubleValue());
-
-         if (stopSignalFlag.getBooleanValue())
-         {
-            removeAllStepsFromStepListExceptFirstTwo(stepList);
-            footLocations.clear();
-            footLocations.addAll(getFirstSteps(stepList, 4));
-            
-            for (int i = 1; i < footstepYoFramePoints.size(); i++)
-            {
-               footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size())-1));
-            }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-            {
-               constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-            }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-            {
-               icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i)); 
-            }
-         }
-
-         icpPlanner.computeDesiredCapturePointPosition(time);
-         icpPlanner.computeDesiredCapturePointVelocity(time);
-         icpPlanner.computeDesiredCapturePointAcceleration(time);
-        
-         icpPositionToPack.set(icpPlanner.getDesiredCapturePointPosition());
-         icpVelocityToPack.set(icpPlanner.getDesiredCapturePointVelocity());
-         icpAccelerationToPack.set(icpPlanner.getDesiredCapturePointAcceleration());
+      {  
+         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, 
+        		 icpVelocityToPack, icpAccelerationToPack, time);
 
          if (visualize)
          {
-            visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition().getPoint3dCopy(), 
-                  icpPlanner.getDesiredCapturePointVelocity().getVector3dCopy(), icpPlanner.getDesiredCapturePointAcceleration().getPoint3dCopy(), time);
+            visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition(), 
+                  icpPlanner.getDesiredCapturePointVelocity(), icpPlanner.getConstantCentersOfPressure().get(0), time);
          }
 
-         tmpPreviousICPPosition.set(icpPositionToPack);
+         initialICPPosition.set(icpPositionToPack);
       }
    }
    
-   public void visualizeICPAndECMP(Point3d icpPosition, Vector3d icpVelocity, Point3d ecmpPosition, double time)
+   public void visualizeICPAndECMP(YoFramePoint icpPosition, YoFrameVector icpVelocity, YoFramePoint ecmpPosition, double time)
    {
       icpPositionYoFramePoint.set(icpPosition);
       icpVelocityYoFramePoint.set(icpVelocity);
 
-      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition, icpVelocity, 0.5);
+      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition.getPoint3dCopy(), icpVelocity.getVector3dCopy(), 0.5);
       Point2d icpPosition2d = new Point2d(icpPosition.getX(), icpPosition.getY());
       PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d, icpArrowTip.getFramePoint2dCopy().getPointCopy());
 
-      cmpPositionYoFramePoint.set(ecmpPosition);
+//      cmpPositionYoFramePoint.set(ecmpPosition);
 
       timeYoVariable.set(time);
       scs.tickAndUpdate();

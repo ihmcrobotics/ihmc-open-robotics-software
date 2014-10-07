@@ -86,7 +86,7 @@ public class CapturePointTools
    public static void computeConstantCentersOfPressuresOnFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<YoFramePoint> footstepList,
          int numberFootstepsToConsider)
    {
-      for (int i = 0; i < numberFootstepsToConsider - 1; i++)
+      for (int i = 0; i < numberFootstepsToConsider; i++)
       {
          arrayToPack.get(i).set(footstepList.get(i));
       }
@@ -104,15 +104,15 @@ public class CapturePointTools
          ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
    {
       // Probably something broken with this logic.
-      capturePointsToPack.set(capturePointsToPack.size()-1, constantCentersOfPressure.get(constantCentersOfPressure.size()-1));
+      capturePointsToPack.set(capturePointsToPack.size()-1, constantCentersOfPressure.get(capturePointsToPack.size()-1));
 
-      for (int i = constantCentersOfPressure.size() - 2; i >= 0; i--)
+      for (int i = capturePointsToPack.size() - 1; i > 0; i--)
       {
-         double tmpX = (capturePointsToPack.get(i+1).getX()-constantCentersOfPressure.get(i).getX())*(1 / Math.exp(omega0 * stepTime)) + constantCentersOfPressure.get(i).getX();
-         double tmpY = (capturePointsToPack.get(i+1).getY()-constantCentersOfPressure.get(i).getY())*(1 / Math.exp(omega0 * stepTime)) + constantCentersOfPressure.get(i).getY();
+         double tmpX = (capturePointsToPack.get(i).getX()-constantCentersOfPressure.get(i-1).getX())*(1 / Math.exp(omega0 * stepTime)) + constantCentersOfPressure.get(i-1).getX();
+         double tmpY = (capturePointsToPack.get(i).getY()-constantCentersOfPressure.get(i-1).getY())*(1 / Math.exp(omega0 * stepTime)) + constantCentersOfPressure.get(i-1).getY();
          
-         capturePointsToPack.get(i).setX(tmpX);
-         capturePointsToPack.get(i).setY(tmpY);
+         capturePointsToPack.get(i-1).setX(tmpX);
+         capturePointsToPack.get(i-1).setY(tmpY);
       }
    }
 
@@ -206,5 +206,10 @@ public class CapturePointTools
       
       accelerationToPack.setX(x);
       accelerationToPack.setY(y);
+   }
+   
+   public static void computeDesiredCenterOfPressure()
+   {
+	   
    }
 }

@@ -62,7 +62,7 @@ public class CapturePointToolsTest
          
          CapturePointTools.computeConstantCentersOfPressuresOnFeet(arrayToPack, footstepList, numberFootstepsToConsider);
          
-         for(int i = 0; i<arrayToPack.size()-1; i++)
+         for(int i = 0; i<arrayToPack.size(); i++)
          {
             JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPoint3dCopy(), 1e-10);
          }
@@ -228,6 +228,7 @@ public class CapturePointToolsTest
       ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
+      YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test",new FramePose());
       FramePoint2d p1 = new FramePoint2d();
       FramePoint2d p2 = new FramePoint2d();
@@ -263,6 +264,11 @@ public class CapturePointToolsTest
          double omega0 = 0.5;
          double time = 0.5;
          CapturePointTools.computeDesiredEndOfStepCapturePointLocations(constantCentersOfPressures, capturePointsToPack, time, omega0);
+
+         CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), 
+        		 constantCentersOfPressures.get(0), icpToCheck);
+         
+         JUnitTools.assertFramePointEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
 
          for(int i = 0; i<constantCentersOfPressures.size()-2; i++)
          {
