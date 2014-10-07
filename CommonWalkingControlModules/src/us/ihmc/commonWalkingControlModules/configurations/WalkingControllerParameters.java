@@ -113,23 +113,15 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    
    public abstract YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry);
 
+   public abstract YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry);
+
+   public abstract YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry);
+
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
-
-   public abstract double getHoldKpXY();
-
-   public abstract double getHoldKpOrientation();
-
-   public abstract double getHoldZeta();
 
    public abstract double getSupportSingularityEscapeMultiplier();
 
    public abstract double getSwingSingularityEscapeMultiplier();
-
-   public abstract double getToeOffKpXY();
-
-   public abstract double getToeOffKpOrientation();
-
-   public abstract double getToeOffZeta();
 
    public abstract boolean doPrepareManipulationForLocomotion();
 

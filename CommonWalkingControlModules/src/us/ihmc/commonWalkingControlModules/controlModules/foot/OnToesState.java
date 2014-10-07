@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Matrix3d;
+
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
@@ -21,13 +23,13 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
-
 
 public class OnToesState extends AbstractFootControlState
 {
@@ -49,12 +51,6 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint proportionalPart = new FramePoint();
    private final FrameVector derivativePart = new FrameVector();
 
-   private double toeOffKdx;// = GainCalculator.computeDerivativeGain(toeOffKpx.getDoubleValue(), toeOffZeta.getDoubleValue());      
-   private double toeOffKdy;// = GainCalculator.computeDerivativeGain(toeOffKpy.getDoubleValue(), toeOffZeta.getDoubleValue());      
-   private double toeOffKdz;// = GainCalculator.computeDerivativeGain(toeOffKpz.getDoubleValue(), toeOffZeta.getDoubleValue());
-
-   protected double toeOffKpx, toeOffKpy, toeOffKpz, toeOffKpRoll, toeOffKpPitch, toeOffKpYaw, toeOffZeta;
-
    private final int rootToFootJacobianId;
 
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
@@ -68,15 +64,20 @@ public class OnToesState extends AbstractFootControlState
    double kneeToeOffQDesired = 0.7;
    double kneeToeOffDamp = 0.0;
    double controlledKneeToeOffQdd;
-   
+
    private final OneDoFJoint kneeJoint;
+
+   private final YoSE3PIDGains gains;
+   private final Matrix3d proportionalGainMatrix;
+   private final Matrix3d derivativeGainMatrix;
 
    public OnToesState(WalkingControllerParameters walkingControllerParameters, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, RobotSide robotSide, YoVariableRegistry registry)
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, RobotSide robotSide,
+         YoVariableRegistry registry)
    {
-      super(ConstraintType.TOES, accelerationControlModule, momentumBasedController,
-            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
+      super(ConstraintType.TOES, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
+            jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
 
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
 
@@ -97,8 +98,13 @@ public class OnToesState extends AbstractFootControlState
 
       originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
       copyOriginalContactPointPositions();
-      
+
       kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
+
+      this.gains = gains;
+      YoPositionPIDGains positionGains = gains.getPositionGains();
+      proportionalGainMatrix = positionGains.createProportionalGainMatrix();
+      derivativeGainMatrix = positionGains.createDerivativeGainMatrix();
    }
 
    public void doSpecificAction()
@@ -159,11 +165,11 @@ public class OnToesState extends AbstractFootControlState
 
          proportionalPart.changeFrame(rootBody.getBodyFixedFrame());
          proportionalPart.sub(desiredEdgeContactPositions.get(i), contactPointPosition);
-         proportionalPart.scale(toeOffKpx, toeOffKpy, toeOffKpz);
+         proportionalGainMatrix.transform(proportionalPart.getPoint());
 
          derivativePart.setToZero(rootBody.getBodyFixedFrame());
          derivativePart.sub(contactPointLinearVelocity);
-         derivativePart.scale(toeOffKdx, toeOffKdy, toeOffKdz);
+         derivativeGainMatrix.transform(derivativePart.getVector());
 
          desiredLinearAcceleration.setToZero(rootBody.getBodyFixedFrame());
          desiredLinearAcceleration.add(proportionalPart);
@@ -227,10 +233,6 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public void doTransitionIntoAction()
    {
-      toeOffKdx = GainCalculator.computeDerivativeGain(toeOffKpx, toeOffZeta);
-      toeOffKdy = GainCalculator.computeDerivativeGain(toeOffKpy, toeOffZeta);
-      toeOffKdz = GainCalculator.computeDerivativeGain(toeOffKpz, toeOffZeta);
-
       edgeToRotateAbout.set(edgeContactPoints.get(0), edgeContactPoints.get(1));
       for (int i = 0; i < 2; i++)
       {
@@ -260,28 +262,13 @@ public class OnToesState extends AbstractFootControlState
 
    private void setOnToesFreeMotionGains()
    {
-      double kPosition = 0.0;
-      double dPosition = GainCalculator.computeDerivativeGain(0.0, toeOffZeta);
-      double dxOrientation = GainCalculator.computeDerivativeGain(toeOffKpRoll, toeOffZeta);
-      double dyOrientation = GainCalculator.computeDerivativeGain(toeOffKpPitch, toeOffZeta);
-      double dzOrientation = GainCalculator.computeDerivativeGain(toeOffKpYaw, toeOffZeta);
-
-      accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
-      accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
-      accelerationControlModule.setOrientationProportionalGains(toeOffKpRoll, toeOffKpPitch, toeOffKpYaw);
-      accelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
-   }
-
-   public void setToeOffGains(double toeOffZeta, double toeOffKpx, double toeOffKpy, double toeOffKpz, double toeOffKpRoll, double toeOffKpPitch,
-         double toeOffKpYaw)
-   {
-      this.toeOffZeta = toeOffZeta;
-      this.toeOffKpx = toeOffKpx;
-      this.toeOffKpy = toeOffKpy;
-      this.toeOffKpz = toeOffKpz;
-      this.toeOffKpRoll = toeOffKpRoll;
-      this.toeOffKpPitch = toeOffKpPitch;
-      this.toeOffKpYaw = toeOffKpYaw;
+      // TODO Pretty hackish there clean that up
+      // We use the RigidBodySpatialAccelerationControlModule only for the orientation, the position control part is done in this class
+      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionIntegralGains(0.0, 0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionMaxAccelerationAndJerk(0.0, 0.0);
+      accelerationControlModule.setOrientationGains(gains.getOrientationGains());
    }
 
    protected List<FramePoint2d> getEdgeContactPoints2d()

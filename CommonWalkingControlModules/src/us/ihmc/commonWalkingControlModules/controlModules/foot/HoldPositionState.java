@@ -5,13 +5,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-
 
 public class HoldPositionState extends AbstractFootControlState
 {
@@ -20,12 +19,12 @@ public class HoldPositionState extends AbstractFootControlState
    private final FrameVector fullyConstrainedNormalContactVector;
    private final EnumYoVariable<ConstraintType> requestedState;
 
-   private double holdZeta, holdKpx, holdKpy, holdKpz, /* holdKdz, */holdKpRoll, holdKpPitch, holdKpYaw;
+   private final YoSE3PIDGains gains;
 
    public HoldPositionState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         FrameVector fullyConstrainedNormalContactVector, RobotSide robotSide, YoVariableRegistry registry)
+         FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
@@ -33,6 +32,7 @@ public class HoldPositionState extends AbstractFootControlState
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
       this.requestedState = requestedState;
+      this.gains = gains;
    }
 
    public void doTransitionIntoAction()
@@ -53,11 +53,13 @@ public class HoldPositionState extends AbstractFootControlState
 
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
+
+      accelerationControlModule.setGains(gains);
    }
 
    public void doSpecificAction()
    {
-      setHoldPositionStateGains();
+      accelerationControlModule.setGains(gains);
       determineCoPOnEdge();
 
       if (!isCoPOnEdge && (requestHoldPosition == null || !requestHoldPosition.getBooleanValue()))
@@ -75,33 +77,5 @@ public class HoldPositionState extends AbstractFootControlState
    @Override
    public void doTransitionOutOfAction()
    {
-   }
-
-   public void setHoldGains(double holdZeta, double holdKpx, double holdKpy, double holdKpz, double holdKdz, double holdKpRoll, double holdKpPitch,
-         double holdKpYaw)
-   {
-      this.holdZeta = holdZeta;
-      this.holdKpx = holdKpx;
-      this.holdKpy = holdKpy;
-      this.holdKpz = holdKpz;
-      //      this.holdKdz = holdKdz;
-      this.holdKpRoll = holdKpRoll;
-      this.holdKpPitch = holdKpPitch;
-      this.holdKpYaw = holdKpYaw;
-   }
-
-   private void setHoldPositionStateGains()
-   {
-      double dxPosition = GainCalculator.computeDerivativeGain(holdKpx, holdZeta);
-      double dyPosition = GainCalculator.computeDerivativeGain(holdKpy, holdZeta);
-      double dzPosition = GainCalculator.computeDerivativeGain(holdKpz, holdZeta);
-      double dxOrientation = GainCalculator.computeDerivativeGain(holdKpRoll, holdZeta);
-      double dyOrientation = GainCalculator.computeDerivativeGain(holdKpPitch, holdZeta);
-      double dzOrientation = GainCalculator.computeDerivativeGain(holdKpYaw, holdZeta);
-
-      accelerationControlModule.setPositionProportionalGains(holdKpx, holdKpy, holdKpz);
-      accelerationControlModule.setPositionDerivativeGains(dxPosition, dyPosition, dzPosition);
-      accelerationControlModule.setOrientationProportionalGains(holdKpRoll, holdKpPitch, holdKpYaw);
-      accelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
    }
 }

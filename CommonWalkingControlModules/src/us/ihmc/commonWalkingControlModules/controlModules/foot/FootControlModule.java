@@ -24,7 +24,6 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -86,7 +85,8 @@ public class FootControlModule
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
-   public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains, DoubleProvider swingTimeProvider,
+   public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
+         YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, DoubleProvider swingTimeProvider,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -156,7 +156,7 @@ public class FootControlModule
       states.add(touchdownOnHeelState);
 
       onToesState = new OnToesState(walkingControllerParameters, accelerationControlModule, momentumBasedController, contactableFoot, jacobianId,
-            nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
+            nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, toeOffFootControlGains, robotSide, registry);
       states.add(onToesState);
 
       FullyConstrainedState supportState = new FullyConstrainedState(accelerationControlModule, momentumBasedController, contactableFoot, requestHoldPosition,
@@ -165,7 +165,7 @@ public class FootControlModule
       states.add(supportState);
 
       holdPositionState = new HoldPositionState(accelerationControlModule, momentumBasedController, contactableFoot, requestHoldPosition, requestedState,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector, robotSide, registry);
+            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector, holdPositionFootControlGains, robotSide, registry);
       states.add(holdPositionState);
 
       swingState = new SwingState(swingTimeProvider, touchdownVelocityProvider, accelerationControlModule, momentumBasedController, contactableFoot,
@@ -179,25 +179,6 @@ public class FootControlModule
       states.add(moveStraightState);
 
       setupStateMachine(states);
-   }
-
-   public void setMaxAccelerationAndJerk(double maxPositionAcceleration, double maxPositionJerk, double maxOrientationAcceleration, double maxOrientationJerk)
-   {
-      accelerationControlModule.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
-      accelerationControlModule.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
-   }
-
-   public void setHoldGains(double holdKpXY, double holdKpOrientation, double holdZeta)
-   {
-      double holdKpz = 0.0;
-      double holdKdz = GainCalculator.computeDerivativeGain(holdKpz, holdZeta);
-      holdPositionState.setHoldGains(holdZeta, holdKpXY, holdKpXY, holdKpz, holdKdz, holdKpOrientation, holdKpOrientation, holdKpOrientation);
-   }
-
-   public void setToeOffGains(double toeOffKpXY, double toeOffKpOrientation, double toeOffZeta)
-   {
-      double toeOffKpz = 0.0;
-      onToesState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
    }
 
    private void setupContactStatesMap()
