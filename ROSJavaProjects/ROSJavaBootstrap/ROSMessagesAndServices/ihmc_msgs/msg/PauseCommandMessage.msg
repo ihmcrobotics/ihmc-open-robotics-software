@@ -1,0 +1,4 @@
+# PauseCommandMessage
+
+bool pause
+
