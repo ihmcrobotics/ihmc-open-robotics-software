@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -27,20 +26,5 @@ public class JointAngleOffsetSliderBoard
         sliderBoardConfigurationManager.setSlider(8, "neck_ry" + "_angleOffsetPreTransmission", registry, 
               Math.toRadians(-10.0), Math.toRadians(10.0));
    }
-
-   private static final SliderBoardFactory factory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new JointAngleOffsetSliderBoard(scs, registry, generalizedSDFRobotModel);
-      }
-   };
-
-   public static SliderBoardFactory getFactory()
-   {
-      return factory;
-   }
-
 }
 

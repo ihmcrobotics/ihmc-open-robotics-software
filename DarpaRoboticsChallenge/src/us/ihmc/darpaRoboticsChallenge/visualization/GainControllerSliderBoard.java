@@ -39,18 +39,4 @@ public class GainControllerSliderBoard
       // sliderBoardConfigurationManager.saveConfiguration(this.getClass().getSimpleName());
       // sliderBoardConfigurationManager.loadConfiguration(this.getClass().getSimpleName());
    }
-
-   private static final SliderBoardFactory factory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new GainControllerSliderBoard(scs, registry, generalizedSDFRobotModel);
-      }
-   };
-
-   public static SliderBoardFactory getFactory()
-   {
-      return factory;
-   }
 }
