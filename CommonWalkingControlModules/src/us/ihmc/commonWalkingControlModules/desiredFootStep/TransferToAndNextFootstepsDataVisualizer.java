@@ -10,6 +10,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 

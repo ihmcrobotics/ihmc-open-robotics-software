@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
@@ -72,6 +71,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;

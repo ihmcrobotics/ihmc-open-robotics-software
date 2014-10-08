@@ -16,11 +16,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGeneratorVisualizer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepValidityMetric;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SimplePathParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
@@ -35,6 +31,10 @@ import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepValidityMetric;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurningThenStraightFootstepGenerator;
 
 import com.yobotics.simulationconstructionset.Robot;
 
