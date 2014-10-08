@@ -2,9 +2,6 @@ package us.ihmc.atlas;
 
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardControllerListener;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 
@@ -18,19 +15,15 @@ public class RemoteAtlasVisualizer
    public static final int defaultPort = NetworkConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
    private final boolean showOverheadView = true;
    
+   public enum AtlasSliderBoardType {GAIN_CONTROLLER, JOINT_ANGLE_OFFSET, WALK_CONTROLLER}
+   
    public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel robotModel)
    {
       System.out.println("Connecting to host " + host);
-      
-//      SDFRobot robot = robotLoader.createRobot(jointMap, false);
-//      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-//      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new AtlasSliderBoardControllerListener(robotModel, bufferSize, AtlasSliderBoardType.WALK_CONTROLLER);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
       scsYoVariablesUpdatedListener.addButton("setWristForceSensorsToZero", 1.0);
-      
       
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", showOverheadView);
       client.start();
@@ -75,8 +68,5 @@ public class RemoteAtlasVisualizer
          System.err.println();
          System.exit(1);
       }
-      
-      
-      
    }
 }
