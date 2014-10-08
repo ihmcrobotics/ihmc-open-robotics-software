@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.subscriber;
 
 
 public abstract class AbstractRosTopicSubscriber<T> implements RosTopicSubscriberInterface<T>

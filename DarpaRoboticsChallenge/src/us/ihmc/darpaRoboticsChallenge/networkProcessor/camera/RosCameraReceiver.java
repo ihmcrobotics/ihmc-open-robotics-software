@@ -18,9 +18,9 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.ros.RosImageSubscriber;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosPoseStampedPublisher;
+import us.ihmc.utilities.ros.publisher.RosPoseStampedPublisher;
+import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
 
 public class RosCameraReceiver extends CameraDataReceiver
 {

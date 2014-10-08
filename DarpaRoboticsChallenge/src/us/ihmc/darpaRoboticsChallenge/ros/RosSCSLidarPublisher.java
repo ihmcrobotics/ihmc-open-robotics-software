@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 
 import org.ros.message.Time;
@@ -12,10 +11,11 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SpindleAngleRec
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
-import us.ihmc.utilities.ros.RosLidarPublisher;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.publisher.RosLidarPublisher;
 
 public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
 {
@@ -28,7 +28,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
    private final RosTfPublisher tfPublisher;
    private final int nSensors;
 
-   public RosSCSLidarPublisher(LocalObjectCommunicator scsCommunicator,
+   public RosSCSLidarPublisher(ObjectCommunicator scsCommunicator,
          RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          SDFFullRobotModel fullRobotModel,

@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.publisher;
 
 
 public class RosStringPublisher extends RosTopicPublisher<std_msgs.String>

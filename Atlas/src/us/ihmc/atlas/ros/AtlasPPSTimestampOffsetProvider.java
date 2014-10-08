@@ -11,7 +11,7 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSRequestType;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTimestampSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
 
 public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {

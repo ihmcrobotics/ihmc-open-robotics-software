@@ -11,7 +11,7 @@ import us.ihmc.atlas.AtlasDampingParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
-import us.ihmc.utilities.ros.RosStringPublisher;
+import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import atlas_msgs.SetJointDamping;
 import atlas_msgs.SetJointDampingRequest;
 import atlas_msgs.SetJointDampingResponse;

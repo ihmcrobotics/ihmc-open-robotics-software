@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.subscriber;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
