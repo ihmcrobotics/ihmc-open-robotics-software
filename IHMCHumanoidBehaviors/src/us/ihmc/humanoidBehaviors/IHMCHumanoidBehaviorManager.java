@@ -12,6 +12,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
+import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -19,6 +20,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class IHMCHumanoidBehaviorManager
 {
+   public static final int BEHAVIOR_YO_VARIABLE_SERVER_PORT = 5559;
+   public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
+   
+   private final YoVariableServer yoVariableServer = new YoVariableServer(BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
 
@@ -38,6 +43,9 @@ public class IHMCHumanoidBehaviorManager
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
+      
+      yoVariableServer.setMainRegistry(registry, fullRobotModel, null);
+      yoVariableServer.start();
 
       Thread dispatcherThread = new Thread(dispatcher, "BehaviorDispatcher");
       dispatcherThread.start();
