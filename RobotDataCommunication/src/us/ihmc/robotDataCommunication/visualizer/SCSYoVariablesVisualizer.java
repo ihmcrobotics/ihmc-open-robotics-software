@@ -16,7 +16,7 @@ public class SCSYoVariablesVisualizer
    {
       System.out.println("Connecting to host " + host);
       
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize);
+      SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize);
 
       boolean showOverheadView = false;
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", showOverheadView);
@@ -48,7 +48,7 @@ public class SCSYoVariablesVisualizer
       else
       {
          System.err.println();
-         System.err.println("Usage: java " + SCSYoVariablesUpdatedListener.class.getName());
+         System.err.println("Usage: java " + SCSVisualizer.class.getName());
          System.err.println("                " + jsap.getUsage());
          System.err.println();
          System.exit(1);

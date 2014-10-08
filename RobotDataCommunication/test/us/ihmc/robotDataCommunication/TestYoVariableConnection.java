@@ -1,6 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -33,7 +33,7 @@ public class TestYoVariableConnection
    public TestYoVariableConnection()
    {
       int bufferSize=8192;
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize);
+      SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize);
       server.setMainRegistry(registry, null, null);
       new ThreadTester(server).start();
       server.start();

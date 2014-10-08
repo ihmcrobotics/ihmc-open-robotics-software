@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -41,7 +41,7 @@ public class YoVariableConnectionBurstTest
       
       //start client
       int bufferSize=256;
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize, false);      
+      SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize, false);      
       scsYoVariablesUpdatedListener.setDisplayOneInNPackets(1);
       final YoVariableClient client = new YoVariableClient("localhost", 1234, scsYoVariablesUpdatedListener, "", false);
       client.start();
