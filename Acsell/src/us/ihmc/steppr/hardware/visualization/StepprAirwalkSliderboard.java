@@ -3,7 +3,7 @@ package us.ihmc.steppr.hardware.visualization;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -12,7 +12,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
-public class StepprAirwalkSliderboard extends SCSYoVariablesUpdatedListener
+public class StepprAirwalkSliderboard extends SCSVisualizer
 {
    public StepprAirwalkSliderboard(Robot robot, int bufferSize)
    {
@@ -48,7 +48,7 @@ public class StepprAirwalkSliderboard extends SCSYoVariablesUpdatedListener
       BonoRobotModel robotModel = new BonoRobotModel(true, false);
       SDFRobot robot = robotModel.createSdfRobot(false);
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new StepprAirwalkSliderboard(robot, 16384);
+      SCSVisualizer scsYoVariablesUpdatedListener = new StepprAirwalkSliderboard(robot, 16384);
 
     
       

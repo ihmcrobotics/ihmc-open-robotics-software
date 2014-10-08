@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
-public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implements IndexChangedListener
+public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedListener
 {
 
    private final SDFRobot robot;
@@ -251,7 +251,7 @@ public class StepprPDSliderboard extends SCSYoVariablesUpdatedListener implement
       BonoRobotModel robotModel = new BonoRobotModel(true, false);
       SDFRobot robot = robotModel.createSdfRobot(false);
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new StepprPDSliderboard(robot, 16384);
+      SCSVisualizer scsYoVariablesUpdatedListener = new StepprPDSliderboard(robot, 16384);
 
       YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, StepprNetworkParameters.VARIABLE_SERVER_PORT,
             scsYoVariablesUpdatedListener, "remote", false);
