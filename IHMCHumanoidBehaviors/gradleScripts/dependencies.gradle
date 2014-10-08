@@ -12,5 +12,5 @@ dependencies {
 	compile project(':IHMCCommunication')
 	compile project(':SimulationConstructionSet')
 	compile project(':IHMCYoUtilities')
-
+	compile project(':RobotDataCommunication')
 }
