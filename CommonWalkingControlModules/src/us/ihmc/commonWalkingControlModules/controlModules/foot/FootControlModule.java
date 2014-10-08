@@ -86,7 +86,7 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
-         YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, DoubleProvider swingTimeProvider,
+         YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains supportFootControlGains, DoubleProvider swingTimeProvider,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -161,7 +161,7 @@ public class FootControlModule
 
       FullyConstrainedState supportState = new FullyConstrainedState(accelerationControlModule, momentumBasedController, contactableFoot, requestHoldPosition,
             requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector,
-            doFancyOnToesControl, robotSide, registry);
+            doFancyOnToesControl, supportFootControlGains, robotSide, registry);
       states.add(supportState);
 
       holdPositionState = new HoldPositionState(accelerationControlModule, momentumBasedController, contactableFoot, requestHoldPosition, requestedState,
