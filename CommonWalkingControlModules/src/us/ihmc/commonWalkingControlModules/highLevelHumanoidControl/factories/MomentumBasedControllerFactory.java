@@ -46,7 +46,7 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
-public class MomentumBasedControllerFactory implements HumanoidControllerFactory
+public class MomentumBasedControllerFactory
 {   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -99,19 +99,11 @@ public class MomentumBasedControllerFactory implements HumanoidControllerFactory
       this.variousWalkingProviderFactory = variousWalkingProviderFactory;
    }
    
-   /* (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory#addUpdatable(us.ihmc.commonWalkingControlModules.controllers.Updatable)
-    */
-   @Override
    public void addUpdatable(Updatable updatable)
    {
       this.updatables.add(updatable);
    }
 
-   /* (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory#getController(us.ihmc.utilities.humanoidRobot.model.FullRobotModel, us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames, double, double, us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable, us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry, us.ihmc.utilities.screwTheory.TwistCalculator, us.ihmc.utilities.screwTheory.CenterOfMassJacobian, us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder, us.ihmc.utilities.io.streamingData.GlobalDataProducer, us.ihmc.utilities.screwTheory.InverseDynamicsJoint)
-    */
-   @Override
    public RobotController getController(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, GlobalDataProducer dataProducer,
@@ -282,10 +274,6 @@ public class MomentumBasedControllerFactory implements HumanoidControllerFactory
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.WALKING);
    }
 
-   /* (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory#addHighLevelBehaviorFactory(us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory)
-    */
-   @Override
    public void addHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
    {
       if (momentumBasedController == null)

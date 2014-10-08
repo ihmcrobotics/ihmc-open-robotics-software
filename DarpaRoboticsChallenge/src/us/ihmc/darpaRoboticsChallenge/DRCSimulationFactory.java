@@ -1,13 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
@@ -27,6 +25,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.TimestampProvider;
 
 import com.yobotics.simulationconstructionset.Joint;
@@ -54,7 +53,7 @@ public class DRCSimulationFactory
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
-   public DRCSimulationFactory(DRCRobotModel drcRobotModel, HumanoidControllerFactory controllerFactory, Graphics3DObject environmentGraphics,
+   public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, Graphics3DObject environmentGraphics,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
@@ -95,7 +94,7 @@ public class DRCSimulationFactory
       return drcControllerThread.getFullRobotModelCorruptor();
    }
    
-   private void createRobotController(DRCRobotModel drcRobotModel, HumanoidControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
+   private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
          SDFRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
