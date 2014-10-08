@@ -567,7 +567,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
       
-      gains.setPositionDerivativeGains(20.0, 0.0, 0.0);
+      gains.setOrientationDerivativeGains(20.0, 0.0, 0.0);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
 
       return gains;
