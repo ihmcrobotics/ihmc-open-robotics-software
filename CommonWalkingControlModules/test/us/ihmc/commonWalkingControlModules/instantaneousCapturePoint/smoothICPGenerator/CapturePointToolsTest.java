@@ -32,7 +32,6 @@ public class CapturePointToolsTest
    {
       ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      RobotSide robotSide = RobotSide.LEFT;
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test",new FramePose());
 
       int nFootsteps = 10;
@@ -74,7 +73,6 @@ public class CapturePointToolsTest
    {
       ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      RobotSide robotSide = RobotSide.LEFT;
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test",new FramePose());
 
       int nFootsteps = 10;
@@ -123,7 +121,6 @@ public class CapturePointToolsTest
    {
       ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      RobotSide robotSide = RobotSide.LEFT;
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test",new FramePose());
 
       int nFootsteps = 10;
@@ -238,12 +235,15 @@ public class CapturePointToolsTest
       for(int i = 0; i<numberFootstepsToConsider; i++)
       {
          constantCentersOfPressures.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+      }
+      for(int i = 0; i<numberFootstepsToConsider-1; i++)
+      {
          capturePointsToPack.add(new YoFramePoint("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
       
       for(int j = 0; j<nTests; j++)
       {
-         for (int i = 0; i < nFootsteps; i++)
+         for (int i = 0; i < numberFootstepsToConsider; i++)
          {
             FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(), random.nextDouble()), new Quat4d(random.nextDouble(),
                   random.nextDouble(), random.nextDouble(), random.nextDouble()));
@@ -288,7 +288,6 @@ public class CapturePointToolsTest
       ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
-      RobotSide robotSide = RobotSide.LEFT;
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test",new FramePose());
       FramePoint2d p1 = new FramePoint2d();
       FramePoint2d p2 = new FramePoint2d();
@@ -299,6 +298,9 @@ public class CapturePointToolsTest
       for(int i = 0; i<numberFootstepsToConsider; i++)
       {
          constantCentersOfPressures.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+      }
+      for(int i = 0; i<numberFootstepsToConsider-1; i++)
+      {
          capturePointsToPack.add(new YoFramePoint("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
       }
       
