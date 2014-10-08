@@ -5,12 +5,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidBehaviors.workingArea.behaviors.scripts.engine.ScriptEngineSettings;
-import us.ihmc.humanoidBehaviors.workingArea.behaviors.scripts.engine.ScriptFileLoader;
+import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
+import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
