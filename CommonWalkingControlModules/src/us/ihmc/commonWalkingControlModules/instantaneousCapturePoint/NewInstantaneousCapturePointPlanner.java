@@ -69,6 +69,18 @@ public class NewInstantaneousCapturePointPlanner
 
 		this.numberFootstepsToConsider.set(maxNumberFootstepsToConsider);
 		this.atAStop.set(true);
+		
+		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
+		{
+			YoFramePoint constantCopYoFramePoint = new YoFramePoint("icpConstantCoP" + i, ReferenceFrame.getWorldFrame(), registry);
+			constantCentersOfPressure.add(constantCopYoFramePoint);
+		}
+
+		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
+		{
+			YoFramePoint icpCornerPointYoFramePoint = new YoFramePoint("icpCornerPoints" + i, ReferenceFrame.getWorldFrame(), registry);
+			capturePointCornerPoints.add(icpCornerPointYoFramePoint);
+		}
 
 		parentRegistry.addChild(this.registry);
 
