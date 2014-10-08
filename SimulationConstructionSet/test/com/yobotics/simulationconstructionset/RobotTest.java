@@ -38,7 +38,7 @@ public class RobotTest
    private static final boolean SHOW_GUI = false;
 
    @AfterClass
-   public void finishedAllTestsMessage()
+   public static void finishedAllTestsMessage()
    {
       System.out.println("Finished RobotTest, moving on.");
    }
