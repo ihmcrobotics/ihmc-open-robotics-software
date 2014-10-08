@@ -8,11 +8,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.kinematics.urdf.Interface;
@@ -33,7 +31,7 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
  */
 public class ValkyrieSliderBoard
 {
-   private enum ValkyrieSliderBoardType {ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING}
+   public enum ValkyrieSliderBoardType {ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING, GRAVITY_COMPENSATION}
 
    private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint, remoteSelectedJoint;
 
@@ -42,7 +40,7 @@ public class ValkyrieSliderBoard
    private final IntegerYoVariable remoteTurboIndex;
 
    @SuppressWarnings("unchecked")
-   public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
+   public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel,
                               ValkyrieSliderBoardType sliderBoardType)
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
@@ -56,29 +54,36 @@ public class ValkyrieSliderBoard
       switch (sliderBoardType)
       {
          case ON_BOARD_POSITION :
-            setupSliderBoardForOnBoardPositionControl(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+            setupSliderBoardForOnBoardPositionControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
 
             break;
 
          case TORQUE_PD_CONTROL :
-            setupSliderBoardForForceControl(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+            setupSliderBoardForForceControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
 
             break;
 
          case WALKING :
-            new WalkControllerSliderBoard(scs, registry, generalizedSDFRobotModel);
+            new WalkControllerSliderBoard(scs, registry, drcRobotModel.getGeneralizedRobotModel());
 
             break;
 
          case TUNING :
             try
             {
-               setupSliderBoardForForceControlTuning(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+               setupSliderBoardForForceControlTuning(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
             }
             catch (JAXBException e)
             {
                e.printStackTrace();
             }
+            
+            break;
+         case GRAVITY_COMPENSATION :
+            
+            new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, drcRobotModel.createFullRobotModel(), registry, CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
+            
+            break;
       }
 
       sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
@@ -114,7 +119,7 @@ public class ValkyrieSliderBoard
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             System.out.println("loading configuration " + selectedJoint.getEnumValue());
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
@@ -239,7 +244,7 @@ public class ValkyrieSliderBoard
                            turboIndexMonitor.addVariableChangedListener(new VariableChangedListener()
                            {
                               @Override
-                              public void variableChanged(YoVariable v)
+                              public void variableChanged(YoVariable<?> v)
                               {
                                  if (isTunableRotaryJoint(selectedJoint.getEnumValue().toString()))
                                  {
@@ -273,7 +278,7 @@ public class ValkyrieSliderBoard
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             if (isTunableRotaryJoint(selectedJoint.getEnumValue().toString()))
             {
@@ -358,7 +363,7 @@ public class ValkyrieSliderBoard
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             System.out.println("loading configuration " + selectedJoint.getEnumValue());
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
@@ -369,77 +374,5 @@ public class ValkyrieSliderBoard
             }
          }
       });
-   }
-
-   private static final SliderBoardFactory turboDriverPositionControlFactory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.ON_BOARD_POSITION);
-      }
-   };
-
-   public static SliderBoardFactory getTurboDriverPositionControlFactory()
-   {
-      return turboDriverPositionControlFactory;
-   }
-
-   private static final SliderBoardFactory forceControlFactory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.TORQUE_PD_CONTROL);
-      }
-   };
-
-   public static SliderBoardFactory getForceControlFactory()
-   {
-      return forceControlFactory;
-   }
-
-   private static final SliderBoardFactory forceControlTuningFactory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.TUNING);
-      }
-   };
-
-   public static SliderBoardFactory getForceTuningControlFactory()
-   {
-      return forceControlTuningFactory;
-   }
-
-   private static final SliderBoardFactory walkingFactory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.WALKING);
-      }
-   };
-
-   // FIXME: Implement this
-   public static SliderBoardFactory getWalkingSliderBoardFactory()
-   {
-      return walkingFactory;
-   }
-
-   public static SliderBoardFactory getIDControllerSliderBoardFactory(final DRCRobotModel robotModel)
-   {
-      SliderBoardFactory inverseDynamicsControllerSliderBoardFactory = new SliderBoardFactory()
-      {
-         @Override
-         public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-         {
-            SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-            new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, fullRobotModel, registry, CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
-         }
-      };
-      
-      return inverseDynamicsControllerSliderBoardFactory;
    }
 }

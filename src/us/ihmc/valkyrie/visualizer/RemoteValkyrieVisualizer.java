@@ -1,10 +1,9 @@
 package us.ihmc.valkyrie.visualizer;
 
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
-import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
+import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.ValkyrieSliderBoardType;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -20,12 +19,9 @@ public class RemoteValkyrieVisualizer
    {
       System.out.println("Connecting to host " + host);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
-      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
-//    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
-//      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
 
       ValkyrieSliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize,
-            sliderBoardFactory);
+            ValkyrieSliderBoardType.WALKING);
 
       int numberOfTicksBeforeUpdatingGraphs = 30;
       scsYoVariablesUpdatedListener.updateGraphsLessFrequently(true, numberOfTicksBeforeUpdatingGraphs);

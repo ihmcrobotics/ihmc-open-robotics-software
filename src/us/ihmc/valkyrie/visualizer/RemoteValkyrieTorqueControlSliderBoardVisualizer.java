@@ -1,12 +1,10 @@
 package us.ihmc.valkyrie.visualizer;
 
-
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
-import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
+import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.ValkyrieSliderBoardType;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -22,9 +20,8 @@ public class RemoteValkyrieTorqueControlSliderBoardVisualizer
    {
       System.out.println("Connecting to host " + host);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
-      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getForceControlFactory();
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize, ValkyrieSliderBoardType.TORQUE_PD_CONTROL);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
@@ -60,8 +57,5 @@ public class RemoteValkyrieTorqueControlSliderBoardVisualizer
          System.err.println();
          System.exit(1);
       }
-
-
-
    }
 }
