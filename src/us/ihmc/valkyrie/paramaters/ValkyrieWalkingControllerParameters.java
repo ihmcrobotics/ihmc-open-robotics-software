@@ -8,6 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
@@ -559,6 +560,20 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
+   public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
+   {
+      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SupportFoot", registry);
+
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionDerivativeGains(20.0, 0.0, 0.0);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
 
       return gains;
    }
