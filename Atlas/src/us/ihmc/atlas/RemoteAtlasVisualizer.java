@@ -21,7 +21,7 @@ public class RemoteAtlasVisualizer
    {
       System.out.println("Connecting to host " + host);
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new AtlasSliderBoardControllerListener(robotModel, bufferSize, AtlasSliderBoardType.WALK_CONTROLLER);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new AtlasSCSYoVariablesUpdatedListener(robotModel, bufferSize, AtlasSliderBoardType.WALK_CONTROLLER);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
       scsYoVariablesUpdatedListener.addButton("setWristForceSensorsToZero", 1.0);
       
