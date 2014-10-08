@@ -32,376 +32,393 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class TestNewInstantaneousCapturePointPlanner
 {
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
-   private boolean visualize = true;
+	private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
-   private YoGraphicsListRegistry yoGraphicsListRegistry = null;
-   private SimulationConstructionSet scs = null;
-   private DoubleYoVariable timeYoVariable = null;
-   private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
-   private BooleanYoVariable stopSignalFlag = new BooleanYoVariable("stopSignalFlag", registry);
-   
-   YoFramePoint tmpPreviousICPPosition = new YoFramePoint("PreviousICPPosition", ReferenceFrame.getWorldFrame(), registry);
+	private boolean visualize = true;
 
-   private YoFramePoint icpArrowTip = null;
-   private YoFramePoint icpPositionYoFramePoint = null;
-   private YoFramePoint icpVelocityYoFramePoint = null;
-   private YoFramePoint cmpPositionYoFramePoint = null;
+	private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
+	private YoGraphicsListRegistry yoGraphicsListRegistry = null;
+	private SimulationConstructionSet scs = null;
+	private DoubleYoVariable timeYoVariable = null;
+	private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
 
-   private ArrayList<YoFramePoint> footstepYoFramePoints = null;
-   
-   private ArrayList<YoFramePoint> icpFootCenterCornerPointsViz = null; 
-   
-   private ArrayList<YoFramePoint> constantCoPsViz = null; 
+	YoFramePoint tmpPreviousICPPosition = new YoFramePoint("PreviousICPPosition", ReferenceFrame.getWorldFrame(), registry);
 
-   private YoFramePoint doubleSupportStartICPYoFramePoint = null;
-   private YoFramePoint doubleSupportEndICPYoFramePoint = null;
+	private YoFramePoint icpArrowTip = null;
+	private YoFramePoint icpPositionYoFramePoint = null;
+	private YoFramePoint singleSupportEndICPPosition = null;
+	private YoFramePoint icpVelocityYoFramePoint = null;
+	private YoFramePoint cmpPositionYoFramePoint = null;
 
-   private final double deltaT = 0.001;
+	private ArrayList<YoFramePoint> footstepYoFramePoints = null;
 
-   private double singleSupportDuration = 0.5;
-   private double doubleSupportDuration = 0.2;
-   private double doubleSupportInitialTransferDuration = 0.4;
-   private int numberOfStepsInStepList = 4;
-   private int maxNumberOfConsideredFootsteps = numberOfStepsInStepList;  
-   private NewInstantaneousCapturePointPlanner icpPlanner;
+	private ArrayList<YoFramePoint> icpFootCenterCornerPointsViz = null;
 
-   private YoFrameLineSegment2d icpVelocityLineSegment = null;
+	private ArrayList<YoFramePoint> constantCoPsViz = null;
 
-   private double scsPlaybackRate = 1;
+	private YoFramePoint doubleSupportStartICPYoFramePoint = null;
+	private YoFramePoint doubleSupportEndICPYoFramePoint = null;
 
-   private double scsPlaybackDesiredFrameRate = 0.001;
-   
-   @After
-   public void removeVisualizersAfterTest()
-   {
-      if (scs != null)
-      {
-         scs.closeAndDispose();
-      }
+	private final double deltaT = 0.001;
 
-      visualize = false;
+	private double singleSupportDuration = 0.7;
+	private double doubleSupportDuration = 0.2;
+	private int numberOfStepsInStepList = 5;
+	private int maxNumberOfConsideredFootsteps = 3;
+	private NewInstantaneousCapturePointPlanner icpPlanner;
 
-      pointAndLinePlotter = null;
-      yoGraphicsListRegistry = null;
-      scs = null;
-      timeYoVariable = null;
-      registry = null;
+	private YoFrameLineSegment2d icpVelocityLineSegment = null;
 
-      icpArrowTip = null;
-      icpPositionYoFramePoint = null;
-      icpVelocityYoFramePoint = null;
+	private double scsPlaybackRate = 1;
 
-      footstepYoFramePoints = null;
-      
-      icpFootCenterCornerPointsViz = null; 
+	private double scsPlaybackDesiredFrameRate = 0.001;
 
-      constantCoPsViz = null;
+	@After
+	public void removeVisualizersAfterTest()
+	{
+		if (scs != null)
+		{
+			scs.closeAndDispose();
+		}
 
-      doubleSupportStartICPYoFramePoint = null;
-      doubleSupportEndICPYoFramePoint = null;
+		visualize = false;
 
-      icpVelocityLineSegment = null;
-   }
-   
-   @Test
-   public void test1()
-   {
-      icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps,doubleSupportInitialTransferDuration,
-            registry,yoGraphicsListRegistry);
-      
-      stopSignalTime.set(1.9e100);
+		pointAndLinePlotter = null;
+		yoGraphicsListRegistry = null;
+		scs = null;
+		timeYoVariable = null;
+		registry = null;
 
-      createVisualizers(maxNumberOfConsideredFootsteps);
+		icpArrowTip = null;
+		icpPositionYoFramePoint = null;
+		icpVelocityYoFramePoint = null;
 
-      RobotSide stepSide = RobotSide.LEFT;
-      double stepLength = 0.3;
-      double halfStepWidth = 0.1;
-      boolean startSquaredUp = true;
+		footstepYoFramePoints = null;
 
-      double comHeight = 1.0;
-      double gravitationalAcceleration = 9.81;
+		icpFootCenterCornerPointsViz = null;
 
-      double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
-      
+		constantCoPsViz = null;
 
-      ArrayList<YoFramePoint> stepList = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength, halfStepWidth);
+		doubleSupportStartICPYoFramePoint = null;
+		doubleSupportEndICPYoFramePoint = null;
 
-//      ArrayList<YoFramePoint> stepList = createABunchOfRandomWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength, halfStepWidth);
+		icpVelocityLineSegment = null;
+	}
 
-      YoFramePoint initialICPPosition = new YoFramePoint("initialICP", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePoint initialCMPPosition = new YoFramePoint("initialCMP", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector initialICPVelocity = new YoFrameVector("initialICPVelocity", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector initialICPAcceleration = new YoFrameVector("initialICPAcceleration", ReferenceFrame.getWorldFrame(), registry);
+	@Test
+	public void test1()
+	{
+		icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps, registry, yoGraphicsListRegistry);
 
-      YoFramePoint icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector icpVelocity = new YoFrameVector("icpVelocity", ReferenceFrame.getWorldFrame(), registry);
-      YoFrameVector icpAcceleration = new YoFrameVector("icpAcceleration", ReferenceFrame.getWorldFrame(),registry);
-      
-      YoFramePoint cmpPosition = new YoFramePoint("cmpPosition", ReferenceFrame.getWorldFrame(), registry);
+		stopSignalTime.set(1.9e100);
 
-      double initialTime = 0.0;
-      ArrayList<YoFramePoint> footLocations = getFirstSteps(stepList, maxNumberOfConsideredFootsteps);  
+		createVisualizers(maxNumberOfConsideredFootsteps);
 
-      initialICPPosition.set(footLocations.get(0));
-      initialICPPosition.add(footLocations.get(1));
-      initialICPPosition.scale(0.5);
+		RobotSide stepSide = RobotSide.LEFT;
+		double stepLength = 0.3;
+		double halfStepWidth = 0.1;
+		boolean startSquaredUp = true;
 
-      icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, initialICPPosition, 
-              initialICPVelocity, omega0, initialTime, footLocations);
-      
-      icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialTime);
-      
-      if (visualize)
-      {
-		  for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
-	      {
-	         footstepYoFramePoints.get(i).set(footLocations.get(i));
-	      }
-		  
-	      for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-	      {
-	         constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i)); 
-	      }
-	     
-	      for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-	      {
-	         icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i)); 
-	      }
-      }
+		double comHeight = 1.0;
+		double gravitationalAcceleration = 9.81;
 
-      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportInitialTransferDuration, initialTime,
-              deltaT, omega0, initialICPPosition, stepList, footLocations);
+		double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-      initialTime = initialTime + doubleSupportInitialTransferDuration;
+		ArrayList<YoFramePoint> stepList = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength,
+				halfStepWidth);
 
-      stepList.remove(0);
+		YoFramePoint initialICPPosition = new YoFramePoint("initialICP", ReferenceFrame.getWorldFrame(), registry);
+		YoFrameVector initialICPVelocity = new YoFrameVector("initialICPVelocity", ReferenceFrame.getWorldFrame(), registry);
+		YoFrameVector initialICPAcceleration = new YoFrameVector("initialICPAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
-//      while (stepList.size() >= 2)
-//      {
-         footLocations = getFirstSteps(stepList, 4);
+		YoFramePoint icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
+		YoFrameVector icpVelocity = new YoFrameVector("icpVelocity", ReferenceFrame.getWorldFrame(), registry);
+		YoFrameVector icpAcceleration = new YoFrameVector("icpAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
-         icpPlanner.initializeSingleSupport(singleSupportDuration, doubleSupportDuration, omega0, initialTime,footLocations);
+		YoFramePoint cmpPosition = new YoFramePoint("cmpPosition", ReferenceFrame.getWorldFrame(), registry);
 
-         if (visualize)
-         {            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-            {
-               constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-            }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
-            {
-               icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy()); 
-            }
-         }
+		double initialTime = 0.0;
+		ArrayList<YoFramePoint> footLocations = getFirstSteps(stepList, maxNumberOfConsideredFootsteps);
 
-         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialTime);
-         
-         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration, initialTime, omega0,
-                 initialICPPosition, stepList, footLocations);
+		initialICPPosition.set(footLocations.get(0));
+		initialICPPosition.add(footLocations.get(1));
+		initialICPPosition.scale(0.5);
 
-         initialTime = initialTime + singleSupportDuration;
-         
-         icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, icpPosition, icpVelocity, omega0, 
-        		 initialTime, footLocations);
-         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialTime);
+		icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, initialICPPosition, initialICPVelocity, omega0,
+				initialTime, footLocations);
 
-         if (visualize)
-         {  
-            for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-            {
-               constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
-            }
-         }
+		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
+				initialTime);
 
-         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration, initialTime, deltaT, omega0,
-                 initialICPPosition, stepList, footLocations);
+		if (visualize)
+		{
+			for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
+			{
+				footstepYoFramePoints.get(i).set(footLocations.get(i));
+			}
 
-         initialTime = initialTime + doubleSupportDuration;
-//
-//
-//         stepList.remove(0);
-//      }
+			for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+			{
+				constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i));
+			}
 
-//      double timeToSimulateAtEnd = 1.0;
-//      initialICPPosition.set(icpPosition);
-//      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, timeToSimulateAtEnd, initialTime, deltaT, omega0,
-//              initialICPPosition.getPoint3dCopy(), stepList, footLocations);
+			for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
+			{
+				icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
+			}
+		}
 
-      if (visualize)
-      {
-         pointAndLinePlotter.addPointsAndLinesToSCS(scs);
+		simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration,
+				initialTime, deltaT, omega0, initialICPPosition, stepList, footLocations);
 
-         scs.startOnAThread();
-         ThreadTools.sleepForever();
-      }
-   }
-   
-   private ArrayList<YoFramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp, int numberOfStepsInStepList,
-         double stepLength, double halfStepWidth)
-    {
-       ArrayList<YoFramePoint> footLocations = new ArrayList<YoFramePoint>();
-   
-       double height = 0.5;
-   
-       if (startSquaredUp)
-       {
-          YoFramePoint firstStepLocation = new YoFramePoint("stepListElement" + 100, "", ReferenceFrame.getWorldFrame(), registry);
-          firstStepLocation.set(0, stepSide.negateIfRightSide(halfStepWidth), height);
-          footLocations.add(firstStepLocation);
-   
-          stepSide = stepSide.getOppositeSide();
-       }
-   
-       for (int i = 0; i < numberOfStepsInStepList; i++)
-       {
-          YoFramePoint stepLocation = new YoFramePoint("stepListElement" + i, "", ReferenceFrame.getWorldFrame(), registry);
-          stepLocation.set(i * stepLength, stepSide.negateIfRightSide(halfStepWidth), height);
-   
-          footLocations.add(stepLocation);
-          stepSide = stepSide.getOppositeSide();
-       }
-   
-       return footLocations;
-    }
-   
-   private ArrayList<YoFramePoint> getFirstSteps(ArrayList<YoFramePoint> stepList, int maximumNumberOfStepsToReturn)
-   {
-      ArrayList<YoFramePoint> ret = new ArrayList<YoFramePoint>();
+		initialTime = initialTime + doubleSupportDuration;
 
-      int numberOfStepsToReturn = Math.min(stepList.size(), maximumNumberOfStepsToReturn);
-      for (int i = 0; i < numberOfStepsToReturn; i++)
-      {
-         ret.add(stepList.get(i));
-      }
+		stepList.remove(0);
 
-      return ret;
-   }
-   
-   private void createVisualizers(int maxNumberOfConsideredFootsteps)
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+		for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
+		{
+			footstepYoFramePoints.get(i).set(footLocations.get(i));
+		}
 
-      Robot robot = new Robot("TestRobot");
-      scs = new SimulationConstructionSet(robot);
+		while (stepList.size() >= 2)
+		{
+			footLocations = getFirstSteps(stepList, 4);
 
-      scs.setDT(deltaT, 1);
-      scs.changeBufferSize(16000);
-      scs.setPlaybackRealTimeRate(scsPlaybackRate );
-      scs.setPlaybackDesiredFrameRate(scsPlaybackDesiredFrameRate );
+			icpPlanner.initializeSingleSupport(singleSupportDuration, doubleSupportDuration, omega0, initialTime, footLocations);
 
-      robot.getRobotsYoVariableRegistry().addChild(registry);
-      timeYoVariable = robot.getYoTime();
+			if (visualize)
+			{
+				for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+				{
+					constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy());
+				}
 
-      pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
+				for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
+				{
+					icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy());
+				}
+			}
 
-      icpArrowTip = new YoFramePoint("icpVelocityTip", "", worldFrame, registry);
-      icpVelocityLineSegment = new YoFrameLineSegment2d("icpVelocityForViz", "", worldFrame, registry);
-      icpPositionYoFramePoint = new YoFramePoint("icpPositionForViz", "", worldFrame, registry);
-      icpPositionYoFramePoint.setZ(0.5);
-      icpVelocityYoFramePoint = new YoFramePoint("icpVelocityForViz", "", worldFrame, registry);
-      cmpPositionYoFramePoint = new YoFramePoint("cmpPositionForViz", "", worldFrame, registry);
-      cmpPositionYoFramePoint.setZ(0.5);
+			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
+					initialICPAcceleration, initialTime);
 
-      doubleSupportStartICPYoFramePoint = new YoFramePoint("doubleSupportICPStart", "", worldFrame, registry);
-      doubleSupportEndICPYoFramePoint = new YoFramePoint("doubleSupportICPEnd", "", worldFrame, registry);
+			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
+					initialTime, omega0, initialICPPosition, stepList, footLocations);
+			
+			singleSupportEndICPPosition.set(icpPosition);
+			
+			initialTime = initialTime + singleSupportDuration;
 
-      footstepYoFramePoints = new ArrayList<YoFramePoint>();
-      icpFootCenterCornerPointsViz = new ArrayList<YoFramePoint>();
-      constantCoPsViz = new ArrayList<YoFramePoint>();
-      
-      for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-      {
-         YoFramePoint footstepYoFramePoint = pointAndLinePlotter.plotPoint3d("footstep" + i, new Point3d(), YoAppearance.Black(), 0.009);
-         footstepYoFramePoints.add(footstepYoFramePoint);
-         
-      }
-      
-      for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-      {
-         YoFramePoint constantCoPPoint = pointAndLinePlotter.plotPoint3d("constantCoPsViz" + i, new Point3d(), YoAppearance.Red(), 0.004);
-         constantCoPsViz.add(constantCoPPoint); 
-      }
-      
-      
-      for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-      {
-         YoFramePoint cornerICPFramePoint = pointAndLinePlotter.plotPoint3d("icpCornerPoint" + i, new Point3d(), YoAppearance.Green(), 0.003);
-         icpFootCenterCornerPointsViz.add(cornerICPFramePoint);
-      }
+			icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, icpPosition, icpVelocity, omega0, initialTime,
+					footLocations);
+			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
+					initialICPAcceleration, initialTime);
 
-      pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.Gold(), 0.005);
-      pointAndLinePlotter.plotYoFramePoint("cmpPosition", cmpPositionYoFramePoint, YoAppearance.Magenta(), 0.005);
-      pointAndLinePlotter.plotLineSegment("icpVelocity", icpVelocityLineSegment, Color.gray);
+			if (visualize)
+			{
+				for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+				{
+					constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i).getFramePointCopy());
+				}
 
-      pointAndLinePlotter.plotYoFramePoint("doubleSupportICPStart", doubleSupportStartICPYoFramePoint, YoAppearance.Cyan(), 0.003);
-      pointAndLinePlotter.plotYoFramePoint("doubleSupportICPEnd", doubleSupportEndICPYoFramePoint, YoAppearance.Cyan(), 0.004);
+				for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
+				{
+					icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy());
+				}
+			}
 
-      yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
-   }
-   
-   private void simulateForwardAndCheckSingleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack, YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack,
-         NewInstantaneousCapturePointPlanner icpPlanner, double singleSupportDuration, double initialTime, double omega0, YoFramePoint initialICPPosition,
-           ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
-   {
-      for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
-      {
-         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, time);
+			simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration,
+					initialTime, deltaT, omega0, initialICPPosition, stepList, footLocations);
 
-         if (visualize)
-         {
-            visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition(), icpPlanner.getDesiredCapturePointVelocity(), 
-            		icpPlanner.getConstantCentersOfPressure().get(0), time);
-         }
+			initialTime = initialTime + doubleSupportDuration;
 
-         initialICPPosition.set(icpPositionToPack);
-      }
-   }
-   
-   private void simulateForwardAndCheckDoubleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack, YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack,
-         NewInstantaneousCapturePointPlanner icpPlanner, double doubleSupportDuration, double initialTime, double deltaT, double omega0, YoFramePoint initialICPPosition,
-           ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
-   {
-      for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
-      {  
-         icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, 
-        		 icpVelocityToPack, icpAccelerationToPack, time);
+			stepList.remove(0);
 
-         if (visualize)
-         {
-            visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition(), 
-                  icpPlanner.getDesiredCapturePointVelocity(), icpPlanner.getConstantCentersOfPressure().get(0), time);
-         }
+			for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
+			{
+				footstepYoFramePoints.get(i).set(footLocations.get(i));
+			}
+		}
 
-         initialICPPosition.set(icpPositionToPack);
-      }
-   }
-   
-   public void visualizeICPAndECMP(YoFramePoint icpPosition, YoFrameVector icpVelocity, YoFramePoint ecmpPosition, double time)
-   {
-      icpPositionYoFramePoint.set(icpPosition);
-      icpVelocityYoFramePoint.set(icpVelocity);
+		if (visualize)
+		{
+			pointAndLinePlotter.addPointsAndLinesToSCS(scs);
 
-      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition.getPoint3dCopy(), icpVelocity.getVector3dCopy(), 0.5);
-      Point2d icpPosition2d = new Point2d(icpPosition.getX(), icpPosition.getY());
-      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d, icpArrowTip.getFramePoint2dCopy().getPointCopy());
+			scs.startOnAThread();
+			ThreadTools.sleepForever();
+		}
+	}
 
-//      cmpPositionYoFramePoint.set(ecmpPosition);
+	private ArrayList<YoFramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp,
+			int numberOfStepsInStepList, double stepLength, double halfStepWidth)
+	{
+		ArrayList<YoFramePoint> footLocations = new ArrayList<YoFramePoint>();
 
-      timeYoVariable.set(time);
-      scs.tickAndUpdate();
-   }
-   
-   private void removeAllStepsFromStepListExceptFirstTwo(ArrayList<YoFramePoint> stepList)
-   {
-      int stepListSize = stepList.size();
+		double height = 0.5;
 
-      for (int i = stepListSize - 1; i >= 2; i--)
-      {
-         stepList.remove(i);
-      }
-   }
+		if (startSquaredUp)
+		{
+			YoFramePoint firstStepLocation = new YoFramePoint("stepListElement" + 100, "", ReferenceFrame.getWorldFrame(), registry);
+			firstStepLocation.set(0, stepSide.negateIfRightSide(halfStepWidth), height);
+			footLocations.add(firstStepLocation);
+
+			stepSide = stepSide.getOppositeSide();
+		}
+
+		for (int i = 0; i < numberOfStepsInStepList; i++)
+		{
+			YoFramePoint stepLocation = new YoFramePoint("stepListElement" + i, "", ReferenceFrame.getWorldFrame(), registry);
+			stepLocation.set(i * stepLength, stepSide.negateIfRightSide(halfStepWidth), height);
+
+			footLocations.add(stepLocation);
+			stepSide = stepSide.getOppositeSide();
+		}
+
+		return footLocations;
+	}
+
+	private ArrayList<YoFramePoint> getFirstSteps(ArrayList<YoFramePoint> stepList, int maximumNumberOfStepsToReturn)
+	{
+		ArrayList<YoFramePoint> ret = new ArrayList<YoFramePoint>();
+
+		int numberOfStepsToReturn = Math.min(stepList.size(), maximumNumberOfStepsToReturn);
+		for (int i = 0; i < numberOfStepsToReturn; i++)
+		{
+			ret.add(stepList.get(i));
+		}
+
+		return ret;
+	}
+
+	private void createVisualizers(int maxNumberOfConsideredFootsteps)
+	{
+		ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+		Robot robot = new Robot("TestRobot");
+		scs = new SimulationConstructionSet(robot);
+
+		scs.setDT(deltaT, 1);
+		scs.changeBufferSize(16000);
+		scs.setPlaybackRealTimeRate(scsPlaybackRate);
+		scs.setPlaybackDesiredFrameRate(scsPlaybackDesiredFrameRate);
+
+		robot.getRobotsYoVariableRegistry().addChild(registry);
+		timeYoVariable = robot.getYoTime();
+
+		pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
+
+		icpArrowTip = new YoFramePoint("icpVelocityTip", "", worldFrame, registry);
+		singleSupportEndICPPosition = new YoFramePoint("flegm","",worldFrame,registry);
+		icpVelocityLineSegment = new YoFrameLineSegment2d("icpVelocityForViz", "", worldFrame, registry);
+		icpPositionYoFramePoint = new YoFramePoint("icpPositionForViz", "", worldFrame, registry);
+		icpPositionYoFramePoint.setZ(0.5);
+		icpVelocityYoFramePoint = new YoFramePoint("icpVelocityForViz", "", worldFrame, registry);
+		cmpPositionYoFramePoint = new YoFramePoint("cmpPositionForViz", "", worldFrame, registry);
+		cmpPositionYoFramePoint.setZ(0.5);
+
+		doubleSupportStartICPYoFramePoint = new YoFramePoint("doubleSupportICPStart", "", worldFrame, registry);
+		doubleSupportEndICPYoFramePoint = new YoFramePoint("doubleSupportICPEnd", "", worldFrame, registry);
+
+		footstepYoFramePoints = new ArrayList<YoFramePoint>();
+		icpFootCenterCornerPointsViz = new ArrayList<YoFramePoint>();
+		constantCoPsViz = new ArrayList<YoFramePoint>();
+
+		for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+		{
+			YoFramePoint footstepYoFramePoint = pointAndLinePlotter.plotPoint3d("footstep" + i, new Point3d(), YoAppearance.Black(), 0.009);
+			footstepYoFramePoints.add(footstepYoFramePoint);
+
+		}
+
+		for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+		{
+			YoFramePoint constantCoPPoint = pointAndLinePlotter
+					.plotPoint3d("constantCoPsViz" + i, new Point3d(), YoAppearance.Red(), 0.004);
+			constantCoPsViz.add(constantCoPPoint);
+		}
+
+		for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
+		{
+			YoFramePoint cornerICPFramePoint = pointAndLinePlotter.plotPoint3d("icpCornerPoint" + i, new Point3d(), YoAppearance.Green(),
+					0.003);
+			icpFootCenterCornerPointsViz.add(cornerICPFramePoint);
+		}
+
+		pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.Gold(), 0.005);
+		pointAndLinePlotter.plotYoFramePoint("icpFlegmPosition", singleSupportEndICPPosition, YoAppearance.Crimson(), 0.004);
+		pointAndLinePlotter.plotYoFramePoint("cmpPosition", cmpPositionYoFramePoint, YoAppearance.Magenta(), 0.005);
+		pointAndLinePlotter.plotLineSegment("icpVelocity", icpVelocityLineSegment, Color.gray);
+
+		pointAndLinePlotter.plotYoFramePoint("doubleSupportICPStart", doubleSupportStartICPYoFramePoint, YoAppearance.Cyan(), 0.003);
+		pointAndLinePlotter.plotYoFramePoint("doubleSupportICPEnd", doubleSupportEndICPYoFramePoint, YoAppearance.Cyan(), 0.004);
+
+		yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
+	}
+
+	private void simulateForwardAndCheckSingleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack,
+			YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack, NewInstantaneousCapturePointPlanner icpPlanner,
+			double singleSupportDuration, double initialTime, double omega0, YoFramePoint initialICPPosition,
+			ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
+	{
+		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
+		{
+			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
+					time);
+
+			if (visualize)
+			{
+				visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition(), icpPlanner.getDesiredCapturePointVelocity(), icpPlanner
+						.getConstantCentersOfPressure().get(0), time);
+			}
+
+			initialICPPosition.set(icpPositionToPack);
+		}
+	}
+
+	private void simulateForwardAndCheckDoubleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack,
+			YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack, NewInstantaneousCapturePointPlanner icpPlanner,
+			double doubleSupportDuration, double initialTime, double deltaT, double omega0, YoFramePoint initialICPPosition,
+			ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
+	{
+		for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
+		{
+			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
+					time);
+
+			if (visualize)
+			{
+				visualizeICPAndECMP(icpPlanner.getDesiredCapturePointPosition(), icpPlanner.getDesiredCapturePointVelocity(), icpPlanner
+						.getConstantCentersOfPressure().get(0), time);
+			}
+
+			initialICPPosition.set(icpPositionToPack);
+		}
+	}
+
+	public void visualizeICPAndECMP(YoFramePoint icpPosition, YoFrameVector icpVelocity, YoFramePoint ecmpPosition, double time)
+	{
+		icpPositionYoFramePoint.set(icpPosition);
+		icpVelocityYoFramePoint.set(icpVelocity);
+
+		PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition.getPoint3dCopy(),
+				icpVelocity.getVector3dCopy(), 0.5);
+		Point2d icpPosition2d = new Point2d(icpPosition.getX(), icpPosition.getY());
+		PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d, icpArrowTip
+				.getFramePoint2dCopy().getPointCopy());
+
+		// cmpPositionYoFramePoint.set(ecmpPosition);
+
+		timeYoVariable.set(time);
+		scs.tickAndUpdate();
+	}
+
+	private void removeAllStepsFromStepListExceptFirstTwo(ArrayList<YoFramePoint> stepList)
+	{
+		int stepListSize = stepList.size();
+
+		for (int i = stepListSize - 1; i >= 2; i--)
+		{
+			stepList.remove(i);
+		}
+	}
 }
