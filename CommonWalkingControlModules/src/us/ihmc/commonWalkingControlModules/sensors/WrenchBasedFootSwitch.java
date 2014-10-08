@@ -216,6 +216,10 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       readSensorData(footWrenchToPack);
    }
 
+   public ReferenceFrame getMeasurementFrame()
+   {
+      return forceSensorData.getMeasurementFrame();
+   }
    
    private boolean isCoPPastThreshold()
    {
