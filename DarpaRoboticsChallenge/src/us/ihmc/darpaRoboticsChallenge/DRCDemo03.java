@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemoEnvironmentWithBoxAndSteeringWheel;
@@ -58,7 +58,7 @@ public abstract class DRCDemo03
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(robotModel.getDrivingControllerParameters());
 
       
-      HumanoidControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
+      MomentumBasedControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
       Graphics3DObject linkGraphics = null;
       if (terrainObject3D != null)

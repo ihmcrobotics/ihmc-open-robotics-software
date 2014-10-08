@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InverseDynamicsJointControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
@@ -23,8 +22,8 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
@@ -52,7 +51,7 @@ public class DRCInverseDynamicsControllerDemo
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
-      HumanoidControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
+      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
             footForceSensorNames, walkingControllerParameters, armControllerParameters,
             HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new InverseDynamicsJointControllerFactory(true));
