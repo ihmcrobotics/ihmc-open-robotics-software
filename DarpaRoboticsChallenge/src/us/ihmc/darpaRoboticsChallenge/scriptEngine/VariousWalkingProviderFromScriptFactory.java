@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelState
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
-import us.ihmc.humanoidBehaviors.workingArea.behaviors.scripts.engine.ScriptFileLoader;
+import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
