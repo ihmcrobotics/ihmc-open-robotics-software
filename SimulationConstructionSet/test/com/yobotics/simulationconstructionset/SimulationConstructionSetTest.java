@@ -25,7 +25,8 @@ public class SimulationConstructionSetTest
 {
    private boolean isGradleBuild()
    {
-      if (System.getProperty("bamboo.gradle").contains("yes"))
+      String property = System.getProperty("bamboo.gradle");
+      if (property != null && property.contains("yes"))
       {
          return true;
       }
