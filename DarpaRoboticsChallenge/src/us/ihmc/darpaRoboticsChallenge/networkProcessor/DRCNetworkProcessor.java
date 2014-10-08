@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.AbstractNetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
@@ -18,19 +18,14 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-public class DRCNetworkProcessor
+public class DRCNetworkProcessor extends AbstractNetworkProcessor
 {
-
    private final boolean useSimulatedSensors;
-   private final ObjectCommunicator fieldComputerClient;
-   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
-   private final AbstractNetworkProcessorNetworkingManager networkingManager;
    private final SDFFullRobotModel fullRobotModel;
    private final RobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
@@ -61,7 +56,7 @@ public class DRCNetworkProcessor
       {
          String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
          if(NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-            kryoIP = NetworkConfigParameters.BEHAVIOR_MODULE_IP;
+            kryoIP = "10.66.171.41";
          
          this.fieldComputerClient = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TCP_PORT,
                new IHMCCommunicationKryoNetClassList());
@@ -112,7 +107,7 @@ public class DRCNetworkProcessor
       }
    }
    
-   private void connect()
+   protected void connect()
    {
       try
       {
