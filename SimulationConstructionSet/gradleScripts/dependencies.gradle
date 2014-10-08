@@ -9,7 +9,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
 	compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x'
-	compile group: 'us.ihmc.thirdparty', name: 'vclip', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
 	compile group: 'net.java.jinput', name: 'jinput-platform', version: '2.0.5'
