@@ -41,6 +41,8 @@ public class RobotTest
    public static void finishedAllTestsMessage()
    {
       System.out.println("Finished RobotTest, moving on.");
+      System.out.flush();
+      System.err.flush();
    }
 
    @Test
