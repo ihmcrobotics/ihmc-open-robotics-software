@@ -21,7 +21,7 @@ public class RemoteValkyrieTurboDriverPositionControlSliderBoardVisualizer
       System.out.println("Connecting to host " + host);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize, ValkyrieSliderBoardType.ON_BOARD_POSITION);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSCSYoVariablesUpdatedListener(robotModel, bufferSize, ValkyrieSliderBoardType.ON_BOARD_POSITION);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
