@@ -9,10 +9,6 @@ dependencies {
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCYoUtilities')
-	compile project(':IHMCROSTools')
 	compile project(':Graphics3DAdapter')
-    compile project(':ROSJavaBootstrap')
-    compile project(':ROSJavaMessages')
-    compile project(':ROSJava')
 	
 }
