@@ -26,7 +26,7 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
-public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener, ExitActionListener
+public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener
 {
    private static final int DISPLAY_ONE_IN_N_PACKETS = 6;
 
@@ -37,27 +37,28 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
    private volatile boolean recording = true;
    private YoVariableClient client;
+   private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
 
-   public SCSYoVariablesUpdatedListener(int bufferSize)
+   public SCSVisualizer(int bufferSize)
    {
       this(bufferSize, true);
    }
 
-   public SCSYoVariablesUpdatedListener(int bufferSize, boolean showGUI)
+   public SCSVisualizer(int bufferSize, boolean showGUI)
    {
       this(new Robot("NullRobot"), bufferSize, showGUI);
    }
    
-   public SCSYoVariablesUpdatedListener(Robot robot, int bufferSize)
+   public SCSVisualizer(Robot robot, int bufferSize)
    {
       this(robot, bufferSize, true);
    }
    
-   public SCSYoVariablesUpdatedListener(Robot robot, int bufferSize, boolean showGUI)
+   public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI)
    {
       this.robot = robot;
       this.scs = new SimulationConstructionSet(robot, showGUI, bufferSize);
@@ -67,9 +68,11 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       scs.attachExitActionListener(this);
    }
 
-
    public void start()
    {
+      for (SCSVisualizerStateListener stateListener : stateListeners)
+         stateListener.starting();
+      
       for (String yoVariableName : buttons.keySet())
       {
          final YoVariable<?> var = registry.getVariable(yoVariableName);
@@ -166,6 +169,16 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    {
       return true;
    }
+   
+   public SimulationConstructionSet getSCS()
+   {
+      return scs;
+   }
+   
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
+   }
 
    public void closeAndDispose()
    {
@@ -201,5 +214,10 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    public void updateGraphsLessFrequently(boolean enable, int numberOfTicksBeforeUpdatingGraphs)
    {
       scs.setFastSimulate(enable, numberOfTicksBeforeUpdatingGraphs);
+   }
+   
+   public void addSCSVisualizerStateListener(SCSVisualizerStateListener stateListener)
+   {
+      stateListeners.add(stateListener);
    }
 }

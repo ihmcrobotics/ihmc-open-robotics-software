@@ -2,31 +2,63 @@ package us.ihmc.atlas;
 
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
+import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
+import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-public class RemoteAtlasVisualizer
+public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
    public static final int defaultPort = NetworkConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
    private final boolean showOverheadView = true;
+   private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER; 
    
    public enum AtlasSliderBoardType {GAIN_CONTROLLER, JOINT_ANGLE_OFFSET, WALK_CONTROLLER}
    
-   public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel robotModel)
+   private DRCRobotModel drcRobotModel;
+   private SCSVisualizer scsVisualizer;
+   
+   public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel drcRobotModel)
    {
+      this.drcRobotModel = drcRobotModel;
+      
       System.out.println("Connecting to host " + host);
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new AtlasSCSYoVariablesUpdatedListener(robotModel, bufferSize, AtlasSliderBoardType.WALK_CONTROLLER);
-      scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
-      scsYoVariablesUpdatedListener.addButton("setWristForceSensorsToZero", 1.0);
+      scsVisualizer = new SCSVisualizer(drcRobotModel.createSdfRobot(false), bufferSize);
+      scsVisualizer.addSCSVisualizerStateListener(this);
+      scsVisualizer.addButton("requestStop", 1.0);
+      scsVisualizer.addButton("setWristForceSensorsToZero", 1.0);
       
-      YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", showOverheadView);
+      YoVariableClient client = new YoVariableClient(host, port, scsVisualizer, "remote", showOverheadView);
       client.start();
+   }
+
+   @Override
+   public void starting()
+   {
+      switch (defaultSliderBoardType)
+      {
+         case WALK_CONTROLLER :
+            new WalkControllerSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), drcRobotModel.getGeneralizedRobotModel());
+
+            break;
+
+         case GAIN_CONTROLLER :
+            new GainControllerSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), drcRobotModel.getGeneralizedRobotModel());
+
+            break;
+
+         case JOINT_ANGLE_OFFSET :
+            new JointAngleOffsetSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), drcRobotModel.getGeneralizedRobotModel());
+
+            break;
+      }
    }
 
    public static void main(String[] args) throws JSAPException
