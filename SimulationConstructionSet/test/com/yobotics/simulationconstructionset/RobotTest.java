@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -34,6 +36,12 @@ public class RobotTest
 {
    private static final double COORDINATE_SYSTEM_LENGTH = 0.3;
    private static final boolean SHOW_GUI = false;
+
+   @AfterClass
+   public void finishedAllTestsMessage()
+   {
+      System.out.println("Finished RobotTest, moving on.");
+   }
 
    @Test
    public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException
