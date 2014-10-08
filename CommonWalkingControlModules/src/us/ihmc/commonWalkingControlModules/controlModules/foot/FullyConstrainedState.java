@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -14,20 +15,18 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 
 public class FullyConstrainedState extends AbstractFootControlState
 {
-   private final double supportKdRoll = 20.0;
-   private final double supportKdPitch = 0.0;
-   private final double supportKdYaw = 0.0;
-
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
    private final BooleanYoVariable doFancyOnToesControl;
 
    private final EnumYoVariable<ConstraintType> requestedState;
 
+   private final YoSE3PIDGains gains;
+
    public FullyConstrainedState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, RobotSide robotSide, YoVariableRegistry registry)
+         FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, accelerationControlModule, momentumBasedController,
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
@@ -36,6 +35,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
       this.doFancyOnToesControl = doFancyOnToesControl;
       this.requestedState = requestedState;
+      this.gains = gains;
    }
 
    public void doTransitionIntoAction()
@@ -45,15 +45,11 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    private void setFullyConstrainedStateGains()
    {
-      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setOrientationProportionalGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setOrientationDerivativeGains(supportKdRoll, supportKdPitch, supportKdYaw);
+      accelerationControlModule.setGains(gains);
    }
 
    public void doSpecificAction()
    {
-      // is false on the real robot anyway
       if (doFancyOnToesControl.getBooleanValue())
          determineCoPOnEdge();
 
