@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 import sensor_msgs.JointState;

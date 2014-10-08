@@ -1,11 +1,10 @@
-package us.ihmc.utilities.ros;
-
-import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
+package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
 import sensor_msgs.CameraInfo;
 import std_msgs.Header;
+import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 
 public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
 {

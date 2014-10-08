@@ -9,8 +9,8 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
-import us.ihmc.utilities.ros.RosJointStatePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 
 public class RosRobotJointStatePublisher implements ObjectConsumer<RobotConfigurationData>
 {

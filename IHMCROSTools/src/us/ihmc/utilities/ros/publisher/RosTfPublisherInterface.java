@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.publisher;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 

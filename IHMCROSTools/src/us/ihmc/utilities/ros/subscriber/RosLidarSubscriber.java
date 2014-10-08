@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.subscriber;
 
 import sensor_msgs.LaserScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;

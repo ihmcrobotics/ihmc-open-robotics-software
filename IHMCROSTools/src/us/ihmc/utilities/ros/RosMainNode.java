@@ -20,6 +20,8 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class RosMainNode implements NodeMain
 {

@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.publisher;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferFactory;

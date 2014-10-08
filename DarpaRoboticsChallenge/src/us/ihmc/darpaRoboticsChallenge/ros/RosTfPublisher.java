@@ -1,11 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTf1Publisher;
-import us.ihmc.utilities.ros.RosTf2Publisher;
-import us.ihmc.utilities.ros.RosTfPublisherInterface;
+import us.ihmc.utilities.ros.publisher.RosTf1Publisher;
+import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
+import us.ihmc.utilities.ros.publisher.RosTfPublisherInterface;
 
 public class RosTfPublisher implements RosTfPublisherInterface
 {

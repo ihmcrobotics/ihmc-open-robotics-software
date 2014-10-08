@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.subscriber;
 
 public abstract class RosTimestampSubscriber extends AbstractRosTopicSubscriber<std_msgs.Time>
 {

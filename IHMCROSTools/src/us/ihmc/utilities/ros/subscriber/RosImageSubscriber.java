@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.subscriber;
 
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.graphics3DAdapter.camera.JPanelCameraStreamer;
+import us.ihmc.utilities.ros.RosTools;
 
 public abstract class RosImageSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {

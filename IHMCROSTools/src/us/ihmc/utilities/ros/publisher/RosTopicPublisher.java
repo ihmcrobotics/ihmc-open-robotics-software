@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.publisher;
 
 import org.ros.internal.message.Message;
 import org.ros.node.topic.Publisher;

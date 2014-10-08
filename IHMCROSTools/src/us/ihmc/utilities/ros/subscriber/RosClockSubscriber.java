@@ -1,4 +1,4 @@
-package us.ihmc.utilities.ros;
+package us.ihmc.utilities.ros.subscriber;
 
 import us.ihmc.utilities.net.TimestampProvider;
 
