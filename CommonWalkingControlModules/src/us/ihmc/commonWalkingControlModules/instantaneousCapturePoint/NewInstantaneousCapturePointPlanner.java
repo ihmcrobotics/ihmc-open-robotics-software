@@ -97,13 +97,10 @@ public class NewInstantaneousCapturePointPlanner
 
 		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
 		{
-			YoFramePoint constantCopYoFramePoint = new YoFramePoint("icpConstantCoP" + i, ReferenceFrame.getWorldFrame(), registry);
-			constantCentersOfPressure.add(constantCopYoFramePoint);
-
 			if (VISUALIZE.getBooleanValue())
 			{
 				YoGraphicPosition constantFootCenterCentersOfPressureViz = new YoGraphicPosition("icpConstantCoP" + i,
-						constantCopYoFramePoint, ICP_CONSTANT_COP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
+						constantCentersOfPressure.get(i), ICP_CONSTANT_COP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
 
 				yoGraphicsList.add(constantFootCenterCentersOfPressureViz);
 				artifactList.add(constantFootCenterCentersOfPressureViz.createArtifact());
@@ -112,12 +109,9 @@ public class NewInstantaneousCapturePointPlanner
 
 		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
 		{
-			YoFramePoint icpCornerPointYoFramePoint = new YoFramePoint("icpCornerPoints" + i, ReferenceFrame.getWorldFrame(), registry);
-			capturePointCornerPoints.add(icpCornerPointYoFramePoint);
-
 			if (VISUALIZE.getBooleanValue())
 			{
-				YoGraphicPosition icpCornerPointsViz = new YoGraphicPosition("icpCornerPoints" + i, icpCornerPointYoFramePoint,
+				YoGraphicPosition icpCornerPointsViz = new YoGraphicPosition("icpCornerPoints" + i, capturePointCornerPoints.get(i),
 						ICP_CORNER_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
 
 				yoGraphicsList.add(icpCornerPointsViz);
