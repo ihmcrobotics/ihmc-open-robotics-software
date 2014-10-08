@@ -50,7 +50,7 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
    @Override
    public void attachGlobalListenerToNetworkProcessor(GlobalObjectConsumer listener)
    {
-      networkProcessorCommunicator.attachListener(Object.class, listener);
+      networkProcessorCommunicator.attachGlobalListener(listener);
    }
 
    @Override
