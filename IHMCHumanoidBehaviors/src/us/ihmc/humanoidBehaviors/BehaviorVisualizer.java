@@ -16,4 +16,9 @@ public class BehaviorVisualizer extends SCSVisualizer
       YoVariableClient client = new YoVariableClient(host, IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_PORT, this, "behavior", showOverheadView);
       client.start();
    }
+   
+   public static void main(String[] arg)
+   {
+      new BehaviorVisualizer("localhost",16300,new Robot("theInvisibleRobot"));
+   }
 }

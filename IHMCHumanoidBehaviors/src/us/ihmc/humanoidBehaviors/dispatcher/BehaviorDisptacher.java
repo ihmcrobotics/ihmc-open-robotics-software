@@ -61,7 +61,7 @@ public class BehaviorDisptacher implements Runnable
       stateMachine = new BehaviorStateMachine<HumanoidBehaviorType>("behaviorState", "behaviorSwitchTime", HumanoidBehaviorType.class, yoTime, registry);
 
       SimpleForwardingBehavior simpleForwardingBehavior = new SimpleForwardingBehavior(communicationBridge, communicationBridge);
-      attechListeners(simpleForwardingBehavior);
+      attachListeners(simpleForwardingBehavior);
       addHumanoidBehavior(HumanoidBehaviorType.STOP, simpleForwardingBehavior);
       stateMachine.setCurrentState(HumanoidBehaviorType.STOP);
       
@@ -205,14 +205,14 @@ public class BehaviorDisptacher implements Runnable
       public void doTransitionAction()
       {
          detachListeners(fromBehaviorState.getBehavior());
-         attechListeners(toBehaviorState.getBehavior());
+         attachListeners(toBehaviorState.getBehavior());
       }
    }
 
-   private void attechListeners(BehaviorInterface behavior)
+   private void attachListeners(BehaviorInterface behavior)
    {
       if (DEBUG)
-         System.out.println("remove listeners to: " + behavior.getName());
+         System.out.println("attach listeners to: " + behavior.getName());
       communicationBridge.attachGlobalListenerToController(behavior.getControllerGlobalObjectConsumer());
       communicationBridge.attachGlobalListenerToNetworkProcessor(behavior.getNetworkProcessorGlobalObjectConsumer());
    }
@@ -220,7 +220,7 @@ public class BehaviorDisptacher implements Runnable
    private void detachListeners(BehaviorInterface behavior)
    {
       if (DEBUG)
-         System.out.println("attach listeners to: " + behavior.getName());
+         System.out.println("detach listeners to: " + behavior.getName());
       communicationBridge.detachGlobalListenerFromController(behavior.getControllerGlobalObjectConsumer());
       communicationBridge.detachGlobalListenerFromNetworkProcessor(behavior.getNetworkProcessorGlobalObjectConsumer());
    }
