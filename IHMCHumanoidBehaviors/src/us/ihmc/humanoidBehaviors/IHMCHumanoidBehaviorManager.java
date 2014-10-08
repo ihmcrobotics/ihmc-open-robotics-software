@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.workingArea;
+package us.ihmc.humanoidBehaviors;
 
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
