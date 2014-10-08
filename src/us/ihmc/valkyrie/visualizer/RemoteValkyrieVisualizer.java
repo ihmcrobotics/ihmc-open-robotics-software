@@ -20,7 +20,7 @@ public class RemoteValkyrieVisualizer
       System.out.println("Connecting to host " + host);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
 
-      ValkyrieSliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize,
+      ValkyrieSCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSCSYoVariablesUpdatedListener(robotModel, bufferSize,
             ValkyrieSliderBoardType.WALKING);
 
       int numberOfTicksBeforeUpdatingGraphs = 30;
