@@ -29,7 +29,7 @@ public class CapturePointTools
 
 		for (int i = 1; i < numberFootstepsToConsider; i++)
 		{
-			arrayToPack.get(i).set(footstepList.get(i));
+			arrayToPack.get(i).set(footstepList.get(i));	
 		}
 	}
 
