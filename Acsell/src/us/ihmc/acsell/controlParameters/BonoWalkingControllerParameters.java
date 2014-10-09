@@ -9,6 +9,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -297,15 +298,22 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getKpCoMHeight()
+   public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
    {
-      return 50.0;
-   }
+      YoPDGains gains = new YoPDGains("CoMHeight", registry);
 
-   @Override
-   public double getZetaCoMHeight()
-   {
-      return 1.0;
+      double kp = runningOnRealRobot ? 40.0 : 50.0;
+      double zeta = runningOnRealRobot ? 0.4 : 1.0;
+      double maxAcceleration = 0.5 * 9.81;
+      double maxJerk = maxAcceleration / 0.05;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
+      return gains;
    }
 
    @Override
