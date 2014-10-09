@@ -8,6 +8,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
@@ -29,6 +30,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
@@ -47,7 +49,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
    
    private static final String VALKYRIE_NETWORK_CONFIG = "Configurations/valkyrie_network_config.ini";
    private static final String DEFAULT_NETWORK_CONFIG =	"Configurations/localhost_network_config.ini";
-
+   
+   private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
@@ -103,10 +106,17 @@ public class ValkyrieRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, transform);
       }
 
+      capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
       networkParameters = new RobotNetworkParameters(runningOnRealRobot ? VALKYRIE_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
+   }
+   
+   @Override
+   public CapturePointPlannerParameters getCapturePointPlannerParameters()
+   {
+	   return capturePointPlannerParameters;
    }
 
    @Override
