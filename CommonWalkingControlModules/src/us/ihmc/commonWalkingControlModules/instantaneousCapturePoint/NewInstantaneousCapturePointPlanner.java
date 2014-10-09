@@ -6,12 +6,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.DoubleSupportPolynomialTrajectory;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.MinimumJerkTrajectory;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -296,6 +294,14 @@ public class NewInstantaneousCapturePointPlanner
 		desiredCapturePointPositionToPack.set(this.desiredCapturePointPosition);
 		desiredCapturePointVelocityToPack.set(this.desiredCapturePointVelocity);
 		desiredCapturePointAccelerationToPack.set(this.desiredCapturePointAcceleration);
+	}
+	
+	public void updateForSingleSupportPush(ArrayList<YoFramePoint> footstepList, double time)
+	{
+		computeTimeInCurrentState(time);
+		double timeRemaining = singleSupportDuration.getDoubleValue()-timeInCurrentState.getDoubleValue();
+		computeConstantCentersOfPressure(footstepList); // update with new footsteps
+		computeCapturePointCornerPoints(timeRemaining + doubleSupportDuration.getDoubleValue());
 	}
 
 	public void resetParametersToDefault()
