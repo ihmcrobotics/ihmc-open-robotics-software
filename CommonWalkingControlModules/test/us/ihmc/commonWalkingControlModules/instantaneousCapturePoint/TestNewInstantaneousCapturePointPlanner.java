@@ -36,6 +36,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
 	private boolean visualize = true;
+	private boolean testPush = false;
 
 	private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
 	private YoGraphicsListRegistry yoGraphicsListRegistry = null;
@@ -165,7 +166,7 @@ public class TestNewInstantaneousCapturePointPlanner
 
 		double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-		ArrayList<YoFramePoint> stepList = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength,
+		ArrayList<YoFramePoint> footLocations= createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength,
 				halfStepWidth);
 
 		YoFramePoint initialICPPosition = new YoFramePoint("initialICP", ReferenceFrame.getWorldFrame(), registry);
@@ -179,7 +180,6 @@ public class TestNewInstantaneousCapturePointPlanner
 		YoFramePoint cmpPosition = new YoFramePoint("cmpPosition", ReferenceFrame.getWorldFrame(), registry);
 
 		double initialTime = 0.0;
-		ArrayList<YoFramePoint> footLocations = getFirstSteps(stepList, maxNumberOfConsideredFootsteps);
 
 		initialICPPosition.set(footLocations.get(0));
 		initialICPPosition.add(footLocations.get(1));
@@ -210,20 +210,19 @@ public class TestNewInstantaneousCapturePointPlanner
 		}
 
 		simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportInitialTransferDuration,
-				initialTime, deltaT, omega0, initialICPPosition, stepList, footLocations);
+				initialTime, deltaT, omega0, initialICPPosition);
 
 		initialTime = initialTime + doubleSupportInitialTransferDuration;
 
-		stepList.remove(0);
+		footLocations.remove(0);
 
 		for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
 		{
 			footstepYoFramePoints.get(i).set(footLocations.get(i));
 		}
 
-		while (stepList.size() >= 2)
+		while (footLocations.size() >= 2)
 		{
-			footLocations = getFirstSteps(stepList, 4);
 
 			icpPlanner.initializeSingleSupport(omega0, initialTime, footLocations);
 
@@ -244,7 +243,7 @@ public class TestNewInstantaneousCapturePointPlanner
 					initialICPAcceleration, initialTime);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-					initialTime, omega0, initialICPPosition, stepList, footLocations);
+					initialTime, omega0, initialICPPosition, footLocations);
 			
 			singleSupportEndICPPosition.set(icpPosition);
 			
@@ -269,11 +268,11 @@ public class TestNewInstantaneousCapturePointPlanner
 			}
 
 			simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration,
-					initialTime, deltaT, omega0, initialICPPosition, stepList, footLocations);
+					initialTime, deltaT, omega0, initialICPPosition);
 
 			initialTime = initialTime + doubleSupportDuration;
 
-			stepList.remove(0);
+			footLocations.remove(0);
 
 			for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
 			{
@@ -399,7 +398,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	private void simulateForwardAndCheckSingleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack,
 			YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack, NewInstantaneousCapturePointPlanner icpPlanner,
 			double singleSupportDuration, double initialTime, double omega0, YoFramePoint initialICPPosition,
-			ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
+			ArrayList<YoFramePoint> footLocations)
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
 		{
@@ -413,13 +412,22 @@ public class TestNewInstantaneousCapturePointPlanner
 			}
 
 			initialICPPosition.set(icpPositionToPack);
+			
+//			if(testPush)
+//			{
+//				messWithFootsteps
+//				if(time > initialTime + 10*deltaT)
+//				{
+//					icpPlanner.updateForSingleSupportPush(footstepList, time);
+//				}
+//			}
 		}
+		testPush = false;
 	}
 
 	private void simulateForwardAndCheckDoubleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack,
 			YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack, NewInstantaneousCapturePointPlanner icpPlanner,
-			double doubleSupportDuration, double initialTime, double deltaT, double omega0, YoFramePoint initialICPPosition,
-			ArrayList<YoFramePoint> stepList, ArrayList<YoFramePoint> footLocations)
+			double doubleSupportDuration, double initialTime, double deltaT, double omega0, YoFramePoint initialICPPosition)
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
 		{
