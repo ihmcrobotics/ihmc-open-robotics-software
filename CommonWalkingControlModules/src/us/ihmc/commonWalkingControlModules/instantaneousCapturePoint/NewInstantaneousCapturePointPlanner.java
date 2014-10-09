@@ -135,7 +135,7 @@ public class NewInstantaneousCapturePointPlanner
 	public void initializeDoubleSupport(YoFramePoint currentDesiredCapturePointPosition, YoFrameVector currentDesiredCapturePointVelocity,
 			double omega0, double initialTime, ArrayList<YoFramePoint> footstepList)
 	{
-		comeToStop.set(footstepList.size() <= 2);
+		comeToStop.set(footstepList.size() <= 3);
 		this.isDoubleSupport.set(true);
 		this.omega0.set(omega0);
 		this.initialTime.set(initialTime);
@@ -176,7 +176,7 @@ public class NewInstantaneousCapturePointPlanner
 		this.omega0.set(omega0);
 		this.initialTime.set(initialTime);
 		this.isInitialTransfer.set(false);
-		comeToStop.set(footstepList.size() <= 2);
+		comeToStop.set(footstepList.size() <= 3);
 		atAStop.set(false);
 
 		computeConstantCentersOfPressure(footstepList);
@@ -185,23 +185,22 @@ public class NewInstantaneousCapturePointPlanner
 
 	protected void computeConstantCentersOfPressure(ArrayList<YoFramePoint> footstepList)
 	{
-		comeToStop.set(footstepList.size() <= 2);
+		comeToStop.set(footstepList.size() <= 3);
 
-		int numberOfCentersOfPressurToPlan = (this.numberFootstepsToConsider.getIntegerValue() > footstepList.size()) ? footstepList.size()
+		int numberOfCentersOfPressureToPlan = (this.numberFootstepsToConsider.getIntegerValue() > footstepList.size()) ? footstepList.size()
 				: this.numberFootstepsToConsider.getIntegerValue();
 
 		if (atAStop.getBooleanValue())
 		{
-			if (!comeToStop.getBooleanValue())// footstepList.size() >
-												// this.numberFootstepsToConsider.getIntegerValue())
+			if (!comeToStop.getBooleanValue())
 			{
 				CapturePointTools.computeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet(constantCentersOfPressure,
-						footstepList, numberOfCentersOfPressurToPlan);
+						footstepList, numberOfCentersOfPressureToPlan);
 			}
 			else
 			{
 				CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(constantCentersOfPressure,
-						footstepList, numberOfCentersOfPressurToPlan);
+						footstepList, numberOfCentersOfPressureToPlan);
 			}
 		}
 		else if (!atAStop.getBooleanValue())
@@ -209,12 +208,12 @@ public class NewInstantaneousCapturePointPlanner
 			if (comeToStop.getBooleanValue())
 			{
 				CapturePointTools.computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(constantCentersOfPressure, footstepList,
-						numberOfCentersOfPressurToPlan);
+						numberOfCentersOfPressureToPlan);
 			}
 			else
 			{
 				CapturePointTools.computeConstantCentersOfPressuresOnFeet(constantCentersOfPressure, footstepList,
-						numberOfCentersOfPressurToPlan);
+						numberOfCentersOfPressureToPlan);
 			}
 		}
 	}

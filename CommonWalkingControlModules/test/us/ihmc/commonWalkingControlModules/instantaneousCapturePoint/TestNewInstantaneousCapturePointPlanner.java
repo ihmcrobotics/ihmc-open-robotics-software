@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -37,6 +38,7 @@ public class TestNewInstantaneousCapturePointPlanner
 
 	private boolean visualize = true;
 	private boolean testPush = false;
+	private final Random random = new Random();
 
 	private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
 	private YoGraphicsListRegistry yoGraphicsListRegistry = null;
@@ -105,7 +107,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
 	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
 	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-	private int numberOfStepsInStepList = 5;
+	private int numberOfStepsInStepList = 2;
 	private int maxNumberOfConsideredFootsteps = 3;
 	private NewInstantaneousCapturePointPlanner icpPlanner;
 
@@ -317,19 +319,6 @@ public class TestNewInstantaneousCapturePointPlanner
 		return footLocations;
 	}
 
-	private ArrayList<YoFramePoint> getFirstSteps(ArrayList<YoFramePoint> stepList, int maximumNumberOfStepsToReturn)
-	{
-		ArrayList<YoFramePoint> ret = new ArrayList<YoFramePoint>();
-
-		int numberOfStepsToReturn = Math.min(stepList.size(), maximumNumberOfStepsToReturn);
-		for (int i = 0; i < numberOfStepsToReturn; i++)
-		{
-			ret.add(stepList.get(i));
-		}
-
-		return ret;
-	}
-
 	private void createVisualizers(int maxNumberOfConsideredFootsteps)
 	{
 		ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -398,7 +387,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	private void simulateForwardAndCheckSingleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack,
 			YoFrameVector icpAccelerationToPack, YoFramePoint ecmpPositionToPack, NewInstantaneousCapturePointPlanner icpPlanner,
 			double singleSupportDuration, double initialTime, double omega0, YoFramePoint initialICPPosition,
-			ArrayList<YoFramePoint> footLocations)
+			ArrayList<YoFramePoint> footstepList)
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
 		{
@@ -415,14 +404,15 @@ public class TestNewInstantaneousCapturePointPlanner
 			
 //			if(testPush)
 //			{
-//				messWithFootsteps
 //				if(time > initialTime + 10*deltaT)
 //				{
+//					updateFootstepsFromPush(footstepList);
 //					icpPlanner.updateForSingleSupportPush(footstepList, time);
 //				}
+//				
+//				testPush = false;
 //			}
 		}
-		testPush = false;
 	}
 
 	private void simulateForwardAndCheckDoubleSupport(YoFramePoint icpPositionToPack, YoFrameVector icpVelocityToPack,
@@ -444,7 +434,7 @@ public class TestNewInstantaneousCapturePointPlanner
 		}
 	}
 
-	public void visualizeICPAndECMP(YoFramePoint icpPosition, YoFrameVector icpVelocity, YoFramePoint ecmpPosition, double time)
+	private void visualizeICPAndECMP(YoFramePoint icpPosition, YoFrameVector icpVelocity, YoFramePoint ecmpPosition, double time)
 	{
 		icpPositionYoFramePoint.set(icpPosition);
 		icpVelocityYoFramePoint.set(icpVelocity);
@@ -460,14 +450,16 @@ public class TestNewInstantaneousCapturePointPlanner
 		timeYoVariable.set(time);
 		scs.tickAndUpdate();
 	}
-
-	private void removeAllStepsFromStepListExceptFirstTwo(ArrayList<YoFramePoint> stepList)
-	{
-		int stepListSize = stepList.size();
-
-		for (int i = stepListSize - 1; i >= 2; i--)
-		{
-			stepList.remove(i);
+	
+	private void updateFootstepsFromPush(ArrayList<YoFramePoint> footstepList)
+	{	
+		double tmpx = random.nextDouble()*0.05;
+		double tmpy = random.nextDouble()*0.02;
+		
+		for(int i = 1; i < footstepList.size()-1; i++)
+		{	
+			footstepList.get(i).setX(footstepList.get(i).getX()+tmpx);
+			footstepList.get(i).setY(footstepList.get(i).getY()+tmpy);
 		}
 	}
 }
