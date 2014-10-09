@@ -18,6 +18,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 
@@ -47,15 +48,19 @@ public class BehaviorDisptacher implements Runnable
 
    private final RobotDataReceiver robotDataReceiver;
 
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
+
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
    public BehaviorDisptacher(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, RobotDataReceiver robotDataReceiver,
          HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber, HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber,
-         BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, YoVariableRegistry parentRegistry)
+         BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoTime = yoTime;
       this.yoVaribleServer = yoVaribleServer;
       this.communicationBridge = communicationBridge;
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       this.robotDataReceiver = robotDataReceiver;
       this.desiredBehaviorSubscriber = desiredBehaviorSubscriber;
@@ -67,7 +72,6 @@ public class BehaviorDisptacher implements Runnable
       attachListeners(simpleForwardingBehavior);
       addHumanoidBehavior(HumanoidBehaviorType.STOP, simpleForwardingBehavior);
       stateMachine.setCurrentState(HumanoidBehaviorType.STOP);
-      
 
       requestedBehavior.set(null);
       startTime.set(Double.NaN);
@@ -118,6 +122,8 @@ public class BehaviorDisptacher implements Runnable
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+
+      yoGraphicsListRegistry.update();
    }
 
    private void updateRobotState()
@@ -181,9 +187,9 @@ public class BehaviorDisptacher implements Runnable
             initialize();
             hasBeenInitialized.set(true);
          }
-         
+
          doControl();
-         
+
          yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
 
          ThreadTools.sleep(1);
