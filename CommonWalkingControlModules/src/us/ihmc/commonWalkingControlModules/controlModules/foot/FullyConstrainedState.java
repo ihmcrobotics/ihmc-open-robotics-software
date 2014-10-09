@@ -61,7 +61,7 @@ public class FullyConstrainedState extends AbstractFootControlState
             requestedState.set(ConstraintType.HOLD_POSITION);
       }
 
-      if (!FootControlModule.USE_SUPPORT_DAMPING)
+      if (gains == null)
       {
          footAcceleration.setToZero(contactableBody.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableBody.getFrameAfterParentJoint());
       }

@@ -40,7 +40,6 @@ import us.ihmc.yoUtilities.stateMachines.StateTransition;
 public class FootControlModule
 {
    public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
-   public static final boolean USE_SUPPORT_DAMPING = true;
 
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
