@@ -381,7 +381,10 @@ public class ScriptBehavior extends BehaviorInterface
    public void stop()
    {
       scriptFinished.set(true);
-      scriptObjects.clear();
+      if(scriptObjects != null)
+      {
+         scriptObjects.clear();
+      }
    }
 
    @Override
