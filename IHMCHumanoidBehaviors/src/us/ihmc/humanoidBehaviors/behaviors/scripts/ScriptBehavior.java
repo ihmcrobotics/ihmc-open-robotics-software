@@ -202,23 +202,27 @@ public class ScriptBehavior extends BehaviorInterface
    {
 	   checkIfScriptBehaviorInputPacketReceived();
       if (!inputsSupplied() || scriptFinished.getBooleanValue())
-         return;
+      {
+    	  return;
+      }
+      
 
-//      if (!scriptLoaded.getBooleanValue())
-//         loadScript();
+      if (!scriptLoaded.getBooleanValue())
+         loadScript();
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
    }
    
-   private void checkIfScriptBehaviorInputPacketReceived()
-   {
-	   if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
-	      {
-		   System.out.println("Test if script behavior is received");
-	         receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
-	      }
-   }
+	private void checkIfScriptBehaviorInputPacketReceived() 
+	{
+		if (scriptBehaviorInputPacketListener.isNewPacketAvailable()) 
+		{
+			receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
+			scriptObjectTransformToWorld = (receivedScriptBehavior.getReferenceTransform());
+			scriptFile = new File(receivedScriptBehavior.getScriptName());
+		}
+	}
 
    private boolean inputsSupplied()
    {
