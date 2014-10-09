@@ -64,7 +64,7 @@ public class FootCenterToToeEvaluator
    private final double deltaT = 0.001;
 
    private double doubleSupportFirstStepFraction = 0.5;
-   private int maxNumberOfConsideredFootsteps = 4;
+   private int maxNumberOfConsideredFootsteps = 3;
    private DoubleSupportFootCenterToToeICPComputer smoothICPComputer;  
 
 
@@ -133,7 +133,7 @@ public class FootCenterToToeEvaluator
 
       double singleSupportDuration = 0.7;
       double doubleSupportDuration = 0.2;
-      double doubleSupportInitialTransferDuration = 0.4;
+      double doubleSupportInitialTransferDuration = 1;
 
       double eCMPHeight = 1.0;
       double gravitationalAcceleration = 9.81;

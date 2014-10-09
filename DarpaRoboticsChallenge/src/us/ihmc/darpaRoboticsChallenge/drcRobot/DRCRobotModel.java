@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
@@ -25,6 +26,8 @@ public interface DRCRobotModel
    //TODO: RobotBoundingBoxes.java
 
    public abstract boolean isRunningOnRealRobot();
+   
+   public abstract CapturePointPlannerParameters getCapturePointPlannerParameters();
 
    public abstract ArmControllerParameters getArmControllerParameters();
 
