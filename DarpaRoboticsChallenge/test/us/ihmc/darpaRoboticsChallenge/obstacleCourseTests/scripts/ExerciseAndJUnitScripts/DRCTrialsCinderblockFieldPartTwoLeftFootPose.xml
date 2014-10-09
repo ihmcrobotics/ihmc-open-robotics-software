@@ -1,5 +1,9 @@
 <object-stream>
   <long>14785135398</long>
+   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <heightOffset>0.046060000000000004</heightOffset>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
+    <long>14785135398</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
@@ -63,7 +67,7 @@
         <location>
           <x>0.7880380838306259</x>
           <y>0.3696087489509431</y>
-          <z>0.2309249712114898</z>
+          <z>.25</z>
         </location>
         <orientation>
           <x>-0.010592954162576523</x>
@@ -117,7 +121,7 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.5606619529088864</x>
+          <x>1.59</x>
           <y>0.19181181389683812</y>
           <z>0.4078161656419239</z>
         </location>
@@ -131,9 +135,9 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.5605287205835529</x>
+          <x>1.59</x>
           <y>0.35</y>
-          <z>0.4627749015350778</z>
+          <z>.49</z>
         </location>
         <orientation>
           <x>-0.00607721555534431</x>
