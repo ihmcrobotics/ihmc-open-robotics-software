@@ -12,7 +12,7 @@ public class BehaviorVisualizer extends SCSVisualizer
    
    public BehaviorVisualizer(String host, int bufferSize, Robot robot)
    {
-      super(robot, bufferSize, true, true);
+      super(robot, bufferSize, true, false);
       
       YoVariableClient client = new YoVariableClient(host, NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, this, "behavior", showOverheadView);
       client.start();
