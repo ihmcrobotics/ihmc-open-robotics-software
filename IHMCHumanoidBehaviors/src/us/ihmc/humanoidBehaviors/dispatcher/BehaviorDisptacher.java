@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleForwardingBehav
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
+import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.TimeTools;
@@ -34,6 +35,7 @@ public class BehaviorDisptacher implements Runnable
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final DoubleYoVariable yoTime;
+   private final YoVariableServer yoVaribleServer;
    private final DoubleYoVariable startTime = new DoubleYoVariable("startTime", registry);
    private final BehaviorStateMachine<HumanoidBehaviorType> stateMachine;
 
@@ -49,9 +51,10 @@ public class BehaviorDisptacher implements Runnable
 
    public BehaviorDisptacher(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, RobotDataReceiver robotDataReceiver,
          HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber, HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber,
-         BehaviorCommunicationBridge communicationBridge, YoVariableRegistry parentRegistry)
+         BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, YoVariableRegistry parentRegistry)
    {
       this.yoTime = yoTime;
+      this.yoVaribleServer = yoVaribleServer;
       this.communicationBridge = communicationBridge;
 
       this.robotDataReceiver = robotDataReceiver;
@@ -178,8 +181,10 @@ public class BehaviorDisptacher implements Runnable
             initialize();
             hasBeenInitialized.set(true);
          }
-
+         
          doControl();
+         
+         yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
 
          ThreadTools.sleep(1);
       }

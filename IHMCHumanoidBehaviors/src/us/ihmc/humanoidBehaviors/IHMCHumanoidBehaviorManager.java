@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -20,15 +21,16 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class IHMCHumanoidBehaviorManager
 {
-   public static final int BEHAVIOR_YO_VARIABLE_SERVER_PORT = 5559;
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
    
-   private final YoVariableServer yoVariableServer = new YoVariableServer(BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
+   private final YoVariableServer yoVariableServer = new YoVariableServer(NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
 
    public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator)
    {
+      System.out.println("[INFO] " + getClass().getSimpleName() + ": Initializing");
+      
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(networkProcessorCommunicator, controllerCommunicator, registry);
 
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel);
@@ -36,7 +38,7 @@ public class IHMCHumanoidBehaviorManager
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
       BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, fullRobotModel, robotDataReceiver, desiredBehaviorControlSubscriber,
-            desiredBehaviorSubscriber, communicationBridge, registry);
+            desiredBehaviorSubscriber, communicationBridge, yoVariableServer, registry);
 
       createAndRegisterBehaviors(dispatcher, fullRobotModel, yoTime, communicationBridge);
 

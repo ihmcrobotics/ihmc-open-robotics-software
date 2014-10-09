@@ -109,7 +109,7 @@ public class YoVariableServer implements RobotVisualizer
     * 
     * @param timestamp timestamp to send to logger
     */
-   public void update(long timestamp, long id)
+   public void update(long timestamp)
    {
       update(timestamp, mainRegistry);
    }
