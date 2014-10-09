@@ -1,8 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
@@ -11,12 +8,12 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -24,8 +21,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
@@ -83,9 +80,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final SideDependentList<AlphaFilteredYoFramePoint2d> copsFilteredInFootFrame = new SideDependentList<AlphaFilteredYoFramePoint2d>();
    private final SideDependentList<YoFramePoint2d> copsRawInFootFrame = new SideDependentList<YoFramePoint2d>();
 
-   private final SideDependentList<FrameLine2d> ankleToCoPLines = new SideDependentList<FrameLine2d>();
-
    private final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<FrameConvexPolygon2d>();
+   private final SideDependentList<FrameLineSegment2d> footCenterCoPLineSegments = new SideDependentList<FrameLineSegment2d>();
 
    private final BooleanYoVariable kinematicsIsUpToDate = new BooleanYoVariable("kinematicsIsUpToDate", registry);
    private final BooleanYoVariable trustCoPAsNonSlippingContactPoint = new BooleanYoVariable("trustCoPAsNonSlippingContactPoint", registry);
@@ -96,7 +92,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final FramePoint tempPosition = new FramePoint();
    private final FramePoint2d tempCoP = new FramePoint2d();
    private final FrameVector tempCoPOffset = new FrameVector();
-   private final SideDependentList<FrameLineSegment2d> tempLineSegments = new SideDependentList<FrameLineSegment2d>();
    private final RobotSide[] singleElementRobotSideArray = new RobotSide[1];
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<ContactablePlaneBody> bipedFeet,
@@ -126,11 +121,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(bipedFeet.get(robotSide).getContactPoints2d());
          footPolygons.put(robotSide, footPolygon);
 
-         FrameLine2d ankleToCoPLine = new FrameLine2d(footFrame, new Point2d(), new Point2d(1.0, 0.0));
-         ankleToCoPLines.put(robotSide, ankleToCoPLine);
-
          FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2d(footFrame), new FramePoint2d(footFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
-         tempLineSegments.put(robotSide, tempLineSegment);
+         footCenterCoPLineSegments.put(robotSide, tempLineSegment);
 
          YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(sidePrefix + "CoPRawInFootFrame", footFrames.get(robotSide), registry);
          copsRawInFootFrame.put(robotSide, copRawInFootFrame);
@@ -289,12 +281,21 @@ public class PelvisKinematicsBasedLinearStateCalculator
             boolean isCoPInsideFoot = footPolygon.isPointInside(tempCoP);
             if (!isCoPInsideFoot)
             {
-               FrameLineSegment2d tempLineSegment = tempLineSegments.get(trustedSide);
-               footPolygon.getClosestEdge(tempLineSegment, tempCoP);
+               FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedSide);
+               footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP.getX(), tempCoP.getY());
+               // TODO Garbage
+               FramePoint2d[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
 
-               FrameLine2d ankleToCoPLine = ankleToCoPLines.get(trustedSide);
-               ankleToCoPLine.set(footFrame, 0.0, 0.0, tempCoP.getX(), tempCoP.getY());
-               tempLineSegment.intersectionWith(tempCoP, ankleToCoPLine);
+               if (intersectionPoints.length == 2)
+                  System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
+               
+               if (intersectionPoints.length == 0)
+               {
+                  System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
+                  tempCoP.setToZero(footFrame);
+               }
+               else
+                  tempCoP.set(intersectionPoints[0]);
             }
          }
       }
