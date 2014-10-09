@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -93,9 +93,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry);
 
-   public abstract double getKpCoMHeight();
-
-   public abstract double getZetaCoMHeight();
+   public abstract YoPDGains createCoMHeightControlGains(YoVariableRegistry registry);
 
    public abstract boolean getCoMHeightDriftCompensation();
 

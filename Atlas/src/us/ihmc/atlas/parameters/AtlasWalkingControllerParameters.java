@@ -4,7 +4,6 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -14,9 +13,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -343,19 +344,24 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       if (!runningOnRealRobot) return 2000.0;
       return 200.0; //80.0; //40.0;
    }
-   
-   @Override
-   public double getKpCoMHeight()
-   {
-      if (!runningOnRealRobot) return 40.0;
-      return 40.0; //20.0; 
-   }
 
    @Override
-   public double getZetaCoMHeight()
+   public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
    {
-      if (!runningOnRealRobot) return 0.8; //1.0;
-      return 0.4;
+      YoPDGains gains = new YoPDGains("CoMHeight", registry);
+
+      double kp = runningOnRealRobot ? 40.0 : 40.0;
+      double zeta = runningOnRealRobot ? 0.4 : 0.8;
+      double maxAcceleration = 0.5 * 9.81;
+      double maxJerk = maxAcceleration / 0.05;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
+      return gains;
    }
 
    @Override

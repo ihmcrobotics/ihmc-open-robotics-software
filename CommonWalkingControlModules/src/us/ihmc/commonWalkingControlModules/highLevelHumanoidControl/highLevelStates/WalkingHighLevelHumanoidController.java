@@ -63,8 +63,8 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.controllers.PDController;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -266,8 +266,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controlledCoMHeightAcceleration = icpAndMomentumBasedController.getControlledCoMHeightAcceleration();
       centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
 
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
-
       // this.finalDesiredICPCalculator = finalDesiredICPCalculator;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
 
@@ -284,11 +282,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
 
-      this.centerOfMassHeightController = new PDController("comHeight", registry);
-      double kpCoMHeight = walkingControllerParameters.getKpCoMHeight();
-      centerOfMassHeightController.setProportionalGain(kpCoMHeight);
-      double zetaCoMHeight = walkingControllerParameters.getZetaCoMHeight();
-      centerOfMassHeightController.setDerivativeGain(GainCalculator.computeDerivativeGain(centerOfMassHeightController.getProportionalGain(), zetaCoMHeight));
+      YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
+      DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
+      DoubleYoVariable kdCoMHeight = comHeightControlGains.getYoKd();
+      DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumAcceleration();
+      DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumJerk();
+
+      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
+      this.centerOfMassHeightController = new PDController(kpCoMHeight, kdCoMHeight, "comHeight", registry);
 
       String namePrefix = "walking";
 
