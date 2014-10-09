@@ -8,6 +8,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
+import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -19,6 +20,7 @@ import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
@@ -68,6 +70,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasJointMap jointMap;
    private final AtlasSensorInformation sensorInformation;
    private final AtlasArmControllerParameters armControllerParameters;
+   private final AtlasCapturePointPlannerParameters capturePointPlannerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
@@ -94,6 +97,7 @@ public class AtlasRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
 
+      capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(runningOnRealRobot);
       sensorInformation = new AtlasSensorInformation(runningOnRealRobot);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new AtlasWalkingControllerParameters(runningOnRealRobot);
@@ -296,6 +300,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public RobotNetworkParameters getNetworkParameters()
    {
       return networkParameters;
+   }
+   
+   @Override
+   public CapturePointPlannerParameters getCapturePointPlannerParameters()
+   {
+	   return capturePointPlannerParameters;
    }
 
    @Override

@@ -293,18 +293,8 @@ public class DoubleSupportFootCenterToToeICPComputer
       this.initialTime.set(initialTime);
 
       double steppingDuration = singleSupportDuration + doubleSupportDuration;
-      double toeToFootCenterShiftDuration = steppingDuration * singleSupportToePercentage;
-      double footCenterToToeShiftDuration = steppingDuration * (1 - singleSupportToePercentage);
-      double durationForCornerPoints = getDurationForCornerPoints(singleSupportDuration, steppingDuration);
-      
-      if (doHeelToToeTransfer.getBooleanValue())
-      {
-         NewDoubleSupportICPComputer.computeConstantCentersOfPressureAndCornerPointsForFootCenterAndToe(constantFootCenterCentersOfPressure,
-               constantToeCentersOfPressure, footCenterICPCornerFramePoints, toeICPCornerFramePoints, maxFrontalToeOffset, footLocationList, soleFrameList,
-               maxNumberOfConsideredFootsteps, isInitialTransfer.getBooleanValue(), this.omega0.getDoubleValue(), toeToFootCenterShiftDuration,
-               footCenterToToeShiftDuration);
-      }
-      else
+      double durationForCornerPoints = steppingDuration;
+
       {
          NewDoubleSupportICPComputer.computeConstantCentersOfPressure(constantFootCenterCentersOfPressure, footLocationList, maxNumberOfConsideredFootsteps,
                isInitialTransfer.getBooleanValue() || comeToStop.getBooleanValue());
@@ -327,15 +317,6 @@ public class DoubleSupportFootCenterToToeICPComputer
       singleSupportEndICP.set(initialICPPosition);
       singleSupportEndICPVelocity.set(0.0, 0.0, 0.0);
 
-      if (doHeelToToeTransfer.getBooleanValue())
-      {
-         double secondDoubleSupportFractionDuration = doubleSupportDuration * (1 - doubleSupportFirstStepFraction);
-
-         JojosICPutilities.extrapolateDCMposAndVel(doubleSupportEndICP, doubleSupportEndICPVelocity, constantFootCenterCentersOfPressure.get(1)
-               .getPoint3dCopy(), secondDoubleSupportFractionDuration, omega0, footCenterICPCornerFramePoints.get(1).getPoint3dCopy());
-
-      }
-      else
       {
          if (comeToStop.getBooleanValue())
          {
@@ -380,13 +361,6 @@ public class DoubleSupportFootCenterToToeICPComputer
       if (atAStop.getBooleanValue() || comeToStop.getBooleanValue())
       {
          double doubleSupportInitialTransferDuration = this.doubleSupportInitialTransferDuration.getDoubleValue();
-
-         // ALesman: this no longer happens because we now always want to initialize from the existing desired icp
-         if (currentDesiredICP == null || currentDesiredICPVelocity == null)
-         {
-            this.computeICPPositionVelocityAcceleration(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration, desiredECMP, initialTime);
-         }
-         else
          {
             desiredICPPosition.set(currentDesiredICP);
             desiredICPVelocity.set(currentDesiredICPVelocity);

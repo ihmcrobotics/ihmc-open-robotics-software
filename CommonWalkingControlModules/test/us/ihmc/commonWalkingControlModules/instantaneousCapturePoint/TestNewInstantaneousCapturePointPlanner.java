@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.DoubleSupportFootCenterToToeICPComputer;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.PointAndLinePlotter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -60,9 +61,49 @@ public class TestNewInstantaneousCapturePointPlanner
 	private YoFramePoint doubleSupportEndICPYoFramePoint = null;
 
 	private final double deltaT = 0.001;
+	
+	private final CapturePointPlannerParameters testICPPlannerParams = new CapturePointPlannerParameters()
+	{
+		
+		@Override
+		public double getSingleSupportDuration()
+		{
+			// TODO Auto-generated method stub
+			return 0.7;
+		}
+		
+		@Override
+		public int getNumberOfFootstepsToConsider()
+		{
+			// TODO Auto-generated method stub
+			return 3;
+		}
+		
+		@Override
+		public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
+		{
+			// TODO Auto-generated method stub
+			return 5;
+		}
+		
+		@Override
+		public double getDoubleSupportInitialTransferDuration()
+		{
+			// TODO Auto-generated method stub
+			return 1.0;
+		}
+		
+		@Override
+		public double getDoubleSupportDuration()
+		{
+			// TODO Auto-generated method stub
+			return 0.2;
+		}
+	};
 
-	private double singleSupportDuration = 0.7;
-	private double doubleSupportDuration = 0.2;
+	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
+	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
+	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
 	private int numberOfStepsInStepList = 5;
 	private int maxNumberOfConsideredFootsteps = 3;
 	private NewInstantaneousCapturePointPlanner icpPlanner;
@@ -108,7 +149,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	@Test
 	public void test1()
 	{
-		icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps, registry, yoGraphicsListRegistry);
+		icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps, testICPPlannerParams,registry, yoGraphicsListRegistry);
 
 		stopSignalTime.set(1.9e100);
 
@@ -144,7 +185,7 @@ public class TestNewInstantaneousCapturePointPlanner
 		initialICPPosition.add(footLocations.get(1));
 		initialICPPosition.scale(0.5);
 
-		icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, initialICPPosition, initialICPVelocity, omega0,
+		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, omega0,
 				initialTime, footLocations);
 
 		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
@@ -168,10 +209,10 @@ public class TestNewInstantaneousCapturePointPlanner
 			}
 		}
 
-		simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration,
+		simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportInitialTransferDuration,
 				initialTime, deltaT, omega0, initialICPPosition, stepList, footLocations);
 
-		initialTime = initialTime + doubleSupportDuration;
+		initialTime = initialTime + doubleSupportInitialTransferDuration;
 
 		stepList.remove(0);
 
@@ -184,7 +225,7 @@ public class TestNewInstantaneousCapturePointPlanner
 		{
 			footLocations = getFirstSteps(stepList, 4);
 
-			icpPlanner.initializeSingleSupport(singleSupportDuration, doubleSupportDuration, omega0, initialTime, footLocations);
+			icpPlanner.initializeSingleSupport(omega0, initialTime, footLocations);
 
 			if (visualize)
 			{
@@ -209,7 +250,7 @@ public class TestNewInstantaneousCapturePointPlanner
 			
 			initialTime = initialTime + singleSupportDuration;
 
-			icpPlanner.initializeDoubleSupport(doubleSupportDuration, singleSupportDuration, icpPosition, icpVelocity, omega0, initialTime,
+			icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, omega0, initialTime,
 					footLocations);
 			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
 					initialICPAcceleration, initialTime);
