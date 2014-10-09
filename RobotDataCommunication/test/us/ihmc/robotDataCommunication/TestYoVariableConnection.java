@@ -58,7 +58,7 @@ public class TestYoVariableConnection
          
          echoOut.set(echoIn.getIntegerValue());
          
-         server.update(++timestamp, 0);
+         server.update(++timestamp);
          ThreadTools.sleep(1);
       }
    }

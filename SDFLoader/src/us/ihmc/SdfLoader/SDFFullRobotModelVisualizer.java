@@ -83,7 +83,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    
    private final Vector3d tempPosition = new Vector3d();
    private final Quat4d tempOrientation = new Quat4d();
-   public void update(long timestamp, long id)
+   public void update(long timestamp)
    {
       if(rootJoint != null)
       {
@@ -123,7 +123,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    @Override
    public void update(long timestamp, YoVariableRegistry registry)
    {
-      update(timestamp, 0);
+      update(timestamp);
    }
 
    @Override

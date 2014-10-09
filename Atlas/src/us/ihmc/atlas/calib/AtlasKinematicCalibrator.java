@@ -80,7 +80,7 @@ public class AtlasKinematicCalibrator
    {
       yoIndex.set(index);
       updateDynamicGraphicsObjects(index);
-      visualizer.update(1, 0);
+      visualizer.update(1);
    }
 
    protected void updateDynamicGraphicsObjects(int index)

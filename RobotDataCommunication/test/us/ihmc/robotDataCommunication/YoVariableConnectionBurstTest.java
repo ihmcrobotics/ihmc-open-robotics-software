@@ -67,7 +67,7 @@ public class YoVariableConnectionBurstTest
          }
          var3.set(values[i]);
          
-         server.update(++timestamp, 0);
+         server.update(++timestamp);
          
          
          if (iter < 50)
