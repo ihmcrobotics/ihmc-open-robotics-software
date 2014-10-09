@@ -8,10 +8,12 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
+import us.ihmc.acsell.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
@@ -50,6 +52,7 @@ public class BonoRobotModel implements DRCRobotModel
    private final BonoJointMap jointMap = new BonoJointMap();
    private final DRCRobotSensorInformation sensorInformation;
    private final BonoArmControlParameters armControlParameters;
+   private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
    private final BonoWalkingControllerParameters multiContactControllerParameters;
 
@@ -72,7 +75,7 @@ public class BonoRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
 
-
+      capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
       armControlParameters = new BonoArmControlParameters(runningOnRealRobot);
       walkingControllerParameters = new BonoWalkingControllerParameters(runningOnRealRobot);
       multiContactControllerParameters = new BonoWalkingControllerParameters(runningOnRealRobot);
@@ -250,4 +253,10 @@ public class BonoRobotModel implements DRCRobotModel
    {
 	   return null;
    }
+
+	@Override
+	public CapturePointPlannerParameters getCapturePointPlannerParameters()
+	{
+		return capturePointPlannerParameters;
+	}
 }
