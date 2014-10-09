@@ -408,5 +408,27 @@ public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParam
       handleMultisenseParameters(object);
    }
 
-   
+   public void setLidarSpindleSpeed(double motorSpeed)
+   {
+      multiSenseClient.waitTillConnected();
+      ReconfigureRequest request = multiSenseClient.getMessage();
+      DoubleParameter motorSpeedParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+      motorSpeedParam.setName("motor_speed");
+      motorSpeedParam.setValue(motorSpeed);
+      request.getConfig().getDoubles().add(motorSpeedParam);
+      
+      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+      {
+
+         public void onSuccess(ReconfigureResponse response)
+         {
+            System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+         }
+
+         public void onFailure(RemoteException e)
+         {
+            e.printStackTrace();
+         }
+      });
+   }
 }
