@@ -80,6 +80,7 @@ public class MultiSenseSensorManager
 
       System.out.println("initialise parameteres--------------------------------------------------------------------------------");
       multiSenseParamaterSetter.initializeParameterListeners(); 
+      multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
    }
 
    private void setMultiseSenseParams(double lidarSpindleVelocity)
