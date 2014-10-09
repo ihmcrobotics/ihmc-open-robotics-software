@@ -8,11 +8,11 @@ import com.yobotics.simulationconstructionset.Robot;
 
 public class BehaviorVisualizer extends SCSVisualizer
 {
-   private final boolean showOverheadView = true;
+   private final boolean showOverheadView = false;
    
    public BehaviorVisualizer(String host, int bufferSize, Robot robot)
    {
-      super(robot, bufferSize);
+      super(robot, bufferSize, true, true);
       
       YoVariableClient client = new YoVariableClient(host, NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, this, "behavior", showOverheadView);
       client.start();

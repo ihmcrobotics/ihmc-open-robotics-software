@@ -60,8 +60,15 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    
    public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI)
    {
+      this(robot, bufferSize, showGUI, false);
+   }
+   
+   public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI, boolean hideViewport)
+   {
       this.robot = robot;
       this.scs = new SimulationConstructionSet(robot, showGUI, bufferSize);
+      if (hideViewport)
+         scs.hideViewport();
       this.registry = scs.getRootRegistry();
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
