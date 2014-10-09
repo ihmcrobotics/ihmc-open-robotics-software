@@ -156,7 +156,7 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       
       if (visualizer != null)
       {
-         visualizer.update(timestamp, 0);
+         visualizer.update(timestamp);
       }
    }
 
