@@ -156,7 +156,13 @@ public class MomentumBasedController
    
    private final BooleanYoVariable feetCoPControlIsActive;
    private final DoubleYoVariable footCoPOffsetX, footCoPOffsetY;
-   private final EnumYoVariable<RobotSide> footUnderCoPControl;   
+   private final EnumYoVariable<RobotSide> footUnderCoPControl;
+
+   private final BooleanYoVariable userActivateFeetForce = new BooleanYoVariable("userActivateFeetForce", registry);
+   private final DoubleYoVariable userLateralFeetForce = new DoubleYoVariable("userLateralFeetForce", registry);
+   private final DoubleYoVariable userForwardFeetForce = new DoubleYoVariable("userForwardFeetForce", registry);
+   private final DoubleYoVariable userYawFeetTorque = new DoubleYoVariable("userYawFeetTorque", registry);
+   private final Wrench userAdditionalFeetWrench = new Wrench();
 
    private final double totalMass;
    
@@ -435,6 +441,22 @@ public class MomentumBasedController
       qpOutputCoMAcceleration.set(centroidalMomentumRateSolutionLinearPart);
       
       Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
+
+      if (userActivateFeetForce.getBooleanValue())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            RigidBody foot = fullRobotModel.getFoot(robotSide);
+            userAdditionalFeetWrench.setToZero(foot.getBodyFixedFrame(), referenceFrames.getMidFeetZUpFrame());
+            userAdditionalFeetWrench.setLinearPartX(robotSide.negateIfRightSide(userForwardFeetForce.getDoubleValue()));
+            userAdditionalFeetWrench.setLinearPartY(robotSide.negateIfRightSide(userLateralFeetForce.getDoubleValue()));
+            userAdditionalFeetWrench.setAngularPartZ(robotSide.negateIfRightSide(userYawFeetTorque.getDoubleValue()));
+            
+            Wrench externalWrench = externalWrenches.get(foot);
+            userAdditionalFeetWrench.changeFrame(externalWrench.getExpressedInFrame());
+            externalWrench.add(userAdditionalFeetWrench);
+         }
+      }
 
       for (RigidBody rigidBody : externalWrenches.keySet())
       {
