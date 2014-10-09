@@ -49,14 +49,32 @@ public class CoMHeightTimeDerivativesSmoother
    private final DoubleYoVariable eigenValueThreeReal = new DoubleYoVariable("eigenValueThreeReal", registry);
    private final DoubleYoVariable eigenValueThreeImag = new DoubleYoVariable("eigenValueThreeImag", registry);
 
-   private double maximumAcceleration = 0.5 * 9.81; //3.0 * 9.81;
-   private double minimumAcceleration = 0.5 * 9.81;
-   private double maximumJerk = maximumAcceleration/0.05;
+   private final DoubleYoVariable maximumAcceleration;
+   private final DoubleYoVariable maximumJerk;
 
-   
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
    {
+      this(null, null, dt, parentRegistry);
+   }
+
+   public CoMHeightTimeDerivativesSmoother(DoubleYoVariable maximumAcceleration, DoubleYoVariable maximumJerk, double dt, YoVariableRegistry parentRegistry)
+   {
       this.dt = dt;
+      
+      if (maximumAcceleration == null)
+      {
+         maximumAcceleration = new DoubleYoVariable("comHeightMaxAcceleration", registry);
+         maximumAcceleration.set(0.5 * 9.81);
+      }
+
+      if (maximumJerk == null)
+      {
+         maximumJerk = new DoubleYoVariable("comHeightMaxJerk", registry);
+         maximumJerk.set(0.5 * 9.81 / 0.05);
+      }
+      
+      this.maximumAcceleration = maximumAcceleration;
+      this.maximumJerk = maximumJerk;
 
 //      comHeightGain.set(200.0); // * 0.001/dt); //200.0;
 //      comHeightVelocityGain.set(80.0); // * 0.001/dt); // 80.0;
@@ -71,16 +89,6 @@ public class CoMHeightTimeDerivativesSmoother
       computeEigenvalues();
       
       hasBeenInitialized.set(false);
-   }
-   
-   public void setMaximumAcceleration(double maximumAcceleration)
-   {
-      this.maximumAcceleration = maximumAcceleration;
-   }
-   
-   public void setMinimumAcceleration(double minimumAcceleration)
-   {
-      this.minimumAcceleration = minimumAcceleration;
    }
    
    public void computeGainsByPolePlacement(double w0, double w1, double zeta1)
@@ -146,19 +154,19 @@ public class CoMHeightTimeDerivativesSmoother
       double accelerationError = heightAccelerationIn - smoothComHeightAcceleration.getDoubleValue();
       
       double jerk = comHeightAccelerationGain.getDoubleValue() * accelerationError + comHeightVelocityGain.getDoubleValue() * velocityError + comHeightGain.getDoubleValue() * heightError;
-      jerk = MathTools.clipToMinMax(jerk, -maximumJerk, maximumJerk);
+      jerk = MathTools.clipToMinMax(jerk, -maximumJerk.getDoubleValue(), maximumJerk.getDoubleValue());
       
       smoothComHeightJerk.set(jerk);
       
       smoothComHeightAcceleration.add(jerk * dt);
       
-      if (smoothComHeightAcceleration.getDoubleValue() > maximumAcceleration)
+      if (smoothComHeightAcceleration.getDoubleValue() > maximumAcceleration.getDoubleValue())
       {
-         smoothComHeightAcceleration.set(maximumAcceleration);
+         smoothComHeightAcceleration.set(maximumAcceleration.getDoubleValue());
       }
-      if (smoothComHeightAcceleration.getDoubleValue() < -minimumAcceleration)
+      if (smoothComHeightAcceleration.getDoubleValue() < -maximumAcceleration.getDoubleValue())
       {
-         smoothComHeightAcceleration.set(-minimumAcceleration);
+         smoothComHeightAcceleration.set(-maximumAcceleration.getDoubleValue());
       }
       
       smoothComHeightVelocity.add(smoothComHeightAcceleration.getDoubleValue() * dt);
