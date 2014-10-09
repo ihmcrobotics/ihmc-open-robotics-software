@@ -6,7 +6,7 @@ import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 
 import com.yobotics.simulationconstructionset.Robot;
 
-public class BehaviorVisualizer extends SCSVisualizer
+public abstract class BehaviorVisualizer extends SCSVisualizer
 {
    private final boolean showOverheadView = false;
    
@@ -16,10 +16,5 @@ public class BehaviorVisualizer extends SCSVisualizer
       
       YoVariableClient client = new YoVariableClient(host, NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, this, "behavior", showOverheadView);
       client.start();
-   }
-   
-   public static void main(String[] arg)
-   {
-      new BehaviorVisualizer("localhost",16300,new Robot("theInvisibleRobot"));
    }
 }
