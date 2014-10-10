@@ -4,9 +4,10 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import multisense_ros.StampedPps;
+
 import org.zeromq.ZMQ;
 
-import std_msgs.Time;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSRequestType;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
@@ -41,9 +42,9 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
       ppsSubscriber = new RosTimestampSubscriber()
       {
          @Override
-         public void onNewMessage(Time message)
+         public void onNewMessage(StampedPps message)
          {
-            currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getData().totalNsecs());
+            currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getHostTime().totalNsecs());
             offsetIsDetermined.set(true);
          }
       };
