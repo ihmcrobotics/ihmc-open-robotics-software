@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
@@ -43,12 +44,36 @@ public class ScriptFileLoader
       fileReader = new FileReader(file.getAbsoluteFile());
       inputStream = xStream.createObjectInputStream(fileReader);
    }
+   
+   public ScriptFileLoader(InputStream scriptInputStream) throws IOException
+   {
+	   XStream xStream = new XStream()
+	      {
+	         protected MapperWrapper wrapMapper(MapperWrapper next)
+	         {
+	            return new MapperWrapper(next)
+	            {
+
+	               public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
+	               {
+	                  return definedIn != Object.class ? super.shouldSerializeMember(definedIn, fieldName) : false;
+	               }
+	            };
+	         }
+	      };
+	      
+	      fileReader = null;
+	      inputStream = xStream.createObjectInputStream(scriptInputStream);
+   }
 
    public void close()
    {
       try
       {
-         fileReader.close();
+    	  if(fileReader != null)
+    	  {
+    		  fileReader.close();    		  
+    	  }
          inputStream.close();
       }
       catch (IOException e)

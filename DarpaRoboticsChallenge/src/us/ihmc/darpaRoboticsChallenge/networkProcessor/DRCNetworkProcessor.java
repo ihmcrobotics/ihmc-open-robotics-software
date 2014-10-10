@@ -18,6 +18,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.utilities.net.KryoLocalObjectCommunicator;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -54,19 +56,35 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
    {
       if (fieldComputerClient == null)
       {
-         String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
-         if(NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-            kryoIP = "10.66.171.41";
-         
-         this.fieldComputerClient = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TCP_PORT,
-               new IHMCCommunicationKryoNetClassList());
-         ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
+    	  String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
+       	  fieldComputerClient = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+    			  new IHMCCommunicationKryoNetClassList());
+    	  ((KryoObjectClient) fieldComputerClient).setReconnectAutomatically(true);    
+    	  
+          if(NetworkConfigParameters.USE_BEHAVIORS_MODULE)
+          {
+        	  KryoLocalObjectCommunicator behaviorModuleToNetworkProcessorLocalObjectCommunicator = new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList());
+              new IHMCHumanoidBehaviorManager(robotModel.createFullRobotModel(), behaviorModuleToNetworkProcessorLocalObjectCommunicator, fieldComputerClient);
+             
+              try {
+            	  fieldComputerClient.connect();
+              } catch (IOException e) {
+            	  // TODO Auto-generated catch block
+            	  e.printStackTrace();
+              }
+              
+              this.fieldComputerClient = behaviorModuleToNetworkProcessorLocalObjectCommunicator;
+          }
+          else
+          {
+        	  this.fieldComputerClient = fieldComputerClient;
+          }
       }
       else
       {
          this.fieldComputerClient = fieldComputerClient;
       }
-      
+            
       useSimulatedSensors = !robotModel.isRunningOnRealRobot();
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
