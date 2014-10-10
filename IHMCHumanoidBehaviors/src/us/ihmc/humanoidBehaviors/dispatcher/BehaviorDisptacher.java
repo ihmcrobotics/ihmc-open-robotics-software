@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.dispatcher;
 
 import java.util.List;
 
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -159,21 +161,26 @@ public class BehaviorDisptacher implements Runnable
          {
             case STOP:
                stateMachine.stop();
+               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.STOP));
                break;
             case PAUSE:
                stateMachine.pause();
                communicationBridge.setPacketPassThrough(true);
+               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.PAUSE));
                break;
             case RESUME:
                stateMachine.resume();
                communicationBridge.setPacketPassThrough(false);
+               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.RESUME));
                break;
             case ENABLE_ACTIONS:
                stateMachine.enableActions();
+               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS));
                break;
             default:
                throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
          }
+         
       }
    }
 
