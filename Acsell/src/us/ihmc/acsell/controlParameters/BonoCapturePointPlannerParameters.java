@@ -41,4 +41,10 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	{
 		return 5;
 	}
+
+	@Override
+	public int getNumberOfFootstepsToStop()
+	{
+		return 2;
+	}
 }
