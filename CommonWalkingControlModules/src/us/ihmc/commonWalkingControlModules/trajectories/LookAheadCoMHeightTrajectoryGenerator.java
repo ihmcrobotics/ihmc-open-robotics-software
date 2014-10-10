@@ -282,11 +282,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       FramePoint transferToContactFramePosition = new FramePoint(transferToFootstep.getPoseReferenceFrame());
 
       Footstep transferFromDesiredFootstep = transferToAndNextFootstepsData.getTransferFromDesiredFootstep();
+      FrameVector fromContactFrameDrift = null;
+
       if (correctForCoMHeightDrift.getBooleanValue() && transferFromDesiredFootstep != null)
       {
          FramePoint transferFromDesiredContactFramePosition = new FramePoint(transferFromDesiredFootstep.getPoseReferenceFrame());
          transferFromDesiredContactFramePosition.changeFrame(transferFromContactFramePosition.getReferenceFrame());
-         FrameVector fromContactFrameDrift = new FrameVector(transferFromContactFramePosition.getReferenceFrame());
+         fromContactFrameDrift = new FrameVector(transferFromContactFramePosition.getReferenceFrame());
          fromContactFrameDrift.sub(transferFromContactFramePosition, transferFromDesiredContactFramePosition);
          fromContactFrameDrift.changeFrame(transferToContactFramePosition.getReferenceFrame());
          transferToContactFramePosition.setZ(transferToContactFramePosition.getZ() + fromContactFrameDrift.getZ());
@@ -299,6 +301,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       if (nextFootstep != null)
       {
          nextContactFramePosition = new FramePoint(nextFootstep.getPoseReferenceFrame());
+         if (fromContactFrameDrift != null)
+         {
+            fromContactFrameDrift.changeFrame(nextContactFramePosition.getReferenceFrame());
+            nextContactFramePosition.setZ(nextContactFramePosition.getZ() + fromContactFrameDrift.getZ());
+         }
          nextContactFramePosition.changeFrame(worldFrame);
       }
 
