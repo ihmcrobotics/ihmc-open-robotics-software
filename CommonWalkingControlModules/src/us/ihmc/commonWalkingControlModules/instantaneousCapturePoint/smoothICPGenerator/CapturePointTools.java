@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import cern.colt.matrix.linalg.Matrix2DMatrix2DFunction;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -27,9 +31,20 @@ public class CapturePointTools
 		arrayToPack.get(0).add(footstepList.get(1));
 		arrayToPack.get(0).scale(0.5);
 
+		int numberFootstepsInList = footstepList.size();
+		
 		for (int i = 1; i < numberFootstepsToConsider; i++)
 		{
-			arrayToPack.get(i).set(footstepList.get(i));	
+			if(i < numberFootstepsInList-1)
+			{
+				arrayToPack.get(i).set(footstepList.get(i));
+			}
+			else
+			{
+				arrayToPack.get(i).set(footstepList.get(numberFootstepsInList-1));
+				arrayToPack.get(i).add(footstepList.get(numberFootstepsInList-2));
+				arrayToPack.get(i).scale(0.5);
+			}
 		}
 	}
 
@@ -314,10 +329,5 @@ public class CapturePointTools
 
 		accelerationToPack.setX(x);
 		accelerationToPack.setY(y);
-	}
-
-	public static void computeDesiredCenterOfPressure()
-	{
-
 	}
 }

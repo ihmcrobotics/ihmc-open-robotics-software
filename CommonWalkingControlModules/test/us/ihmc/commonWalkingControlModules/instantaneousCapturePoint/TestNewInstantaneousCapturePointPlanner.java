@@ -37,7 +37,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
 	private boolean visualize = true;
-	private boolean testPush = false;
+	private boolean testPush = true;
 	private final Random random = new Random();
 
 	private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
@@ -71,43 +71,44 @@ public class TestNewInstantaneousCapturePointPlanner
 		@Override
 		public double getSingleSupportDuration()
 		{
-			// TODO Auto-generated method stub
 			return 0.7;
 		}
 		
 		@Override
 		public int getNumberOfFootstepsToConsider()
 		{
-			// TODO Auto-generated method stub
 			return 3;
 		}
 		
 		@Override
 		public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
 		{
-			// TODO Auto-generated method stub
 			return 5;
 		}
 		
 		@Override
 		public double getDoubleSupportInitialTransferDuration()
 		{
-			// TODO Auto-generated method stub
 			return 1.0;
 		}
 		
 		@Override
 		public double getDoubleSupportDuration()
 		{
-			// TODO Auto-generated method stub
 			return 0.2;
+		}
+
+		@Override
+		public int getNumberOfFootstepsToStop()
+		{
+			return 2;
 		}
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
 	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
 	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-	private int numberOfStepsInStepList = 2;
+	private int numberOfStepsInStepList = 5;
 	private int maxNumberOfConsideredFootsteps = 3;
 	private NewInstantaneousCapturePointPlanner icpPlanner;
 
@@ -402,16 +403,27 @@ public class TestNewInstantaneousCapturePointPlanner
 
 			initialICPPosition.set(icpPositionToPack);
 			
-//			if(testPush)
-//			{
-//				if(time > initialTime + 10*deltaT)
-//				{
-//					updateFootstepsFromPush(footstepList);
-//					icpPlanner.updateForSingleSupportPush(footstepList, time);
-//				}
-//				
-//				testPush = false;
-//			}
+			if(testPush)
+			{
+				if(time > initialTime + 0.2)
+				{
+					updateFootstepsFromPush(footstepList);
+					icpPlanner.updateForSingleSupportPush(footstepList, time);
+					if (visualize)
+					{
+						for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+						{
+							constantCoPsViz.get(i).set(icpPlanner.getConstantCentersOfPressure().get(i));
+						}
+
+						for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
+						{
+							icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
+						}
+					}
+					testPush=false;
+				}
+			}
 		}
 	}
 
@@ -453,13 +465,18 @@ public class TestNewInstantaneousCapturePointPlanner
 	
 	private void updateFootstepsFromPush(ArrayList<YoFramePoint> footstepList)
 	{	
-		double tmpx = random.nextDouble()*0.05;
-		double tmpy = random.nextDouble()*0.02;
+		double tmpx = random.nextDouble()*0.1;
+		double tmpy = random.nextDouble()*0.05;
 		
 		for(int i = 1; i < footstepList.size()-1; i++)
 		{	
 			footstepList.get(i).setX(footstepList.get(i).getX()+tmpx);
 			footstepList.get(i).setY(footstepList.get(i).getY()+tmpy);
+		}
+		
+		for (int i = 0; i < Math.min(footstepList.size(), footstepYoFramePoints.size()); i++)
+		{
+			footstepYoFramePoints.get(i).set(footstepList.get(i));
 		}
 	}
 }
