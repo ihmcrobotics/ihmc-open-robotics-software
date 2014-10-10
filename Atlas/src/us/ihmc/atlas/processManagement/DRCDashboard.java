@@ -109,8 +109,8 @@ public class DRCDashboard
    private JScrollPane networkStatusScrollPane;
    private ImageIcon goodConnectionIcon;
    private ImageIcon badConnectionIcon;
-   private ImageIcon startSimIcon = new ImageIcon(DRCDashboard.class.getResource("start_sim.png"));
-   private ImageIcon killSimIcon = new ImageIcon(DRCDashboard.class.getResource("kill_sim.png"));
+   private ImageIcon startSimIcon = new ImageIcon(DRCDashboard.class.getResource("/drcDashboard/start_sim.png"));
+   private ImageIcon killSimIcon = new ImageIcon(DRCDashboard.class.getResource("/drcDashboard/kill_sim.png"));
 
    private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
@@ -528,8 +528,8 @@ public class DRCDashboard
 
       networkStatusScrollPane = new JScrollPane(new JPanel());
 
-      goodConnectionIcon = new ImageIcon(DRCDashboard.class.getResource("good_connection.png"));
-      badConnectionIcon = new ImageIcon(DRCDashboard.class.getResource("bad_connection.png"));
+      goodConnectionIcon = new ImageIcon(DRCDashboard.class.getResource("/drcDashboard/good_connection.png"));
+      badConnectionIcon = new ImageIcon(DRCDashboard.class.getResource("/drcDashboard/bad_connection.png"));
 
       processPanel.add(networkStatusScrollPane, c);
 
