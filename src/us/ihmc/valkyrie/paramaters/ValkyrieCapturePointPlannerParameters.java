@@ -40,4 +40,10 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
 	{
 		return 5;
 	}
+
+	@Override
+	public int getNumberOfFootstepsToStop()
+	{
+		return 2;
+	}
 }
