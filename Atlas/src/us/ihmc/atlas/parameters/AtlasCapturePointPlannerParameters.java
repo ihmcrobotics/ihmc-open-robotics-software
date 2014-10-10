@@ -40,4 +40,10 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 	{
 		return 5;
 	}
+
+	@Override
+	public int getNumberOfFootstepsToStop()
+	{
+		return 2;
+	}
 }

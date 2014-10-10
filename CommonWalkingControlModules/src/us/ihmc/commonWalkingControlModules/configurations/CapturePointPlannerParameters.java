@@ -11,4 +11,6 @@ public interface CapturePointPlannerParameters
 	public abstract int getNumberOfFootstepsToConsider();
 	
 	public abstract int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory();
+	
+	public abstract int getNumberOfFootstepsToStop();
 }
