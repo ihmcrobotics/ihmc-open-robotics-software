@@ -103,6 +103,12 @@ public class TestNewInstantaneousCapturePointPlanner
 		{
 			return 2;
 		}
+
+		@Override
+		public double getIsDoneTimeThreshold()
+		{
+			return -1e-4;
+		}
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();

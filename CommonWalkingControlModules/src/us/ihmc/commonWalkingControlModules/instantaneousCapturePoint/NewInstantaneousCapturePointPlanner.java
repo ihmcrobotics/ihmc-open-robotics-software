@@ -35,6 +35,7 @@ public class NewInstantaneousCapturePointPlanner
 	private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable("icpPlannerIsInitialTransfer", registry);
 	private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
 	private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable("icpPlannerTimeInCurrentState", registry);
+	private final DoubleYoVariable isDoneTimeThreshold = new DoubleYoVariable("icpPlannerisDoneTimeThreshold", registry);
 	private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("icpPlannerDoubleSupportTime", registry);
 	private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("icpPlannerSingleSupportTime", registry);
 	private final DoubleYoVariable doubleSupportInitialTransferDuration = new DoubleYoVariable("icpPlannerInitialTransferDuration",
@@ -80,7 +81,8 @@ public class NewInstantaneousCapturePointPlanner
 		this.doubleSupportInitialTransferDuration.set(this.capturePointPlannerParameters.getDoubleSupportInitialTransferDuration());
 		this.numberFootstepsToConsider.set(this.capturePointPlannerParameters.getNumberOfFootstepsToConsider());
 		this.footstepsToStop.set(this.capturePointPlannerParameters.getNumberOfFootstepsToStop());
-
+		this.isDoneTimeThreshold.set(this.capturePointPlannerParameters.getIsDoneTimeThreshold());
+		
 		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
 		{
 			YoFramePoint constantCopYoFramePoint = new YoFramePoint("icpConstantCoP" + i, ReferenceFrame.getWorldFrame(), registry);
@@ -327,6 +329,27 @@ public class NewInstantaneousCapturePointPlanner
 	{
 		timeInCurrentState.set(time - initialTime.getDoubleValue());
 	}
+	
+	public double computeTimeRemaining(double time)
+	{
+		computeTimeInCurrentState(time);
+		
+		if(isDoubleSupport.getBooleanValue())
+		{
+			if(atAStop.getBooleanValue())
+			{
+				return (doubleSupportInitialTransferDuration.getDoubleValue()-timeInCurrentState.getDoubleValue());
+			}
+			else
+			{
+				return (doubleSupportDuration.getDoubleValue()-timeInCurrentState.getDoubleValue());
+			}
+		}
+		else
+		{
+			return (singleSupportDuration.getDoubleValue()-timeInCurrentState.getDoubleValue());
+		}
+	}
 
 	public YoFramePoint getDesiredCapturePointPosition()
 	{
@@ -385,6 +408,7 @@ public class NewInstantaneousCapturePointPlanner
 
 	public boolean isDone(double time)
 	{
-		return false;
+		double timeRemaining = computeTimeRemaining(time);
+		return (timeRemaining <= isDoneTimeThreshold.getDoubleValue());
 	}
 }

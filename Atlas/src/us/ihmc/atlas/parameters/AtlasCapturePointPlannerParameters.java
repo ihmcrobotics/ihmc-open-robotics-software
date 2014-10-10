@@ -46,4 +46,10 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 	{
 		return 2;
 	}
+
+	@Override
+	public double getIsDoneTimeThreshold()
+	{
+		return -1e-4;
+	}
 }
