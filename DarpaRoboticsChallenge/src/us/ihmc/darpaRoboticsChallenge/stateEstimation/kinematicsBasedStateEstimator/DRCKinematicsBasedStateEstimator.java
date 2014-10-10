@@ -63,7 +63,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
-//      usePelvisCorrector.set(true);
+      usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
       this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
