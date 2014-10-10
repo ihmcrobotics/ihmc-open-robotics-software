@@ -47,4 +47,10 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	{
 		return 2;
 	}
+
+	@Override
+	public double getIsDoneTimeThreshold()
+	{
+		return -1e-4;
+	}
 }
