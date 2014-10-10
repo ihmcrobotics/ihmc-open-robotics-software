@@ -84,8 +84,7 @@ public class CapturePointTools
 	}
 
 	/**
-	 * Put the constant COP'S except the last one on the footsteps. Put the last
-	 * COP between the feet.
+	 * Put the constant COP'S on the footsteps.
 	 * 
 	 * @param arrayToPack ArrayList that will be packed with the constant center
 	 *            of pressure locations
@@ -97,6 +96,25 @@ public class CapturePointTools
 			int numberFootstepsToConsider)
 	{
 		for (int i = 0; i < numberFootstepsToConsider; i++)
+		{
+			arrayToPack.get(i).set(footstepList.get(i));
+		}
+	}
+	
+	/**
+	 * Put the constant COP'S on the feet except the first one. The first one 
+	 * goes unset. This is useful for single support push recovery.
+	 * 
+	 * @param arrayToPack ArrayList that will be packed with the constant center
+	 *            of pressure locations
+	 * @param footstepList ArrayList containing the footsteps
+	 * @param numberFootstepsToConsider Integer describing the number of
+	 *            footsteps to consider when laying out the COP's
+	 */
+	public static void computeConstantCentersOfPressuresExceptFirstOnFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<YoFramePoint> footstepList,
+			int numberFootstepsToConsider)
+	{
+		for (int i = 1; i < numberFootstepsToConsider; i++)
 		{
 			arrayToPack.get(i).set(footstepList.get(i));
 		}
@@ -128,7 +146,62 @@ public class CapturePointTools
 			capturePointsToPack.get(i - 1).setY(tmpY);
 		}
 	}
+	
+	/**
+	 * Backward calculation of desired end of step capture point locations.
+	 * 
+	 * @param constantCentersOfPressure
+	 * @param capturePointsToPack
+	 * @param stepTime
+	 * @param omega0
+	 */
+	public static void computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(ArrayList<YoFramePoint> constantCentersOfPressure,
+			ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
+	{
+		computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime,
+				constantCentersOfPressure.get(capturePointsToPack.size()), constantCentersOfPressure.get(capturePointsToPack.size() - 1),
+				capturePointsToPack.get(capturePointsToPack.size() - 1));
 
+		for (int i = capturePointsToPack.size() - 1; i > 1; i--)
+		{
+			double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX())
+					* (1 / Math.exp(omega0 * stepTime)) + constantCentersOfPressure.get(i - 1).getX();
+			double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY())
+					* (1 / Math.exp(omega0 * stepTime)) + constantCentersOfPressure.get(i - 1).getY();
+
+			capturePointsToPack.get(i - 1).setX(tmpX);
+			capturePointsToPack.get(i - 1).setY(tmpY);
+		}
+	}
+
+	/**
+	 * Given a desired capturePoint location and an initial position of the capture point,
+	 * compute the constant center of pressure that will drive the capture point from the 
+	 * initial position to the final position.
+	 * 
+	 * @param finalDesiredCapturePoint
+	 * @param initialCapturePoint
+	 * @param centerOfPressureToPack
+	 * @param omega0
+	 * @param stepTime
+	 */
+	public static void computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(YoFramePoint finalDesiredCapturePoint, YoFramePoint initialCapturePoint, YoFramePoint centerOfPressureToPack, double omega0, double stepTime)
+	{
+		double exponentialTerm = Math.exp(omega0*stepTime);
+		centerOfPressureToPack.setX((finalDesiredCapturePoint.getX() - initialCapturePoint.getX()*exponentialTerm)/(1-exponentialTerm));
+		centerOfPressureToPack.setY((finalDesiredCapturePoint.getY() - initialCapturePoint.getY()*exponentialTerm)/(1-exponentialTerm));
+	}
+
+	/**
+	 * Given an initial center of pressure location, a final capture point location, 
+	 * and the step time, compute the initial capture point location. 
+	 * 
+	 * @param omega0
+	 * @param time
+	 * @param finalCapturePoint
+	 * @param initialCenterOfPressure
+	 * @param positionToPack
+	 */
 	public static void computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(double omega0, double time,
 			YoFramePoint finalCapturePoint, YoFramePoint initialCenterOfPressure, YoFramePoint positionToPack)
 	{
