@@ -42,7 +42,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
    private final BooleanYoVariable hasFootstepsBeenGenerated = new BooleanYoVariable("hasFootstepsBeenGenerated", registry);
-  
+
    private final Point3d targetLocation = new Point3d();
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation("targetOrientation", ReferenceFrame.getWorldFrame(), registry);
 
@@ -95,6 +95,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       hasTargetBeenProvided.set(false);
       hasFootstepsBeenGenerated.set(false);
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
+      footstepListBehavior.initialize();
 
       robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
       robotPose.changeFrame(worldFrame);
@@ -103,6 +104,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       robotPose.getPosition(robotLocation);
       robotPose.getOrientation(robotOrientation);
+      //for testing purpose
+      //this.setTarget(new Point3d(2.0, 2.0,0.0),new YoFrameOrientation( "blabla", ReferenceFrame.getWorldFrame(), registry));
    }
 
    private void generateFootsteps()
@@ -122,6 +125,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
          Footstep footstep = footsteps.get(i);
          footstep.setZ(midFeetPosition.getZ());
       }
+
       footstepListBehavior.set(footsteps, bipedFeet);
       hasFootstepsBeenGenerated.set(true);
    }
@@ -129,11 +133,11 @@ public class WalkToLocationBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      if (!hasTargetBeenProvided.getBooleanValue())
-         return;
-      if (!hasFootstepsBeenGenerated.getBooleanValue())
-         generateFootsteps();
-      footstepListBehavior.doControl();
+         if (!hasTargetBeenProvided.getBooleanValue())
+            return;
+         if (!hasFootstepsBeenGenerated.getBooleanValue())
+            generateFootsteps();
+         footstepListBehavior.doControl();
    }
 
    @Override
@@ -146,7 +150,6 @@ public class WalkToLocationBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
       footstepListBehavior.consumeObjectFromController(object);
-
    }
 
    @Override
