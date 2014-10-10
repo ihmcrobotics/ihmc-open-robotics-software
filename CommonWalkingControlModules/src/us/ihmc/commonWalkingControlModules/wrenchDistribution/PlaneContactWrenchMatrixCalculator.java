@@ -60,7 +60,7 @@ public class PlaneContactWrenchMatrixCalculator
    private RobotSide footUnderCoPControl;
    private ReferenceFrame footCoPReferenceFrame; 
 
-   private final int rhoSize;
+   private final int totalRhoSize;
    private final int nSupportVectors;
    private final int nPointsPerPlane;
    private final double supportVectorAngleIncrement;
@@ -88,7 +88,7 @@ public class PlaneContactWrenchMatrixCalculator
    {
       this.centerOfMassFrame = centerOfMassFrame;
 
-      this.rhoSize = rhoSize;
+      this.totalRhoSize = rhoSize;
       this.nSupportVectors = maxNSupportVectors;
       this.nPointsPerPlane = maxNPointsPerPlane;
       this.supportVectorAngleIncrement = 2.0 * Math.PI / maxNSupportVectors;
@@ -144,8 +144,6 @@ public class PlaneContactWrenchMatrixCalculator
       for (int i = 0; i < planeContactStates.size(); i++)
       {
          PlaneContactState planeContactState = planeContactStates.get(i);
-         if (!planeContactState.inContact())
-            continue;
          
          if (planeContactState.getNumberOfContactPointsInContact() > nPointsPerPlane)
             throw new RuntimeException("Unhandled number of contact points: " + planeContactState.getNumberOfContactPointsInContact());
@@ -157,47 +155,54 @@ public class PlaneContactWrenchMatrixCalculator
 
          for (int j = 0; j < planeContactState.getTotalNumberOfContactPoints(); j++)
          {
-            ContactPoint contactPoint = planeContactState.getContactPoints().get(j);
-            if (!contactPoint.isInContact())
-               continue;
+        	 ContactPoint contactPoint = planeContactState.getContactPoints().get(j);
+        	 boolean isInContact = contactPoint.isInContact();
 
-            for (int k = 0; k < nSupportVectors; k++)
-            {
-               computeBasisVector(planeContactState, contactPoint, k);
-               
-               currentBasisVector.packMatrixColumn(qRho, iRho);
-               rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
-               wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
-               wRhoSmootherMatrix.set(iRho, iRho, wRhoSmoother.getDoubleValue());
-               
-               if (footCoPReferenceFrame != null)
-               {
-                  if (planeContactState.getPlaneFrame() == footCoPReferenceFrame.getParent())
-                  {
-                     computeCoPBasisVector(planeContactState, contactPoint, k);
-                     qFeetCoP.set(0, iRho, currentBasisVectorCoP.getAngularPartX());
-                     qFeetCoP.set(1, iRho, currentBasisVectorCoP.getAngularPartY());
-                  }
-                  else
-                  {
-                     qFeetCoP.set(0, iRho, 0.0);
-                     qFeetCoP.set(1, iRho, 0.0);
-                  }
-               }
-               else
-               {
-                  qFeetCoP.set(0, iRho, 0.0);
-                  qFeetCoP.set(1, iRho, 0.0);
-               }
-               
-               iRho++;
-            }
+        	 for (int k = 0; k < nSupportVectors; k++)
+        	 {
+        		 if (isInContact)
+        		 {
+        			 computeBasisVector(planeContactState, contactPoint, k);
+
+        			 currentBasisVector.packMatrixColumn(qRho, iRho);
+        			 rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
+        			 wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
+        			 wRhoSmootherMatrix.set(iRho, iRho, wRhoSmoother.getDoubleValue());
+
+        			 if ((footCoPReferenceFrame != null) && (planeContactState.getPlaneFrame() == footCoPReferenceFrame.getParent()))
+        			 {
+        				 computeCoPBasisVector(planeContactState, contactPoint, k);
+        				 qFeetCoP.set(0, iRho, currentBasisVectorCoP.getAngularPartX());
+        				 qFeetCoP.set(1, iRho, currentBasisVectorCoP.getAngularPartY());
+
+        			 }
+        			 else
+        			 {
+        				 qFeetCoP.set(0, iRho, 0.0);
+        				 qFeetCoP.set(1, iRho, 0.0);
+        			 }
+        		 }
+        		 else
+        		 {
+        			 rhoMin.set(iRho, 0, 0.0);
+        			 wRhoMatrix.set(iRho, iRho, 0.0);
+        			 wRhoSmootherMatrix.set(iRho, iRho, 0.0);
+
+        			 qFeetCoP.set(0, iRho, 0.0);
+    				 qFeetCoP.set(1, iRho, 0.0); 
+    				 
+    				 for (int m = 0; m < Wrench.SIZE; m++)
+    					 qRho.set(m, iRho, 0.0); // Set the basis vectors of the points not in contact to zero
+        		 }
+
+        		 iRho++;
+        	 }
          }
       }
-      
-      for (int i = iRho; i < rhoSize; i++)
-         for (int j = 0; j < Wrench.SIZE; j++)
-            qRho.set(j, i, 0.0); // Set the basis vectors of the points not in contact to zero
+
+      for (int i = iRho; i < totalRhoSize; i++)
+    	  for (int j = 0; j < Wrench.SIZE; j++)
+    		  qRho.set(j, i, 0.0); // Set the basis vectors of the points not in contact to zero   
    }
 
    private void computeNormalContactVectorTransform(PlaneContactState planeContactState)
@@ -277,57 +282,70 @@ public class PlaneContactWrenchMatrixCalculator
       {
          PlaneContactState planeContactState = planeContactStates.get(i);
 
-         if (!planeContactState.inContact())
-            continue;
-
-         int rhoSize = planeContactState.getNumberOfContactPointsInContact() * nSupportVectors;
-         int iRhoStart = iRho;
-         int iRhoFinal = iRhoStart + rhoSize;
-
-         DenseMatrix64F rhosSingleEndEffector = CommonOps.extract(rho, iRhoStart, iRhoFinal, 0, 1);
-         double rhosAverage = CommonOps.elementSum(rhosSingleEndEffector) / rhoSize;
-         rhoTotal.add(rhosAverage);
-         rhoMeanLoadedEndEffectors.set(iLoadedEndEffector, rhosAverage);
-
-         tempSum.zero();
-         for (;iRho < iRhoFinal; iRho++)
+         if (planeContactState.inContact())
          {
-            rhoMean.set(iRho, rhosAverage);
+        	 int rhoSizeInContact = planeContactState.getNumberOfContactPointsInContact() * nSupportVectors;
+        	 int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
+        	 int iRhoStart = iRho;
+        	 int iRhoFinal = iRhoStart + rhoSizeTotalForOneEndEffector;
 
-            CommonOps.extract(qRho, 0, SpatialForceVector.SIZE, iRho, iRho + 1, tempVector, 0, 0);
-            MatrixTools.addMatrixBlock(tempSum, 0, 0, tempVector, 0, 0, SpatialForceVector.SIZE, 1, rho.get(iRho));
+        	 DenseMatrix64F rhosSingleEndEffector = CommonOps.extract(rho, iRhoStart, iRhoFinal, 0, 1);
+        	 double rhosAverage = CommonOps.elementSum(rhosSingleEndEffector) / rhoSizeInContact;
+        	 rhoTotal.add(rhosAverage);
+        	 rhoMeanLoadedEndEffectors.set(iLoadedEndEffector, rhosAverage);
+
+        	 tempSum.zero();
+        	 for (;iRho < iRhoFinal; iRho++)
+        	 {
+        		 rhoMean.set(iRho, rhosAverage);
+
+        		 CommonOps.extract(qRho, 0, SpatialForceVector.SIZE, iRho, iRho + 1, tempVector, 0, 0);
+        		 MatrixTools.addMatrixBlock(tempSum, 0, 0, tempVector, 0, 0, SpatialForceVector.SIZE, 1, rho.get(iRho));
+        	 }
+
+        	 iLoadedEndEffector++;
+
+        	 RigidBody rigidBody = planeContactState.getRigidBody();
+        	 ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
+
+        	 tempWrench.set(bodyFixedFrame, centerOfMassFrame, tempSum);
+        	 tempWrench.changeFrame(bodyFixedFrame);
+
+        	 wrenches.get(rigidBody).add(tempWrench);
          }
-
-         iLoadedEndEffector++;
-
-         RigidBody rigidBody = planeContactState.getRigidBody();
-         ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
-
-         tempWrench.set(bodyFixedFrame, centerOfMassFrame, tempSum);
-         tempWrench.changeFrame(bodyFixedFrame);
-
-         wrenches.get(rigidBody).add(tempWrench);
+         else
+         {
+        	 iRho = iRho + planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
+         }
       }
 
       iRho = 0;
       for (int i = 0; i < planeContactStates.size(); i++)
       {
-         PlaneContactState planeContactState = planeContactStates.get(i);
-         
-         if (!planeContactState.inContact())
-            continue;
-         
-         double penaltyScaling = 0.0;
+    	  PlaneContactState planeContactState = planeContactStates.get(i);
 
-         if (rhoTotal.getDoubleValue() > 1e-3)
-            penaltyScaling = Math.max(0.0, 1.0 - rhoMeanLoadedEndEffectors.get(i) / rhoTotal.getDoubleValue());
+    	  if (planeContactState.inContact())
+    	  {
+    		  double penaltyScaling = 0.0;
 
-         int rhoSize = planeContactState.getNumberOfContactPointsInContact() * nSupportVectors;
-         int iRhoFinal = iRho + rhoSize;
-         for (;iRho < iRhoFinal; iRho++)
-            wRhoPenalizerMatrix.set(iRho, iRho, wRhoPenalizer.getDoubleValue() * penaltyScaling);
+    		  if (rhoTotal.getDoubleValue() > 1e-3)
+    			  penaltyScaling = Math.max(0.0, 1.0 - rhoMeanLoadedEndEffectors.get(i) / rhoTotal.getDoubleValue());
+
+    		  int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
+    		  int iRhoFinal = iRho + rhoSizeTotalForOneEndEffector;
+    		  for (;iRho < iRhoFinal; iRho++)
+    			  wRhoPenalizerMatrix.set(iRho, iRho, wRhoPenalizer.getDoubleValue() * penaltyScaling);
+    	  }
+    	  else
+    	  {
+    		  int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
+
+    		  int iRhoFinal = iRho + rhoSizeTotalForOneEndEffector;
+    		  for (;iRho < iRhoFinal; iRho++)
+    			  wRhoPenalizerMatrix.set(iRho, iRho, 0.0);
+    	  }
       }
-      
+
       return wrenches;
    }
 
