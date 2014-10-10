@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
 import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
@@ -26,7 +27,6 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepDataListObjectCommunicator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
@@ -37,6 +37,7 @@ import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.net.KryoLocalObjectCommunicator;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -154,7 +155,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new ScriptedFootstepDataListObjectCommunicator("Team"),
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
             simpleFlatGroundScriptName, fileName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -197,7 +198,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new ScriptedFootstepDataListObjectCommunicator("Team"),
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(
+            new IHMCCommunicationKryoNetClassList()),
             simpleFlatGroundScriptName, fileName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       
@@ -241,7 +243,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new ScriptedFootstepDataListObjectCommunicator("Team"),
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(
+            new IHMCCommunicationKryoNetClassList()),
             simpleFlatGroundScriptName, fileName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       
@@ -539,7 +542,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    
    private OscillateFeetPerturber generateFeerPertuber(final SimulationConstructionSet simulationConstructionSet, SDFRobot robot, int ticksPerPerturbation)
    {
-      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.06, 0.011});
       
