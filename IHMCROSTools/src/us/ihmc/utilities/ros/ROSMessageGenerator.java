@@ -27,6 +27,7 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
 
 public class ROSMessageGenerator
 {
@@ -40,25 +41,8 @@ public class ROSMessageGenerator
 
    public static void main(String... args)
    {
-      List<Class> toConvert = new ArrayList<Class>();
-      toConvert.add(RobotConfigurationData.class);
-      toConvert.add(HandPosePacket.class);
-      toConvert.add(ComHeightPacket.class);
-      toConvert.add(FootPosePacket.class);
-      toConvert.add(FootStatePacket.class);
-
-      // toConvert.add(RobotPoseData.class); //RigidBodyTranspose conversion required
-      toConvert.add(FootstepData.class);
-      toConvert.add(FootstepDataList.class);
-      toConvert.add(FootstepStatus.class);
-      toConvert.add(ChestOrientationPacket.class);
-      toConvert.add(LookAtPacket.class);
-      toConvert.add(HeadOrientationPacket.class);
-      toConvert.add(PauseCommand.class);
-      toConvert.add(PelvisPosePacket.class);
-
       ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
-      for (Class clazz : toConvert)
+      for (Class clazz : IHMCMessageMap.packetList)
       {
          messageGenerator.createNewRosMessage(clazz, true);
       }
