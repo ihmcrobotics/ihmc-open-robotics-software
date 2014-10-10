@@ -9,6 +9,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
+import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
+import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -45,9 +47,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -70,6 +70,8 @@ public class ScriptBehavior extends BehaviorInterface
    private File scriptFile = null;
    private RigidBodyTransform scriptObjectTransformToWorld = null;
    private ArrayList<ScriptObject> scriptObjects = null;
+   private ScriptBehaviorStatusEnum scriptStatus;
+   private int scriptIndex = 0;
 
    private final FullRobotModel fullRobotModel;
    private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
@@ -187,6 +189,7 @@ public class ScriptBehavior extends BehaviorInterface
          public void doTransitionAction()
          {
             loadNextScriptObject();
+            outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
          }
       };
 
@@ -197,29 +200,29 @@ public class ScriptBehavior extends BehaviorInterface
       StateMachineTools.addRequestedStateTransition(requestedState, false, idleState, newBehaviorState);
    }
 
-   @Override
-   public void doControl()
-   {
-	   checkIfScriptBehaviorInputPacketReceived();
-      if (!inputsSupplied() || scriptFinished.getBooleanValue())
-      {
-    	  return;
-      }
-      
+	@Override
+	public void doControl() 
+	{
+		checkIfScriptBehaviorInputPacketReceived();
+		if (!inputsSupplied() || scriptFinished.getBooleanValue()) 
+		{
+			return;
+		}
 
-      if (!scriptLoaded.getBooleanValue())
-         loadScript();
+		if (!scriptLoaded.getBooleanValue())
+			loadScript();
 
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
-   }
+		stateMachine.checkTransitionConditions();
+		stateMachine.doAction();
+	}
    
 	private void checkIfScriptBehaviorInputPacketReceived() 
 	{
 		if (scriptBehaviorInputPacketListener.isNewPacketAvailable()) 
 		{
 			receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
-			scriptObjectTransformToWorld = (receivedScriptBehavior.getReferenceTransform());
+			scriptObjectTransformToWorld = receivedScriptBehavior.getReferenceTransform();
+			System.out.println("Reference Transform Is: "+ scriptObjectTransformToWorld);
 			scriptFile = new File(receivedScriptBehavior.getScriptName());
 		}
 	}
@@ -233,22 +236,34 @@ public class ScriptBehavior extends BehaviorInterface
    {
       scriptObjects = scriptEngine.getScriptObjects(scriptFile);
       scriptLoaded.set(true);
+      scriptStatus = scriptStatus.SCRIPT_LOADED;
+      outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
       loadNextScriptObject();
+      outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
    }
 
    private void loadNextScriptObject()
    {
       if (scriptObjects.size() == 0)
-         return;
-
+      {
+    	  scriptStatus = scriptStatus.SCRIPT_LOAD_FAILED;
+    	  return;
+      }
+      
+      scriptIndex++;
+      scriptStatus = scriptStatus.INDEX_CHANGED;
+      
       ScriptObject scriptObject = scriptObjects.remove(0);
 
       scriptObject.applyTransform(scriptObjectTransformToWorld);
+      System.out.println("Transform used for script object is: " + scriptObjectTransformToWorld);
 
       if (scriptObject.getScriptObject() instanceof EndOfScriptCommand)
       {
          if (DEBUG) System.out.println("End of script");
          scriptFinished.set(true);
+         scriptIndex--;
+         scriptStatus = scriptStatus.FINISHED;
       }
       else if (scriptObject.getScriptObject() instanceof FootstepDataList)
       {
@@ -291,6 +306,7 @@ public class ScriptBehavior extends BehaviorInterface
          if (DEBUG) System.out.println("Loaded foot pose");
          footPoseBehavior.setInput((FootPosePacket) scriptObject.getScriptObject());
          requestedState.set(PrimitiveBehaviorType.FOOT_POSE);
+         scriptIndex--;
       }
       else if (scriptObject.getScriptObject() instanceof PelvisPosePacket)
       {
@@ -338,6 +354,7 @@ public class ScriptBehavior extends BehaviorInterface
       else
       {
          loadNextScriptObject();
+         scriptIndex--;
       }
    }
 
