@@ -1,0 +1,10 @@
+int64    frame_count
+time     time_stamp
+uint32   width
+uint32   height
+float32  gain
+float32  fps
+uint32   exposure_time
+uint32   channels
+uint32   bins
+uint32[] data

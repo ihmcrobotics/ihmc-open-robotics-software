@@ -1,9 +1,9 @@
 package us.ihmc.utilities.ros.subscriber;
 
-public abstract class RosTimestampSubscriber extends AbstractRosTopicSubscriber<std_msgs.Time>
+public abstract class RosTimestampSubscriber extends AbstractRosTopicSubscriber<multisense_ros.StampedPps>
 {
    public RosTimestampSubscriber()
    {
-      super(std_msgs.Time._TYPE);
+      super(multisense_ros.StampedPps._TYPE);
    }
 }
