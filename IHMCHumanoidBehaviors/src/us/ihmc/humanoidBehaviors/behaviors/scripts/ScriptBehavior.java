@@ -1,10 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
-
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
@@ -67,7 +64,7 @@ public class ScriptBehavior extends BehaviorInterface
    private final BooleanYoVariable scriptFinished = new BooleanYoVariable("scriptFinished", registry);
 
    private final ScriptEngine scriptEngine;
-   private File scriptFile = null;
+   private InputStream scriptResourceStream = null;
    private RigidBodyTransform scriptObjectTransformToWorld = null;
    private ArrayList<ScriptObject> scriptObjects = null;
    private ScriptBehaviorStatusEnum scriptStatus;
@@ -200,41 +197,41 @@ public class ScriptBehavior extends BehaviorInterface
       StateMachineTools.addRequestedStateTransition(requestedState, false, idleState, newBehaviorState);
    }
 
-	@Override
-	public void doControl() 
-	{
-		checkIfScriptBehaviorInputPacketReceived();
-		if (!inputsSupplied() || scriptFinished.getBooleanValue()) 
-		{
-			return;
-		}
+   @Override
+   public void doControl()
+   {
+	   checkIfScriptBehaviorInputPacketReceived();
+      if (!inputsSupplied() || scriptFinished.getBooleanValue())
+      {
+    	  return;
+      }
+      
 
-		if (!scriptLoaded.getBooleanValue())
-			loadScript();
+      if (!scriptLoaded.getBooleanValue())
+         loadScript();
 
-		stateMachine.checkTransitionConditions();
-		stateMachine.doAction();
-	}
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+   }
    
 	private void checkIfScriptBehaviorInputPacketReceived() 
 	{
 		if (scriptBehaviorInputPacketListener.isNewPacketAvailable()) 
 		{
 			receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
-			scriptObjectTransformToWorld = receivedScriptBehavior.getReferenceTransform();
-			System.out.println("Reference Transform Is: "+ scriptObjectTransformToWorld);
-			scriptFile = new File(receivedScriptBehavior.getScriptName());
+			scriptObjectTransformToWorld = (receivedScriptBehavior.getReferenceTransform());
+			scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
 		}
 	}
 
    private boolean inputsSupplied()
    {
-      return (scriptFile != null && scriptObjectTransformToWorld != null);
+      return (scriptResourceStream != null && scriptObjectTransformToWorld != null);
    }
 
    private void loadScript()
    {
-      scriptObjects = scriptEngine.getScriptObjects(scriptFile);
+      scriptObjects = scriptEngine.getScriptObjects(scriptResourceStream);
       scriptLoaded.set(true);
       scriptStatus = scriptStatus.SCRIPT_LOADED;
       outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
@@ -256,7 +253,6 @@ public class ScriptBehavior extends BehaviorInterface
       ScriptObject scriptObject = scriptObjects.remove(0);
 
       scriptObject.applyTransform(scriptObjectTransformToWorld);
-      System.out.println("Transform used for script object is: " + scriptObjectTransformToWorld);
 
       if (scriptObject.getScriptObject() instanceof EndOfScriptCommand)
       {
@@ -375,24 +371,24 @@ public class ScriptBehavior extends BehaviorInterface
 //      }
    }
 
-   public void getScriptFileFromDialog()
-   {
-      System.out.println("------------>Open File Load Dialog");
-      JFileChooser chooser = new JFileChooser();
-      FileNameExtensionFilter filter = new FileNameExtensionFilter("xml Scripts", "xml");
-      chooser.setFileFilter(filter);
-      int returnVal = chooser.showDialog(null, "Run Script");
-      if (returnVal == JFileChooser.APPROVE_OPTION)
-      {
-         System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
-         scriptFile = chooser.getSelectedFile();
-      }
-      else
-      {
-         System.out.println("File Load Canceled");
-         stop();
-      }
-   }
+//   public void getScriptFileFromDialog()
+//   {
+//      System.out.println("------------>Open File Load Dialog");
+//      JFileChooser chooser = new JFileChooser();
+//      FileNameExtensionFilter filter = new FileNameExtensionFilter("xml Scripts", "xml");
+//      chooser.setFileFilter(filter);
+//      int returnVal = chooser.showDialog(null, "Run Script");
+//      if (returnVal == JFileChooser.APPROVE_OPTION)
+//      {
+//         System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+//         scriptResourceStream = chooser.getSelectedFile();
+//      }
+//      else
+//      {
+//         System.out.println("File Load Canceled");
+//         stop();
+//      }
+//   }
 
    @Override
    public void stop()
@@ -466,7 +462,7 @@ public class ScriptBehavior extends BehaviorInterface
       scriptFinished.set(false);
       scriptLoaded.set(false);
       scriptObjectTransformToWorld = null;
-      scriptFile = null;
+      scriptResourceStream = null;
       scriptObjects = null;
       stateMachine.finalize();
       stateMachine.setCurrentState(PrimitiveBehaviorType.IDLE);

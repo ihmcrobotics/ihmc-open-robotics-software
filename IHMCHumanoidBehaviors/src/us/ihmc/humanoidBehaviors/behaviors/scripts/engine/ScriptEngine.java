@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -72,6 +73,25 @@ public class ScriptEngine
          return null;
       }
    }
+   
+   public ArrayList<ScriptObject> getScriptObjectsFromInputStream(InputStream inStream)
+   {
+      ScriptFileLoader loader;
+      try
+      {
+         loader = new ScriptFileLoader(inStream);
+         ArrayList<ScriptObject> scriptObjects = loader.readIntoList();
+         loader.close();
+
+         return scriptObjects;
+      }
+      catch (IOException e)
+      {
+         System.err.println("Problem loading file. Try another one. Sorry :(.");
+
+         return null;
+      }
+   }
 
    public ArrayList<ScriptObject> getScriptObjects()
    {
@@ -87,6 +107,16 @@ public class ScriptEngine
          lastScriptFileLoaded = file;
 
          return getScriptObjectsFromFile(file);
+      }
+      else
+         return null;
+   }
+   
+   public ArrayList<ScriptObject> getScriptObjects(InputStream inStream)
+   {
+      if (inStream != null)
+      {
+         return getScriptObjectsFromInputStream(inStream);
       }
       else
          return null;
