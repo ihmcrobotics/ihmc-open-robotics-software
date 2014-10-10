@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -75,5 +76,8 @@ public class IHMCHumanoidBehaviorManager
 
       ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
+
+      WalkToLocationBehavior walkToObjectLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToObjectLocationBehavior);
    }
 }

@@ -1,13 +1,24 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
+import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 
 public class FootstepListBehavior extends BehaviorInterface
 {
@@ -21,7 +32,7 @@ public class FootstepListBehavior extends BehaviorInterface
    private final IntegerYoVariable numberOfFootsteps = new IntegerYoVariable("numberOfFootsteps" + behaviorName, registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped", registry);
-   
+
    public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
@@ -33,6 +44,25 @@ public class FootstepListBehavior extends BehaviorInterface
    public void set(FootstepDataList footStepList)
    {
       outgoingFootstepDataList = footStepList;
+      numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+   }
+
+   public void set(ArrayList<Footstep> footsteps, SideDependentList<ContactablePlaneBody> feet)
+   {
+      FootstepDataList footsepDataList = new FootstepDataList();
+      
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         Footstep footstep = footsteps.get(i);
+         Point3d location = new Point3d(footstep.getX(), footstep.getY(), footstep.getZ());
+         Quat4d orientation = new Quat4d();
+         footstep.getOrientation(orientation);
+
+         RobotSide footstepSide = FootstepUtils.getSideFromFootstep(footstep, feet);
+         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         footsepDataList.add(footstepData);
+      }
+      outgoingFootstepDataList = footsepDataList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
    }
 
@@ -67,7 +97,7 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-	   numberOfFootsteps.set(-1);
+      numberOfFootsteps.set(-1);
    }
 
    @Override
@@ -140,4 +170,5 @@ public class FootstepListBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+
 }
