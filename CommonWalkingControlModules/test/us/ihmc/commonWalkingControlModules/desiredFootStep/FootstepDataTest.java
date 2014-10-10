@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
@@ -290,6 +291,7 @@ public class FootstepDataTest
       netClassList.addType(ArrayList.class);
       netClassList.addType(Point3d.class);
       netClassList.addType(Quat4d.class);
+      netClassList.addType(PacketDestination.class);
       netClassList.addType(FootstepStatus.Status.class);
       netClassList.addType(TrajectoryWaypointGenerationMethod.class);
       netClassList.addType(RobotSide.class);
@@ -400,6 +402,7 @@ public class FootstepDataTest
    {
       ArrayList<Footstep> reconstructedFootsteps = new ArrayList<Footstep>();
 
+      @Override
       public void consumeObject(FootstepData packet)
       {
          RigidBody endEffector = createRigidBody(packet.getRobotSide());
@@ -424,6 +427,7 @@ public class FootstepDataTest
    {
       ArrayList<Footstep> reconstructedFootstepPath = new ArrayList<Footstep>();
 
+      @Override
       public void consumeObject(FootstepDataList packet)
       {
          for (FootstepData footstepData : packet)
@@ -464,6 +468,7 @@ public class FootstepDataTest
    {
       ArrayList<Boolean> reconstructedCommands = new ArrayList<Boolean>();
 
+      @Override
       public void consumeObject(PauseCommand packet)
       {
          reconstructedCommands.add(packet.isPaused());
@@ -479,6 +484,7 @@ public class FootstepDataTest
    {
       private ArrayList<FootstepStatus> reconstructedFootstepStatuses = new ArrayList<FootstepStatus>();
 
+      @Override
       public void consumeObject(FootstepStatus footstepStatus)
       {
          reconstructedFootstepStatuses.add(footstepStatus);
