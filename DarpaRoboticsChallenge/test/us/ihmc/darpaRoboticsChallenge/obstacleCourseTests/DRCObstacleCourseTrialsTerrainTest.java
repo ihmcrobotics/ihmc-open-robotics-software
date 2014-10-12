@@ -110,7 +110,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
-      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.035, 0.035, 0.005});
+      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.02, 0.03, 0.0}, new double[] {0.025, 0.035, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.02, 0.01, 0.0}, new double[] {0.2, 0.05, 0.01});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 0.5);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
