@@ -78,10 +78,11 @@ public class LinearStickSlipGroundContactModelTest
          position = RandomTools.generateRandomPoint(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ);
 
          // Keep it under ground for now to make sure touchdown doesn't change.
-         if (position.getZ() > -1e-7)
-            position.setZ(-1e-7);
+         if (position.getZ() > -0.002)
+            position.setZ(-0.002);
 
          velocity = RandomTools.generateRandomVector(random, maxSpeed);
+         if (velocity.getZ() > 0.0) velocity.setZ(-velocity.getZ());
 
          groundContactPoint.setPosition(position);
          groundContactPoint.setVelocity(velocity);
