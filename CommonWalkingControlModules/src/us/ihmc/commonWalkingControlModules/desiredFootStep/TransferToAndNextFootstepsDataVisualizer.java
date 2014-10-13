@@ -26,7 +26,7 @@ public class TransferToAndNextFootstepsDataVisualizer
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList("TransferToAndNextFootstepsDataVisualizer");
 
-      int maxNumberOfVertices = 6;
+      int maxNumberOfVertices = 8;
       transferFromPolygon = new YoFrameConvexPolygon2d("transferFromPolygon", "", worldFrame, maxNumberOfVertices, registry);
       transferToPolygon = new YoFrameConvexPolygon2d("transferToPolygon", "", worldFrame, maxNumberOfVertices, registry);
       nextStepPolygon = new YoFrameConvexPolygon2d("nextStepPolygon", "", worldFrame, maxNumberOfVertices, registry);
