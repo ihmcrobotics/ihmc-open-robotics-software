@@ -325,16 +325,13 @@ public class NewInstantaneousCapturePointPlanner
 	{
 		computeTimeInCurrentState(time);
 		double timeRemaining = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
+		
 		this.wasPushedInSingleSupport.set(true);
+		
 		computeConstantCentersOfPressure(footstepList);
 		computeCapturePointCornerPoints(doubleSupportDuration.getDoubleValue()+singleSupportDuration.getDoubleValue());
 
-//		CapturePointTools.computeConstantCentersOfPressuresExceptFirstOnFeet(constantCentersOfPressure, footstepList,
-//				numberFootstepsToConsider.getIntegerValue());
-//
-//		CapturePointTools.computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(footstepList, capturePointCornerPoints,
-//				this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue(), omega0.getDoubleValue());
-//		capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
+		capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
 
 		CapturePointTools.computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(capturePointCornerPoints.get(1),
 				capturePointCornerPoints.get(0), constantCentersOfPressure.get(0), this.omega0.getDoubleValue(), timeRemaining+doubleSupportDuration.getDoubleValue());
