@@ -23,7 +23,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class CapturePointToolsTest
 {
-	int nTests = 10;
+	int nTests = 20;
 	Random random = new Random();
 	YoVariableRegistry registry = new YoVariableRegistry("");
 
@@ -35,7 +35,7 @@ public class CapturePointToolsTest
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
 		int nFootsteps = 10;
-		int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
+		int numberFootstepsToConsider = 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
 			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
@@ -78,7 +78,7 @@ public class CapturePointToolsTest
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
 		int nFootsteps = 10;
-		int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
+		int numberFootstepsToConsider = 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
 			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
@@ -127,7 +127,7 @@ public class CapturePointToolsTest
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
 		int nFootsteps = 10;
-		int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
+		int numberFootstepsToConsider = 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
 			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
@@ -176,7 +176,7 @@ public class CapturePointToolsTest
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
 		int nFootsteps = 10;
-		int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
+		int numberFootstepsToConsider = 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
 			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
