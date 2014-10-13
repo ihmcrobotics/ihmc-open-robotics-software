@@ -16,9 +16,9 @@ dependencies {
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
 	compile group: 'javax.media', name: 'jmf', version: '2.1.1e'
-	compile group: 'batik', name: 'batik-svggen', version: '1.5'
-	compile group: 'batik', name: 'batik-dom', version: '1.5'
-	compile group: 'batik', name: 'batik-awt-util', version: '1.5'
+	compile group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.7'
+	compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
+	compile group: 'org.apache.xmlgraphics', name: 'batik-awt-util', version: '1.7'
 	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
 	compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5' //1.7.5
 	compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0' //1.14.0.0
