@@ -114,7 +114,7 @@ public class TestNewInstantaneousCapturePointPlanner
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
 	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
 	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-	private int numberOfStepsInStepList = 3;
+	private int numberOfStepsInStepList = 6;
 	private int maxNumberOfConsideredFootsteps = testICPPlannerParams.getNumberOfFootstepsToConsider();
 	private NewInstantaneousCapturePointPlanner icpPlanner;
 
