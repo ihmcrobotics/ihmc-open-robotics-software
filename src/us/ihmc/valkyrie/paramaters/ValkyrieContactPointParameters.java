@@ -1,22 +1,25 @@
 package us.ihmc.valkyrie.paramaters;
 
+import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footChamferX;
+import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footChamferY;
 import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footLength;
 import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footWidth;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFPenalizedSmootherNative;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class ValkyrieContactPointParameters extends DRCRobotContactPointParameters
 {
@@ -25,6 +28,8 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
 
+   private final boolean CHAMFER_FEET_CORNERS = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES;
+   
    public ValkyrieContactPointParameters(DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -34,11 +39,27 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
 
          ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<>();
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
+         
+         if (CHAMFER_FEET_CORNERS)
+         {
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0 - footChamferX, -footWidth / 2.0)));
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0 - footChamferX, footWidth / 2.0)));
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0 + footChamferX, -footWidth / 2.0)));
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0 + footChamferX, footWidth / 2.0)));
 
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0  + footChamferY)));
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0  - footChamferY)));
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0  + footChamferY)));
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0  - footChamferY)));
+         }
+         else
+         {
+        	 footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
+             footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
+             footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
+             footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
+         }
+         
          for (Pair<String, Point2d> footGC : footGCs)
          {
             footGroundContactPoints.get(robotSide).add(footGC.second());
