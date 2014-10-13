@@ -1,0 +1,23 @@
+repositories {
+	maven {
+		url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
+	}
+
+    /**
+     * Maven central repository, local proxy
+     */
+    maven{
+        url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+    }
+
+    /**
+     * Vendored third-party jars
+     */
+    maven{
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
+    
+    maven{
+    	url "https://bengal.ihmc.us/nexus/content/repositories/xuggle/"
+    }
+}
