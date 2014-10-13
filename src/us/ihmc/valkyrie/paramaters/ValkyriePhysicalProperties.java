@@ -19,6 +19,9 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
    public static final double thighLength = 0.431;
    public static final double shinLength = 0.406;
    public static final double pelvisToFoot = 0.887 + 0.3;
+   
+   public static final double footChamferX = 0.2 * footLength;
+   public static final double footChamferY = 0.2 * footWidth;
 
    public static final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    public static final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<RigidBodyTransform>(new RigidBodyTransform(), new RigidBodyTransform());
