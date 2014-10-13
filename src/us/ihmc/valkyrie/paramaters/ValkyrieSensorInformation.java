@@ -31,7 +31,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
-   public static final boolean USE_HOME_MADE_FOOT_SENSOR_TARRING = true;
 
    private static final SideDependentList<SpatialForceVector> footForceSensorTareOffsets;
    static
