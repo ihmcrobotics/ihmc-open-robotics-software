@@ -33,6 +33,7 @@ public class NewInstantaneousCapturePointPlanner
 	private final BooleanYoVariable atAStop = new BooleanYoVariable("icpPlannerAtAStop", registry);
 	private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
 	private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable("icpPlannerIsInitialTransfer", registry);
+	private final BooleanYoVariable wasPushedInSingleSupport = new BooleanYoVariable("icpPlannerWasPushedInSingleSupport", registry);
 	private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
 	private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable("icpPlannerTimeInCurrentState", registry);
 	private final DoubleYoVariable isDoneTimeThreshold = new DoubleYoVariable("icpPlannerisDoneTimeThreshold", registry);
@@ -72,6 +73,7 @@ public class NewInstantaneousCapturePointPlanner
 		this.capturePointPlannerParameters = capturePointPlannerParameters;
 		this.numberFootstepsToConsider.set(maxNumberFootstepsToConsider);
 		this.atAStop.set(true);
+		this.wasPushedInSingleSupport.set(false);
 
 		this.doubleSupportCapturePointTrajectory = new DoubleSupportPolynomialTrajectory("icpPlannerDoubleSupportTrajectory",
 				this.capturePointPlannerParameters.getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory(),
@@ -146,7 +148,7 @@ public class NewInstantaneousCapturePointPlanner
 
 		this.desiredCapturePointPosition.set(currentDesiredCapturePointPosition);
 		this.desiredCapturePointVelocity.set(currentDesiredCapturePointVelocity);
-
+		
 		computeConstantCentersOfPressure(footstepList);
 		computeCapturePointCornerPoints(this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue());
 
@@ -163,6 +165,11 @@ public class NewInstantaneousCapturePointPlanner
 		{
 			initializeDoubleSupportCapturePointTrajectory(currentDesiredCapturePointPosition, currentDesiredCapturePointVelocity,
 					finalDesiredCapturePointPosition, finalDesiredCapturePointVelocity, doubleSupportDuration);
+		}
+		
+		if(wasPushedInSingleSupport.getBooleanValue())
+		{
+			wasPushedInSingleSupport.set(false);
 		}
 	}
 
@@ -194,38 +201,53 @@ public class NewInstantaneousCapturePointPlanner
 		int numberOfCentersOfPressureToPlan = (this.numberFootstepsToConsider.getIntegerValue() > footstepList.size()) ? footstepList
 				.size() : this.numberFootstepsToConsider.getIntegerValue();
 
-		if (atAStop.getBooleanValue())
-		{
-			if (!comeToStop.getBooleanValue())
+		if(!wasPushedInSingleSupport.getBooleanValue())
+		{	
+			if (atAStop.getBooleanValue())
 			{
-				CapturePointTools.computeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet(constantCentersOfPressure,
-						footstepList, numberOfCentersOfPressureToPlan);
+				if (!comeToStop.getBooleanValue())
+				{
+					CapturePointTools.computeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet(constantCentersOfPressure,
+							footstepList, numberOfCentersOfPressureToPlan);
+				}
+				else
+				{
+					CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(constantCentersOfPressure,
+							footstepList, numberOfCentersOfPressureToPlan);
+				}
 			}
 			else
 			{
-				CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(constantCentersOfPressure,
-						footstepList, numberOfCentersOfPressureToPlan);
+				if (comeToStop.getBooleanValue())
+				{
+					CapturePointTools.computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(constantCentersOfPressure, footstepList,
+							numberOfCentersOfPressureToPlan);
+				}
+				else
+				{
+					CapturePointTools.computeConstantCentersOfPressuresOnFeet(constantCentersOfPressure, footstepList,
+							numberOfCentersOfPressureToPlan);
+				}
 			}
 		}
-		else if (!atAStop.getBooleanValue())
+		else
 		{
-			if (comeToStop.getBooleanValue())
-			{
-				CapturePointTools.computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(constantCentersOfPressure, footstepList,
-						numberOfCentersOfPressureToPlan);
-			}
-			else
-			{
-				CapturePointTools.computeConstantCentersOfPressuresOnFeet(constantCentersOfPressure, footstepList,
-						numberOfCentersOfPressureToPlan);
-			}
+			CapturePointTools.computeConstantCentersOfPressuresExceptFirstOnFeet(constantCentersOfPressure, footstepList,
+					numberFootstepsToConsider.getIntegerValue());
 		}
 	}
 
 	protected void computeCapturePointCornerPoints(double steppingDuration)
 	{
-		CapturePointTools.computeDesiredEndOfStepCapturePointLocations(constantCentersOfPressure, capturePointCornerPoints,
-				steppingDuration, omega0.getDoubleValue());
+		if(!wasPushedInSingleSupport.getBooleanValue())
+		{
+			CapturePointTools.computeDesiredEndOfStepCapturePointLocations(constantCentersOfPressure, capturePointCornerPoints,steppingDuration, omega0.getDoubleValue());
+		}
+		else
+		{
+			CapturePointTools.computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(constantCentersOfPressure, capturePointCornerPoints,
+					this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue(), omega0.getDoubleValue());
+		}
 	}
 
 	protected void computeDesiredCapturePointPosition(double time)
@@ -303,13 +325,16 @@ public class NewInstantaneousCapturePointPlanner
 	{
 		computeTimeInCurrentState(time);
 		double timeRemaining = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
+		this.wasPushedInSingleSupport.set(true);
+		computeConstantCentersOfPressure(footstepList);
+		computeCapturePointCornerPoints(doubleSupportDuration.getDoubleValue()+singleSupportDuration.getDoubleValue());
 
-		CapturePointTools.computeConstantCentersOfPressuresExceptFirstOnFeet(constantCentersOfPressure, footstepList,
-				numberFootstepsToConsider.getIntegerValue());
-
-		CapturePointTools.computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(footstepList, capturePointCornerPoints,
-				this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue(), omega0.getDoubleValue());
-		capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
+//		CapturePointTools.computeConstantCentersOfPressuresExceptFirstOnFeet(constantCentersOfPressure, footstepList,
+//				numberFootstepsToConsider.getIntegerValue());
+//
+//		CapturePointTools.computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(footstepList, capturePointCornerPoints,
+//				this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue(), omega0.getDoubleValue());
+//		capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
 
 		CapturePointTools.computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(capturePointCornerPoints.get(1),
 				capturePointCornerPoints.get(0), constantCentersOfPressure.get(0), this.omega0.getDoubleValue(), timeRemaining+doubleSupportDuration.getDoubleValue());
