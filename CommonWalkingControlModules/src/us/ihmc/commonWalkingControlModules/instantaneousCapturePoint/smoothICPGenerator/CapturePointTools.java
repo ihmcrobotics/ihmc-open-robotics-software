@@ -61,9 +61,20 @@ public class CapturePointTools
 	public static void computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(ArrayList<YoFramePoint> arrayToPack,
 			ArrayList<YoFramePoint> footstepList, int numberFootstepsToConsider)
 	{
+		int numberFootstepsInList = footstepList.size();
+		
 		for (int i = 0; i < numberFootstepsToConsider - 1; i++)
 		{
-			arrayToPack.get(i).set(footstepList.get(i));
+			if(i < numberFootstepsInList-1)
+			{
+				arrayToPack.get(i).set(footstepList.get(i));
+			}
+			else
+			{
+				arrayToPack.get(i).set(footstepList.get(numberFootstepsInList-1));
+				arrayToPack.get(i).add(footstepList.get(numberFootstepsInList-2));
+				arrayToPack.get(i).scale(0.5);
+			}
 		}
 
 		arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
@@ -87,10 +98,21 @@ public class CapturePointTools
 		arrayToPack.get(0).set(footstepList.get(0));
 		arrayToPack.get(0).add(footstepList.get(1));
 		arrayToPack.get(0).scale(0.5);
+		
+		int numberFootstepsInList = footstepList.size();
 
 		for (int i = 1; i < numberFootstepsToConsider - 1; i++)
 		{
-			arrayToPack.get(i).set(footstepList.get(i));
+			if(i < numberFootstepsInList-1)
+			{
+				arrayToPack.get(i).set(footstepList.get(i));
+			}
+			else
+			{
+				arrayToPack.get(i).set(footstepList.get(numberFootstepsInList-1));
+				arrayToPack.get(i).add(footstepList.get(numberFootstepsInList-2));
+				arrayToPack.get(i).scale(0.5);
+			}
 		}
 
 		arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
@@ -110,9 +132,21 @@ public class CapturePointTools
 	public static void computeConstantCentersOfPressuresOnFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<YoFramePoint> footstepList,
 			int numberFootstepsToConsider)
 	{
+		
+		int numberFootstepsInList = footstepList.size();
+		
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
-			arrayToPack.get(i).set(footstepList.get(i));
+			if(i < numberFootstepsInList-1)
+			{
+				arrayToPack.get(i).set(footstepList.get(i));
+			}
+			else
+			{
+				arrayToPack.get(i).set(footstepList.get(numberFootstepsInList-1));
+				arrayToPack.get(i).add(footstepList.get(numberFootstepsInList-2));
+				arrayToPack.get(i).scale(0.5);
+			}
 		}
 	}
 	
@@ -129,9 +163,21 @@ public class CapturePointTools
 	public static void computeConstantCentersOfPressuresExceptFirstOnFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<YoFramePoint> footstepList,
 			int numberFootstepsToConsider)
 	{
+		
+		int numberFootstepsInList = footstepList.size();
+		
 		for (int i = 1; i < numberFootstepsToConsider; i++)
 		{
-			arrayToPack.get(i).set(footstepList.get(i));
+			if(i < numberFootstepsInList-1)
+			{
+				arrayToPack.get(i).set(footstepList.get(i));
+			}
+			else
+			{
+				arrayToPack.get(i).set(footstepList.get(numberFootstepsInList-1));
+				arrayToPack.get(i).add(footstepList.get(numberFootstepsInList-2));
+				arrayToPack.get(i).scale(0.5);
+			}
 		}
 	}
 
