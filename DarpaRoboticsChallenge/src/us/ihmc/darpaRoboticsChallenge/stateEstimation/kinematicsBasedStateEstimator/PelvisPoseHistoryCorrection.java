@@ -13,10 +13,9 @@ import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.geometry.TransformTools;
-import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -33,9 +32,6 @@ public class PelvisPoseHistoryCorrection
 {
    
    private final TimeStampedPelvisPoseBuffer stateEstimatorPelvisPoseBuffer;
-
-   private final AtomicSettableTimestampProvider timestampProvider;
-
    private ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber;
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
@@ -102,19 +98,16 @@ public class PelvisPoseHistoryCorrection
    private final DoubleYoVariable interpolationAlphaFilterAlphaValue;
 
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
-         final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
-         AtomicSettableTimestampProvider timestampProvider)
+         final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
    {
-      this(inverseDynamicsStructure, null, dt, parentRegistry, pelvisBufferSize, timestampProvider);
+      this(inverseDynamicsStructure, null, dt, parentRegistry, pelvisBufferSize);
    }
    
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
-         ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
-         AtomicSettableTimestampProvider timestampProvider)
+         ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
-      this.timestampProvider = timestampProvider;
       this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
       this.registry = new YoVariableRegistry("PelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
@@ -185,8 +178,9 @@ public class PelvisPoseHistoryCorrection
    
    /**
     * Converges the state estimator pelvis pose towards an external position provided by an external Pelvis Pose Subscriber
+    * @param l 
     */
-   public void doControl()
+   public void doControl(long visionSensorTimestamp)
    {
       if (externalPelvisPoseSubscriber != null)
       {
@@ -198,7 +192,7 @@ public class PelvisPoseHistoryCorrection
          rootJointFrame.getTransformToParent(pelvisPose);
          interpolationAlphaFilter.update(confidenceFactor.getDoubleValue());
 
-         addPelvisePoseToPelvisBuffer();
+         addPelvisePoseToPelvisBuffer(visionSensorTimestamp);
          updateNonProcessedYoVariables();
          calculateCorrectedPelvisPose();
          updateProcessedYoVariables();
@@ -247,9 +241,8 @@ public class PelvisPoseHistoryCorrection
       return errorBuffer[index].getTransform3D();
    }
 
-   private void addPelvisePoseToPelvisBuffer()
+   private void addPelvisePoseToPelvisBuffer(long timeStamp)
    {
-      long timeStamp = timestampProvider.getTimestamp();
       seNonProcessedPelvisTimeStamp.set(timeStamp);
       stateEstimatorPelvisPoseBuffer.put(pelvisPose, timeStamp);
    }

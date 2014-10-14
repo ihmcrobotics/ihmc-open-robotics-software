@@ -265,7 +265,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void read(double time, long currentClockTime, long sensorTime)
+   public void read(long currentClockTime)
    {
       runController.set(threadDataSynchronizer.receiveControllerState());
       

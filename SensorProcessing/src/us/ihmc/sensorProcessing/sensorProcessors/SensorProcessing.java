@@ -18,6 +18,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
@@ -32,6 +33,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
+   private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
+   
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointPositionRawValues = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
    private final ObjectObjectMap<OneDoFJoint, ElasticityCompensatorYoVariable> jointPositionsDeflected = new ObjectObjectMap<OneDoFJoint, ElasticityCompensatorYoVariable>();
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointStiffnesses = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
@@ -264,13 +268,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    {
       return imuOutputs;
    }
-
+   
    private final Matrix3d tempOrientation = new Matrix3d();
    private final Vector3d tempAngularVelocity = new Vector3d();
    private final Vector3d tempLinearAcceleration = new Vector3d();
    
-   public void startComputation()
+   public void startComputation(long timestamp, long visionSensorTimestamp)
    {
+      this.timestamp.set(timestamp);
+      this.visionSensorTimestamp.set(visionSensorTimestamp);
       if (doElasticityCompensation)
       {
          for (int i = 0; i < jointPositionsDeflected.getLength(); i++)
@@ -318,6 +324,18 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    public void initialize()
    {
-      startComputation();
+      startComputation(0, 0);
+   }
+
+   @Override
+   public long getTimestamp()
+   {
+      return timestamp.getLongValue();
+   }
+
+   @Override
+   public long getVisionSensorTimestamp()
+   {
+      return visionSensorTimestamp.getLongValue();
    }
 }

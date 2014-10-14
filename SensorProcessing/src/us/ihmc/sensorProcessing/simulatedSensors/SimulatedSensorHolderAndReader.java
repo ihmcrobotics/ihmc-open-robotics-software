@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -25,6 +26,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
   
    private final double estimatorDT;
+   
+   private final DoubleYoVariable yoTime;
 
    private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor>();
    private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor> jointVelocitySensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>();
@@ -47,11 +50,12 @@ public class SimulatedSensorHolderAndReader implements SensorReader
 
    private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
 
-   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry sensorReaderFactoryRegistry)
+   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator, SensorNoiseParameters sensorNoiseParameters, DoubleYoVariable yoTime, YoVariableRegistry sensorReaderFactoryRegistry)
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
       this.forceSensorDataHolder = forceSensorDataHolderForEstimator;
       this.estimatorDT = sensorFilterParameters.getEstimatorDT();
+      this.yoTime = yoTime;
       step.set(29831);
 
       useFiniteDifferencesForVelocities = new BooleanYoVariable("useFiniteDifferencesForVelocities", registry);
@@ -196,7 +200,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          }
       }
 
-      sensorProcessing.startComputation();
+      long timestamp = TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue());
+      sensorProcessing.startComputation(timestamp, timestamp);
 
       step.increment();
       

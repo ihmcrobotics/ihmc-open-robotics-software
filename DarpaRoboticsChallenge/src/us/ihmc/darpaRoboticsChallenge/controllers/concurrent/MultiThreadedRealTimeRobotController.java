@@ -27,10 +27,10 @@ public class MultiThreadedRealTimeRobotController
       robotControllers.add(new Tuple<MultiThreadedRobotControlElement, PriorityParameters, Processor>(robotController, priorityParameters, processor));
    }
    
-   public void read(double time, long sensorTime)
+   public void read()
    {
       long timestamp = RealtimeThread.getCurrentMonotonicClockTime();
-      sensorReader.read(time, timestamp, sensorTime);
+      sensorReader.read(timestamp);
       sensorReader.run();
       
       // Magic jitter fix
@@ -75,7 +75,7 @@ public class MultiThreadedRealTimeRobotController
       {
          while(true)
          {
-            controller.read(Double.NaN, RealtimeThread.getCurrentMonotonicClockTime(), Long.MIN_VALUE);
+            controller.read(RealtimeThread.getCurrentMonotonicClockTime());
             controller.run();
             controller.write(RealtimeThread.getCurrentMonotonicClockTime());
             
