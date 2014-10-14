@@ -71,8 +71,10 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class MomentumBasedController
 {
    public static final boolean DO_NECK_PD_CONTROL = true;
+   private static final boolean DO_PASSIVE_KNEE_CONTROL = true;
    
    public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -315,9 +317,12 @@ public class MomentumBasedController
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
 
-      passiveQKneeThreshold.set(0.55);
-      passiveKneeMaxTorque.set(60.0);
-      passiveKneeKv.set(5.0);
+      if (DO_PASSIVE_KNEE_CONTROL)
+      {
+         passiveQKneeThreshold.set(0.55);
+         passiveKneeMaxTorque.set(60.0);
+         passiveKneeKv.set(5.0);
+      }
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
