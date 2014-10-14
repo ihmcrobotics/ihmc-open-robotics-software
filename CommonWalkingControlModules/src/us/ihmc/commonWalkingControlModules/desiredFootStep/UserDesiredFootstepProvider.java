@@ -29,13 +29,15 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private final EnumYoVariable<RobotSide> userStepFirstSide = new EnumYoVariable<RobotSide>("userStepFirstSide", registry, RobotSide.class);
    private final DoubleYoVariable userStepLength = new DoubleYoVariable("userStepLength", registry);
    private final DoubleYoVariable userStepWidth = new DoubleYoVariable("userStepWidth", registry);
+   private final DoubleYoVariable userStepSideways = new DoubleYoVariable("userStepSideways", registry);
+   private final DoubleYoVariable userStepMinWidth = new DoubleYoVariable("userStepMinWidth", registry);
    private final DoubleYoVariable userStepHeight = new DoubleYoVariable("userStepHeight", registry);
    private final DoubleYoVariable userStepYaw = new DoubleYoVariable("userStepYaw", registry);
    private final BooleanYoVariable userStepsTakeEm = new BooleanYoVariable("userStepsTakeEm", registry);
    private final IntegerYoVariable userStepsNotifyCompleteCount = new IntegerYoVariable("userStepsNotifyCompleteCount", registry);
 
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
-
+   
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
          YoVariableRegistry parentRegistry)
    {
@@ -44,6 +46,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       this.ankleZUpReferenceFrames = ankleZUpReferenceFrames;
 
       userStepWidth.set(0.3);
+      userStepMinWidth.set(0.22);
       userStepFirstSide.set(RobotSide.LEFT);
    }
 
@@ -115,8 +118,17 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(previousFootFrame);
-      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(userStepWidth
-            .getDoubleValue()), userStepHeight.getDoubleValue());
+      double stepYOffset = supportLegSide.negateIfLeftSide(userStepWidth.getDoubleValue()) + userStepSideways.getDoubleValue();
+      if ((supportLegSide == RobotSide.LEFT) && (stepYOffset > -userStepMinWidth.getDoubleValue()))
+      {
+         stepYOffset = -userStepMinWidth.getDoubleValue();
+      }
+      if ((supportLegSide == RobotSide.RIGHT) && (stepYOffset < userStepMinWidth.getDoubleValue()))
+      {
+         stepYOffset = userStepMinWidth.getDoubleValue();
+      }
+
+      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(), stepYOffset, userStepHeight.getDoubleValue());
 
       footstepPosition.add(footstepOffset);
 
