@@ -62,6 +62,10 @@ public class DRCSimSensorReader implements SensorReader
       forceSensorDataLength = forceSensorDataHolderForEstimator.getForceSensorDefinitions().size() * 6 * 8;
       data = ByteBuffer.allocate(jointDataLength + imuDataLength + forceSensorDataLength);
 
+
+      System.out.println(jointList);
+      System.out.println(forceSensorDataHolderForEstimator.getForceSensorDefinitions());
+
       try
       {
          channel = SocketChannel.open();
@@ -99,7 +103,6 @@ public class DRCSimSensorReader implements SensorReader
          long timestamp = data.getLong();
 
          System.out.println("Getting joints");
-         System.out.println(jointList);
          for (int i = 0; i < jointList.size(); i++)
          {
             OneDoFJoint joint = jointList.get(i);
@@ -130,7 +133,6 @@ public class DRCSimSensorReader implements SensorReader
          sensorProcessing.setAngularVelocitySensorValue(imu, angularVelocity);
 
          System.out.println("Getting force sensor data");
-         System.out.println(forceSensorDataHolderForEstimator.getForceSensorDefinitions());
          for (int i = 0; i < forceSensorDataHolderForEstimator.getForceSensorDefinitions().size(); i++)
          {
             ForceSensorDefinition definition = forceSensorDataHolderForEstimator.getForceSensorDefinitions().get(i);
