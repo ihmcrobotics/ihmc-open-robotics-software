@@ -15,4 +15,6 @@ public interface CapturePointPlannerParameters
 	public abstract int getNumberOfFootstepsToStop();
 	
 	public abstract double getIsDoneTimeThreshold();
+	
+	public abstract double getDoubleSupportSplitFraction();
 }
