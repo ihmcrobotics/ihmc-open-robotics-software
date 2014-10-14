@@ -26,7 +26,8 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
  */
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
-   private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = true;
+   private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = false;
+   private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
 
    protected boolean trajectoryWasReplanned;
 
@@ -38,6 +39,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    
    private final YoFramePoint yoDesiredPosition;
    private final YoFrameVector yoDesiredLinearVelocity;
+   protected final RigidBody pelvis;
 
    public AbstractUnconstrainedState(ConstraintType constraintType, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
@@ -62,6 +64,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
       yoDesiredPosition.setToNaN();
+      pelvis = momentumBasedController.getFullRobotModel().getPelvis();
    }
 
    /**
@@ -108,8 +111,14 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity,
             desiredLinearAcceleration);
 
+//      desiredLinearVelocity.setToZero();
+//      desiredAngularVelocity.setToZero();
+//      desiredLinearAcceleration.setToZero();
+//      desiredAngularAcceleration.setToZero();
+
+      RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+            desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
