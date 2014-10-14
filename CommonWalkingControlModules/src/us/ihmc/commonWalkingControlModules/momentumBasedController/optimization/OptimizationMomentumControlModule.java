@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CQP
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerAdapter;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerInterface;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -52,7 +53,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public enum QPSolverFlavor
    {
-      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT, EIGEN_ACTIVESET_DIRECT_JNA, CQP_OASES_DIRECT, CQP_JOPT_DIRECT
+      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT, EIGEN_ACTIVESET_DIRECT_JNA, CQP_OASES_DIRECT, CQP_QUADPROG_DIRECT
    };
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -121,6 +122,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF, false));
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT_JNA, new ActiveSetQPMomentumOptimizer(nDoF, true));
       momentumOptimizers.put(QPSolverFlavor.CQP_OASES_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new OASESConstrainedQPSolver(registry)));
+      momentumOptimizers.put(QPSolverFlavor.CQP_QUADPROG_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new QuadProgSolver(registry)));
 //      momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
 
       //initialize default solver
@@ -188,7 +190,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
            throws MomentumControlModuleException
 
    {
-      checkQPSolverSwitch();
+	   checkQPSolverSwitch();
       
       switch(currentQPSolver.getEnumValue())
       {
@@ -196,6 +198,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       case EIGEN_ACTIVESET_DIRECT:
       case EIGEN_DIRECT:
       case CQP_OASES_DIRECT:
+      case CQP_QUADPROG_DIRECT:
 //      case CQP_JOPT_DIRECT:
          return compute(contactStates, upcomingSupportLeg,false);
          

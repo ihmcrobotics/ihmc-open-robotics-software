@@ -114,16 +114,33 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.changeSign(f);
 
       /*
-       * nDoF|nRho Aeq = [-A QRho] nWrench [Jp ] nDoF beq = [c pp]
+       *        nDoF|nRho 
+       * Aeq = [-A   QRho] nWrench 
+       *       [Jp   Zero] nDoF 
+       *       
+       * beq = [c    pp  ]
        */
+      boolean isPrimaryConstraintUsed = Jp.numRows>0 && !Double.isNaN(Jp.get(0,0));
+      if(isPrimaryConstraintUsed)
+      {
+    	  Aeq.reshape(nWrench+Jp.numRows, nDoF+nRho);
+    	  beq.reshape(nWrench+pp.numRows, 1);
+          CommonOps.insert(Jp, Aeq, nWrench, 0);
+          CommonOps.insert(pp, beq, nWrench, 0);
+      }
+      else
+      {
+    	  Aeq.reshape(nWrench, nDoF+nRho);
+    	  beq.reshape(nWrench, 1);
+      }
+
       CommonOps.scale(-1, A, negA);
 
       CommonOps.insert(negA, Aeq, 0, 0);
       CommonOps.insert(QRho, Aeq, 0, nDoF);
-      CommonOps.insert(Jp, Aeq, nWrench, 0);
-
       CommonOps.insert(c, beq, 0, 0);
-      CommonOps.insert(pp, beq, nWrench, 0);
+
+      
       /*
        * Equality Constraint Ain - nDoF nRho ---------------- | Zero| -I | nRho
        * ----------------
@@ -152,7 +169,14 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       }
       else
       {
-         CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, x0, firstCall);
+    	  try{
+          CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, x0, firstCall);
+    	  }
+          catch(Exception e)
+          {
+        	 System.out.println(Aeq);
+        	 System.out.println(e.getMessage());
+          }
       }
       firstCall = false;
       CommonOps.extract(x0, 0, nDoF, 0, 1, vd, 0, 0);

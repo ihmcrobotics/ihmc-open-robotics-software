@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+import org.junit.Assert;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -22,11 +23,16 @@ public class ConstrainedQPSolverTest
       DenseMatrix64F Ain = new DenseMatrix64F(nin, nv, true, 2,1);
       DenseMatrix64F bin = new DenseMatrix64F(nin, 1, true, 0);
       
-      ConstrainedQPSolver[] optimizers = {new JOptimizerConstrainedQPSolver(), new OASESConstrainedQPSolver(registry)};
+      ConstrainedQPSolver[] optimizers = {
+    		  new JOptimizerConstrainedQPSolver(), 
+    		  new OASESConstrainedQPSolver(registry), 
+    		  new QuadProgSolver(registry)};
       for(int i=0;i<optimizers.length;i++)
       {
+    	  System.out.println("i="+i);
         DenseMatrix64F x = new DenseMatrix64F(nv, 1, true, -1, 1);
         optimizers[i].solve(Q, f, Aeq, beq, Ain, bin, x, false);
+        Assert.assertArrayEquals(x.getData(), new double[]{-.5, .5}, 1e-10);
         System.out.println("xopt="+x);
       }
    }
