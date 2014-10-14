@@ -29,12 +29,14 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class OnToesState extends AbstractFootControlState
 {
    private static final int NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT = 2;
    private static final boolean USE_TOEOFF_FOOT_HOLD_POSITION = true;
+   private static final boolean CONTROL_SINGLE_POINT = true;
 
    protected final List<FramePoint2d> edgeContactPoints;
    private final List<FramePoint> desiredEdgeContactPositions;
@@ -56,6 +58,9 @@ public class OnToesState extends AbstractFootControlState
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
    private final List<FramePoint> originalContactPointPositions;
+   
+   private final List<YoFrameVector> contactPointPositionErrors = new ArrayList<YoFrameVector>();
+   private final List<YoFrameVector> contactPointDesiredAccelerations = new ArrayList<YoFrameVector>();
 
    private final FramePoint2d singleToeContactPoint;
 
@@ -91,8 +96,17 @@ public class OnToesState extends AbstractFootControlState
       this.edgeContactPoints = getEdgeContactPoints2d();
       desiredEdgeContactPositions = new ArrayList<FramePoint>();
       for (int i = 0; i < 2; i++)
+      {
          desiredEdgeContactPositions.add(edgeContactPoints.get(i).toFramePoint());
+         
+         String index = String.valueOf(i);
+         
+         YoFrameVector contactPointPositionError = new YoFrameVector(namePrefix + "ToeOffContactPoint" + index + "PositionError", worldFrame, registry);
+         contactPointPositionErrors.add(contactPointPositionError);
 
+         YoFrameVector contactPointDesiredAcceleration = new YoFrameVector(namePrefix + "ToeOffContactPoint" + index + "DesiredAcceleration", worldFrame, registry);
+         contactPointDesiredAccelerations.add(contactPointDesiredAcceleration);
+      }
       singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
       singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
 
@@ -153,7 +167,8 @@ public class OnToesState extends AbstractFootControlState
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      for (int i = 0; i < edgeContactPoints.size(); i++)
+      int numberOfContactPointsToControl = CONTROL_SINGLE_POINT ? 1 : edgeContactPoints.size();
+      for (int i = 0; i < numberOfContactPointsToControl; i++)
       {
          FramePoint2d contactPoint2d = edgeContactPoints.get(i);
          contactPointPosition.setIncludingFrame(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);
@@ -165,6 +180,7 @@ public class OnToesState extends AbstractFootControlState
 
          proportionalPart.changeFrame(rootBody.getBodyFixedFrame());
          proportionalPart.sub(desiredEdgeContactPositions.get(i), contactPointPosition);
+         contactPointPositionErrors.get(i).setAndMatchFrame(proportionalPart);
          proportionalGainMatrix.transform(proportionalPart.getPoint());
 
          derivativePart.setToZero(rootBody.getBodyFixedFrame());
@@ -174,6 +190,7 @@ public class OnToesState extends AbstractFootControlState
          desiredLinearAcceleration.setToZero(rootBody.getBodyFixedFrame());
          desiredLinearAcceleration.add(proportionalPart);
          desiredLinearAcceleration.add(derivativePart);
+         contactPointDesiredAccelerations.get(i).setAndMatchFrame(desiredLinearAcceleration);
 
          momentumBasedController.setDesiredPointAcceleration(rootToFootJacobianId, contactPointPosition, desiredLinearAcceleration);
       }
