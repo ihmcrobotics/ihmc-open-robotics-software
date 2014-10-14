@@ -1,9 +1,7 @@
 package us.ihmc.atlas.drcsim;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
@@ -76,7 +74,6 @@ public class DRCSimSensorReader implements SensorReader
       
       
       parentRegistry.addChild(registry);
-      // TODO Auto-generated constructor stub
    }
 
    @Override
@@ -111,6 +108,10 @@ public class DRCSimSensorReader implements SensorReader
          angularVelocity.setY(data.getDouble());
          angularVelocity.setZ(data.getDouble());
          
+         sensorProcessing.setOrientationSensorValue(imu, orientation);
+         sensorProcessing.setLinearAccelerationSensorValue(imu, linearAcceleration);
+         sensorProcessing.setAngularVelocitySensorValue(imu, angularVelocity);
+         
          for(int i = 0; i < forceSensorDataHolderForEstimator.getForceSensorDefinitions().size(); i++)
          {
             ForceSensorDefinition definition = forceSensorDataHolderForEstimator.getForceSensorDefinitions().get(i);
@@ -142,8 +143,7 @@ public class DRCSimSensorReader implements SensorReader
    @Override
    public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return sensorProcessing;
    }
 
 }
