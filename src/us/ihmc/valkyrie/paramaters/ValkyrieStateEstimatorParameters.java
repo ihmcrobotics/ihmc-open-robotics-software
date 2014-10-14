@@ -74,7 +74,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       doFiniteDifferenceForJointVelocities = false;
 
       doElasticityCompensation = true;
-      defaultJointStiffness = 40000.0; //Double.POSITIVE_INFINITY; 
+      defaultJointStiffness = 10000; //40000.0; //Double.POSITIVE_INFINITY; 
 
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
             angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
@@ -222,7 +222,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -240,7 +240,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean createFusedIMUSensor()
    {
-      return true;
+      return false;
    }
 
    @Override
