@@ -61,18 +61,22 @@ public class FullRobotModelCorruptor
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         
+
          String upperArmName = sidePrefix + "UpperArm";
-         final RigidBody upperArm = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getPredecessor();
-         createMassAndCoMOffsetCorruptors(upperArmName, upperArm);
-         
-         String lowerArmName = sidePrefix + "LowerArm";
-         final RigidBody lowerArm = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getSuccessor();
-         createMassAndCoMOffsetCorruptors(lowerArmName, lowerArm);
-         
+         OneDoFJoint elbowPitchJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
+         if (elbowPitchJoint != null)
+         {
+            RigidBody upperArm = elbowPitchJoint.getPredecessor();
+            createMassAndCoMOffsetCorruptors(upperArmName, upperArm);
+
+            String lowerArmName = sidePrefix + "LowerArm";
+            final RigidBody lowerArm = elbowPitchJoint.getSuccessor();
+            createMassAndCoMOffsetCorruptors(lowerArmName, lowerArm);
+         }
+
          String handName = sidePrefix + "Hand";
          final RigidBody hand = fullRobotModel.getHand(robotSide);
-         createMassAndCoMOffsetCorruptors(handName, hand);
+         if (hand != null) createMassAndCoMOffsetCorruptors(handName, hand);
      }
 
 
