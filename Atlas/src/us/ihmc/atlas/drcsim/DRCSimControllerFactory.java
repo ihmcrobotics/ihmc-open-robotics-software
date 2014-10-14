@@ -24,7 +24,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -41,8 +40,6 @@ public class DRCSimControllerFactory
 
    public DRCSimControllerFactory()
    {
-      boolean runningOnRealRobot = true;
-
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, true);
       /*
        * Create registries
@@ -114,10 +111,6 @@ public class DRCSimControllerFactory
       }
 
       yoVariableServer.start();
-      if (robotModel.getNetworkParameters().getLoggingHostIP() != null)
-      {
-         YoVariableLoggerDispatcher.requestLogSession(robotModel.getNetworkParameters().getLoggingHostIP(), DRCSimControllerFactory.class.getSimpleName());
-      }
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();

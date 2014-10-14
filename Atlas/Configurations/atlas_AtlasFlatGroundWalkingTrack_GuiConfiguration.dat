@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>walk</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -22,6 +22,7 @@
 
 <Graph Array Window Size>0</Graph Array Window Size>
 
+
 <Extra Panels>
 <Main Viewport>
 Plotter,
@@ -29,9 +30,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>10.411394492261302</Camera X>
- <Camera Y>11.459145362864689</Camera Y>
- <Camera Z>2.7120634209969157</Camera Z>
+ <Camera X>2.5794634446482294</Camera X>
+ <Camera Y>0.21810580727213846</Camera Y>
+ <Camera Z>1.5326670770153177</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +56,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>4.025709056962009</Fix X>
-<Fix Y>0.6640055769604833</Fix Y>
-<Fix Z>0.7905749853245115</Fix Z>
+<Fix X>2.451074695003993</Fix X>
+<Fix Y>5.699191111916843</Fix Y>
+<Fix Z>0.9513739832804654</Fix Z>
 </Fix Position>
 </Canvas 1>
