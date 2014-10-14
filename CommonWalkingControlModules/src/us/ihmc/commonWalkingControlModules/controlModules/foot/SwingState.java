@@ -106,6 +106,7 @@ public class SwingState extends AbstractUnconstrainedState
             initialConfigurationProvider, finalConfigurationProvider, registry);
    }
 
+   @Override
    protected void initializeTrajectory()
    {
       positionTrajectoryGenerator.initialize();
@@ -115,6 +116,7 @@ public class SwingState extends AbstractUnconstrainedState
       replanTrajectory.set(false);
    }
 
+   @Override
    protected void computeAndPackTrajectory()
    {
       if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?

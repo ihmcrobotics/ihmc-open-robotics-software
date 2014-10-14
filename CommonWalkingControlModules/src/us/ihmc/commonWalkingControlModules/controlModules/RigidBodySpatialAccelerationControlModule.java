@@ -55,6 +55,8 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void reset()
    {
+      desiredAccelerationLinearViz.setToZero();
+      desiredAccelerationAngularViz.setToZero();
       se3pdController.reset();
    }
 

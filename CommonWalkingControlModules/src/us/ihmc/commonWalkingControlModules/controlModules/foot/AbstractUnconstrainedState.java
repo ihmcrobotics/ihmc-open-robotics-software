@@ -76,11 +76,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
     */
    protected abstract void computeAndPackTrajectory();
 
+   @Override
    public void doTransitionIntoAction()
    {
+      super.doTransitionIntoAction();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
-
-      accelerationControlModule.reset();
 
       isCoPOnEdge = false;
       initializeTrajectory();
@@ -88,6 +88,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       accelerationControlModule.setGains(gains);
    }
 
+   @Override
    public void doSpecificAction()
    {
       accelerationControlModule.setGains(gains);
@@ -193,12 +194,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       desiredAngularAcceleration.changeFrame(worldFrame);
    }
 
+   @Override
    public void doTransitionOutOfAction()
    {
+      super.doTransitionOutOfAction();
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;
-
-      accelerationControlModule.reset();
    }
 }

@@ -91,6 +91,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    public abstract void doSpecificAction();
 
+   @Override
    public void doAction()
    {
       computeNullspaceMultipliers();
@@ -159,5 +160,17 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
          edgeToRotateAbout = closestEdge;
       }
+   }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+      accelerationControlModule.reset();
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      accelerationControlModule.reset();
    }
 }

@@ -35,8 +35,10 @@ public class HoldPositionState extends AbstractFootControlState
       this.gains = gains;
    }
 
+   @Override
    public void doTransitionIntoAction()
    {
+      super.doTransitionIntoAction();
       // Remember the previous contact normal, in case the foot leaves the ground and rotates
       holdPositionNormalContactVector.setIncludingFrame(fullyConstrainedNormalContactVector);
       holdPositionNormalContactVector.changeFrame(worldFrame);
@@ -57,6 +59,7 @@ public class HoldPositionState extends AbstractFootControlState
       accelerationControlModule.setGains(gains);
    }
 
+   @Override
    public void doSpecificAction()
    {
       accelerationControlModule.setGains(gains);
@@ -72,10 +75,5 @@ public class HoldPositionState extends AbstractFootControlState
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
    }
 }
