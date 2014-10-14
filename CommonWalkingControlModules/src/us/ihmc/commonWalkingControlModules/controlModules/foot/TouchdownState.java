@@ -104,8 +104,10 @@ public class TouchdownState extends AbstractFootControlState
          desiredEdgeContactPositions.add(edgeContactPoints.get(i).toFramePoint());
    }
 
+   @Override
    public void doTransitionIntoAction()
    {
+      super.doTransitionIntoAction();
       updateTouchdownInitialAngularVelocity();
       setTouchdownOnEdgeGains();
 
@@ -126,6 +128,7 @@ public class TouchdownState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
    }
 
+   @Override
    public void doSpecificAction()
    {
       desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
@@ -204,8 +207,10 @@ public class TouchdownState extends AbstractFootControlState
       setTaskspaceConstraint(footAcceleration);
    }
 
+   @Override
    public void doTransitionOutOfAction()
    {
+      super.doTransitionOutOfAction();
       // TODO: kind of a hack
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);

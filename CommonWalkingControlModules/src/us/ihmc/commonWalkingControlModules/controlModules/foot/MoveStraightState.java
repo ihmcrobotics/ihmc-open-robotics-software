@@ -59,12 +59,14 @@ public class MoveStraightState extends AbstractUnconstrainedState
       finalConfigurationProvider.setPose(footPose);
    }
 
+   @Override
    protected void initializeTrajectory()
    {
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
    }
 
+   @Override
    protected void computeAndPackTrajectory()
    {
       positionTrajectoryGenerator.compute(getTimeInCurrentState());

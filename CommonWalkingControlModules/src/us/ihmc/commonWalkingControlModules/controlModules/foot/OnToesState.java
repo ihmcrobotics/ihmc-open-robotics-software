@@ -121,6 +121,7 @@ public class OnToesState extends AbstractFootControlState
       derivativeGainMatrix = positionGains.createDerivativeGainMatrix();
    }
 
+   @Override
    public void doSpecificAction()
    {
       desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
@@ -250,6 +251,7 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public void doTransitionIntoAction()
    {
+      super.doTransitionIntoAction();
       edgeToRotateAbout.set(edgeContactPoints.get(0), edgeContactPoints.get(1));
       for (int i = 0; i < 2; i++)
       {
@@ -266,8 +268,10 @@ public class OnToesState extends AbstractFootControlState
       setOnToesFreeMotionGains();
    }
 
+   @Override
    public void doTransitionOutOfAction()
    {
+      super.doTransitionOutOfAction();
       // TODO: kind of a hack
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);

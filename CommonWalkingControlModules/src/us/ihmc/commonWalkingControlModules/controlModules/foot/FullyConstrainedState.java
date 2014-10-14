@@ -40,6 +40,7 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    public void doTransitionIntoAction()
    {
+      super.doTransitionIntoAction();
       momentumBasedController.setPlaneContactStateNormalContactVector(contactableBody, fullyConstrainedNormalContactVector);
    }
 
@@ -87,11 +88,5 @@ public class FullyConstrainedState extends AbstractFootControlState
       }
 
       setTaskspaceConstraint(footAcceleration);
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-
    }
 }
