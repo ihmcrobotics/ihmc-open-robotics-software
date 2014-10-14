@@ -109,6 +109,12 @@ public class TestNewInstantaneousCapturePointPlanner
 		{
 			return -1e-4;
 		}
+
+      @Override
+      public double getDoubleSupportSplitFraction()
+      {
+         return 0.5;
+      }
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
