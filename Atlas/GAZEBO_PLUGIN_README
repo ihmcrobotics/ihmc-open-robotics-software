@@ -5,3 +5,7 @@ To build the plugin:
 	Run 'cmake ..' in Atlas/build
 	
 	Make all
+	
+To run the plugin in Gazebo:
+
+	
