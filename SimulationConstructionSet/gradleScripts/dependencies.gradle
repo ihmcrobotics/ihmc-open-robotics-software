@@ -12,7 +12,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
 	compile group: 'net.java.jinput', name: 'jinput-platform', version: '2.0.5'
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.3'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.4'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
 	compile group: 'javax.media', name: 'jmf', version: '2.1.1e'
