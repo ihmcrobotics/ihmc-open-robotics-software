@@ -18,7 +18,7 @@ dependencies {
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
 	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.3+'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.4'
 	
 	
 	compile project(':IHMCUtilities')
