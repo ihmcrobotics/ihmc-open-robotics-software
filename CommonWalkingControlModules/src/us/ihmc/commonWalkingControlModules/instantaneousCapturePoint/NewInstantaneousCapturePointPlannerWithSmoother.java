@@ -57,7 +57,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final DoubleSupportPolynomialTrajectory doubleSupportCapturePointTrajectory;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
 
-   public NewInstantaneousCapturePointPlannerWithSmoother(int maxNumberFootstepsToConsider, CapturePointPlannerParameters capturePointPlannerParameters,
+   public NewInstantaneousCapturePointPlannerWithSmoother(CapturePointPlannerParameters capturePointPlannerParameters,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (yoGraphicsListRegistry == null)
@@ -66,7 +66,6 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       }
 
       this.capturePointPlannerParameters = capturePointPlannerParameters;
-      this.numberFootstepsToConsider.set(maxNumberFootstepsToConsider);
       this.atAStop.set(true);
       this.wasPushedInSingleSupport.set(false);
 
