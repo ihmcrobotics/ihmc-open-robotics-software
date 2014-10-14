@@ -42,7 +42,7 @@ public class ROSMessageGenerator
    public static void main(String... args)
    {
       ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
-      for (Class clazz : IHMCMessageMap.packetList)
+      for (Class clazz : IHMCMessageMap.PACKET_LIST)
       {
          messageGenerator.createNewRosMessage(clazz, true);
       }
