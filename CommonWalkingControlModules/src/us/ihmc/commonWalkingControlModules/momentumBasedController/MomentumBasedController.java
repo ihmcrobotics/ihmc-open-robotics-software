@@ -139,11 +139,18 @@ public class MomentumBasedController
    private final DoubleYoVariable alphaCoPControl = new DoubleYoVariable("alphaCoPControl", registry);
    private final DoubleYoVariable maxAnkleTorqueCoPControl = new DoubleYoVariable("maxAnkleTorqueCoPControl", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector2d> desiredTorquesForCoPControl;
+   
+   
+   private final SideDependentList<Double> xSignsForCoPControl, ySignsForCoPControl;
+   private final double minZForceForCoPControlScaling, maxZForceForCoPControlScaling;
+   
    private final SideDependentList<YoFrameVector2d> yoCoPError;
    private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(new DoubleYoVariable(
          "leftFootCoPErrorMagnitude", registry), new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
    private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
    private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
+   private final SideDependentList<DoubleYoVariable> copControlScales;
+
 
    // once we receive the data from the UI through a provider this variables souldn't be necessary
    private final DoubleYoVariable frictionCompensationEffectiveness;
@@ -314,7 +321,27 @@ public class MomentumBasedController
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
+      xSignsForCoPControl = new SideDependentList<Double>();
+      ySignsForCoPControl = new SideDependentList<Double>();
+      copControlScales = new SideDependentList<DoubleYoVariable>();
 
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+         OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
+
+         FrameVector pitchJointAxis = anklePitchJoint.getJointAxis();
+         FrameVector rollJointAxis = ankleRollJoint.getJointAxis();
+
+         xSignsForCoPControl.put(robotSide, pitchJointAxis.getY());
+         ySignsForCoPControl.put(robotSide, rollJointAxis.getY());
+
+         copControlScales.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "CoPControlScale", registry));
+      }
+      
+      minZForceForCoPControlScaling = 0.20 * totalMass * 9.81;
+      maxZForceForCoPControlScaling = 0.45 * totalMass * 9.81;
+      
       alphaCoPControl.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, controlDT));
       maxAnkleTorqueCoPControl.set(10.0);
 
@@ -520,6 +547,8 @@ public class MomentumBasedController
    private final FramePoint2d copDesired = new FramePoint2d();
    private final FramePoint2d copActual = new FramePoint2d();
    private final FrameVector2d copError = new FrameVector2d();
+   private final Wrench footWrench = new Wrench();
+   private final FrameVector footForceVector = new FrameVector();
 
    public final void doProportionalControlOnCoP()
    {
@@ -538,20 +567,35 @@ public class MomentumBasedController
          }
 
          copDesired.setIncludingFrame(cop);
-         footSwitches.get(robotSide).computeAndPackCoP(copActual);
+         FootSwitchInterface footSwitch = footSwitches.get(robotSide);
+         footSwitch.computeAndPackCoP(copActual);
 
          if (copActual.containsNaN())
          {
             desiredTorqueForCoPControl.setToZero();
             return;
          }
-
+         
          copError.setToZero(planeFrame);
          copError.sub(copDesired, copActual);
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.length());
 
-         copError.scale(gainCoPX.getDoubleValue(), -gainCoPY.getDoubleValue());
+         double xSignForCoPControl = xSignsForCoPControl.get(robotSide);
+         double ySignForCoPControl = ySignsForCoPControl.get(robotSide);
+         
+         footSwitch.computeAndPackFootWrench(footWrench);
+         footForceVector.setToZero(footWrench.getExpressedInFrame());
+         footWrench.packLinearPart(footForceVector);
+         footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
+         
+         double zForce = footForceVector.getZ();
+         double scale = (zForce - minZForceForCoPControlScaling) / (maxZForceForCoPControlScaling - minZForceForCoPControlScaling);
+         scale = MathTools.clipToMinMax(scale, 0.0, 1.0);
+         
+         copControlScales.get(robotSide).set(scale);
+         
+         copError.scale(scale * xSignForCoPControl * gainCoPX.getDoubleValue(), scale * ySignForCoPControl * gainCoPY.getDoubleValue());
          copError.clipMaxLength(maxAnkleTorqueCoPControl.getDoubleValue());
 
          desiredTorqueForCoPControl.update(copError);
