@@ -69,8 +69,8 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
       CommonOps.insert(_pSecondary, ps, 0, 0);
       CommonOps.insert(_weightMatrixSecondary, Ws, 0, 0);
       
-      Jp.set(0, 0, Double.NaN); //when calling as a NULL solver, marke primary constraint as not used
-      pp.set(0, 0, Double.NaN);
+      CommonOps.fill(Jp, Double.NaN);
+      CommonOps.fill(pp, Double.NaN);
 
       WRho=_WRho;
       Lambda=_Lambda;
@@ -99,7 +99,9 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
          WRhoCop, QRho, c, rhoMin, QfeetCoP);
       
       //note: the nrow(Jp vd=pp) may change
+      Jp.reshape(jPrimary.numRows, jPrimary.numCols);
       CommonOps.insert(jPrimary, Jp, 0, 0);
+      pp.reshape(pPrimary.numRows, pPrimary.numCols);
       CommonOps.insert(pPrimary, pp, 0, 0);
    }
 
