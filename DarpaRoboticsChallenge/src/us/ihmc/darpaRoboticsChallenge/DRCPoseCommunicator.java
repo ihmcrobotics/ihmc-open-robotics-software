@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
@@ -13,10 +11,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.TimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
@@ -37,17 +36,17 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
    private final ObjectCommunicator networkProcessorCommunicator;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
-   private final TimestampProvider timeProvider;
+   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private State currentState;
 
    private final ConcurrentRingBuffer<State> stateRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider, DRCRobotSensorInformation sensorInformation)
+         ObjectCommunicator networkProcessorCommunicator, SensorOutputMapReadOnly sensorOutputMapReadOnly, DRCRobotSensorInformation sensorInformation)
    {
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
-      this.timeProvider = timestampProvider;
+      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
       stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);
@@ -209,7 +208,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          return;
       }
 
-      long timestamp = timeProvider.getTimestamp();
+      long timestamp = sensorOutputMapReadOnly.getVisionSensorTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData);
       state.poseData.setAll(timestamp, rootTransform, cameraPoses, lidarPoses, pointCloudPoses);
 

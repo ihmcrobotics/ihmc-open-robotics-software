@@ -7,9 +7,13 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public interface SensorOutputMapReadOnly
 {
+   public long getTimestamp();
+   
    public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint);
 
    public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint);
    
    public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs();
+
+   public long getVisionSensorTimestamp();
 }

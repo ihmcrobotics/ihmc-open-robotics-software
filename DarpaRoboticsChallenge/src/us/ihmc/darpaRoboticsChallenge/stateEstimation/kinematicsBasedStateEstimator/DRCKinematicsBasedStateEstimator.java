@@ -18,15 +18,15 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 
@@ -53,21 +53,21 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final CenterOfPressureVisualizer copVisualizer;
 
    private final BooleanYoVariable usePelvisCorrector;
+   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
-         AtomicSettableTimestampProvider timestampProvider)
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
-
+      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
       
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
       this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
-            stateEstimatorParameters.getEstimatorDT(), registry, 1000, timestampProvider);
+            stateEstimatorParameters.getEstimatorDT(), registry, 1000);
 
       List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>();
@@ -139,7 +139,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public void doControl()
    {
-      yoTime.add(estimatorDT); //Hack to have a yoTime in the state estimator
+      yoTime.set(TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
@@ -150,7 +150,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
-         pelvisPoseHistoryCorrection.doControl();
+         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getVisionSensorTimestamp());
       }
 
       updateVisualizers();

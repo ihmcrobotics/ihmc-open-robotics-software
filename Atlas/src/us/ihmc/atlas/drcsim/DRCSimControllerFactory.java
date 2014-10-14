@@ -21,7 +21,6 @@ import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
-import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -154,4 +153,9 @@ public class DRCSimControllerFactory
       return controllerFactory;
    }
 
+   
+   public static void main(String[] args)
+   {
+      new DRCSimControllerFactory();
+   }
 }

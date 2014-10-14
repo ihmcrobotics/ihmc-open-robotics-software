@@ -33,13 +33,10 @@ import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
@@ -61,7 +58,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ThreadDataSynchronizer threadDataSynchronizer;
    private final SensorReader sensorReader;
 
-   private final DoubleYoVariable estimatorTime = new DoubleYoVariable("estimatorTime", estimatorRegistry);
+   private final LongYoVariable estimatorTime = new LongYoVariable("estimatorTime", estimatorRegistry);
    private final LongYoVariable estimatorTick = new LongYoVariable("estimatorTick", estimatorRegistry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", estimatorRegistry);
    
@@ -70,8 +67,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final LongYoVariable actualEstimatorDT = new LongYoVariable("actualEstimatorDT", estimatorRegistry);
    
-   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
-
+   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+   
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
          GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
@@ -100,11 +97,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       sensorReader = sensorReaderFactory.getSensorReader();
       
       estimatorController = new ModularRobotController("EstimatorController");
+      
+      sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       if (sensorReaderFactory.useStateEstimator())
       {
-         SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, robotModel, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParamaters, forceSensorDataHolderForEstimator, yoGraphicsListRegistry, estimatorRegistry, timestampProvider);
+               contactPointParamaters, forceSensorDataHolderForEstimator, yoGraphicsListRegistry, estimatorRegistry);
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
@@ -131,7 +129,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel);
          
          estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
-               objectCommunicator, timestampProvider, sensorInformation));
+               objectCommunicator, sensorOutputMapReadOnly, sensorInformation));
       }
       
       firstTick.set(true);
@@ -161,13 +159,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void read(double time, long currentClockTime, long sensorTime)
+   public void read(long currentClockTime)
    {
       actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
-      estimatorTime.set(time);
       startClockTime.set(currentClockTime);
       sensorReader.read();
-      timestampProvider.set(sensorTime);
+      estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
    }
 
    @Override
@@ -187,7 +184,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    @Override
    public void write(long timestamp)
    {
-      long startTimestamp = TimeTools.secondsToNanoSeconds(estimatorTime.getDoubleValue());
+      long startTimestamp = estimatorTime.getLongValue();
       threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
       if(robotVisualizer != null)
       {
@@ -199,7 +196,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public static DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry, AtomicSettableTimestampProvider timestampProvider)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
@@ -229,7 +226,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, yoGraphicsListRegistry, timestampProvider);
+            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, yoGraphicsListRegistry);
 
       return drcStateEstimator;
    }
