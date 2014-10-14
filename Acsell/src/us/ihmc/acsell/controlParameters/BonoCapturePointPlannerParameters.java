@@ -53,4 +53,10 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	{
 		return -1e-4;
 	}
+
+   @Override
+   public double getDoubleSupportSplitFraction()
+   {
+      return 0.5;
+   }
 }
