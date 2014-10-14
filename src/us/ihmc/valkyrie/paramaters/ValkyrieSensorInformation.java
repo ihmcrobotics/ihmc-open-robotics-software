@@ -47,11 +47,32 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 //      SpatialForceVector leftFootForceSensorTareOffset_20140909 = new SpatialForceVector(null, new double[] {6.6, -23.4, 2.2, 193.9, 298.5, 1142});
 //      SpatialForceVector rightFootForceSensorTareOffset_20140909 = new SpatialForceVector(null, new double[] {-1.5, -2.8, -10.8, 66.0, -2.0, -156.0});
 
-      SpatialForceVector leftFootForceSensorTareOffset_20140916 = new SpatialForceVector(null, new double[] {6.98, -24.8, 2.01, 175.0, 313.0, 1102.0});
-      SpatialForceVector rightFootForceSensorTareOffset_20140916 = new SpatialForceVector(null, new double[] {-1.42, -2.89, -11.2, 83.0, -15.0, -138.2});
+//      SpatialForceVector leftFootForceSensorTareOffset_20140916 = new SpatialForceVector(null, new double[] {6.98, -24.8, 2.01, 175.0, 313.0, 1102.0});
+//      SpatialForceVector rightFootForceSensorTareOffset_20140916 = new SpatialForceVector(null, new double[] {-1.42, -2.89, -11.2, 83.0, -15.0, -138.2});
 
-      
-      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140916, rightFootForceSensorTareOffset_20140916);
+//      SpatialForceVector leftFootForceSensorTareOffset_20141004 = new SpatialForceVector(null, new double[] {6.14, -22.73, 2.42, 187.8, 303.5, 1083.4});
+//      SpatialForceVector rightFootForceSensorTareOffset_20141004 = new SpatialForceVector(null, new double[] {-1.8, -3.0, -11.6, 73.1, -12.5, -149.0});
+
+      // TODO The force sensor of the right foot seems to be drifting a lot when compared to the left foot force sensor.
+//      SpatialForceVector leftFootForceSensorTareOffset_20141007_1130am = new SpatialForceVector(null, new double[] {5.13, -21.52, 2.88, 189.1, 287.8, 1096.0});
+//      SpatialForceVector rightFootForceSensorTareOffset_20141007_1130am = new SpatialForceVector(null, new double[] {-1.77, -2.9, -9.82, 76.9, -12.8, -89.3});
+
+//      SpatialForceVector leftFootForceSensorTareOffset_20141007_1225pm = new SpatialForceVector(null, new double[] {5.41, -22.25, 2.86, 187.6, 290.8, 1095.8});
+//      SpatialForceVector rightFootForceSensorTareOffset_20141007_1225pm = new SpatialForceVector(null, new double[] {-2.07, -2.96, -9.83, 78.0, -14.14, -113.2});
+
+//      SpatialForceVector leftFootForceSensorTareOffset_20141008_151132 = new SpatialForceVector(null, new double[] { 5.61, -22.31,  2.78,  187.41,  292.99,  1103.93});
+//      SpatialForceVector rightFootForceSensorTareOffset_20141008_151132 = new SpatialForceVector(null, new double[] {-1.90, -2.83, -10.03,  77.03, -12.40, -106.21});
+
+//      SpatialForceVector leftFootForceSensorTareOffset_20141008_154411 = new SpatialForceVector(null, new double[] { 5.96, -22.87,  3.13,  184.51,  296.45,  1086.79});
+//      SpatialForceVector rightFootForceSensorTareOffset_20141008_154411 = new SpatialForceVector(null, new double[] {-1.96, -2.91, -10.37,  82.31, -11.73, -134.80});
+
+//      SpatialForceVector leftFootForceSensorTareOffset_20141008_173646 = new SpatialForceVector(null, new double[] { 5.62, -22.47,  3.04,  186.05,  293.79,  1103.74});
+//      SpatialForceVector rightFootForceSensorTareOffset_20141008_173646 = new SpatialForceVector(null, new double[] {-1.94, -2.88, -10.29,  81.03, -14.43, -108.00});
+
+      SpatialForceVector leftFootForceSensorTareOffset_20141012_135433 = new SpatialForceVector(null, new double[] { 6.72, -23.23,  3.28,  183.80,  306.97,  1065.85});
+      SpatialForceVector rightFootForceSensorTareOffset_20141012_135433 = new SpatialForceVector(null, new double[] {-1.59, -3.04, -10.12,  82.64, -4.46, -122.53});
+
+      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20141012_135433, rightFootForceSensorTareOffset_20141012_135433);
    }
 
    public static final SideDependentList<RigidBodyTransform> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
@@ -121,9 +142,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
    
    // Use this until sim can handle multiple IMUs
-    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
+//    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
-//   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
+   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
    public ValkyrieSensorInformation()
    {
