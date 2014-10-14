@@ -92,4 +92,18 @@ public class SmartCMPProjectorTwo
       return (cmpProjectedAlongRay.getBooleanValue() || cmpProjectedOrthogonally.getBooleanValue());
    }
 
+
+   public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+
+   public void setMinICPToCMPProjection(double minICPToCMPProjection)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }
