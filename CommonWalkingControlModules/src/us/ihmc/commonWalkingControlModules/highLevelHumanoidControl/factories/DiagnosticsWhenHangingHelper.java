@@ -117,12 +117,12 @@ public class DiagnosticsWhenHangingHelper
    {
       appliedTorque.set(feedbackCorrectionTorque + estimatedTorque.getDoubleValue()); 
       
-      if (adaptTorqueOffset && (Math.abs(appliedTorque.getDoubleValue()) < 10.0))
+      if (adaptTorqueOffset) // && (Math.abs(appliedTorque.getDoubleValue()) < 10.0))
       {
          torqueOffset.sub(feedbackCorrectionTorque * torqueCorrectionAlpha.getDoubleValue());
          
-         if (torqueOffset.getDoubleValue() > 10.0) torqueOffset.set(10.0);
-         if (torqueOffset.getDoubleValue() < -10.0) torqueOffset.set(-10.0);
+         if (torqueOffset.getDoubleValue() > 15.0) torqueOffset.set(15.0);
+         if (torqueOffset.getDoubleValue() < -15.0) torqueOffset.set(-15.0);
       }
       
       return appliedTorque.getDoubleValue() - torqueOffset.getDoubleValue();
