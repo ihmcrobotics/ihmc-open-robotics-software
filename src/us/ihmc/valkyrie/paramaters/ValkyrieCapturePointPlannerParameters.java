@@ -52,4 +52,10 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
 	{
 		return -1e-4;
 	}
+
+   @Override
+   public double getDoubleSupportSplitFraction()
+   {
+      return 0.5;
+   }
 }
