@@ -2,6 +2,6 @@ IHMC Atlas Gazebo Sim Plugin
 
 To build the plugin:
 
-	Run 'cmake ..' in the Atlas/build
+	Run 'cmake ..' in Atlas/build
 	
 	Make all
