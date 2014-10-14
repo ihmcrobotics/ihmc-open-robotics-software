@@ -104,10 +104,10 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter
       return registry;
    }
 
-   public void addTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffsetToAdd)
+   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffsetToAdd)
    {
       DoubleYoVariable torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
-      torqueOffsetVariable.add(torqueOffsetToAdd);
+      torqueOffsetVariable.sub(torqueOffsetToAdd);
    }
 }
 
