@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -14,12 +15,16 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 
 public class HoldPositionState extends AbstractFootControlState
 {
+   private static final boolean CONTROL_WRT_PELVIS = false;
+
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
    private final EnumYoVariable<ConstraintType> requestedState;
 
    private final YoSE3PIDGains gains;
+
+   private final RigidBody pelvisBody;
 
    public HoldPositionState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
@@ -33,6 +38,7 @@ public class HoldPositionState extends AbstractFootControlState
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
       this.requestedState = requestedState;
       this.gains = gains;
+      this.pelvisBody = momentumBasedController.getFullRobotModel().getPelvis();
    }
 
    @Override
@@ -70,8 +76,9 @@ public class HoldPositionState extends AbstractFootControlState
       if (!FootControlModule.USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
          requestedState.set(ConstraintType.FULL);
 
+      RigidBody baseForControl = CONTROL_WRT_PELVIS ? pelvisBody : rootBody;
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+            desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
