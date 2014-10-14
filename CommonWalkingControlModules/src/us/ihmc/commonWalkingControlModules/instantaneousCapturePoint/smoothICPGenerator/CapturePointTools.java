@@ -376,4 +376,20 @@ public class CapturePointTools
 		accelerationToPack.setX(x);
 		accelerationToPack.setY(y);
 	}
+	
+	/**
+	 * Computes the desired centroidal momentum pivot by,
+	 * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
+	 * 
+	 * @param desiredCapturePointPosition
+	 * @param desiredCapturePointVelocity
+	 * @param omega0
+	 * @param desiredCentroidalMomentumPivotToPack
+	 */
+	public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0, YoFramePoint desiredCentroidalMomentumPivotToPack)
+	{
+	   desiredCentroidalMomentumPivotToPack.set(desiredCapturePointVelocity);
+	   desiredCentroidalMomentumPivotToPack.scale(-1/omega0);
+	   desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
+	}
 }
