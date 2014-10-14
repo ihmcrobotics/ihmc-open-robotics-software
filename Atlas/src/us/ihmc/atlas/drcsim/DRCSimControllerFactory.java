@@ -98,7 +98,6 @@ public class DRCSimControllerFactory
        */
 
       DRCSimThreadedRobotController robotController = new DRCSimThreadedRobotController();
-      robotController.addController(estimatorThread, 1, false);
       int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getEstimatorDT());
       int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 

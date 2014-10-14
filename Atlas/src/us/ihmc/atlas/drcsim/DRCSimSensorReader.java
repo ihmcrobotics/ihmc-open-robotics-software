@@ -32,6 +32,7 @@ public class DRCSimSensorReader implements SensorReader
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCSimSensorReader");
 
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1234);
+   private final ByteBuffer data;
 
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final SensorProcessing sensorProcessing;
@@ -54,10 +55,12 @@ public class DRCSimSensorReader implements SensorReader
       this.jointList = stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions();
       this.imu = stateEstimatorSensorDefinitions.getAngularVelocitySensorDefinitions().get(0);
       this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
+      
 
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;
       forceSensorDataLength = forceSensorDataHolderForEstimator.getForceSensorDefinitions().size() * 6 * 8;
+      data = ByteBuffer.allocate(jointDataLength + imuDataLength + forceSensorDataLength);
 
       try
       {
@@ -84,13 +87,14 @@ public class DRCSimSensorReader implements SensorReader
    @Override
    public void read()
    {
-      ByteBuffer data = ByteBuffer.allocate(jointDataLength + imuDataLength + forceSensorDataLength);
       try
       {
          System.out.println("reading data from channel");
+         data.clear();
          channel.read(data);
          data.flip();
 
+         System.out.println(data);
          System.out.println("Getting timestamp");
          long timestamp = data.getLong();
 
