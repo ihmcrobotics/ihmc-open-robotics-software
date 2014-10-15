@@ -106,4 +106,11 @@ public class HandStateBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingHandStatePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

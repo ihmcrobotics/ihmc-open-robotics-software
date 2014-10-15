@@ -106,4 +106,12 @@ public class ComHeightBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+
+   @Override
+   public boolean hasInputBeenSet() {
+	   if (outgoingComHeightPacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

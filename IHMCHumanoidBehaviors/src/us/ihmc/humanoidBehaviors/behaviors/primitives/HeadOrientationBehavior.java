@@ -106,4 +106,11 @@ public class HeadOrientationBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingHeadOrientationPacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

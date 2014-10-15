@@ -91,4 +91,12 @@ public class BumStateBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   @Override
+   public boolean hasInputBeenSet() {
+	   if (outgoingBumStatePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

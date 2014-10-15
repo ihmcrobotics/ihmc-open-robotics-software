@@ -105,4 +105,11 @@ public class PelvisPoseBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingPelvisPosePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

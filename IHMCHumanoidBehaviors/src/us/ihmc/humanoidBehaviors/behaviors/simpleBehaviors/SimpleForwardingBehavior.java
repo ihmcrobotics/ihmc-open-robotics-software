@@ -78,4 +78,8 @@ public class SimpleForwardingBehavior extends BehaviorInterface
    {
 
    }
+   
+   public boolean hasInputBeenSet() {
+		   return false;
+   }
 }

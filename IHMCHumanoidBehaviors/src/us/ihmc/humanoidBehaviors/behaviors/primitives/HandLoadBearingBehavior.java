@@ -91,4 +91,11 @@ public class HandLoadBearingBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingHandLoadBearingPacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

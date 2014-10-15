@@ -107,4 +107,12 @@ public class FingerStateBehavior extends BehaviorInterface
    {
    }
 
+   @Override
+   public boolean hasInputBeenSet() {
+	   if (outgoingFingerStatePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
+
 }

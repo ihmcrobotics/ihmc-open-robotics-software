@@ -91,4 +91,11 @@ public class FootStateBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingFootStatePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }
