@@ -68,6 +68,15 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return !runningOnRealRobot;
    }
 
+   /**
+    * To enable that feature, doToeOffIfPossible() return true is required.
+    */
+   @Override
+   public boolean doToeOffWhenHittingAnkleLimit()
+   {
+      return false; 
+   }
+
    @Override
    public double getMaximumToeOffAngle()
    {
