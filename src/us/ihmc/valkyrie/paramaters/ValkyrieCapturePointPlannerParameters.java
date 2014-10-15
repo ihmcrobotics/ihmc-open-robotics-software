@@ -58,4 +58,28 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    {
       return 0.5;
    }
+   
+   @Override
+   public double getFreezeTimeFactor()
+   {
+      return 0.9;
+   }
+
+   @Override
+   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
+   {
+      return 0.02;
+   }
+   
+   @Override
+   public boolean getDoTimeFreezing()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean getDoFootSlipCompensation()
+   {
+      return true;
+   }
 }
