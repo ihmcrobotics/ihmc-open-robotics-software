@@ -1,4 +1,4 @@
-package us.ihmc.communication.ros;
+package us.ihmc.communication.packetAnnotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ROSMessageFieldAnnotation
+public @interface FieldAnnotation
 {
 	String fieldDocumentation();
 }
