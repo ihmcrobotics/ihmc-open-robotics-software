@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.Vector3d;
@@ -19,11 +21,13 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
 
@@ -47,6 +51,7 @@ public class WalkOnTheEdgesManager
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
+   private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
    private final DoubleYoVariable jacobianDeterminantThresholdForToeOff = new DoubleYoVariable("jacobianDeterminantThresholdForToeOff", registry);
 
@@ -81,30 +86,40 @@ public class WalkOnTheEdgesManager
 
    private final WalkingControllerParameters walkingControllerParameters;
 
-   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(new DoubleYoVariable(
-         "angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
+   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(
+         new DoubleYoVariable("angleFootWithDesiredLeft", registry),
+         new DoubleYoVariable("angleFootWithDesiredRight", registry));
    private BooleanYoVariable enabledDoubleState = new BooleanYoVariable("enabledDoubleState", registry);
 
-   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(new YoFrameOrientation(
-         "orientationLeftFoot", worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
+   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(
+         new YoFrameOrientation("orientationLeftFoot", worldFrame, registry),
+         new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
 
-   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch",
-         registry), new BooleanYoVariable("r_Desired_Pitch", registry));
+   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(
+         new BooleanYoVariable("l_Desired_Pitch", registry),
+         new BooleanYoVariable("r_Desired_Pitch", registry));
    private Footstep desiredFootstep;
+
+   private final BooleanYoVariable isRearAnklePitchHittingLimit;
+   private final GlitchFilteredBooleanYoVariable isRearAnklePitchHittingLimitFilt;
+
+   private final FullRobotModel fullRobotModel;
 
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
+   public WalkOnTheEdgesManager(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
          SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
+      this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
       this.doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
       this.doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
+      this.fullRobotModel = fullRobotModel;
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
       desiredFootstep = null;
@@ -122,6 +137,9 @@ public class WalkOnTheEdgesManager
 
       minStepLengthForToeTouchdown.set(0.40);
 
+      isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
+      isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt", registry, isRearAnklePitchHittingLimit, 10);
+
       parentRegistry.addChild(registry);
    }
 
@@ -138,6 +156,10 @@ public class WalkOnTheEdgesManager
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
       isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+
+      OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
+      isRearAnklePitchHittingLimit.set(Math.abs(anklePitch.getJointLimitLower() - anklePitch.getQ()) < 0.02);
+      isRearAnklePitchHittingLimitFilt.update();
 
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
@@ -196,6 +218,12 @@ public class WalkOnTheEdgesManager
    {
       RobotSide leadingLeg = trailingLeg.getOppositeSide();
       ReferenceFrame frontFootFrame = feet.get(leadingLeg).getFrameAfterParentJoint();
+
+      if (doToeOffWhenHittingAnkleLimit.getBooleanValue() && isRearAnklePitchHittingLimitFilt.getBooleanValue())
+      {
+         doToeOff.set(true);
+         return;
+      }
 
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
       {
