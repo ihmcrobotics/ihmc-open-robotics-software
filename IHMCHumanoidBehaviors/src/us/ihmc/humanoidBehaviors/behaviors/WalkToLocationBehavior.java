@@ -44,7 +44,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final BooleanYoVariable hasFootstepsBeenGenerated = new BooleanYoVariable("hasFootstepsBeenGenerated", registry);
 
    private final Point3d targetLocation = new Point3d();
-   private final YoFrameOrientation targetOrientation = new YoFrameOrientation("targetOrientation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameOrientation targetOrientation = new YoFrameOrientation("targetOrientation", worldFrame, registry);
 
    SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
 
@@ -133,23 +133,25 @@ public class WalkToLocationBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-         if (!hasTargetBeenProvided.getBooleanValue())
-            return;
-         if (!hasFootstepsBeenGenerated.getBooleanValue())
-            generateFootsteps();
-         footstepListBehavior.doControl();
+      if (!hasTargetBeenProvided.getBooleanValue())
+         return;
+      if (!hasFootstepsBeenGenerated.getBooleanValue())
+         generateFootsteps();
+      footstepListBehavior.doControl();
    }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      footstepListBehavior.consumeObjectFromNetworkProcessor(object);
+      if (footstepListBehavior != null)
+         footstepListBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      footstepListBehavior.consumeObjectFromController(object);
+      if (footstepListBehavior != null)
+         footstepListBehavior.consumeObjectFromController(object);
    }
 
    @Override
