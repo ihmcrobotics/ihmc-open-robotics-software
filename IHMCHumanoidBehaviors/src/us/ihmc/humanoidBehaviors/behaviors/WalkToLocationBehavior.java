@@ -196,5 +196,12 @@ public class WalkToLocationBehavior extends BehaviorInterface
       hasTargetBeenProvided.set(false);
       hasFootstepsBeenGenerated.set(false);
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (hasFootstepsBeenGenerated.getBooleanValue())
+		   return true;
+	   else
+		   return false;
+   }
 
 }
