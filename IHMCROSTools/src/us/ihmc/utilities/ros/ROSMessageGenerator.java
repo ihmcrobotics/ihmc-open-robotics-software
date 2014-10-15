@@ -28,7 +28,8 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.ros.ROSMessageAnnotation;
+import us.ihmc.communication.ros.ROSMessageClassAnnotation;
+import us.ihmc.communication.ros.ROSMessageFieldAnnotation;
 import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
 
 public class ROSMessageGenerator
@@ -77,16 +78,14 @@ public class ROSMessageGenerator
             PrintStream fileStream = new PrintStream(messageFile);
 
             String outBuffer = "## " + messageName + System.lineSeparator();
-            ROSMessageAnnotation annotation = (ROSMessageAnnotation) clazz.getAnnotation(ROSMessageAnnotation.class);
-            String[] commentLines;
+            ROSMessageClassAnnotation annotation = (ROSMessageClassAnnotation) clazz.getAnnotation(ROSMessageClassAnnotation.class);
             if (annotation != null)
             {
-               commentLines = annotation.documentation().split("\r?\n|\r");
-
-               for (String commentLine : commentLines)
-               {
-                  outBuffer += "# " + commentLine + System.lineSeparator();
-               }
+            	String[] annotationString = annotation.documentation().split("\r?\n|\r");
+         	   for(String line : annotationString)
+         	   {
+         		   outBuffer += "# " + line + System.lineSeparator();
+         	   }
             }
             else
             {
@@ -115,7 +114,17 @@ public class ROSMessageGenerator
 
    private String printType(Field field)
    {
-      String buffer = "";
+	   String buffer = "";
+	   ROSMessageFieldAnnotation fieldAnnotation = field.getAnnotation(ROSMessageFieldAnnotation.class);
+	   if(fieldAnnotation != null)
+	   {
+		   String[] annotationString = fieldAnnotation.fieldDocumentation().split("\r?\n|\r");
+		   for(String line : annotationString)
+		   {
+			   buffer += "# " + line + System.lineSeparator();
+		   }
+	   }
+	   
       if (List.class.isAssignableFrom(field.getType()))
       {
          Class genericType = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
@@ -146,7 +155,7 @@ public class ROSMessageGenerator
       else if (clazz.isEnum())
       {
          Object[] enumList = clazz.getEnumConstants();
-         buffer += "#Options for enum";
+         buffer += "#Options for enum" + System.lineSeparator();
 
          for (int i = 0; i < enumList.length; i++)
          {
@@ -209,4 +218,13 @@ public class ROSMessageGenerator
 
       return buffer;
    }
+   
+//   private void printAnnotation(String annotaionString, String printBuffer)
+//   {
+//	   String[] annotationString = annotaionString.split("\r?\n|\r");
+//	   for(String line : annotationString)
+//	   {
+//		   printBuffer += "# " + line + System.lineSeparator();
+//	   }
+//   }
 }
