@@ -131,8 +131,8 @@ public class FootCenterToToeEvaluator
       double halfStepWidth = 0.1;
       boolean startSquaredUp = true;
 
-      double singleSupportDuration = 0.7;
-      double doubleSupportDuration = 0.2;
+      double singleSupportDuration = 1;
+      double doubleSupportDuration = 1;
       double doubleSupportInitialTransferDuration = 1;
 
       double eCMPHeight = 1.0;

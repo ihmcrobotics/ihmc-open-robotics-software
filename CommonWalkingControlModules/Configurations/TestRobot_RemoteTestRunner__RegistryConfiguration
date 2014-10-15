@@ -1,5 +1,5 @@
 root*false*false
 root.TestRobot*false*false
-root.TestRobot.FootCenterToToeEvaluator*false*false
-root.TestRobot.FootCenterToToeEvaluator.DoubleSupportFootCenterToToeICPComputer*false*false
-root.TestRobot.FootCenterToToeEvaluator.PointAndLinePlotter*false*false
+root.TestRobot.TestNewInstantaneousCapturePointPlannerWithSmoother*false*false
+root.TestRobot.TestNewInstantaneousCapturePointPlannerWithSmoother.PointAndLinePlotter*false*false
+root.TestRobot.TestNewInstantaneousCapturePointPlannerWithSmoother.NewInstantaneousCapturePointPlannerWithSmoother*false*false
