@@ -176,4 +176,6 @@ public abstract class BehaviorInterface implements RobotController
    {
       return controllerObjectConsumer;
    }
+   
+   public abstract boolean hasInputBeenSet();
 }
