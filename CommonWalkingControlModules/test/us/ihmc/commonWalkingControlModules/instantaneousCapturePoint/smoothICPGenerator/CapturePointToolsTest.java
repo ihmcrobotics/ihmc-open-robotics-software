@@ -11,6 +11,7 @@ import javax.vecmath.Quat4d;
 import org.junit.Test;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.Line2d;
@@ -30,7 +31,7 @@ public class CapturePointToolsTest
 	@Test
 	public void TestComputeConstantCentersOfPressuresOnFeet()
 	{
-		ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
+		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
@@ -55,8 +56,7 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				YoFramePoint footstepData = new YoFramePoint(Integer.toString(i) + Integer.toString(j), poseReferenceFrame.getRootFrame(),
-						registry);
+				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
 				footstepData.set(pointToPack);
 				footstepList.add(footstepData);
 			}
@@ -65,7 +65,7 @@ public class CapturePointToolsTest
 
 			for (int i = 0; i < arrayToPack.size(); i++)
 			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPoint3dCopy(), 1e-10);
+				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
 			}
 		}
 	}
@@ -73,7 +73,7 @@ public class CapturePointToolsTest
 	@Test
 	public void TestComputeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet()
 	{
-		ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
+		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
@@ -98,8 +98,7 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				YoFramePoint footstepData = new YoFramePoint(Integer.toString(i) + Integer.toString(j), poseReferenceFrame.getRootFrame(),
-						registry);
+				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
 				footstepData.set(pointToPack);
 				footstepList.add(footstepData);
 			}
@@ -108,13 +107,13 @@ public class CapturePointToolsTest
 					numberFootstepsToConsider);
 
 			Point3d copPos1 = new Point3d();
-			copPos1.set(footstepList.get(0).getPoint3dCopy());
-			copPos1.add(footstepList.get(1).getPoint3dCopy());
+			copPos1.set(footstepList.get(0).getPointCopy());
+			copPos1.add(footstepList.get(1).getPointCopy());
 			copPos1.scale(0.5);
 			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
 			for (int i = 1; i < arrayToPack.size() - 1; i++)
 			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPoint3dCopy(), 1e-10);
+				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
 			}
 		}
 	}
@@ -122,7 +121,7 @@ public class CapturePointToolsTest
 	@Test
 	public void TestComputeConstantCentersOfPressureWithEndBetweenFeetAndRestOnFeet()
 	{
-		ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
+		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
@@ -147,8 +146,7 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				YoFramePoint footstepData = new YoFramePoint(Integer.toString(i) + Integer.toString(j), poseReferenceFrame.getRootFrame(),
-						registry);
+				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
 				footstepData.set(pointToPack);
 				footstepList.add(footstepData);
 			}
@@ -157,13 +155,13 @@ public class CapturePointToolsTest
 					numberFootstepsToConsider);
 
 			Point3d copPos1 = new Point3d();
-			copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPoint3dCopy());
-			copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPoint3dCopy());
+			copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
+			copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
 			copPos1.scale(0.5);
 			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
 			for (int i = 0; i < arrayToPack.size() - 2; i++)
 			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPoint3dCopy(), 1e-10);
+				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
 			}
 		}
 	}
@@ -171,7 +169,7 @@ public class CapturePointToolsTest
 	@Test
 	public void TestComputeConstantCentersOfPressureWithEndAndBeginningBetweenFeet()
 	{
-		ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
+		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
@@ -196,8 +194,7 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				YoFramePoint footstepData = new YoFramePoint(Integer.toString(i) + Integer.toString(j), poseReferenceFrame.getRootFrame(),
-						registry);
+				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
 
 				footstepData.set(pointToPack);
 				footstepList.add(footstepData);
@@ -207,19 +204,19 @@ public class CapturePointToolsTest
 					numberFootstepsToConsider);
 
 			Point3d copPos1 = new Point3d();
-			copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPoint3dCopy());
-			copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPoint3dCopy());
+			copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
+			copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
 			copPos1.scale(0.5);
 			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
 
-			copPos1.set(footstepList.get(0).getPoint3dCopy());
-			copPos1.add(footstepList.get(1).getPoint3dCopy());
+			copPos1.set(footstepList.get(0).getPointCopy());
+			copPos1.add(footstepList.get(1).getPointCopy());
 			copPos1.scale(0.5);
 			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
 
 			for (int i = 1; i < arrayToPack.size() - 2; i++)
 			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPoint3dCopy(), 1e-10);
+				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
 			}
 		}
 	}
@@ -227,7 +224,7 @@ public class CapturePointToolsTest
 	@Test
 	public void TestComputeDesiredEndOfStepCapturePointLocations()
 	{
-		ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
+		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 		ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
 		ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
 		YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
@@ -260,8 +257,7 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				YoFramePoint footstepData = new YoFramePoint(Integer.toString(i) + Integer.toString(j), poseReferenceFrame.getRootFrame(),
-						registry);
+				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
 				footstepData.set(pointToPack);
 				footstepList.add(footstepData);
 			}
@@ -292,7 +288,7 @@ public class CapturePointToolsTest
 	@Test
 	public void TestComputeDesiredCapturePointLocations()
 	{
-		ArrayList<YoFramePoint> footstepList = new ArrayList<YoFramePoint>();
+		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 		ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
 		ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
@@ -325,8 +321,7 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				YoFramePoint footstepData = new YoFramePoint(Integer.toString(i) + Integer.toString(j), poseReferenceFrame.getRootFrame(),
-						registry);
+				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
 				footstepData.set(pointToPack);
 				footstepList.add(footstepData);
 			}

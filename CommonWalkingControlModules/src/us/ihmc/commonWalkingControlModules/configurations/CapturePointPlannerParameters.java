@@ -17,4 +17,12 @@ public interface CapturePointPlannerParameters
 	public abstract double getIsDoneTimeThreshold();
 	
 	public abstract double getDoubleSupportSplitFraction();
+	
+	public abstract double getFreezeTimeFactor();
+	
+	public abstract double getMaxInstantaneousCapturePointErrorForStartingSwing();
+	
+	public abstract boolean getDoTimeFreezing();
+	
+	public abstract boolean getDoFootSlipCompensation();
 }
