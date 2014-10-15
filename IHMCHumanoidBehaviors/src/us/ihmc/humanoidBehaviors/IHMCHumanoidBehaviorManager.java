@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -79,5 +80,8 @@ public class IHMCHumanoidBehaviorManager
 
       WalkToLocationBehavior walkToObjectLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToObjectLocationBehavior);
+      
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
    }
 }
