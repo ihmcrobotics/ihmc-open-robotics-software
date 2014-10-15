@@ -32,6 +32,8 @@ public class FootstepListBehavior extends BehaviorInterface
    private final IntegerYoVariable numberOfFootsteps = new IntegerYoVariable("numberOfFootsteps" + behaviorName, registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped", registry);
+   private boolean isInitialized;
+   
 
    public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
@@ -45,6 +47,7 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       outgoingFootstepDataList = footStepList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      System.out.println("FootstepDataList size is set to: " + numberOfFootsteps.getIntegerValue());
    }
 
    public void set(ArrayList<Footstep> footsteps, SideDependentList<ContactablePlaneBody> feet)
@@ -64,6 +67,7 @@ public class FootstepListBehavior extends BehaviorInterface
       }
       outgoingFootstepDataList = footsepDataList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      System.out.println("2: FootstepDataList size is set to: " + numberOfFootsteps.getIntegerValue());
    }
 
    @Override
@@ -97,7 +101,18 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      numberOfFootsteps.set(-1);
+	   System.out.println("FootstepInitialization Called");
+	   if(!isInitialized)
+	   {
+		   footstepStatusQueue.clear();
+		   outgoingFootstepDataList = null;
+		   packetHasBeenSent.set(false);
+		   numberOfFootsteps.set(-1);
+		   
+		   lastFootstepStatus = null;
+		   isPaused.set(false);
+		   isStopped.set(false);
+	   }
    }
 
    @Override
@@ -111,6 +126,7 @@ public class FootstepListBehavior extends BehaviorInterface
       lastFootstepStatus = null;
       isPaused.set(false);
       isStopped.set(false);
+      isInitialized = false;
    }
 
    @Override
@@ -170,5 +186,13 @@ public class FootstepListBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
-
+   
+   @Override
+   public boolean hasInputBeenSet() {
+	   if (numberOfFootsteps.getIntegerValue() != -1)
+		   return true;
+	   else
+		   return false;
+   }
+   
 }

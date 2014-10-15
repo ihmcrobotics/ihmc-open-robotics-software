@@ -106,4 +106,12 @@ public class ChestOrientationBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   @Override
+   public boolean hasInputBeenSet() {
+	   if (outgoingChestOrientationPacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

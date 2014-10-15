@@ -105,4 +105,11 @@ public class HandPoseBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingHandPosePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

@@ -91,4 +91,11 @@ public class ThighStateBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingThighStatePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 }

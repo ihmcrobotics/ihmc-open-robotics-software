@@ -106,5 +106,12 @@ public class FootPoseBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
+   
+   public boolean hasInputBeenSet() {
+	   if (outgoingFootPosePacket != null)
+		   return true;
+	   else
+		   return false;
+   }
 
 }
