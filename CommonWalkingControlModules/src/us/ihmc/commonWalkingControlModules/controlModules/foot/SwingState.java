@@ -22,7 +22,6 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -61,11 +60,10 @@ public class SwingState extends AbstractUnconstrainedState
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, gains, robotSide, registry);
 
-      RigidBody rigidBody = contactableBody.getRigidBody();
-      String namePrefix = rigidBody.getName();
+      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
 
-      finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "SwingFootFinal", worldFrame, registry);
-      replanTrajectory = new BooleanYoVariable(namePrefix + "replanTrajectory", registry);
+      finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "SwingFinal", worldFrame, registry);
+      replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
 
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
@@ -86,7 +84,7 @@ public class SwingState extends AbstractUnconstrainedState
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, swingTimeProvider, registry);
 
-      PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(namePrefix + "PushRecoverySwing",
+      PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(namePrefix + "SwingPushRecovery",
             worldFrame, swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider,
             touchdownVelocityProvider, trajectoryParametersProvider, registry, yoGraphicsListRegistry, swingTrajectoryGenerator,
             walkingControllerParameters, visualizeSwingTrajectory);
@@ -102,7 +100,7 @@ public class SwingState extends AbstractUnconstrainedState
       pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
             + "PushRecoveryTrajectoryGenerator", registry);
 
-      orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "SwingFootOrientation", worldFrame, swingTimeProvider,
+      orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, finalConfigurationProvider, registry);
    }
 
