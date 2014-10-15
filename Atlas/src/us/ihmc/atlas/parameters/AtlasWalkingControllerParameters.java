@@ -73,11 +73,20 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return false; // Not working for now
    }
-   
+
    @Override
    public boolean doToeOffIfPossible()
    {
       return true; 
+   }
+
+   /**
+    * To enable that feature, doToeOffIfPossible() return true is required.
+    */
+   @Override
+   public boolean doToeOffWhenHittingAnkleLimit()
+   {
+      return false; 
    }
 
    @Override

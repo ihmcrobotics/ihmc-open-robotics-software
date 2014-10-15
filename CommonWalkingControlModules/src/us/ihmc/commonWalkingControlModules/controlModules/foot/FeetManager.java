@@ -56,7 +56,7 @@ public class FeetManager
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
 
       feet = momentumBasedController.getContactableFeet();
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController.getFullRobotModel(), walkingControllerParameters, feet, footControlModules, registry);
 
       this.footSwitches = momentumBasedController.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();

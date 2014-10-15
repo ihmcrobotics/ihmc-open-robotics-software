@@ -49,6 +49,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean doToeOffIfPossible();
 
+   public abstract boolean doToeOffWhenHittingAnkleLimit();
+
    public abstract double getMaximumToeOffAngle();
 
    public abstract double getFootSwitchCoPThresholdFraction();
