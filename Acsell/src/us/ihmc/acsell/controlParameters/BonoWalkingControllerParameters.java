@@ -52,6 +52,15 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return true;
    }
 
+   /**
+    * To enable that feature, doToeOffIfPossible() return true is required.
+    */
+   @Override
+   public boolean doToeOffWhenHittingAnkleLimit()
+   {
+      return false; 
+   }
+
    @Override
    public double getMaximumToeOffAngle()
    {
