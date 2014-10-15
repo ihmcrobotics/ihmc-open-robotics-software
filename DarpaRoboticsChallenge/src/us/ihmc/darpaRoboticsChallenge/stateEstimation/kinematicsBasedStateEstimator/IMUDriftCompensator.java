@@ -38,7 +38,8 @@ public class IMUDriftCompensator
    private final BooleanYoVariable isIMUDriftCompensationActivated = new BooleanYoVariable("isIMUDriftCompensationActivated", registry);
    private final BooleanYoVariable isIMUDriftYawRateEstimationActivated = new BooleanYoVariable("isIMUDriftYawRateEstimationActivated", registry);
    private final BooleanYoVariable isIMUDriftYawRateEstimated = new BooleanYoVariable("isIMUDriftYawRateEstimated", registry);
-   
+   private final BooleanYoVariable isIMUDriftFeetLoadedEnough = new BooleanYoVariable("isIMUDriftFeetLoadedEnough", registry);
+
    private final DoubleYoVariable alphaFilterIMUDrift = new DoubleYoVariable("alphaFilterIMUDrift", registry);
    private final DoubleYoVariable imuDriftYawRate = new DoubleYoVariable("estimatedIMUDriftYawRate", registry);
    private final AlphaFilteredYoVariable imuDriftYawRateFiltered = new AlphaFilteredYoVariable("estimatedIMUDriftYawRateFiltered", registry, alphaFilterIMUDrift, imuDriftYawRate);
@@ -163,7 +164,7 @@ public class IMUDriftCompensator
          isIMUDriftYawRateEstimated.set(false);
       }
       
-      if (isIMUDriftCompensationActivated.getBooleanValue() && areFeetLoadedEnough)
+      if (isIMUDriftCompensationActivated.getBooleanValue())
          compensateIMUDriftYaw();
    }
 
@@ -180,7 +181,7 @@ public class IMUDriftCompensator
       
       updateFootOrientations();
 
-      if (isIMUDriftCompensationActivated.getBooleanValue() && areFeetLoadedEnough)
+      if (isIMUDriftCompensationActivated.getBooleanValue())
          compensateIMUDriftYaw();
    }
 
@@ -235,6 +236,7 @@ public class IMUDriftCompensator
          totalLoadPercentage += footSwitches.get(robotSide).computeFootLoadPercentage();
       totalLoadPercentageOnFeet.set(totalLoadPercentage);
       boolean areFeetLoadedEnough = totalLoadPercentageOnFeet.getDoubleValue() > loadPercentageOnFeetThresholdForIMUDrift.getDoubleValue();
+      isIMUDriftFeetLoadedEnough.set(areFeetLoadedEnough);
       return areFeetLoadedEnough;
    }
 
