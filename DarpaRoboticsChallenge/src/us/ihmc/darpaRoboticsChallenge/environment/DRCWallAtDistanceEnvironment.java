@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 

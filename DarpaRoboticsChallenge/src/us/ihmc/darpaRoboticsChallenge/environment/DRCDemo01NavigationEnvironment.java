@@ -3,11 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -15,6 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;

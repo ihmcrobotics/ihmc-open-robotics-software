@@ -30,7 +30,6 @@ dependencies {
     compile project(':IHMCUtilities')
     compile project(':BambooTools')
     compile project(':CommonWalkingControlModules')
-    compile project(':CommonAvatarInterfaces')
     compile project(':DarpaRoboticsChallenge')
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output

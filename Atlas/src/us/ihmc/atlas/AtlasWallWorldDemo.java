@@ -1,9 +1,9 @@
 package us.ihmc.atlas;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemoStarter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;

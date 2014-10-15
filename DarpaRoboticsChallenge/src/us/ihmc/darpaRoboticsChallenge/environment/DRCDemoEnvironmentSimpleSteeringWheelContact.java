@@ -5,16 +5,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.apache.commons.math3.util.FastMath;
 
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
