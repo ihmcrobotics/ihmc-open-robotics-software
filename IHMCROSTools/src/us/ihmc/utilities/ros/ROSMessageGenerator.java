@@ -5,6 +5,7 @@ package us.ihmc.utilities.ros;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.communication.ros.ROSMessageAnnotation;
 import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
 
 public class ROSMessageGenerator
@@ -74,7 +76,24 @@ public class ROSMessageGenerator
             System.out.println("Message Created: " + messageFile.getName());
             PrintStream fileStream = new PrintStream(messageFile);
 
-            String outBuffer = "# " + messageName + System.lineSeparator() + System.lineSeparator();
+            String outBuffer = "## " + messageName + System.lineSeparator();
+            ROSMessageAnnotation annotation = (ROSMessageAnnotation) clazz.getAnnotation(ROSMessageAnnotation.class);
+            String[] commentLines;
+            if (annotation != null)
+            {
+               commentLines = annotation.documentation().split("\r?\n|\r");
+
+               for (String commentLine : commentLines)
+               {
+                  outBuffer += "# " + commentLine + System.lineSeparator();
+               }
+            }
+            else
+            {
+               outBuffer += "# No Documentation Annotation Found" + System.lineSeparator();
+            }
+
+            outBuffer += System.lineSeparator();
 
             Field[] fields = clazz.getFields();
             for (Field field : fields)
@@ -185,7 +204,6 @@ public class ROSMessageGenerator
       }
       else
       {
-         // buffer += "ihmc_msg/";
          buffer += createNewRosMessage(clazz, overwriteSubMessages);
       }
 
