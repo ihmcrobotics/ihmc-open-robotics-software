@@ -47,7 +47,6 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       outgoingFootstepDataList = footStepList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
-      System.out.println("FootstepDataList size is set to: " + numberOfFootsteps.getIntegerValue());
    }
 
    public void set(ArrayList<Footstep> footsteps, SideDependentList<ContactablePlaneBody> feet)
@@ -67,7 +66,6 @@ public class FootstepListBehavior extends BehaviorInterface
       }
       outgoingFootstepDataList = footsepDataList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
-      System.out.println("2: FootstepDataList size is set to: " + numberOfFootsteps.getIntegerValue());
    }
 
    @Override
