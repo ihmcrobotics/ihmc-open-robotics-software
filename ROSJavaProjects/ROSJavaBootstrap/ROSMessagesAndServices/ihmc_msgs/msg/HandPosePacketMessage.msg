@@ -19,6 +19,9 @@ uint8 referenceFrame
 bool toHomePosition
 geometry_msgs/Vector3 position
 geometry_msgs/Quaternion orientation
+# trajectoryTime specifies how fast to move the hand to the desired position
 float64 trajectoryTime
+# jointAngles specifies the desired individual arm joint angles. For Atlas, those are:
+# shoulder pitch, shoulder roll, elbow pitch, elbow roll, wrist pitch, wrist roll
 float64[] jointAngles
 

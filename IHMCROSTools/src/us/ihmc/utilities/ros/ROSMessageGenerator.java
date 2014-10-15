@@ -15,6 +15,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packetAnnotations.ClassAnnotation;
+import us.ihmc.communication.packetAnnotations.FieldAnnotation;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
@@ -28,8 +30,6 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.ros.ROSMessageClassAnnotation;
-import us.ihmc.communication.ros.ROSMessageFieldAnnotation;
 import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
 
 public class ROSMessageGenerator
@@ -78,7 +78,7 @@ public class ROSMessageGenerator
             PrintStream fileStream = new PrintStream(messageFile);
 
             String outBuffer = "## " + messageName + System.lineSeparator();
-            ROSMessageClassAnnotation annotation = (ROSMessageClassAnnotation) clazz.getAnnotation(ROSMessageClassAnnotation.class);
+            ClassAnnotation annotation = (ClassAnnotation) clazz.getAnnotation(ClassAnnotation.class);
             if (annotation != null)
             {
             	String[] annotationString = annotation.documentation().split("\r?\n|\r");
@@ -115,7 +115,7 @@ public class ROSMessageGenerator
    private String printType(Field field)
    {
 	   String buffer = "";
-	   ROSMessageFieldAnnotation fieldAnnotation = field.getAnnotation(ROSMessageFieldAnnotation.class);
+	   FieldAnnotation fieldAnnotation = field.getAnnotation(FieldAnnotation.class);
 	   if(fieldAnnotation != null)
 	   {
 		   String[] annotationString = fieldAnnotation.fieldDocumentation().split("\r?\n|\r");
