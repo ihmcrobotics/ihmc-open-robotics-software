@@ -242,7 +242,7 @@ public class ScriptBehavior extends BehaviorInterface
 		scriptIndex = 0;
 		scriptObjects = scriptEngine.getScriptObjects(scriptResourceStream);
 		scriptLoaded.set(true);
-		scriptStatus = scriptStatus.SCRIPT_LOADED;
+		scriptStatus = ScriptBehaviorStatusEnum.SCRIPT_LOADED;
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
 		loadNextScriptObject();
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
@@ -259,12 +259,12 @@ public class ScriptBehavior extends BehaviorInterface
 		
 		if (scriptObjects.size() == 0)
 		{
-			scriptStatus = scriptStatus.SCRIPT_LOAD_FAILED;
+			scriptStatus = ScriptBehaviorStatusEnum.SCRIPT_LOAD_FAILED;
 			return;
 		}
 		
 		scriptIndex++;
-		scriptStatus = scriptStatus.INDEX_CHANGED;
+		scriptStatus = ScriptBehaviorStatusEnum.INDEX_CHANGED;
 		
 		scriptObject = scriptObjects.remove(0);
 		
@@ -275,7 +275,7 @@ public class ScriptBehavior extends BehaviorInterface
 			if (DEBUG) System.out.println("End of script");
 			scriptFinished.set(true);
 			scriptIndex--;
-			scriptStatus = scriptStatus.FINISHED;
+			scriptStatus = ScriptBehaviorStatusEnum.FINISHED;
 		}
 		else if (scriptObject.getScriptObject() instanceof FootstepDataList)
 		{
@@ -524,65 +524,6 @@ public class ScriptBehavior extends BehaviorInterface
 	@Override
 	public boolean hasInputBeenSet() 
 	{
-		if (scriptObject.getScriptObject() instanceof FootstepDataList)
-		{
-			return footstepListBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof HandPosePacket)
-		{
-			return handPoseBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof FootStatePacket)
-		{
-			return footStateBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof HandStatePacket)
-		{
-			return handStateBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof HeadOrientationPacket)
-		{
-			return headOrientationBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof ComHeightPacket)
-		{
-			return comHeightBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof FootPosePacket)
-		{
-			return footPoseBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof PelvisPosePacket)
-		{
-			return pelvisPoseBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof ChestOrientationPacket)
-		{
-			return chestOrientationBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof HandLoadBearingPacket)
-		{
-			return handLoadBearingBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof BumStatePacket)
-		{
-			return bumStateBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof ThighStatePacket)
-		{
-			return thighStateBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof HighLevelStatePacket)
-		{
-			return highLevelStateBehavior.hasInputBeenSet();
-		}
-		else if (scriptObject.getScriptObject() instanceof FingerStatePacket)
-		{
-			return fingerStateBehavior.hasInputBeenSet();
-		}
-		else
-		{
-			return false;
-		}
+		return stateMachine.getCurrentState().getBehavior().hasInputBeenSet();
 	}
 }

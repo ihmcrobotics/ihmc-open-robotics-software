@@ -13,8 +13,8 @@ public class LocalizationBehavior extends BehaviorInterface {
 	
 	private final FullRobotModel fullRobotModel;
 	private ScriptBehavior scriptBehavior;
-	//private String scriptName = "us/ihmc/atlas/scripts/TestWalkingLocalAll_LocalizationTest.xml";
-	private String scriptName = "us/ihmc/atlas/scripts/SimpleFlatGroundScript.xml";
+	//private String scriptName = "us/ihmc/atlas/scripts/TestLocalization.xml";
+	private String scriptName = "us/ihmc/atlas/scripts/ShortScriptForLooping.xml";
 	private int i = 0;
 	private RigidBodyTransform scriptObjectTransformToWorld = null;
 	private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
@@ -27,6 +27,7 @@ public class LocalizationBehavior extends BehaviorInterface {
 	      
 	      this.fullRobotModel = fullRobotModel;
 	      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+	      registry.addChild(scriptBehavior.getYoVariableRegistry());
 	      scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
 	      super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
 	   }
@@ -35,13 +36,6 @@ public class LocalizationBehavior extends BehaviorInterface {
 	public void doControl() 
 	{
 		checkIfScriptBehaviorInputPacketReceived();
-		
-//		if (i == 0)
-//		{
-//			System.out.println("Starting iteration " + i + " of the localization test.");
-//			i++;
-//			reloadScriptBehavior();
-//		}
 		
 		if ((scriptBehavior.isDone() && i < 10) || firstRun)
 		{
@@ -68,14 +62,12 @@ public class LocalizationBehavior extends BehaviorInterface {
 	@Override
 	protected void passReceivedNetworkProcessorObjectToChildBehaviors(
 			Object object) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	protected void passReceivedControllerObjectToChildBehaviors(Object object) {
-		// TODO Auto-generated method stub
-
+		scriptBehavior.consumeObjectFromController(object);
 	}
 
 	@Override
