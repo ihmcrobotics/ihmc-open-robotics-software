@@ -51,6 +51,7 @@ public class AtlasGFENetworkProcessor
    public static void main(String[] args) throws JSAPException, IOException
    {
       JSAP jsap = new JSAP();
+      System.out.println("test");
       
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
@@ -64,31 +65,18 @@ public class AtlasGFENetworkProcessor
       jsap.registerParameter(rosNameSpace);
       JSAPResult config = jsap.parse(args);
 
-      if (config.success())
+      DRCRobotModel robotModel;
+      try
       {
-         
-        DRCRobotModel robotModel;
-        try
-        {
-           robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
-        }
-        catch (IllegalArgumentException e)
-        {
-           System.err.println("Incorrect robot model " + config.getString("robotModel"));
-           System.out.println(jsap.getHelp());
-           return;
-        }
-        
-        new AtlasGFENetworkProcessor(robotModel, config.getString("namespace"));
-        
-      } else {
-         System.err.println("Invalid parameters!");
-         for (int i = 0; i < args.length; i++)
-         {
-            System.out.println("Arg " + i + ": " + args[i]);
-         }
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
+      }
+      catch (IllegalArgumentException e)
+      {
+         System.err.println("Incorrect robot model " + config.getString("robotModel"));
          System.out.println(jsap.getHelp());
          return;
       }
+
+      new AtlasGFENetworkProcessor(robotModel, config.getString("namespace"));
    }
 }
