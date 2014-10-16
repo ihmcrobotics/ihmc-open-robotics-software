@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.ArrayList;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -393,8 +394,8 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLine(YoFramePoint currentCapturePointPosition, YoFramePoint desiredCapturePointPosition,
-         YoFrameVector desiredCapturePointVelocity)
+   public static double computeDistanceToCapturePointFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
+         FrameVector desiredCapturePointVelocity)
    {
       double desiredCapturePointVelocityMagnitude = Math
             .sqrt(desiredCapturePointVelocity.getX() * desiredCapturePointVelocity.getX() + desiredCapturePointVelocity.getY()

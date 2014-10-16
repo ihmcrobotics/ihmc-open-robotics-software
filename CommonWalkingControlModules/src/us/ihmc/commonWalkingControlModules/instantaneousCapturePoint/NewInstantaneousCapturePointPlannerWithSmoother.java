@@ -170,7 +170,6 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       {
          initializeDoubleSupportCapturePointTrajectory(desiredCapturePointPosition, desiredCapturePointVelocity,
                singleSupportInitialDesiredCapturePointPosition, singleSupportInitialDesiredCapturePointVelocity, doubleSupportInitialTransferDuration);
-         atAStop.set(false);
       }
       else
       {
@@ -186,11 +185,11 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
    public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
    {
+      atAStop.set(false);
       this.isDoubleSupport.set(false);
       this.initialTime.set(initialTime);
       this.isInitialTransfer.set(false);
       comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
-      atAStop.set(false);
 
       computeConstantCentersOfPressure(footstepList);
       computeCapturePointCornerPoints(this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue());
