@@ -4,9 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -16,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,6 +24,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
@@ -36,6 +35,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
@@ -238,7 +238,7 @@ public class PushRecoveryControlModule
                      footFrame = momentumBasedController.getFullRobotModel().getSoleFrame(side);
                      projectedCapturePoint.changeFrame(footFrame);
                      currentFootstep = createFootstepAtCurrentLocation(side);
-                     calculateTouchdownFootPolygon(currentFootstep, projectedCapturePoint.getReferenceFrame(), footPolygon);
+                     calculateTouchdownFootPolygon(currentFootstep, side, projectedCapturePoint.getReferenceFrame(), footPolygon);
                      projectedCapturePoint2d.setIncludingFrame(projectedCapturePoint.getReferenceFrame(), projectedCapturePoint.getX(),
                            projectedCapturePoint.getY());
 
@@ -453,7 +453,7 @@ public class PushRecoveryControlModule
             return false;
          }
 
-         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, footPolygon.getCentroid(),
+         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, feet.get(nextFootstep.getRobotSide()), footPolygon.getCentroid(),
                captureRegionCalculator.getCaptureRegion(), isRecoveringFromDoubleSupportFall()));
 
          if (footstepWasProjectedInCaptureRegion.getBooleanValue())
@@ -486,9 +486,9 @@ public class PushRecoveryControlModule
       }
    }
 
-   private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
+   private void calculateTouchdownFootPolygon(Footstep footstep, RobotSide robotSide, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
-      List<FramePoint> expectedContactPoints = footstep.getExpectedContactPoints();
+      List<FramePoint> expectedContactPoints = FootstepUtils.calculateExpectedContactPoints(footstep, feet.get(robotSide));
       int numberOfVertices = expectedContactPoints.size();
       for (int i = 0; i < numberOfVertices; i++)
       {
@@ -584,7 +584,7 @@ public class PushRecoveryControlModule
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
 
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(foot, poseReferenceFrame, trustHeight);
+      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
 
       return footstep;
    }

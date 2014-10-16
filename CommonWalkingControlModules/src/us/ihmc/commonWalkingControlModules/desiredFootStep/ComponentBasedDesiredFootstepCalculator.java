@@ -111,7 +111,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
       ContactablePlaneBody foot = contactableBodies.get(futureSwingLegSide);
       boolean trustHeight = true;
-      return new Footstep(foot, poseReferenceFrame, trustHeight);
+      return new Footstep(foot.getRigidBody(), futureSwingLegSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
    }
 
    private FramePoint getDesiredFootstepPosition(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide,

@@ -306,7 +306,7 @@ public class DesiredFootstepVisualizer
     	  Point3d location = new Point3d();
     	  Quat4d orientation = new Quat4d();
     	  footstep.getPose(location, orientation);
-         FootstepData footStepData = new FootstepData(FootstepUtils.getSideFromFootstep(footstep, bipedFeet), location, orientation);
+         FootstepData footStepData = new FootstepData(footstep.getRobotSide(), location, orientation);
          footstepConsumer.consume(dataIdentifier, footStepData);
       }
 

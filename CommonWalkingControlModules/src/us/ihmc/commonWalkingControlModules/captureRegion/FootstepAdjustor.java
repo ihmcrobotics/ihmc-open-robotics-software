@@ -9,7 +9,9 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
@@ -52,7 +54,7 @@ public class FootstepAdjustor
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
-   public boolean adjustFootstep(Footstep footstep, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
+   public boolean adjustFootstep(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
    {
       boolean footstepChanged = false;
 
@@ -74,7 +76,7 @@ public class FootstepAdjustor
       }
 
       // Check if the desired footstep intersects the capture region.
-      calculateTouchdownFootPolygon(footstep, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
+      calculateTouchdownFootPolygon(footstep, contactablePlaneBody, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
       boolean nextStepInside = desiredSteppingRegion.intersectionWith(touchdownFootPolygon, intersection);
 
       if (nextStepInside)
@@ -88,7 +90,7 @@ public class FootstepAdjustor
       }
 
       // No overlap between touch-down polygon and capture region.
-      projectFootstepInCaptureRegion(footstep, supportCentroid, desiredSteppingRegion, moveToExtremeBorder);
+      projectFootstepInCaptureRegion(footstep, contactablePlaneBody, supportCentroid, desiredSteppingRegion, moveToExtremeBorder);
       updateVisualizer();
       return footstepChanged;
    }
@@ -103,7 +105,7 @@ public class FootstepAdjustor
     * Might be a bit conservative it should be sufficient to slightly overlap the capture region
     * and the touch-down polygon.
     */
-   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
+   private void projectFootstepInCaptureRegion(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
    {
       projection.setIncludingFrame(projectionPoint);
       projection.changeFrame(footstep.getParentFrame());
@@ -135,7 +137,7 @@ public class FootstepAdjustor
       nextStep2d.sub(direction);
       footstep.setPositionChangeOnlyXY(nextStep2d);
 
-      calculateTouchdownFootPolygon(footstep, captureRegion.getReferenceFrame(), adjustedTouchdownFootPolygon);
+      calculateTouchdownFootPolygon(footstep, contactablePlaneBody, captureRegion.getReferenceFrame(), adjustedTouchdownFootPolygon);
    }
 
    private final FramePoint2d centroid2d = new FramePoint2d();
@@ -145,13 +147,13 @@ public class FootstepAdjustor
     * This function takes a footstep and calculates the touch-down polygon in the
     * desired reference frame
     */
-   private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
+   private void calculateTouchdownFootPolygon(Footstep footstep, ContactablePlaneBody contactablePlaneBody, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
       footstep.getPositionIncludingFrame(centroid3d);
       centroid3d.getFramePoint2d(centroid2d);
       centroid2d.changeFrame(desiredFrame);
 
-      List<FramePoint> expectedContactPoints = footstep.getExpectedContactPoints();
+      List<FramePoint> expectedContactPoints = FootstepUtils.calculateExpectedContactPoints(footstep, contactablePlaneBody);
       polygonToPack.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(desiredFrame, expectedContactPoints);
       // shrink the polygon for safety by pulling all the corner points towards the center
       polygonToPack.scale(centroid2d, SHRINK_TOUCHDOWN_POLYGON_FACTOR);

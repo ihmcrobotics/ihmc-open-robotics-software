@@ -125,7 +125,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
 
       ContactablePlaneBody foot = contactableBodies.get(futureSwingLegSide);
       boolean trustHeight = true;
-      return new Footstep(foot, poseReferenceFrame, trustHeight);
+      return new Footstep(foot.getRigidBody(), futureSwingLegSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
    }
 
    private FramePoint getDesiredFootstepPositionCopy(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide, FramePoint2d desiredDestination,

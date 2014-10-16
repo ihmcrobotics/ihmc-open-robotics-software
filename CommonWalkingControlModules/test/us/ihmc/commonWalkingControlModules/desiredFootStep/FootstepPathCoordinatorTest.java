@@ -261,12 +261,6 @@ public class FootstepPathCoordinatorTest
    private void compareFootsteps(Footstep footstep1, Footstep footstep2)
    {
       assertTrue(footstep1.epsilonEquals(footstep2, 0.0001));
-      for (int j = 0; j < footstep1.getExpectedContactPoints().size(); j++)
-      {
-         FramePoint framePoint = footstep1.getExpectedContactPoints().get(j);
-         FramePoint reconstructedFramePoint = footstep2.getExpectedContactPoints().get(j);
-         assertTrue(framePoint.epsilonEquals(reconstructedFramePoint, 0.0001));
-      }
    }
 
    private ArrayList<Footstep> createRandomFootsteps(int numberToTest)
@@ -282,7 +276,7 @@ public class FootstepPathCoordinatorTest
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), null, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          footsteps.add(footstep);
       }
       return footsteps;

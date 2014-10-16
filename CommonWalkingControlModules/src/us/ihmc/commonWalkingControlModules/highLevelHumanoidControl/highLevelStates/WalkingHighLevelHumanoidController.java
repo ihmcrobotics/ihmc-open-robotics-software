@@ -374,8 +374,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide);
          DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
-         SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot);
-         SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot);
+         SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide);
+         SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide.getOppositeSide());
          StartWalkingCondition startWalkingCondition = new StartWalkingCondition(robotSide);
          IsFallingFromDoubleSupportCondition isFallingFromDoubleSupportCondition = pushRecoveryModule.new IsFallingFromDoubleSupportCondition(robotSide);
          FlamingoStanceCondition flamingoStanceCondition = new FlamingoStanceCondition(robotSide);
@@ -1188,13 +1188,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class SingleSupportToTransferToCondition extends DoneWithSingleSupportCondition
    {
-      private final ContactablePlaneBody nextSwingFoot;
+      private final RobotSide robotSide;
 
-      public SingleSupportToTransferToCondition(ContactablePlaneBody nextSwingFoot)
+      public SingleSupportToTransferToCondition(RobotSide robotSide)
       {
          super();
 
-         this.nextSwingFoot = nextSwingFoot;
+         this.robotSide = robotSide;
       }
 
       public boolean checkCondition()
@@ -1203,8 +1203,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (nextFootstep == null)
             return super.checkCondition();
 
-         ContactablePlaneBody nextSwingFoot = nextFootstep.getBody();
-         if (this.nextSwingFoot != nextSwingFoot)
+         if (this.robotSide != nextFootstep.getRobotSide())
             return false;
 
          boolean condition = super.checkCondition();
@@ -1321,12 +1320,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean isNextFootstepForThisSide = true;
          if (footstepListHasBeenUpdated.getBooleanValue())
          {
-            isNextFootstepForThisSide = isNextFootstepNull || FootstepUtils.getSideFromFootstep(upcomingFootstepList.getNextFootstep(), feet) != robotSide;
+            isNextFootstepForThisSide = isNextFootstepNull || upcomingFootstepList.getNextFootstep().getRobotSide() != robotSide;
          }
          else
          {
             boolean isNextNextFootstepNull = upcomingFootstepList.getNextNextFootstep() == null;
-            isNextFootstepForThisSide = isNextNextFootstepNull || FootstepUtils.getSideFromFootstep(upcomingFootstepList.getNextNextFootstep(), feet) != robotSide;
+            isNextFootstepForThisSide = isNextNextFootstepNull || upcomingFootstepList.getNextNextFootstep().getRobotSide() != robotSide;
          }
          boolean isSupportLegNull = supportLeg.getEnumValue() == null;
          boolean noMoreFootstepsForThisSide = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull || !isNextFootstepForThisSide;
@@ -1677,7 +1676,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
 
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(foot, poseReferenceFrame, trustHeight);
+      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
 
       return footstep;
    }

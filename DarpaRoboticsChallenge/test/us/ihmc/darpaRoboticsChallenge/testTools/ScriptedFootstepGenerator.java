@@ -81,7 +81,7 @@ public class ScriptedFootstepGenerator
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      Footstep footstep = new Footstep(foot, footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
 
       return footstep;
    }
@@ -91,12 +91,12 @@ public class ScriptedFootstepGenerator
       boolean trustHeight = true;
       ContactablePlaneBody foot = bipedFeet.get(robotSide);
 
-      return generateFootstep(foot, pointInWorldToStepTo, footstepYaw, surfaceNormal, trustHeight);
+      return generateFootstep(foot, robotSide, pointInWorldToStepTo, footstepYaw, surfaceNormal, trustHeight);
    }
 
    private final Matrix3d tempMatrix3d = new Matrix3d();
 
-   public Footstep generateFootstep(ContactablePlaneBody foot, Point3d pointInWorldToStepTo, double footstepHeading, Vector3d surfaceNormal,
+   public Footstep generateFootstep(ContactablePlaneBody foot, RobotSide robotSide, Point3d pointInWorldToStepTo, double footstepHeading, Vector3d surfaceNormal,
                                     boolean trustHeight)
    {
       getRotationGivenNormalAndHeading(tempMatrix3d, surfaceNormal, footstepHeading);
@@ -107,7 +107,7 @@ public class ScriptedFootstepGenerator
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      Footstep footstep = new Footstep(foot, footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
 
       return footstep;
    }

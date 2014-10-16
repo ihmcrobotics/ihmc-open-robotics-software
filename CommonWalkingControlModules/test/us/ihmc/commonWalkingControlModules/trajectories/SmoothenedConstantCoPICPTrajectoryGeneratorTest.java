@@ -66,7 +66,7 @@ public class SmoothenedConstantCoPICPTrajectoryGeneratorTest
 
          PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame" + i, pose);
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(endEffector, poseFrame, trustHeight);
+         Footstep footstep = new Footstep(endEffector.getRigidBody(), null, soleFrame, poseFrame, trustHeight);
          footsteps.add(footstep);       
 
          flip = -flip; 
