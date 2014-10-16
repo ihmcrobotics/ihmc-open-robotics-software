@@ -12,6 +12,10 @@ To run the plugin in Gazebo:
 	
 		export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:[your_workspace_here]/ROSCatkinWorkspace/catkin_ws
 		export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:[your_workspace_here]/ROSCatkinWorkspace/catkin_ws/ihmc_gazebo/lib
+		
+	(for now) Make a symlink from ROSCatkinWorkspace/catkin_ws to Atlas/ihmc_gazebo using:
+	
+		ln -s R ROSCatkinWorkspace/catkin_ws/ihmc_gazebo Atlas/ihmc_gazebo
 	
 	Make sure you can:
 	
