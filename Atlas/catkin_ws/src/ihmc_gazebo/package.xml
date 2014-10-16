@@ -68,7 +68,7 @@
   <export>
     <!-- You can specify that this package is a metapackage here: -->
     <!-- <metapackage/> -->
-  <gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
+    <gazebo_ros plugin_path="${prefix}/../../devel/lib"/>
 
     <!-- Other tools can request additional information be placed here -->
 

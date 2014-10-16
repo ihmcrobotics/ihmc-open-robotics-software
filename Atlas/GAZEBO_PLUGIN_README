@@ -8,8 +8,10 @@ To build the plugin:
 
 	Run 'catkin_make' in Atlas/catkin_ws
 	
-Add this line to your .bashrc:
+Make sure you have the following in your .bashrc: (source ~/.bashrc to update it)
 
+	source /opt/ros/indigo/setup.bash   # this is necessary for drcsim 3.1.0 and later
+	source /usr/share/drcsim/setup.sh
 	source [your_workspace_here]/Atlas/catkin_ws/devel/setup.bash
 	
 To run the plugin in Gazebo:
