@@ -23,6 +23,7 @@ import com.martiansoftware.jsap.JSAPResult;
 public class AtlasGFENetworkProcessor
 {
    private static String defaultRosNameSpace = "atlas";
+   private static String defaultRobotModel = "DRC_NO_HANDS";
    
    public AtlasGFENetworkProcessor(DRCRobotModel robotModel, String nameSpace)
    {
@@ -47,17 +48,17 @@ public class AtlasGFENetworkProcessor
       new ThePeoplesGloriousGFENetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, robotModel, nameSpace);
    }
    
-   public static void main(String args[]) throws JSAPException, IOException
+   public static void main(String[] args) throws JSAPException, IOException
    {
-      
       JSAP jsap = new JSAP();
       
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
       rosNameSpace.setDefault(defaultRosNameSpace);
 
-      FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
+      model.setDefault(defaultRobotModel);
       
       jsap.registerParameter(model);
       jsap.registerParameter(rosNameSpace);
@@ -81,7 +82,11 @@ public class AtlasGFENetworkProcessor
         new AtlasGFENetworkProcessor(robotModel, config.getString("namespace"));
         
       } else {
-         System.err.println("Invalid parameters");
+         System.err.println("Invalid parameters!");
+         for (int i = 0; i < args.length; i++)
+         {
+            System.out.println("Arg " + i + ": " + args[i]);
+         }
          System.out.println(jsap.getHelp());
          return;
       }

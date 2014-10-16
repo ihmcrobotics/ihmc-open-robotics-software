@@ -9,6 +9,7 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -19,6 +20,8 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.ComparableDataObject;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -28,6 +31,7 @@ import us.ihmc.utilities.ros.publisher.IHMCPacketToMsgPublisher;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
+import us.ihmc.utilities.ros.subscriber.TimestampedPoseFootStepGenerator;
 
 public class ThePeoplesGloriousGFENetworkProcessor
 {
@@ -45,6 +49,7 @@ public class ThePeoplesGloriousGFENetworkProcessor
 
    private final NodeConfiguration nodeConfiguration;
    private final MessageFactory messageFactory;
+   private final FullRobotModel fullRobotModel;
 
    public ThePeoplesGloriousGFENetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge,
          DRCRobotModel robotModel, String namespace)
@@ -60,8 +65,12 @@ public class ThePeoplesGloriousGFENetworkProcessor
 
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
+      this.fullRobotModel = robotModel.createFullRobotModel();
+      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, true);
+      ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
+      controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      setupInputs(namespace + "/inputs");
+      setupInputs(namespace + "/inputs", referenceFrames, fullRobotModel);
       setupOutputs(namespace + "/outputs");
       rosMainNode.execute();
    }
@@ -103,7 +112,7 @@ public class ThePeoplesGloriousGFENetworkProcessor
       }
    }
 
-   private void setupInputs(String namespace)
+   private void setupInputs(String namespace, ReferenceFrames referenceFrames, FullRobotModel fullRobotModel)
    {
       Map<String, Class> inputPacketList = IHMCMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
 
@@ -115,5 +124,8 @@ public class ThePeoplesGloriousGFENetworkProcessor
          subscribers.add(subscriber);
          rosMainNode.attachSubscriber(namespace + "/" + e.getKey(), subscriber);
       }
+      
+      TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(referenceFrames, fullRobotModel, controllerCommunicationBridge);
+      rosMainNode.attachSubscriber(namespace + "/TimestampedPoseFootStepGenerator", footPoseGenerator);
    }
 }
