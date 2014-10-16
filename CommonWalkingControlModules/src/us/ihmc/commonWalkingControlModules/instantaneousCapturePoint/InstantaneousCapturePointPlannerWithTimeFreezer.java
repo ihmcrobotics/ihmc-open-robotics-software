@@ -83,8 +83,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       }
       else if ((getEstimatedTimeRemainingForState(time) < 0.1) && 
             (instantaneousCapturePointPlanner.isPerformingICPDoubleSupport()) && 
-            (icpDistanceToFreezeLine.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()) &&
-            Double.isNaN(icpDistanceToFreezeLine.getDoubleValue()))
+            (icpDistanceToFreezeLine.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()))
       {
          freezeTime(time, 1.0);
       }

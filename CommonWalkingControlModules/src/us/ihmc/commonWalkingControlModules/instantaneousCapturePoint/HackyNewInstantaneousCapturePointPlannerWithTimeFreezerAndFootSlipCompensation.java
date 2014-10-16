@@ -1,7 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -15,6 +19,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BooleanYoVariable doTimeFreezing;
    private final BooleanYoVariable doFootSlipCompensation;
+   private final BooleanYoVariable isTimeBeingFrozen;
    private final DoubleYoVariable timeDelay;
    private final DoubleYoVariable capturePointPositionError;
    private final DoubleYoVariable distanceToFreezeLine;
@@ -31,15 +36,17 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
 
       timeDelay = new DoubleYoVariable("icpPlannerTimeDelayFromeFreezer", registry);
       capturePointPositionError = new DoubleYoVariable("icpPlannerCapturePointPositionError", registry);
-      distanceToFreezeLine = new DoubleYoVariable("icpPlannerDistanceToFreezeLinre", registry);
+      distanceToFreezeLine = new DoubleYoVariable("icpPlannerDistanceToFreezeLine", registry);
       freezeTimeFactor = new DoubleYoVariable("icpPlannerFreezeTimeFactor", registry);
       maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable("icpPlannerMaxCapturePointErrorAllowedToBeginSwingPhase", registry);
       previousTime = new DoubleYoVariable("icpPlannerPreviousTime", registry);
       doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
       doFootSlipCompensation = new BooleanYoVariable("icpPlannerDoFootSlipCompensation", registry);
+      isTimeBeingFrozen = new BooleanYoVariable("icpPlannerIsTimeBeingFrozen", registry);
       vectorFromActualToDesiredCapturePoint = new YoFrameVector("icpPlannerVectorFromActualToDesiredCapturePoint", worldFrame, registry);
       normalizedCapturePointVelocityVector = new YoFrameVector("icpPlannerNormalizedCapturePointVelocityVector", worldFrame, registry);
 
+      isTimeBeingFrozen.set(false);
       timeDelay.set(0.0);
       capturePointPositionError.set(0.0);
       normalizedCapturePointVelocityVector.setToZero();
@@ -47,12 +54,13 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       distanceToFreezeLine.set(0.0);
       doTimeFreezing.set(capturePointPlannerParameters.getDoTimeFreezing());
       doFootSlipCompensation.set(capturePointPlannerParameters.getDoTimeFreezing());
-
-      freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
+      
+      this.maxCapturePointErrorAllowedToBeginSwingPhase.set(capturePointPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
+      this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(YoFramePoint desiredCapturePointPositionToPack, YoFrameVector desiredCapturePointVelocityToPack,
-         double time, YoFramePoint currentCapturePointPosition)
+   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+         double time, FramePoint currentCapturePointPosition)
    {
       super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, time);
 
@@ -67,26 +75,47 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       }
 
    }
+   
+   @Override
+   public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity,
+         double initialTime, ArrayList<FramePoint> footstepList)
+      {
+         timeDelay.set(0.0);
+         super.initializeDoubleSupport(currentDesiredCapturePointPosition, currentDesiredCapturePointVelocity, initialTime, footstepList);
+      }
+   
+   @Override
+   public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
+   {
+      timeDelay.set(0.0);
+      super.initializeSingleSupport(initialTime, footstepList);
+   }
 
-   private void doTimeFreezeIfNeeded(YoFramePoint currentCapturePointPosition, YoFramePoint desiredCapturePointPosition,
-         YoFrameVector desiredCapturePointVelocity, double time)
+   private void doTimeFreezeIfNeeded(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
+         FrameVector desiredCapturePointVelocity, double time)
    {
       computeCapturePointPositionErrorMagnitude(currentCapturePointPosition, desiredCapturePointPosition);
       computeCapturePointDistantToFreezeLine(currentCapturePointPosition, desiredCapturePointPosition, desiredCapturePointVelocity);
-
+      
       if (isDone(getTimeWithDelay(time)))
       {
          completelyFreezeTime(time);
+         isTimeBeingFrozen.set(true);
       }
       else if (computeAndReturnTimeRemaining(getTimeWithDelay(time)) < 0.1 && isDoubleSupport.getBooleanValue()
-            && distanceToFreezeLine.getDoubleValue() > maxCapturePointErrorAllowedToBeginSwingPhase.getDoubleValue()
-            && Double.isNaN(distanceToFreezeLine.getDoubleValue()))
+            && distanceToFreezeLine.getDoubleValue() > maxCapturePointErrorAllowedToBeginSwingPhase.getDoubleValue())
       {
          completelyFreezeTime(time);
+         isTimeBeingFrozen.set(true);
       }
       else if ((distanceToFreezeLine.getDoubleValue() > maxCapturePointErrorAllowedToBeginSwingPhase.getDoubleValue()))
       {
          freezeTimeUsingFreezeTimeFactor(time);
+         isTimeBeingFrozen.set(true);
+      }
+      else
+      {
+         isTimeBeingFrozen.set(false);
       }
       
       previousTime.set(time);
@@ -117,16 +146,21 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       timeDelay.add(time - previousTime.getDoubleValue());
    }
 
-   private void computeCapturePointDistantToFreezeLine(YoFramePoint currentCapturePointPosition, YoFramePoint desiredCapturePointPosition,
-         YoFrameVector desiredCapturePointVelocity)
+   private void computeCapturePointDistantToFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
+         FrameVector desiredCapturePointVelocity)
    {
       distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLine(currentCapturePointPosition, desiredCapturePointPosition,
             desiredCapturePointVelocity));
    }
 
-   private void computeCapturePointPositionErrorMagnitude(YoFramePoint currentCapturePointPosition, YoFramePoint desiredCapturePointPosition)
+   private void computeCapturePointPositionErrorMagnitude(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition)
    {
       capturePointPositionError.set(currentCapturePointPosition.distance(desiredCapturePointPosition));
+   }
+   
+   public boolean getIsTimeBeingFrozen()
+   {
+      return isTimeBeingFrozen.getBooleanValue();
    }
 
    private double getTimeWithDelay(double time)
