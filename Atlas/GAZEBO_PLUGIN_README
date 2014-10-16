@@ -1,28 +1,22 @@
 IHMC Atlas Gazebo Sim Plugin
 
+Make sure stereo-image-proc is installed:
+
+	sudo apt-get install ros-indigo-stereo-image-proc
+
 To build the plugin:
 
-	Run 'cmake ..' in Atlas/build
+	Run 'catkin_make' in Atlas/catkin_ws
 	
-	Make all
+Add this line to your .bashrc:
+
+	source [your_workspace_here]/Atlas/catkin_ws/devel/setup.bash
 	
 To run the plugin in Gazebo:
-
-	Add these lines to your .bashrc (replace [your_workspace_here]):
-	
-		export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:[your_workspace_here]/ROSCatkinWorkspace/catkin_ws
-		export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:[your_workspace_here]/ROSCatkinWorkspace/catkin_ws/ihmc_gazebo/lib
-		
-	(for now) Make a symlink from ROSCatkinWorkspace/catkin_ws to Atlas/ihmc_gazebo using:
-	
-		ln -s Atlas/ihmc_gazebo ROSCatkinWorkspace/catkin_ws/ihmc_gazebo
-	
-	Make sure you can:
-	
-		roscd ihmc_gazebo
-	
-	Then run:
 	
 		roslaunch ihmc_gazebo ihmc_atlas.launch
+		
+		
+TODO: Put ros_rviz into catkin_ws
 
 	
