@@ -453,7 +453,7 @@ public class ScriptBehavior extends BehaviorInterface
 	}
 	
 	@Override
-	protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+	public void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
 	{
 		footstepListBehavior.consumeObjectFromNetworkProcessor(object);
 		handPoseBehavior.consumeObjectFromNetworkProcessor(object);
@@ -472,7 +472,7 @@ public class ScriptBehavior extends BehaviorInterface
 	}
 	
 	@Override
-	protected void passReceivedControllerObjectToChildBehaviors(Object object)
+	public void passReceivedControllerObjectToChildBehaviors(Object object)
 	{
 		footstepListBehavior.consumeObjectFromController(object);
 		handPoseBehavior.consumeObjectFromController(object);
