@@ -14,8 +14,10 @@ Add this line to your .bashrc:
 	
 To run the plugin in Gazebo:
 	
-		roslaunch ihmc_gazebo ihmc_atlas.launch
-		
+	roslaunch ihmc_gazebo ihmc_atlas.launch
+	
+
+REMEMBER: Add catkin_ws/build and catkin_ws/devel to svn:ignore.
 		
 TODO: Put ros_rviz into catkin_ws
 
