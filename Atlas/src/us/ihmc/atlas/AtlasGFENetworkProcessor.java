@@ -51,7 +51,6 @@ public class AtlasGFENetworkProcessor
    public static void main(String[] args) throws JSAPException, IOException
    {
       JSAP jsap = new JSAP();
-      System.out.println("test");
       
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
