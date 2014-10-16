@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -26,15 +27,18 @@ public class SimpleUpperBodySubController implements UpperBodySubController
    private final EnumMap<NeckJointName, PIDController> neckControllers = ContainerTools.createEnumMap(NeckJointName.class);
    private final EnumMap<NeckJointName, DoubleYoVariable> desiredNeckPositions = ContainerTools.createEnumMap(NeckJointName.class);
 
+   private final NeckJointName[] neckJointNames;
    private final double controlDT;
 
-   public SimpleUpperBodySubController(ProcessedSensorsInterface processedSensors, double controlDT, ArmControlModule armControlModule, SpineControlModule spineControlModule,
+   public SimpleUpperBodySubController(FullRobotModel fullRobotModel, ProcessedSensorsInterface processedSensors, double controlDT, ArmControlModule armControlModule, SpineControlModule spineControlModule,
            YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
       this.controlDT = controlDT;
       this.armControlModule = armControlModule;
       this.spineControlModule = spineControlModule;
+
+      neckJointNames = fullRobotModel.getRobotSpecificJointNames().getNeckJointNames();
 
       populateYoVariables();
 
@@ -62,7 +66,7 @@ public class SimpleUpperBodySubController implements UpperBodySubController
    {
       NeckTorques neckTorques = new NeckTorques();
 
-      for (NeckJointName neckJointName : NeckJointName.values())
+      for (NeckJointName neckJointName : neckJointNames)
       {
          PIDController pidController = neckControllers.get(neckJointName);
          double desiredPosition = desiredNeckPositions.get(neckJointName).getDoubleValue();
@@ -80,7 +84,7 @@ public class SimpleUpperBodySubController implements UpperBodySubController
 
    private void populateYoVariables()
    {
-      for (NeckJointName neckJointName : NeckJointName.values())
+      for (NeckJointName neckJointName : neckJointNames)
       {
          String name = "desired" + neckJointName.getCamelCaseNameForMiddleOfExpression();
          DoubleYoVariable variable = new DoubleYoVariable(name, registry);
@@ -91,7 +95,7 @@ public class SimpleUpperBodySubController implements UpperBodySubController
 
    private void populateControllers()
    {
-      for (NeckJointName neckJointName : NeckJointName.values())
+      for (NeckJointName neckJointName : neckJointNames)
       {
          neckControllers.put(neckJointName, new PIDController(neckJointName.getCamelCaseNameForStartOfExpression(), registry));
       }

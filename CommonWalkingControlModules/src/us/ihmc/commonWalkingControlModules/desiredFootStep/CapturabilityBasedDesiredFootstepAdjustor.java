@@ -78,17 +78,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
          return baseSwingFootstep;
       }
 
-      RobotSide swingLegSide = null;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (baseSwingFootstep.getBody() == feet.get(robotSide))
-            swingLegSide = robotSide;
-      }
-
-      if (swingLegSide == null)
-      {
-         throw new RuntimeException("Swing leg side not recognized");
-      }
+      RobotSide swingLegSide = baseSwingFootstep.getRobotSide();
 
       if (steppingStonesCaptureRegionIntersectionCalculator != null)
       {
