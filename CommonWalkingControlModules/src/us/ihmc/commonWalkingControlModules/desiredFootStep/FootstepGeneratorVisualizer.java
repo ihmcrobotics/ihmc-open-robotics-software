@@ -14,6 +14,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -24,11 +25,12 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
@@ -77,17 +79,19 @@ public class FootstepGeneratorVisualizer
    }
 
 
-   public void addFootstepsAndTickAndUpdate(SimulationConstructionSet scs, List<Footstep> footsteps)
+   public void addFootstepsAndTickAndUpdate(SimulationConstructionSet scs, List<Footstep> footsteps, List<ContactablePlaneBody> contactablePlaneBodies)
    {
-      for (Footstep footstep : footsteps)
+      for (int i = 0; i < footsteps.size(); i++)
       {
-         addFootstep(footstep);
+         Footstep footstep = footsteps.get(i);
+         ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
+         addFootstep(footstep, contactablePlaneBody);
          scs.tickAndUpdate();
       }
 
    }
 
-   public void addFootstep(Footstep footstep)
+   public void addFootstep(Footstep footstep, ContactablePlaneBody contactablePlaneBody)
    {
       printIfDebug("Adding footstep " + footstep);
 
@@ -108,7 +112,7 @@ public class FootstepGeneratorVisualizer
          contactPolygonsHashMap.put(name, contactPolygon);
 
          // Keep the contact points in sole frame:
-         List<FramePoint> expectedContactPoints = footstep.getExpectedContactPoints();
+         List<FramePoint> expectedContactPoints = FootstepUtils.calculateExpectedContactPoints(footstep, contactablePlaneBody);
          ArrayList<Point2d> contactPointsInSoleFrame = new ArrayList<Point2d>();
 
          for (FramePoint contactPoint : expectedContactPoints)
@@ -146,13 +150,13 @@ public class FootstepGeneratorVisualizer
    {
       Robot nullRobot = new Robot("FootstepVisualizerRobot");
 
-      List<Footstep> footsteps = generateDefaultFootstepList();
+      Pair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = generateDefaultFootstepList();
 
-      visualizeFootsteps(nullRobot, footsteps);
+      visualizeFootsteps(nullRobot, footstepsAndContactablePlaneBodies.first(), footstepsAndContactablePlaneBodies.second());
    }
 
 
-   public static List<Footstep> generateDefaultFootstepList()
+   public static Pair<List<Footstep>, List<ContactablePlaneBody>> generateDefaultFootstepList()
    {
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       SideDependentList<PoseReferenceFrame> soleFrames = new SideDependentList<PoseReferenceFrame>();
@@ -188,7 +192,16 @@ public class FootstepGeneratorVisualizer
             RobotSide.LEFT);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
 
-      return footsteps;
+      Pair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = new Pair<List<Footstep>, List<ContactablePlaneBody>>(new ArrayList<Footstep>(), new ArrayList<ContactablePlaneBody>());
+
+      for (Footstep footstep : footsteps)
+      {
+         footstepsAndContactablePlaneBodies.first().add(footstep);
+         footstepsAndContactablePlaneBodies.second().add(bipedFeet.get(footstep.getRobotSide()));
+      }
+      
+      
+      return footstepsAndContactablePlaneBodies;
    }
 
 
@@ -218,7 +231,7 @@ public class FootstepGeneratorVisualizer
    }
 
 
-   public static void visualizeFootsteps(Robot nullRobot, List<Footstep> footsteps)
+   public static void visualizeFootsteps(Robot nullRobot, List<Footstep> footsteps, List<ContactablePlaneBody> contactablePlaneBodies)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
       scs.setDT(0.25, 1);
@@ -229,7 +242,7 @@ public class FootstepGeneratorVisualizer
       FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry,
                                                                    yoGraphicsListRegistry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      footstepGeneratorVisualizer.addFootstepsAndTickAndUpdate(scs, footsteps);
+      footstepGeneratorVisualizer.addFootstepsAndTickAndUpdate(scs, footsteps, contactablePlaneBodies);
 
       scs.startOnAThread();
 

@@ -93,7 +93,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       assertAllStepsValid(footstepValidityMetric);
       assertLastStepIsPointingCorrectly(footSteps.get(footSteps.size() - 1), destination);
       if (VISUALIZE)
-         FootstepGeneratorVisualizer.visualizeFootsteps(new Robot("null"), footSteps);
+         FootstepGeneratorVisualizer.visualizeFootsteps(new Robot("null"), footSteps, null); //broken
       if (VISUALIZE)
          ThreadTools.sleepForever();
    }
@@ -149,7 +149,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
          currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side, bipedFeet));
       }
 
-      boolean firstStepIsLeft = footSteps.get(0).getBody().getRigidBody() == fullRobotModel.getFoot(RobotSide.LEFT);
+      boolean firstStepIsLeft = footSteps.get(0).getBody() == fullRobotModel.getFoot(RobotSide.LEFT);
       RobotSide firstStepSide = firstStepIsLeft ? RobotSide.LEFT : RobotSide.RIGHT;
       ArrayList<Footstep> footstepQueue = new ArrayList<Footstep>();
       footstepQueue.add(currentFootLocations.get(firstStepSide));

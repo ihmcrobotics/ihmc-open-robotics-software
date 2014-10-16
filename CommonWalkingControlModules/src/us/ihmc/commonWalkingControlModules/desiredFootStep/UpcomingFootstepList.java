@@ -70,7 +70,7 @@ public class UpcomingFootstepList
             nextFootstepList.add(nextFootstep);
             nextFootstepIndex.set(nextFootstepList.size() - 1);
 
-            upcomingSupportLeg.set(getRobotSide(nextFootstep.getBody(), bipedFeet).getOppositeSide());
+            upcomingSupportLeg.set(nextFootstep.getRobotSide().getOppositeSide());
             FramePose pose = new FramePose();
             nextFootstep.getPose(pose);
             nextFootstepPose.set(pose);
@@ -171,17 +171,6 @@ public class UpcomingFootstepList
    public Footstep getFootstepTwoBackFromNextFootstepList()
    {
       return nextFootstepList.get(nextFootstepIndex.getIntegerValue() - 2);
-   }
-
-   private static RobotSide getRobotSide(ContactablePlaneBody body, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (body == bipedFeet.get(robotSide))
-            return robotSide;
-      }
-
-      throw new RuntimeException("ContactablePlaneBody: " + body + " not found.");
    }
 
    public boolean hasNextFootsteps()

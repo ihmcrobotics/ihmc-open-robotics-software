@@ -11,7 +11,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 
@@ -38,11 +37,6 @@ public class TransferToAndNextFootstepsData
    private double doubleSupportInitialTransferDuration;
    
    private boolean stopIfReachedEnd;
-   
-   public ContactablePlaneBody getTransferToFootContactablePlaneBody()
-   {
-      return transferToFootstep.getBody();
-   }
    
    public Footstep getTransferToFootstep()
    {

@@ -60,7 +60,7 @@ public class FootstepListBehavior extends BehaviorInterface
          Quat4d orientation = new Quat4d();
          footstep.getOrientation(orientation);
 
-         RobotSide footstepSide = FootstepUtils.getSideFromFootstep(footstep, feet);
+         RobotSide footstepSide = footstep.getRobotSide();
          FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
          footsepDataList.add(footstepData);
       }

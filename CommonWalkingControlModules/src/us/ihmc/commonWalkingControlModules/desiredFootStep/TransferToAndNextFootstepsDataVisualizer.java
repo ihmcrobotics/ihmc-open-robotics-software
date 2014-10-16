@@ -95,8 +95,9 @@ public class TransferToAndNextFootstepsDataVisualizer
    {
       if (footstep != null)
       {
-         FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(footstep, footstep.getSoleReferenceFrame());
-         footstepPolygon.setConvexPolygon2d(nextFootPolygon.getConvexPolygon2d());
+         // FIXME I broke it Sylvain
+//         FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(footstep, footstep.getSoleReferenceFrame());
+//         footstepPolygon.setConvexPolygon2d(nextFootPolygon.getConvexPolygon2d());
 
          footstepPolygonViz.setToReferenceFrame(footstep.getSoleReferenceFrame());
          footstepCoordinateSystem.setToReferenceFrame(footstep.getPoseReferenceFrame());

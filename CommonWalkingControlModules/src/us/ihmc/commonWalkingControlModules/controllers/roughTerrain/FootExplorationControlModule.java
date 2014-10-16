@@ -276,7 +276,7 @@ public class FootExplorationControlModule
          {
             PlaneContactState planeContactState = planeContactStates.get(i);
             RigidBody planeBody = planeContactState.getRigidBody();
-            RigidBody nextFootStepBody = nextFootStep.getBody().getRigidBody();
+            RigidBody nextFootStepBody = nextFootStep.getBody();
 
             if (planeBody.equals(nextFootStepBody))
                currentPlaneContactStateToExplore = planeContactState;

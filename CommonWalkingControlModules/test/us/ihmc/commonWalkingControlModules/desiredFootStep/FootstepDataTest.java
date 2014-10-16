@@ -333,7 +333,7 @@ public class FootstepDataTest
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), robotSide, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -347,27 +347,7 @@ public class FootstepDataTest
          Footstep sentFootstep = sentFootsteps.get(i);
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
-         assertTrue(sentFootstep.getBody().getName().equals(receivedFootstep.getBody().getName()));
-
-         FramePose sentPose = new FramePose();
-         sentFootstep.getPose(sentPose);
-         FramePose receivedPose = new FramePose();
-         receivedFootstep.getPose(receivedPose);
-
-         assertTrue(sentPose.epsilonEquals(receivedPose, 0.0001));
-
-         for (int j = 0; j < sentFootstep.getExpectedContactPoints().size(); j++)
-         {
-            FramePoint sentFramePoint = sentFootstep.getExpectedContactPoints().get(j);
-            FramePoint receivedFramePoint = receivedFootstep.getExpectedContactPoints().get(j);
-
-            Point3d expected = new Point3d();
-            Point3d actual = new Point3d();
-            sentFramePoint.get(expected);
-            receivedFramePoint.get(actual);
-            JUnitTools.assertTuple3dEquals(expected, actual, 1e-4);
-            //            assertTrue(sentFramePoint.epsilonEquals(receivedFramePoint, 0.0001));
-         }
+         assertTrue(sentFootstep.epsilonEquals(receivedFootstep, 1e-4));
       }
    }
 
@@ -413,7 +393,7 @@ public class FootstepDataTest
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -441,7 +421,7 @@ public class FootstepDataTest
             PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
             boolean trustHeight = true;
-            Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
+            Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), footstepData.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }

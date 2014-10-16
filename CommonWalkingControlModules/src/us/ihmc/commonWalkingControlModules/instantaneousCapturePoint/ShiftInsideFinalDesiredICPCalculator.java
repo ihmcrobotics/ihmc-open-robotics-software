@@ -50,15 +50,14 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
 
       FramePose transferToFootstepAnklePose = new FramePose();
       transferToFootstep.getPose(transferToFootstepAnklePose);
-      ContactablePlaneBody transferToFootContactablePlaneBody = transferToAndNextFootstepsData.getTransferToFootContactablePlaneBody();
       FrameConvexPolygon2d transferToFootPolygonInSoleFrame = transferToAndNextFootstepsData.getTransferToFootPolygonInSoleFrame();
       RobotSide transferToSide = transferToAndNextFootstepsData.getTransferToSide();
 
       RigidBodyTransform footstepAnkleToWorldTransform = new RigidBodyTransform();
       getTransformFromPoseToWorld(footstepAnkleToWorldTransform, transferToFootstepAnklePose);
 
-      ReferenceFrame footBodyFrame = transferToFootContactablePlaneBody.getFrameAfterParentJoint();
-      ReferenceFrame footPlaneFrame = transferToFootContactablePlaneBody.getSoleFrame();
+      ReferenceFrame footBodyFrame = transferToFootstep.getBody().getParentJoint().getFrameAfterJoint();
+      ReferenceFrame footPlaneFrame = transferToFootstep.getSoleReferenceFrame();
       RigidBodyTransform ankleToSoleTransform = footPlaneFrame.getTransformToDesiredFrame(footBodyFrame);
 
       FramePoint2d centroid2d = transferToFootPolygonInSoleFrame.getCentroidCopy();

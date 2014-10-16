@@ -121,17 +121,16 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
 
-      FrameConvexPolygon2d transferToFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(transferToFootstep, worldFrame);
-
-      FramePoint2d transferToCentroid = transferToFootPolygon.getCentroidCopy();
+      FramePoint2d transferToCentroid = new FramePoint2d(transferToFootstep.getSoleReferenceFrame());
+      transferToCentroid.changeFrameAndProjectToXYPlane(worldFrame);
 
       if (nextFootstep == null)
       {
          return transferToCentroid;
       }
 
-      FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(nextFootstep, worldFrame);
-      FramePoint2d nextCentroid = nextFootPolygon.getCentroidCopy();
+      FramePoint2d nextCentroid = new FramePoint2d(nextFootstep.getSoleReferenceFrame());
+      nextCentroid.changeFrameAndProjectToXYPlane(worldFrame);
 
       FrameVector2d vectorFromTransferToNext = new FrameVector2d(nextCentroid);
       vectorFromTransferToNext.sub(transferToCentroid);
@@ -156,9 +155,8 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
 
-      FrameConvexPolygon2d transferToFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(transferToFootstep, worldFrame);
-
-      FramePoint2d transferToCentroid = transferToFootPolygon.getCentroidCopy();
+      FramePoint2d transferToCentroid = new FramePoint2d(transferToFootstep.getSoleReferenceFrame());
+      transferToCentroid.changeFrameAndProjectToXYPlane(worldFrame);
 
       FramePoint2d finalDesiredICP;
       if (nextFootstep == null)
@@ -167,8 +165,8 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       }
       else
       {
-         FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(nextFootstep, worldFrame);
-         FramePoint2d nextCentroid = nextFootPolygon.getCentroidCopy();
+         FramePoint2d nextCentroid = new FramePoint2d(nextFootstep.getSoleReferenceFrame());
+         nextCentroid.changeFrameAndProjectToXYPlane(worldFrame);
 
          FrameVector2d vectorFromTransferToNext = new FrameVector2d(nextCentroid);
          vectorFromTransferToNext.sub(transferToCentroid);
