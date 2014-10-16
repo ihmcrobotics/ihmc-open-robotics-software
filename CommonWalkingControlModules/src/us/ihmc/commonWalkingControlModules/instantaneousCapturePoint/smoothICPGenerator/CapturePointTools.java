@@ -278,7 +278,7 @@ public class CapturePointTools
 
    /**
     * Compute the desired capture point position at a given time. ICP_d =
-    * e^{w0*t} + (1-e^{w0*t})*p0
+    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*p0
     * 
     * @param omega0
     * @param time
