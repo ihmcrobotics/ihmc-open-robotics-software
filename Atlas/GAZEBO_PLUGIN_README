@@ -15,7 +15,7 @@ To run the plugin in Gazebo:
 		
 	(for now) Make a symlink from ROSCatkinWorkspace/catkin_ws to Atlas/ihmc_gazebo using:
 	
-		ln -s R ROSCatkinWorkspace/catkin_ws/ihmc_gazebo Atlas/ihmc_gazebo
+		ln -s Atlas/ihmc_gazebo ROSCatkinWorkspace/catkin_ws/ihmc_gazebo
 	
 	Make sure you can:
 	
