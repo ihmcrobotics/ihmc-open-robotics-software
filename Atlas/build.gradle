@@ -9,3 +9,9 @@ setupDefaultDirectoryStructure()
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
+
+apply plugin: 'application'
+
+applicationName = "IHMCAtlasAPI"
+applicationDefaultJvmArgs = ["-Djava.library.path=../lib"]
+mainClassName = "us.ihmc.atlas.AtlasGFENetworkProcessor"
