@@ -248,6 +248,12 @@ public class ScriptBehavior extends BehaviorInterface
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
 	}
 	
+	public void setScriptInputs(String scriptName, RigidBodyTransform referenceFrame)
+	{
+		scriptResourceStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+		scriptObjectTransformToWorld = referenceFrame;
+	}
+	
 	private void loadNextScriptObject()
 	{
 		
