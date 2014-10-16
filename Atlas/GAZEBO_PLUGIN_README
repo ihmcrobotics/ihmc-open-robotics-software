@@ -8,4 +8,17 @@ To build the plugin:
 	
 To run the plugin in Gazebo:
 
+	Add these lines to your .bashrc (replace [your_workspace_here]):
+	
+		export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:[your_workspace_here]/ROSCatkinWorkspace/catkin_ws
+		export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:[your_workspace_here]/ROSCatkinWorkspace/catkin_ws/ihmc_gazebo/lib
+	
+	Make sure you can:
+	
+		roscd ihmc_gazebo
+	
+	Then run:
+	
+		roslaunch ihmc_gazebo ihmc_atlas.launch
+
 	
