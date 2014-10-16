@@ -19,10 +19,7 @@ import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.FootstepGenerator;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
@@ -49,7 +46,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
 
-   private FootstepGenerator footstepGenerator;
+   private TurnStraightTurnFootstepGenerator footstepGenerator;
 
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
@@ -67,6 +64,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
+      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -87,7 +85,6 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       hasTargetBeenProvided.set(false);
       hasFootstepsBeenGenerated.set(false);
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
       footstepListBehavior.initialize();
 
       robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -103,11 +100,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private void generateFootsteps()
    {
+      footsteps.clear();
       FramePose2d endPose = new FramePose2d(worldFrame);
       endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
 
-      footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType, RobotSide.LEFT);
+      footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
+      footstepGenerator.initialize();
       footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
 
       FramePoint midFeetPosition = new FramePoint(referenceFrames.getMidFeetZUpFrame());
@@ -188,6 +187,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       isStopped.set(false);
       hasTargetBeenProvided.set(false);
       hasFootstepsBeenGenerated.set(false);
+      footstepListBehavior.finalize();
    }
    
    public boolean hasInputBeenSet() {
