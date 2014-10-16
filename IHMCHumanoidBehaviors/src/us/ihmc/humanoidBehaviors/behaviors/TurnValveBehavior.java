@@ -21,24 +21,18 @@ public class TurnValveBehavior extends BehaviorInterface
 	private final ScriptBehavior scriptBehavior;
 	private final WalkToLocationBehavior walkToLocationBehavior;
 	
-	private Vector3d temp;
-	private Point3d valveLocation;
-	private Point3d targetWalkLocation;
-	private YoFrameOrientation valveOrientation;
+	private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.65, 0.2, 0.0);
+//	private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.65, 2.0, 0.0);
 
-	private InputStream scriptResourceStream = null;
-	private RigidBodyTransform scriptObjectTransformToWorldNoTranslation = null;
-	private RigidBodyTransform worldTransformToScriptObject = new RigidBodyTransform();
+
+	private Point3d targetWalkLocation;
+	private final YoFrameOrientation targetWalkOrientation;
+
+	private InputStream scriptResourceStream;
 
 	private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
 	private ScriptBehaviorInputPacket receivedScriptBehavior;
-	
-	private final FullRobotModel fullRobotModel;
-	private final DoubleYoVariable yoTime;
 		
-	private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.65, -0.1, 0.0);
-	private Vector3d valveInteractionOffsetInWorld = new Vector3d();
-
 	
 //	private final ModifiableValveModel valveModel;
 
@@ -47,15 +41,11 @@ public class TurnValveBehavior extends BehaviorInterface
 			ReferenceFrames referenceFrames, DoubleYoVariable yoTime)
 	{
 		super(outgoingCommunicationBridge);
-
-		this.fullRobotModel = fullRobotModel;
-		this.yoTime = yoTime;
 				
-		temp = new Vector3d();
-		valveLocation = new Point3d();
 		targetWalkLocation = new Point3d();
 		valveOrientation = new YoFrameOrientation(behaviorName + "ValveOrientation", ReferenceFrame.getWorldFrame(), registry);
-
+		targetWalkOrientation = new YoFrameOrientation(behaviorName + "WalkToOrientation", ReferenceFrame.getWorldFrame(), registry);
+		
 		scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
 		walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
 
@@ -87,51 +77,79 @@ public class TurnValveBehavior extends BehaviorInterface
 
 	}
 
+	private RigidBodyTransform worldToValveTransform;
+
+	
 	private void checkIfScriptBehaviorInputPacketReceived() 
 	{
 		if (scriptBehaviorInputPacketListener.isNewPacketAvailable()) 
 		{
 			receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
-			scriptObjectTransformToWorldNoTranslation = (receivedScriptBehavior.getReferenceTransform());  
+			worldToValveTransform = receivedScriptBehavior.getReferenceTransform();	
 
-			scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
 			
-			scriptObjectTransformToWorldNoTranslation.get(temp); valveLocation.set(temp);			
-			valveOrientation.set(scriptObjectTransformToWorldNoTranslation);
-						
-			convertValveOffsetFromValveFrameToWorldFrame();
-			
-			targetWalkLocation.set(valveLocation);
-			targetWalkLocation.add(valveInteractionOffsetInWorld);
+			setValveLocationAndOrientation( worldToValveTransform );
+												
+			targetWalkLocation.set(valveLoction);
+//			convertVectorFromValveFrameToWorldFrame(valveInteractionOffsetInValveFrame, valveOffsetInWorldFrame);
+			convertVectorFromValveFrameToWorldFrame_Hack(valveInteractionOffsetInValveFrame, valveOffsetInWorldFrame);
 
-			walkToLocationBehavior.setTarget(targetWalkLocation, valveOrientation);
-//			walkToLocationBehavior.setTarget(valveLocation, valveOrientation);
+			System.out.println("TurnValveBehavior:  ValveOffset in World Frame:" + valveOffsetInWorldFrame);		
+
+			targetWalkLocation.add(valveOffsetInWorldFrame);
 			
+			targetWalkOrientation.setYawPitchRoll(
+					valveOrientation.getYaw().getDoubleValue() + 0.5*Math.PI,
+					valveOrientation.getPitch().getDoubleValue(),
+					valveOrientation.getRoll().getDoubleValue());
+
+			walkToLocationBehavior.setTarget(targetWalkLocation, targetWalkOrientation);
 			
-			System.out.println("Turn Valve Location Updated:" + valveLocation);
+
+			System.out.println("Turn Valve Location Updated:" + valveLoction);
 			System.out.println("Target Walk to Location Updated:" + targetWalkLocation);
+			
+			scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
 
 		}
 	}
-
 	
-	private void convertValveOffsetFromValveFrameToWorldFrame()
+	
+	private Vector3d valveLoction = new Vector3d();
+	private YoFrameOrientation valveOrientation;
+
+	private void setValveLocationAndOrientation(RigidBodyTransform worldToValveTransform) 
 	{
-		scriptObjectTransformToWorldNoTranslation.invert(worldTransformToScriptObject);
-		scriptObjectTransformToWorldNoTranslation.setTranslation(0, 0, 0);
-		
-		
-		valveInteractionOffsetInWorld.set(valveInteractionOffsetInValveFrame);
-		scriptObjectTransformToWorldNoTranslation.transform(valveInteractionOffsetInValveFrame, valveInteractionOffsetInWorld);
-		
-		
-		System.out.println("TurnValveBehavior:  ValveOffset in World Frame:" + valveInteractionOffsetInWorld);
+		worldToValveTransform.get(valveLoction);
+		valveOrientation.set(worldToValveTransform);
+	}
+	
+	
+	private RigidBodyTransform valveToWorldRotation = new RigidBodyTransform();
+	private Vector3d valveOffsetInWorldFrame = new Vector3d();
+	
+	private void convertVectorFromValveFrameToWorldFrame(Vector3d vecInValveFrame, Vector3d vecInWorldFrameToPack) 
+	{
+		valveToWorldRotation.set(worldToValveTransform);
+		valveToWorldRotation.invert();
+		valveToWorldRotation.setTranslation(0, 0, 0);
+
+		valveToWorldRotation.transform(vecInValveFrame, vecInWorldFrameToPack);
+	}
+
+
+	private void convertVectorFromValveFrameToWorldFrame_Hack(Vector3d vecInValveFrame, Vector3d vecInWorldFrameToPack)
+	{
+		double x = vecInValveFrame.x;
+		double y = vecInValveFrame.y;
+		double yaw = valveOrientation.getYaw().getDoubleValue() + 0.5*Math.PI;
+		vecInWorldFrameToPack.set(x*Math.cos(yaw) - y*Math.sin(yaw), x*Math.sin(yaw) + y*Math.cos(yaw), 0.0);
 	}
 	
 	
 	private boolean inputsSupplied()
 	{
-		return (scriptResourceStream != null && scriptObjectTransformToWorldNoTranslation != null);
+		return (scriptResourceStream != null && worldToValveTransform != null);
 	}
 
 	@Override
