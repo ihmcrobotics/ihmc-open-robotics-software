@@ -13,12 +13,9 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 
 public class FootstepListBehavior extends BehaviorInterface
 {
@@ -49,7 +46,7 @@ public class FootstepListBehavior extends BehaviorInterface
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
    }
 
-   public void set(ArrayList<Footstep> footsteps, SideDependentList<ContactablePlaneBody> feet)
+   public void set(ArrayList<Footstep> footsteps)
    {
       FootstepDataList footsepDataList = new FootstepDataList();
       

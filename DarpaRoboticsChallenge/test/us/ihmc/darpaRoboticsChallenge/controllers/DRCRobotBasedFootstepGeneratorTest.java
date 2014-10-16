@@ -29,6 +29,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
@@ -48,7 +49,9 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private List<Footstep> footSteps = new ArrayList<Footstep>();
    private FullRobotModel fullRobotModel;
    private ReferenceFrames referenceFrames;
-   private SideDependentList<ContactablePlaneBody> bipedFeet;
+   private SideDependentList<ContactablePlaneBody> contactableFeet;
+   private SideDependentList<RigidBody> feet;
+   private SideDependentList<ReferenceFrame> soleFrames;
    private WalkingControllerParameters walkingParamaters;
 
    @Before
@@ -102,7 +105,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, pathOrientation, Math.PI / 6, Math.PI * 0.15, 0.35);
 
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, endPoint, pathType, RobotSide.RIGHT);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(feet, soleFrames, endPoint, pathType, RobotSide.RIGHT);
 
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }
@@ -146,7 +149,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       SideDependentList<Footstep> currentFootLocations = new SideDependentList<Footstep>();
       for (RobotSide side : RobotSide.values)
       {
-         currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side, bipedFeet));
+         currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side, contactableFeet));
       }
 
       boolean firstStepIsLeft = footSteps.get(0).getBody() == fullRobotModel.getFoot(RobotSide.LEFT);
@@ -165,6 +168,14 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       walkingParamaters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
-      bipedFeet = DRCOperatorInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
+      contactableFeet = DRCOperatorInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
+
+      feet = new SideDependentList<RigidBody>();
+      soleFrames = new SideDependentList<ReferenceFrame>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         feet.put(robotSide, contactableFeet.get(robotSide).getRigidBody());
+         soleFrames.put(robotSide, contactableFeet.get(robotSide).getSoleFrame());
+      }
    }
 }

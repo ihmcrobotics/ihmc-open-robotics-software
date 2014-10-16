@@ -215,7 +215,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
       FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
       ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, 0.0);
-      nextFootstep = poseFinder.generateFootstep(footstepPose, foot, null, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
+      nextFootstep = poseFinder.generateFootstep(footstepPose, foot.getRigidBody(), foot.getSoleFrame(), null, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
 
       return nextFootstep;
    }
