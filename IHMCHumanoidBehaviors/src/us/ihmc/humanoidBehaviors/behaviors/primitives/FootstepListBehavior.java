@@ -99,7 +99,6 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-	   System.out.println("FootstepInitialization Called");
 	   if(!isInitialized)
 	   {
 		   footstepStatusQueue.clear();
