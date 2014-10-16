@@ -12,7 +12,7 @@ Make sure you have the following in your .bashrc: (source ~/.bashrc to update it
 
 	source /opt/ros/indigo/setup.bash   # this is necessary for drcsim 3.1.0 and later
 	source /usr/share/drcsim/setup.sh
-	source [your_workspace_here]/Atlas/catkin_ws/devel/setup.bash
+	source [your_workspace_here]/Atlas/ihmc_gazebo_catkin_ws/devel/setup.bash
 	
 To run the plugin in Gazebo:
 	
