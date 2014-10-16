@@ -62,7 +62,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time, FramePoint currentCapturePointPosition)
    {
-      super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, time);
+      super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 
       if (doFootSlipCompensation.getBooleanValue())
       {
@@ -166,5 +166,11 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    private double getTimeWithDelay(double time)
    {
       return time - timeDelay.getDoubleValue();
+   }
+   
+   @Override
+   public boolean isDone(double time)
+   {
+      return super.isDone(getTimeWithDelay(time));
    }
 }
