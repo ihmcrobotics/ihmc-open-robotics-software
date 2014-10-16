@@ -98,14 +98,11 @@ public class FootstepListBehavior extends BehaviorInterface
    {
 	   if(!isInitialized)
 	   {
-		   footstepStatusQueue.clear();
-		   outgoingFootstepDataList = null;
 		   packetHasBeenSent.set(false);
-		   numberOfFootsteps.set(-1);
 		   
-		   lastFootstepStatus = null;
 		   isPaused.set(false);
 		   isStopped.set(false);
+		   isInitialized = true;
 	   }
    }
 
@@ -183,7 +180,7 @@ public class FootstepListBehavior extends BehaviorInterface
    
    @Override
    public boolean hasInputBeenSet() {
-	   if (numberOfFootsteps.getIntegerValue() != -1)
+	   if (numberOfFootsteps.getIntegerValue() != -1 && lastFootstepStatus != null)
 		   return true;
 	   else
 		   return false;
