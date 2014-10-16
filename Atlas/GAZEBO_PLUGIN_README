@@ -6,7 +6,7 @@ Make sure stereo-image-proc is installed:
 
 To build the plugin:
 
-	Run 'catkin_make' in Atlas/catkin_ws
+	Run 'catkin_make' in Atlas/ihmc_gazebo_catkin_ws
 	
 Make sure you have the following in your .bashrc: (source ~/.bashrc to update it)
 
