@@ -66,11 +66,17 @@ public class DesiredFootstepVisualizer
    private final DoubleYoVariable minZ = new DoubleYoVariable("minZ", registry);
    private final SideDependentList<SixDoFJoint> sixDoFJoints;
    private final SideDependentList<ReferenceFrame> soleFrames;
+   public SideDependentList<ReferenceFrame> getSoleFrames()
+   {
+      return soleFrames;
+   }
+
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<ReferenceFrame> footFrames;
    private final ArrayList<ReferenceFrame> framesToVisualize;
 
-   private final SideDependentList<ContactablePlaneBody> bipedFeet;
+   private final SideDependentList<ContactablePlaneBody> contactableFeet;
+   private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
 
    private final SideDependentList<BagOfBalls> bagsOfBalls;
 
@@ -87,7 +93,7 @@ public class DesiredFootstepVisualizer
       this.soleFrames = new SideDependentList<ReferenceFrame>();
       this.footFrames = new SideDependentList<ReferenceFrame>();
       this.ankleZUpFrames = new SideDependentList<ReferenceFrame>();
-      this.bipedFeet = new SideDependentList<ContactablePlaneBody>();
+      this.contactableFeet = new SideDependentList<ContactablePlaneBody>();
 
       double footWidth = 0.15;
       double footForward = 0.25;
@@ -95,6 +101,7 @@ public class DesiredFootstepVisualizer
       double footHeight = 0.05;
       for (RobotSide robotSide : RobotSide.values)
       {
+         feet.put(robotSide, contactableFeet.get(robotSide).getRigidBody());
          String robotSideName = robotSide.getCamelCaseNameForStartOfExpression();
 
          SixDoFJoint sixDoFJoint = new SixDoFJoint(robotSideName + "Joint", elevator, elevator.getBodyFixedFrame());
@@ -112,7 +119,7 @@ public class DesiredFootstepVisualizer
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
 
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBackward, footWidth / 2.0, -footWidth / 2.0);
-         bipedFeet.put(robotSide, foot);
+         contactableFeet.put(robotSide, foot);
          framesToVisualize.add(footFrame);
       }
 
@@ -129,7 +136,7 @@ public class DesiredFootstepVisualizer
       SideDependentList<Color> footColors = new SideDependentList<Color>(Color.pink, Color.blue);
       for (RobotSide robotSide : RobotSide.values)
       {
-         int maxNumberOfVertices = bipedFeet.get(robotSide).getContactPointsCopy().size();
+         int maxNumberOfVertices = contactableFeet.get(robotSide).getContactPointsCopy().size();
          String footName = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
          YoFrameConvexPolygon2d yoFrameFootPolygonInWorld = new YoFrameConvexPolygon2d(footName, "", worldFrame, maxNumberOfVertices, registry);
          this.feetPolygonsInWorld.put(robotSide, yoFrameFootPolygonInWorld);
@@ -154,11 +161,16 @@ public class DesiredFootstepVisualizer
       return footFrames;
    }
 
-   private SideDependentList<ContactablePlaneBody> getBipedFeet()
+   private SideDependentList<ContactablePlaneBody> getContactableFeet()
    {
-      return bipedFeet;
+      return contactableFeet;
    }
-
+   
+   private SideDependentList<RigidBody> getFeet()
+   {
+      return feet;
+   }
+   
    public void setFootstepProvider(FootstepProvider footstepProvider)
    {
       this.footstepProvider = footstepProvider;
@@ -242,7 +254,7 @@ public class DesiredFootstepVisualizer
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         tempFootPolygonInWorld.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(worldFrame, bipedFeet.get(robotSide).getContactPointsCopy());
+         tempFootPolygonInWorld.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(worldFrame, contactableFeet.get(robotSide).getContactPointsCopy());
 
          feetPolygonsInWorld.get(robotSide).setFrameConvexPolygon2d(tempFootPolygonInWorld);
       }
@@ -250,7 +262,7 @@ public class DesiredFootstepVisualizer
 
    private void computeMinZ(RobotSide swingLegSide)
    {
-      ContactablePlaneBody bipedFoot = bipedFeet.get(swingLegSide);
+      ContactablePlaneBody bipedFoot = contactableFeet.get(swingLegSide);
       RigidBodyTransform footToWorldTransform = sixDoFJoints.get(swingLegSide).getFrameAfterJoint().getTransformToDesiredFrame(worldFrame);
       FramePoint minZPoint = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, bipedFoot, worldFrame);
       this.minZ.set(minZPoint.getZ());
@@ -285,7 +297,9 @@ public class DesiredFootstepVisualizer
 
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, yoGraphicsListRegistry);
 
-      SideDependentList<ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
+      SideDependentList<ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getContactableFeet();
+      SideDependentList<RigidBody> feet = desiredFootstepVisualizer.getFeet();
+      SideDependentList<ReferenceFrame> soleFrames = desiredFootstepVisualizer.getSoleFrames();
 
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
@@ -294,7 +308,7 @@ public class DesiredFootstepVisualizer
 
       FramePoint2d endPoint = new FramePoint2d(worldFrame, 10.0, 0.0);
 
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, endPoint, pathType, initialStanceSide);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(feet, soleFrames, endPoint, pathType, initialStanceSide);
 
       List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
 
@@ -358,14 +372,14 @@ public class DesiredFootstepVisualizer
 
       ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(worldFrame, parentRegistry);
 
-      ReferenceFrame footBodyFrame = desiredFootstepVisualizer.getBipedFeet().get(RobotSide.LEFT).getFrameAfterParentJoint();
-      ReferenceFrame footPlaneFrame = desiredFootstepVisualizer.getBipedFeet().get(RobotSide.LEFT).getSoleFrame();
+      ReferenceFrame footBodyFrame = desiredFootstepVisualizer.getContactableFeet().get(RobotSide.LEFT).getFrameAfterParentJoint();
+      ReferenceFrame footPlaneFrame = desiredFootstepVisualizer.getContactableFeet().get(RobotSide.LEFT).getSoleFrame();
       RigidBodyTransform transformFromFootBodyFrameToFootPlaneFrame = footBodyFrame.getTransformToDesiredFrame(footPlaneFrame);
       Vector3d trans = new Vector3d();
       transformFromFootBodyFrameToFootPlaneFrame.get(trans);
       double ankleHeight = trans.getZ();
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight,
-            desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(), desiredFootstepVisualizer.getBipedFeet(),
+            desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(), desiredFootstepVisualizer.getContactableFeet(),
             desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
       desiredFootstepCalculator.setInPlaceWidth(0.4);
       desiredFootstepCalculator.setMaxStepLength(0.6);

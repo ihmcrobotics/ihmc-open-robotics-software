@@ -53,13 +53,12 @@ public class FootstepGeneratorVisualizer
    private final LinkedHashMap<String, YoFramePose> contactPosesHashMap = new LinkedHashMap<String, YoFramePose>();
    private final LinkedHashMap<String, YoFrameConvexPolygon2d> contactPolygonsHashMap = new LinkedHashMap<String, YoFrameConvexPolygon2d>();
 
-
    public FootstepGeneratorVisualizer(int maxNumberOfContacts, int maxPointsPerContact, YoVariableRegistry parentRegistry,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList("FootstepGeneratorVisualizer");
 
-      AppearanceDefinition[] appearances = new AppearanceDefinition[] {YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Purple()};
+      AppearanceDefinition[] appearances = new AppearanceDefinition[] { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Purple() };
 
       for (int i = 0; i < maxNumberOfContacts; i++)
       {
@@ -69,15 +68,14 @@ public class FootstepGeneratorVisualizer
          YoFrameConvexPolygon2d contactPolygon = new YoFrameConvexPolygon2d("contactPolygon" + i, "", worldFrame, maxPointsPerContact, registry);
          contactPolygonsWorld.add(contactPolygon);
 
-         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("contactPolygon" + i, contactPolygon, contactPose, 1.0,
-                                                                 appearances[i % appearances.length]);
+         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("contactPolygon" + i, contactPolygon, contactPose, 1.0, appearances[i
+               % appearances.length]);
          yoGraphicsList.add(dynamicGraphicPolygon);
       }
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       parentRegistry.addChild(registry);
    }
-
 
    public void addFootstepsAndTickAndUpdate(SimulationConstructionSet scs, List<Footstep> footsteps, List<ContactablePlaneBody> contactablePlaneBodies)
    {
@@ -145,7 +143,6 @@ public class FootstepGeneratorVisualizer
          System.out.println(string);
    }
 
-
    public static void main(String[] args)
    {
       Robot nullRobot = new Robot("FootstepVisualizerRobot");
@@ -155,11 +152,11 @@ public class FootstepGeneratorVisualizer
       visualizeFootsteps(nullRobot, footstepsAndContactablePlaneBodies.first(), footstepsAndContactablePlaneBodies.second());
    }
 
-
    public static Pair<List<Footstep>, List<ContactablePlaneBody>> generateDefaultFootstepList()
    {
-      SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
-      SideDependentList<PoseReferenceFrame> soleFrames = new SideDependentList<PoseReferenceFrame>();
+      SideDependentList<ContactablePlaneBody> contactableFeet = new SideDependentList<ContactablePlaneBody>();
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
+      SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
       SideDependentList<SixDoFJoint> sixDoFJoints = new SideDependentList<SixDoFJoint>();
 
       RigidBody rootBody = new RigidBody("Root", ReferenceFrame.getWorldFrame());
@@ -174,36 +171,35 @@ public class FootstepGeneratorVisualizer
          sixDoFJoints.set(robotSide, sixDoFJoint);
 
          RigidBody rigidBody = ScrewTestTools.addRandomRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", random, sixDoFJoint);
+         feet.put(robotSide, rigidBody);
          double forward = 0.12;
          double back = -0.07;
          double left = 0.06;
          double right = -0.06;
          RectangularContactableBody contactableBody = new RectangularContactableBody(rigidBody, soleFrame, forward, back, left, right);
 
-         bipedFeet.set(robotSide, contactableBody);
+         contactableFeet.set(robotSide, contactableBody);
       }
-      
-//      FramePose2d startPose = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);//should be done in bipedFeet instead
+
+      //      FramePose2d startPose = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);//should be done in bipedFeet instead
       FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(0.0, -3.0));
 
       SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
 
-      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet, endPoint, pathType,
-            RobotSide.LEFT);
+      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(feet, soleFrames, endPoint, pathType, RobotSide.LEFT);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
 
-      Pair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = new Pair<List<Footstep>, List<ContactablePlaneBody>>(new ArrayList<Footstep>(), new ArrayList<ContactablePlaneBody>());
+      Pair<List<Footstep>, List<ContactablePlaneBody>> footstepsAndContactablePlaneBodies = new Pair<List<Footstep>, List<ContactablePlaneBody>>(
+            new ArrayList<Footstep>(), new ArrayList<ContactablePlaneBody>());
 
       for (Footstep footstep : footsteps)
       {
          footstepsAndContactablePlaneBodies.first().add(footstep);
-         footstepsAndContactablePlaneBodies.second().add(bipedFeet.get(footstep.getRobotSide()));
+         footstepsAndContactablePlaneBodies.second().add(contactableFeet.get(footstep.getRobotSide()));
       }
-      
-      
+
       return footstepsAndContactablePlaneBodies;
    }
-
 
    public static FramePose setupStanceFoot(SideDependentList<PoseReferenceFrame> soleFrames, SideDependentList<SixDoFJoint> sixDoFJoints)
    {
@@ -217,7 +213,6 @@ public class FootstepGeneratorVisualizer
       return startStanceFootPose;
    }
 
-
    public static FramePose setupSwingFoot(SideDependentList<PoseReferenceFrame> soleFrames, SideDependentList<SixDoFJoint> sixDoFJoints)
    {
       FramePose startSwingFootPose = new FramePose(worldFrame, new Point3d(0.0, -0.2, 0.0), new Quat4d());
@@ -230,7 +225,6 @@ public class FootstepGeneratorVisualizer
       return startSwingFootPose;
    }
 
-
    public static void visualizeFootsteps(Robot nullRobot, List<Footstep> footsteps, List<ContactablePlaneBody> contactablePlaneBodies)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
@@ -240,7 +234,7 @@ public class FootstepGeneratorVisualizer
       int maxNumberOfContacts = 2;
       int maxPointsPerContact = 4;
       FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry,
-                                                                   yoGraphicsListRegistry);
+            yoGraphicsListRegistry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       footstepGeneratorVisualizer.addFootstepsAndTickAndUpdate(scs, footsteps, contactablePlaneBodies);
 
@@ -249,7 +243,6 @@ public class FootstepGeneratorVisualizer
       deleteFirstDataPointAndCropData(scs);
    }
 
-
    private static void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
    {
       scs.gotoInPointNow();
@@ -257,7 +250,5 @@ public class FootstepGeneratorVisualizer
       scs.setInPoint();
       scs.cropBuffer();
    }
-
-
 
 }

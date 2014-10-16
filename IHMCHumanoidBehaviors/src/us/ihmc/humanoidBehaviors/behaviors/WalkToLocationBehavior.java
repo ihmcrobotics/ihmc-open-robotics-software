@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootSpoof;
@@ -53,22 +54,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
 
-   double xToAnkle = -0.15;
-   double yToAnkle = 0.02;
-   double zToAnkle = 0.21;
-   double footForward = 0.1;
-   double footBack = 0.05;
-   double footSide = 0.05;
-   double coefficientOfFriction = 0.0;
-
-   ContactablePlaneBody leftFoot = new FootSpoof("leftFoot", xToAnkle, yToAnkle, zToAnkle, footForward, footBack, footSide, coefficientOfFriction);
-   ContactablePlaneBody rightFoot = new FootSpoof("rightFoot", xToAnkle, yToAnkle, zToAnkle, footForward, footBack, footSide, coefficientOfFriction);
-   SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
-
-   {
-      bipedFeet.set(RobotSide.LEFT, leftFoot);
-      bipedFeet.set(RobotSide.RIGHT, rightFoot);
-   }
+   private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames)
@@ -80,6 +67,12 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         feet.put(robotSide, fullRobotModel.getFoot(robotSide));
+         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
+      }
    }
 
    public void setTarget(Point3d targetLocation, YoFrameOrientation targetOrientation)//(Point3d targetLocation, YoFrameOrientation targetOrientation)   //(YoFramePoint targetLocation, YoFrameOrientation targetOrientation)
@@ -114,7 +107,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
 
-      footstepGenerator = new TurnStraightTurnFootstepGenerator(bipedFeet, endPose, pathType, RobotSide.LEFT);
+      footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType, RobotSide.LEFT);
       footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
 
       FramePoint midFeetPosition = new FramePoint(referenceFrames.getMidFeetZUpFrame());
@@ -126,7 +119,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
          footstep.setZ(midFeetPosition.getZ());
       }
 
-      footstepListBehavior.set(footsteps, bipedFeet);
+      footstepListBehavior.set(footsteps);
       hasFootstepsBeenGenerated.set(true);
    }
 
