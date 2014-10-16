@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.vecmath.Quat4d;
@@ -52,7 +56,15 @@ public class DRCSimSensorReader implements SensorReader
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
 
-      this.jointList = stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions();
+      this.jointList = new ArrayList<>(stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions());
+      Collections.sort(jointList, new Comparator<OneDoFJoint>()
+      {
+         @Override
+         public int compare(OneDoFJoint o1, OneDoFJoint o2)
+         {
+            return o1.getName().compareTo(o2.getName());
+         }
+      });;
       this.imu = stateEstimatorSensorDefinitions.getAngularVelocitySensorDefinitions().get(0);
       this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
       
@@ -60,8 +72,8 @@ public class DRCSimSensorReader implements SensorReader
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;
       forceSensorDataLength = forceSensorDataHolderForEstimator.getForceSensorDefinitions().size() * 6 * 8;
-      data = ByteBuffer.allocate(jointDataLength + imuDataLength + forceSensorDataLength);
-
+      data = ByteBuffer.allocate(8 + jointDataLength + imuDataLength + forceSensorDataLength);
+      data.order(ByteOrder.nativeOrder());
 
       System.out.println(jointList);
       System.out.println(forceSensorDataHolderForEstimator.getForceSensorDefinitions());
@@ -93,16 +105,14 @@ public class DRCSimSensorReader implements SensorReader
    {
       try
       {
-         System.out.println("reading data from channel");
          data.clear();
-         channel.read(data);
+         while(data.position() < data.limit())
+         {
+            channel.read(data);
+         }
          data.flip();
 
-         System.out.println(data);
-         System.out.println("Getting timestamp");
          long timestamp = data.getLong();
-
-         System.out.println("Getting joints");
          for (int i = 0; i < jointList.size(); i++)
          {
             OneDoFJoint joint = jointList.get(i);
@@ -110,29 +120,28 @@ public class DRCSimSensorReader implements SensorReader
             sensorProcessing.setJointVelocitySensorValue(joint, data.getDouble());
          }
 
-         System.out.println("getting imu data");
          Quat4d orientation = new Quat4d();
          Vector3d linearAcceleration = new Vector3d();
          Vector3d angularVelocity = new Vector3d();
 
+         orientation.setW(data.getDouble());
          orientation.setX(data.getDouble());
          orientation.setY(data.getDouble());
          orientation.setZ(data.getDouble());
-         orientation.setW(data.getDouble());
+         
+         angularVelocity.setX(data.getDouble());
+         angularVelocity.setY(data.getDouble());
+         angularVelocity.setZ(data.getDouble());
+         
 
          linearAcceleration.setX(data.getDouble());
          linearAcceleration.setY(data.getDouble());
          linearAcceleration.setZ(data.getDouble());
 
-         angularVelocity.setX(data.getDouble());
-         angularVelocity.setY(data.getDouble());
-         angularVelocity.setZ(data.getDouble());
-
          sensorProcessing.setOrientationSensorValue(imu, orientation);
          sensorProcessing.setLinearAccelerationSensorValue(imu, linearAcceleration);
          sensorProcessing.setAngularVelocitySensorValue(imu, angularVelocity);
 
-         System.out.println("Getting force sensor data");
          for (int i = 0; i < forceSensorDataHolderForEstimator.getForceSensorDefinitions().size(); i++)
          {
             ForceSensorDefinition definition = forceSensorDataHolderForEstimator.getForceSensorDefinitions().get(i);
@@ -146,7 +155,6 @@ public class DRCSimSensorReader implements SensorReader
             wrench.set(3, 0, data.getDouble());
             wrench.set(4, 0, data.getDouble());
             wrench.set(5, 0, data.getDouble());
-            wrench.set(6, 0, data.getDouble());
             dataHolder.setWrench(wrench);
          }
 
