@@ -526,4 +526,10 @@ public class ScriptBehavior extends BehaviorInterface
 	{
 		return stateMachine.getCurrentState().getBehavior().hasInputBeenSet();
 	}
+
+   public void setScriptInputs(String scriptName, RigidBodyTransform referenceFrame)
+   {
+      // TODO Auto-generated method stub
+      setScriptInputs(getClass().getClassLoader().getResourceAsStream(scriptName), referenceFrame);
+   }
 }
