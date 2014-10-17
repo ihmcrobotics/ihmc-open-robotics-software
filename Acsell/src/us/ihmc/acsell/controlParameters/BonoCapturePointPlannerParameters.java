@@ -83,4 +83,10 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    {
       return true;
    }
+
+   @Override
+   public double getAlphaDeltaFootPositionForFootslipCompensation()
+   {
+      return 0.65;
+   }
 }
