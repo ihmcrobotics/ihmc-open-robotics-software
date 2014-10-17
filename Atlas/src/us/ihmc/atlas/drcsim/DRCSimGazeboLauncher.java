@@ -2,9 +2,7 @@ package us.ihmc.atlas.drcsim;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 public class DRCSimGazeboLauncher
 {
