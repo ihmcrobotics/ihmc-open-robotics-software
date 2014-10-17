@@ -1,8 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -106,10 +113,22 @@ public class HandPoseBehavior extends BehaviorInterface
    {
    }
    
+   @Override
    public boolean hasInputBeenSet() {
 	   if (outgoingHandPosePacket != null)
 		   return true;
 	   else
 		   return false;
+   }
+
+   public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
+   {
+      Vector3d translation = new Vector3d();
+      Quat4d rotation = new Quat4d();
+      pose.get(translation);
+      pose.get(rotation);
+      Point3d point = new Point3d(translation.getX(), translation.getY(), translation.getZ());
+      this.outgoingHandPosePacket = new HandPosePacket(robotSide, frame, point, rotation, trajectoryTime);
+      behaviorTime = trajectoryTime;
    }
 }
