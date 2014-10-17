@@ -164,7 +164,6 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       percentIn = MathTools.clipToMinMax(percentIn, 0.0, 1.0);
 
       changeInTransferToFootPosition.scale(percentIn);
-      
       capturePointPositionToPack.setX(capturePointPositionToPack.getX() + changeInTransferToFootPosition.getX());
       capturePointPositionToPack.setY(capturePointPositionToPack.getY() + changeInTransferToFootPosition.getY());
   
