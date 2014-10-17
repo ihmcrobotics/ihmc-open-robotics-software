@@ -1,10 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
+import java.io.InputStream;
+
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -14,8 +15,9 @@ public class LocalizationBehavior extends BehaviorInterface {
 	private final FullRobotModel fullRobotModel;
 	private ScriptBehavior scriptBehavior;
 	//private String scriptName = "us/ihmc/atlas/scripts/TestLocalization.xml";
-	private String scriptName = "us/ihmc/atlas/scripts/ShortScriptForLooping.xml";
+	//private String scriptName = "us/ihmc/atlas/scripts/ShortScriptForLooping.xml";
 	private int i = 0;
+	private InputStream scriptResourceStream = null;
 	private RigidBodyTransform scriptObjectTransformToWorld = null;
 	private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
 	private ScriptBehaviorInputPacket receivedScriptBehavior;
@@ -56,6 +58,12 @@ public class LocalizationBehavior extends BehaviorInterface {
 			System.out.println("New packet available. Loading inputs...");
 			receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
 			scriptObjectTransformToWorld = (receivedScriptBehavior.getReferenceTransform());
+			scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
+			
+			if (scriptResourceStream == null)
+				System.out.println("Script Resource Stream is null. Can't load script!");
+			else
+				System.out.println("Script " + receivedScriptBehavior.getScriptName() + " loaded.");
 		}
 	}
 
@@ -121,7 +129,8 @@ public class LocalizationBehavior extends BehaviorInterface {
 	private void reloadScriptBehavior() {
 		scriptBehavior.finalize();
 		scriptBehavior.initialize();
-		scriptBehavior.setScriptInputs(scriptName,scriptObjectTransformToWorld);
+		scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
+		scriptBehavior.setScriptInputs(scriptResourceStream,scriptObjectTransformToWorld);
 		
 	}
 

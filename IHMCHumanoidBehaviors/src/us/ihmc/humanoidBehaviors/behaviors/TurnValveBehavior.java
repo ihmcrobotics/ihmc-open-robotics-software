@@ -112,7 +112,7 @@ public class TurnValveBehavior extends BehaviorInterface
          walkToLocationBehavior.setTarget(targetWalkLocation, targetWalkOrientation);
          System.out.println("Turn Valve Location Updated:" + valveLoction);
          System.out.println("Target Walk to Location Updated:" + targetWalkLocation);
-         scriptBehavior.setScriptInputs(receivedScriptBehavior.getScriptName(), worldToValveTransform);
+         scriptBehavior.setScriptInputs(getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName()), worldToValveTransform);
       }
    }
 
