@@ -217,6 +217,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getMinMechanicalLegLength()
+   {
+      return 0.1;
+   }
+
+   @Override
    public double getFinalToeOffPitchAngularVelocity()
    {
       return 3.5;
