@@ -44,7 +44,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final Point3d targetLocation = new Point3d();
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation("targetOrientation", worldFrame, registry);
 
-   SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
+   SimplePathParameters pathType = new SimplePathParameters(0.4, 0.30, 0.0, Math.PI / 20, Math.PI / 30, 0.3);
 
    private TurnStraightTurnFootstepGenerator footstepGenerator;
 
@@ -94,6 +94,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       robotPose.getPosition(robotLocation);
       robotPose.getOrientation(robotOrientation);
+
       //for testing purpose
       //this.setTarget(new Point3d(2.0, 2.0,0.0),new YoFrameOrientation( "blabla", ReferenceFrame.getWorldFrame(), registry));
    }
@@ -189,12 +190,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
       hasFootstepsBeenGenerated.set(false);
       footstepListBehavior.finalize();
    }
-   
-   public boolean hasInputBeenSet() {
-	   if (hasFootstepsBeenGenerated.getBooleanValue())
-		   return true;
-	   else
-		   return false;
+
+   public boolean hasInputBeenSet()
+   {
+      if (hasFootstepsBeenGenerated.getBooleanValue())
+         return true;
+      else
+         return false;
    }
 
 }
