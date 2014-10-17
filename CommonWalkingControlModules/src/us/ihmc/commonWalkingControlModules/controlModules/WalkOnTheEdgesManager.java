@@ -157,19 +157,22 @@ public class WalkOnTheEdgesManager
       FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
       isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
 
-      OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
-      isRearAnklePitchHittingLimit.set(Math.abs(anklePitch.getJointLimitLower() - anklePitch.getQ()) < 0.02);
-      isRearAnklePitchHittingLimitFilt.update();
+      FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
+      isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
+      isCurrentICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(currentICP));
+
+      boolean needToSwitchToToeOffForAnkleLimit = checkAnkleLimitForToeOff(trailingLeg);
+      if (needToSwitchToToeOffForAnkleLimit)
+      {
+         doToeOff.set(true);
+         return;
+      }
 
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
          return;
       }
-
-      FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
-      isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
-      isCurrentICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(currentICP));
 
       if (!isDesiredICPOKForToeOff.getBooleanValue() || !isCurrentICPOKForToeOff.getBooleanValue())
       {
@@ -178,6 +181,21 @@ public class WalkOnTheEdgesManager
       }
 
       isReadyToSwitchToToeOff(trailingLeg);
+   }
+
+   private boolean checkAnkleLimitForToeOff(RobotSide trailingLeg)
+   {
+      OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
+      isRearAnklePitchHittingLimit.set(Math.abs(anklePitch.getJointLimitLower() - anklePitch.getQ()) < 0.02);
+      isRearAnklePitchHittingLimitFilt.update();
+
+      if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())
+         return false;
+
+      if (!isDesiredICPOKForToeOff.getBooleanValue() || !isCurrentICPOKForToeOff.getBooleanValue())
+         return false;
+
+      return isRearAnklePitchHittingLimitFilt.getBooleanValue();
    }
 
    public void updateToeOffStatusBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP)
@@ -218,12 +236,6 @@ public class WalkOnTheEdgesManager
    {
       RobotSide leadingLeg = trailingLeg.getOppositeSide();
       ReferenceFrame frontFootFrame = feet.get(leadingLeg).getFrameAfterParentJoint();
-
-      if (doToeOffWhenHittingAnkleLimit.getBooleanValue() && isRearAnklePitchHittingLimitFilt.getBooleanValue())
-      {
-         doToeOff.set(true);
-         return;
-      }
 
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
       {
