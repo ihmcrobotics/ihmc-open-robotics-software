@@ -11,6 +11,7 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
    private final ObjectCommunicator controllerCommunicator;
    private final NonBlockingGlobalObjectConsumerRelay networkProcessorToControllerRelay;
    private final NonBlockingGlobalObjectConsumerRelay controllerToNetworkProcessorRelay;
+   private final BehaviorPacketPassThroughManager behaviorPacketPassThroughFromNpToController;
    
    private final YoVariableRegistry registry;
    private final BooleanYoVariable packetPassthrough;
@@ -22,6 +23,10 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
       this.controllerCommunicator = controllerCommunicator;
       this.networkProcessorToControllerRelay = new NonBlockingGlobalObjectConsumerRelay(networkProcessorCommunicator,controllerCommunicator);
       this.controllerToNetworkProcessorRelay = new NonBlockingGlobalObjectConsumerRelay(controllerCommunicator,networkProcessorCommunicator);
+      this.behaviorPacketPassThroughFromNpToController = new BehaviorPacketPassThroughManager(networkProcessorCommunicator, controllerCommunicator,
+            BehaviorPacketPassthroughList.PACKETS_TO_ALWAYS_PASS_FROM_NP_TO_CONTROLLER_THROUGH_BEHAVIORS);
+      
+      this.
       
       registry = new YoVariableRegistry("BehaviorCommunicationBridge");
       parentRegistry.addChild(registry);
@@ -75,11 +80,13 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
       if (!packetPassthrough.getBooleanValue() && activate)
       {
          networkProcessorToControllerRelay.enableForwarding();
+         behaviorPacketPassThroughFromNpToController.setPassthroughActive(false);
       }
 
       if (packetPassthrough.getBooleanValue() && !activate)
       {
          networkProcessorToControllerRelay.disableForwarding();
+         behaviorPacketPassThroughFromNpToController.setPassthroughActive(true);
       }
       packetPassthrough.set(activate);
    }
