@@ -82,4 +82,10 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    {
       return true;
    }
+
+   @Override
+   public double getAlphaDeltaFootPositionForFootslipCompensation()
+   {
+      return 0.65;
+   }
 }
