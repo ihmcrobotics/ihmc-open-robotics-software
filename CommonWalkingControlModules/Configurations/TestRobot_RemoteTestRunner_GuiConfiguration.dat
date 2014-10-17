@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.TestRobot.TestNewInstantaneousCapturePointPlannerWithSmoother.NewInstantaneousCapturePointPlannerWithSmoother.icpPlannerDesiredCapturePointPositionX</Variables>
+		<Variables>root.TestRobot.TestHackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerDesiredCapturePointPositionX,root.TestRobot.TestHackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerDesiredCapturePointPositionY</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
