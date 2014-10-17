@@ -261,6 +261,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double getMinMechanicalLegLength()
+   {
+      return 0.1;
+   }
+
+   @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
       return 0.1;
