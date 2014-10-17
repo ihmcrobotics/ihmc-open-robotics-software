@@ -137,6 +137,12 @@ public class TestNewInstantaneousCapturePointPlanner
          // TODO Auto-generated method stub
          return false;
       }
+
+      @Override
+      public double getAlphaDeltaFootPositionForFootslipCompensation()
+      {
+         return 0.65;
+      }
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
