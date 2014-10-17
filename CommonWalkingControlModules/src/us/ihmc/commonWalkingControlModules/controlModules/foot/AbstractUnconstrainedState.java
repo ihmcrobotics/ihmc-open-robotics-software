@@ -108,8 +108,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
          correctInputsAccordingToJointLimits();
 
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity,
-            desiredLinearAcceleration);
+      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
 //      desiredLinearVelocity.setToZero();
 //      desiredAngularVelocity.setToZero();

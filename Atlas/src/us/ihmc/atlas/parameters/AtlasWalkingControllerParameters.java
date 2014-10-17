@@ -38,6 +38,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double pelvis_pitch_lower_limit = -0.1; //-math.pi / 6.0;
 
    private final double  min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
+   private final double  min_mechanical_leg_length = 0.392; // corresponds to q_kny = 2.25 rad (close to knee limit)
 
    public AtlasWalkingControllerParameters()
    {
@@ -257,11 +258,17 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return AtlasPhysicalProperties.shinLength + AtlasPhysicalProperties.thighLength;
    }
-   
+
    @Override
    public double getMinLegLengthBeforeCollapsingSingleSupport()
    {
       return min_leg_length_before_collapsing_single_support;
+   }
+
+   @Override
+   public double getMinMechanicalLegLength()
+   {
+      return min_mechanical_leg_length;
    }
 
    @Override
