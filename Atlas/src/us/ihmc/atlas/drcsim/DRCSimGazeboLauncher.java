@@ -6,6 +6,8 @@ import java.io.IOException;
 
 public class DRCSimGazeboLauncher
 {
+   public static final boolean RUN_CATKIN_MAKE = true;
+   
    public static void main(String[] args)
    {
       new DRCSimGazeboLauncher();
@@ -19,11 +21,14 @@ public class DRCSimGazeboLauncher
    private void runProcess()
    {
       //Build plugin
-      String commandline1 = "source ~/.bashrc;" +
-            "source /opt/ros/indigo/setup.bash;" +
-            "cd ihmc_gazebo_catkin_ws;"+
-            "catkin_make";
-      runCommandLine(commandline1);
+      if (RUN_CATKIN_MAKE)
+      {
+         String commandline1 = "source ~/.bashrc;" +
+               "source /opt/ros/indigo/setup.bash;" +
+               "cd ihmc_gazebo_catkin_ws;"+
+               "catkin_make";
+         runCommandLine(commandline1);
+      }
 
       //Launch gazebo with ihmc_plugin
       String commandline2 = "source ~/.bashrc;" +
