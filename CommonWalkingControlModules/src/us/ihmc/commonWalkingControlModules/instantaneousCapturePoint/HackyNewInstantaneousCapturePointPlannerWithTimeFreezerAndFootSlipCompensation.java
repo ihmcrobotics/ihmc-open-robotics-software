@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -11,6 +12,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -26,47 +28,65 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    private final DoubleYoVariable previousTime;
    private final DoubleYoVariable freezeTimeFactor;
    private final DoubleYoVariable maxCapturePointErrorAllowedToBeginSwingPhase;
-   private final YoFrameVector vectorFromActualToDesiredCapturePoint;
-   private final YoFrameVector normalizedCapturePointVelocityVector;
+   private final DoubleYoVariable alphaDeltaFootPosition;
+   private final DoubleYoVariable changeInTransferToFootPositionMagnitude;
+   private final DoubleYoVariable percentToScaleBackOnVelocity;
+   private final FrameVector vectorFromActualToDesiredCapturePoint;
+   private final FrameVector normalizedCapturePointVelocityVector;
+   private final FramePoint currentTransferToFootLocation;
+   private final FramePoint initialTransferToFootLocation;
+   
+   private final AlphaFilteredYoFrameVector changeInTransferToFootPosition;
 
    public HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(CapturePointPlannerParameters capturePointPlannerParameters,
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(capturePointPlannerParameters, registry, yoGraphicsListRegistry);
 
-      timeDelay = new DoubleYoVariable("icpPlannerTimeDelayFromeFreezer", registry);
-      capturePointPositionError = new DoubleYoVariable("icpPlannerCapturePointPositionError", registry);
-      distanceToFreezeLine = new DoubleYoVariable("icpPlannerDistanceToFreezeLine", registry);
-      freezeTimeFactor = new DoubleYoVariable("icpPlannerFreezeTimeFactor", registry);
-      maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable("icpPlannerMaxCapturePointErrorAllowedToBeginSwingPhase", registry);
-      previousTime = new DoubleYoVariable("icpPlannerPreviousTime", registry);
-      doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
-      doFootSlipCompensation = new BooleanYoVariable("icpPlannerDoFootSlipCompensation", registry);
-      isTimeBeingFrozen = new BooleanYoVariable("icpPlannerIsTimeBeingFrozen", registry);
-      vectorFromActualToDesiredCapturePoint = new YoFrameVector("icpPlannerVectorFromActualToDesiredCapturePoint", worldFrame, registry);
-      normalizedCapturePointVelocityVector = new YoFrameVector("icpPlannerNormalizedCapturePointVelocityVector", worldFrame, registry);
-
-      isTimeBeingFrozen.set(false);
-      timeDelay.set(0.0);
-      capturePointPositionError.set(0.0);
-      normalizedCapturePointVelocityVector.setToZero();
-      vectorFromActualToDesiredCapturePoint.setToZero();
-      distanceToFreezeLine.set(0.0);
-      doTimeFreezing.set(capturePointPlannerParameters.getDoTimeFreezing());
-      doFootSlipCompensation.set(capturePointPlannerParameters.getDoTimeFreezing());
+      this.timeDelay = new DoubleYoVariable("icpPlannerTimeDelayFromeFreezer", registry);
+      this.capturePointPositionError = new DoubleYoVariable("icpPlannerCapturePointPositionError", registry);
+      this.distanceToFreezeLine = new DoubleYoVariable("icpPlannerDistanceToFreezeLine", registry);
+      this.freezeTimeFactor = new DoubleYoVariable("icpPlannerFreezeTimeFactor", registry);
+      this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable("icpPlannerMaxCapturePointErrorAllowedToBeginSwingPhase", registry);
+      this.previousTime = new DoubleYoVariable("icpPlannerPreviousTime", registry);
+      this.percentToScaleBackOnVelocity = new DoubleYoVariable("percentToScaleBackOnVelocity", registry);
+      this.alphaDeltaFootPosition = new DoubleYoVariable("alphaDeltaFootPosition", registry);
+      this.changeInTransferToFootPositionMagnitude = new DoubleYoVariable("icpPlannerChangeInTransferToFootPosition", registry);
+      this.doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
+      this.doFootSlipCompensation = new BooleanYoVariable("icpPlannerDoFootSlipCompensation", registry);
+      this.isTimeBeingFrozen = new BooleanYoVariable("icpPlannerIsTimeBeingFrozen", registry);
+      this.vectorFromActualToDesiredCapturePoint = new FrameVector(worldFrame);
+      this.normalizedCapturePointVelocityVector = new FrameVector(worldFrame);
+      this.currentTransferToFootLocation = new FramePoint(worldFrame);
+      this.initialTransferToFootLocation = new FramePoint(worldFrame);
       
+      this.changeInTransferToFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("icpPlannerChangeInTransferToFootLocation", "", registry,
+            alphaDeltaFootPosition, worldFrame);
+
+      this.isTimeBeingFrozen.set(false);
+      this.timeDelay.set(0.0);
+      this.alphaDeltaFootPosition.set(0.65);
+      this.capturePointPositionError.set(0.0);
+      this.normalizedCapturePointVelocityVector.setToZero();
+      this.vectorFromActualToDesiredCapturePoint.setToZero();
+      this.distanceToFreezeLine.set(0.0);
+      this.doTimeFreezing.set(capturePointPlannerParameters.getDoTimeFreezing());
+      this.doFootSlipCompensation.set(capturePointPlannerParameters.getDoTimeFreezing());
+
       this.maxCapturePointErrorAllowedToBeginSwingPhase.set(capturePointPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
    public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
-         double time, FramePoint currentCapturePointPosition)
+         double time, FramePoint currentCapturePointPosition, FramePoint transferToFoot)
    {
       super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 
-      if (doFootSlipCompensation.getBooleanValue())
+      if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && transferToFoot != null)
       {
-         doFootSlipCompensation();
+         this.currentTransferToFootLocation.set(transferToFoot);
+         this.currentTransferToFootLocation.changeFrame(worldFrame);
+         doFootSlipCompensation(time, desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack);
       }
 
       if (doTimeFreezing.getBooleanValue())
@@ -75,15 +95,17 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       }
 
    }
-   
+
    @Override
-   public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity,
-         double initialTime, ArrayList<FramePoint> footstepList)
-      {
-         timeDelay.set(0.0);
-         super.initializeDoubleSupport(currentDesiredCapturePointPosition, currentDesiredCapturePointVelocity, initialTime, footstepList);
-      }
-   
+   public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity, double initialTime,
+         ArrayList<FramePoint> footstepList)
+   {
+      timeDelay.set(0.0);
+      initialTransferToFootLocation.set(footstepList.get(1));
+      initialTransferToFootLocation.changeFrame(worldFrame);
+      super.initializeDoubleSupport(currentDesiredCapturePointPosition, currentDesiredCapturePointVelocity, initialTime, footstepList);
+   }
+
    @Override
    public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
    {
@@ -91,12 +113,12 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       super.initializeSingleSupport(initialTime, footstepList);
    }
 
-   private void doTimeFreezeIfNeeded(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
-         FrameVector desiredCapturePointVelocity, double time)
+   private void doTimeFreezeIfNeeded(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity,
+         double time)
    {
       computeCapturePointPositionErrorMagnitude(currentCapturePointPosition, desiredCapturePointPosition);
       computeCapturePointDistantToFreezeLine(currentCapturePointPosition, desiredCapturePointPosition, desiredCapturePointVelocity);
-      
+
       if (isDone(getTimeWithDelay(time)))
       {
          completelyFreezeTime(time);
@@ -117,13 +139,47 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       {
          isTimeBeingFrozen.set(false);
       }
-      
+
       previousTime.set(time);
    }
 
-   private void doFootSlipCompensation()
-   {
+   /**
+    * Really hacky method here. Need to figure out a more gooder way to do this, so 
+    * it can be more gooder.
+    * @param time
+    */
+   private void doFootSlipCompensation(double time, FramePoint capturePointPositionToPack, FrameVector capturePointVelocityToPack)
+   {  
+      double deltaX = currentTransferToFootLocation.getX() - initialTransferToFootLocation.getX();
+      double deltaY = currentTransferToFootLocation.getY() - initialTransferToFootLocation.getY();
+      
+      changeInTransferToFootPosition.update(deltaX,deltaY,0.0);
+      changeInTransferToFootPositionMagnitude.set(changeInTransferToFootPosition.length());
+      
+      double timeInState = super.computeAndReturnTimeInCurrentState(time);
+      double timeLeft = super.computeAndReturnTimeRemaining(timeInState);
 
+      double percentIn = timeInState / (timeInState + timeLeft);
+
+      percentIn = MathTools.clipToMinMax(percentIn, 0.0, 1.0);
+
+      changeInTransferToFootPosition.scale(percentIn);
+      
+      capturePointPositionToPack.setX(capturePointPositionToPack.getX() + changeInTransferToFootPosition.getX());
+      capturePointPositionToPack.setY(capturePointPositionToPack.getY() + changeInTransferToFootPosition.getY());
+  
+      // Scale back on the velocity if the foot slipped a lot.
+      // And when coming to the end of the trajectory.
+      // This is very hackish. We should make the trajectories better so we don't have
+      // to do this...
+      percentToScaleBackOnVelocity.set(1.0 - changeInTransferToFootPositionMagnitude.getDoubleValue() / 0.04);
+      percentToScaleBackOnVelocity.set(MathTools.clipToMinMax(percentToScaleBackOnVelocity.getDoubleValue(), 0.0, 1.0));
+
+      // At 95% in, should be at zero velocity.
+      double percentToScaleDownAtEnd = 1.0 - (percentIn) / 0.95;
+      percentToScaleDownAtEnd = MathTools.clipToMinMax(percentToScaleDownAtEnd, 0.0, 1.0);
+      percentToScaleBackOnVelocity.set(percentToScaleBackOnVelocity.getDoubleValue() * percentToScaleDownAtEnd);
+      capturePointVelocityToPack.scale(percentToScaleBackOnVelocity.getDoubleValue());
    }
 
    private void freezeTimeUsingFreezeTimeFactor(double time)
@@ -157,7 +213,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    {
       capturePointPositionError.set(currentCapturePointPosition.distance(desiredCapturePointPosition));
    }
-   
+
    public boolean getIsTimeBeingFrozen()
    {
       return isTimeBeingFrozen.getBooleanValue();
@@ -167,7 +223,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    {
       return time - timeDelay.getDoubleValue();
    }
-   
+
    @Override
    public boolean isDone(double time)
    {

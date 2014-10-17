@@ -25,4 +25,6 @@ public interface CapturePointPlannerParameters
 	public abstract boolean getDoTimeFreezing();
 	
 	public abstract boolean getDoFootSlipCompensation();
+	
+	public abstract double getAlphaDeltaFootPositionForFootslipCompensation();
 }

@@ -82,4 +82,10 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    {
       return true;
    }
+
+   @Override
+   public double getAlphaDeltaFootPositionForFootslipCompensation()
+   {
+      return 0.65;
+   }
 }
