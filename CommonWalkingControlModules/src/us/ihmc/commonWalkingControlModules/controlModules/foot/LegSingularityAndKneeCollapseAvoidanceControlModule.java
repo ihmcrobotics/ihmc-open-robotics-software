@@ -435,7 +435,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaSwingMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minMechanicalPercentOfLegLength.getDoubleValue() * maximumLegLength.getDoubleValue());
-      double correctedDesiredPositionZ = desiredOrMinLegLength; //(1.0 - alphaSingularityAvoidance.getDoubleValue()) * desiredFootPosition.getZ() + alphaSingularityAvoidance.getDoubleValue() * desiredOrMaxLegLength;
+      double correctedDesiredPositionZ = (1.0 - alphaSwingMechanicalLimitAvoidance.getDoubleValue()) * desiredFootPosition.getZ() + alphaSwingMechanicalLimitAvoidance.getDoubleValue() * desiredOrMinLegLength;
 //      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
 //      unachievedSwingTranslation.changeFrame(worldFrame);
 //      yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
