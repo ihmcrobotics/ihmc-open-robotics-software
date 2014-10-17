@@ -39,6 +39,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final FrameVector tmpFrameVector2 = new FrameVector(worldFrame);
    
    private final BooleanYoVariable atAStop = new BooleanYoVariable("icpPlannerAtAStop", registry);
+   private final BooleanYoVariable cancelPlan = new BooleanYoVariable("icpPlannerCancelPlan", registry);
    private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable("icpPlannerIsInitialTransfer", registry);
    private final BooleanYoVariable wasPushedInSingleSupport = new BooleanYoVariable("icpPlannerWasPushedInSingleSupport", registry);
@@ -72,6 +73,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       {
          VISUALIZE.set(false);
       }
+      
+      cancelPlan.set(false);
 
       this.capturePointPlannerParameters = capturePointPlannerParameters;
       this.atAStop.set(true);
@@ -145,8 +148,16 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity,
          double initialTime, ArrayList<FramePoint> footstepList)
    {
+	   this.isDoubleSupport.set(true);
+	   
+	   if(cancelPlan.getBooleanValue())
+	   {
+		   cancelPlan(initialTime, footstepList);
+		   atAStop.set(true);
+		   return;
+	   }
+	   
       comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
-      this.isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
 
       this.desiredCapturePointPosition.set(currentDesiredCapturePointPosition);
@@ -422,6 +433,18 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    
    public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
    {
+	   if(isDoubleSupport.getBooleanValue())
+	   {
+		   cancelPlanNow(time, footstepList);
+	   }
+	   else
+	   {
+		   cancelPlan.set(true);
+	   }
+   }
+   
+   private void cancelPlanNow(double time, ArrayList<FramePoint> footstepList)
+   {
       capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
 
       singleSupportInitialDesiredCapturePointPosition.set(footstepList.get(0));
@@ -447,7 +470,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
       initialTime.set(time);
       
-      atAStop.set(true);
+      cancelPlan.set(false);
    }
 
    public void resetParametersToDefault()
