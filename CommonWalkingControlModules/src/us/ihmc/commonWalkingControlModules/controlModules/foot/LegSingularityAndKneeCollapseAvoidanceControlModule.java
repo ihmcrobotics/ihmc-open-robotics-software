@@ -40,7 +40,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private boolean moreVisualizers = true;
    
    private static final boolean USE_SINGULARITY_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the leg motion range.
-   private static final boolean USE_MECHANICAL_LIMIT_AVOIDANCE_SWING = false; // Limit the swing foot motion according to the knee flexion limit.
+   private static final boolean USE_MECHANICAL_LIMIT_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the knee flexion limit.
    public static final boolean USE_SINGULARITY_AVOIDANCE_SUPPORT = true; // Progressively limit the CoM height as the support leg(s) are getting more straight
    private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = true; // Lower the CoM if a footstep is unreachable
    private static final boolean USE_COLLAPSE_AVOIDANCE = false; // Try to avoid the knee from collapsing by limiting how low the CoM can be
@@ -202,7 +202,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       percentOfLegLengthThresholdForCollapseAvoidance.set(0.83);
       minPercentOfLegLengthForCollapseAvoidance.set(0.76);//walkingControllerParameters.getMinLegLengthBeforeCollapsingSingleSupport() / maximumLegLength.getDoubleValue());
       minMechanicalPercentOfLegLength.set(minimumLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.set(0.05 + minMechanicalPercentOfLegLength.getDoubleValue());
+      percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.set(0.07 + minMechanicalPercentOfLegLength.getDoubleValue());
       percentOfLegLengthThresholdToDisableSwingKneeLimitAvoidance.set(0.02 + percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue());
       footLoadThresholdToEnableCollapseAvoidance.set(0.62); // 0.65
       footLoadThresholdToDisableCollapseAvoidance.set(0.59); // 0.62
