@@ -44,7 +44,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final Point3d targetLocation = new Point3d();
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation("targetOrientation", worldFrame, registry);
 
-   SimplePathParameters pathType = new SimplePathParameters(0.4, 0.30, 0.0, Math.PI / 20, Math.PI / 30, 0.3);
+   SimplePathParameters pathType = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
 
    private TurnStraightTurnFootstepGenerator footstepGenerator;
 
