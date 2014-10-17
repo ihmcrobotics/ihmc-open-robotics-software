@@ -9,6 +9,7 @@ import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationTrial;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -42,6 +43,7 @@ public class IHMCHumanoidBehaviorManager
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel);
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
+      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
@@ -51,7 +53,6 @@ public class IHMCHumanoidBehaviorManager
 
       createAndRegisterBehaviors(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry);
 
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
@@ -79,6 +80,9 @@ public class IHMCHumanoidBehaviorManager
       ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
 
+      WalkToLocationTrial walkToLocationTrial = new WalkToLocationTrial(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TRIAL, walkToLocationTrial);
+      
       WalkToLocationBehavior walkToObjectLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToObjectLocationBehavior);
       
@@ -87,5 +91,6 @@ public class IHMCHumanoidBehaviorManager
       
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
+      
    }
 }
