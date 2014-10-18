@@ -89,14 +89,14 @@ public class FootExplorationControlModule
 
    // unstable situations
    private static double maxICPAbsError = 0.04;
-   private static double maxICPAbsErrorForSingleSupport = 0.03;
+   private static double maxICPAbsErrorForSingleSupport = 0.01;
    private static double minCoPDistanceFromBorder = 0.01;
    private static double recoverStateContactPointsScaleFactor = 0.9;
    private static double recoverTime = 5;
    private static int minimumNumberOfContactPointsToHaveAPolygon = 3;
    
    // parameter of tilt foot
-   private static double zeroVelocity = 0.01;
+   private static double zeroVelocity = 0.1;
    private static double alphaForJointVelocity = 0.95;
    private static int numberOfJointCheckedForZeroVelocity = 2;
    private static double safetyScalingOfContactPoints = 0.85;
@@ -244,7 +244,14 @@ public class FootExplorationControlModule
       
       parentRegistry.addChild(registry); 
    }
-   
+    /**
+     * This is the main method of the module. When the module is active this method is called from the
+     * high level every control tick. 
+     *  
+     * @param desiredICPToPack - desired ICP to pack
+     * @param desiredICPVelocityToPack - desired ICP velocity to pack
+     * @param currentCapturePoint - current ICP
+     */
    public void controlSwingFoot(YoFramePoint2d desiredICPToPack, YoFrameVector2d desiredICPVelocityToPack, FramePoint2d currentCapturePoint)
    {
       desiredICPLocal.changeFrame(desiredICPToPack.getReferenceFrame());
@@ -268,6 +275,17 @@ public class FootExplorationControlModule
       } 
    }
    
+   /**
+    * This method initialize the variables for the exploration only if an exploration has 
+    * been requested. Furthermore when some high level variables are changed, we store 
+    * their original value and set 'true' the corresponding 'hasBeenChanged' variable, in 
+    * this way when the exploration is finished we can restore the original value.
+    *    
+    * @param nextFootStep - next footstep that, if module is active, will be explored
+    * @param supportFootPolygon - current support foot polygon
+    * @param footUderCoPControl - side, left or right, of the foot that, if the module is 
+    *                             active, will be used for the exploration
+    */
    public void initialize(Footstep nextFootStep, FrameConvexPolygon2d supportFootPolygon, RobotSide footUderCoPControl)
    {
       if (nextFootStep != null)
@@ -384,6 +402,11 @@ public class FootExplorationControlModule
       stateMachine.addState(recover);
    }
    
+   /**
+    * This is the first state. It controls the swing of the foot keeping the ICP inside of the 
+    * polygon of the support foot.
+    *
+    */
    private class PerformingSwingState extends State<FeetExplorationState>
    {
       FramePoint2d constantICP;
@@ -425,6 +448,11 @@ public class FootExplorationControlModule
       }
    }
 
+   /**
+    * This is the real exploration phase. In this state the module moves the local 
+    * CoP of the foot that is used for the exploration and check if the foot is tilting.
+    *
+    */
    private class ExplorationState extends State<FeetExplorationState>
    {
       FramePoint2d tempICP;
@@ -519,7 +547,10 @@ public class FootExplorationControlModule
       }
       
       /**
-       * This method adjust the contact point location if the foot tilts during the exploration.
+       * This method moves the CoP computing a CoPScaledPercentage that is a value used inside of the CoP
+       * planner to compute the the desired CoP position as a percentage (between 0 and copToContactPointScalingFactor)
+       * of the line that connects the initial and final CoP points. 
+       * Furthermore this method adjusts the contact point location if the foot tilts during the exploration.
        * The location of the new contact point is defined as the measured foot CoP. To avoid cases 
        * where for some reason (e.g. joint limits) the measured CoP is in another location respect
        * to the desire CoP, we check the error between desired and actual. If the error is greater 
@@ -572,6 +603,15 @@ public class FootExplorationControlModule
          }
       }
       
+      /**
+       * This method checks all the contact planes that are not the contact plane that
+       * is currently under CoP control (i.e. the one that we are exploring). 
+       * For all those contact planes, if are in contact and with a minimum number
+       * of contact points, the method checks if their local CoP is too close to
+       * the border of the polygon constructed with their contact points.
+       * If the CoP distance from the border is less than a threshold the contact point 
+       * counter is incremented. 
+       */
       private void skipContactPointIfMirroredCoPIsCloseToBorder()
       {
          outerloop: for (int i = 0; i < numberOfPlaneContactStates.getIntegerValue(); i++)
@@ -604,6 +644,11 @@ public class FootExplorationControlModule
          }
       }
       
+      /**
+       * This method returns the current measured foot CoP.
+       * 
+       * @return FramePoint2d - current measured foot CoP.
+       */
       private FramePoint2d getMeasuredFootCoP()
       {
          SideDependentList<FootSwitchInterface> footSwitches = momentumBasedController.getFootSwitches();
@@ -613,6 +658,17 @@ public class FootExplorationControlModule
          return copActual;
       }
       
+      /**
+       * This method returns the distance from a pointToCheck and the closest border of the polygon constructed 
+       * using a List of ContactPoints.
+       * In particular a FrameConvexPolygon2d is constructed from the List of contact point, and subsequently 
+       * for each couple of vertex we construct a 2d line and measure the distance of the point that we want 
+       * to check. Eventually only the smallest distance is returned.
+       *  
+       * @param points - a List of ContactPoint to construct the convex polygon
+       * @param pointToCheck - the point that needs to be checked for the distance from each edge of the polygon
+       * @return double - the distance of the point from the closest edge of the polygon
+       */
       private double getClosestEdgeDistance(List<? extends ContactPoint> points, FramePoint2d pointToCheck)
       {        
          double ret = Double.POSITIVE_INFINITY;
@@ -629,6 +685,12 @@ public class FootExplorationControlModule
          return ret;
       }
       
+      /**
+       * This method updates the foot angular rate and than checks if the rate 
+       * of the foot that is under CoP control is greater than the zeroVelocity.
+       * 
+       * @return boolean - true if the foot angular rate is greater than the zeroVelocity.
+       */
       private boolean checkJointIsNotMoving()
       {
          updateFootAngularRate();
@@ -636,6 +698,13 @@ public class FootExplorationControlModule
          return footAngularRate.get(footUderCoPControl).getDoubleValue() > zeroVelocity;
       }
       
+      /**
+       * This method checks is the roll and pitch absolute value of the ankle angular velocities 
+       * are greater than the zeroVelocity. 
+       * Note. Currently this method is not used. Instead the foot angular rate is used.
+       * 
+       * @return boolean - true if the ankle velocity abs is greater than the zeroVelocity.
+       */
       private boolean checkAnkleVelocity()
       {         
          double absVelocity = 0.0;
@@ -652,6 +721,14 @@ public class FootExplorationControlModule
          return absVelocity > zeroVelocity;
       }
       
+      /**
+       * This method updates the angular component of the velocity of both feet.
+       * In particular this quantity considers also the relative motion between the leg and the foot
+       * such that, if for example the foot is not moving, but the robot main body is moving, the measured 
+       * velocity is almost null. Instead considering the ankle velocities, we would have 
+       * obtained a greater velocity.
+       * 
+       */
       private void updateFootAngularRate()
       {
           for(RobotSide side : RobotSide.values)
@@ -663,6 +740,12 @@ public class FootExplorationControlModule
           }      
       }
       
+      /**
+       * This method gets the X and Y components of the CoP from the CoPPlanner, and sets the 
+       * offsets inside of the momentum based controller in order to move the CoP inside of the foot. 
+       *  
+       * @return FramePoint2d - The desired CoP position represented in the reference frame CoPFrame.
+       */
       private FramePoint2d setAndGetDesiredFootCop()
       {
          FramePoint2d positionToPack = new FramePoint2d(CoPFrame);
@@ -674,6 +757,17 @@ public class FootExplorationControlModule
       }
    }
    
+   /**
+    * In this state the module simply shifts the ICP from the initial position
+    * to a percentage (between 0 and 1) of the line connecting the initial 
+    * and final ICP points. For this purpose is used the local ICP planner.
+    * 
+    * Note. Temporary there is a control of the CoM height based on the distance 
+    * between current and desired ICP. This is necessary because sometimes if the 
+    * step is too long the robot can not move the ICP close enough to the next 
+    * footstep center point. This hack should be removed maybe allowing the 'toe off'.
+    *
+    */
    private class ICPShiftingState extends State<FeetExplorationState>
    {
       double initialICPPositionPercentage;
@@ -745,6 +839,11 @@ public class FootExplorationControlModule
       }
    }
    
+   /**
+    * This state is meant to be used when an unstable situation is detected.
+    * The exploration is stopped and the desired ICP moved to a safe position.
+    *
+    */
    private class RecoverState extends State<FeetExplorationState>
    {
       private double initialTime;
