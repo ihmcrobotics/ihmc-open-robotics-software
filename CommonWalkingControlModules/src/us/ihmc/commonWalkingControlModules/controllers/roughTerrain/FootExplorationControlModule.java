@@ -72,7 +72,7 @@ public class FootExplorationControlModule
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    // control of CoM height
-   private static boolean adjustCoMHeightBasedOnICP = true;
+   private static boolean adjustCoMHeightBasedOnICP = false;
    private static boolean lowerCoMDuringSwing = false && !adjustCoMHeightBasedOnICP;
    private static double maxCoMHeightOffset = 0.00;
    private static double minCoMHeightOffset = -0.03; // for simulation use -0.1, real robot -0.03. Note: This in general is useful if the steps are too far each other, so use short steps
@@ -1085,10 +1085,10 @@ public class FootExplorationControlModule
       FramePoint2d pointOnEdge = getClosestPointToAReferencePoint(intersectioPoints, endPoint);
           
       double lengthOfSegmentInsideSupportFoot = Math.abs(initialPoint.distance(pointOnEdge));
-      constantICPPoints.add((lengthOfSegmentInsideSupportFoot * firstInternalICPPercentage)/footstepCentroidsDistance.getDoubleValue());
+//      constantICPPoints.add((lengthOfSegmentInsideSupportFoot * firstInternalICPPercentage)/footstepCentroidsDistance.getDoubleValue());
       constantICPPoints.add(firstExternalICPPercentage);
-      constantICPPoints.add(secondExternalICPPercentage);
-      constantICPPoints.add(lastExternalICPPercentage);
+//      constantICPPoints.add(secondExternalICPPercentage);
+		 constantICPPoints.add(lastExternalICPPercentage);
    }
    
    private FramePoint2d getClosestPointToAReferencePoint(FramePoint2d[] listOfPoints, FramePoint2d referencePoint)
