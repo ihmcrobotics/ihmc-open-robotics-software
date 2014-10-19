@@ -177,20 +177,25 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       for (RobotSide robotSide : RobotSide.values)
       {
+         
+         //MomentumBasedControll ContactPoints
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
          footGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
          footGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, footWidth / 2.0));
          footGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, -toeWidth / 2.0));
          footGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, toeWidth / 2.0));
-         contactableBodiesFactory.addFootContactParameters(footGroundContactPoints); // goes to MomentumBasedController
+         contactableBodiesFactory.addFootContactParameters(footGroundContactPoints); 
 
-         int numberOfPointsY = 2, numberOfPointsX = 2;
-
-         for (int ix = 0; ix < numberOfPointsX; ix++)
+         
+         //SCS Sim contactPoints
+         int numberOfSimContactPointsY = 3, numberOfSimContactPointsX = 4;
+         for (int ix = 0; ix < numberOfSimContactPointsX; ix++)
          {
-            for (int iy = 0; iy < numberOfPointsY; iy++)
+            for (int iy = 0; iy < numberOfSimContactPointsY; iy++)
             {
-               Point3d gcOffset = new Point3d(ix * footLength / (numberOfPointsX - 1) - footLength / 2, iy * footWidth / (numberOfPointsY - 1) - footWidth / 2,
+               Point3d gcOffset = new Point3d(
+                     ix * footLength / (numberOfSimContactPointsX - 1) - footLength / 2,
+                     iy * footWidth / (numberOfSimContactPointsY - 1) - footWidth / 2, 
                      0);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
