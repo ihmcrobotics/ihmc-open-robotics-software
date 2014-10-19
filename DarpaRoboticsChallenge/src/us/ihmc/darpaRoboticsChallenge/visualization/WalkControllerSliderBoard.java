@@ -100,9 +100,9 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.clearControls();
       
       /* Terrain Exploration Section */
-      sliderBoardConfigurationManager.setSlider(0, "footCoPOffsetX", registry, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(1, "footCoPOffsetY", registry, -0.1, 0.1);
-      sliderBoardConfigurationManager.setButton(1, registry.getVariable("MomentumBasedController","FeetCoPBasedControl"));
+      sliderBoardConfigurationManager.setSlider(1, "footCoPOffsetX", registry, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(2, "footCoPOffsetY", registry, -0.1, 0.1);
+      sliderBoardConfigurationManager.setButton(1, registry.getVariable("MomentumBasedController","FeetCoPControlIsActive"));
       
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.TerrainExploration.toString());
       sliderBoardConfigurationManager.clearControls();
