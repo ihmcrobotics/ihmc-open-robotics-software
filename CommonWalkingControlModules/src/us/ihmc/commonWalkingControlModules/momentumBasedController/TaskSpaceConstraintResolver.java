@@ -188,7 +188,7 @@ public class TaskSpaceConstraintResolver
       for (GeometricJacobian jacobian : phiCMap.keySet())
       {
          DenseMatrix64F phiC = phiCMap.get(jacobian);
-         vdotTaskSpace.setReshape(phiC);
+         vdotTaskSpace.set(phiC);
         
          Map<InverseDynamicsJoint, DenseMatrix64F> phiJMapForJacobian = phiJMap.get(jacobian);
          for (InverseDynamicsJoint unconstrainedJointOnPath : phiJMapForJacobian.keySet())

@@ -35,14 +35,14 @@ public class TaskspaceConstraintData
    public void set(SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers, DenseMatrix64F selectionMatrix)
    {
       this.spatialAcceleration.set(spatialAcceleration);
-      this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
-      this.selectionMatrix.setReshape(selectionMatrix);
+      this.nullspaceMultipliers.set(nullspaceMultipliers);
+      this.selectionMatrix.set(selectionMatrix);
    }
 
    public void set(SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
    {
       this.spatialAcceleration.set(spatialAcceleration);
-      this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
+      this.nullspaceMultipliers.set(nullspaceMultipliers);
       this.selectionMatrix.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
    }
@@ -53,7 +53,7 @@ public class TaskspaceConstraintData
       this.spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredAngularAcceleration.getReferenceFrame());
       this.spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
 
-      this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
+      this.nullspaceMultipliers.set(nullspaceMultipliers);
       
       this.selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
       this.selectionMatrix.set(0, 0, 1.0);
@@ -98,7 +98,7 @@ public class TaskspaceConstraintData
 
       MathTools.checkIfInRange(selectionMatrix.numRows, 0, 3);
 
-      this.selectionMatrix.setReshape(selectionMatrix);
+      this.selectionMatrix.set(selectionMatrix);
    }
 
    public SpatialAccelerationVector getSpatialAcceleration()

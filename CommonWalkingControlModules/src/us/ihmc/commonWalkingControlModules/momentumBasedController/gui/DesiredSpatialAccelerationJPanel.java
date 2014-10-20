@@ -46,10 +46,10 @@ public class DesiredSpatialAccelerationJPanel extends JPanel
       
       desiredSpatialAccelerationVector.packMatrix(desiredSpatialAcceleration, 0);
       
-      desiredSpatialAcceleration2.setReshape(desiredSpatialAccelerationCommandAndMotionConstraint.getDesiredSpatialAcceleration());
-      achievedSpatialAcceleration.setReshape(desiredSpatialAccelerationCommandAndMotionConstraint.getAchievedSpatialAcceleration());
+      desiredSpatialAcceleration2.set(desiredSpatialAccelerationCommandAndMotionConstraint.getDesiredSpatialAcceleration());
+      achievedSpatialAcceleration.set(desiredSpatialAccelerationCommandAndMotionConstraint.getAchievedSpatialAcceleration());
       
-      errorSpatialAcceleration.setReshape(desiredSpatialAcceleration2);
+      errorSpatialAcceleration.set(desiredSpatialAcceleration2);
       CommonOps.subtract(achievedSpatialAcceleration, desiredSpatialAcceleration2, errorSpatialAcceleration);
       
       this.repaint();
