@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
@@ -18,6 +17,12 @@ public class VisualizerUtils
 {
    public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... yoGraphicsListRegistries)
    {
+      createOverheadPlotter(scs, showOverheadView, null, yoGraphicsListRegistries);
+   }
+
+   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, String variableNameToTrack, YoGraphicsListRegistry... yoGraphicsListRegistries)
+   {
+
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
       plotter.setDrawHistory(false);
       plotter.setXVariableToTrack(null);
@@ -40,14 +45,17 @@ public class VisualizerUtils
          ArrayList<ArtifactList> buffer = new ArrayList<>();
          yoGraphicsListRegistry.getRegisteredArtifactLists(buffer);
 
-         for (ArtifactList artifactList : buffer)
+         if (variableNameToTrack != null && !variableNameToTrack.isEmpty())
          {
-            for (Artifact artifact : artifactList.getArtifacts())
+            for (ArtifactList artifactList : buffer)
             {
-               if (artifact.getID() == CommonCapturePointCalculator.CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME)
+               for (Artifact artifact : artifactList.getArtifacts())
                {
-                  plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
-                  plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
+                  if (artifact.getID() == variableNameToTrack)
+                  {
+                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
+                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
+                  }
                }
             }
          }

@@ -6,7 +6,6 @@ dependencies {
     compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'
        
     compile project(':SimulationConstructionSet')
-    compile project(':CommonWalkingControlModules')
     compile project(':Graphics3DAdapter')
     compile project(':JMEGraphics3DAdapter')
     compile project(':IHMCUtilities')

@@ -12,17 +12,13 @@ dependencies {
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	
-	compile project(':IHMCRealtime')
-	compile project(':SDFLoader')
-	compile project(':CommonWalkingControlModules')
-	compile project(':SimulationConstructionSet')
-	compile project(':Graphics3DAdapter')
-	compile project(':IHMCUtilities')
-	compile project(':Plotting')
 	compile project(':3DModelLoaders')
-	compile project(':JMEGraphics3DAdapter')
-	compile project(':CapturePointCalculator')
-	compile project(':IHMCControlFlow')
-	compile project(':KalmanProject')
-	compile project(':SensorProcessing')
+	compile project(':Graphics3DAdapter')
+	compile project(':IHMCRealtime')
+	compile project(':IHMCUtilities')
+	compile project(':IHMCYoUtilities')
+	compile project(':Plotting')
+	compile project(':SDFLoader')
+	compile project(':SimulationConstructionSet')
+	compile project(':UserInterface')
 }
