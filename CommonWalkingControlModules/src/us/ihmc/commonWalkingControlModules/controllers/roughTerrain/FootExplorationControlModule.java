@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajec
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -86,7 +85,7 @@ public class FootExplorationControlModule
    private static double copToContactPointScalingFactor = 0.8; // how far we explore, max 1.0
    private static double copPercentageToSwitchToNextContactPoint = 2; // if this value is >1 the exploration will continue to keep the desired cop at the maximum value of copToContactPointScalingFactor
    private static double maxAbsCoPError = 0.04;
-   private static boolean adjustContactPointInXNOnly=true;
+   private static boolean adjustContactPointInXNOnly=false;
 
    // unstable situations
    private static double maxICPAbsError = 0.04;
@@ -329,10 +328,7 @@ public class FootExplorationControlModule
          supportFootCentroid = new FramePoint(tempCentroid.getReferenceFrame(), tempCentroid.getX(), tempCentroid.getY(), 0.0);
          supportFootCentroid.changeFrame(worldFrame);
 
-         FramePoint tempNextFootStepCentroid = new FramePoint(worldFrame);
-         nextFootStep.getPositionIncludingFrame(tempNextFootStepCentroid);
-         nextFootStepCentroid = new FramePoint(tempNextFootStepCentroid.getReferenceFrame(), tempNextFootStepCentroid.getX(), tempNextFootStepCentroid.getY(),
-               tempNextFootStepCentroid.getZ());
+         nextFootStepCentroid.setToZero(nextFootStep.getSoleReferenceFrame());
          nextFootStepCentroid.changeFrame(worldFrame);
 
          ICPTrajectory.set(worldFrame, supportFootCentroid.getX(), supportFootCentroid.getY(), nextFootStepCentroid.getX(), nextFootStepCentroid.getY());
@@ -459,6 +455,7 @@ public class FootExplorationControlModule
             planeContactStateToRescale = null;
          }
          updateNextFootstepCentroid();
+         footExplorationCoPPlanner.initialize();
       }
    }
 
@@ -552,6 +549,8 @@ public class FootExplorationControlModule
          icpIndex.increment();
          CoPPositionPercentage.set(Double.NaN);
          explorationTime.set(Double.NaN);
+         updateNextFootstepCentroid();
+         footExplorationICPPlanner.initialize();
       }
 
       /**
@@ -785,6 +784,8 @@ public class FootExplorationControlModule
       @Override
       public void doTransitionIntoAction()
       {
+         updateNextFootstepCentroid();
+         footExplorationICPPlanner.initialize();         
          initialICPPositionPercentage = ICPPositionPercentage.getDoubleValue();
          initialTime = yoTime.getDoubleValue();
          slope = (finalICPPositionPercentage.getDoubleValue() - initialICPPositionPercentage) / icpShiftTime;
