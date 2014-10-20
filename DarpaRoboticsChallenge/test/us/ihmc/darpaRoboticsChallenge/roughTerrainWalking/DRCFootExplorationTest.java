@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.Random;
 
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +22,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -88,14 +92,25 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   //   @Test
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException
+   {
+      testDRCOverBlocksField(0.4);
+   }
+
+   @Test
+   public void testDRCOverRandomBars() throws SimulationExceededMaximumTimeException
+   {
+      testDRCOverBlocksField(-0.4);
+   }
+
+   private void testDRCOverBlocksField(double StartingYOffsetFromCenter) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      double standingTimeDuration = 1.0;
+      double standingTimeDuration = 2.0;
       double maximumWalkTime = 10.0;
-      double desiredVelocityValue = 0.5;
+      double desiredVelocityValue = 0.3;
       double desiredHeadingValue = 0.0;
 
       boolean useVelocityAndHeadingScript = false;
@@ -111,7 +126,8 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0001, 0); //slighly off ground
+      robotInitialSetup.setOffset(new Vector3d(0, StartingYOffsetFromCenter, 0));
 
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotInitialSetup);
@@ -149,11 +165,11 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       {
          fail("comError = " + Math.abs(comError.getDoubleValue()));
       }
-      
+
       // TODO: add boundingbox3d
-      if(q_x.getDoubleValue() < 0.9)
+      if (q_x.getDoubleValue() < 0.9)
       {
-         fail("Robot didn't traverse the terrain. CoM_x = " + q_x.getDoubleValue() );
+         fail("Robot didn't traverse the terrain. CoM_x = " + q_x.getDoubleValue());
       }
 
       createMovie(scs);
@@ -171,16 +187,33 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       double maxLength = 0.4;
       double maxHeight = 0.06;
 
-      combinedTerrainObject.addBox(xMin - 2.0, yMin - maxLength, xMax + 2.0, yMax + maxLength, -0.01, 0.0, YoAppearance.Gold());
+      combinedTerrainObject.addBox(xMin - 2.0, yMin - maxLength, xMax + 2.0, yMax + maxLength, -0.01, 0.0, YoAppearance.Gray());
 
+      //random boxes
       for (int i = 0; i < numberOfBoxes; i++)
       {
          double xStart = RandomTools.generateRandomDouble(random, xMin, xMax);
-         double yStart = RandomTools.generateRandomDouble(random, yMin, yMax);
+         double yStart = RandomTools.generateRandomDouble(random, 0, yMax);
          double xEnd = xStart + RandomTools.generateRandomDouble(random, maxLength * 0.1, maxLength);
          double yEnd = yStart + RandomTools.generateRandomDouble(random, maxLength * 0.1, maxLength);
          double zStart = 0.0;
          double zEnd = zStart + RandomTools.generateRandomDouble(random, maxHeight * 0.1, maxHeight);
+         combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
+      }
+
+      //random horizontal bars
+      int numberOfBars = 10;
+      double lastXEnd = 0;
+      for (int i = 0; lastXEnd < xMax; i++)
+      {
+         double xStart = RandomTools.generateRandomDouble(random, lastXEnd, lastXEnd + 0.3);
+         double xEnd = xStart + RandomTools.generateRandomDouble(random, 0.08, 0.2);
+         lastXEnd = xEnd;
+         double yStart = yMin;
+         double yEnd = 0;
+         double zStart = 0.0;
+         //         double zEnd = zStart + RandomTools.generateRandomDouble(random, maxHeight * 0.1, maxHeight);
+         double zEnd = zStart + 0.035;
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
 
@@ -238,7 +271,9 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
+      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
+
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
       guiInitialSetup.setIsGuiShown(SHOW_GUI);
 
       return guiInitialSetup;
@@ -247,10 +282,10 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
    protected void setupCameraForUnitTest(SimulationConstructionSet scs)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      cameraConfiguration.setCameraFix(0.6, 0.4, 1.1);
-      cameraConfiguration.setCameraPosition(-0.15, 10.0, 3.0);
+      cameraConfiguration.setCameraFix(0.08, -0.1, 0.035);
+      cameraConfiguration.setCameraPosition(3, -1.25, 1.35);
       cameraConfiguration.setCameraTracking(true, true, true, false);
-      cameraConfiguration.setCameraDolly(true, true, true, false);
+      //      cameraConfiguration.setCameraDolly(true, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
    }
