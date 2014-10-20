@@ -2,8 +2,6 @@ package us.ihmc.atlas.drcsim;
 
 import java.io.IOException;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelVisualizer;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
@@ -26,14 +24,13 @@ import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotDataCommunication.VisualizerUtils;
+import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
-
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCSimControllerFactory
 {
@@ -59,9 +56,8 @@ public class DRCSimControllerFactory
        */
       KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList());
-      //      YoVariableServer yoVariableServer = new YoVariableServer(SCSYoVariablesVisualizer.defaultPort, robotModel.getEstimatorDT());
-      SDFRobot visualizationRobot = robotModel.createSdfRobot(false);
-      SDFFullRobotModelVisualizer yoVariableServer = new SDFFullRobotModelVisualizer(visualizationRobot, 1, robotModel.getEstimatorDT());
+      YoVariableServer yoVariableServer = new YoVariableServer(SCSYoVariablesVisualizer.defaultPort, robotModel.getEstimatorDT());
+
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       /*
@@ -116,14 +112,7 @@ public class DRCSimControllerFactory
          e.printStackTrace();
       }
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(visualizationRobot, 16532);
-      scs.setGroundVisible(false);
-      yoVariableServer.registerSCS(scs);
-      VisualizerUtils.createOverheadPlotter(scs, true, controllerThread.getDynamicGraphicObjectsListRegistry(),
-            estimatorThread.getDynamicGraphicObjectsListRegistry());
-      scs.addYoGraphicsListRegistry(controllerThread.getDynamicGraphicObjectsListRegistry(), false);
-      scs.addYoGraphicsListRegistry(estimatorThread.getDynamicGraphicObjectsListRegistry(), false);
-      scs.startOnAThread();
+      yoVariableServer.start();
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
