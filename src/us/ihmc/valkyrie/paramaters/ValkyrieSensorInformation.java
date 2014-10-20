@@ -261,4 +261,22 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
       return sensorFramesToTrackAsPrimitive;
    }
+
+   @Override
+   public boolean setupROSLocationService()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean setupROSParameterSetters()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean isMultisenseHead()
+   {
+      return false;
+   }
 }
