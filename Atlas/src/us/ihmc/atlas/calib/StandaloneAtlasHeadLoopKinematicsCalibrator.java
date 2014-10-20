@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
@@ -51,10 +51,10 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
+   public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion)
    {
       //load robot
-	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot, runningOnRealRobot);
+	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, AtlasTarget.SIM, false);
       fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();
 
@@ -233,7 +233,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_MODEL = AtlasRobotVersion.DRC_NO_HANDS;
 	  
-      StandaloneAtlasHeadLoopKinematicsCalibrator calib = new StandaloneAtlasHeadLoopKinematicsCalibrator(ATLAS_ROBOT_MODEL, false);
+      StandaloneAtlasHeadLoopKinematicsCalibrator calib = new StandaloneAtlasHeadLoopKinematicsCalibrator(ATLAS_ROBOT_MODEL);
 //      calib.loadData("data/calibration20131208");
       calib.loadData("data/armCalibratoin20131209/calibration_right");
 //      calib.loadData("data/chessboard_joints_20131204");

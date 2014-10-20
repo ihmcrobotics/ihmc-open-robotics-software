@@ -101,7 +101,7 @@ public class AtlasSDFVerificationTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
+      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);
       SDFRobot sdfRobot = selectedModel.createSdfRobot(true);
 
       pinRobotInAir(sdfRobot);

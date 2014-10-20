@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRamps
 
 public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
-   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
    @Override
    public DRCRobotModel getRobotModel()

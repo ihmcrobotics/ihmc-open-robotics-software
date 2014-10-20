@@ -55,7 +55,7 @@ public class MultiSenseSensorManager
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
-         DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean runningWithRealHead)
+         DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
    {
       this.depthDataProcessor = depthDataProcessor;
       this.rosTransformProvider = rosTransformProvider;
@@ -70,7 +70,7 @@ public class MultiSenseSensorManager
       this.sensorURI = sensorURI;
       registerCameraReceivers();
       registerLidarReceivers();
-      if(runningWithRealHead)
+      if(setROSParameters)
       {
          multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, networkingManager);
          setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());

@@ -25,7 +25,7 @@ public interface DRCRobotModel
 {
    //TODO: RobotBoundingBoxes.java
 
-   public abstract boolean isRunningOnRealRobot();
+//   public abstract boolean isRunningOnRealRobot();
    
    public abstract CapturePointPlannerParameters getCapturePointPlannerParameters();
 

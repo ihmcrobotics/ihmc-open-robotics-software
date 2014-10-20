@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasPushRecoveryTrack
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    private final static boolean VISUALIZE_FORCE = true;
 
    public static void main(String[] args) throws JSAPException
@@ -30,7 +30,7 @@ public class AtlasPushRecoveryTrack
       DRCRobotModel model = null;
       final double groundHeight = 0.0;
 
-      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
+      model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
 
       if (model == null)
          model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);

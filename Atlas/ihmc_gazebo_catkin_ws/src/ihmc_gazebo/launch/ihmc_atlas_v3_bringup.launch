@@ -2,15 +2,15 @@
   <!-- Use sim time -->
   <param name="/use_sim_time" type="bool" value="true"/>
 
-  <!-- joint states to tf 
+  <!-- joint states to tf  
   <node pkg="robot_state_publisher" type="state_publisher" name="atlas_robot_state_publisher">
     <param name="publish_frequency" type="double" value="50.0" />
     <remap from="joint_states" to="/atlas/joint_states" />
-  </node>
+  </node> -->
   <node pkg="robot_state_publisher" type="state_publisher" name="multisense_sl_robot_state_publisher">
-    <param name="publish_frequency" type="double" value="50.0" />
-    <remap from="joint_states" to="/multisense_sl/joint_states" />
-  </node>-->
+    <param name="publish_frequency" type="double" value="1000.0" />
+    <remap from="joint_states" to="/joint_states" />
+  </node>
 
   <!-- Fake Calibration
   <node pkg="rostopic" type="rostopic" name="fake_joint_calibration"
@@ -38,4 +38,6 @@
     <remap from="/multisense_sl/left/image_rect_color" to="/multisense/left/image_rect_color"/>
     <remap from="/mutlisense_sl/right/image_rect_color" to="/multisense_sl/right/image_rect_color"/>
   </node>
+
+  <node pkg="rostopic" type="rostopic" name="set_spindle_speed" args="pub /multisense_sl/set_spindle_speed std_msgs/Float64 5" />
 </launch>

@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
@@ -80,7 +81,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       
       if (config.success())
       {
-    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), true, false);
+    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasTarget.REAL_ROBOT, false);
     	  
     	  String host;
     	  if (config.getString("host") != null)

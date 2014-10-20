@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
@@ -29,6 +30,7 @@ public class AtlasNetworkProcessor
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
+      Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
       
       FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand").setShortFlag('l').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand").setShortFlag('r').setRequired(false).setStringParser(JSAP.STRING_PARSER);
@@ -50,7 +52,20 @@ public class AtlasNetworkProcessor
     	  DRCRobotModel model;
     	  try
     	  {
-    		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), config.getBoolean(runningOnRealRobot.getID()), true);
+    	     AtlasTarget target;
+    	     if(config.getBoolean(runningOnRealRobot.getID()))
+    	     {
+    	        target = AtlasTarget.REAL_ROBOT;
+    	     }
+    	     else if(config.getBoolean(runningOnGazebo.getID()))
+    	     {
+    	       target = AtlasTarget.GAZEBO;
+    	     }
+    	     else
+    	     {
+    	        target = AtlasTarget.SIM;
+    	     }
+    		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
     	  }
     	  catch (IllegalArgumentException e)
     	  {

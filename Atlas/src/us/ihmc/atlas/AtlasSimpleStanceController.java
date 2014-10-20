@@ -38,7 +38,7 @@ public class AtlasSimpleStanceController {
 
 	         if (config.success())
 	         {
-	            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
+	            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
 	         }
 	         else
 	         {

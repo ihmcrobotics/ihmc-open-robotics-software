@@ -51,7 +51,15 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
+   public enum AtlasTarget
+   {
+      SIM,
+      GAZEBO,
+      REAL_ROBOT
+   }
+   
    private final AtlasRobotVersion selectedVersion;
+   private final AtlasTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
    private static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
@@ -64,7 +72,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private static final String ATLAS_NETWORK_CONFIG = "Configurations/atlas_network_config.ini";
    private static final String DEFAULT_NETWORK_CONFIG = "Configurations/localhost_network_config.ini";
 
-   private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
 
    private final AtlasJointMap jointMap;
@@ -77,11 +84,11 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final RobotNetworkParameters networkParameters;
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot, boolean headless)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
    {
       selectedVersion = atlasVersion;
-      this.runningOnRealRobot = runningOnRealRobot;
       jointMap = new AtlasJointMap(selectedVersion);
+      this.target = target;
 
       if (!headless)
       {
@@ -97,8 +104,9 @@ public class AtlasRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
 
+      boolean runningOnRealRobot = target == AtlasTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(runningOnRealRobot);
-      sensorInformation = new AtlasSensorInformation(runningOnRealRobot);
+      sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new AtlasWalkingControllerParameters(runningOnRealRobot);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
@@ -271,7 +279,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
-      if (runningOnRealRobot)
+      if (target == AtlasTarget.REAL_ROBOT)
       {
          return new AtlasPPSTimestampOffsetProvider(sensorInformation);
       }
@@ -283,13 +291,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
-
-   @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
+   
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
@@ -311,7 +313,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
    {
-      if (runningOnRealRobot)
+      if (target == AtlasTarget.REAL_ROBOT)
       {
          switch (getHandType())
          {

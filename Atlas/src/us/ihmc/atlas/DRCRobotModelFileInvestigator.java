@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class DRCRobotModelFileInvestigator
@@ -33,7 +34,7 @@ public class DRCRobotModelFileInvestigator
    {
       for (String st : AtlasRobotModelFactory.getAvailableRobotModels())
       {
-         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st, false, false));
+         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st, AtlasTarget.SIM, false));
       }
    }
 
