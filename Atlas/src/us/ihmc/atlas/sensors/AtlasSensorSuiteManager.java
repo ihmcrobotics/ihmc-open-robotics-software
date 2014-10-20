@@ -126,7 +126,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
+                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties, boolean usingRealHead)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
@@ -153,16 +153,24 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(depthDataProcessor, rosTransformProvider, robotPoseBuffer,
             rosMainNode, networkingManager, rosNativeNetworkProcessor,
             ppsTimestampOffsetProvider, sensorURI, multisenseLeftEyeCameraParameters,
-            multisenseLidarParameters, multisenseStereoParameters);
+            multisenseLidarParameters, multisenseStereoParameters, usingRealHead);
 
-      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, networkingManager,
-            DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+      if(usingRealHead)
+      {
+         FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, networkingManager,
+               DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);         
+         fishEyeDataReceiver.getBlackFlyParameterSetter().initializeParameterListeners();
+      }
             
 //      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
 //      networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
-      RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-    
+      
+      if(usingRealHead)
+      {
+         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
+         networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
+      }
+      
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
          RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
@@ -183,7 +191,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       }
       
       multiSenseSensorManager.initializeParameterListeners();
-      fishEyeDataReceiver.getBlackFlyParameterSetter().initializeParameterListeners();
+      
    }
 
 }

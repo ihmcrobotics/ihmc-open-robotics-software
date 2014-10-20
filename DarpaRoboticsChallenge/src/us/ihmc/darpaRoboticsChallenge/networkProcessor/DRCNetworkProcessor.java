@@ -85,7 +85,7 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
          this.fieldComputerClient = fieldComputerClient;
       }
             
-      useSimulatedSensors = !robotModel.isRunningOnRealRobot();
+      useSimulatedSensors = scsCommunicator != null;
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
@@ -109,11 +109,11 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
          networkingManager.getControllerCommandHandler().attachListener(TestbedClientPacket.class, testbed);
          new Thread(testbed).start();
       }
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel.getPhysicalProperties());
+      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel.getPhysicalProperties(), robotModel.isRunningOnRealRobot());
       connect();
    }
 
-   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
+   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI, DRCRobotPhysicalProperties physicalProperties, boolean usingRealHead)
    {
       if (useSimulatedSensors)
       {
@@ -121,7 +121,7 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
       }
       else
       {
-         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI, physicalProperties);
+         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI, physicalProperties, usingRealHead);
       }
    }
    

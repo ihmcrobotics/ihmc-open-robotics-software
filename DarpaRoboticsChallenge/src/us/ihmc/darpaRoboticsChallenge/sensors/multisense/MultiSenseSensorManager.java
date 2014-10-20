@@ -55,7 +55,7 @@ public class MultiSenseSensorManager
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
-         DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters)
+         DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean runningWithRealHead)
    {
       this.depthDataProcessor = depthDataProcessor;
       this.rosTransformProvider = rosTransformProvider;
@@ -70,30 +70,42 @@ public class MultiSenseSensorManager
       this.sensorURI = sensorURI;
       registerCameraReceivers();
       registerLidarReceivers();
-      multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, networkingManager);
-      setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
-
+      if(runningWithRealHead)
+      {
+         multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, networkingManager);
+         setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
+      }
+      else
+      {
+         multiSenseParamaterSetter = null;
+      }
    }
 
    public void initializeParameterListeners()
    {
 
       System.out.println("initialise parameteres--------------------------------------------------------------------------------");
-      multiSenseParamaterSetter.initializeParameterListeners(); 
-      multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
+      if(multiSenseParamaterSetter != null)
+      {
+         multiSenseParamaterSetter.initializeParameterListeners(); 
+         multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
+      }
    }
 
    private void setMultiseSenseParams(double lidarSpindleVelocity)
    {
-      multiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
-
-      if (RosNativeNetworkProcessor.hasNativeLibrary())
+      if(multiSenseParamaterSetter != null)
       {
-         multiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor, lidarSpindleVelocity);
-      }
-      else
-      {
-         multiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode, lidarSpindleVelocity);
+         multiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
+   
+         if (RosNativeNetworkProcessor.hasNativeLibrary())
+         {
+            multiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor, lidarSpindleVelocity);
+         }
+         else
+         {
+            multiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode, lidarSpindleVelocity);
+         }
       }
    }
 
