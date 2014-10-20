@@ -99,4 +99,22 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    {
       return null;
    }
+
+   @Override
+   public boolean setupROSLocationService()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean setupROSParameterSetters()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean isMultisenseHead()
+   {
+      return false;
+   }
 }
