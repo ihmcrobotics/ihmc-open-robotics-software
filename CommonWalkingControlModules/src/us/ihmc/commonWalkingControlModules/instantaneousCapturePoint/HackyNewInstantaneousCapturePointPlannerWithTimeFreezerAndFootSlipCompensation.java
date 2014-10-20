@@ -214,9 +214,20 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    }
    
    @Override
-   public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
+   public void updateForSingleSupportPush(ArrayList<FramePoint> footstepList, double time)
    {
 	   timeDelay.set(0.0);
+	   super.updateForSingleSupportPush(footstepList, time);
+   }
+   
+   @Override
+   public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
+   {
+	   if(isDoubleSupport.getBooleanValue())
+	   {
+		   timeDelay.set(0.0);
+	   }
+		
 	   super.cancelPlan(getTimeWithDelay(time), footstepList);
    }
 

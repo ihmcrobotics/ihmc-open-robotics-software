@@ -159,7 +159,6 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 		if (cancelPlan.getBooleanValue())
 		{
 			cancelPlan(initialTime, footstepList);
-			atAStop.set(true);
 			return;
 		}
 
