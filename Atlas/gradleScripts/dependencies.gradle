@@ -8,8 +8,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 
-	//compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/ejml-snapshot", include: "*.jar")
+	['core','complex','equation','experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}
     //compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")
     //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-calibration', version: '0.18'
