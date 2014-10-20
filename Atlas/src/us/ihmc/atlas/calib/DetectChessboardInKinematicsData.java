@@ -115,7 +115,7 @@ public class DetectChessboardInKinematicsData
       PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(boardWidth, boardHeight, 0.03);
 
       // Computes the homography
-      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
+      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
       // decomposes the homography
       Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 

@@ -36,7 +36,7 @@ public class TrackCalibrationGrid
 
       PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 6, 10);
 
-      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
+      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
       Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
       if( !computeH.computeHomography(detector.getPoints()) )

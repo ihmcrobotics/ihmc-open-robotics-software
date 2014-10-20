@@ -30,7 +30,7 @@ public class DRCArmKinematicsCalibration
    PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6));
    PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 6, 0.01);
 
-   Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
+   Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
    Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 
    ImageFloat32 gray = new ImageFloat32(1, 1);
