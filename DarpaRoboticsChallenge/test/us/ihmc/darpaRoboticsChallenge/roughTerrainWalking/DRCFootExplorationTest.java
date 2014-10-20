@@ -202,7 +202,6 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       }
 
       //random horizontal bars
-      int numberOfBars = 10;
       double lastXEnd = 0;
       for (int i = 0; lastXEnd < xMax; i++)
       {
