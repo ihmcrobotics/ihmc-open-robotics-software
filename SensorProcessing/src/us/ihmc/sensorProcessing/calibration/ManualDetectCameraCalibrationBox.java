@@ -126,7 +126,7 @@ public class ManualDetectCameraCalibrationBox
       // creating your own target.. Note z=0 is assumed
       PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(5, 7, 0.03);
       // Computes the homography
-      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target);
+      Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.points);
       // decomposes the homography
       Zhang99DecomposeHomography decomposeH = new Zhang99DecomposeHomography();
 

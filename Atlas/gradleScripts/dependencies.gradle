@@ -10,14 +10,21 @@ dependencies {
 
 	//compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/ejml-snapshot", include: "*.jar")
-    compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
-    compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-calibration', version: '0.18'
-    compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
-    compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.18'
-    compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.18'
-    compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
+    //compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")
+    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-calibration', version: '0.18'
+    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
+    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.18'
+    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.18'
+    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-calibration-0.19-SNAPSHOT.jar")
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-geo-0.19-SNAPSHOT.jar")
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-io-0.19-SNAPSHOT.jar")
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-ip-0.19-SNAPSHOT.jar")
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-visualize-0.19-SNAPSHOT.jar")
     compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.0'
-    compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.6.+'
+    //compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.6.+'
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/DDogleg", include: "ddogleg-0.7-SNAPSHOT.jar")
     compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
     compile group: 'org.apache.ant', name: 'ant', version: '1.9.0'
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
