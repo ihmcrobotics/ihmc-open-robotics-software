@@ -304,12 +304,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
-   @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
       return new ValkyrieSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation);
