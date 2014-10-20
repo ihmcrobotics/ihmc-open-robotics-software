@@ -85,7 +85,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final DoubleYoVariable desiredLegLength;
    private final DoubleYoVariable currentLegLength;
-   private final DoubleYoVariable currentLegLengthPrevValue;
    private final DoubleYoVariable correctedDesiredLegLength;
 
    private final RigidBody pelvis;
@@ -226,7 +225,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       desiredLegLength = new DoubleYoVariable(namePrefix + "DesiredLegLength", registry);
       correctedDesiredLegLength = new DoubleYoVariable(namePrefix + "CorrectedDesiredLegLength", registry);
       currentLegLength = new DoubleYoVariable(namePrefix + "CurrentLegLength", registry);
-      currentLegLengthPrevValue = new DoubleYoVariable(namePrefix + "CurrentLegLengthPrevValue", registry);
 
       isSwingMechanicalLimitAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSwingMechanicalLimitAvoidanceUsed", registry);
       isSwingSingularityAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSwingSingularityAvoidanceUsed", registry);
@@ -415,8 +413,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          correctSwingFootTrajectoryForMechanicalLimitAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect, desiredFootLinearAccelerationToCorrect);
       if (USE_SINGULARITY_AVOIDANCE_SWING)
          correctSwingFootTrajectoryForSingularityAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect, desiredFootLinearAccelerationToCorrect);
-
-      currentLegLengthPrevValue.set(currentLegLength.getDoubleValue());
    }
 
    private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect, FrameVector desiredFootLinearAccelerationToCorrect)
@@ -436,7 +432,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaSwingMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
 //      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
-      double correctedDesiredPositionZ = ((1.0 - alphaSwingMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue() + alphaSwingMechanicalLimitAvoidance.getDoubleValue() * currentLegLengthPrevValue.getDoubleValue());
+      double correctedDesiredPositionZ = ((1.0 - alphaSwingMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue() + alphaSwingMechanicalLimitAvoidance.getDoubleValue() * currentLegLength.getDoubleValue());
       correctedDesiredPositionZ = - Math.max(correctedDesiredPositionZ, minimumLegLength.getDoubleValue());
 //      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
 //      unachievedSwingTranslation.changeFrame(worldFrame);
