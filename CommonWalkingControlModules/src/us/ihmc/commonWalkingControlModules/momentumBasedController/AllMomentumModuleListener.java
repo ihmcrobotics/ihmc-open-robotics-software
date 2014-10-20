@@ -289,9 +289,9 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    
    public void setCentroidalMomentumMatrix(DenseMatrix64F centroidalMomentumAMatrix, DenseMatrix64F momentumDotEquationRightHandSide, DenseMatrix64F momentumSubspace)
    { 
-      centroidalMomentumAMatrixCopy.setReshape(centroidalMomentumAMatrix);
-      momentumDotEquationRightHandSideCopy.setReshape(momentumDotEquationRightHandSide);
-      momentumSubspaceCopy.setReshape(momentumSubspace);
+      centroidalMomentumAMatrixCopy.set(centroidalMomentumAMatrix);
+      momentumDotEquationRightHandSideCopy.set(momentumDotEquationRightHandSide);
+      momentumSubspaceCopy.set(momentumSubspace);
       
       if (printMotionConstraints.getBooleanValue())
       {
@@ -312,7 +312,7 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    public void setPrimaryMotionConstraintJMatrix(DenseMatrix64F jPrimary)
    {
-      jPrimaryMotionConstraint.setReshape(jPrimary);
+      jPrimaryMotionConstraint.set(jPrimary);
       
       if (printMotionConstraints.getBooleanValue())
       {
@@ -353,7 +353,7 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    public void setPrimaryMotionConstraintPVector(DenseMatrix64F pPrimary)
    {
-      pPrimaryMotionConstraint.setReshape(pPrimary);
+      pPrimaryMotionConstraint.set(pPrimary);
       
       if (printMotionConstraints.getBooleanValue())
       {
@@ -367,14 +367,14 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
 
    public void setPrimaryMotionConstraintCheck(DenseMatrix64F primaryCheck)
    {
-      primaryMotionConstraintCheck.setReshape(primaryCheck);
+      primaryMotionConstraintCheck.set(primaryCheck);
       
 //      System.out.println("!!! PrimaryMotionConstraint Check = " + primaryMotionConstraintCheck);
    }
 
    public void setCheckJQEqualsZeroAfterSetConstraint(DenseMatrix64F checkJQEqualsZero)
    {
-      this.checkJQEqualsZero.setReshape(checkJQEqualsZero);
+      this.checkJQEqualsZero.set(checkJQEqualsZero);
       
 //      System.out.println("!!! PrimaryMotionConstraint checkJQEqualsZero = " + this.checkJQEqualsZero);
    }
@@ -400,7 +400,7 @@ public class AllMomentumModuleListener implements MotionConstraintListener, Desi
    public void setJointAccelerationSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerationsSolution)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
-      this.jointAccelerationsSolution.setReshape(jointAccelerationsSolution);
+      this.jointAccelerationsSolution.set(jointAccelerationsSolution);
 //      System.out.println("\n\n***********\njointAccelerationsSolution = " + this.jointAccelerationsSolution);
 
    }

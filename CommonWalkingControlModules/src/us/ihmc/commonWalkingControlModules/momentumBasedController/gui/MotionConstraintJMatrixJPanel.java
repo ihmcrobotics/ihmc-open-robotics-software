@@ -25,7 +25,7 @@ public class MotionConstraintJMatrixJPanel extends JPanel
    
    public synchronized void setMotionConstraintJMatrix(DenseMatrix64F motionConstraintJMatrix)
    {
-      this.motionConstraintJMatrix.setReshape(motionConstraintJMatrix);
+      this.motionConstraintJMatrix.set(motionConstraintJMatrix);
        this.repaint();
    }
 

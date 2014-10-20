@@ -220,8 +220,8 @@ public class MotionConstraintHandler
          
          jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
 
-         tempBaseToEndEffectorJacobianMatrix.setReshape(baseToEndEffectorJacobian.getJacobianMatrix());
-         tempJacobianMatrix.setReshape(jacobian.getJacobianMatrix());
+         tempBaseToEndEffectorJacobianMatrix.set(baseToEndEffectorJacobian.getJacobianMatrix());
+         tempJacobianMatrix.set(jacobian.getJacobianMatrix());
 
          int nullity = nullspaceMultipliers.getNumRows();
          if (nullity > 0)
@@ -510,8 +510,8 @@ public class MotionConstraintHandler
    
    public void getMotionConstraintJMatrixPVectorAndWeight(int motionConstraintIndex, DenseMatrix64F jToPack, DenseMatrix64F pToPack, MutableDouble wToPack)
    {
-      jToPack.setReshape(jList.get(motionConstraintIndex));
-      pToPack.setReshape(pList.get(motionConstraintIndex));
+      jToPack.set(jList.get(motionConstraintIndex));
+      pToPack.set(pList.get(motionConstraintIndex));
       wToPack.setValue(weightList.get(motionConstraintIndex));
    }
 
