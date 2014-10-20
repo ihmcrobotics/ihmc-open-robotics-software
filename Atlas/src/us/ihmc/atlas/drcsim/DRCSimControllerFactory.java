@@ -42,7 +42,7 @@ public class DRCSimControllerFactory
 
    public DRCSimControllerFactory()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_NO_HANDS, false, false);
       /*
        * Create registries
        */

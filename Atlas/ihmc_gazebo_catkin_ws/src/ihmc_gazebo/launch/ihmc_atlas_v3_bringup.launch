@@ -32,8 +32,10 @@
   -->
 
   <!-- Stereo image processing -->
-  <node ns="multisense_sl/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
+  <node ns="multisense_sl" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
     <param name="disparity_range" type="int" value="128"/>
     <param name="approximate_sync" type="bool" value="false"/>
+    <remap from="/multisense_sl/left/image_rect_color" to="/multisense/left/image_rect_color"/>
+    <remap from="/mutlisense_sl/right/image_rect_color" to="/multisense_sl/right/image_rect_color"/>
   </node>
 </launch>

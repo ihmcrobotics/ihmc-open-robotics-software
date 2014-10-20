@@ -23,6 +23,7 @@
 #include "TCPServer.h"
 
 const uint32_t BUFFER_SIZE = 1460;  //MTU = 1500, TCP overhead = 40
+
 namespace gazebo {
 class DRCSimIHMCPlugin: public ModelPlugin {
 private:
@@ -49,9 +50,11 @@ private:
 	int simulationCyclesPerControlCycle;
 	std::vector<double> desiredTorques;
 
+
 public:
 	DRCSimIHMCPlugin() :
-			tcpDataServer(1234, BUFFER_SIZE), tcpCommandListener(1235, BUFFER_SIZE), initialized(false), receivedControlMessage(false), cyclesRemainingTillControlMessage(0), simulationCyclesPerControlCycle(-1) {
+			tcpDataServer(1234, BUFFER_SIZE), tcpCommandListener(1235, BUFFER_SIZE), initialized(false), receivedControlMessage(false), cyclesRemainingTillControlMessage(0), simulationCyclesPerControlCycle(-1)
+	{
 		std::cout << "IHMC Plugin Loaded" << std::endl;
 	}
 
@@ -65,21 +68,14 @@ public:
 		joints = this->model->GetJoints();
 		std::sort(joints.begin(), joints.end(), DRCSimIHMCPlugin::sortJoints);
 
-		for (unsigned int i = 0; i < joints.size(); i++) {
-			const boost::shared_ptr<physics::Joint> joint = joints.at(i);
-			std::cout << joint->GetName() << " ";
-		}
-		std::cout << std::endl;
+
 
 		sensors::Sensor_V sensors = sensors::SensorManager::Instance()->GetSensors();
 		for (unsigned int i = 0; i < sensors.size(); i++) {
-			std::cout << sensors.at(i)->GetName() << std::endl;
-
 			gazebo::sensors::ImuSensorPtr imu = boost::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(sensors.at(i));
 			if (imu) {
 				std::cout << imu->GetParentName() << std::endl;
 				if (imu->GetParentName() == "atlas::pelvis") {
-					std::cout << "Adding imu " << imu->GetName() << std::endl;
 					imus.push_back(imu);
 				}
 			}
@@ -104,9 +100,12 @@ public:
 		double initialAngles[] = { 0.0, 0.0, 0.0, 0.0, 0.498, 2.0, -1.3, 0.3, -0.004, 0.0, -0.062, -0.276, 0.062, -0.233, 0.0, 0.518, 0, -0.498, 2.0, 1.3, 0.3, 0.004, 0.0, 0.062, -0.276, -0.062, -0.233, 0.0, 0.518 };
 
 		for (unsigned int i = 0; i < joints.size(); i++) {
-			joints.at(i)->SetPosition(0, initialAngles[i]);
-			joints.at(i)->SetUpperLimit(0, initialAngles[i]);
-			joints.at(i)->SetLowerLimit(0, initialAngles[i]);
+			if(joints.at(i)->GetName() != "hokuyo_joint")
+			{
+				joints.at(i)->SetPosition(0, initialAngles[i]);
+				joints.at(i)->SetUpperLimit(0, initialAngles[i]);
+				joints.at(i)->SetLowerLimit(0, initialAngles[i]);
+			}
 		}
 
 		desiredTorques.resize(joints.size(), 0.0);
@@ -121,10 +120,14 @@ public:
 					// Waiting for controller to connect, do not actively control robot
 				} else {
 					// First control tick. Unlock joints
-					std::cout << "Unlocking joints. Starting control" << std::endl;
+					std::cout << "Unlocking joints. Starting control." << std::endl;
 					for (unsigned int i = 0; i < joints.size(); i++) {
-						joints.at(i)->SetLowerLimit(0, -3.14);
-						joints.at(i)->SetUpperLimit(0, 3.14);
+						if(joints.at(i)->GetName() != "hokuyo_joint")
+						{
+							joints.at(i)->SetLowerLimit(0, -3.14);
+							joints.at(i)->SetUpperLimit(0, 3.14);
+							joints.at(i)->SetEffortLimit(0, -1);
+						}
 					}
 
 					initialized = true;
