@@ -3,7 +3,8 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	testCompile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
 	compile group: 'us.ihmc.thirdparty', name: 'mosek', version: 'x'
-	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+	//compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/ejml-snapshot", include: "*.jar")
 	compile group: 'us.ihmc.thirdparty', name: 'joptimizer', version: '3.3.0-jdk5'
         compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2'
         compile group: 'colt', name: 'colt', version: '1.2.0'
