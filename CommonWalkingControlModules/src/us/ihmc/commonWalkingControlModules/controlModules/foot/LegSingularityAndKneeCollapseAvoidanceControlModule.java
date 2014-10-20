@@ -63,7 +63,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final DoubleYoVariable minimumLegLength;
 
    private final DoubleYoVariable percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance;
-   private final DoubleYoVariable percentOfLegLengthThresholdToDisableSwingKneeLimitAvoidance;
    private final DoubleYoVariable percentOfLegLengthThresholdToEnableSingularityAvoidance;
    private final DoubleYoVariable percentOfLegLengthThresholdToDisableSingularityAvoidance;
    private final DoubleYoVariable percentOfLegLengthThresholdForCollapseAvoidance;
@@ -86,6 +85,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final DoubleYoVariable desiredLegLength;
    private final DoubleYoVariable currentLegLength;
+   private final DoubleYoVariable currentLegLengthPrevValue;
    private final DoubleYoVariable correctedDesiredLegLength;
 
    private final RigidBody pelvis;
@@ -180,7 +180,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       unachievedSwingAccelerationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingAccelerationFiltered", registry, alphaUnreachableFootstep);
 
       percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance = new DoubleYoVariable(namePrefix + "PercThresSwingKneeLimitAvoidance", registry);
-      percentOfLegLengthThresholdToDisableSwingKneeLimitAvoidance = new DoubleYoVariable(namePrefix + "PercThresToDisableSwingKneeLimitAvoidance", registry);
       percentOfLegLengthThresholdToEnableSingularityAvoidance = new DoubleYoVariable(namePrefix + "PercThresSingularityAvoidance", registry);
       percentOfLegLengthThresholdToDisableSingularityAvoidance = new DoubleYoVariable(namePrefix + "PercThresToDisableSingularityAvoidance", registry);
       maxPercentOfLegLengthForSingularityAvoidanceInSwing = new DoubleYoVariable(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSwing", registry);
@@ -203,7 +202,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       minPercentOfLegLengthForCollapseAvoidance.set(0.76);//walkingControllerParameters.getMinLegLengthBeforeCollapsingSingleSupport() / maximumLegLength.getDoubleValue());
       minMechanicalPercentOfLegLength.set(minimumLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
       percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.set(0.07 + minMechanicalPercentOfLegLength.getDoubleValue());
-      percentOfLegLengthThresholdToDisableSwingKneeLimitAvoidance.set(0.02 + percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue());
       footLoadThresholdToEnableCollapseAvoidance.set(0.62); // 0.65
       footLoadThresholdToDisableCollapseAvoidance.set(0.59); // 0.62
       timeDelayToDisableCollapseAvoidance.set(0.5);
@@ -228,6 +226,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       desiredLegLength = new DoubleYoVariable(namePrefix + "DesiredLegLength", registry);
       correctedDesiredLegLength = new DoubleYoVariable(namePrefix + "CorrectedDesiredLegLength", registry);
       currentLegLength = new DoubleYoVariable(namePrefix + "CurrentLegLength", registry);
+      currentLegLengthPrevValue = new DoubleYoVariable(namePrefix + "CurrentLegLengthPrevValue", registry);
 
       isSwingMechanicalLimitAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSwingMechanicalLimitAvoidanceUsed", registry);
       isSwingSingularityAvoidanceUsed = new BooleanYoVariable(namePrefix + "IsSwingSingularityAvoidanceUsed", registry);
@@ -416,6 +415,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          correctSwingFootTrajectoryForMechanicalLimitAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect, desiredFootLinearAccelerationToCorrect);
       if (USE_SINGULARITY_AVOIDANCE_SWING)
          correctSwingFootTrajectoryForSingularityAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect, desiredFootLinearAccelerationToCorrect);
+
+      currentLegLengthPrevValue.set(currentLegLength.getDoubleValue());
    }
 
    private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect, FrameVector desiredFootLinearAccelerationToCorrect)
@@ -434,8 +435,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             / (minMechanicalPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue()));
       alphaSwingMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
-      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minMechanicalPercentOfLegLength.getDoubleValue() * maximumLegLength.getDoubleValue());
-      double correctedDesiredPositionZ = (1.0 - alphaSwingMechanicalLimitAvoidance.getDoubleValue()) * desiredFootPosition.getZ() + alphaSwingMechanicalLimitAvoidance.getDoubleValue() * desiredOrMinLegLength;
+//      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
+      double correctedDesiredPositionZ = ((1.0 - alphaSwingMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue() + alphaSwingMechanicalLimitAvoidance.getDoubleValue() * currentLegLengthPrevValue.getDoubleValue());
+      correctedDesiredPositionZ = - Math.max(correctedDesiredPositionZ, minimumLegLength.getDoubleValue());
 //      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
 //      unachievedSwingTranslation.changeFrame(worldFrame);
 //      yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
