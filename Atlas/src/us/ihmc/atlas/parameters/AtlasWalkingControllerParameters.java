@@ -8,6 +8,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -26,7 +27,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
 {   
-   private final boolean runningOnRealRobot;
+   private final AtlasTarget target;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    // Limits
@@ -42,12 +43,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public AtlasWalkingControllerParameters()
    {
-      this(false);
+      this(AtlasTarget.SIM);
    }
    
-   public AtlasWalkingControllerParameters(boolean runningOnRealRobot)
+   public AtlasWalkingControllerParameters(AtlasTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.target = target;
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -316,21 +317,21 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getCaptureKpParallelToMotion()
    {
-      if (!runningOnRealRobot) return 1.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 1.0;
       return 1.0; 
    }
 
    @Override
    public double getCaptureKpOrthogonalToMotion()
    {      
-      if (!runningOnRealRobot) return 1.0; 
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 1.0; 
       return 1.0; 
    }
    
    @Override
    public double getCaptureKi()
    {      
-      if (!runningOnRealRobot) return 4.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 4.0;
       return 4.0; 
    }
    
@@ -343,21 +344,21 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      if (!runningOnRealRobot) return 16.0; //Double.POSITIVE_INFINITY;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 16.0; //Double.POSITIVE_INFINITY;
       return 16.0;
    }
    
    @Override
    public double getCMPRateLimit()
    {
-      if (!runningOnRealRobot) return 60.0; 
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 60.0; 
       return 6.0; //3.0; //4.0; //3.0;
    }
 
    @Override
    public double getCMPAccelerationLimit()
    {
-      if (!runningOnRealRobot) return 2000.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 2000.0;
       return 200.0; //80.0; //40.0;
    }
 
@@ -366,8 +367,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       YoPDGains gains = new YoPDGains("CoMHeight", registry);
 
-      double kp = runningOnRealRobot ? 40.0 : 40.0;
-      double zeta = runningOnRealRobot ? 0.4 : 0.8;
+      double kp = (target == AtlasTarget.REAL_ROBOT) ? 40.0 : 40.0;
+      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.4 : 0.8;
       double maxAcceleration = 0.5 * 9.81;
       double maxJerk = maxAcceleration / 0.05;
 
@@ -398,11 +399,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
       double kp = 80.0;
-      double zeta = runningOnRealRobot ? 0.25 : 0.8;
+      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 12.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 180.0 : 540.0;
+      double maxAccel = (target == AtlasTarget.REAL_ROBOT) ? 12.0 : 36.0;
+      double maxJerk = (target == AtlasTarget.REAL_ROBOT) ? 180.0 : 540.0;
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
@@ -421,11 +422,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
       double kp = 40.0;
-      double zeta = runningOnRealRobot ? 0.4 : 0.8;
+      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.4 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
+      double maxAccel = (target == AtlasTarget.REAL_ROBOT) ? 6.0 : 36.0;
+      double maxJerk = (target == AtlasTarget.REAL_ROBOT) ? 60.0 : 540.0;
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
@@ -453,28 +454,28 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getKpUpperBody()
    {
-      if (!runningOnRealRobot) return 80.0; //100.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 80.0; //100.0;
       return 80.0; //40.0;
    }
 
    @Override
    public double getZetaUpperBody()
    {
-      if (!runningOnRealRobot) return 0.8; //1.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 0.8; //1.0;
       return 0.25;
    }
    
    @Override
    public double getMaxAccelerationUpperBody()
    {
-      if (!runningOnRealRobot) return 36.0; // 18.0; //100.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 36.0; // 18.0; //100.0;
       return 6.0;
    }
    
    @Override
    public double getMaxJerkUpperBody()
    {
-      if (!runningOnRealRobot) return 540.0; // 270.0; //1000.0;
+      if (!(target == AtlasTarget.REAL_ROBOT)) return 540.0; // 270.0; //1000.0;
       return 60.0;
    }
 
@@ -484,11 +485,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
       double kp = 80.0;
-      double zeta = runningOnRealRobot ? 0.25 : 0.8;
+      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
+      double maxAccel = (target == AtlasTarget.REAL_ROBOT) ? 6.0 : 36.0;
+      double maxJerk = (target == AtlasTarget.REAL_ROBOT) ? 60.0 : 540.0;
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
@@ -508,13 +509,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       double kpXY = 100.0;
       double kpZ = 200.0;
-      double zetaXYZ = runningOnRealRobot ? 0.25 : 0.7;
+      double zetaXYZ = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.7;
       double kpOrientation = 200.0;
       double zetaOrientation = 0.7;
-      double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
       
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
@@ -534,14 +535,14 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       double kpXY = 100.0;
       double kpZ = 0.0;
-      double zetaXYZ = runningOnRealRobot ? 0.2 : 1.0;
-      double kpXYOrientation = runningOnRealRobot ? 100.0 : 200.0;
-      double kpZOrientation = runningOnRealRobot ? 100.0 : 200.0;
-      double zetaOrientation = runningOnRealRobot ? 0.2 : 1.0;
-      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double zetaXYZ = (target == AtlasTarget.REAL_ROBOT) ? 0.2 : 1.0;
+      double kpXYOrientation = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : 200.0;
+      double kpZOrientation = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : 200.0;
+      double zetaOrientation = (target == AtlasTarget.REAL_ROBOT) ? 0.2 : 1.0;
+      double maxLinearAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
       
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
@@ -561,14 +562,14 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       double kpXY = 100.0;
       double kpZ = 0.0;
-      double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
-      double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
-      double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
-      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
-      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double zetaXYZ = (target == AtlasTarget.REAL_ROBOT) ? 0.4 : 0.4;
+      double kpXYOrientation = (target == AtlasTarget.REAL_ROBOT) ? 200.0 : 200.0;
+      double kpZOrientation = (target == AtlasTarget.REAL_ROBOT) ? 200.0 : 200.0;
+      double zetaOrientation = (target == AtlasTarget.REAL_ROBOT) ? 0.4 : 0.4;
+      double maxLinearAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
       
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
@@ -586,8 +587,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SupportFoot", registry);
 
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
       
       gains.setOrientationDerivativeGains(20.0, 0.0, 0.0);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
@@ -615,7 +616,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getSwingSingularityEscapeMultiplier()
    {
-      return runningOnRealRobot ? 50.0 : 200.0;
+      return (target == AtlasTarget.REAL_ROBOT) ? 50.0 : 200.0;
    }
 
    @Override
@@ -625,21 +626,15 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
-      return runningOnRealRobot ? 1.5 : 0.25;
+      return (target == AtlasTarget.REAL_ROBOT) ? 1.5 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return runningOnRealRobot ? 1.5 : 0.60;
+      return (target == AtlasTarget.REAL_ROBOT) ? 1.5 : 0.60;
    }
 
    @Override
@@ -706,7 +701,17 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getContactThresholdForce()
    {
-      return runningOnRealRobot ? 80.0 : 5.0;
+      switch(target)
+      {
+      case REAL_ROBOT:
+         return 80.0;
+      case GAZEBO:
+         return 50.0;
+      case SIM:
+         return 5.0;
+         default:
+            throw new RuntimeException();
+      }
    }
    
    @Override
@@ -730,5 +735,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       momentumOptimizationSettings.setRhoMin(4.0);
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+   }
+
+   @Override
+   public boolean doFancyOnToesControl()
+   {
+      return !(target == AtlasTarget.REAL_ROBOT);
    }
 }

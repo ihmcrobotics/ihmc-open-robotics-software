@@ -78,9 +78,6 @@ public class DRCSimSensorReader implements SensorReader
       data = ByteBuffer.allocate(16 + jointDataLength + imuDataLength + forceSensorDataLength);
       data.order(ByteOrder.nativeOrder());
 
-      System.out.println(jointList);
-      System.out.println(forceSensorDataHolderForEstimator.getForceSensorDefinitions());
-
       try
       {
          channel = SocketChannel.open();

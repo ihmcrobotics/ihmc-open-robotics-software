@@ -108,7 +108,7 @@ public class AtlasRobotModel implements DRCRobotModel
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(runningOnRealRobot);
       sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot);
-      walkingControllerParameters = new AtlasWalkingControllerParameters(runningOnRealRobot);
+      walkingControllerParameters = new AtlasWalkingControllerParameters(target);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters();
       drivingControllerParameters = new AtlasDrivingControllerParameters();
