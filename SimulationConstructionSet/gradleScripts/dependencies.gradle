@@ -7,7 +7,8 @@ dependencies {
 	compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
-	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+	//compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/ejml-snapshot", include: "*.jar")
 	compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'

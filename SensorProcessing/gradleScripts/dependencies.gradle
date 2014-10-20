@@ -7,7 +7,8 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x' 
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.+' 
-    compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+    //compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
+	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/ejml-snapshot", include: "*.jar")
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6' 
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1' 
     compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
