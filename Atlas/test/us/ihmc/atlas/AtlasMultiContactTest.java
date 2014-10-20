@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -15,6 +14,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;

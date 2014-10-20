@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.utilities.Pair;
@@ -13,6 +12,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
 
 public class YoVariableServer implements RobotVisualizer
