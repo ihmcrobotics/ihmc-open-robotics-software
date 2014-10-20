@@ -119,9 +119,11 @@ public class DRCSimControllerFactory
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
       
-      URI rosMasterURI = robotModel.getNetworkParameters().getRosURI();
-      new DRCNetworkProcessor(rosMasterURI, robotModel);
-      
+      if(USE_GUI)
+      {
+         URI rosMasterURI = robotModel.getNetworkParameters().getRosURI();
+         new DRCNetworkProcessor(rosMasterURI, robotModel);
+      }
       try
       {
          simulationThread.join();

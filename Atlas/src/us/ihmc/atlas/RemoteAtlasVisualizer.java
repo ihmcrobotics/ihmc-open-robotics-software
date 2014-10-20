@@ -81,7 +81,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       
       if (config.success())
       {
-    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasTarget.REAL_ROBOT, false);
+    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasTarget.SIM, false);
     	  
     	  String host;
     	  if (config.getString("host") != null)
