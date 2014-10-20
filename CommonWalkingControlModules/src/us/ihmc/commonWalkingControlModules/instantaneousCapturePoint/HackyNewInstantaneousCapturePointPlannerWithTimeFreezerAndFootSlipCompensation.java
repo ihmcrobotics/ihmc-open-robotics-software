@@ -212,6 +212,13 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    {
       capturePointPositionError.set(currentCapturePointPosition.distance(desiredCapturePointPosition));
    }
+   
+   @Override
+   public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
+   {
+	   timeDelay.set(0.0);
+	   super.cancelPlan(getTimeWithDelay(time), footstepList);
+   }
 
    public boolean getIsTimeBeingFrozen()
    {
