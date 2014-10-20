@@ -561,12 +561,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       return 0.25; // 1.5; //
@@ -667,5 +661,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       momentumOptimizationSettings.setRhoMin(4.0);
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+   }
+
+   @Override
+   public boolean doFancyOnToesControl()
+   {
+      return true;
    }
 }
