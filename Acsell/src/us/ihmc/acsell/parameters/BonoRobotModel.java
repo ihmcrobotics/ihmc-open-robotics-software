@@ -229,13 +229,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
-
-   @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
+   
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
