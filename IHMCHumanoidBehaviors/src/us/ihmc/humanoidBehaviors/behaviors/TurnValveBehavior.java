@@ -22,7 +22,7 @@ import javax.vecmath.Vector3d;
 
 public class TurnValveBehavior extends BehaviorInterface
 {
-   private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.12, 0.0, 0.64);
+   private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
    private Vector3d valveLoction = new Vector3d();
    private Vector3d valveOffsetInWorldFrame = new Vector3d();
    private final ArrayList<BehaviorInterface> behaviorQueue = new ArrayList<>();
