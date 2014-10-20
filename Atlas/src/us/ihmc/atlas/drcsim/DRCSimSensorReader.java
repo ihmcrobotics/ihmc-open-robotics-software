@@ -30,6 +30,7 @@ import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class DRCSimSensorReader implements SensorReader
 {
@@ -38,6 +39,7 @@ public class DRCSimSensorReader implements SensorReader
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1234);
    private final ByteBuffer data;
 
+   private final LongYoVariable delay = new LongYoVariable("delay", registry);
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final SensorProcessing sensorProcessing;
    private final List<OneDoFJoint> jointList;
@@ -67,12 +69,13 @@ public class DRCSimSensorReader implements SensorReader
       });;
       this.imu = stateEstimatorSensorDefinitions.getAngularVelocitySensorDefinitions().get(0);
       this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
+
       
 
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;
       forceSensorDataLength = forceSensorDataHolderForEstimator.getForceSensorDefinitions().size() * 6 * 8;
-      data = ByteBuffer.allocate(8 + jointDataLength + imuDataLength + forceSensorDataLength);
+      data = ByteBuffer.allocate(16 + jointDataLength + imuDataLength + forceSensorDataLength);
       data.order(ByteOrder.nativeOrder());
 
       System.out.println(jointList);
@@ -96,7 +99,6 @@ public class DRCSimSensorReader implements SensorReader
       {
          throw new RuntimeException(e);
       }
-
       parentRegistry.addChild(registry);
    }
 
@@ -113,6 +115,9 @@ public class DRCSimSensorReader implements SensorReader
          data.flip();
 
          long timestamp = data.getLong();
+         long controlTimestamp = data.getLong();
+         
+         delay.set(timestamp - controlTimestamp);
          for (int i = 0; i < jointList.size(); i++)
          {
             OneDoFJoint joint = jointList.get(i);

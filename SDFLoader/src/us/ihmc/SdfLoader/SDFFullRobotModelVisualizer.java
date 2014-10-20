@@ -67,6 +67,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
          this.revoluteJoints.add(jointPair);
       }
       
+      robot.addYoVariableRegistry(registry);
       
    }
 
@@ -109,12 +110,6 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
       }
    }
 
-   public void setRootRegistry(YoVariableRegistry registry)
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
    public void close()
    {
       // no-op
@@ -129,7 +124,6 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    @Override
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      // TODO Auto-generated method stub
-      
+      robot.addYoVariableRegistry(registry);
    }
 }

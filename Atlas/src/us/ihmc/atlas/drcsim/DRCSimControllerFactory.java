@@ -2,6 +2,8 @@ package us.ihmc.atlas.drcsim;
 
 import java.io.IOException;
 
+import us.ihmc.SdfLoader.SDFFullRobotModelVisualizer;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
@@ -9,6 +11,7 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -23,16 +26,18 @@ import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
+import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
 
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+
 public class DRCSimControllerFactory
 {
+   private static final boolean USE_GUI = true;
 
    private final AtlasSensorInformation sensorInformation;
 
@@ -40,7 +45,7 @@ public class DRCSimControllerFactory
 
    public DRCSimControllerFactory()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, true);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
       /*
        * Create registries
        */
@@ -54,7 +59,9 @@ public class DRCSimControllerFactory
        */
       KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList());
-      YoVariableServer yoVariableServer = new YoVariableServer(SCSYoVariablesVisualizer.defaultPort, robotModel.getEstimatorDT());
+      //      YoVariableServer yoVariableServer = new YoVariableServer(SCSYoVariablesVisualizer.defaultPort, robotModel.getEstimatorDT());
+      SDFRobot visualizationRobot = robotModel.createSdfRobot(false);
+      SDFFullRobotModelVisualizer yoVariableServer = new SDFFullRobotModelVisualizer(visualizationRobot, 1, robotModel.getEstimatorDT());
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       /*
@@ -74,10 +81,9 @@ public class DRCSimControllerFactory
        * Create output writer
        */
 
-      DRCSimOutputWriter outputWriter = new DRCSimOutputWriter();
+      DRCSimOutputWriter outputWriter = new DRCSimOutputWriter(robotModel);
 
-      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = null;
-      externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
+      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
 
       /*
@@ -100,7 +106,7 @@ public class DRCSimControllerFactory
 
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
-    
+
       try
       {
          drcNetworkProcessorServer.connect();
@@ -110,7 +116,14 @@ public class DRCSimControllerFactory
          e.printStackTrace();
       }
 
-      yoVariableServer.start();
+      SimulationConstructionSet scs = new SimulationConstructionSet(visualizationRobot, 16532);
+      scs.setGroundVisible(false);
+      yoVariableServer.registerSCS(scs);
+      VisualizerUtils.createOverheadPlotter(scs, true, controllerThread.getDynamicGraphicObjectsListRegistry(),
+            estimatorThread.getDynamicGraphicObjectsListRegistry());
+      scs.addYoGraphicsListRegistry(controllerThread.getDynamicGraphicObjectsListRegistry(), false);
+      scs.addYoGraphicsListRegistry(estimatorThread.getDynamicGraphicObjectsListRegistry(), false);
+      scs.startOnAThread();
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
@@ -132,20 +145,28 @@ public class DRCSimControllerFactory
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       final HighLevelState initialBehavior;
-      initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
+      initialBehavior = HighLevelState.WALKING; // HERE!!
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParameters);
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
             sensorInformation.getFeetForceSensorNames(), walkingControllerParameters, armControllerParameters, initialBehavior);
 
-      VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
-      controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+      if (USE_GUI)
+      {
+         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
+         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+
+      }
+      else
+      {
+         VariousWalkingProviderFactory variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(true, null, robotModel.getControllerDT());
+         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+      }
 
       return controllerFactory;
    }
 
-   
    public static void main(String[] args)
    {
       new DRCSimControllerFactory();
