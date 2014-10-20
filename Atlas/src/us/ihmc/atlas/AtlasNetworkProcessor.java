@@ -42,6 +42,7 @@ public class AtlasNetworkProcessor
       jsap.registerParameter(rosURIFlag);
       jsap.registerParameter(simulateController);
       jsap.registerParameter(runningOnRealRobot);
+      jsap.registerParameter(runningOnGazebo);
       jsap.registerParameter(leftHandHost);
       jsap.registerParameter(rightHandHost);
 
