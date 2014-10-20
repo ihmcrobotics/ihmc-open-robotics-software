@@ -129,8 +129,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean doPrepareManipulationForLocomotion();
 
-   public abstract boolean isRunningOnRealRobot();
-
    public abstract double getDefaultTransferTime();
 
    public abstract double getDefaultSwingTime();
@@ -154,5 +152,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract String[] getJointsToIgnoreInController();
 
    public abstract void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings);
+
+   public abstract boolean doFancyOnToesControl();
 
 }

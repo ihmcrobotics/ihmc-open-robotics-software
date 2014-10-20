@@ -127,10 +127,7 @@ public class FootControlModule
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
 
       doFancyOnToesControl = new BooleanYoVariable(contactableFoot.getName() + "DoFancyOnToesControl", registry);
-      if (walkingControllerParameters.isRunningOnRealRobot())
-         doFancyOnToesControl.set(false);
-      else
-         doFancyOnToesControl.set(true);
+      doFancyOnToesControl.set(walkingControllerParameters.doFancyOnToesControl());
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);

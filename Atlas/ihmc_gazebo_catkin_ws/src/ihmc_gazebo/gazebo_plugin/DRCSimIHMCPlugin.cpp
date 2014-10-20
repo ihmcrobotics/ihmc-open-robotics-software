@@ -127,6 +127,7 @@ public:
 							joints.at(i)->SetLowerLimit(0, -3.14);
 							joints.at(i)->SetUpperLimit(0, 3.14);
 							joints.at(i)->SetEffortLimit(0, -1);
+							joints.at(i)->SetDamping(0, 0.1);
 						}
 					}
 
