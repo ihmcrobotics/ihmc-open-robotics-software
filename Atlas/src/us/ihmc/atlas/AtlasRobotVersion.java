@@ -11,7 +11,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 public enum AtlasRobotVersion {
-	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, ATLAS_ROBOTIQ;
+	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, ATLAS_ROBOTIQ, GAZEBO_ATLAS_NO_HANDS;
 
 	private static String[] resourceDirectories;
 	private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>(); 
@@ -33,6 +33,7 @@ public enum AtlasRobotVersion {
 		case DRC_NO_HANDS:
 		case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
 		case DRC_EXTENDED_HOOKS:
+      case GAZEBO_ATLAS_NO_HANDS:
 		default:
 			return DRCHandType.NONE;
 		}
@@ -79,6 +80,8 @@ public enum AtlasRobotVersion {
 	            return "models/GFE/drc_task_hose.sdf";
 	         case DRC_EXTENDED_HOOKS:
 	            return "models/GFE/drc_extended_hooks.sdf";
+            case GAZEBO_ATLAS_NO_HANDS:
+               return "models/GFE/gazebo_atlas.sdf";
 	         default :
 	            throw new RuntimeException("AtlasRobotVersion: Unimplemented enumeration case : " + this);
 	      }
