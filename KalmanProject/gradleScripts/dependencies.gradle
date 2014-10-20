@@ -4,8 +4,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x' 
-    //compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/ejml-snapshot", include: "*.jar")
+    ['core','complex','equation','experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}
     compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x' 
     compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'  
       
