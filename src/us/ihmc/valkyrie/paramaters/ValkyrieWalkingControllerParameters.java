@@ -609,12 +609,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       return runningOnRealRobot ? 1.4 : 0.25;
@@ -713,5 +707,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       momentumOptimizationSettings.setRhoMin(4.0);
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12); //0.06);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+   }
+   
+   @Override
+   public boolean doFancyOnToesControl()
+   {
+      return !runningOnRealRobot;
    }
 }
