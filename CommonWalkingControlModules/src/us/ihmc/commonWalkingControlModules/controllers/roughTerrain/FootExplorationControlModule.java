@@ -83,9 +83,10 @@ public class FootExplorationControlModule
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
    private static double swingTimeForExploration = 4;
    private static double ICPShiftRestingTime = 2;
-   private static double copToContactPointScalingFactor = 0.8; // max 1.0
+   private static double copToContactPointScalingFactor = 0.8; // how far we explore, max 1.0
    private static double copPercentageToSwitchToNextContactPoint = 2; // if this value is >1 the exploration will continue to keep the desired cop at the maximum value of copToContactPointScalingFactor
    private static double maxAbsCoPError = 0.04;
+   private static boolean adjustContactPointInXNOnly=true;
 
    // unstable situations
    private static double maxICPAbsError = 0.04;
@@ -98,8 +99,10 @@ public class FootExplorationControlModule
    // parameter of tilt foot
    private static double zeroVelocity = 0.1;
    private static double alphaForJointVelocity = 0.95;
+   private static double alphaForFootAngularRate = 0.95;
    private static int numberOfJointCheckedForZeroVelocity = 2;
-   private static double safetyScalingOfContactPoints = 0.85; //during swing.
+   //private static double safetyScalingOfContactPoints = 0.85; //during swing.
+   private static double safetyScalingOfContactPoints = 1.0; //during swing.
 
    //  ICP positions parameters
    private static double firstInternalICPPercentage = 0.95;
@@ -212,7 +215,7 @@ public class FootExplorationControlModule
       ankleJointVelocity = new AlphaFilteredYoVariable("ankleJointVelocity", registry, alphaForJointVelocity);
       for (RobotSide side : RobotSide.values)
       {
-         footAngularRate.put(side, new DoubleYoVariable(side.name() + "FootAngularRate", registry));
+         footAngularRate.put(side, new AlphaFilteredYoVariable(side.name() + "FootAngularRate", registry, alphaForFootAngularRate));
       }
       currentContactPointNumber = new IntegerYoVariable("currentContactPointNumber", registry);
       feetExplorationCoPError = new DoubleYoVariable("feetExplorationCoPError", registry);
@@ -595,8 +598,16 @@ public class FootExplorationControlModule
             double x = actualCop.getX();
             double y = actualCop.getY();
             Vector2d vector = new Vector2d(x, y);
-            contactPoint.getPosition().set(vector.getX(), vector.getY(), 0.0);
-            contactPoint.getPosition2d().set(vector.getX(), vector.getY());
+            if(adjustContactPointInXNOnly)
+            {
+               contactPoint.getPosition().setX(vector.getX());
+               contactPoint.getPosition2d().setX(vector.getX());
+            }
+            else
+            {
+               contactPoint.getPosition().set(vector.getX(), vector.getY(), 0.0);
+               contactPoint.getPosition2d().set(vector.getX(), vector.getY());
+            }
             updateNextFootstepCentroid();
             footExplorationICPPlanner.initialize();
             currentContactPointNumber.increment();
