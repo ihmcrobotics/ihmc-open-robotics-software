@@ -2,6 +2,7 @@ package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
 
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
@@ -85,15 +86,21 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private final String stereoBaseFrame = multisense_namespace + "/head";
    private final String stereoEndFrame = multisense_namespace + "/left_camera_frame";
    
-   public AtlasSensorInformation(boolean runningOnRealRobot)
+   private final boolean isMultisenseHead;
+   private final boolean setupROSLocationService;
+   private final boolean setupROSParameterSetters;
+   
+   public AtlasSensorInformation(AtlasTarget target)
    {      
-      if(runningOnRealRobot)
+      if(target == AtlasTarget.REAL_ROBOT || target == AtlasTarget.GAZEBO)
       {
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, left_frame_name, baseTfName, MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, right_frame_name, baseTfName, MULTISENSE_SL_RIGHT_CAMERA_ID);
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
-      } else {
+      } 
+      else 
+      {
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, multisenseHandoffFrame, MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic,  multisenseHandoffFrame, MULTISENSE_SL_RIGHT_CAMERA_ID);
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
@@ -101,6 +108,10 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       }
       cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, BLACKFLY_LEFT_CAMERA_ID);
       cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, BLACKFLY_RIGHT_CAMERA_ID);
+      
+      setupROSLocationService = target == AtlasTarget.REAL_ROBOT;
+      setupROSParameterSetters = target == AtlasTarget.REAL_ROBOT;
+      isMultisenseHead = target == AtlasTarget.REAL_ROBOT;
    }
    
    @Override
@@ -205,5 +216,23 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       String[] sensorFramesToTrackAsPrimitive = new String[sensorFramesToTrack.size()];
       sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
       return sensorFramesToTrackAsPrimitive;
+   }
+
+   @Override
+   public boolean setupROSLocationService()
+   {
+      return setupROSLocationService;
+   }
+
+   @Override
+   public boolean setupROSParameterSetters()
+   {
+      return setupROSParameterSetters;
+   }
+
+   @Override
+   public boolean isMultisenseHead()
+   {
+      return isMultisenseHead;
    }
 }

@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -36,6 +35,7 @@ import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -46,9 +46,10 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import boofcv.alg.geo.PerspectiveOps;
@@ -489,9 +490,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public static void main(String[] arg) throws InterruptedException, IOException
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-	  final boolean RUNNING_ON_REAL_ROBOT = true;
 	  
-	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION,RUNNING_ON_REAL_ROBOT, RUNNING_ON_REAL_ROBOT);
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.REAL_ROBOT, true);
 	  
       AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator(robotModel);
       calib.loadData("data/armCalibratoin20131209/calibration_right");

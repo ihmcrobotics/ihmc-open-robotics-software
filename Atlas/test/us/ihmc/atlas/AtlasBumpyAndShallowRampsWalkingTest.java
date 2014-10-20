@@ -10,7 +10,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    }
 
    @Override

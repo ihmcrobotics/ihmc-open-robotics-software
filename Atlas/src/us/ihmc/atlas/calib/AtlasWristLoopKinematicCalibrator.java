@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
@@ -81,9 +82,8 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    public static void main(String[] arg)
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-	  final boolean RUNNING_ON_REAL_ROBOT = true;
 	  
-	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT, RUNNING_ON_REAL_ROBOT);
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.REAL_ROBOT, true);
 
       AtlasWristLoopKinematicCalibrator calibrator = new AtlasWristLoopKinematicCalibrator(robotModel);
       //calibrator.loadData("data/coupledWristLog_20131204");

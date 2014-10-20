@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
@@ -118,7 +119,7 @@ public class AtlasMultiContactTest
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
-      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup,
+      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.SIM, false), guiInitialSetup,
             MultiContactTask.DEFAULT);
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
 

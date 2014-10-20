@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -26,7 +27,7 @@ public class AtlasRobotModelFactory
       }
    }
 
-   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, boolean runningOnRealRobot, boolean headless)
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, AtlasTarget runningOnRealRobot, boolean headless)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
       try
@@ -94,7 +95,7 @@ public class AtlasRobotModelFactory
       else if (selectedOption == JOptionPane.OK_OPTION)
       {
          String groundTypeString = robotTypeComboBox.getSelectedItem().toString();
-         AtlasRobotModel model = createDRCRobotModel(groundTypeString, false, false);
+         AtlasRobotModel model = createDRCRobotModel(groundTypeString, AtlasRobotModel.AtlasTarget.SIM, false);
          return model;
       }
       else
@@ -103,7 +104,7 @@ public class AtlasRobotModelFactory
       }
    }
 
-   public static AtlasRobotModel selectModelFromFlag(String[] args, boolean runningOnRealRobot, boolean headless)
+   public static AtlasRobotModel selectSimulationModelFromFlag(String[] args)
    {
       // Add flag to set robot model
       JSAP jsap = new JSAP();
@@ -116,7 +117,7 @@ public class AtlasRobotModelFactory
          JSAPResult config = jsap.parse(args);
 
          if (config.success())
-            return createDRCRobotModel(config.getString("robotModel"), runningOnRealRobot, headless);
+            return createDRCRobotModel(config.getString("robotModel"), AtlasTarget.SIM, false);
       }
       catch (JSAPException e)
       {

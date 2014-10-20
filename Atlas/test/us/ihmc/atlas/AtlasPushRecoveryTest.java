@@ -7,6 +7,6 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    }
 }

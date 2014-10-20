@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProces
 
 public class AtlasDepthDataProcessorTest extends DepthDataProcessorTest
 {
-   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
    @Override
    public DRCRobotModel getRobotModel()

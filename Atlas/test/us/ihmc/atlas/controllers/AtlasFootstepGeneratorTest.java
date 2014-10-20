@@ -9,7 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 public class AtlasFootstepGeneratorTest extends DRCRobotBasedFootstepGeneratorTest
 {
    private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-   private final static DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
+   private final static DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);
 
    @Override
    public DRCRobotModel getRobotModel()

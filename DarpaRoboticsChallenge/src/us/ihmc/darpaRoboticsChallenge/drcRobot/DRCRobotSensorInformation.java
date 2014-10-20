@@ -27,4 +27,10 @@ public interface DRCRobotSensorInformation
    public DRCRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
 
    public String[] getSensorFramesToTrack();
+   
+   public boolean setupROSLocationService();
+
+   public boolean setupROSParameterSetters();
+   
+   public boolean isMultisenseHead();
 }

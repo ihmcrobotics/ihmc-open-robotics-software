@@ -48,7 +48,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
    SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 

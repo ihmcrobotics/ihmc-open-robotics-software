@@ -13,7 +13,7 @@ public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlat
    
    public AtlasBigStepUpWithHandPlatformTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
       
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();

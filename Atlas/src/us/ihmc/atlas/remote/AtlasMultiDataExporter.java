@@ -80,7 +80,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
       String[] vars = null;
       int numberOfEntries = 0;
-      DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
+      DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);
       DRCRobotJointMap jointMap = model.getJointMap();
       ArmJointName[] joints = jointMap.getArmJointNames();
       SDFFullRobotModel robotModel = model.createFullRobotModel();

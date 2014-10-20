@@ -67,7 +67,7 @@ public class AtlasGFENetworkProcessor
       DRCRobotModel robotModel;
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
       }
       catch (IllegalArgumentException e)
       {

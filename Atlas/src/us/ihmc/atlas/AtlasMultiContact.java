@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
@@ -181,7 +182,7 @@ public class AtlasMultiContact
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, true);
 
-      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup, MultiContactTask.DEFAULT);
+      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.SIM, false), guiInitialSetup, MultiContactTask.DEFAULT);
    }
 
 }

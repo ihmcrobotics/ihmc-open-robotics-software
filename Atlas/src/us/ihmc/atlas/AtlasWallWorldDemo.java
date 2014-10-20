@@ -13,7 +13,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
 {
-   private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, false);
+   private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
    public static void main(final String[] args) throws JSAPException
    {

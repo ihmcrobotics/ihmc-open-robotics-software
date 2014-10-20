@@ -14,7 +14,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
 
-   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    @Override
    public DRCRobotModel getRobotModel()
    {

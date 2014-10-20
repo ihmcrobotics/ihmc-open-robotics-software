@@ -16,14 +16,14 @@ import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 public class AtlasHighLevelPositionControlDemo
 {
    
- private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+ private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
  private static final double ROBOT_FLOATING_HEIGHT = 0.3;
    
    public static void main(String[] args) throws JSAPException
    {
       DRCRobotModel model = null;
       
-      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
+      model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
       
       if (model == null)
          model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);

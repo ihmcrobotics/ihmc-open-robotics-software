@@ -19,7 +19,7 @@ import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasFlatGroundWalkingTrack
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
    private static final boolean USE_BUMPY_GROUND = false;
    private static final boolean USE_FEET_PERTURBER = false;
@@ -28,7 +28,7 @@ public class AtlasFlatGroundWalkingTrack
    {
 
       DRCRobotModel model = null;
-      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
+      model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
 
       if (model == null)
          model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);

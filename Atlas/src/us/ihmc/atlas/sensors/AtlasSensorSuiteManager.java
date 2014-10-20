@@ -126,7 +126,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties, boolean usingRealHead)
+                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
@@ -153,19 +153,15 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(depthDataProcessor, rosTransformProvider, robotPoseBuffer,
             rosMainNode, networkingManager, rosNativeNetworkProcessor,
             ppsTimestampOffsetProvider, sensorURI, multisenseLeftEyeCameraParameters,
-            multisenseLidarParameters, multisenseStereoParameters, usingRealHead);
+            multisenseLidarParameters, multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
 
-      if(usingRealHead)
-      {
-         FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, networkingManager,
-               DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);         
-         fishEyeDataReceiver.getBlackFlyParameterSetter().initializeParameterListeners();
-      }
+      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, networkingManager,
+            DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider, sensorInformation.setupROSParameterSetters());
             
 //      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
 //      networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
       
-      if(usingRealHead)
+      if(sensorInformation.setupROSLocationService())
       {
          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
          networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);

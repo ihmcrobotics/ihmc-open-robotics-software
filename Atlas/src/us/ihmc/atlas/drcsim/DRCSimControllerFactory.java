@@ -1,6 +1,7 @@
 package us.ihmc.atlas.drcsim;
 
 import java.io.IOException;
+import java.net.URI;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -24,6 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
@@ -42,7 +44,7 @@ public class DRCSimControllerFactory
 
    public DRCSimControllerFactory()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_NO_HANDS, false, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
       /*
        * Create registries
        */
@@ -116,6 +118,10 @@ public class DRCSimControllerFactory
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
+      
+      URI rosMasterURI = robotModel.getNetworkParameters().getRosURI();
+      new DRCNetworkProcessor(rosMasterURI, robotModel);
+      
       try
       {
          simulationThread.join();
