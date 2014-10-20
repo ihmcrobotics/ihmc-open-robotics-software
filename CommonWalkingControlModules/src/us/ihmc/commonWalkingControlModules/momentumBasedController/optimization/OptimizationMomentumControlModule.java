@@ -126,7 +126,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 //      momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
 
       //initialize default solver
-      final QPSolverFlavor defaultSolver =QPSolverFlavor.CQP_QUADPROG_DIRECT;
+      final QPSolverFlavor defaultSolver =QPSolverFlavor.CVX_NULL;
       requestedQPSolver.set(defaultSolver);
       currentQPSolver.set(defaultSolver);
       momentumOptimizer = momentumOptimizers.get(defaultSolver);
