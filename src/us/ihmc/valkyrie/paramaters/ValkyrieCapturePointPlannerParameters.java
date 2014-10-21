@@ -88,4 +88,16 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    {
       return 0.65;
    }
+   
+   @Override
+	public double getCapturePointInFromFootCenterDistance()
+	{
+		return 0.006;
+	}
+   
+   @Override
+	public double getCapturePointForwardFromFootCenterDistance()
+	{
+		return 0.0;
+	}
 }
