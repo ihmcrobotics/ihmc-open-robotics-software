@@ -51,6 +51,11 @@ public class DRCSimSensorReader implements SensorReader
    private final int jointDataLength;
    private final int imuDataLength;
    private final int forceSensorDataLength;
+   
+   private final Quat4d orientation = new Quat4d();
+   private final Vector3d linearAcceleration = new Vector3d();
+   private final Vector3d angularVelocity = new Vector3d();
+   private final DenseMatrix64F wrench = new DenseMatrix64F(6, 1);
 
    public DRCSimSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
          SensorFilterParameters sensorFilterParameters, SensorNoiseParameters sensorNoiseParameters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
@@ -122,9 +127,7 @@ public class DRCSimSensorReader implements SensorReader
             sensorProcessing.setJointVelocitySensorValue(joint, data.getDouble());
          }
 
-         Quat4d orientation = new Quat4d();
-         Vector3d linearAcceleration = new Vector3d();
-         Vector3d angularVelocity = new Vector3d();
+
 
          orientation.setW(data.getDouble());
          orientation.setX(data.getDouble());
@@ -149,7 +152,7 @@ public class DRCSimSensorReader implements SensorReader
             ForceSensorDefinition definition = forceSensorDataHolderForEstimator.getForceSensorDefinitions().get(i);
             ForceSensorData dataHolder = forceSensorDataHolderForEstimator.get(definition);
 
-            DenseMatrix64F wrench = new DenseMatrix64F(6, 1);
+            
 
             wrench.set(0, 0, data.getDouble());
             wrench.set(1, 0, data.getDouble());

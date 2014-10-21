@@ -37,7 +37,7 @@ import us.ihmc.utilities.net.KryoObjectServer;
 
 public class DRCSimControllerFactory
 {
-   private static final boolean USE_GUI = true;
+   private static final boolean USE_GUI = false;
 
    private final AtlasSensorInformation sensorInformation;
 
