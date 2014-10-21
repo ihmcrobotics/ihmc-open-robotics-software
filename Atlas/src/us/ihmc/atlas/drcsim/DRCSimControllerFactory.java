@@ -8,6 +8,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
@@ -140,14 +141,14 @@ public class DRCSimControllerFactory
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      final HighLevelState initialBehavior;
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();      final HighLevelState initialBehavior;
+      CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       initialBehavior = HighLevelState.WALKING; // HERE!!
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParameters);
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            sensorInformation.getFeetForceSensorNames(), walkingControllerParameters, armControllerParameters, initialBehavior);
+            sensorInformation.getFeetForceSensorNames(), walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
 
       if (USE_GUI)
       {

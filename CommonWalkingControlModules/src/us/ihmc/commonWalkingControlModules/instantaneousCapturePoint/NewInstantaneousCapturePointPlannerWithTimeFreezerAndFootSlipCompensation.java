@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation extends NewInstantaneousCapturePointPlannerWithSmoother
+public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation extends NewInstantaneousCapturePointPlannerWithSmoother
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BooleanYoVariable doTimeFreezing;
@@ -38,7 +38,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    
    private final AlphaFilteredYoFrameVector changeInTransferToFootPosition;
 
-   public HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(CapturePointPlannerParameters capturePointPlannerParameters,
+   public NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(CapturePointPlannerParameters capturePointPlannerParameters,
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(capturePointPlannerParameters, registry, yoGraphicsListRegistry);

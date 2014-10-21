@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -44,6 +45,7 @@ public class DRCInverseDynamicsControllerDemo
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
+      CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
@@ -52,7 +54,7 @@ public class DRCInverseDynamicsControllerDemo
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            footForceSensorNames, walkingControllerParameters, armControllerParameters,
+            footForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, 
             HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new InverseDynamicsJointControllerFactory(true));
 

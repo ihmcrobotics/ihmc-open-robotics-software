@@ -27,4 +27,8 @@ public interface CapturePointPlannerParameters
 	public abstract boolean getDoFootSlipCompensation();
 	
 	public abstract double getAlphaDeltaFootPositionForFootslipCompensation();
+	
+	public abstract double getCapturePointInFromFootCenterDistance();
+	
+	public abstract double getCapturePointForwardFromFootCenterDistance();
 }
