@@ -37,14 +37,14 @@
 
 <Extra Panels>
 <Main Viewport>
-Plotter,Plotter Legend,
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>10.091441837043448</Camera X>
- <Camera Y>-3.452028336916144</Camera Y>
- <Camera Z>2.076671454762537</Camera Z>
+ <Camera X>6.0314231379024115</Camera X>
+ <Camera Y>-14.080416755102108</Camera Y>
+ <Camera Z>6.944408360352819</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -68,8 +68,8 @@ Plotter,Plotter Legend,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>7.440487421788726</Fix X>
-<Fix Y>0.6722304161606479</Fix Y>
-<Fix Z>0.42450643421177103</Fix Z>
+<Fix X>-1.5142313593921477</Fix X>
+<Fix Y>1.7693662032542594</Fix Y>
+<Fix Z>-2.00614137052769</Fix Z>
 </Fix Position>
 </Canvas 1>

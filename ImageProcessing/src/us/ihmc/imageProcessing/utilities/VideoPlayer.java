@@ -61,6 +61,7 @@ public class VideoPlayer
          while ((frame = demuxer.getNextFrame()) != null)
          {
             videoListener.updateImage(frame.getImage());
+            frame.delete();
          }
       }
       catch (IOException e)

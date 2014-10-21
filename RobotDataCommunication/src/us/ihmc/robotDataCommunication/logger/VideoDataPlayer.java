@@ -94,7 +94,9 @@ public class VideoDataPlayer
       try
       {
          demuxer.seekToPTS(videoTimestamp);
-         viewer.update(demuxer.getNextFrame());
+         YUVPicture nextFrame = demuxer.getNextFrame();
+         viewer.update(nextFrame);
+         nextFrame.delete();
       }
       catch (IOException e)
       {
