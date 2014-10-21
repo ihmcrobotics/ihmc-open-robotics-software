@@ -7,7 +7,8 @@ dependencies {
 	compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
-	['core','complex','equation','experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}
+	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
+	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
 	compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x'
 	//compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")

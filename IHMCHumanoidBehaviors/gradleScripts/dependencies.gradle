@@ -3,7 +3,8 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
-	['core','complex','equation','experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}
+	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
+	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	compile group: 'us.ihmc.thirdparty', name: 'jeromq', version: '0.3.+'
 	
