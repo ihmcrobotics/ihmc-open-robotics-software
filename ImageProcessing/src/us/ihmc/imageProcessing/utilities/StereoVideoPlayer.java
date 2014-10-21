@@ -86,7 +86,8 @@ public class StereoVideoPlayer
          while ((leftEye = leftEyeDemuxer.getNextFrame()) != null && (rightEye = rightEyeDemuxer.getNextFrame()) != null)
          {
             videoListener.updateImage(leftEye.getImage(), rightEye.getImage());
-
+            leftEye.delete();
+            rightEye.delete();
             //TODO: Insert eait loop
          }
       }

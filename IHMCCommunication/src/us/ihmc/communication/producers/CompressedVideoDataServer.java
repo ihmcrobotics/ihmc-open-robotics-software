@@ -137,11 +137,10 @@ public class CompressedVideoDataServer implements NetStateListener, VideoDataSer
       }
 
       YUV420Picture frame = new YUV420Picture(bufferedImage);
-      frame = frame.scale(desiredEvenHorizontalResolution, desiredEvenVerticalResolution, FilterModeEnum.kFilterBilinear);
-
+      YUV420Picture scaled = frame.scale(desiredEvenHorizontalResolution, desiredEvenVerticalResolution, FilterModeEnum.kFilterBilinear);
       try
       {
-         encoder.encodeFrame(frame, new NALProcessor()
+         encoder.encodeFrame(scaled, new NALProcessor()
          {
             
             @Override
@@ -157,6 +156,13 @@ public class CompressedVideoDataServer implements NetStateListener, VideoDataSer
       {
          e.printStackTrace();
       }
+      finally
+      {
+         frame.delete();
+         scaled.delete();
+      }
+      
+     
       
       prevTimeStamp = timeStamp;
    }

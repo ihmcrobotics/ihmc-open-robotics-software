@@ -6,7 +6,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.4'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.5'
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCYoUtilities')
