@@ -1,5 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.Collection;
@@ -112,7 +113,7 @@ public class YoVariableProducer extends Thread
                   compressedBuffer.flip();
                   compressedBuffer.position(4);
                }
-               catch (IllegalArgumentException e)
+               catch (IllegalArgumentException | IOException e)
                {
                   e.printStackTrace();
                   continue;
