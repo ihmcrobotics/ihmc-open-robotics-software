@@ -7,3 +7,4 @@
 	
 General crazyness:
 	- SetForce adds force. At every iteration, force is set to zero.
+	- ForceSensors are crazy noisy
