@@ -455,7 +455,7 @@ public class FootExplorationControlModule
             planeContactStateToRescale = null;
          }
          updateNextFootstepCentroid();
-         footExplorationCoPPlanner.initialize();
+         footExplorationICPPlanner.initialize();
       }
    }
 
