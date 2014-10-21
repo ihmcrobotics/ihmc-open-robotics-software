@@ -94,6 +94,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
          doTimeFreezeIfNeeded(currentCapturePointPosition, desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, time);
       }
 
+      previousTime.set(time);
    }
 
    @Override
@@ -119,7 +120,7 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       computeCapturePointPositionErrorMagnitude(currentCapturePointPosition, desiredCapturePointPosition);
       computeCapturePointDistantToFreezeLine(currentCapturePointPosition, desiredCapturePointPosition, desiredCapturePointVelocity);
 
-      if (isDone(getTimeWithDelay(time)))
+      if (isDone(time))
       {
          completelyFreezeTime(time);
          isTimeBeingFrozen.set(true);
@@ -139,8 +140,6 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
       {
          isTimeBeingFrozen.set(false);
       }
-
-      previousTime.set(time);
    }
 
    /**
@@ -183,21 +182,11 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
 
    private void freezeTimeUsingFreezeTimeFactor(double time)
    {
-      if (super.computeAndReturnTimeInCurrentState(getTimeWithDelay(time)) < 0.0)
-      {
-         return;
-      }
-
       timeDelay.add(freezeTimeFactor.getDoubleValue() * (time - previousTime.getDoubleValue()));
    }
 
    private void completelyFreezeTime(double time)
    {
-      if (super.computeAndReturnTimeInCurrentState(getTimeWithDelay(time)) < 0.0)
-      {
-         return;
-      }
-
       timeDelay.add(time - previousTime.getDoubleValue());
    }
 
@@ -239,6 +228,12 @@ public class HackyNewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipC
    private double getTimeWithDelay(double time)
    {
       return time - timeDelay.getDoubleValue();
+   }
+   
+   public void reset()
+   {
+	   changeInTransferToFootPosition.set(0.0,0.0,0.0);
+	   super.reset();
    }
 
    @Override
