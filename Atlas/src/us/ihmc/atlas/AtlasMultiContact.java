@@ -12,6 +12,7 @@ import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -117,9 +118,10 @@ public class AtlasMultiContact
       };
 
       WalkingControllerParameters controllerParameters = robotModel.getWalkingControllerParameters();
+      CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(
-            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), controllerParameters, armControllerParameters,
+            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), controllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.DO_NOTHING_BEHAVIOR);
       
       controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));

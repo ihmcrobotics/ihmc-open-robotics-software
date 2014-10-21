@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -38,12 +39,13 @@ public class DRCFlatGroundWalkingTrack
 
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
+      CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            footForceSensorNames, walkingControllerParameters, armControllerParameters,
+            footForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, 
             HighLevelState.WALKING);
       
       HeightMap heightMapForCheating = null;
