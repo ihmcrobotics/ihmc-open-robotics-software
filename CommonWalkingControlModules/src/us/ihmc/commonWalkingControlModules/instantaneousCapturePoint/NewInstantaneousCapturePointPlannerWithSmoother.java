@@ -29,7 +29,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 	private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	private BooleanYoVariable VISUALIZE = new BooleanYoVariable("icpPlannerVISUALIZE", registry);
+	private boolean VISUALIZE = true;
 	private double ICP_CORNER_POINT_SIZE = 0.004;
 	private double ICP_CONSTANT_COP_POINT_SIZE = 0.005;
 
@@ -77,7 +77,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	{
 		if (yoGraphicsListRegistry == null)
 		{
-			VISUALIZE.set(false);
+			VISUALIZE = false;
 		}
 
 		cancelPlan.set(false);
@@ -112,7 +112,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
 		parentRegistry.addChild(this.registry);
 
-		if (VISUALIZE.getBooleanValue())
+		if (VISUALIZE)
 		{
 			setupVisualizers(yoGraphicsListRegistry);
 		}
@@ -125,7 +125,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
 		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
 		{
-			if (VISUALIZE.getBooleanValue())
+			if (VISUALIZE)
 			{
 				YoGraphicPosition constantFootCenterCentersOfPressureViz = new YoGraphicPosition("icpConstantCoP" + i,
 						constantCentroidalMomentumPivots.get(i), ICP_CONSTANT_COP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
@@ -137,10 +137,10 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
 		for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
 		{
-			if (VISUALIZE.getBooleanValue())
+			if (VISUALIZE)
 			{
 				YoGraphicPosition icpCornerPointsViz = new YoGraphicPosition("icpCornerPoints" + i, capturePointCornerPoints.get(i),
-						ICP_CORNER_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
+						ICP_CORNER_POINT_SIZE, YoAppearance.Blue(), GraphicType.SOLID_BALL);
 
 				yoGraphicsList.add(icpCornerPointsViz);
 				artifactList.add(icpCornerPointsViz.createArtifact());
@@ -562,6 +562,21 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	{
 		this.computeTimeInCurrentState(time);
 		return timeInCurrentState.getDoubleValue();
+	}
+	
+	public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+	{
+		capturePointCornerPoints.get(1).getFrameTupleIncludingFrame(finalDesiredCapturePointPositionToPack);
+	}
+	
+	public void getConstantCentroidalMomentumPivotPosition(FramePoint constantCentroidalMomentumPositionToPack)
+	{
+		constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(constantCentroidalMomentumPositionToPack);
+	}
+	
+	public void reset()
+	{
+		comeToStop.set(true);
 	}
 
 	public boolean isDone(double time)
