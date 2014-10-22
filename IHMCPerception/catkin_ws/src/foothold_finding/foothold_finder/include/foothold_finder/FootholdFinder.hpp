@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include "foothold_finder/Plane.hpp"
+#include "foothold_finder/PlaneSegmentation.hpp"
+
 // Grid map
 #include <grid_map_msg/GridMap.h>
 #include <grid_map/GridMap.hpp>
@@ -19,6 +22,7 @@
 
 // ROS
 #include <ros/ros.h>
+#include <visualization_msgs/Marker.h>
 
 // Kindr
 #include <kindr/phys_quant/PhysicalQuantitiesEigen.hpp>
@@ -77,48 +81,73 @@ class FootholdFinder
    */
   bool adaptCallback(foothold_finding_msg::AdaptFootholds::Request& request, foothold_finding_msg::AdaptFootholds::Response& response);
 
+  /*!
+   * Request the map around position and given size.
+   * @param[in] position the desired position of the map (center)
+   * @param[in] sideLength the side lengths of the desired map.
+   * @param[out] map the acquired map.
+   * @return true if successful, false otherwise.
+   */
   bool getMap(const Eigen::Vector2d& position, const double sideLength, grid_map::GridMap& map);
 
-  bool checkArea(const Polygon& polygon, grid_map::GridMap& map);
+  /*!
+   * Exploration and optimization of the foothold.
+   * @param[in] foothold to optimize.
+   * @param[in] segmentation the segmentation information containing the map and the planes.
+   * @param[out] candidates the found candidates.
+   * @return true if successful, false otherwise.
+   */
+  bool findCandidates(const foothold_finding_msg::Foothold& foothold, PlaneSegmentation& segmentation, std::vector<foothold_finding_msg::Foothold>& candidates);
 
   /*!
-   * Clusters the entire map.
-   * @param map the the grid map to be clustered.
+   * Locally optimizes foothold with a search.
+   * @param[in] segmentation the segmentation information containing the map and the planes.
+   * @param[in/out] foothold the foothold to optimize.
+   * @return true if candidate found, false otherwise.
    */
-  void clusterMap(grid_map::GridMap& map);
+  bool localSearch(PlaneSegmentation& segmentation, foothold_finding_msg::Foothold& foothold);
 
   /*!
-   * Positions and projects a rotated standard foot shape to the world horizontal plane.
-   * @param[in] pose the pose of the foot.
-   * @param[out] footShape the positioned and projected foot shape.
+   * Checks if a foot hold is valid.
+   * @param[in] segmentation the segmentation information containing the map and the planes.
+   * @param[in/out] foothold the foothold to be checked.
    */
-  void getFootShapeInWorldFrame(const Pose& pose, Polygon& footShape);
+  void checkFoothold(PlaneSegmentation& segmentation, foothold_finding_msg::Foothold& foothold);
 
   /*!
-   * Checks is two cells belong to the same cluster (belong to the same plane).
-   * @param map the map holding the data.
-   * @param firstIndex the index of the reference cell to check.
-   * @param secondIndex the index of the cell to check.
-   * @return true if same cluster, false if not.
+   * Adapt a foothold to a plane in pitch and roll, but keep yaw orientation.
+   * @param[in] plane the plane to adapt the foothold to.
+   * @param[out] foothold the foothold to adapt.
    */
-  bool isSameCluster(const grid_map::GridMap& map, const Eigen::Array2i& firstIndex, const Eigen::Array2i& secondIndex);
+  void adapt(Plane& plane, foothold_finding_msg::Foothold& foothold);
 
   /*!
-   * Computes the distance of a point to the plane specified by a point and a normal vector.
-   * @param normal the normal vector of the plane.
-   * @param offset the vector from the point on the plane to the point the distance is measured.
-   * @return distance of the point to the plane.
+   * Positions and projects a polygon to the map horizontal plane based on a pose.
+   * @param referencePolygon the input polygon.
+   * @param pose the desired pose of the output polygon.
+   * @param polygonTransformed the output polygon.
    */
-  double computeDistanceToNormalPlance(const Eigen::Vector3d& normal, const Eigen::Vector3d& offset);
+  void getPolygonInMapFrame(const Polygon& referencePolygon, const Pose& pose, Polygon& polygonTransformed);
 
-  bool findCandidates(const foothold_finding_msg::Foothold& foothold, grid_map::GridMap& map,
-                      std::vector<foothold_finding_msg::Foothold>& candidates);
+  /*!
+   * Publish foot shape as marker for visualization.
+   * @param[in] footShape n map frame the foot shape to be published.
+   * @param[in] plane the plane of the foothold.
+   */
+  void publishFootShape(const Polygon& footShape, Plane& plane);
 
-  void checkAndAdaptFoothold(grid_map::GridMap& map, foothold_finding_msg::Foothold& foothold);
-
-  int checkFoothold(const grid_map::GridMap& map, const foothold_finding_msg::Foothold& foothold);
-
+  /*!
+   * Set the roll and pitch of a rotation to align the surface normal.
+   * @param[in] normal the surface normal to be matched to.
+   * @param[out] rotation the rotation to align.
+   */
   void matchToSurfaceNormal(const Eigen::Vector3d& normal, Rotation& rotation);
+
+  /*! Helper function to get a debug string of a rotation.
+   * @param rotation the rotation to get the information form.
+   * @return the debug string.
+   */
+  std::string getDebugForm(const Rotation& rotation);
 
   //! ROS nodehandle.
   ros::NodeHandle& nodeHandle_;
@@ -132,40 +161,41 @@ class FootholdFinder
   //! Name of the elevation map service.
   std::string elevationMapServiceName_;
 
+  //! Name of the elevation map frame.
+  std::string mapFrame_;
+
+  //! Foot shape publisher for debugging.
+  ros::Publisher footShapePublisher_;
+
+  //! Segmentation method.
+  PlaneSegmentation segmentation_;
+
   //! Side length of the area to look for for each foothold.
-  double searchAreaSideLength_;
+  double searchRegionSideLength_;
 
-  //! Tolerance on how close the points have to lie on a plane to be regarded as same plane.
-  double planeTolerance_;
-
+  //! Percentage of valid cells for a valid foothold.
   double validCellCountThreshold_;
 
-  int minNumberOfCellsPerFoothold_;
+  //! Maximum allowed slope angle for a valid foothold.
+  double maxSlopeAngle_;
 
   //! Shape of the footprint in the foot frame;
   Polygon footShape_;
 
+  //! Shape of the region to search for each foothold;
+  Polygon searchRegion_;
+
+  //! Marker for the foot shape to be published.
+  visualization_msgs::Marker footShapeMarker_;
+
+  //! Line width of the foot shape published polygon.
+  double footShapeLineWidth_;
+
+  //! Offset to be added to the visualization in z-direction.
+  double footShapeVisualizationOffset_;
+
   //! Types to be requested from elevation map.
   std::vector<std::string> mapRequestTypes_;
-
-  //! Map as point cloud publisher (for visualization purposes).
-  ros::Publisher segmentationPublisher_;
-
-//
-//  //! ROS subscriber to the grid map.
-//  ros::Subscriber mapSubscriber_;
-//
-//  //! Topic name of the grid map to be visualized.
-//  std::string mapTopic_;
-//
-//  //! Map region visualization.
-//  MapRegionVisualization mapRegionVisualization_;
-//
-//  //! Visualizing map as point cloud.
-//  PointCloudVisualization pointCloudVisualization_;
-//
-//  //! Visualizing data as vectors.
-//  VectorVisualization vectorVisualization_;
 };
 
 } /* namespace */
