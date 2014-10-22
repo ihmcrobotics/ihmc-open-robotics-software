@@ -173,8 +173,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
 	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
 	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-	private int numberOfStepsInStepList = 6;
+	private int numberOfStepsInStepList = 3;
 	private int maxNumberOfConsideredFootsteps = testICPPlannerParams.getNumberOfFootstepsToConsider();
+	private final RobotSide robotSide = RobotSide.RIGHT;
 	private NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner;
 
 	private YoFrameLineSegment2d icpVelocityLineSegment = null;
@@ -221,11 +222,11 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	@Test
 	public void visualizePlanner()
 	{
-		boolean testPush = false;
+		boolean testPush = true;
 		boolean cancelPlanInDoubleSupport = false;
 		boolean cancelPlanInSingleSupport = false;
 		boolean breakAfterDoubleSupportPhase = cancelPlanInDoubleSupport || cancelPlanInSingleSupport;
-		boolean testFootslipCompensation = true;
+		boolean testFootslipCompensation = false;
 		for (int i = 0; i < 4; i++)
 		{
 			YoFrameLineSegment2d line1 = new YoFrameLineSegment2d("line" + i, "", ReferenceFrame.getWorldFrame(), registry);
@@ -274,12 +275,12 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		actualICPPosition.set(initialICPPosition);
 
 		icpPlanner.setOmega0(omega0);
-		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations);
+		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations,robotSide,footLocations.get(1));
 
 		icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
 		singleSupportInitialICPPosition.set(singleSupportStartICP);
 
-		icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition, null);
+		icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition, footLocations.get(1));
 
 		if (visualize)
 		{
@@ -348,9 +349,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 			initialTime = initialTime + singleSupportDuration;
 
-			icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations);
+			icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations,robotSide.getOppositeSide(),footLocations.get(1));
 			icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
-					null);
+					footLocations.get(1));
 
 			icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
 			singleSupportInitialICPPosition.set(singleSupportStartICP);

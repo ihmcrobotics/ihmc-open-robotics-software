@@ -22,7 +22,7 @@ public class CapturePointTools
    public static void computeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet(ArrayList<YoFramePoint> arrayToPack,
          ArrayList<FramePoint> footstepList, int numberFootstepsToConsider)
    {
-      arrayToPack.get(0).set(footstepList.get(0));
+      arrayToPack.get(0).setAndMatchFrame(footstepList.get(0));
       arrayToPack.get(0).add(footstepList.get(1));
       arrayToPack.get(0).scale(0.5);
 
@@ -32,11 +32,11 @@ public class CapturePointTools
       {
          if (i < numberFootstepsInList - 1)
          {
-            arrayToPack.get(i).set(footstepList.get(i));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
          }
          else
          {
-            arrayToPack.get(i).set(footstepList.get(numberFootstepsInList - 1));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
             arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
             arrayToPack.get(i).scale(0.5);
          }
@@ -66,13 +66,13 @@ public class CapturePointTools
          }
          else
          {
-            arrayToPack.get(i).set(footstepList.get(numberFootstepsInList - 1));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
             arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
             arrayToPack.get(i).scale(0.5);
          }
       }
 
-      arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
+      arrayToPack.get(numberFootstepsToConsider - 1).setAndMatchFrame(footstepList.get(numberFootstepsToConsider - 2));
       arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
       arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
    }
@@ -90,7 +90,7 @@ public class CapturePointTools
    public static void computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(ArrayList<YoFramePoint> arrayToPack,
          ArrayList<FramePoint> footstepList, int numberFootstepsToConsider)
    {
-      arrayToPack.get(0).set(footstepList.get(0));
+      arrayToPack.get(0).setAndMatchFrame(footstepList.get(0));
       arrayToPack.get(0).add(footstepList.get(1));
       arrayToPack.get(0).scale(0.5);
 
@@ -100,11 +100,11 @@ public class CapturePointTools
       {
          if (i < numberFootstepsInList - 1)
          {
-            arrayToPack.get(i).set(footstepList.get(i));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
          }
          else
          {
-            arrayToPack.get(i).set(footstepList.get(numberFootstepsInList - 1));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
             arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
             arrayToPack.get(i).scale(0.5);
          }
@@ -134,11 +134,11 @@ public class CapturePointTools
       {
          if (i < numberFootstepsInList - 1)
          {
-            arrayToPack.get(i).set(footstepList.get(i));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
          }
          else
          {
-            arrayToPack.get(i).set(footstepList.get(numberFootstepsInList - 1));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
             arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
             arrayToPack.get(i).scale(0.5);
          }
@@ -165,11 +165,11 @@ public class CapturePointTools
       {
          if (i < numberFootstepsInList - 1)
          {
-            arrayToPack.get(i).set(footstepList.get(i));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
          }
          else
          {
-            arrayToPack.get(i).set(footstepList.get(numberFootstepsInList - 1));
+            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
             arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
             arrayToPack.get(i).scale(0.5);
          }
@@ -187,11 +187,15 @@ public class CapturePointTools
    public static void computeDesiredEndOfStepCapturePointLocations(ArrayList<YoFramePoint> constantCentersOfPressure,
          ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
    {
+      capturePointsToPack.get(capturePointsToPack.size() - 1).checkReferenceFrameMatch(constantCentersOfPressure.get(capturePointsToPack.size()));
+      
       computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime, constantCentersOfPressure.get(capturePointsToPack.size()),
             constantCentersOfPressure.get(capturePointsToPack.size() - 1), capturePointsToPack.get(capturePointsToPack.size() - 1));
 
       for (int i = capturePointsToPack.size() - 1; i > 0; i--)
       {
+         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i-1));
+         
          double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX()) * (1 / Math.exp(omega0 * stepTime))
                + constantCentersOfPressure.get(i - 1).getX();
          double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY()) * (1 / Math.exp(omega0 * stepTime))
@@ -213,11 +217,15 @@ public class CapturePointTools
    public static void computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(ArrayList<YoFramePoint> constantCentersOfPressure,
          ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
    {
+      constantCentersOfPressure.get(capturePointsToPack.size()).checkReferenceFrameMatch(capturePointsToPack.get(capturePointsToPack.size() - 1).getReferenceFrame());
+            
       computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime, constantCentersOfPressure.get(capturePointsToPack.size()),
             constantCentersOfPressure.get(capturePointsToPack.size() - 1), capturePointsToPack.get(capturePointsToPack.size() - 1));
 
       for (int i = capturePointsToPack.size() - 1; i > 1; i--)
       {
+         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i-1));
+         
          double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX()) * (1 / Math.exp(omega0 * stepTime))
                + constantCentersOfPressure.get(i - 1).getX();
          double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY()) * (1 / Math.exp(omega0 * stepTime))
@@ -242,9 +250,14 @@ public class CapturePointTools
    public static void computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(YoFramePoint finalDesiredCapturePoint,
          YoFramePoint initialCapturePoint, YoFramePoint centerOfPressureToPack, double omega0, double stepTime)
    {
+      initialCapturePoint.checkReferenceFrameMatch(finalDesiredCapturePoint.getReferenceFrame());
+      
       double exponentialTerm = Math.exp(omega0 * stepTime);
-      centerOfPressureToPack.setX((finalDesiredCapturePoint.getX() - initialCapturePoint.getX() * exponentialTerm) / (1 - exponentialTerm));
-      centerOfPressureToPack.setY((finalDesiredCapturePoint.getY() - initialCapturePoint.getY() * exponentialTerm) / (1 - exponentialTerm));
+      
+      double x = (finalDesiredCapturePoint.getX() - initialCapturePoint.getX() * exponentialTerm) / (1 - exponentialTerm);
+      double y = (finalDesiredCapturePoint.getY() - initialCapturePoint.getY() * exponentialTerm) / (1 - exponentialTerm);
+      
+      centerOfPressureToPack.set(initialCapturePoint.getReferenceFrame(), x, y, 0.0);
    }
 
    /**
@@ -260,20 +273,14 @@ public class CapturePointTools
    public static void computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(double omega0, double time, YoFramePoint finalCapturePoint,
          YoFramePoint initialCenterOfPressure, YoFramePoint positionToPack)
    {
-      finalCapturePoint.getReferenceFrame().checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+      finalCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
       double exponentialTerm = Math.exp(omega0 * -time);
-      double copX0 = initialCenterOfPressure.getX();
-      double copY0 = initialCenterOfPressure.getY();
 
-      copX0 = (1 - exponentialTerm) * copX0;
-      copY0 = (1 - exponentialTerm) * copY0;
-
-      positionToPack.set(finalCapturePoint);
-      positionToPack.scale(exponentialTerm);
-
-      positionToPack.setX(positionToPack.getX() + copX0);
-      positionToPack.setY(positionToPack.getY() + copY0);
+      double x = finalCapturePoint.getX()*exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getX();
+      double y = finalCapturePoint.getY()*exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getY();
+      
+      positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
 
    }
 
@@ -290,20 +297,14 @@ public class CapturePointTools
    public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCenterOfPressure,
          YoFramePoint positionToPack)
    {
-      initialCapturePoint.getReferenceFrame().checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
       double exponentialTerm = Math.exp(omega0 * time);
-      double copX0 = initialCenterOfPressure.getX();
-      double copY0 = initialCenterOfPressure.getY();
-
-      copX0 = (1 - exponentialTerm) * copX0;
-      copY0 = (1 - exponentialTerm) * copY0;
-
-      positionToPack.set(initialCapturePoint);
-      positionToPack.scale(exponentialTerm);
-
-      positionToPack.setX(positionToPack.getX() + copX0);
-      positionToPack.setY(positionToPack.getY() + copY0);
+      
+      double x = initialCenterOfPressure.getX()*(1-exponentialTerm) + initialCapturePoint.getX()*exponentialTerm;
+      double y = initialCenterOfPressure.getY()*(1-exponentialTerm) + initialCapturePoint.getY()*exponentialTerm;
+      
+      positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
 
    /**
@@ -319,15 +320,14 @@ public class CapturePointTools
    public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCenterOfPressure,
          YoFrameVector velocityToPack)
    {
-      initialCapturePoint.getReferenceFrame().checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
       double exponentialTerm = Math.exp(omega0 * time);
 
       double x = omega0 * exponentialTerm * initialCapturePoint.getX() - initialCenterOfPressure.getX() * omega0 * exponentialTerm;
       double y = omega0 * exponentialTerm * initialCapturePoint.getY() - initialCenterOfPressure.getY() * omega0 * exponentialTerm;
 
-      velocityToPack.setX(x);
-      velocityToPack.setY(y);
+      velocityToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
 
    /**
@@ -340,7 +340,7 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, YoFrameVector desiredCapturePointVelocity, YoFrameVector accelerationToPack)
    {
-      accelerationToPack.set(desiredCapturePointVelocity);
+      accelerationToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
       accelerationToPack.scale(omega0);
    }
 
@@ -357,15 +357,14 @@ public class CapturePointTools
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint,
          YoFramePoint initialCenterOfPressure, YoFrameVector accelerationToPack)
    {
-      initialCapturePoint.getReferenceFrame().checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
       double exponentialTerm = Math.exp(omega0 * time);
 
       double x = omega0 * (omega0 * exponentialTerm * initialCapturePoint.getX() - initialCenterOfPressure.getX() * omega0 * exponentialTerm);
       double y = omega0 * (omega0 * exponentialTerm * initialCapturePoint.getY() - initialCenterOfPressure.getY() * omega0 * exponentialTerm);
 
-      accelerationToPack.setX(x);
-      accelerationToPack.setY(y);
+      accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
 
    /**
@@ -380,7 +379,7 @@ public class CapturePointTools
    public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0,
          YoFramePoint desiredCentroidalMomentumPivotToPack)
    {
-      desiredCentroidalMomentumPivotToPack.set(desiredCapturePointVelocity);
+      desiredCentroidalMomentumPivotToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
       desiredCentroidalMomentumPivotToPack.scale(-1 / omega0);
       desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
    }
@@ -397,6 +396,9 @@ public class CapturePointTools
    public static double computeDistanceToCapturePointFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
          FrameVector desiredCapturePointVelocity)
    {
+      currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition.getReferenceFrame());
+      desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition.getReferenceFrame());
+      
       double desiredCapturePointVelocityMagnitude = Math
             .sqrt(desiredCapturePointVelocity.getX() * desiredCapturePointVelocity.getX() + desiredCapturePointVelocity.getY()
                   * desiredCapturePointVelocity.getY() + desiredCapturePointVelocity.getZ() * desiredCapturePointVelocity.getZ());
