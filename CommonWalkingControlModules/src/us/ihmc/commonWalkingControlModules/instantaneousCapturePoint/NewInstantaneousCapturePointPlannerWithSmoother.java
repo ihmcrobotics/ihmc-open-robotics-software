@@ -165,8 +165,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 		comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
 		this.initialTime.set(initialTime);
 
-		this.desiredCapturePointPosition.set(currentDesiredCapturePointPosition);
-		this.desiredCapturePointVelocity.set(currentDesiredCapturePointVelocity);
+		this.desiredCapturePointPosition.setAndMatchFrame(currentDesiredCapturePointPosition);
+		this.desiredCapturePointVelocity.setAndMatchFrame(currentDesiredCapturePointVelocity);
 
 		computeConstantCentersOfPressure(footstepList);
 		computeCapturePointCornerPoints(this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue());
