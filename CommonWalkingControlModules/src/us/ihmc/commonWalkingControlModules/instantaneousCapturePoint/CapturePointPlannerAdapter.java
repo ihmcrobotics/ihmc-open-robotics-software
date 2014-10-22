@@ -7,6 +7,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputer2D;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -14,6 +15,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlanner
@@ -23,11 +25,13 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 	private final ArrayList<ReferenceFrame> soleFrameList = new ArrayList<ReferenceFrame>();
 	private final ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 	private final FramePoint transferToFootLocation = new FramePoint(worldFrame);
+	private final EnumYoVariable<RobotSide> currentTransferToSide;
 	private final CapturePointPlannerParameters capturePointPlannerParameters;
 	private final FramePoint tmpFramePoint = new FramePoint(worldFrame);
 	private final FramePoint tmpFramePoint2 = new FramePoint(worldFrame);
 	private final FramePoint2d tmpFramePoint2d = new FramePoint2d(worldFrame);
 	private final FrameVector tmpFrameVector = new FrameVector(worldFrame);
+	private final CommonHumanoidReferenceFrames referenceFrames;
 
 	InstantaneousCapturePointPlanner oldCapturePointPlanner;
 	NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation newCapturePointPlanner;
@@ -36,6 +40,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 			YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT, CommonHumanoidReferenceFrames referenceFrames)
 	{
 		this.capturePointPlannerParameters = capturePointPlannerParameters;
+		this.referenceFrames = referenceFrames;
+		this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerAdapterCurrentTransferToSide", registry, RobotSide.class);
 
 		SmoothICPComputer2D smoothICPComputer2D = new SmoothICPComputer2D(referenceFrames, controlDT,
 				this.capturePointPlannerParameters.getDoubleSupportSplitFraction(),
@@ -99,13 +105,15 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
 
-			transferToAndNextFootstepsData.getTransferToFootstep().getPositionIncludingFrame(transferToFootLocation);
+			currentTransferToSide.set(transferToAndNextFootstepsData.getTransferToSide());
 
 			tmpFramePoint.set(initialICPPosition.getX(), initialICPPosition.getY(), 0.0);
 			tmpFrameVector.set(0.0, 0.0, 0.0);
+			transferToFootLocation.setToZero(referenceFrames.getSoleFrame(transferToAndNextFootstepsData.getTransferToSide()));
+			transferToFootLocation.changeFrame(worldFrame);
 
 			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
-			newCapturePointPlanner.initializeDoubleSupport(tmpFramePoint, tmpFrameVector, initialTime, footstepList);
+			newCapturePointPlanner.initializeDoubleSupport(tmpFramePoint, tmpFrameVector, initialTime, footstepList, transferToAndNextFootstepsData.getTransferToSide(), transferToFootLocation);
 		}
 	}
 
@@ -122,16 +130,16 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
 
-			
-			transferToAndNextFootstepsData.getTransferToFootstep().getPositionIncludingFrame(transferToFootLocation);
-
 			tmpFramePoint.set(transferToAndNextFootstepsData.getCurrentDesiredICP().getX(), transferToAndNextFootstepsData
 					.getCurrentDesiredICP().getY(), 0.0);
 			tmpFrameVector.set(transferToAndNextFootstepsData.getCurrentDesiredICPVelocity().getX(), transferToAndNextFootstepsData
 					.getCurrentDesiredICPVelocity().getY(), 0.0);
+			
+			transferToFootLocation.setToZero(referenceFrames.getSoleFrame(transferToAndNextFootstepsData.getTransferToSide()));
+         transferToFootLocation.changeFrame(worldFrame);
 
 			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
-			newCapturePointPlanner.initializeDoubleSupport(tmpFramePoint, tmpFrameVector, initialTime, footstepList);
+			newCapturePointPlanner.initializeDoubleSupport(tmpFramePoint, tmpFrameVector, initialTime, footstepList,transferToAndNextFootstepsData.getTransferToSide(), transferToFootLocation);
 		}
 	}
 
@@ -145,13 +153,17 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
+		   transferToFootLocation.setToZero(referenceFrames.getSoleFrame(currentTransferToSide.getEnumValue()));
+		   transferToFootLocation.changeFrame(worldFrame);
+		   
 			tmpFramePoint2.set(actualICP.getX(), actualICP.getY(), 0.0);
 			newCapturePointPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, time, tmpFramePoint2,
 					transferToFootLocation);
 
 			icpPositionToPack.set(tmpFramePoint.getX(), tmpFramePoint.getY());
+			
 			icpVelocityToPack.set(tmpFrameVector.getX(), tmpFrameVector.getY());
-
+			
 			newCapturePointPlanner.packDesiredCentroidalMomentumPivotPosition(tmpFramePoint);
 			ecmpToPack.set(tmpFramePoint.getX(), tmpFramePoint.getY());
 		}
