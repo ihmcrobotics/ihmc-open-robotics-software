@@ -187,7 +187,7 @@ public class ScriptBehavior extends BehaviorInterface
 			public void doTransitionAction()
 			{
 				loadNextScriptObject();
-				outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
+				sendPacketToNetworkProcessor(scriptObject, scriptStatus,scriptIndex);
 			}
 		};
 		
@@ -243,9 +243,19 @@ public class ScriptBehavior extends BehaviorInterface
 		scriptObjects = scriptEngine.getScriptObjects(scriptResourceStream);
 		scriptLoaded.set(true);
 		scriptStatus = ScriptBehaviorStatusEnum.SCRIPT_LOADED;
-		outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
+		sendPacketToNetworkProcessor(scriptObject, scriptStatus,scriptIndex);
 		loadNextScriptObject();
-		outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
+		sendPacketToNetworkProcessor(scriptObject, scriptStatus,scriptIndex);
+		//outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptStatus,scriptIndex));
+	}
+	
+	private void sendPacketToNetworkProcessor(ScriptObject scriptObject, ScriptBehaviorStatusEnum scriptBehaviorStatusEnum, int scriptIndexToSend)
+	{ 
+		//TODO: get rid of "true" when footstep data lists are downlinked
+		if (true) //scriptObject == null || !(scriptObject.getScriptObject() instanceof FootstepDataList))
+		{
+			outgoingCommunicationBridge.sendPacketToNetworkProcessor(new ScriptBehaviorStatusPacket(scriptBehaviorStatusEnum,scriptIndexToSend));
+		}
 	}
 	
 	public void setScriptInputs(InputStream scriptResourceStream, RigidBodyTransform referenceFrame)
