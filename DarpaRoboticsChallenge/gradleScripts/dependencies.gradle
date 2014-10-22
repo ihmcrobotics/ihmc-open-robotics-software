@@ -67,7 +67,8 @@ dependencies {
 	compile project(':ROSJavaGeometry')
 	compile project(':IHMCCommunication')
 	compile project(':IHMCHumanoidBehaviors')
-
+	compile project(':ROSJNIWrapper')
+	
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':IHMCCommunication').sourceSets.test.output
