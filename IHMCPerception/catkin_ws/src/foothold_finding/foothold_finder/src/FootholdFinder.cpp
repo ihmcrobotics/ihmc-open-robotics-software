@@ -19,6 +19,7 @@
 // ROS
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/String.h>
+#include <std_msgs/ColorRGBA.h>
 
 // Eigen
 #include <Eigen/Core>
@@ -26,11 +27,11 @@
 // Math
 #include <math.h>
 
-// Kindr
-#include <kindr/thirdparty/ros/RosEigen.hpp>
-
 // Random sort
 #include <cstdlib>
+
+// Kindr
+#include <kindr/thirdparty/ros/RosEigen.hpp>
 
 using namespace std;
 using namespace ros;
@@ -40,14 +41,15 @@ using namespace boost::assign; // bring 'operator+=()' into scope
 namespace foothold_finder {
 
 FootholdFinder::FootholdFinder(ros::NodeHandle& nodeHandle)
-    : nodeHandle_(nodeHandle)
+    : nodeHandle_(nodeHandle),
+      segmentation_(nodeHandle_)
 {
   ROS_INFO("Foothold finder started.");
   readParameters();
   mapRequestTypes_ += "elevation", "variance", "surface_normal_x", "surface_normal_y", "surface_normal_z";
   footholdAdaptService_ = nodeHandle_.advertiseService("adapt", &FootholdFinder::adaptCallback, this);
   elevationMapClient_ = nodeHandle_.serviceClient<grid_map_msg::GetGridMap>(elevationMapServiceName_);
-  segmentationPublisher_ = nodeHandle_.advertise<sensor_msgs::PointCloud2>("segmented_map", 1);
+  footShapePublisher_ = nodeHandle_.advertise<visualization_msgs::Marker>("foot_shape", 1, true);
   initialize();
 }
 
@@ -56,25 +58,53 @@ FootholdFinder::~FootholdFinder() {}
 bool FootholdFinder::readParameters()
 {
   nodeHandle_.param("elevation_map_service", elevationMapServiceName_, string("/elevation_mapping/get_grid_map"));
-  nodeHandle_.param("search_area_side_length", searchAreaSideLength_, 0.6);
-  nodeHandle_.param("plane_tolerance", planeTolerance_, 0.05);
-  nodeHandle_.param("valid_cell_count_threshold", validCellCountThreshold_, 0.8);
-  nodeHandle_.param("min_number_of_cells_per_foothold", minNumberOfCellsPerFoothold_, 8);
+  nodeHandle_.param("map_frame", mapFrame_, string("/map"));
+  nodeHandle_.param("foothold_evaluation/valid_cell_count_threshold", validCellCountThreshold_, 0.8);
+  nodeHandle_.param("foothold_evaluation/max_slope_angle", maxSlopeAngle_, 0.2);
 
-  // TODO Parameterize this.
-  footShape_.push_back(Eigen::Vector2d(-0.09, 0.06));
-  footShape_.push_back(Eigen::Vector2d(0.105, 0.06));
-  footShape_.push_back(Eigen::Vector2d(0.165, 0.0475));
-  footShape_.push_back(Eigen::Vector2d(0.165, -0.0475));
-  footShape_.push_back(Eigen::Vector2d(0.105, -0.06));
-  footShape_.push_back(Eigen::Vector2d(-0.09, -0.06));
+  nodeHandle_.param("foot_shape/line_width", footShapeLineWidth_, 0.01);
+  nodeHandle_.param("foot_shape/visualization_offset", footShapeVisualizationOffset_, 0.02);
+  std::vector<double> footShapeXCoordinates, footShapeYCoordinates;
+  nodeHandle_.getParam("foot_shape/x_coordinates", footShapeXCoordinates);
+  nodeHandle_.getParam("foot_shape/y_coordinates", footShapeYCoordinates);
+
+  ROS_ASSERT(footShapeXCoordinates.size() == footShapeYCoordinates.size());
+  for(unsigned i = 0; i < footShapeXCoordinates.size(); i++) {
+    footShape_.push_back(Eigen::Vector2d(footShapeXCoordinates[i], footShapeYCoordinates[i]));
+  }
+
+  nodeHandle_.param("search_region/map_side_length", searchRegionSideLength_, 0.3);
+  std::vector<double> searchRegionXCoordinates, searchRegionYCoordinates;
+  nodeHandle_.getParam("search_region/x_coordinates", searchRegionXCoordinates);
+  nodeHandle_.getParam("search_region/y_coordinates", searchRegionYCoordinates);
+
+  ROS_ASSERT(searchRegionXCoordinates.size() == searchRegionYCoordinates.size());
+  for(unsigned i = 0; i < searchRegionXCoordinates.size(); i++) {
+    searchRegion_.push_back(Eigen::Vector2d(searchRegionXCoordinates[i], searchRegionYCoordinates[i]));
+  }
+
+  segmentation_.readParameters();
 
   return true;
 }
 
 bool FootholdFinder::initialize()
 {
-  ROS_INFO("Foothold finder visualization initialized.");
+  footShapeMarker_.ns = "foot_shape";
+  footShapeMarker_.lifetime = ros::Duration(1.0);
+  footShapeMarker_.action = visualization_msgs::Marker::ADD;
+  footShapeMarker_.type = visualization_msgs::Marker::LINE_STRIP;
+  footShapeMarker_.scale.x = footShapeLineWidth_;
+  footShapeMarker_.header.frame_id = mapFrame_;
+
+  unsigned int nVertices = footShape_.size() + 1;
+  footShapeMarker_.points.resize(nVertices);
+  std_msgs::ColorRGBA color;
+  color.r = color.g = color.b = color.a = 1.0; // white.
+  footShapeMarker_.colors.resize(nVertices, color);
+
+  return true;
+  ROS_INFO("Foothold finder initialized.");
   return true;
 }
 
@@ -82,34 +112,40 @@ bool FootholdFinder::adaptCallback(foothold_finding_msg::AdaptFootholds::Request
 {
   ROS_INFO("Received footholds. Adapting...");
 
-  for (const auto& foothold : request.initialFoodholds) {
+  // TODO Add conversion of position in elevation map frame.
+  // TODO Where is the time in the header gone?
+
+  for (const auto& foothold : request.initialFootholds) {
     ROS_INFO("Adapting foothold nr. %i.", foothold.stepNumber);
     Eigen::Vector2d position(foothold.pose.position.x, foothold.pose.position.y);
     grid_map::GridMap map(mapRequestTypes_);
     std::vector<foothold_finding_msg::Foothold> candidates;
-    if (getMap(position, searchAreaSideLength_, map)) {
-      findCandidates(foothold, map, candidates);
+    if (getMap(position, searchRegionSideLength_, map)) {
+      segmentation_.segment(map);
+      findCandidates(foothold, segmentation_, candidates);
     } else {
       foothold_finding_msg::Foothold originalCopy = foothold;
       originalCopy.flag = 0; // unknown
       candidates.push_back(originalCopy);
     }
-    response.adaptedFoodholds.reserve(response.adaptedFoodholds.size() + distance(candidates.begin(), candidates.end()));
-    response.adaptedFoodholds.insert(response.adaptedFoodholds.end(), candidates.begin(), candidates.end());
+    response.adaptedFootholds.reserve(response.adaptedFootholds.size() + distance(candidates.begin(), candidates.end()));
+    response.adaptedFootholds.insert(response.adaptedFootholds.end(), candidates.begin(), candidates.end());
   }
 
-  for (const auto& foothold : response.adaptedFoodholds) {
-    std::cout << foothold << std::endl;
+  ROS_DEBUG("Response: \n -------------------");
+  for (const auto& foothold : response.adaptedFootholds) {
+    ROS_DEBUG_STREAM(foothold);
   }
 
-  ROS_INFO("Footholds adapted and send back.");
+  ROS_INFO("Footholds adapted and sent back.");
   return true;
 }
 
 bool FootholdFinder::getMap(const Eigen::Vector2d& position, const double sideLength, grid_map::GridMap& map)
 {
-  ROS_INFO("Getting map around position (%f, %f) with side length %f.", position(0), position(1), sideLength);
+  ROS_DEBUG("Getting map around position (%f, %f) with side length %f.", position(0), position(1), sideLength);
   // Get map.
+  // TODO Could make this general by moving it to grid map package (e.g. createGetGridMapServiceCall(...)).
   grid_map_msg::GetGridMap serviceCall;
   serviceCall.request.positionX = position(0);
   serviceCall.request.positionY = position(1);
@@ -125,203 +161,169 @@ bool FootholdFinder::getMap(const Eigen::Vector2d& position, const double sideLe
   return true;
 }
 
-bool FootholdFinder::findCandidates(const foothold_finding_msg::Foothold& foothold, grid_map::GridMap& map,
-                                    std::vector<foothold_finding_msg::Foothold>& candidates)
+bool FootholdFinder::findCandidates(const foothold_finding_msg::Foothold& foothold, PlaneSegmentation& segmentation, std::vector<foothold_finding_msg::Foothold>& candidates)
 {
   ROS_INFO("Finding candidates for foothold nr. %i.", foothold.stepNumber);
   foothold_finding_msg::Foothold candidate = foothold;
-  checkAndAdaptFoothold(map, candidate);
+  localSearch(segmentation, candidate);
   candidates.push_back(candidate);
   return true;
 }
 
-void FootholdFinder::checkAndAdaptFoothold(grid_map::GridMap& map, foothold_finding_msg::Foothold& foothold)
+bool FootholdFinder::localSearch(PlaneSegmentation& segmentation, foothold_finding_msg::Foothold& foothold)
+{
+  // Generate candidate indeces.
+  Pose pose;
+  kindr::poses::eigen_impl::convertFromRosGeometryMsg(foothold.pose, pose);
+  Eigen::Array2i requestedIndex;
+  segmentation.getMap()->getIndex(pose.getPosition().toImplementation().head(2), requestedIndex);
+
+  Polygon searchRegion;
+  getPolygonInMapFrame(searchRegion_, pose, searchRegion);
+  vector<Eigen::Array2i> indices;
+
+  for (grid_map_lib::PolygonIterator iterator(*segmentation.getMap(), searchRegion);
+      !iterator.isPassedEnd(); ++iterator) {
+    indices.push_back(*iterator);
+  }
+  std::random_shuffle(indices.begin(), indices.end());
+  indices.push_back(requestedIndex); // The requested index is twice in the list, but that's ok.
+
+  // Search.
+  foothold_finding_msg::Foothold candidate;
+  unsigned int iIteration = 0;
+
+  for (const auto& index : indices) {
+    ROS_DEBUG_STREAM("Search iteration nr. " << iIteration << ".");
+    candidate = foothold;
+    Eigen::Vector2d position;
+    segmentation.getMap()->getPosition(index, position);
+    candidate.pose.position.x = position.x();
+    candidate.pose.position.y = position.y();
+    checkFoothold(segmentation, candidate);
+    if (candidate.flag == 2) {
+      ROS_DEBUG_STREAM("Valid candidate found.");
+      foothold = candidate;
+      return true;
+    }
+    ++iIteration;
+  }
+
+  ROS_DEBUG_STREAM("No valid candidate found.");
+  return false;
+}
+
+// TODO Create class for foothold checking / adaption.
+void FootholdFinder::checkFoothold(PlaneSegmentation& segmentation, foothold_finding_msg::Foothold& foothold)
+{
+  // Get biggest segment in foot area.
+  Pose pose;
+  kindr::poses::eigen_impl::convertFromRosGeometryMsg(foothold.pose, pose);
+  Polygon footShape;
+  getPolygonInMapFrame(footShape_, pose, footShape);
+  size_t id, nBiggestElements, nValidElements, nElements;
+  if (!segmentation.getBiggestSegmentForArea(footShape, id, nBiggestElements, nValidElements, nElements)) {
+    foothold.flag = 0;  // unknown.
+    return;
+  }
+
+  // Visualization.
+  publishFootShape(footShape, segmentation.getPlane(id));
+
+  // Adapt foot.
+  adapt(segmentation.getPlane(id), foothold); // TODO Move this for performance?
+
+  // Check if foot belongs to the same segment.
+  double percentageValid = (double) nBiggestElements / nElements;
+  if (percentageValid < validCellCountThreshold_) {
+    // TODO Check for different heights!
+    ROS_DEBUG_STREAM("Invalid foothold: Too few valid cells in foothold (" << percentageValid << "%).");
+    foothold.flag = 3;  // bad.
+    return;
+  }
+
+  // Check if surface normal is within limits.
+  double slopeAngle = segmentation.getSlopeAngle(id);
+  if (slopeAngle > maxSlopeAngle_) {
+    ROS_DEBUG_STREAM("Invalid foothold: Slope angle " << slopeAngle / M_PI * 180.0 << " is too high.");
+    foothold.flag = 3;  // bad.
+    return;
+  }
+
+  ROS_DEBUG_STREAM("Valid foothold for segment id: " << id << ".");
+  foothold.flag = 2;  // verified.
+}
+
+void FootholdFinder::adapt(Plane& plane, foothold_finding_msg::Foothold& foothold)
 {
   Pose pose;
   kindr::poses::eigen_impl::convertFromRosGeometryMsg(foothold.pose, pose);
   Eigen::Vector2d position(pose.getPosition().getHead(2).toImplementation());
-  Eigen::Array2i index;
-  map.getIndex(position, index);
-
-  // Check.
-  Polygon footShape;
-  getFootShapeInWorldFrame(pose, footShape);
-  if (!checkArea(footShape, map)) {
-    foothold.flag = 3; // bad.
-  }
 
   // Adapt.
   Pose adaptedPose;
   adaptedPose.getPosition().x() = foothold.pose.position.x;
   adaptedPose.getPosition().y() = foothold.pose.position.y;
-  adaptedPose.getPosition().z() = (double) map.at("elevation", index);
+  adaptedPose.getPosition().z() = plane.getHeight(position);
   adaptedPose.getRotation() = pose.getRotation();
-  Eigen::Vector3d normal;
-  map.getVector("surface_normal_", index, normal);
-  if (normal.norm() <= 1e-8)
-  {
-	  foothold.flag = 3;
-	  return;
-  }
-  matchToSurfaceNormal(normal, adaptedPose.getRotation());
+  matchToSurfaceNormal(plane.getNormal(), adaptedPose.getRotation());
 
   // Fill in data.
   geometry_msgs::Pose poseMessage;
   kindr::poses::eigen_impl::convertToRosGeometryMsg(adaptedPose, poseMessage);
   foothold.pose = poseMessage;
-  foothold.flag = 2;  // verified.
 }
 
-bool FootholdFinder::checkArea(const Polygon& polygon, grid_map::GridMap& map)
+// TODO Move this to a more general place.
+void FootholdFinder::getPolygonInMapFrame(const Polygon& referencePolygon, const Pose& pose, Polygon& polygonTransformed)
 {
-  // Extend map with segmentation id data.
-  if (!map.exists("segmentation_id")) map.add("segmentation_id", Eigen::MatrixXf::Constant(map.getBufferSize()(0), map.getBufferSize()(1), NAN));
-
-  // Gather all valid and unsegmented indeces.
-  std::vector<Eigen::Array2i> validIndeces;
-  std::vector<Eigen::Array2i> unsegmentedIndeces;
-  size_t nTotalCells = 0;
-  for (grid_map_lib::PolygonIterator iterator(map, polygon); !iterator.isPassedEnd(); ++iterator) {
-    std::vector<std::string> segmentationIdType;
-    segmentationIdType.push_back("segmentation_id");
-    if (map.isValid(*iterator)) {
-      validIndeces.push_back(*iterator);
-      if (!map.isValid(*iterator, segmentationIdType))
-        unsegmentedIndeces.push_back(*iterator);
-    }
-    ++nTotalCells;
-  }
-
-  // Check if enough valid cells in area.
-  if (validIndeces.size() < minNumberOfCellsPerFoothold_) return false;
-  if (((double) validIndeces.size()) / nTotalCells < validCellCountThreshold_) return false;
-
-  // Random sort.
-  std::random_shuffle(unsegmentedIndeces.begin(), unsegmentedIndeces.end());
-
-  // Segment: Compare each cell from unsegmentedIndeces with remaining points.
-  size_t id = 0;
-  vector<Eigen::Array2i>::iterator iterator = unsegmentedIndeces.begin();
-  for (; iterator != unsegmentedIndeces.end();) {
-    map.at("segmentation_id", *iterator) = id;
-    vector<Eigen::Array2i>::iterator innerIterator = iterator + 1;
-    for (; innerIterator != unsegmentedIndeces.end();) {
-      if (isSameCluster(map, *iterator, *innerIterator)) {
-        map.at("segmentation_id", *innerIterator) = id;
-        innerIterator = unsegmentedIndeces.erase(innerIterator);
-      } else {
-        ++innerIterator;
-      }
-    }
-    iterator = unsegmentedIndeces.erase(iterator);
-    id++;
-  }
-
-  // Debugging visualization.
-  if (segmentationPublisher_.getNumSubscribers() > 0) {
-    sensor_msgs::PointCloud2 pointCloud;
-    map.toPointCloud(pointCloud, "elevation");
-    segmentationPublisher_.publish(pointCloud);
-  }
-
-  // Check if all points form same segment.
-  for (const auto& index : validIndeces) {
-    if (map.at("segmentation_id", index) != map.at("segmentation_id", validIndeces[0])) return false;
-  }
-
-  return true;
-}
-
-void FootholdFinder::clusterMap(grid_map::GridMap& map)
-{
-  // Extend map with segmentation id data.
-  map.add("segmentation_id", Eigen::MatrixXf::Constant(map.getBufferSize()(0), map.getBufferSize()(1), NAN));
-
-  // Gather all valid indeces.
-  std::vector<Eigen::Array2i> unsegmentedIndeces; // Move main index to start?
-  for (grid_map_lib::GridMapIterator iterator(map); !iterator.isPassedEnd(); ++iterator) { // TODO Use circle iterator.
-    if (map.isValid(*iterator)) unsegmentedIndeces.push_back(*iterator);
-  }
-
-  // Random sort.
-  std::random_shuffle(unsegmentedIndeces.begin(), unsegmentedIndeces.end());
-
-  // Segment: Compare each cell from unsegmentedIndeces with remaining points.
-  size_t id = 0;
-  vector<Eigen::Array2i>::iterator iterator = unsegmentedIndeces.begin();
-  for (; iterator != unsegmentedIndeces.end();) {
-    map.at("segmentation_id", *iterator) = id;
-    vector<Eigen::Array2i>::iterator innerIterator = iterator + 1;
-    for (; innerIterator != unsegmentedIndeces.end();) {
-      if (isSameCluster(map, *iterator, *innerIterator)) {
-        map.at("segmentation_id", *innerIterator) = id;
-        innerIterator = unsegmentedIndeces.erase(innerIterator);
-      } else {
-        ++innerIterator;
-      }
-    }
-
-    iterator = unsegmentedIndeces.erase(iterator);
-    id++;
-  }
-
-  if (segmentationPublisher_.getNumSubscribers() > 0) {
-    sensor_msgs::PointCloud2 pointCloud;
-    map.toPointCloud(pointCloud, "elevation");
-    segmentationPublisher_.publish(pointCloud);
-  }
-}
-
-void FootholdFinder::getFootShapeInWorldFrame(const Pose& pose, Polygon& footShape)
-{
-  for (const auto& pointInFootFrame : footShape_) {
+  for (const auto& pointInFootFrame : referencePolygon) {
     Eigen::Vector3d point3InFootFrame(pointInFootFrame.x(), pointInFootFrame.y(), 0.0);
     Eigen::Vector3d pointInWorldFrame = pose.getPosition().vector() + pose.getRotation().inverseRotate(point3InFootFrame);
-    footShape.push_back(pointInWorldFrame.head(2));
+    polygonTransformed.push_back(pointInWorldFrame.head(2));
   }
 }
 
-bool FootholdFinder::isSameCluster(const grid_map::GridMap& map, const Eigen::Array2i& firstIndex, const Eigen::Array2i& secondIndex)
+void FootholdFinder::publishFootShape(const Polygon& footShape, Plane& plane)
 {
-  Eigen::Vector3d firstPosition, secondPosition;
-  map.getPosition3d("elevation", firstIndex, firstPosition);
-  map.getPosition3d("elevation", secondIndex, secondPosition);
-  Eigen::Vector3d connectingVector = secondPosition - firstPosition;
-
-  Eigen::Vector3d firstNormal, secondNormal;
-  map.getVector("surface_normal_", firstIndex, firstNormal);
-  map.getVector("surface_normal_", secondIndex, secondNormal);
-
-  if (computeDistanceToNormalPlance(firstNormal, connectingVector) > planeTolerance_) return false;
-  if (computeDistanceToNormalPlance(secondNormal, connectingVector) > planeTolerance_) return false;
-  return true;
-}
-
-double FootholdFinder::computeDistanceToNormalPlance(const Eigen::Vector3d& normal, const Eigen::Vector3d& offset)
-{
-  double cosAlpha = offset.dot(normal) / (normal.norm() * offset.norm());
-  double angleToPlane = fabs(acos(cosAlpha) - M_PI_2);
-  double distanceToPlance = sin(angleToPlane) * offset.norm();
-  return distanceToPlance;
-}
-
-int FootholdFinder::checkFoothold(const grid_map::GridMap& map, const foothold_finding_msg::Foothold& foothold)
-{
-  return true;
+  if (footShapePublisher_.getNumSubscribers () < 1) return;
+  ROS_DEBUG("Publishing foot shape for visualization.");
+  footShapeMarker_.header.stamp = Time::now();
+  unsigned i = 0;
+  for( ; i < footShape.size(); i++) {
+    footShapeMarker_.points[i].x = footShape[i].x();
+    footShapeMarker_.points[i].y = footShape[i].y();
+    footShapeMarker_.points[i].z = plane.getHeight(footShape[i]) + footShapeVisualizationOffset_;
+  }
+  footShapeMarker_.points[i].x = footShapeMarker_.points[0].x;
+  footShapeMarker_.points[i].y = footShapeMarker_.points[0].y;
+  footShapeMarker_.points[i].z = footShapeMarker_.points[0].z;
+  footShapePublisher_.publish(footShapeMarker_);
 }
 
 void FootholdFinder::matchToSurfaceNormal(const Eigen::Vector3d& normal, Rotation& rotation)
 {
-	std::cout << "Rotation and normal before adapting: " << rotation << std::endl;
-	std::cout << normal << std::endl;
+//  ROS_DEBUG_STREAM("Map normal: " << normal.transpose());
+//  ROS_DEBUG_STREAM("Rotation before adapting: " << getDebugForm(rotation));
   Eigen::Vector3d reference = Eigen::Vector3d::UnitZ();
-  reference = rotation.getActive().rotate(reference);
+  reference = rotation.inverseRotate(reference);
+//  ROS_DEBUG_STREAM("Reference normal: " << reference.transpose());
+//  double difference = acos(reference.dot(normal) / (reference.norm() * normal.norm())) / M_PI * 180.0;
+//  ROS_DEBUG_STREAM("Angle between normal and reference: " << difference << " deg");
   Rotation correction;
   correction.setFromVectors(reference, normal);
-  std::cout << "Correction of adaptation: " << correction << std::endl;
+//  ROS_DEBUG_STREAM("Correction of adaptation: " << getDebugForm(correction));
   rotation = rotation * correction;
-	std::cout << "Rotation and normal after adapting: " << rotation << std::endl;
-	std::cout << normal << std::endl;
+//  ROS_DEBUG_STREAM("Rotation after adapting: " << getDebugForm(rotation));
+}
+
+std::string FootholdFinder::getDebugForm(const Rotation& rotation)
+{
+  kindr::rotations::eigen_impl::EulerAnglesYprPD euler(rotation);
+  Eigen::Vector3d eulerVector = euler.getUnique().toImplementation() / M_PI * 180.0;
+  return std::string("Yaw: ") + std::to_string(eulerVector(0))
+      + " deg, Pitch: " + std::to_string(eulerVector(1))
+      + " deg, Roll: " + std::to_string(eulerVector(2)) + " deg";
 }
 
 } /* namespace */

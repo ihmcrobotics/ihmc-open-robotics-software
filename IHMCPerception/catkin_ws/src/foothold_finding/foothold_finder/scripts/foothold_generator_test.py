@@ -12,52 +12,28 @@ import std_msgs.msg
 def generate_footholds():
     print "Generating footholds"
     
-    header = std_msgs.msg.Header(0, rospy.get_rostime(), "world")
-    stepnumber = 0
-    type =  std_msgs.msg.String("LEFT")
-    position = geometry_msgs.msg.Point(-2.8, 2.8, 0.0)
-    orientation = geometry_msgs.msg.Quaternion(0.0, 0.0, 0.924, 0.383)
-    pose = geometry_msgs.msg.Pose(position, orientation)
-    flag = 0
-    foothold = foothold_finding_msg.msg.Foothold(header, stepnumber, type, pose, flag)
-    footholds = [foothold]
-    
+    # Atlas
 #     header = std_msgs.msg.Header(0, rospy.get_rostime(), "world")
-#     stepnumber = 0
+#     stepnumber = 1
 #     type =  std_msgs.msg.String("LEFT")
-#     position = geometry_msgs.msg.Point(-1.0, -1.0, 0.0)
+#     position = geometry_msgs.msg.Point(0.57, -0.1, 0.0)
 #     orientation = geometry_msgs.msg.Quaternion(0.0, 0.0, 0.0, 1.0)
 #     pose = geometry_msgs.msg.Pose(position, orientation)
 #     flag = 0
 #     foothold = foothold_finding_msg.msg.Foothold(header, stepnumber, type, pose, flag)
 #     footholds = [foothold]
-#     
-#     stepnumber = 1
-#     type =  std_msgs.msg.String("RIGHT")
-#     position = geometry_msgs.msg.Point(1.7, -1.1, 0.0)
-#     orientation = geometry_msgs.msg.Quaternion(0.0, 0.0, 0.0, 1.0)
-#     pose = geometry_msgs.msg.Pose(position, orientation)
-#     flag = 0
-#     foothold = foothold_finding_msg.msg.Foothold(header, stepnumber, type, pose, flag)
-#     footholds = footholds + [foothold]
-#     
-#     stepnumber = 2
-#     type =  std_msgs.msg.String("LEFT")
-#     position = geometry_msgs.msg.Point(0.5, -1.5, 0.0)
-#     orientation = geometry_msgs.msg.Quaternion(0.0, 0.0, 0.383, 0.924)
-#     pose = geometry_msgs.msg.Pose(position, orientation)
-#     flag = 0
-#     foothold = foothold_finding_msg.msg.Foothold(header, stepnumber, type, pose, flag)
-#     footholds = footholds + [foothold]
-#     
-#     stepnumber = 3
-#     type =  std_msgs.msg.String("RIGHT")
-#     position = geometry_msgs.msg.Point(-1.5, -1.0, 0.0)
-#     orientation = geometry_msgs.msg.Quaternion(0.0, 0.0, 0.707, 0.707)
-#     pose = geometry_msgs.msg.Pose(position, orientation)
-#     flag = 0
-#     foothold = foothold_finding_msg.msg.Foothold(header, stepnumber, type, pose, flag)
-#     footholds = footholds + [foothold]
+    
+    # StarlETH
+    header = std_msgs.msg.Header(0, rospy.get_rostime(), "starleth/odometry")
+    stepnumber = 1
+    type =  std_msgs.msg.String("LF")
+    position = geometry_msgs.msg.Point(0.910366654396, 0.120674788952, 0.0569435358047)
+    #position = geometry_msgs.msg.Point(0.772246479988, 0.1186, 0.0)
+    orientation = geometry_msgs.msg.Quaternion(0.0, 0.0, 0.0, 1.0)
+    pose = geometry_msgs.msg.Pose(position, orientation)
+    flag = 0
+    foothold = foothold_finding_msg.msg.Foothold(header, stepnumber, type, pose, flag)
+    footholds = [foothold]
     
     return footholds
 

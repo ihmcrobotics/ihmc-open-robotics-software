@@ -1,26 +1,29 @@
 #!/usr/bin/env python
 
 import roslib
-from bzrlib.transport.http._urllib2_wrappers import Response
-roslib.load_manifest('foothold_adaptation')
+roslib.load_manifest('foothold_finder')
 
 import rospy
-from foothold_adaption_msg.srv import *
+from foothold_finding_msg.srv import *
 
 def adapt_foothold(request):
-    print "Adapting footholds"
-    adaptedFoodholds = request.initialFoodholds
-    for foothold in adaptedFoodholds.footholds:
-        if foothold.type.data == "LEFT":
-            foothold.pose.position.z = 0.4
+    print "Adapting footholds..."
+    adaptedFootholds = request.initialFootholds
+    
+    # Add changes here for debugging purposes.
+    for foothold in adaptedFootholds:
+        foothold.flag = 2     
+#         if foothold.type.data == "LEFT":
+#             foothold.pose.position.z = 0.4
+
         
-    response = AdaptFootholdsResponse(adaptedFoodholds)
+    response = AdaptFootholdsResponse(adaptedFootholds)
     print response
     return response
 
 def foothold_adaption_node():
-    rospy.init_node('foothold_adaptation')
-    service = rospy.Service('foothold_adaption/adapt', AdaptFootholds, adapt_foothold)
+    rospy.init_node('foothold_finder_dummy')
+    service = rospy.Service('foothold_finder/adapt', AdaptFootholds, adapt_foothold)
     print "Ready to adapt footholds."
     rospy.spin()
 
