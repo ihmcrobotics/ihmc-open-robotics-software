@@ -63,6 +63,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
+		   footstepList.clear();
+         soleFrameList.clear();
+         
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
@@ -81,6 +84,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
+		   footstepList.clear();
+	      soleFrameList.clear();
+	      
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
@@ -101,6 +107,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
+		   footstepList.clear();
+		   soleFrameList.clear();
+		   
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
@@ -126,6 +135,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
+		   footstepList.clear();
+		   soleFrameList.clear();
+		   
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
