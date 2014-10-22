@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -11,6 +13,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -19,6 +22,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation extends NewInstantaneousCapturePointPlannerWithSmoother
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final EnumYoVariable<RobotSide> currentTransferToSide;
    private final BooleanYoVariable doTimeFreezing;
    private final BooleanYoVariable doFootSlipCompensation;
    private final BooleanYoVariable isTimeBeingFrozen;
@@ -59,6 +63,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.normalizedCapturePointVelocityVector = new FrameVector(worldFrame);
       this.currentTransferToFootLocation = new FramePoint(worldFrame);
       this.initialTransferToFootLocation = new FramePoint(worldFrame);
+      this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerCurrentTransferToSide", registry, RobotSide.class);
       
       this.changeInTransferToFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("icpPlannerChangeInTransferToFootLocation", "", registry,
             alphaDeltaFootPosition, worldFrame);
@@ -82,10 +87,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    {
       super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 
-      if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && transferToFoot != null)
+      if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && currentTransferToSide.getEnumValue() != null)
       {
-         this.currentTransferToFootLocation.set(transferToFoot);
-         this.currentTransferToFootLocation.changeFrame(worldFrame);
+         this.currentTransferToFootLocation.setIncludingFrame(transferToFoot);
          doFootSlipCompensation(time, desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack);
       }
 
@@ -97,19 +101,20 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       previousTime.set(time);
    }
 
-   @Override
    public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity, double initialTime,
-         ArrayList<FramePoint> footstepList)
+         ArrayList<FramePoint> footstepList, RobotSide transferToSide, FramePoint transferToFootLocation)
    {
+      changeInTransferToFootPosition.reset();
       timeDelay.set(0.0);
-      initialTransferToFootLocation.set(footstepList.get(1));
-      initialTransferToFootLocation.changeFrame(worldFrame);
+      initialTransferToFootLocation.setIncludingFrame(transferToFootLocation);
+      currentTransferToSide.set(transferToSide);
       super.initializeDoubleSupport(currentDesiredCapturePointPosition, currentDesiredCapturePointVelocity, initialTime, footstepList);
    }
 
    @Override
    public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
    {
+      changeInTransferToFootPosition.reset();
       timeDelay.set(0.0);
       super.initializeSingleSupport(initialTime, footstepList);
    }
@@ -154,7 +159,6 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       
       changeInTransferToFootPosition.update(deltaX,deltaY,0.0);
       changeInTransferToFootPositionMagnitude.set(changeInTransferToFootPosition.length());
-      
       double timeInState = super.computeAndReturnTimeInCurrentState(time);
       double timeLeft = super.computeAndReturnTimeRemaining(timeInState);
 
