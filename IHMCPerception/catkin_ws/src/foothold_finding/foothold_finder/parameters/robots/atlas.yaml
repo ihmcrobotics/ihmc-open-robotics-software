@@ -1,0 +1,9 @@
+elevation_map_service: "/elevation_mapping/get_grid_map"
+map_frame: "world"
+max_local_search_iterations: 1000
+valid_cell_count_threshold: 0.8
+min_number_of_cells_per_foothold: 8
+plane_segmentation/distance_tolerance: 0.05
+plane_segmentation/angle_tolerance: 0.1
+plane_segmentation/sleep_duration_between_segmentation_steps: 0.0
+plane_segmentation/min_number_of_cells_for_segment: 8

@@ -1,0 +1,8 @@
+elevation_map_service: "/elevation_mapping/get_grid_map"
+map_frame: "starleth/odometry"
+foothold_evaluation/valid_cell_count_threshold: 0.8
+foothold_evaluation/max_slope_angle: 0.174
+plane_segmentation/distance_tolerance: 0.02
+plane_segmentation/angle_tolerance: 0.15
+plane_segmentation/sleep_duration_between_segmentation_steps: 0.0
+plane_segmentation/min_number_of_cells_for_segment: 4
