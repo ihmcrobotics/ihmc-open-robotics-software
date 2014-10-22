@@ -52,6 +52,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 			registry);
 	private final DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable("icpPlannerDoubleSupportSplitFractior", registry);
 	private final DoubleYoVariable initialTime = new DoubleYoVariable("icpPlannerInitialTime", registry);
+	private final DoubleYoVariable remainingTime = new DoubleYoVariable("icpPlannerRemainingTime", registry);
 	private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable("", registry);
 	private final IntegerYoVariable footstepsToStop = new IntegerYoVariable("icpPlannerNumberFootstepsToStop", registry);
 	private final YoFramePoint singleSupportInitialDesiredCapturePointPosition = new YoFramePoint("icpFinalDesiredCapturePointPosition",
@@ -515,17 +516,19 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 		{
 			if (atAStop.getBooleanValue())
 			{
-				return (doubleSupportInitialTransferDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
+				remainingTime.set(doubleSupportInitialTransferDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
 			}
 			else
 			{
-				return (doubleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
+			   remainingTime.set(doubleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
 			}
 		}
 		else
 		{
-			return (singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
+		   remainingTime.set(singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
 		}
+		
+		return remainingTime.getDoubleValue();
 	}
 
 	public ArrayList<YoFramePoint> getCapturePointCornerPoints()

@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
@@ -23,6 +24,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    private final DoubleYoVariable previousTime = new DoubleYoVariable("previousTime", registry);
    private final DoubleYoVariable freezeTimeFactor = new DoubleYoVariable("freezeTimeFactor", "Set to 0.0 to turn off, 1.0 to completely freeze time", registry);
    private final double maxFreezeLineICPErrorWithoutTimeFreeze = 0.03; 
+   private final BooleanYoVariable isTimeBeingFrozen = new BooleanYoVariable("oldIcpPlannerIsTimeBeingFrozen", registry);
 
    private final FrameVector2d normalizedVelocityVector;
    private final FrameVector2d vectorFromDesiredToActualICP;
@@ -39,6 +41,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       deltaICP = new FrameVector2d(ReferenceFrame.getWorldFrame());
       
       parentRegistry.addChild(registry);
+      isTimeBeingFrozen.set(false);
       timeDelay.set(0.0);
       freezeTimeFactor.set(0.9); 
       maxICPErrorForStartingSwing.set(0.035); 
@@ -80,17 +83,24 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       if (this.isDone(time))
       {
          freezeTime(time, 1.0);
+         isTimeBeingFrozen.set(true);
       }
       else if ((getEstimatedTimeRemainingForState(time) < 0.1) && 
             (instantaneousCapturePointPlanner.isPerformingICPDoubleSupport()) && 
             (icpDistanceToFreezeLine.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()))
       {
          freezeTime(time, 1.0);
+         isTimeBeingFrozen.set(true);
       }
 
       else if ((icpDistanceToFreezeLine.getDoubleValue() > maxFreezeLineICPErrorWithoutTimeFreeze))
       {
          freezeTime(time, freezeTimeFactor.getDoubleValue());
+         isTimeBeingFrozen.set(true);
+      }
+      else
+      {
+         isTimeBeingFrozen.set(false);
       }
       
       previousTime.set(time);

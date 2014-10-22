@@ -141,6 +141,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+			
+			currentTransferToSide.set(transferToAndNextFootstepsData.getTransferToSide());
 
 			tmpFramePoint.set(transferToAndNextFootstepsData.getCurrentDesiredICP().getX(), transferToAndNextFootstepsData
 					.getCurrentDesiredICP().getY(), 0.0);
