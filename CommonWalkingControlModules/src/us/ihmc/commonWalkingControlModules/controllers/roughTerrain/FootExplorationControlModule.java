@@ -24,6 +24,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
@@ -79,6 +80,8 @@ public class FootExplorationControlModule
    // exploration parameters
    private static double icpShiftTime = 3;
    private static double copShiftTime = 2;
+
+
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
    private static double swingTimeForExploration = 4;
    private static double ICPShiftRestingTime = 2;
@@ -86,6 +89,16 @@ public class FootExplorationControlModule
    private static double copPercentageToSwitchToNextContactPoint = 2; // if this value is >1 the exploration will continue to keep the desired cop at the maximum value of copToContactPointScalingFactor
    private static double maxAbsCoPError = 0.04;
    private static boolean adjustContactPointInXNOnly=false;
+   private static double icpBiasToInnerSole=0.01;
+   static{
+      if(false)
+      {
+              icpShiftTime = 2;
+              copShiftTime = 1;
+              copTransitionRestingTime = .5; // must be less than copShiftTime/2
+              ICPShiftRestingTime = 1;
+      }
+   }
 
    // unstable situations
    private static double maxICPAbsError = 0.04;
@@ -330,6 +343,8 @@ public class FootExplorationControlModule
 
          nextFootStepCentroid.setToZero(nextFootStep.getSoleReferenceFrame());
          nextFootStepCentroid.changeFrame(worldFrame);
+         
+         
 
          ICPTrajectory.set(worldFrame, supportFootCentroid.getX(), supportFootCentroid.getY(), nextFootStepCentroid.getX(), nextFootStepCentroid.getY());
          computeConstantICPPoints();
@@ -361,6 +376,8 @@ public class FootExplorationControlModule
          stateMachine.setCurrentState(FeetExplorationState.SWING);
       }
    }
+   
+   
 
    public void reset()
    {
@@ -438,7 +455,13 @@ public class FootExplorationControlModule
       @Override
       public void doTransitionIntoAction()
       {
-         constantICP = new FramePoint2d(worldFrame, supportFootCentroid.getX(), supportFootCentroid.getY());
+         
+         RobotSide supportingFootSide = nextFootStep.getRobotSide().getOppositeSide();
+         FrameVector biasVector = new FrameVector(momentumBasedController.getFullRobotModel().getSoleFrame(supportingFootSide),
+                  0.0, supportingFootSide==RobotSide.LEFT?-icpBiasToInnerSole:icpBiasToInnerSole, 0.0, "icpBias");
+         biasVector.changeFrame(worldFrame);
+         
+         constantICP = new FramePoint2d(worldFrame, supportFootCentroid.getX()+biasVector.getX(), supportFootCentroid.getY()+biasVector.getY());
          setICPLocalToDesired(constantICP);
          desiredICPVelocityLocal.setToZero();
       }
@@ -853,6 +876,7 @@ public class FootExplorationControlModule
    {
       public boolean checkCondition()
       {
+         
          return currentContactPointNumber.getIntegerValue() + 1 > currentPlaneContactStateToExplore.getTotalNumberOfContactPoints();
       }
    }
@@ -1041,6 +1065,7 @@ public class FootExplorationControlModule
       int numberOfPoint = listOfPoints.length;
       double distance = Double.POSITIVE_INFINITY;
       FramePoint2d ret = new FramePoint2d();
+
 
       for (int i = 0; i < numberOfPoint; i++)
       {
