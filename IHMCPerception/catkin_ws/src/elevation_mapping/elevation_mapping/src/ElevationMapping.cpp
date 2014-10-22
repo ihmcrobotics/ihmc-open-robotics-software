@@ -12,6 +12,7 @@
 #include "elevation_mapping/sensor_processors/KinectSensorProcessor.hpp"
 #include "elevation_mapping/sensor_processors/StereoSensorProcessor.hpp"
 #include "elevation_mapping/sensor_processors/LaserSensorProcessor.hpp"
+#include "elevation_mapping/sensor_processors/PerfectSensorProcessor.hpp"
 
 // Grid Map
 #include <grid_map_msg/GridMap.h>
@@ -49,7 +50,8 @@ namespace elevation_mapping {
 
 ElevationMapping::ElevationMapping(ros::NodeHandle& nodeHandle)
     : nodeHandle_(nodeHandle),
-      map_(nodeHandle)
+      map_(nodeHandle),
+      robotMotionMapUpdater_(nodeHandle)
 {
   ROS_INFO("Elevation mapping node started.");
 
@@ -144,10 +146,14 @@ bool ElevationMapping::readParameters()
     sensorProcessor_.reset(new StereoSensorProcessor(nodeHandle_, transformListener_));
   } else if (sensorType == "Laser") {
     sensorProcessor_.reset(new LaserSensorProcessor(nodeHandle_, transformListener_));
+  } else if (sensorType == "Perfect") {
+    sensorProcessor_.reset(new PerfectSensorProcessor(nodeHandle_, transformListener_));
   } else {
     ROS_ERROR("The sensor type %s is not available.", sensorType.c_str());
   }
   if (!sensorProcessor_->readParameters()) return false;
+
+  if (!robotMotionMapUpdater_.readParameters()) return false;
 
   return true;
 }
@@ -172,19 +178,6 @@ void ElevationMapping::runFusionServiceThread()
   }
 }
 
-bool containRGBFiled(std::vector<pcl::PCLPointField>& field)
-{
-	int containRGB=false;
-	for(int i=0;i<field.size();i++)
-		if(field[i].name=="rgb")
-		{
-			containRGB=true;
-			break;
-		}
-	return containRGB;
-}
-
-
 void ElevationMapping::pointCloudCallback(
     const sensor_msgs::PointCloud2& rawPointCloud)
 {
@@ -196,31 +189,8 @@ void ElevationMapping::pointCloudCallback(
   // TODO Double check with http://wiki.ros.org/hydro/Migration
   pcl::PCLPointCloud2 pcl_pc;
   pcl_conversions::toPCL(rawPointCloud, pcl_pc);
-
   PointCloud<PointXYZRGB>::Ptr pointCloud(new PointCloud<PointXYZRGB>);
-  if(containRGBFiled(pcl_pc.fields))
-  {
-          pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
-  }
-  else
-  {
-	  PointCloud<PointXYZI>::Ptr pointCloudXYZI(new PointCloud<PointXYZI>);
-      pcl::fromPCLPointCloud2(pcl_pc, *pointCloudXYZI);
-      pointCloud->header   = pointCloudXYZI->header;
-      pointCloud->width    = pointCloudXYZI->width;
-      pointCloud->height   = pointCloudXYZI->height;
-      pointCloud->is_dense = (pointCloudXYZI->is_dense == 1);
-      for(PointCloud<PointXYZI>::iterator it=pointCloudXYZI->begin(); it!=pointCloudXYZI->end(); it++)
-      {
-    	  PointXYZRGB pt;
-    	  pt.x = it->x;
-    	  pt.y = it->y;
-    	  pt.z = it->z;
-    	  pt.r = pt.g = pt.b = std::min<int>(255,(int)255*it->intensity);
-    	  pointCloud->push_back(pt);
-      }
-  }
-
+  pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
   Time time;
   time.fromNSec(1000 * pointCloud->header.stamp);
 
@@ -266,6 +236,11 @@ void ElevationMapping::pointCloudCallback(
 
   // Publish raw elevation map.
   if (!map_.publishRawElevationMap()) ROS_DEBUG("Elevation map has not been broadcasted.");
+
+  // TODO Add option for continous fusion.
+//  boost::recursive_mutex::scoped_lock scopedLock2(map_.getFusedDataMutex());
+//  map_.fuseAll(true);
+//  map_.publishElevationMap();
 
   resetMapUpdateTimer();
 }
