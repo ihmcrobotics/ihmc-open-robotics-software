@@ -295,7 +295,6 @@ public class FootControlModule
 
    public void doControl()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
       if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
          requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
