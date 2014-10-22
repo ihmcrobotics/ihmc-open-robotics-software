@@ -17,7 +17,6 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
  * this can either be a movement along a straight line or (in case of walking) a swing motion.
@@ -83,8 +82,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
-      legSingularityAndKneeCollapseAvoidanceControlModule.initializeSwingOnNextTick();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
 
       isCoPOnEdge = false;
@@ -208,7 +205,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;

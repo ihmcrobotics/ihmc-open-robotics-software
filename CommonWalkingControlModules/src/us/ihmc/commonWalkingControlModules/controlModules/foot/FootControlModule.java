@@ -36,7 +36,6 @@ import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 
-
 public class FootControlModule
 {
    public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
@@ -295,6 +294,7 @@ public class FootControlModule
 
    public void doControl()
    {
+      legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
       if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
          requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
