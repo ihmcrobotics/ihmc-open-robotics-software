@@ -54,4 +54,5 @@ dependencies {
     compile project(':SensorProcessing')
     compile project(':SimulationConstructionSet')
     compile project(':UserInterface')
+    compile project(':ROSJNIWrapper')
   }

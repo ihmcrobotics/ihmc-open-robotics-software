@@ -4,6 +4,8 @@ import java.net.URI;
 
 import org.ros.node.parameter.ParameterTree;
 
+import us.ihmc.ROSJNIWrapper.ROSNativeTransformTools;
+import us.ihmc.ROSJNIWrapper.RosNativeNetworkProcessor;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
@@ -17,9 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
 
