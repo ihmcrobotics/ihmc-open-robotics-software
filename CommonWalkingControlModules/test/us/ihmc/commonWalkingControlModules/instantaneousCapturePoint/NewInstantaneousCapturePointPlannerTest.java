@@ -155,6 +155,12 @@ public class NewInstantaneousCapturePointPlannerTest
 		{
 			return 0.0;
 		}
+		
+		@Override
+		public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+		{
+			return 0.03;
+		}
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();

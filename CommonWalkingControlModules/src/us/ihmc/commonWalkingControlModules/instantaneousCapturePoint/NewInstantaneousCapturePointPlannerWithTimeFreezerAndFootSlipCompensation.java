@@ -32,6 +32,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    private final DoubleYoVariable previousTime;
    private final DoubleYoVariable freezeTimeFactor;
    private final DoubleYoVariable maxCapturePointErrorAllowedToBeginSwingPhase;
+   private final DoubleYoVariable maxAllowedCapturePointErrorWithoutPartialTimeFreeze;
    private final DoubleYoVariable alphaDeltaFootPosition;
    private final DoubleYoVariable changeInTransferToFootPositionMagnitude;
    private final DoubleYoVariable percentToScaleBackOnVelocity;
@@ -39,6 +40,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    private final FrameVector normalizedCapturePointVelocityVector;
    private final FramePoint currentTransferToFootLocation;
    private final FramePoint initialTransferToFootLocation;
+   
+   private final FramePoint tmpFramePoint;
+   private final FrameVector tmpFrameVector;
    
    private final AlphaFilteredYoFrameVector changeInTransferToFootPosition;
 
@@ -52,10 +56,11 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.distanceToFreezeLine = new DoubleYoVariable("icpPlannerDistanceToFreezeLine", registry);
       this.freezeTimeFactor = new DoubleYoVariable("icpPlannerFreezeTimeFactor", registry);
       this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable("icpPlannerMaxCapturePointErrorAllowedToBeginSwingPhase", registry);
+      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new DoubleYoVariable("icpPlannerMaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
       this.previousTime = new DoubleYoVariable("icpPlannerPreviousTime", registry);
       this.percentToScaleBackOnVelocity = new DoubleYoVariable("percentToScaleBackOnVelocity", registry);
       this.alphaDeltaFootPosition = new DoubleYoVariable("alphaDeltaFootPosition", registry);
-      this.changeInTransferToFootPositionMagnitude = new DoubleYoVariable("icpPlannerChangeInTransferToFootPosition", registry);
+      this.changeInTransferToFootPositionMagnitude = new DoubleYoVariable("icpPlannerChangeInTransferToFootPositionMagnitude", registry);
       this.doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
       this.doFootSlipCompensation = new BooleanYoVariable("icpPlannerDoFootSlipCompensation", registry);
       this.isTimeBeingFrozen = new BooleanYoVariable("icpPlannerIsTimeBeingFrozen", registry);
@@ -64,8 +69,10 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.currentTransferToFootLocation = new FramePoint(worldFrame);
       this.initialTransferToFootLocation = new FramePoint(worldFrame);
       this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerCurrentTransferToSide", registry, RobotSide.class);
+      this.tmpFramePoint = new FramePoint(worldFrame);
+      this.tmpFrameVector = new FrameVector(worldFrame);
       
-      this.changeInTransferToFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("icpPlannerChangeInTransferToFootLocation", "", registry,
+      this.changeInTransferToFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("icpPlannerChangeInTransferToFootPositionFiltered", "", registry,
             alphaDeltaFootPosition, worldFrame);
 
       this.isTimeBeingFrozen.set(false);
@@ -79,25 +86,30 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.doFootSlipCompensation.set(capturePointPlannerParameters.getDoTimeFreezing());
 
       this.maxCapturePointErrorAllowedToBeginSwingPhase.set(capturePointPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
+      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze.set(capturePointPlannerParameters.getMaxAllowedErrorWithoutPartialTimeFreeze());
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
    public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time, FramePoint currentCapturePointPosition, FramePoint transferToFoot)
    {
-      super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
+      super.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, getTimeWithDelay(time));
 
       if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && currentTransferToSide.getEnumValue() != null)
       {
          this.currentTransferToFootLocation.setIncludingFrame(transferToFoot);
-         doFootSlipCompensation(time, desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack);
+         doFootSlipCompensation(time,tmpFramePoint,tmpFrameVector);
       }
 
       if (doTimeFreezing.getBooleanValue())
       {
          doTimeFreezeIfNeeded(currentCapturePointPosition, desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, time);
+         doTimeFreezeIfNeeded(currentCapturePointPosition,tmpFramePoint,tmpFrameVector,time);
       }
 
+      desiredCapturePointPositionToPack.setIncludingFrame(tmpFramePoint);
+      desiredCapturePointVelocityToPack.setIncludingFrame(tmpFrameVector);
+      
       previousTime.set(time);
    }
 
@@ -136,7 +148,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
          completelyFreezeTime(time);
          isTimeBeingFrozen.set(true);
       }
-      else if ((distanceToFreezeLine.getDoubleValue() > maxCapturePointErrorAllowedToBeginSwingPhase.getDoubleValue()))
+      else if ((distanceToFreezeLine.getDoubleValue() > maxAllowedCapturePointErrorWithoutPartialTimeFreeze.getDoubleValue()))
       {
          freezeTimeUsingFreezeTimeFactor(time);
          isTimeBeingFrozen.set(true);
@@ -160,7 +172,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       changeInTransferToFootPosition.update(deltaX,deltaY,0.0);
       changeInTransferToFootPositionMagnitude.set(changeInTransferToFootPosition.length());
       double timeInState = super.computeAndReturnTimeInCurrentState(time);
-      double timeLeft = super.computeAndReturnTimeRemaining(timeInState);
+      double timeLeft = super.computeAndReturnTimeRemaining(time);
 
       double percentIn = timeInState / (timeInState + timeLeft);
 

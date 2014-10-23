@@ -22,6 +22,8 @@ public interface CapturePointPlannerParameters
 	
 	public abstract double getMaxInstantaneousCapturePointErrorForStartingSwing();
 	
+	public abstract double getMaxAllowedErrorWithoutPartialTimeFreeze();
+	
 	public abstract boolean getDoTimeFreezing();
 	
 	public abstract boolean getDoFootSlipCompensation();
