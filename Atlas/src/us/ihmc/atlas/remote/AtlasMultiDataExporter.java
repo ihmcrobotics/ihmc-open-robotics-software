@@ -13,6 +13,8 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JFileChooser;
@@ -36,7 +38,6 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogCropper;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.SwingUtils;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;

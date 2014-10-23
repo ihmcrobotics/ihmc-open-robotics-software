@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.SideDependentList;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
 public abstract class DRCRobotContactPointParameters

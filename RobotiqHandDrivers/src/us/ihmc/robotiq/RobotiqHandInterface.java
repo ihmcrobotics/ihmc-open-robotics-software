@@ -5,12 +5,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusException;
 import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 /* GENERAL INFO
  * (This information assumes right hand for convention)

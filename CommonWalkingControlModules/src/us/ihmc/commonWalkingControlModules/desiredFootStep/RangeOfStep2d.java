@@ -3,10 +3,9 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.awt.geom.Ellipse2D;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class RangeOfStep2d extends Ellipse2D.Double

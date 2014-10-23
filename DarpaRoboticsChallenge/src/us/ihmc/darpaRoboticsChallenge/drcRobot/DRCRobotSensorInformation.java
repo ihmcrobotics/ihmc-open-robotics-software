@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public interface DRCRobotSensorInformation
 {

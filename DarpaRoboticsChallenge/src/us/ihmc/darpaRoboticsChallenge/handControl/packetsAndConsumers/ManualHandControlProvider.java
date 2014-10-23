@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class ManualHandControlProvider implements ObjectConsumer<ManualHandControlPacket>
 {

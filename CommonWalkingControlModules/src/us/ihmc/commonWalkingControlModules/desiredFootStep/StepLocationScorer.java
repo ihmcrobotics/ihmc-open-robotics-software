@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 /**
  * This class is designed to score potential step locations

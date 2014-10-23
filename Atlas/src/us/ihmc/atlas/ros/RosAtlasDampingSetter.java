@@ -8,7 +8,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.atlas.AtlasDampingParameters;
-import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;

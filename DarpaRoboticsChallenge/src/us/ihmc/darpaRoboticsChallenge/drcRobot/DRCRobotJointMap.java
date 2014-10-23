@@ -1,12 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public interface DRCRobotJointMap extends SDFJointNameMap
 {

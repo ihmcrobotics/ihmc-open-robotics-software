@@ -4,10 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 /**
  * Created with IntelliJ IDEA.

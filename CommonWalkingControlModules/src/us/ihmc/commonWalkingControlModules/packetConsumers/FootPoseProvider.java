@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public interface FootPoseProvider
 {
