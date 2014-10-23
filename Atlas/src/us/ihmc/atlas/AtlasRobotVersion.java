@@ -3,8 +3,8 @@ package us.ihmc.atlas;
 import java.io.InputStream;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public enum WalkingState
 {

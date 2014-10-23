@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.referenceFrames;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;

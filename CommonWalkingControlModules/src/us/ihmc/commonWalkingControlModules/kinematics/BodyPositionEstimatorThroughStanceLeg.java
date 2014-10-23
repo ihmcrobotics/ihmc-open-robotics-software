@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.BodyPositionEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.LegToTrustForVelocityReadOnly;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

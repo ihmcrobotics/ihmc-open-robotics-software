@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 

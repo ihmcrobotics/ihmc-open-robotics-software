@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerat
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public interface SwingLegTorqueControlOnlyModule
 {

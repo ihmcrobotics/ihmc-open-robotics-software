@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public interface LegToTrustForVelocityReadOnly
 {

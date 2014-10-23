@@ -1,11 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.robotSide.RobotSide;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 

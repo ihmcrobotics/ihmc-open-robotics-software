@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
-import us.ihmc.robotSide.RobotSide;
 
 public interface LegInverseKinematicsCalculator
 {

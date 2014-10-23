@@ -5,8 +5,8 @@ import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class AtlasDampingParameters
 {

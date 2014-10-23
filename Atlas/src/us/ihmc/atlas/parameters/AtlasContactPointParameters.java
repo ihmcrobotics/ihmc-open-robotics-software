@@ -5,17 +5,17 @@ package us.ihmc.atlas.parameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.footLength;
 import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.footWidth;
 import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.toeWidth;
 
 //~--- JDK imports ------------------------------------------------------------
+
 
 import java.util.ArrayList;
 import java.util.List;

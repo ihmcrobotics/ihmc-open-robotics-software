@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
 {

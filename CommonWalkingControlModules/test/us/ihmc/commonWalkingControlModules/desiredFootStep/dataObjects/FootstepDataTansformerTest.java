@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -16,11 +17,11 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 /**
  * Created with IntelliJ IDEA.

@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.List;
 
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public interface BipedFootInterface extends ContactablePlaneBody

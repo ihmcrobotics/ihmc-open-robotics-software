@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.captur
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class DoNothingCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
 {

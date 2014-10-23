@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorquesInterface;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;

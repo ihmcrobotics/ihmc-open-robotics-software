@@ -5,8 +5,8 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class SandiaHandModel

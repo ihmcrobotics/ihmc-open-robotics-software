@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class LegStrengthCalculatorTools
 {
