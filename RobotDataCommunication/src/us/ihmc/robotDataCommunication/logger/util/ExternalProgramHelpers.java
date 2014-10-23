@@ -8,36 +8,12 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import us.ihmc.utilities.operatingSystem.OperatingSystem;
+import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
+
 public class ExternalProgramHelpers
 {
-   public enum OS
-   {
-      LINUX, MAC, WINDOWS
-   };
-
-   private static final OS currentOS;
-   
-   static
-   {
-      String os = System.getProperty("os.name");
-
-      if (os != null && "mac os x".equals(os.toLowerCase()))
-      {
-         currentOS = OS.MAC;
-      }
-      else if (os != null && os.toLowerCase().indexOf("windows") != -1)
-      {
-         currentOS = OS.WINDOWS;
-      }
-      else if (os != null && os.toLowerCase().indexOf("linux") != -1)
-      {
-         currentOS = OS.LINUX;
-      }
-      else
-      {
-         currentOS = null;
-      }
-   }
+   private static final OperatingSystem currentOS = OperatingSystemTools.getOperatingSystem();
 
    public static String extractExternalProgram(URL url)
    {
@@ -71,10 +47,10 @@ public class ExternalProgramHelpers
       }
    }
 
-   public static OS getOS()
+   public static OperatingSystem getOS()
    {
       if (currentOS == null)
-         throw new RuntimeException("Unsupported OS " + System.getProperty("os.name"));
+         throw new RuntimeException("Unsupported OS " + OperatingSystemTools.getOperatingSystemName());
       
       return currentOS;
    }
@@ -86,7 +62,7 @@ public class ExternalProgramHelpers
 
    public static String getExecutableExtension()
    {
-      if (currentOS != null && currentOS == OS.WINDOWS)
+      if (currentOS != null && currentOS == OperatingSystem.WINDOWS)
       {
          return ".exe";
       }

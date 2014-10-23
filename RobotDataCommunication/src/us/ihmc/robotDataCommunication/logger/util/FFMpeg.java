@@ -1,6 +1,6 @@
 package us.ihmc.robotDataCommunication.logger.util;
 
-import us.ihmc.robotDataCommunication.logger.util.ExternalProgramHelpers.OS;
+import us.ihmc.utilities.operatingSystem.OperatingSystem;
 
 public class FFMpeg implements ExternalProgram
 {
@@ -12,7 +12,7 @@ public class FFMpeg implements ExternalProgram
    {
       String temp = ExternalProgramHelpers.extractExternalProgram(FFMpeg.class.getResource(
             "bin/" + ExternalProgramHelpers.getOSNameAsString() + "/ffmpeg" + ExternalProgramHelpers.getExecutableExtension()));
-      if (ExternalProgramHelpers.getOS() == OS.WINDOWS)
+      if (ExternalProgramHelpers.getOS() == OperatingSystem.WINDOWS)
       {
          // Windows doesn't handle the first slash in the absolute path string: "/C:/..."
          builtinFFMpeg = temp.substring(1);

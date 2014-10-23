@@ -3,8 +3,8 @@ package us.ihmc.robotDataCommunication.logger.util;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import us.ihmc.robotDataCommunication.logger.util.ExternalProgramHelpers.OS;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.operatingSystem.OperatingSystem;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 
 public class PipedCommandExecutor
@@ -29,7 +29,7 @@ public class PipedCommandExecutor
 
       System.out.println("Running command " + cmd.toString());
       
-      if (ExternalProgramHelpers.getOS() == OS.WINDOWS)
+      if (ExternalProgramHelpers.getOS() == OperatingSystem.WINDOWS)
       {
          processBuilder = new ProcessBuilder("cmd", "/C", cmd.toString());
       }

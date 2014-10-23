@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.messages.ClockMessage;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.Float64Message;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.Int8Message;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.PoseMessage;
+import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSVehicleTeleopCheatNativeLibraryCommunicator
@@ -29,7 +30,7 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       catch(UnsatisfiedLinkError e)
       {
          System.err.println("Cannot load native ROS library for the vehicle teleop. Falling back to ROSJava, expect poor performance.");
-         if (isLinux())
+         if (OperatingSystemTools.isLinux())
          {
             System.err.println("Running on a Linux system; Library should be loadable.");
             e.printStackTrace();
@@ -37,13 +38,6 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
          hasNativeLibrary = false;
       }
       
-   }
-
-   private static boolean isLinux()
-   {
-      String os = System.getProperty("os.name").toLowerCase();
-
-      return (os.contains("nix") || os.contains("nux") || os.contains("aix"));
    }
 
    public static boolean hasNativeLibrary()
