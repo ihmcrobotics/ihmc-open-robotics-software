@@ -1,12 +1,13 @@
 package us.ihmc.acsell.parameters;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.TransformTools;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
 {

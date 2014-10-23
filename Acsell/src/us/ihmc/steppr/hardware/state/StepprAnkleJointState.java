@@ -1,6 +1,6 @@
 package us.ihmc.steppr.hardware.state;
 
-import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

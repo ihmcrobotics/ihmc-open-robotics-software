@@ -1,7 +1,7 @@
 package us.ihmc.acsell.parameters;
 
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 
 public class BonoOrderedJointNames

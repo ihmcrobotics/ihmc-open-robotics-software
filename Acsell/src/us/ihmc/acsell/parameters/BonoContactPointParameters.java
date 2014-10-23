@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -15,10 +16,10 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class BonoContactPointParameters extends DRCRobotContactPointParameters
 {
