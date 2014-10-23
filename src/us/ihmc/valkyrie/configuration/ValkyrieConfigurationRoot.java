@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.configuration;
 
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class ValkyrieConfigurationRoot
 {
