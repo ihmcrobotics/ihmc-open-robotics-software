@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.DoubleSupportPolynomialTrajectory;
@@ -501,6 +498,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 		this.doubleSupportDuration.set(this.capturePointPlannerParameters.getDoubleSupportDuration());
 		this.doubleSupportInitialTransferDuration.set(this.capturePointPlannerParameters.getDoubleSupportInitialTransferDuration());
 		this.numberFootstepsToConsider.set(this.capturePointPlannerParameters.getNumberOfFootstepsToConsider());
+		this.doubleSupportSplitFraction.set(this.capturePointPlannerParameters.getDoubleSupportSplitFraction());
 	}
 
 	protected void computeTimeInCurrentState(double time)
@@ -549,6 +547,11 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	public void setSingleSupportTime(double time)
 	{
 		this.singleSupportDuration.set(time);
+	}
+	
+	public void setDoubleSupportSplitFraction(double doubleSupportSplitFraction)
+	{
+		this.doubleSupportSplitFraction.set(doubleSupportSplitFraction);
 	}
 
 	public void setOmega0(double omega0)

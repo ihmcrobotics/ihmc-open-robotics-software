@@ -58,8 +58,8 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable("icpPlannerMaxCapturePointErrorAllowedToBeginSwingPhase", registry);
       this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new DoubleYoVariable("icpPlannerMaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
       this.previousTime = new DoubleYoVariable("icpPlannerPreviousTime", registry);
-      this.percentToScaleBackOnVelocity = new DoubleYoVariable("percentToScaleBackOnVelocity", registry);
-      this.alphaDeltaFootPosition = new DoubleYoVariable("alphaDeltaFootPosition", registry);
+      this.percentToScaleBackOnVelocity = new DoubleYoVariable("icpPlannerPercentToScaleBackOnVelocity", registry);
+      this.alphaDeltaFootPosition = new DoubleYoVariable("icpPlannerAlphaDeltaFootPosition", registry);
       this.changeInTransferToFootPositionMagnitude = new DoubleYoVariable("icpPlannerChangeInTransferToFootPositionMagnitude", registry);
       this.doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
       this.doFootSlipCompensation = new BooleanYoVariable("icpPlannerDoFootSlipCompensation", registry);

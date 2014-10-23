@@ -78,7 +78,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		@Override
 		public int getNumberOfFootstepsToConsider()
 		{
-			return 4;
+			return 3;
 		}
 
 		@Override
@@ -114,7 +114,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		@Override
 		public double getDoubleSupportSplitFraction()
 		{
-			return 0;
+			return 0.0;
 		}
 
 		@Override
@@ -481,6 +481,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		icpPlanner = new NewInstantaneousCapturePointPlannerWithSmoother(testICPPlannerParams, registry, yoGraphicsListRegistry);
 
+		icpPlanner.setDoubleSupportSplitFraction(0.5);
 		createVisualizers(maxNumberOfConsideredFootsteps);
 
 		RobotSide stepSide = RobotSide.LEFT;
