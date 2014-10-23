@@ -452,31 +452,22 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double getKpUpperBody()
+   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
    {
-      if (!(target == AtlasTarget.REAL_ROBOT)) return 80.0; //100.0;
-      return 80.0; //40.0;
-   }
+      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
 
-   @Override
-   public double getZetaUpperBody()
-   {
-      if (!(target == AtlasTarget.REAL_ROBOT)) return 0.8; //1.0;
-      return 0.25;
-   }
-   
-   @Override
-   public double getMaxAccelerationUpperBody()
-   {
-      if (!(target == AtlasTarget.REAL_ROBOT)) return 36.0; // 18.0; //100.0;
-      return 6.0;
-   }
-   
-   @Override
-   public double getMaxJerkUpperBody()
-   {
-      if (!(target == AtlasTarget.REAL_ROBOT)) return 540.0; // 270.0; //1000.0;
-      return 60.0;
+      double kp = (target == AtlasTarget.REAL_ROBOT) ? 80.0 : 80.0;
+      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
+      double maxAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 6.0 : 36.0;
+      double maxJerk = (target == AtlasTarget.REAL_ROBOT) ? 60.0 : 540.0;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
+      return gains;
    }
 
    @Override
