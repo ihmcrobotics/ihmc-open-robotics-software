@@ -55,6 +55,7 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
          ScriptBehaviorInputPacket scriptBehaviorInputPacket = scriptBehaviorInputPacketListener.getNewestPacket();
@@ -147,13 +148,15 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
-      currentBehavior.stop();
+      currentBehavior.pause();
+      isPaused.set(true);
    }
 
    @Override
    public void resume()
    {
       currentBehavior.resume();
+      isPaused.set(false);
    }
 
    @Override
