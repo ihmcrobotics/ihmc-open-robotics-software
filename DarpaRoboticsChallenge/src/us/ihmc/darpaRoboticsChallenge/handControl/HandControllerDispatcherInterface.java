@@ -5,7 +5,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 //
 //import us.ihmc.SdfLoader.SDFFullRobotModel;
 //import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
-//import us.ihmc.robotSide.RobotSide;
+//import us.ihmc.utilities.robotSide.RobotSide;
 //
 //public interface HandControllerDispatcherInterface
 //{
