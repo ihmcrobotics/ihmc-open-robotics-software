@@ -552,7 +552,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
          {
-            footExplorationControlModule.controlSwingFoot(desiredICP, desiredICPVelocity, capturePoint2d);
+            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d);
          }
 
          if (VISUALIZE)
@@ -921,7 +921,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
          {
-            footExplorationControlModule.controlSwingFoot(desiredICP, desiredICPVelocity, capturePoint2d);
+            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d);
          }
 
          if (VISUALIZE)
