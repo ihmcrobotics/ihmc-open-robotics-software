@@ -17,13 +17,14 @@ import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 public class TurnValveBehavior extends BehaviorInterface
 {
    private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
-   private Vector3d valveLoction = new Vector3d();
+   private Vector3d valveLocation = new Vector3d();
    private Vector3d valveOffsetInWorldFrame = new Vector3d();
    private final ArrayList<BehaviorInterface> behaviorQueue = new ArrayList<>();
    private final ScriptBehavior scriptBehavior;
@@ -54,14 +55,37 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      checkIfScriptBehaviorInputPacketReceived();
+      if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
+      {
+         ScriptBehaviorInputPacket scriptBehaviorInputPacket = scriptBehaviorInputPacketListener.getNewestPacket();
+         System.out.println("TurnValveBehavior: New Script Behavior Input Packet Received: " + scriptBehaviorInputPacket);
+
+         worldToValveTransform = scriptBehaviorInputPacket.getReferenceTransform();
+
+         setValveLocationAndOrientation(worldToValveTransform);
+         setTargetWalkLocationAndOrientation(valveLocation, valveOrientation);
+
+         String scriptName = scriptBehaviorInputPacket.getScriptName();
+
+         scriptResourceStream = this.getClass().getClassLoader().getResourceAsStream(scriptName);
+
+         if (scriptResourceStream == null)
+            System.out.println("Script Resource Stream is null. Can't load script!");
+         else
+            System.out.println("Script " + scriptBehaviorInputPacket.getScriptName() + " loaded.");
+
+         scriptBehavior.setScriptInputs(scriptResourceStream, worldToValveTransform);
+      }
+
       if (currentBehavior.isDone())
       {
+         System.out.println("TurnValveBehavior: " + currentBehavior.getName() + " is done.");
          currentBehavior.finalize();
          if (!behaviorQueue.isEmpty())
          {
             currentBehavior = behaviorQueue.remove(0);
             currentBehavior.initialize();
+            System.out.println("TurnValveBehavior: " + currentBehavior.getName() + " is starting.");
          }
          else
          {
@@ -71,32 +95,23 @@ public class TurnValveBehavior extends BehaviorInterface
       currentBehavior.doControl();
    }
 
-   private void checkIfScriptBehaviorInputPacketReceived()
-   {
-      if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
-      {
-         ScriptBehaviorInputPacket receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
-
-         worldToValveTransform = receivedScriptBehavior.getReferenceTransform();
-         setValveLocationAndOrientation(worldToValveTransform);
-         targetWalkLocation.set(valveLoction);
-         worldToValveTransform.transform(valveInteractionOffsetInValveFrame, valveOffsetInWorldFrame);
-         System.out.println("TurnValveBehavior:  ValveOffset in World Frame:" + valveOffsetInWorldFrame);
-         targetWalkLocation.add(valveOffsetInWorldFrame);
-         targetWalkOrientation.setYawPitchRoll(valveOrientation.getYaw().getDoubleValue() + 0.5 * Math.PI, valveOrientation.getPitch().getDoubleValue(),
-               valveOrientation.getRoll().getDoubleValue());
-         walkToLocationBehavior.setTarget(targetWalkLocation, targetWalkOrientation);
-         System.out.println("Turn Valve Location Updated:" + valveLoction);
-         System.out.println("Target Walk to Location Updated:" + targetWalkLocation);
-         scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
-         scriptBehavior.setScriptInputs(scriptResourceStream, worldToValveTransform);
-      }
-   }
-
    private void setValveLocationAndOrientation(RigidBodyTransform worldToValveTransform)
    {
-      worldToValveTransform.get(valveLoction);
+      worldToValveTransform.get(valveLocation);
       valveOrientation.set(worldToValveTransform);
+   }
+
+   private void setTargetWalkLocationAndOrientation(Vector3d valveLocation, YoFrameOrientation valveOrientation)
+   {
+      targetWalkLocation.set(valveLocation);
+      worldToValveTransform.transform(valveInteractionOffsetInValveFrame, valveOffsetInWorldFrame);
+      System.out.println("TurnValveBehavior:  ValveOffset in World Frame:" + valveOffsetInWorldFrame);
+      targetWalkLocation.add(valveOffsetInWorldFrame);
+      targetWalkOrientation.setYawPitchRoll(valveOrientation.getYaw().getDoubleValue() + 0.5 * Math.PI, valveOrientation.getPitch().getDoubleValue(),
+            valveOrientation.getRoll().getDoubleValue());
+      walkToLocationBehavior.setTarget(targetWalkLocation, targetWalkOrientation);
+      System.out.println("TurnValveBehavior: Turn Valve Location Updated:" + valveLocation);
+      System.out.println("TurnValveBehavior: Target Walk to Location Updated:" + targetWalkLocation);
    }
 
    private boolean inputsSupplied()
