@@ -11,6 +11,7 @@ import java.util.Arrays;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
@@ -180,7 +181,9 @@ public class ActiveSetQPMomentumOptimizer extends QPMomentumOptimizer implements
             double[] vd, double[] rho,
             int[] activeSet);
       void initializeNative(int nDoF, int maxIter);
-      JnaInterface INSTANCE = (JnaInterface) Native.loadLibrary("ActiveSetQPMomentumOptimizer_rel", JnaInterface.class);
+      
+      String NATIVE_LIBRARY = NativeLibraryLoader.extractLibrary("us.ihmc.commonWalkingControlModules.lib", "ActiveSetQPMomentumOptimizer_rel");
+      JnaInterface INSTANCE = (JnaInterface) Native.loadLibrary(NATIVE_LIBRARY, JnaInterface.class);
    }
 
    
@@ -198,7 +201,7 @@ public class ActiveSetQPMomentumOptimizer extends QPMomentumOptimizer implements
       {
               try
               {
-                    System.loadLibrary(nativeLibraryCandidates[i]);
+                    NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", nativeLibraryCandidates[i]);
                     break;
               }
               catch(UnsatisfiedLinkError e)

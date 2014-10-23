@@ -5,11 +5,13 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
 
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+
 public class SimpleHQPNative
 {
    static
    {
-      System.loadLibrary("SimpleHQPNative");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "SimpleHQPNative");
    }
 
    public static final int nParams = 14;

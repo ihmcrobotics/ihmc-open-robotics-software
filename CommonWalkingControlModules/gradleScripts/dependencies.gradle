@@ -29,6 +29,4 @@ dependencies {
     compile project(':IHMCCommunication')
 
     testCompile project(':IHMCUtilities').sourceSets.test.output
-    
-    runtime fileTree(dir: 'lib', include: '*.so')
 }

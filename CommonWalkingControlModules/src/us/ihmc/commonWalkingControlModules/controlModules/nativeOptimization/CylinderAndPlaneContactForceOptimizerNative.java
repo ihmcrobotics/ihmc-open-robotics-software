@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
@@ -76,7 +77,7 @@ public class CylinderAndPlaneContactForceOptimizerNative
 
    static
    {
-      System.loadLibrary("CylinderAndPlaneContactForceOptimizer");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "CylinderAndPlaneContactForceOptimizer");
 
       initialize();
 

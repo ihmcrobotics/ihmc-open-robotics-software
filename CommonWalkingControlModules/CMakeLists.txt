@@ -3,7 +3,7 @@ project(CommonWalkingControlModules)
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
-    ${CMAKE_SOURCE_DIR} CACHE PATH "CommonWalkingControlModules install prefix" FORCE
+    ${CMAKE_SOURCE_DIR}/resources/us/ihmc/commonWalkingControlModules CACHE PATH "CommonWalkingControlModules install prefix" FORCE
     )
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 

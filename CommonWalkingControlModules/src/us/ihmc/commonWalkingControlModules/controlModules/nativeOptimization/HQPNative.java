@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class HQPNative
 {
@@ -192,7 +193,7 @@ public class HQPNative
 
    static
    {
-      System.loadLibrary("HQPNative");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "HQPNative");
       initialize();
 
       ADoubleBuffer = setupBuffer(getABuffer());
