@@ -163,12 +163,14 @@ public class WalkToLocationBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
+      footstepListBehavior.pause();
       isPaused.set(true);
    }
 
    @Override
    public void resume()
    {
+      footstepListBehavior.resume();
       isPaused.set(false);
 
    }
