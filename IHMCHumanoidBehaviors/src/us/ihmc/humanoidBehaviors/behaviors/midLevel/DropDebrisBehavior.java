@@ -3,13 +3,13 @@ package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 import java.util.ArrayList;
 
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -21,6 +21,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class DropDebrisBehavior extends BehaviorInterface
 {
+   private final FullRobotModel fullRobotModel;
    private BehaviorInterface currentBehavior;
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
    private final HandPoseBehavior handPoseBehavior;
@@ -33,25 +34,26 @@ public class DropDebrisBehavior extends BehaviorInterface
    private final DoubleYoVariable zHeightOffsetFromChestFrameForMidPoint;
 
    private final SideDependentList<ReferenceFrame> handReferenceFrames = new SideDependentList<ReferenceFrame>();
-   private final ReferenceFrame chest;
+
+   private final ReferenceFrame chestFrame;
    private RobotSide robotSide;
 
-   private long trajectoryTime;
-   private final SideDependentList<RigidBodyTransform> midPoses = new SideDependentList<RigidBodyTransform>();
-   private final SideDependentList<RigidBodyTransform> posesForDrop = new SideDependentList<RigidBodyTransform>();
-   private final SideDependentList<RigidBodyTransform> finalPoses = new SideDependentList<RigidBodyTransform>();
+   private double trajectoryTime = 3.5;
 
    private final RigidBodyTransform[] posesForHandPoseBehavior = new RigidBodyTransform[4];
 
-   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         DoubleYoVariable yoTime)
+   private final FramePose midPose = new FramePose();
+   private final FramePose dropLocationPose = new FramePose();
+
+   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
+      this.fullRobotModel = fullRobotModel;
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       openHandBehavior = new OpenHandBehavior(outgoingCommunicationBridge);
 
       zHeightOffsetFromChestFrameForMidPoint = new DoubleYoVariable("zHeightOffsetFromChestFrameForMidPoint", registry);
-      zHeightOffsetFromChestFrameForMidPoint.set(-0.27);
+      zHeightOffsetFromChestFrameForMidPoint.set(0.27);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
       reachedMidPoint = new BooleanYoVariable("reachedMidPoint", registry);
@@ -61,58 +63,56 @@ public class DropDebrisBehavior extends BehaviorInterface
       handReferenceFrames.put(RobotSide.LEFT, fullRobotModel.getHandControlFrame(RobotSide.LEFT));
       handReferenceFrames.put(RobotSide.RIGHT, fullRobotModel.getHandControlFrame(RobotSide.RIGHT));
 
-      chest = fullRobotModel.getChest().getBodyFixedFrame();
+      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
    }
-   
-   private RigidBodyTransform getDropLocation(RobotSide side)
+
+   private void getMidPose(RobotSide side)
    {
+      midPose.translate(0.0, 0.0, zHeightOffsetFromChestFrameForMidPoint.getDoubleValue());
+      midPose.changeFrame(ReferenceFrame.getWorldFrame());
+   }
+
+   private void getDropLocation(RobotSide side)
+   {
+      Quat4d leftDropRotation = new Quat4d();
       if (side == RobotSide.LEFT)
       {
-         Vector3d leftDropTranslation = new Vector3d(0, 1, 0);
-         Quat4d leftDropRotation = new Quat4d();
+         dropLocationPose.translate(0.3, 0.7, -0.1);
          RotationFunctions.setQuaternionBasedOnYawPitchRoll(leftDropRotation, -Math.PI / 2, 0, 0);
-         return new RigidBodyTransform(leftDropRotation, leftDropTranslation);
       }
-
-      Vector3d rightDropTranslation = new Vector3d(0, -1, 0);
-      Quat4d rightDropRotation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rightDropRotation, Math.PI / 2, 0, 0);
-      return new RigidBodyTransform(rightDropRotation, rightDropTranslation);
-   }
-
-   private RigidBodyTransform getEndLocation(RobotSide side)
-   {
-      if (side == RobotSide.LEFT)
+      else
       {
-         Vector3d leftDropTranslation = new Vector3d(0.1, 0.3, -0.3);
-         Quat4d leftDropRotation = new Quat4d();
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(leftDropRotation, -Math.PI / 10, 0, 0);
-         return new RigidBodyTransform(leftDropRotation, leftDropTranslation);
+         dropLocationPose.translate(0.3, -0.7, -0.1);
+         RotationFunctions.setQuaternionBasedOnYawPitchRoll(leftDropRotation, Math.PI / 2, 0, 0);
       }
-
-      Vector3d rightDropTranslation = new Vector3d(0.1, -0.3, -0.3);
-      Quat4d rightDropRotation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rightDropRotation, Math.PI / 10, 0, 0);
-      return new RigidBodyTransform(rightDropRotation, rightDropTranslation);
-   }
-
-   private RigidBodyTransform getMidPose(RobotSide side)
-   {
-      RigidBodyTransform pose = handReferenceFrames.get(side).getTransformToDesiredFrame(chest);
-      Vector3d translation = new Vector3d();
-      pose.getTranslation(translation);
-      translation.setZ(zHeightOffsetFromChestFrameForMidPoint.getDoubleValue());
-      pose.setTranslation(translation);
-      return pose;
+      dropLocationPose.setOrientation(leftDropRotation);
+      dropLocationPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    private void setPoses(RobotSide side)
    {
+      initializePoses(side);
+      getMidPose(side);
+      posesForHandPoseBehavior[0] = new RigidBodyTransform();
+      midPose.getPose(posesForHandPoseBehavior[0]);
 
-      posesForHandPoseBehavior[0] = getMidPose(side);
-      posesForHandPoseBehavior[1] = getDropLocation(side);
+      getDropLocation(side);
+      posesForHandPoseBehavior[1] = new RigidBodyTransform();
+      dropLocationPose.getPose(posesForHandPoseBehavior[1]);
+
       posesForHandPoseBehavior[2] = null;
-      posesForHandPoseBehavior[3] = getEndLocation(side);
+      posesForHandPoseBehavior[3] = null;
+
+      handPoseBehavior.setInput(Frame.CHEST, posesForHandPoseBehavior[0], robotSide, trajectoryTime);
+   }
+
+   private void initializePoses(RobotSide side)
+   {
+      midPose.setToZero(fullRobotModel.getHandControlFrame(side));
+      midPose.changeFrame(chestFrame);
+      dropLocationPose.changeFrame(chestFrame);
+      dropLocationPose.setToZero(chestFrame);
+
    }
 
    @Override
@@ -128,8 +128,8 @@ public class DropDebrisBehavior extends BehaviorInterface
    public void setInputs(RobotSide side)
    {
       robotSide = side;
-      haveInputsBeenSet.set(true);
       setPoses(side);
+      haveInputsBeenSet.set(true);
    }
 
    private void checkTransitionCondition()
@@ -137,15 +137,21 @@ public class DropDebrisBehavior extends BehaviorInterface
       if (currentBehavior.isDone())
       {
          currentBehavior.finalize();
-         currentBehavior = behaviors.remove(0);
-         behaviorIndex.add(1);
-         if (currentBehavior != null)
+
+         if (!behaviors.isEmpty())
          {
+            currentBehavior = behaviors.remove(0);
+            behaviorIndex.add(1);
             currentBehavior.initialize();
 
             if (posesForHandPoseBehavior[behaviorIndex.getIntegerValue()] != null)
             {
                handPoseBehavior.setInput(Frame.CHEST, posesForHandPoseBehavior[behaviorIndex.getIntegerValue()], robotSide, trajectoryTime);
+            }
+
+            if (behaviors.size() == 1)
+            {
+               handPoseBehavior.goToHomePosition(robotSide);
             }
          }
          else

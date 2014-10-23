@@ -2,9 +2,10 @@ package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
 import java.util.ArrayList;
 
-import us.ihmc.communication.packets.Packet;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -16,7 +17,6 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
 {
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
 
-   private final ConcurrentListeningQueue<Packet> inputListeningQueue = new ConcurrentListeningQueue<Packet>();
    private final GraspObjectBehavior graspObject;
    private final DropDebrisBehavior dropMic;
    private final BooleanYoVariable isDone;
@@ -28,13 +28,12 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
    {
       super(outgoingCommunicationBridge);
 
-      graspObject = new GraspObjectBehavior(outgoingCommunicationBridge);
+      graspObject = new GraspObjectBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dropMic = new DropDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
 
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
 
-      this.attachNetworkProcessorListeningQueue(inputListeningQueue, Packet.class);
    }
 
    @Override
@@ -42,7 +41,6 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
    {
       if (!isDone.getBooleanValue())
       {
-         checkForNewInputs();
          if (currentBehavior != null)
          {
             checkTransitionCondition();
@@ -56,10 +54,12 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
       if (currentBehavior.isDone())
       {
          currentBehavior.finalize();
-         currentBehavior = behaviors.remove(0);
-         if (currentBehavior != null)
+         if (!behaviors.isEmpty())
          {
+            currentBehavior = behaviors.remove(0);
             currentBehavior.initialize();
+            if (currentBehavior instanceof DropDebrisBehavior)
+               dropMic.setInputs(graspObject.getSideToUse());
          }
          else
          {
@@ -68,32 +68,24 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
       }
    }
 
-   private void checkForNewInputs()
+   public void setInputs(RigidBodyTransform graspTransform, Point3d graspPosition, Vector3d graspVector)
    {
-      if (inputListeningQueue.isNewPacketAvailable())
-      {
-         //this.graspPose = inputListeningQueue.getNewestPacket().getPose;
-         graspObject.setGraspPose(null);
-         haveInputsBeenSet.set(true);
-      }
-   }
-
-   public void setInputs(RigidBodyTransform graspPose)
-   {
-      graspObject.setGraspPose(graspPose);
+      graspObject.setGraspPose(graspPosition, graspVector);
       haveInputsBeenSet.set(true);
    }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      currentBehavior.consumeObjectFromNetworkProcessor(object);
+      if (currentBehavior != null)
+         currentBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      currentBehavior.consumeObjectFromController(object);
+      if (currentBehavior != null)
+         currentBehavior.consumeObjectFromController(object);
    }
 
    @Override
