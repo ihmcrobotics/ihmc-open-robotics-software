@@ -1,7 +1,7 @@
 # Takes an initial list of footholds and returns the footholds adapted to the terrain.
 
-Foothold[] initialFoodholds
+Foothold[] initialFootholds
 
 ---
 
-Foothold[] adaptedFoodholds
+Foothold[] adaptedFootholds

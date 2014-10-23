@@ -2,7 +2,7 @@ package ihmc_msgs;
 
 public interface FootstepDataMessage extends org.ros.internal.message.Message {
   static final java.lang.String _TYPE = "ihmc_msgs/FootstepDataMessage";
-  static final java.lang.String _DEFINITION = "# FootstepDataMessage\n\n#Options for enum# uint8 L = 0\n# uint8 R = 1\nuint8 robotSide\ngeometry_msgs/Vector3 location\ngeometry_msgs/Quaternion orientation\n\n";
+  static final java.lang.String _DEFINITION = "## FootstepDataMessage\n# This message gives the position, orientation and side of a single footstep to the controller.\n# If sending a single footstep, position and orientation should be in pelvis frame.\n\n#Options for enum\n# uint8 L = 0\n# uint8 R = 1\nuint8 robotSide\ngeometry_msgs/Vector3 location\ngeometry_msgs/Quaternion orientation\n\n";
   byte getRobotSide();
   void setRobotSide(byte value);
   geometry_msgs.Vector3 getLocation();
