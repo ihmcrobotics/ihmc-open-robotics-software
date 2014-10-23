@@ -453,31 +453,22 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double getKpUpperBody()
+   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
    {
-      if (!runningOnRealRobot) return 100.0;
-      return 80.0;
-   }
+      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
 
-   @Override
-   public double getZetaUpperBody()
-   {
-      if (!runningOnRealRobot) return 0.8;
-      return 0.6;
-   }
+      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.6 : 0.8;
+      double maxAcceleration = runningOnRealRobot ? 18.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
-   @Override
-   public double getMaxAccelerationUpperBody()
-   {
-      if (!runningOnRealRobot) return 18.0;
-      return 18.0;//24.0;//12.0; //6.0;
-   }
-
-   @Override
-   public double getMaxJerkUpperBody()
-   {
-      if (!runningOnRealRobot) return 270.0;
-      return 270.0; //360;//180.0; //60.0;
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
+      return gains;
    }
 
    @Override
