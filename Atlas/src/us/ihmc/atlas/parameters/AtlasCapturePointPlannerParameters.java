@@ -68,7 +68,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getMaxInstantaneousCapturePointErrorForStartingSwing()
    {
-      return 0.02;
+      return 0.035;
    }
 
    @Override
@@ -99,5 +99,11 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 	public double getCapturePointForwardFromFootCenterDistance()
 	{
 		return 0.0;
+	}
+
+	@Override
+	public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+	{
+		return 0.03;
 	}
 }

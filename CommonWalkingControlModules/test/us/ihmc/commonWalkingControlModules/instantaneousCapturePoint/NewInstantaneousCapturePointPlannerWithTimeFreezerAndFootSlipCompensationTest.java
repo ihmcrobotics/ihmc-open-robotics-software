@@ -165,8 +165,13 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		@Override
 		public double getCapturePointForwardFromFootCenterDistance()
 		{
-			// TODO Auto-generated method stub
 			return 0;
+		}
+		
+		@Override
+		public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+		{
+			return 0.03;
 		}
 	};
 
