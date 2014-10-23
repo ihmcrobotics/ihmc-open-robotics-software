@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class HandPoseBehavior extends BehaviorInterface
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
-  private HandPosePacket outgoingHandPosePacket;
+   private HandPosePacket outgoingHandPosePacket;
 
    private final DoubleYoVariable yoTime;
    private double startTime = Double.NaN;
@@ -28,6 +28,11 @@ public class HandPoseBehavior extends BehaviorInterface
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
+   }
+
+   public void goToHomePosition(RobotSide side)
+   {
+      this.outgoingHandPosePacket = HandPosePacket.createGoToHomePacket(side, 3.0);
    }
 
    public void setInput(HandPosePacket handPosePacket)
@@ -112,13 +117,14 @@ public class HandPoseBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
-   
+
    @Override
-   public boolean hasInputBeenSet() {
-	   if (outgoingHandPosePacket != null)
-		   return true;
-	   else
-		   return false;
+   public boolean hasInputBeenSet()
+   {
+      if (outgoingHandPosePacket != null)
+         return true;
+      else
+         return false;
    }
 
    public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
