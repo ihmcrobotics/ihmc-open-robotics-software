@@ -1,12 +1,12 @@
 package us.ihmc.acsell.controlParameters;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
@@ -402,27 +402,22 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getKpUpperBody()
+   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
    {
-      return 100.0;
-   }
+      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
 
-   @Override
-   public double getZetaUpperBody()
-   {
-      return 0.8; //1.0;
-   }
+      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.25 : 0.8;
+      double maxAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 60.0 : Double.POSITIVE_INFINITY;
 
-   @Override
-   public double getMaxAccelerationUpperBody()
-   {
-      return Double.POSITIVE_INFINITY; //100.0;
-   }
-
-   @Override
-   public double getMaxJerkUpperBody()
-   {
-      return Double.POSITIVE_INFINITY;//270.0; //1000.0;
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAcceleration);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
+      return gains;
    }
 
    @Override
