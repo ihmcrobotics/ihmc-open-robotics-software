@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 
 import org.ros.message.Time;
 
-import us.ihmc.ROSJNIWrapper.ROSNativeTransformTools;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
@@ -16,6 +15,7 @@ import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
+import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
