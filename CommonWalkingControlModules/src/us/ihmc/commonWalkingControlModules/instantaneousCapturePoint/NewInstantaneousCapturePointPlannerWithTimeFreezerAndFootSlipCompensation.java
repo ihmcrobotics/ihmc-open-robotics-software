@@ -103,7 +103,6 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
       if (doTimeFreezing.getBooleanValue())
       {
-         doTimeFreezeIfNeeded(currentCapturePointPosition, desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, time);
          doTimeFreezeIfNeeded(currentCapturePointPosition,tmpFramePoint,tmpFrameVector,time);
       }
 
