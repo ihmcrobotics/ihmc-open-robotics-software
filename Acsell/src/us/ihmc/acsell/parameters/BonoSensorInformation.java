@@ -4,8 +4,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class BonoSensorInformation implements DRCRobotSensorInformation
 {

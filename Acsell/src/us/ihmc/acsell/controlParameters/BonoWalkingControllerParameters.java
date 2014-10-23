@@ -1,12 +1,12 @@
 package us.ihmc.acsell.controlParameters;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
