@@ -324,8 +324,8 @@ public class CapturePointTools
 
       double exponentialTerm = Math.exp(omega0 * time);
 
-      double x = omega0 * exponentialTerm * initialCapturePoint.getX() - initialCenterOfPressure.getX() * omega0 * exponentialTerm;
-      double y = omega0 * exponentialTerm * initialCapturePoint.getY() - initialCenterOfPressure.getY() * omega0 * exponentialTerm;
+      double x = omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
+      double y = omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
       velocityToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
