@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
+import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -130,12 +131,14 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
+      sendPacketToController(new PauseCommand(true));
       isPaused.set(true);
    }
 
    @Override
    public void resume()
    {
+      sendPacketToController(new PauseCommand(false));
       isPaused.set(false);
    }
 
