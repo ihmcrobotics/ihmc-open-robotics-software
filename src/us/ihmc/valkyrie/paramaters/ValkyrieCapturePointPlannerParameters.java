@@ -68,7 +68,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getMaxInstantaneousCapturePointErrorForStartingSwing()
    {
-      return 0.02;
+      return 0.035;
    }
    
    @Override
@@ -100,4 +100,10 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
 	{
 		return 0.0;
 	}
+
+@Override
+public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+{
+	return 0.03;
+}
 }
