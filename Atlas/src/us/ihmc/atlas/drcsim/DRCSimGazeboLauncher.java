@@ -1,8 +1,6 @@
 package us.ihmc.atlas.drcsim;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
+import us.ihmc.utilities.ThreadTools;
 
 public class DRCSimGazeboLauncher
 {
@@ -27,7 +25,7 @@ public class DRCSimGazeboLauncher
                "source /opt/ros/indigo/setup.bash;" +
                "cd ihmc_gazebo_catkin_ws;"+
                "catkin_make";
-         runCommandLine(commandline1);
+         ThreadTools.runCommandLine(commandline1);
       }
 
       //Launch gazebo with ihmc_plugin
@@ -36,23 +34,6 @@ public class DRCSimGazeboLauncher
             "source /usr/share/drcsim/setup.sh;" +
             "source $PWD/ihmc_gazebo_catkin_ws/devel/setup.bash;" +
             "roslaunch ihmc_gazebo ihmc_atlas.launch";
-      runCommandLine(commandline2);
-   }
-
-   public static void runCommandLine(String commandline){
-      String[] commands = new String[]{"/bin/bash", "-l","-c", commandline};
-      ProcessBuilder processBuilder = new ProcessBuilder(commands);
-      processBuilder.inheritIO();
-      processBuilder.redirectErrorStream(true);
-
-      try {
-         Process p = processBuilder.start();
-         p.waitFor();
-         IOUtils.copy(p.getErrorStream(), System.out);
-      } catch (IOException e) {
-         e.printStackTrace();
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
+      ThreadTools.runCommandLine(commandline2);
    }
 }
