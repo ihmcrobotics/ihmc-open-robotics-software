@@ -9,7 +9,6 @@ import com.sun.jna.Native;
 class Test
 {
 	static{
-		//System.loadLibrary("Test");
 		Native.register("Test");
 	}
 

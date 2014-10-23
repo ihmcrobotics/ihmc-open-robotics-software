@@ -6,6 +6,7 @@ import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 /**
  * see csrc/CVXWithCylinder/description.cvxgen for problem description
@@ -101,7 +102,7 @@ public class CVXWithCylinderNative
 
    static
    {
-      System.loadLibrary("CVXWithCylinder");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "CVXWithCylinder");
 
       initialize();
 

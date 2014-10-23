@@ -6,6 +6,7 @@ import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class MomentumOptimizerNative
 {
@@ -83,7 +84,7 @@ public class MomentumOptimizerNative
 
    static
    {
-      System.loadLibrary("MomentumOptimizer");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "MomentumOptimizer");
 
       initialize();
 

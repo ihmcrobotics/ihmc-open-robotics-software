@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class ContactPointWrenchOptimizerNative
 {
@@ -52,7 +53,7 @@ public class ContactPointWrenchOptimizerNative
 
    static
    {
-      System.loadLibrary("ContactPointWrenchOptimizer");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "ContactPointWrenchOptimizer");
 
       initialize();
 

@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
 {
@@ -56,7 +57,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
 
    static
    {
-      System.loadLibrary("LeeGoswamiCoPAndNormalTorqueOptimizer");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "LeeGoswamiCoPAndNormalTorqueOptimizer");
 
       initialize();
 

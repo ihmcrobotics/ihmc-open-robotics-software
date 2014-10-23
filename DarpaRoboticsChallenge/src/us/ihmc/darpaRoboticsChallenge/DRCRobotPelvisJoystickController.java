@@ -4,6 +4,7 @@ import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+import us.ihmc.utilities.jinput.JInputLibraryLoader;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -63,6 +64,7 @@ public class DRCRobotPelvisJoystickController
     */
    private Controller findController()
    {
+      JInputLibraryLoader.loadLibraries();
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
       for (Controller controller : controllers)

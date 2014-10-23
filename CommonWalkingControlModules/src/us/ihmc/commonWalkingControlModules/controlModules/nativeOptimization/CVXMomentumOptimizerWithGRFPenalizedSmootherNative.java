@@ -6,6 +6,7 @@ import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 /**
  * see csrc/CVXMomentumOptimizerWithGRFPenalizedSmoother/description.cvxgen for problem description
@@ -105,8 +106,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       {
               try
               {
-                      System.loadLibrary(nativeLibraryCandidates[i]);
-                      break;
+                 NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", nativeLibraryCandidates[i]);
+                    break;
               }
               catch(UnsatisfiedLinkError e)
               {

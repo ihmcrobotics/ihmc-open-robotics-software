@@ -6,6 +6,7 @@ import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 /**
  * see csrc/CVXMomentumOptimizerWithGRFSmoother/description.cvxgen for problem description
@@ -108,7 +109,7 @@ public class CVXMomentumOptimizerWithGRFSmootherNative
 
    static
    {
-      System.loadLibrary("CVXMomentumOptimizerWithGRFSmoother");
+      NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", "CVXMomentumOptimizerWithGRFSmoother");
 
       initialize();
 
