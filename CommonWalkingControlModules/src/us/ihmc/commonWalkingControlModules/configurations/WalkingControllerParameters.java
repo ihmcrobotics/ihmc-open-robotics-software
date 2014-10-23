@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
@@ -103,13 +103,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getTrajectoryTimeHeadOrientation();
 
-   public abstract double getKpUpperBody();
-
-   public abstract double getZetaUpperBody();
-
-   public abstract double getMaxAccelerationUpperBody();
-
-   public abstract double getMaxJerkUpperBody();
+   public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
    public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);
    

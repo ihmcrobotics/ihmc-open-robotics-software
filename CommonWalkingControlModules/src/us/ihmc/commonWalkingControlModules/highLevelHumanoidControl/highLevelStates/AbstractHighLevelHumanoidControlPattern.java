@@ -28,7 +28,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -67,11 +67,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
 
-   private final DoubleYoVariable kpUpperBody = new DoubleYoVariable("kpUpperBody", registry);
-   private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
-   private final DoubleYoVariable maxAccelerationUpperBody = new DoubleYoVariable("maxAccelerationUpperBody", registry);
-   private final DoubleYoVariable maxJerkUpperBody = new DoubleYoVariable("maxJerkUpperBody", registry);
-
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
@@ -83,6 +78,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final VariousWalkingManagers variousWalkingManagers;
 
    protected final YoGraphicsListRegistry yoGraphicsListRegistry;
+
+   private final YoPDGains unconstrainedJointsControlGains;
 
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
@@ -116,10 +113,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       this.walkingControllerParameters = walkingControllerParameters;
 
-      coefficientOfFriction.set(1.0);
+      this.unconstrainedJointsControlGains = walkingControllerParameters.createUnconstrainedJointsControlGains(registry);
 
-      setUpperBodyControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody(),
-                               walkingControllerParameters.getMaxAccelerationUpperBody(), walkingControllerParameters.getMaxJerkUpperBody());
+      coefficientOfFriction.set(1.0);
 
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
@@ -158,14 +154,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    private final DoubleYoVariable extendedNeckPitchDesiredVelocity = new DoubleYoVariable("extendedNeckPitchDesiredVelocity", registry);
    private final YoVariableDoubleProvider extendedNeckPitchInitialAngle;
    private final YoVariableDoubleProvider extendedNeckPitchFinalAngle;
-
-   public void setUpperBodyControlGains(double kpUpperBody, double zetaUpperBody, double maxAcceleration, double maxJerk)
-   {
-      this.kpUpperBody.set(kpUpperBody);
-      this.zetaUpperBody.set(zetaUpperBody);
-      this.maxAccelerationUpperBody.set(maxAcceleration);
-      this.maxJerkUpperBody.set(maxJerk);
-   }
 
    protected OneDoFJoint setupJointForExtendedNeckPitchRange()
    {
@@ -286,13 +274,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
          if (jointForExtendedNeckPitchRange != null)
          {
-            double kpHead = this.kpUpperBody.getDoubleValue();
-            double kdHead = GainCalculator.computeDerivativeGain(kpHead, zetaUpperBody.getDoubleValue());
-
-            double maxAcceleration = maxAccelerationUpperBody.getDoubleValue();
-            double maxJerk = maxJerkUpperBody.getDoubleValue();
-
-
             if ((desiredHeadOrientationProvider != null) && (extendedNeckPitchTrajectory != null))
             {
                double qDesired, qdDesired;
@@ -316,11 +297,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
                extendedNeckPitchDesiredAngle.set(qDesired);
                extendedNeckPitchDesiredVelocity.set(qdDesired);
 
-               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, qDesired, qdDesired, maxAcceleration, maxJerk);
+               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, qDesired, qdDesired, unconstrainedJointsControlGains);
             }
             else
             {
-               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, kpHead, kdHead, 0.0, 0.0, maxAcceleration, maxJerk);
+               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, 0.0, 0.0, unconstrainedJointsControlGains);
             }
          }
       }
@@ -356,12 +337,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected void doJointPositionControl()
    {
-      double kpUpperBody = this.kpUpperBody.getDoubleValue();
-      double kdUpperBody = GainCalculator.computeDerivativeGain(kpUpperBody, zetaUpperBody.getDoubleValue());
-      double maxJerkUpperBody = this.maxJerkUpperBody.getDoubleValue();
-      double maxAccelerationUpperBody = this.maxAccelerationUpperBody.getDoubleValue();
-
-      momentumBasedController.doPDControl(positionControlJoints, kpUpperBody, kdUpperBody, maxAccelerationUpperBody, maxJerkUpperBody);
+      momentumBasedController.doPDControl(positionControlJoints, unconstrainedJointsControlGains);
    }
 
    // TODO: New methods coming from extending State class

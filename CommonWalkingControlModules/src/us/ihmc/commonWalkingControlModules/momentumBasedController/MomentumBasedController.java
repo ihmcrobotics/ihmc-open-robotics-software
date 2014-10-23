@@ -53,6 +53,7 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -387,11 +388,6 @@ public class MomentumBasedController
       return gravitationalWrench;
    }
 
-   private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
-   {
-      return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
-   }
-
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
       if (momentumBasedControllerSpy != null)
@@ -645,12 +641,30 @@ public class MomentumBasedController
       updatables.add(updatable);
    }
 
+   public void doPDControl(OneDoFJoint[] joints, YoPDGains gains)
+   {
+      double kp = gains.getKp();
+      double kd = gains.getKd();
+      double maxAcceleration = gains.getMaximumAcceleration();
+      double maxJerk = gains.getMaximumJerk();
+      doPDControl(joints, kp, kd, maxAcceleration, maxJerk);
+   }
+
    public void doPDControl(OneDoFJoint[] joints, double kp, double kd, double maxAcceleration, double maxJerk)
    {
       for (OneDoFJoint joint : joints)
       {
          doPDControl(joint, kp, kd, 0.0, 0.0, maxAcceleration, maxJerk);
       }
+   }
+
+   public void doPDControl(OneDoFJoint joint, double desiredPosition, double desiredVelocity, YoPDGains gains)
+   {
+      double kp = gains.getKp();
+      double kd = gains.getKd();
+      double maxAcceleration = gains.getMaximumAcceleration();
+      double maxJerk = gains.getMaximumJerk();
+      doPDControl(joint, kp, kd, desiredPosition, desiredVelocity, maxAcceleration, maxJerk);
    }
 
    public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity, double maxAcceleration, double maxJerk)
@@ -673,6 +687,11 @@ public class MomentumBasedController
       rateLimitedDesiredAcceleration.update(desiredAcceleration);
 
       setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
+   }
+
+   private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
+   {
+      return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
 
    private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
