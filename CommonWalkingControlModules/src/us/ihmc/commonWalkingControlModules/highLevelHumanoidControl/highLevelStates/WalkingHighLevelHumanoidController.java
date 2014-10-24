@@ -1681,7 +1681,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
 
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
+      Footstep footstep = new Footstep(foot, robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
 
       return footstep;
    }

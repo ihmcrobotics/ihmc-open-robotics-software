@@ -64,7 +64,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-         Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true);
+         Footstep footstep = new Footstep(id, contactableBody, footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true);
          
          footsteps.add(footstep);
          mapFromFootstepsToTrajectoryParameters.put(footstep, trajectoryParameters);

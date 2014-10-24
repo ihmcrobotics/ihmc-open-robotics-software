@@ -177,7 +177,7 @@ public class TransferToAndNextFootstepsData
    private static void getFootLocationFromFootstepInWorldFramePlusSoleframe(ArrayList<FramePoint> footLocationListToPack, 
          ArrayList<ReferenceFrame> soleFrameListToPack, Footstep footstep, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
-      FramePoint centerOfFootstep = FootstepUtils.getCenterOfFootstep(footstep, side, centimetersForwardFromCenter, centimetersInFromCenter);
+      FramePoint centerOfFootstep = FootstepUtils.getCenterOfPredictedContactPointsInFootstep(footstep, side, centimetersForwardFromCenter, centimetersInFromCenter);
       ReferenceFrame soleFrame = footstep.getSoleReferenceFrame(); 
       footLocationListToPack.add(centerOfFootstep);
       soleFrameListToPack.add(soleFrame);
