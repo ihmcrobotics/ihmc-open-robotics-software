@@ -5,8 +5,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemoStarter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -17,7 +15,6 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
 
    public static void main(final String[] args) throws JSAPException
    {
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       AtlasWallWorldDemo atlasDemo = new AtlasWallWorldDemo();
       boolean automaticallyStartSimulation = true;
       boolean startDRCNetworkProcessor = true;
@@ -30,7 +27,7 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();
       
-      atlasDemo.obstacleCourseStarter(environment.getTerrainObject3D(), robotModel, sliderBoardFactory, initializeEstimatorToActual, automaticallyStartSimulation,
+      atlasDemo.obstacleCourseStarter(environment.getTerrainObject3D(), robotModel, initializeEstimatorToActual, automaticallyStartSimulation,
             startDRCNetworkProcessor);
    }
 

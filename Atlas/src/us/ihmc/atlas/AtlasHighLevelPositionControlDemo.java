@@ -6,8 +6,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCHighLevelPositionControlDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -31,9 +29,7 @@ public class AtlasHighLevelPositionControlDemo
       if (model == null)
          throw new RuntimeException("No robot model selected");
       
-
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
       
       final double groundHeight = 0.0;
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
