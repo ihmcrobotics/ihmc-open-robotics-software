@@ -97,7 +97,7 @@ public class IHMCHumanoidBehaviorManager
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
       
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, forceSensorDataHolder);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
       RemoveDebrisBehavior removeDebrisBehavior = new RemoveDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
