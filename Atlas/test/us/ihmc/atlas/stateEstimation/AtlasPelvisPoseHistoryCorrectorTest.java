@@ -12,7 +12,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_ROBOTIQ_HOOK, AtlasRobotModel.AtlasTarget.SIM, false);
    }
 
    @Override
