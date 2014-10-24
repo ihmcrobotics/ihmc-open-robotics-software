@@ -318,7 +318,7 @@ public class CapturePointTools
     * @param positionToPack
     */
    public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
-         YoFramePoint positionToPack)
+         FramePoint positionToPack)
    {
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
@@ -327,7 +327,7 @@ public class CapturePointTools
       double x = initialCenterOfPressure.getX()*(1-exponentialTerm) + initialCapturePoint.getX()*exponentialTerm;
       double y = initialCenterOfPressure.getY()*(1-exponentialTerm) + initialCapturePoint.getY()*exponentialTerm;
       
-      positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      positionToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
 
    /**
@@ -364,7 +364,7 @@ public class CapturePointTools
     * @param velocityToPack
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
-         YoFrameVector velocityToPack)
+         FrameVector velocityToPack)
    {
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
@@ -373,7 +373,7 @@ public class CapturePointTools
       double x = omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
       double y = omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
-      velocityToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      velocityToPack.setIncludingFrame(initialCapturePoint.getReferenceFrame(), x, y, 0.0);
    }
 
    /**
@@ -424,7 +424,7 @@ public class CapturePointTools
     * @param accelerationToPack
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint,
-         FramePoint initialCenterOfPressure, YoFrameVector accelerationToPack)
+         FramePoint initialCenterOfPressure, FrameVector accelerationToPack)
    {
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
@@ -433,7 +433,7 @@ public class CapturePointTools
       double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
       double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
-      accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      accelerationToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
 
    /**
