@@ -129,18 +129,4 @@ public class WalkControllerSliderBoard
    }
 
    private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration};
-
-   private static final SliderBoardFactory factory = new SliderBoardFactory()
-   {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
-      {
-         new WalkControllerSliderBoard(scs, registry, generalizedSDFRobotModel);
-      }
-   };
-
-   public static SliderBoardFactory getFactory()
-   {
-      return factory;
-   }
 }

@@ -7,7 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
@@ -30,24 +30,17 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
-   private final SliderBoardFactory sliderBoardFactory;
    private boolean showOverheadView = SHOW_OVERHEAD_VIEW;
 
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight)
    {
-      this(groundProfileVisible, drawPlaneAtZeroHeight, null, true);
+      this(groundProfileVisible, drawPlaneAtZeroHeight, true);
    }
 
-   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SliderBoardFactory sliderBoardFactory)
-   {
-      this(groundProfileVisible, drawPlaneAtZeroHeight, sliderBoardFactory, true);
-   }
-
-   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SliderBoardFactory sliderBoardFactory, boolean showGUI)
+   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, boolean showGUI)
    {
       this.groundProfileVisible = groundProfileVisible;
       this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
-      this.sliderBoardFactory = sliderBoardFactory;
       this.isGuiShown = showGUI;
    }
 
@@ -112,10 +105,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
       if (DRCConfigParameters.MAKE_SLIDER_BOARD)
       {
-         if (sliderBoardFactory != null)
-         {
-            sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
-         }
+         new WalkControllerSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
       }
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
@@ -22,8 +22,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -270,9 +268,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
       guiInitialSetup.setIsGuiShown(SHOW_GUI);
 
       return guiInitialSetup;

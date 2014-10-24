@@ -24,8 +24,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.RandomTools;
@@ -100,8 +98,7 @@ public class DRCSimulationTestHelper
       boolean automaticallyStartSimulation = false;
       boolean initializeEstimatorToActual = true;
 
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory, showGUI);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, showGUI);
 
       DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(terrainObject, scriptFileName, selectedLocation, guiInitialSetup,
             initializeEstimatorToActual, automaticallyStartSimulation, startNetworkProcessor, robotModel, networkObjectCommunicator);
