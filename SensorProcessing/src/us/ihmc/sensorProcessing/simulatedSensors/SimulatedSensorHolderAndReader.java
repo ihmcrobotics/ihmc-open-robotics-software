@@ -5,9 +5,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;

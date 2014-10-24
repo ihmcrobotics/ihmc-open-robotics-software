@@ -4,10 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.utilities.ForceSensorDefinition;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;

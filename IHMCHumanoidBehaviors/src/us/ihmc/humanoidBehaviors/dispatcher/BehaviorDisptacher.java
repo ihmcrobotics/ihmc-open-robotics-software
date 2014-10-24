@@ -14,7 +14,6 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -54,7 +53,7 @@ public class BehaviorDisptacher implements Runnable
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
-   public BehaviorDisptacher(DoubleYoVariable yoTime, FullRobotModel fullRobotModel, RobotDataReceiver robotDataReceiver,
+   public BehaviorDisptacher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver,
          HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber, HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber,
          BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)

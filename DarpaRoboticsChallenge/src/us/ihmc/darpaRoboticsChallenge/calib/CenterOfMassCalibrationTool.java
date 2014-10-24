@@ -1,8 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.sensorProcessing.sensors.ForceSensorData;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;

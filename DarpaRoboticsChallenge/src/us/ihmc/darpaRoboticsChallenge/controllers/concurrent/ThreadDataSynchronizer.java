@@ -5,8 +5,8 @@ import java.util.Arrays;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 
 public class ThreadDataSynchronizer
 {
@@ -27,13 +27,11 @@ public class ThreadDataSynchronizer
    public ThreadDataSynchronizer(DRCRobotModel robotModel)
    {
       estimatorFullRobotModel = robotModel.createFullRobotModel();
-      estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()),
-            estimatorFullRobotModel.getRootJoint());
+      estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
 
       controllerFullRobotModel = robotModel.createFullRobotModel();
-      controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()),
-            controllerFullRobotModel.getRootJoint());
+      controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
       controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
 
       IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(robotModel,
