@@ -2,7 +2,6 @@ package us.ihmc.robotiq;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
@@ -344,12 +343,12 @@ public final class RobotiqHandInterface
 	
 	RobotiqHandInterface()
 	{
-		this(RobotiqHandParameters.LEFT_HAND_ADDRESS);
+		this(RobotSide.RIGHT);
 	}
 	
-	public RobotiqHandInterface(String address)
+	public RobotiqHandInterface(RobotSide robotSide)
 	{
-		this.address = address;
+		this.address = robotSide.equals(RobotSide.LEFT) ? RobotiqHandParameters.LEFT_HAND_ADDRESS : RobotiqHandParameters.RIGHT_HAND_ADDRESS;
 	}
 	
 	public boolean connect()
@@ -361,6 +360,7 @@ public final class RobotiqHandInterface
 		}
 		catch(IOException e)
 		{
+			System.out.println("RobotiqHandInterface failed to connect at " + address);
 			connected = false;
 		}
 		return connected;
@@ -410,35 +410,7 @@ public final class RobotiqHandInterface
 				(byte)speed[FINGER_A],
 				(byte)force[FINGER_A]);
 		
-//		do
-//		{
-//			sendRequest(SET_REGISTERS,
-//						REGISTER_START,
-//						(byte)(initializedStatus | operationMode | commandedStatus),
-//						(byte)(fingerControl | scissorControl),
-//						(byte)0x00,	//reserved byte
-//						(byte)position[FINGER_A], //all finger control
-//						(byte)speed[FINGER_A],
-//						(byte)force[FINGER_A]);
-//			do
-//			{
-//				ThreadTools.sleep(1000);
-//				status = this.getStatus();
-//			}while(((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == ACTIVATING) && (status[FAULT_STATUS] == NO_FAULT)); //check/wait while activation is in progress
-//			
-//			if(status[FAULT_STATUS] != 0x00) //checking for errors
-//			{
-//				faultCounter++;
-//				if(faultCounter < 3)
-//					this.reset();
-//				else
-//				{
-//					return;
-//				}
-//			}
-//		}while ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED); //check to see if activation was successful, else resend command	
-//		
-//		faultCounter = 0; //reset fault counter
+		blockDuringMotion();
 	}
 
 	public void reset()
@@ -466,8 +438,8 @@ public final class RobotiqHandInterface
 		try
 		{
 			connection.close();
-		} catch
-		(IOException e)
+		}
+		catch(IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -483,7 +455,6 @@ public final class RobotiqHandInterface
 			position[FINGER_C] = FULLY_OPEN;
 		}
 		sendMotionRequest();
-//		blockDuringMotion();
 	}
 	
 	public void open(double percent)
@@ -495,7 +466,6 @@ public final class RobotiqHandInterface
 			position[FINGER_C] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
 		}
 		sendMotionRequest();
-//		blockDuringMotion();
 	}
 	
 	public void close()
@@ -517,8 +487,8 @@ public final class RobotiqHandInterface
 				force[FINGER_C] = MAX_FORCE/2;
 			}
 		}
+		
 		sendMotionRequest();
-//		blockDuringMotion();
 	}
 	
 	public void close(double percent) throws InterruptedException
@@ -541,7 +511,6 @@ public final class RobotiqHandInterface
 			}
 		}
 		sendMotionRequest();
-//		blockDuringMotion();
 	}
 	
 	public void crush()
@@ -564,7 +533,6 @@ public final class RobotiqHandInterface
 			}
 		}
 		sendMotionRequest();
-//		blockDuringMotion();
 	}
 
 	void blockDuringMotion()
@@ -777,13 +745,21 @@ public final class RobotiqHandInterface
 	public boolean isReady()
 	{
 		status = getStatus();
-		return (status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED;
+		
+		if(status == null)
+			return false;
+		else
+			return (status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED;
 	}
 	
 	public boolean doneInitializing()
 	{
 		status = getStatus();
-		return (status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED;
+		
+		if(status == null)
+			return false;
+		else
+			return (status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED;
 	}
 	
 	public boolean isConnected()
@@ -792,7 +768,8 @@ public final class RobotiqHandInterface
 		{
 		   connected = connection.testConnection();
 		}
-	   return connected;
+		
+		return connected;
 	}
 	
 	public void doControl()
@@ -851,6 +828,13 @@ public final class RobotiqHandInterface
 			System.err.println("Unable to send Modbus request");
 			e.printStackTrace();
 		}
+		catch(NullPointerException e)
+		{
+			connected = false;
+			System.err.println("Connection is null");
+			e.printStackTrace();
+		}
+		
 		return null; //should probably return something a bit more useful that won't break things
 	}
 	

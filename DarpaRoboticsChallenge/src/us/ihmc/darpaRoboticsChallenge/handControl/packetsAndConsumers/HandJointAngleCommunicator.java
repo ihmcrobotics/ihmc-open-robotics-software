@@ -88,7 +88,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 //      fingers[2] = sensorDataFromHand.getThumbJointAngles();
 	   fingers = sensorDataFromHand.getFingerJointAngles();
 	   
-      connected.set(true);
+	   connected.set(true);
    }
 
    // puts the state data into the ring buffer for the output thread
