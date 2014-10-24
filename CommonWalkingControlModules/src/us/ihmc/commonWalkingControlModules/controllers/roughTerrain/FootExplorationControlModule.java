@@ -13,13 +13,17 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLine;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
+import us.ihmc.utilities.math.geometry.FramePlane3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -77,18 +81,22 @@ public class FootExplorationControlModule
    private static double maxCoMHeightOffset = 0.00;
    private static double minCoMHeightOffset = -0.10; // for simulation use -0.1, real robot -0.03. Note: This in general is useful if the steps are too far each other, so use short steps
 
-   // exploration parameters
+   // exploration state parameters
    private static double icpShiftTime = 3;
    private static double copShiftTime = 2;
-
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
-   private static double swingTimeForExploration = 4;
    private static double ICPShiftRestingTime = 2;
    private static double copToContactPointScalingFactor = 0.8; // how far we explore, max 1.0
    private static double copPercentageToSwitchToNextContactPoint = 2; // if this value is >1 the exploration will continue to keep the desired cop at the maximum value of copToContactPointScalingFactor
    private static double maxAbsCoPError = 0.04;
    private static boolean adjustContactPointInXNOnly = false;
-   private static double icpBiasToInnerSole = 0.01;
+   
+   // swing state parameters
+   private static double icpBiasToInnerSole = 0.0;
+   private static double swingTimeForExploration = 4;
+   private static double safetyScalingOfContactPoints = 1.0; //0.85
+   private static boolean forceFootCoPOverCMP = true;
+   private static double footCoPOverCMPGainForQPSolver = 2.0;
 
    // unstable situations
    private static double maxICPAbsError = 0.04;
@@ -103,7 +111,6 @@ public class FootExplorationControlModule
    private static double alphaForJointVelocity = 0.95;
    private static double alphaForFootAngularRate = 0.95;
    private static int numberOfJointCheckedForZeroVelocity = 2;
-   private static double safetyScalingOfContactPoints = 1.0; //0.85; // during swing.
 
    //  ICP positions parameters
    private static double firstInternalICPPercentage = 0.95;
@@ -111,6 +118,8 @@ public class FootExplorationControlModule
    private static double secondExternalICPPercentage = 0.5;
    private static double lastExternalICPPercentage = 1.0;
    private static double icpPercentageToConsiderTransferFinished = 0.99;
+   private static double icpPercentageToDetermineIfIsLastShift = 0.95;
+   private static double maxStallTimeToActivateDoToeOff = 2;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -118,6 +127,7 @@ public class FootExplorationControlModule
    private final BooleanYoVariable footHoldIsSafeEnough;
    private final DoubleYoVariable initialExplorationTime;
    private final MomentumBasedController momentumBasedController;
+   private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
    private final FootExplorationCoPPlanner footExplorationCoPPlanner;
    private final BooleanYoVariable isMasteringFullExploration;
    private final BooleanYoVariable swingIsFinished;
@@ -152,6 +162,8 @@ public class FootExplorationControlModule
    private final DoubleYoVariable feetExplorationCoPError;
    private final SideDependentList<DoubleYoVariable> footAngularRate = new SideDependentList<DoubleYoVariable>();
    private final AlphaFilteredYoVariable ankleJointVelocity;
+   private final DoubleYoVariable initialStallTime;
+   private final DoubleYoVariable timeInStallBecauseICPIsNotCloseEnough;
 
    private InverseDynamicsJoint jointX, jointY;
    private DenseMatrix64F jointVelocityMatrix;
@@ -186,7 +198,8 @@ public class FootExplorationControlModule
    }
 
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime,
-         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SwingTimeCalculationProvider swingTimeCalculationProvider, FeetManager feetManager)
+         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SwingTimeCalculationProvider swingTimeCalculationProvider, 
+         FeetManager feetManager, ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule)
    {
       performCoPExploration = new BooleanYoVariable("performCoPExploration", registry);
       footHoldIsSafeEnough = new BooleanYoVariable("footHoldIsSafe", registry);
@@ -228,11 +241,15 @@ public class FootExplorationControlModule
       defaultCOMHeightOffset = new DoubleYoVariable("defaultCOMHeightOffset", registry);
       needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
       defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
+      initialStallTime = new DoubleYoVariable("initialStallTime", registry);
+      timeInStallBecauseICPIsNotCloseEnough = new DoubleYoVariable("timeInStallBecauseICPIsNotCloseEnough", registry);
+      
       this.yoTime = yoTime;
       this.feetManager = feetManager;
       this.momentumBasedController = momentumBasedController;
       this.centerOfMassHeightTrajectoryGenerator = (LookAheadCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
+      this.icpBasedMomentumRateOfChangeControlModule = icpBasedMomentumRateOfChangeControlModule;
       performCoPExploration.set(IS_ACTIVE);
       ICPTrajectory = new FrameLine2d(worldFrame, new Point2d(0.0, 0.0), new Point2d(1.0, 1.0));
       desiredICPLocal = new FramePoint2d(worldFrame);
@@ -278,7 +295,8 @@ public class FootExplorationControlModule
       icpIsCloseEnoughToDesired.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsError);
       icpIsCloseEnoughForSingleSupport.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsErrorForSingleSupport);
 
-      if (ICPPositionPercentage.getDoubleValue() > icpPercentageToConsiderTransferFinished && icpIsCloseEnoughForSingleSupport.getBooleanValue())
+      boolean explorationIsFinishedAndICPIsCloseToFinalPosition = checkIfExplorationIsFinished();
+      if (explorationIsFinishedAndICPIsCloseToFinalPosition)
       {
          scaleContactPointLocation(currentPlaneContactStateToExplore, safetyScalingOfContactPoints);
          planeContactStateToRescale = currentPlaneContactStateToExplore;
@@ -378,6 +396,8 @@ public class FootExplorationControlModule
       icpIndex.set(0);
       transferToNextFootStepIsDone.set(false);
       ICPPositionPercentage.set(0.0);
+      initialStallTime.set(Double.NaN);
+      timeInStallBecauseICPIsNotCloseEnough.set(0.0);
       resetWalkingVariableIfNecessary();
    }
 
@@ -424,16 +444,48 @@ public class FootExplorationControlModule
     */
    private class PerformingSwingState extends State<FeetExplorationState>
    {
-      FramePoint2d constantICP;
+      private FramePoint2d constantICP;
+      private double timeInSwing;
+      private double initialSwingTime;
+      private FramePoint2d desiredCMPToPack;
+      private FrameVector cmpNormal; 
+      private FramePoint cmpPointCopy;
+      private FrameLine cmpLine;
+      private FrameVector soleNormal; 
+      private FramePoint solePoint;
+      private FramePlane3d solePlane;
+      private FramePoint projectedCMP;
 
       public PerformingSwingState()
       {
          super(FeetExplorationState.SWING);
+         
+         desiredCMPToPack =  new FramePoint2d();
+         cmpNormal = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
+         cmpPointCopy = new FramePoint(worldFrame);
+         cmpLine = new FrameLine(cmpPointCopy, cmpNormal);
+         soleNormal = new FrameVector(worldFrame);
+         solePoint = new FramePoint(worldFrame);
+         solePlane = new FramePlane3d(worldFrame);
+         projectedCMP = new FramePoint(worldFrame);
       }
 
       @Override
       public void doAction()
       {
+         if (forceFootCoPOverCMP)
+         {
+            FramePoint projectedCmp = getProjectedCMPOnFootSole();
+            momentumBasedController.setFootCoPOffsetX(projectedCmp.getX());
+            momentumBasedController.setFootCoPOffsetY(projectedCmp.getY());
+            
+            timeInSwing = yoTime.getDoubleValue() - initialSwingTime;
+            FootSwitchInterface footSwitchInterface = momentumBasedController.getFootSwitches().get(footUderCoPControl);
+            WrenchBasedFootSwitch wrenchBasedFootSwitch = (WrenchBasedFootSwitch) footSwitchInterface;
+            if (wrenchBasedFootSwitch.getForceMagnitudePastThreshhold() && timeInSwing > swingTimeForExploration / 2)
+               momentumBasedController.setFeetCoPControlIsActive(false);
+         }
+
          if (adjustCoMHeightBasedOnICP)
          {
             lowerCoMBasedOnBoolean(icpIsCloseEnoughForSingleSupport.getBooleanValue());
@@ -449,6 +501,13 @@ public class FootExplorationControlModule
          double desiredICPY = supportFootCentroid.getY() + biasVector.getY();
          double desiredICPX = supportFootCentroid.getX() + biasVector.getX();
          constantICP = new FramePoint2d(worldFrame, desiredICPX, desiredICPY);
+
+         initialSwingTime = yoTime.getDoubleValue();
+         if (forceFootCoPOverCMP)
+         {
+            momentumBasedController.setFeetCoPControlIsActive(true);
+            momentumBasedController.setSideOfFootUnderCoPControl(loadBearingSide);
+         }
 
          setICPLocalToDesired(constantICP);
          desiredICPVelocityLocal.setToZero();
@@ -468,6 +527,50 @@ public class FootExplorationControlModule
 
          updateNextFootstepCentroid();
          footExplorationICPPlanner.initialize();
+         
+         if (forceFootCoPOverCMP)
+            momentumBasedController.setFeetCoPControlIsActive(false);
+      }
+      
+      /**
+       * This method computes the projection of the CMP (which is assumed to be drawn on a flat ground)
+       * on the foot sole of the current load-bearing leg. The projection is done in order to have a point 
+       * on the sole where we can try to keep the local foot CoP to increase the stability of the robot 
+       * during slow swings and with reduced foot polygons.
+       * 
+       * Note. For the moment the projection is computed as the intersection of the line passing through the CMP
+       * and normal to the ground, and the foot sole plane. In this way we are not using the proper definition of CMP
+       * (the line should connect the CMP and the robot CoM), but we always obtain a foot CoP that is 
+       * 'pushing a bit more'.
+       * 
+       * @return FramePoint - CMP in foot sole ReferenceFrame and already projected on the foot sole
+       */
+      private FramePoint getProjectedCMPOnFootSole()
+      {
+        icpBasedMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMPToPack);
+        
+        ReferenceFrame cmpFrame = desiredCMPToPack.getReferenceFrame();
+        cmpNormal.setIncludingFrame(cmpFrame, 0.0, 0.0, 1.0); 
+        cmpPointCopy.setIncludingFrame(cmpFrame, desiredCMPToPack.getX(), desiredCMPToPack.getY(), 0.0);
+        cmpLine.changeFrame(cmpFrame);
+        cmpLine.setDirection(cmpNormal);
+        cmpLine.setOrigin(cmpPointCopy);
+        
+        ReferenceFrame soleFrame = momentumBasedController.getContactableFeet().get(loadBearingSide).getSoleFrame();
+        soleNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0); 
+        solePoint.setIncludingFrame(soleFrame, 0.0, 0.0, 0.0);
+        solePlane.changeFrame(soleFrame);
+        solePlane.setNormal(soleNormal.getVector());
+        solePlane.setPoint(solePoint.getPoint());
+        
+        solePlane.changeFrame(cmpFrame);
+        
+        projectedCMP.changeFrame(cmpFrame); 
+        solePlane.getIntersectionWithLine(projectedCMP, cmpLine);
+
+        projectedCMP.changeFrame(soleFrame);
+        
+        return projectedCMP;
       }
    }
 
@@ -669,8 +772,8 @@ public class FootExplorationControlModule
 
                      if (Math.abs(minDistance) < minCoPDistanceFromBorder)
                      {
+                        System.out.println("Skipping contact point n. " + currentContactPointNumber.getIntegerValue() + " because the mirrored CoP is too close to the polygon border.");
                         currentContactPointNumber.increment();
-                        System.out.println("skipExplorationDueToMirrorPointCloseToBorder");
                         break outerloop;
                      }
                   }
@@ -855,10 +958,8 @@ public class FootExplorationControlModule
       @Override
       public void doTransitionOutOfAction()
       {
-         // TODO Auto-generated method stub
 
       }
-
    }
 
    private class DoneWithSwingCondition implements StateTransitionCondition
@@ -873,7 +974,6 @@ public class FootExplorationControlModule
    {
       public boolean checkCondition()
       {
-
          return currentContactPointNumber.getIntegerValue() + 1 > currentPlaneContactStateToExplore.getTotalNumberOfContactPoints();
       }
    }
@@ -901,7 +1001,8 @@ public class FootExplorationControlModule
       {
          double absDifference = Math.abs(ICPPositionPercentage.getDoubleValue() - finalICPPositionPercentage.getDoubleValue());
 
-         return absDifference < 0.001 && ICPPositionPercentage.getDoubleValue() < 0.95 && icpIsCloseEnoughForSingleSupport.getBooleanValue();
+         return absDifference < 0.001 && ICPPositionPercentage.getDoubleValue() < icpPercentageToDetermineIfIsLastShift 
+                && icpIsCloseEnoughForSingleSupport.getBooleanValue();
       }
    }
 
@@ -1155,7 +1256,7 @@ public class FootExplorationControlModule
       return polygon;
    }
 
-   public void resetWalkingVariableIfNecessary()
+   private void resetWalkingVariableIfNecessary()
    {
       if (doToeOffIfPossibleHasBeenChanged.getBooleanValue())
       {
@@ -1173,6 +1274,35 @@ public class FootExplorationControlModule
       {
          centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(defaultCOMHeightOffset.getDoubleValue());
          comHeightOffsetHasBeenChanged.set(false);
+      }
+   }
+   
+   private boolean checkIfExplorationIsFinished()
+   {
+      if(ICPPositionPercentage.getDoubleValue() > icpPercentageToConsiderTransferFinished)
+      {
+         if(icpIsCloseEnoughForSingleSupport.getBooleanValue())
+            return true;
+         
+         if(initialStallTime.isNaN())
+            initialStallTime.set(yoTime.getDoubleValue());
+         
+         timeInStallBecauseICPIsNotCloseEnough.set(yoTime.getDoubleValue() - initialStallTime.getDoubleValue());
+         
+         if(timeInStallBecauseICPIsNotCloseEnough.getDoubleValue() > maxStallTimeToActivateDoToeOff)
+            feetManager.getWalkOnTheEdgesManager().setDoToeOffIfPossible(true);
+         
+         return false;
+      }
+      else
+      {
+         if(!initialStallTime.isNaN())
+         {
+            initialStallTime.set(Double.NaN);
+            timeInStallBecauseICPIsNotCloseEnough.set(0.0);
+         }
+         
+         return false;
       }
    }
 
