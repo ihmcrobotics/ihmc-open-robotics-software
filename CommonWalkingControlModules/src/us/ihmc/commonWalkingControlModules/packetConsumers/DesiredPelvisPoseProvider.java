@@ -64,7 +64,8 @@ public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisPosePacke
       if (object.getPoint() != null)
          desiredPelvisPosition.set(new FramePoint(worldFrame, object.getPoint()));
       if (object.getQuaternion() != null)
-
          desiredPelvisOrientation.set(new FrameOrientation(worldFrame, object.getQuaternion()));
+
+      trajectoryTime = object.getTrajectoryTime();
    }
 }
