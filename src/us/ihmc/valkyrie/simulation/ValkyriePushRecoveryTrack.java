@@ -11,8 +11,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -33,8 +31,7 @@ public class ValkyriePushRecoveryTrack
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
 
       YoVariableThreadAccessValidator.registerAccessValidator();
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
