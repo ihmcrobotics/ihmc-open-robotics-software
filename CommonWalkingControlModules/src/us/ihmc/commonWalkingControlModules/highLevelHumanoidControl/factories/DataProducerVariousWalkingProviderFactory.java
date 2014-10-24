@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientatio
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.NetworkControlStatusProducer;
@@ -82,6 +83,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
          HighLevelHumanoidControllerFactoryHelper.getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, feet,
             registry);
 
+      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = new CapturabilityBasedStatusProducer(objectCommunicator);
+
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator,
                                                            swingTimeCalculator, transferTimeCalculator, registry);
 
@@ -125,7 +128,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
                                                            mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider,
                                                            pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
                                                            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-                                                           pelvisLoadBearingProvider, controlStatusProducer);
+                                                           pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer);
 
       return variousWalkingProviders;
    }

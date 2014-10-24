@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLin
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -189,7 +190,8 @@ public class MomentumBasedControllerFactory
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
             registry, yoGraphicsListRegistry, false);
 
-      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, fullRobotModel, feet, bipedSupportPolygons, registry);
+      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
+      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, fullRobotModel, feet, bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////

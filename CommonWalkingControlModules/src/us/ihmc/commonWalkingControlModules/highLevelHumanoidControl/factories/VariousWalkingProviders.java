@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
@@ -44,6 +45,8 @@ public class VariousWalkingProviders
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final ControlStatusProducer controlStatusProducer;
 
+   private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
+
    public VariousWalkingProviders(FootstepProvider footstepProvider, HandstepProvider handstepProvider, 
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
@@ -51,7 +54,7 @@ public class VariousWalkingProviders
          HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
          FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
          DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
-         ControlStatusProducer controlStatusProducer)
+         ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer)
    {
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -70,6 +73,8 @@ public class VariousWalkingProviders
       this.desiredPelvisLoadBearingProvider = pelvisLoadBearingProvider;
 
       this.controlStatusProducer = controlStatusProducer;
+
+      this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
    }
 
    public void clearPoseProviders()
@@ -172,5 +177,10 @@ public class VariousWalkingProviders
    public ControlStatusProducer getControlStatusProducer()
    {
       return controlStatusProducer;
+   }
+
+   public CapturabilityBasedStatusProducer getCapturabilityBasedStatusProducer()
+   {
+      return capturabilityBasedStatusProducer;
    }
 }

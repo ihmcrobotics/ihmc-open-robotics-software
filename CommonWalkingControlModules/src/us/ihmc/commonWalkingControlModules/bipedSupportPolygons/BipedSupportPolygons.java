@@ -116,6 +116,11 @@ public class BipedSupportPolygons
       return supportPolygonInMidFeetZUp;
    }
 
+   public FrameConvexPolygon2d getSupportPolygonInWorld()
+   {
+      return supportPolygonInWorld;
+   }
+
    public FrameLineSegment2d getConnectingEdge1()
    {
       return connectingEdge1;
