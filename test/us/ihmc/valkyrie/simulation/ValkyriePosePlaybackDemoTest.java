@@ -164,7 +164,7 @@ public class ValkyriePosePlaybackDemoTest
    private SimulationConstructionSet startPosePlaybackSim(PosePlaybackPacket posePlaybackPacket)
    {
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, null);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
       guiInitialSetup.setIsGuiShown(SHOW_GUI);
       double floatingHeight = 0.3;
       double groundHeight = 0.0;
