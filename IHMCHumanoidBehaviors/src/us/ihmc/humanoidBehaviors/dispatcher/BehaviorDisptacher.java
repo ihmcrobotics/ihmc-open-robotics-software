@@ -1,7 +1,9 @@
 package us.ihmc.humanoidBehaviors.dispatcher;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
@@ -50,6 +52,8 @@ public class BehaviorDisptacher implements Runnable
    private final RobotDataReceiver robotDataReceiver;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
+
+   private final ArrayList<Updatable> updatables = new ArrayList<>();
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
@@ -120,11 +124,25 @@ public class BehaviorDisptacher implements Runnable
       updateRobotState();
       updateControlStatus();
       updateRequestedBehavior();
+      callUpdatables();
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
       yoGraphicsListRegistry.update();
+   }
+
+   private void callUpdatables()
+   {
+      for (int i = 0; i < updatables.size(); i++)
+      {
+         updatables.get(i).update(yoTime.getDoubleValue());
+      }
+   }
+
+   public void addUpdatable(Updatable updatable)
+   {
+      updatables.add(updatable);
    }
 
    private void updateRobotState()

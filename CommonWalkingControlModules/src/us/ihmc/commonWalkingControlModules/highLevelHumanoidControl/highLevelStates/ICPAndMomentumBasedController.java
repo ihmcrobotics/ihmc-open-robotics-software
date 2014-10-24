@@ -12,8 +12,10 @@ import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -26,9 +28,9 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
@@ -54,14 +56,20 @@ public class ICPAndMomentumBasedController
    private final DoubleYoVariable omega0;
    private final Omega0CalculatorInterface omega0Calculator;
 
+   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
+
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+
+   private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
    
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
-           SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
       this.momentumBasedController = momentumBasedController;
+      this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
@@ -176,6 +184,13 @@ public class ICPAndMomentumBasedController
 
 //      bipedSupportPolygons.update(footContactPoints, true);
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
+
+      if (capturabilityBasedStatusProducer != null)
+      {
+         desiredICP.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
+         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInWorld();
+         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon);
+      }
    }
 
    private final class Omega0Updater implements Updatable

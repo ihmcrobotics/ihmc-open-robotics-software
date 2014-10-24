@@ -8,6 +8,8 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class NonBlockingGlobalObjectConsumerRelay implements GlobalObjectConsumer
 {
+   private static final boolean DEBUG = false;
+
    private final ConcurrentLinkedQueue<Object> queuedData = new ConcurrentLinkedQueue<Object>(); 
    private final ObjectCommunicator communicatorToForwardFrom;
    private final ObjectCommunicator communicatorToForwardTo;
@@ -53,8 +55,11 @@ public class NonBlockingGlobalObjectConsumerRelay implements GlobalObjectConsume
                Object dataObject;
                while((dataObject = queuedData.poll()) != null)
                {
-                  if(!dataObject.getClass().getSimpleName().equals("RobotConfigurationData") && !dataObject.getClass().getSimpleName().equals("RobotPoseData"))
-                     System.out.println(dataObject.getClass().getSimpleName());
+                  if (DEBUG)
+                  {
+                     if(!dataObject.getClass().getSimpleName().equals("RobotConfigurationData") && !dataObject.getClass().getSimpleName().equals("RobotPoseData"))
+                        System.out.println(dataObject.getClass().getSimpleName());
+                  }
                   communicatorToForwardTo.consumeObject(dataObject, false);
                }
                
