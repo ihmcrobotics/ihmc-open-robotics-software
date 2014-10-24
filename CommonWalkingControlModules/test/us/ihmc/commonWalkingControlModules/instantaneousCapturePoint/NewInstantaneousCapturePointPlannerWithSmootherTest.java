@@ -171,7 +171,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
 	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
 	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-	private int numberOfStepsInStepList = 6;
+	private int numberOfStepsInStepList = 7;
 	private int maxNumberOfConsideredFootsteps = testICPPlannerParams.getNumberOfFootstepsToConsider();
 	private NewInstantaneousCapturePointPlannerWithSmoother icpPlanner;
 
@@ -269,8 +269,8 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		ArrayList<YoFramePoint> cornerPoints = icpPlanner.getCapturePointCornerPoints();
 		ArrayList<YoFramePoint> constantCMPs = icpPlanner.getConstantCentroidalMomentumPivots();
 
-		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-5);
-		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-5);
+		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-4);
+		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-4);
 		JUnitTools.assertPoint3dEquals("", cornerPoints.get(1).getPoint3dCopy(), icpPosition.getPointCopy(), 1e-4);
 
 		initialTime = initialTime + doubleSupportInitialTransferDuration;
@@ -350,8 +350,8 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		ArrayList<YoFramePoint> cornerPoints = icpPlanner.getCapturePointCornerPoints();
 		ArrayList<YoFramePoint> constantCMPs = icpPlanner.getConstantCentroidalMomentumPivots();
 
-		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-5);
-		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-5);
+		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-4);
+		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-4);
 		JUnitTools.assertPoint3dEquals("", cornerPoints.get(1).getPoint3dCopy(), icpPosition.getPointCopy(), 1e-4);
 
 		initialTime = initialTime + doubleSupportInitialTransferDuration;
@@ -437,8 +437,8 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		ArrayList<YoFramePoint> cornerPoints = icpPlanner.getCapturePointCornerPoints();
 		ArrayList<YoFramePoint> constantCMPs = icpPlanner.getConstantCentroidalMomentumPivots();
 
-		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-5);
-		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-5);
+		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-4);
+		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-4);
 		JUnitTools.assertPoint3dEquals("", cornerPoints.get(1).getPoint3dCopy(), icpPosition.getPointCopy(), 1e-4);
 
 		initialTime = initialTime + doubleSupportInitialTransferDuration;
@@ -472,7 +472,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		assertEquals(finalPosition.getY(), icpPosition.getY(), 1e-4);
 	}
 
-	@Test
+	@Ignore
 	public void VisualizePlanner()
 	{
 		boolean testPush = false;
