@@ -21,6 +21,7 @@
 #include "tf_conversions/tf_eigen.h"
 #include "tf/transform_listener.h"
 #include "eigen_conversions/eigen_msg.h"
+#include "std_msgs/Float64.h"
 
 // Services
 #include "std_msgs/String.h"
@@ -54,6 +55,7 @@ class Mapper
 	ros::Publisher odomPub;
 	ros::Publisher icpCorrectionPub;
 	ros::Publisher odomErrorPub;
+	ros::Publisher overlapPub;
 	
 	// Services
 	ros::ServiceServer getPointMapSrv;
@@ -260,6 +262,8 @@ Mapper::Mapper(ros::NodeHandle& n, ros::NodeHandle& pn):
 	odomPub = n.advertise<nav_msgs::Odometry>("icp_odom", 50, true);
 	icpCorrectionPub = n.advertise<geometry_msgs::PoseStamped>("icp_correction", 50, true);
 	odomErrorPub = n.advertise<nav_msgs::Odometry>("icp_error_odom", 50, true);
+	overlapPub = n.advertise<std_msgs::Float64>("localization_overlap", 1, true);
+
 	getPointMapSrv = n.advertiseService("dynamic_point_map", &Mapper::getPointMap, this);
 	saveMapSrv = pn.advertiseService("save_map", &Mapper::saveMap, this);
 	loadMapSrv = pn.advertiseService("load_map", &Mapper::loadMap, this);
@@ -452,6 +456,9 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		// Ensure minimum overlap between scans
 		const double estimatedOverlap = icp.errorMinimizer->getOverlap();
 		ROS_INFO_STREAM("Overlap: " << estimatedOverlap);
+		std_msgs::Float64 overlap_msg;
+		overlap_msg.data = estimatedOverlap;
+		overlapPub.publish(overlap_msg);
 		if (estimatedOverlap < minOverlap)
 		{
 			ROS_ERROR_STREAM("Estimated overlap too small, ignoring ICP correction!");
