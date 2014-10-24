@@ -71,7 +71,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
@@ -212,6 +211,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
 
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
+   private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
 
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
    private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
@@ -231,6 +231,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupManagers(variousWalkingManagers);
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
+      doPreparePelvisForLocomotion.set(true);
 
       if (yoGraphicsListRegistry == null)
       {
@@ -803,6 +804,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
             manipulationControlModule.prepareForLocomotion();
+
+         if (pelvisOrientationManager != null && doPreparePelvisForLocomotion.getBooleanValue())
+            pelvisOrientationManager.prepareForLocomotion();
          
          footExplorationControlModule.reset();
       }
