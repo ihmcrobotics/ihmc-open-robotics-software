@@ -6,6 +6,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -20,13 +23,16 @@ public class JointConfigurationGatherer
    private final SixDoFJoint rootJoint;
    private final Vector3d rootTranslation = new Vector3d();
    private final Quat4d rootOrientation = new Quat4d();
+   
+   private final ArrayList<ForceSensorData> forceSensorData = new ArrayList<>();
 
    /**
     * The estimated state of the whole robot is packed and sent to the GUI using the DRCJointConfigurationData packet.
     * Hackish shit going on around here: the lidar and finger joints are not packed in the packet.
     * @param estimatorModel
+    * @param forceSensorDataHolderForEstimator 
     */
-   public JointConfigurationGatherer(FullRobotModel estimatorModel)
+   public JointConfigurationGatherer(FullRobotModel estimatorModel, ForceSensorDataHolder forceSensorDataHolderForEstimator)
    {
       this.rootJoint = estimatorModel.getRootJoint();
 
@@ -44,6 +50,21 @@ public class JointConfigurationGatherer
             }
          }
       }
+      
+      for(ForceSensorDefinition definition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+      {
+         forceSensorData.add(forceSensorDataHolderForEstimator.get(definition));
+      }
+   }
+   
+   public int getNumberOfJoints()
+   {
+      return joints.size();
+   }
+   
+   public int getNumberOfForceSensors()
+   {
+      return forceSensorData.size();
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
@@ -53,12 +74,7 @@ public class JointConfigurationGatherer
       {
          return;
       }
-
-      if (jointConfigurationData.jointAngles == null)
-      {
-         jointConfigurationData.initJointNumber(joints.size());
-      }
-
+      
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
 
@@ -66,5 +82,10 @@ public class JointConfigurationGatherer
       jointConfigurationData.setRootOrientation(rootOrientation);
       jointConfigurationData.setJointAngles(joints);
       jointConfigurationData.setSimTime(timestamp);
+      
+      for(int i = 0; i < forceSensorData.size(); i++)
+      {
+         forceSensorData.get(i).packWrench(jointConfigurationData.getForceSensorData(i));
+      }
    }
 }

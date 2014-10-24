@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
 import us.ihmc.utilities.GenericCRC32;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -49,7 +49,7 @@ public class IntermediateEstimatorStateHolder
       intermediateToControllerCopier = new InverseDynamicsJointStateCopier(intermediateRootBody, controllerRootBody);
 
       this.estimatorForceSensorDataHolder = estimatorForceSensorDataHolder;
-      this.intermediateForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(intermediateModel.getForceSensorDefinitions()), intermediateModel.getRootJoint());
+      this.intermediateForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(intermediateModel.getForceSensorDefinitions()));
       this.controllerForceSensorDataHolder = controllerForceSensorDataHolder;
       
       RawJointSensorDataHolderMap intermediateRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(intermediateModel);

@@ -20,15 +20,15 @@ import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfiguratio
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.DRCKinematicsBasedStateEstimator;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensors.ForceSensorData;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -126,7 +126,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (dataProducer != null)
       {
          ObjectCommunicator objectCommunicator = dataProducer.getObjectCommunicator();
-         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel);
+         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel, forceSensorDataHolderForEstimator);
          
          estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
                objectCommunicator, sensorOutputMapReadOnly, sensorInformation));

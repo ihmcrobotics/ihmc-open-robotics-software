@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
-import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
@@ -49,77 +48,86 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
-      stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);
+      stateRingBuffer = new ConcurrentRingBuffer<State>(new State.Builder(jointConfigurationGathererAndProducer.getNumberOfJoints(), jointConfigurationGathererAndProducer.getNumberOfForceSensors()), 16);
       setupSensorFrames(sensorInformation, estimatorModel);
       startWriterThread();
    }
 
-   private void setupSensorFrames(DRCRobotSensorInformation sensorInformation,SDFFullRobotModel estimatorModel)
+   private void setupSensorFrames(DRCRobotSensorInformation sensorInformation, SDFFullRobotModel estimatorModel)
    {
 
       DRCRobotCameraParameters[] cameraParams = sensorInformation.getCameraParameters();
       DRCRobotLidarParameters[] lidarParams = sensorInformation.getLidarParameters();
       DRCRobotPointCloudParameters[] pointCloudParams = sensorInformation.getPointCloudParameters();
-      
-      if(cameraParams != null)
+
+      if (cameraParams != null)
       {
          cameraFrames = new ReferenceFrame[cameraParams.length];
          cameraPoses = new RigidBodyTransform[cameraParams.length];
-         setupSensorFrames(cameraParams,cameraFrames,cameraPoses,estimatorModel);
-      } else {
+         setupSensorFrames(cameraParams, cameraFrames, cameraPoses, estimatorModel);
+      }
+      else
+      {
          cameraFrames = new ReferenceFrame[0];
          cameraPoses = new RigidBodyTransform[0];
       }
-      
-      if(lidarParams != null)
+
+      if (lidarParams != null)
       {
          lidarFrames = new ReferenceFrame[lidarParams.length];
          lidarPoses = new RigidBodyTransform[lidarParams.length];
-         setupSensorFrames(lidarParams,lidarFrames,lidarPoses,estimatorModel);
-      } else {
+         setupSensorFrames(lidarParams, lidarFrames, lidarPoses, estimatorModel);
+      }
+      else
+      {
          lidarFrames = new ReferenceFrame[0];
          lidarPoses = new RigidBodyTransform[0];
       }
-      
-      if(pointCloudParams != null)
+
+      if (pointCloudParams != null)
       {
          pointCloudFrames = new ReferenceFrame[pointCloudParams.length];
          pointCloudPoses = new RigidBodyTransform[pointCloudParams.length];
-         setupSensorFrames(pointCloudParams,pointCloudFrames,pointCloudPoses,estimatorModel);
-      } else {
+         setupSensorFrames(pointCloudParams, pointCloudFrames, pointCloudPoses, estimatorModel);
+      }
+      else
+      {
          pointCloudFrames = new ReferenceFrame[0];
          pointCloudPoses = new RigidBodyTransform[0];
       }
    }
-   
-   private void setupSensorFrames(DRCRobotSensorParameters[] params, ReferenceFrame[] referenceFrames, RigidBodyTransform[] poses, SDFFullRobotModel sdfRobotModel)
+
+   private void setupSensorFrames(DRCRobotSensorParameters[] params, ReferenceFrame[] referenceFrames, RigidBodyTransform[] poses,
+         SDFFullRobotModel sdfRobotModel)
    {
-      for(int i = 0; i < params.length; i++)
+      for (int i = 0; i < params.length; i++)
       {
          poses[i] = new RigidBodyTransform();
-         if(params[i].useRosForTransformFromPoseToSensor())
+         if (params[i].useRosForTransformFromPoseToSensor())
          {
             referenceFrames[i] = sdfRobotModel.getSensorReferenceFrameByLink(params[i].getPoseFrameForSdf());
-         } else {
-            switch(params[i].getSensorType())
+         }
+         else
+         {
+            switch (params[i].getSensorType())
             {
             case CAMERA:
                referenceFrames[i] = sdfRobotModel.getCameraFrame(params[i].getSensorNameInSdf());
-               if(referenceFrames[i] == null)
+               if (referenceFrames[i] == null)
                {
                   System.err.println("DrcPoseCommunicator: Camera sensor not found: " + params[i].getSensorNameInSdf());
                }
                break;
             case LIDAR:
                referenceFrames[i] = sdfRobotModel.getLidarBaseFrame(params[i].getSensorNameInSdf());
-               if(referenceFrames[i] == null)
+               if (referenceFrames[i] == null)
                {
                   System.err.println("DrcPoseCommunicator: Lidar sensor not found: " + params[i].getSensorNameInSdf());
                }
                break;
             case POINTCLOUD:
                referenceFrames[i] = sdfRobotModel.getLidarBaseFrame(params[i].getSensorNameInSdf());
-               if(referenceFrames[i] == null)
+               if (referenceFrames[i] == null)
                {
                   System.err.println("DrcPoseCommunicator: PointCloud sensor not found: " + params[i].getSensorNameInSdf());
                }
@@ -141,14 +149,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
             {
                while ((currentState = stateRingBuffer.read()) != null)
                {
-                  if (networkProcessorCommunicator == null)
-                  {
-                     System.out.println("Net Proc Comm");
-                  }
-                  if (currentState.poseData == null)
-                  {
-                     System.out.println("Pose Data");
-                  }
                   networkProcessorCommunicator.consumeObject(currentState.poseData);
                   networkProcessorCommunicator.consumeObject(currentState.jointData);
                }
@@ -185,7 +185,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       for (int i = 0; i < referenceFrames.length; i++)
       {
-         if(referenceFrames[i] != null)
+         if (referenceFrames[i] != null)
          {
             referenceFrames[i].getTransformToDesiredFrame(targetTransforms[i], ReferenceFrame.getWorldFrame());
          }
@@ -221,19 +221,28 @@ public class DRCPoseCommunicator implements RawOutputWriter
       public final RobotPoseData poseData;
       public final RobotConfigurationData jointData;
 
-      public static final Builder<State> builder = new Builder<State>()
+      public State(int numberOfJoints, int numberOfForceSensors)
       {
+         poseData = new RobotPoseData();
+         jointData = new RobotConfigurationData(numberOfJoints, numberOfForceSensors);
+      }
+
+      public static class Builder implements us.ihmc.concurrent.Builder<State>
+      {
+         private final int numberOfJoints, numberOfForceSensors;
+
+         public Builder(int numberOfJoints, int numberOfForceSensors)
+         {
+            this.numberOfJoints = numberOfJoints;
+            this.numberOfForceSensors = numberOfForceSensors;
+         }
+
          @Override
          public State newInstance()
          {
-            return new State();
+            return new State(numberOfJoints, numberOfForceSensors);
          }
-      };
 
-      public State()
-      {
-         poseData = new RobotPoseData();
-         jointData = new RobotConfigurationData();
       }
    }
 }

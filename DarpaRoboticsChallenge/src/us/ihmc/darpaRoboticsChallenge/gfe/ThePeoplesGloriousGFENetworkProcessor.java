@@ -66,7 +66,7 @@ public class ThePeoplesGloriousGFENetworkProcessor
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.fullRobotModel = robotModel.createFullRobotModel();
-      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, true);
+      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
@@ -78,7 +78,7 @@ public class ThePeoplesGloriousGFENetworkProcessor
    private void setupOutputs(String namespace)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new RobotDataReceiver(fullRobotModel, true);
+      new RobotDataReceiver(fullRobotModel, null, true);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       RobotPoseBuffer robotPoseBuffer = new RobotPoseBuffer(controllerCommunicationBridge, 1000, timestampProvider);
 

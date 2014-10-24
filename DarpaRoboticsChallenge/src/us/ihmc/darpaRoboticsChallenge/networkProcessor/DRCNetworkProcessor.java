@@ -89,7 +89,7 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
-      drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, true);
+      drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
       RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
       lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
       
