@@ -214,10 +214,7 @@ public class MomentumBasedController
 
       RigidBody elevator = fullRobotModel.getElevator();
 
-      if (jointsToIgnore != null && jointsToIgnore.length > 0)
-         inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ, Arrays.asList(jointsToIgnore));
-      else
-         inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
