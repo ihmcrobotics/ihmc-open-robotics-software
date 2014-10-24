@@ -14,10 +14,11 @@ public interface HeadOrientationControllerParameters
 
    public abstract String getJointNameForExtendedPitchRange();
 
-   public abstract double getUpperNeckPitchLimit();
+   public abstract double getNeckPitchUpperLimit();
 
-   public abstract double getLowerNeckPitchLimit();
+   public abstract double getNeckPitchLowerLimit();
 
+   
    public abstract double getHeadYawLimit();
 
    public abstract double getHeadRollLimit();

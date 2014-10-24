@@ -17,8 +17,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean checkOrbitalEnergyCondition();
 
-   public abstract double getGroundReactionWrenchBreakFrequencyHertz();
-
    public abstract boolean resetDesiredICPToCurrentAtStartOfSwing();
 
    public abstract double getFootForwardOffset();
@@ -55,8 +53,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getMaximumToeOffAngle();
 
-   public abstract double getFootSwitchCoPThresholdFraction();
-
    public abstract boolean doToeTouchdownIfPossible();
 
    public abstract double getToeTouchdownAngle();
@@ -64,8 +60,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doHeelTouchdownIfPossible();
 
    public abstract double getHeelTouchdownAngle();
-
-   public abstract double getFinalToeOffPitchAngularVelocity();
 
    public abstract double getInPlaceWidth();
 
@@ -127,10 +121,19 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getDefaultSwingTime();
 
+   /** Used by the UI to limit motion range of the spine yaw. It doesn't have to be equal to the actual joint limit */
+   public abstract double getSpineYawLimit();
+
+   /** Used by the UI to limit motion range of the spine pitch. It doesn't have to be equal to the actual joint limit */
    public abstract double getSpinePitchUpperLimit();
 
+   /** Used by the UI to limit motion range of the spine pitch. It doesn't have to be equal to the actual joint limit */
    public abstract double getSpinePitchLowerLimit();
 
+   /** Used by the UI to limit motion range of the spine roll. It doesn't have to be equal to the actual joint limit */
+   public abstract double getSpineRollLimit();
+
+   /** Used by the UI to indicate if the spine pitch joint is reversed (true for Valkyrie) */
    public abstract boolean isSpinePitchReversed();
 
    public abstract double getFoot_start_toetaper_from_back();
