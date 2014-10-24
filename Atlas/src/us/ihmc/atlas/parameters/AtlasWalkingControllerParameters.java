@@ -629,19 +629,19 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double getPelvisPitchUpperLimit()
+   public double getSpinePitchUpperLimit()
    {
       return pelvis_pitch_upper_limit;
    }
    
    @Override
-   public double getPelvisPitchLowerLimit()
+   public double getSpinePitchLowerLimit()
    {
       return pelvis_pitch_lower_limit;
    }
 
    @Override
-   public boolean isPelvisPitchReversed()
+   public boolean isSpinePitchReversed()
    {
       return false;
    }

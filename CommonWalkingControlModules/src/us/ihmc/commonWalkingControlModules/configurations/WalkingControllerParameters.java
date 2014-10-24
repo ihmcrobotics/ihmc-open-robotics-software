@@ -127,11 +127,11 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getDefaultSwingTime();
 
-   public abstract double getPelvisPitchUpperLimit();
+   public abstract double getSpinePitchUpperLimit();
 
-   public abstract double getPelvisPitchLowerLimit();
+   public abstract double getSpinePitchLowerLimit();
 
-   public abstract boolean isPelvisPitchReversed();
+   public abstract boolean isSpinePitchReversed();
 
    public abstract double getFoot_start_toetaper_from_back();
 
