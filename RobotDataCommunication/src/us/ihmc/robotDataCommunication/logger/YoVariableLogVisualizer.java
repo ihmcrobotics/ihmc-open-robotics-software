@@ -110,6 +110,11 @@ public class YoVariableLogVisualizer
       scs.getStandardSimulationGUI().addJComponentToMainPanel( new YoVariableLogVisualizerGUI(selectedFile, players, robot, yoVariableLogCropper, scs), BorderLayout.SOUTH);
    }
    
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+      return scs;
+   }
+   
    public void run()
    {
       new Thread(scs).start();
