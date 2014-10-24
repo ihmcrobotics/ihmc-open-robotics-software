@@ -32,13 +32,13 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
 	private final FramePoint tmpFramePoint1 = new FramePoint(worldFrame);
 	private final FramePoint tmpFramePoint2 = new FramePoint(worldFrame);
+	private final FramePoint tmpFramePoint3 = new FramePoint(worldFrame);
 	private final FrameVector tmpFrameVector1 = new FrameVector(worldFrame);
 	private final FrameVector tmpFrameVector2 = new FrameVector(worldFrame);
 
 	private final BooleanYoVariable atAStop = new BooleanYoVariable("icpPlannerAtAStop", registry);
 	private final BooleanYoVariable cancelPlan = new BooleanYoVariable("icpPlannerCancelPlan", registry);
 	private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
-	private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable("icpPlannerIsInitialTransfer", registry);
 	private final BooleanYoVariable wasPushedInSingleSupport = new BooleanYoVariable("icpPlannerWasPushedInSingleSupport", registry);
 	protected final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
 	private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable("icpPlannerTimeInCurrentState", registry);
@@ -205,7 +205,6 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 		atAStop.set(false);
 		this.isDoubleSupport.set(false);
 		this.initialTime.set(initialTime);
-		this.isInitialTransfer.set(false);
 		comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
 
 		computeConstantCentersOfPressure(footstepList);
@@ -309,7 +308,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 			constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
 
 			CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), time, tmpFramePoint1,
-					tmpFramePoint2, desiredCapturePointPosition);
+					tmpFramePoint2, tmpFramePoint3);
+			desiredCapturePointPosition.set(tmpFramePoint3);
 		}
 		else
 		{
@@ -327,14 +327,14 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 			constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
 
 			CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), time, tmpFramePoint1,
-					tmpFramePoint2, desiredCapturePointVelocity);
+					tmpFramePoint2, tmpFrameVector1);
 		}
 		else
 		{
 			doubleSupportCapturePointTrajectory.compute(time);
 			doubleSupportCapturePointTrajectory.getVelocity(tmpFrameVector1);
-			desiredCapturePointVelocity.set(tmpFrameVector1);
 		}
+		desiredCapturePointVelocity.set(tmpFrameVector1);
 	}
 
 	protected void computeDesiredCapturePointAcceleration(double time)
@@ -345,14 +345,14 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 			constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
 
 			CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), time, tmpFramePoint1,
-					tmpFramePoint2, desiredCapturePointAcceleration);
+					tmpFramePoint2, tmpFrameVector1);
 		}
 		else
 		{
 			doubleSupportCapturePointTrajectory.compute(time);
 			doubleSupportCapturePointTrajectory.getAcceleration(tmpFrameVector1);
-			desiredCapturePointAcceleration.set(tmpFrameVector1);
 		}
+		desiredCapturePointAcceleration.set(tmpFrameVector1);
 	}
 
 	protected void computeDesiredCentroidalMomentumPivot()
