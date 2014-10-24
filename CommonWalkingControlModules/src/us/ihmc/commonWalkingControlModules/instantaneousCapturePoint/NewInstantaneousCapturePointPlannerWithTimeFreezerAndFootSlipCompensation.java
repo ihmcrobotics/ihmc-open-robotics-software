@@ -94,7 +94,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
          double time, FramePoint currentCapturePointPosition, FramePoint transferToFoot)
    {
       super.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, getTimeWithDelay(time));
-
+      
       if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && currentTransferToSide.getEnumValue() != null)
       {
          this.currentTransferToFootLocation.setIncludingFrame(transferToFoot);

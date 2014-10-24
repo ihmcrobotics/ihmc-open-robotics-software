@@ -305,33 +305,35 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	{
 		if (!isDoubleSupport.getBooleanValue())
 		{
-			YoFramePoint initialCapturePoint = singleSupportInitialDesiredCapturePointPosition;
-			YoFramePoint initialCenterOfPressure = constantCentroidalMomentumPivots.get(0);
+			singleSupportInitialDesiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
+			constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
 
-			CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), time, initialCapturePoint,
-					initialCenterOfPressure, desiredCapturePointPosition);
+			CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), time, tmpFramePoint1,
+					tmpFramePoint2, desiredCapturePointPosition);
 		}
 		else
 		{
 			doubleSupportCapturePointTrajectory.compute(time);
-			doubleSupportCapturePointTrajectory.getPosition(desiredCapturePointPosition);
+			doubleSupportCapturePointTrajectory.getPosition(tmpFramePoint1);
+			desiredCapturePointPosition.set(tmpFramePoint1);
 		}
 	}
 
 	protected void computeDesiredCapturePointVelocity(double time)
 	{
 		if (!isDoubleSupport.getBooleanValue())
-		{
-			YoFramePoint initialCapturePoint = singleSupportInitialDesiredCapturePointPosition;
-			YoFramePoint initialCenterOfPressure = constantCentroidalMomentumPivots.get(0);
+		{	
+			singleSupportInitialDesiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
+			constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
 
-			CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), time, initialCapturePoint,
-					initialCenterOfPressure, desiredCapturePointVelocity);
+			CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), time, tmpFramePoint1,
+					tmpFramePoint2, desiredCapturePointVelocity);
 		}
 		else
 		{
 			doubleSupportCapturePointTrajectory.compute(time);
-			doubleSupportCapturePointTrajectory.getVelocity(desiredCapturePointVelocity);
+			doubleSupportCapturePointTrajectory.getVelocity(tmpFrameVector1);
+			desiredCapturePointVelocity.set(tmpFrameVector1);
 		}
 	}
 
@@ -339,16 +341,17 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	{
 		if (!isDoubleSupport.getBooleanValue())
 		{
-			YoFramePoint initialCapturePoint = singleSupportInitialDesiredCapturePointPosition;
-			YoFramePoint initialCenterOfPressure = constantCentroidalMomentumPivots.get(0);
+			singleSupportInitialDesiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
+			constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
 
-			CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), time, initialCapturePoint,
-					initialCenterOfPressure, desiredCapturePointAcceleration);
+			CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), time, tmpFramePoint1,
+					tmpFramePoint2, desiredCapturePointAcceleration);
 		}
 		else
 		{
 			doubleSupportCapturePointTrajectory.compute(time);
-			doubleSupportCapturePointTrajectory.getAcceleration(desiredCapturePointAcceleration);
+			doubleSupportCapturePointTrajectory.getAcceleration(tmpFrameVector1);
+			desiredCapturePointAcceleration.set(tmpFrameVector1);
 		}
 	}
 
@@ -356,10 +359,11 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	{
 		if (isDoubleSupport.getBooleanValue())
 		{
-//			CapturePointTools.computeDesiredCentroidalMomentumPivot(singleSupportInitialDesiredCapturePointPosition,
-//					desiredCapturePointVelocity, omega0.getDoubleValue(), desiredCentroidalMomentumPivotPosition);
-			CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePointPosition,
-					desiredCapturePointVelocity, omega0.getDoubleValue(), desiredCentroidalMomentumPivotPosition);
+			desiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
+			desiredCapturePointVelocity.getFrameTupleIncludingFrame(tmpFrameVector1);
+			
+			CapturePointTools.computeDesiredCentroidalMomentumPivot(tmpFramePoint1,
+					tmpFrameVector1, omega0.getDoubleValue(), desiredCentroidalMomentumPivotPosition);
 		}
 		else
 		{

@@ -266,7 +266,8 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.getPosition(desiredCapturePointPosition);
+         doubleSupportCapturePointTrajectory.getPosition(tmpFramePoint1);
+         desiredCapturePointPosition.set(tmpFramePoint1);
       }
    }
 
@@ -283,7 +284,8 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.getVelocity(desiredCapturePointVelocity);
+         doubleSupportCapturePointTrajectory.getVelocity(tmpFrameVector1);
+         desiredCapturePointVelocity.set(tmpFrameVector1);
       }
    }
 
@@ -300,7 +302,8 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.getAcceleration(desiredCapturePointAcceleration);
+         doubleSupportCapturePointTrajectory.getAcceleration(tmpFrameVector1);
+         desiredCapturePointAcceleration.set(tmpFrameVector1);
       }
    }
 

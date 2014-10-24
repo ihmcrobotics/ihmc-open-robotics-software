@@ -306,6 +306,29 @@ public class CapturePointTools
       
       positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
+   
+   /**
+    * Compute the desired capture point position at a given time. ICP_d =
+    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*p0
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCenterOfPressure
+    * @param positionToPack
+    */
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
+         YoFramePoint positionToPack)
+   {
+      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+
+      double exponentialTerm = Math.exp(omega0 * time);
+      
+      double x = initialCenterOfPressure.getX()*(1-exponentialTerm) + initialCapturePoint.getX()*exponentialTerm;
+      double y = initialCenterOfPressure.getY()*(1-exponentialTerm) + initialCapturePoint.getY()*exponentialTerm;
+      
+      positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+   }
 
    /**
     * Compute the desired capture point velocity at a given time. ICPv_d = w *
@@ -318,6 +341,29 @@ public class CapturePointTools
     * @param velocityToPack
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCenterOfPressure,
+         YoFrameVector velocityToPack)
+   {
+      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+
+      double exponentialTerm = Math.exp(omega0 * time);
+
+      double x = omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
+      double y = omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
+
+      velocityToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+   }
+   
+   /**
+    * Compute the desired capture point velocity at a given time. ICPv_d = w *
+    * e^{w*t} * ICP0 - p0 * w * e^{w*t}
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCenterOfPressure
+    * @param velocityToPack
+    */
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
          YoFrameVector velocityToPack)
    {
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
@@ -361,8 +407,31 @@ public class CapturePointTools
 
       double exponentialTerm = Math.exp(omega0 * time);
 
-      double x = omega0 * (omega0 * exponentialTerm * initialCapturePoint.getX() - initialCenterOfPressure.getX() * omega0 * exponentialTerm);
-      double y = omega0 * (omega0 * exponentialTerm * initialCapturePoint.getY() - initialCenterOfPressure.getY() * omega0 * exponentialTerm);
+      double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
+      double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
+
+      accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+   }
+   
+   /**
+    * Compute the desired capture point velocity at a given time. ICPv_d = w^2
+    * * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCenterOfPressure
+    * @param accelerationToPack
+    */
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint,
+         FramePoint initialCenterOfPressure, YoFrameVector accelerationToPack)
+   {
+      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
+
+      double exponentialTerm = Math.exp(omega0 * time);
+
+      double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
+      double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
       accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
    }
@@ -380,6 +449,23 @@ public class CapturePointTools
          YoFramePoint desiredCentroidalMomentumPivotToPack)
    {
       desiredCentroidalMomentumPivotToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
+      desiredCentroidalMomentumPivotToPack.scale(-1 / omega0);
+      desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
+   }
+   
+   /**
+    * Computes the desired centroidal momentum pivot by,
+    * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
+    * 
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @param omega0
+    * @param desiredCentroidalMomentumPivotToPack
+    */
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0,
+         YoFramePoint desiredCentroidalMomentumPivotToPack)
+   {
+      desiredCentroidalMomentumPivotToPack.setAndMatchFrame(desiredCapturePointVelocity);
       desiredCentroidalMomentumPivotToPack.scale(-1 / omega0);
       desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
    }
