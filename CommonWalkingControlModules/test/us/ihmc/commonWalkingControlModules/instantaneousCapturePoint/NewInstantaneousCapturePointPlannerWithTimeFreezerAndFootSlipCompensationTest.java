@@ -141,7 +141,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		@Override
 		public boolean getDoTimeFreezing()
 		{
-			return true;
+			return false;
 		}
 
 		@Override
@@ -178,7 +178,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
 	private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
 	private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-	private int numberOfStepsInStepList = 3;
+	private int numberOfStepsInStepList = 7;
 	private int maxNumberOfConsideredFootsteps = testICPPlannerParams.getNumberOfFootstepsToConsider();
 	private final RobotSide robotSide = RobotSide.RIGHT;
 	private NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner;
@@ -227,7 +227,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	@Test
 	public void visualizePlanner()
 	{
-		boolean testPush = true;
+		boolean testPush = false;
 		boolean cancelPlanInDoubleSupport = false;
 		boolean cancelPlanInSingleSupport = false;
 		boolean breakAfterDoubleSupportPhase = cancelPlanInDoubleSupport || cancelPlanInSingleSupport;
