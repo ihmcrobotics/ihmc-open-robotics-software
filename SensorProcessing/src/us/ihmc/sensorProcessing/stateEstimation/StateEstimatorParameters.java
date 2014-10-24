@@ -57,4 +57,6 @@ public interface StateEstimatorParameters
    public abstract boolean createFusedIMUSensor();
 
    public abstract double getContactThresholdForce();
+
+   public abstract double getFootSwitchCoPThresholdFraction();
 }

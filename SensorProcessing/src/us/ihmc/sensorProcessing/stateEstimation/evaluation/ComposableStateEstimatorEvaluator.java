@@ -247,6 +247,12 @@ public class ComposableStateEstimatorEvaluator
          {
             return 120.0;
          }
+
+         @Override
+         public double getFootSwitchCoPThresholdFraction()
+         {
+            return 0.02;
+         }
       };
       
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
