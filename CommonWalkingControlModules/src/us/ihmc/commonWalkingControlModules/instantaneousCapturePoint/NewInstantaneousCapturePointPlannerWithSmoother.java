@@ -356,7 +356,9 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 	{
 		if (isDoubleSupport.getBooleanValue())
 		{
-			CapturePointTools.computeDesiredCentroidalMomentumPivot(singleSupportInitialDesiredCapturePointPosition,
+//			CapturePointTools.computeDesiredCentroidalMomentumPivot(singleSupportInitialDesiredCapturePointPosition,
+//					desiredCapturePointVelocity, omega0.getDoubleValue(), desiredCentroidalMomentumPivotPosition);
+			CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePointPosition,
 					desiredCapturePointVelocity, omega0.getDoubleValue(), desiredCentroidalMomentumPivotPosition);
 		}
 		else
