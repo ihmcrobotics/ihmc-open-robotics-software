@@ -7,105 +7,38 @@ import us.ihmc.robotiq.communication.ModbusTCPConnection;
 
 public class RobotiqHandTesting
 {
+	private static final long WAIT_TIME_MS = 60000;
+	
 	public static void main(String[] args) throws Exception
 	{
 		//testing the robot hand interface
 		RobotiqHandInterface rightHand = new RobotiqHandInterface();
 		
-		Thread.sleep(2000);
+		long startTime = System.currentTimeMillis();
 		
-		System.out.println("starting connection");
-		rightHand.connect();
-		System.out.println("connected");
-		
-//		System.out.println("Sending Activation Request");
-//		rightHand.initialize();
-//		System.out.println("Activation Request Sent");
-		
-		System.out.println("Resetting Hand");
-		rightHand.reset();
-		System.out.println("Hand Reset");
-		
-		
-//		System.out.println("Going to pinch");
-//		rightHand.pinchGrip();
-//		System.out.println("Pinching");
-//		
-		System.out.println("Closing Hand");
-		rightHand.close(0.1);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.2);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.3);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.4);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.5);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.6);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.7);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.8);
-		rightHand.blockDuringMotion();
-		rightHand.close(0.9);
-		rightHand.blockDuringMotion();
-		rightHand.close(1.0);
-		rightHand.blockDuringMotion();
-		System.out.println("Hand Closed");
-		
-//		rightHand.stop();System.out.println("Hand Stopped");
-//		
-		Thread.sleep(1000);
-//		
-		System.out.println("Opening Hand");
-		rightHand.open(0.1);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.2);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.3);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.4);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.5);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.6);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.7);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.8);
-		rightHand.blockDuringMotion();
-		rightHand.open(0.9);
-		rightHand.blockDuringMotion();
-		rightHand.open(1.0);
-		rightHand.blockDuringMotion();
-		System.out.println("Hand Open");
-		
-//		testCycles(rightHand, 2);
-//		
-//		System.out.println("Going to pinch");
-//		rightHand.pinchGrip();
-//		System.out.println("Pinching");
-//		
-//		testCycles(rightHand, 2);
-//		
-//		System.out.println("Going to wide mode");
-//		rightHand.wideGrip();
-//		System.out.println("In wide mode");
-//		
-//		testCycles(rightHand, 2);
-//		
-//		System.out.println("Going to scissor mode");
-//		rightHand.scissorGrip();
-//		System.out.println("In scissor mode");
-//		
-//		testCycles(rightHand, 2);		
-//		
-//		System.out.println("Going to basic mode");
-//		rightHand.normalGrip();
-//		System.out.println("In basic mode");
-//		
-//		System.out.println();
+		do
+		{
+			if(!rightHand.isReady())
+			{
+//				System.out.println("starting connection");
+//				rightHand.connect();
+//				System.out.println("connected");
+						
+				System.out.println("Sending Activation Request");
+				rightHand.initialize();
+				System.out.println("Activation Request Sent");
+						
+//				System.out.println("Resetting Hand");
+//				rightHand.reset();
+//				System.out.println("Hand Reset");
+			}
+			
+			long timeDifference = System.currentTimeMillis() - startTime;
+			
+			if(timeDifference > WAIT_TIME_MS)
+				break;
+		}
+		while (true);
 		
 		System.out.println("Shutting Down Hand");
 		rightHand.shutdown();

@@ -10,6 +10,8 @@ import java.util.Arrays;
 
 public class ModbusTCPConnection
 {
+	private static final int HEADER_LENGTH = 7; // header length in bytes
+	
 	private Socket connection;
 	private OutputStream outStream;
 	private FilterInputStream inStream;
@@ -73,10 +75,10 @@ public class ModbusTCPConnection
 		
 		for(int counter = 0; counter < data.length; counter++)
 		{
-			outBuffer[counter+7] = data[counter];
+			outBuffer[counter + HEADER_LENGTH] = data[counter];
 		}
 		
-		int outBytes = 7 + data.length; 
+		int outBytes = HEADER_LENGTH + data.length; 
 		outStream.write(outBuffer, 0, outBytes); //request
 		outStream.flush();
 		
@@ -96,7 +98,7 @@ public class ModbusTCPConnection
 			}
 		}
 		
-		return Arrays.copyOfRange(inBuffer, 7, inBytes); //return the reply with the proper length (removes header)
+		return Arrays.copyOfRange(inBuffer, HEADER_LENGTH, inBytes); //return the reply with the proper length (removes header)
 		
 	}
 	
