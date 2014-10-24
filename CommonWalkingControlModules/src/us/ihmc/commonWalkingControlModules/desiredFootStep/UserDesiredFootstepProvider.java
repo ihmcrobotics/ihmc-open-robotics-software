@@ -144,7 +144,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       ContactablePlaneBody foot = bipedFeet.get(swingLegSide);
 
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), swingLegSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
+      Footstep desiredFootstep = new Footstep(foot, swingLegSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
 
       return desiredFootstep;
    }
