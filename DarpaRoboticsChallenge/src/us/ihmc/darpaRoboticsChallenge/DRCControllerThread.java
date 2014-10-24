@@ -134,10 +134,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
       }
 
-      String[] additionalJoinsToIgnore = robotModel.getWalkingControllerParameters().getJointsToIgnoreInController();
-      if (additionalJoinsToIgnore != null)
+      String[] additionalJointsToIgnore = robotModel.getWalkingControllerParameters().getJointsToIgnoreInController();
+      if (additionalJointsToIgnore != null)
       {
-         for (String jointToIgnore : additionalJoinsToIgnore)
+         for (String jointToIgnore : additionalJointsToIgnore)
          {
             listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(jointToIgnore));
          }
