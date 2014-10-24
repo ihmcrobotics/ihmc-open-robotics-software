@@ -19,26 +19,44 @@ public class HandPoseBehavior extends BehaviorInterface
    private HandPosePacket outgoingHandPosePacket;
 
    private final DoubleYoVariable yoTime;
-   private double startTime = Double.NaN;
-   private double currentTime = Double.NaN;
-   private double behaviorTime = 1.0;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
+
+   private final BooleanYoVariable hasInputBeenSet;
+   private final BooleanYoVariable trajectoryTimeElapsed;
 
    public HandPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
-   }
-
-   public void goToHomePosition(RobotSide side)
-   {
-      this.outgoingHandPosePacket = HandPosePacket.createGoToHomePacket(side, 3.0);
+      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime.set(Double.NaN);
+      hasInputBeenSet = new BooleanYoVariable(getName() + "HasInputBeenSet", registry);
+      trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(HandPosePacket handPosePacket)
    {
       this.outgoingHandPosePacket = handPosePacket;
-      behaviorTime = handPosePacket.getTrajectoryTime();
+      hasInputBeenSet.set(true);
+   }
+
+   public void goToHomePosition(RobotSide side)
+   {
+      setInput(HandPosePacket.createGoToHomePacket(side, 3.0));
+   }
+
+   public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
+   {
+      Vector3d translation = new Vector3d();
+      Quat4d rotation = new Quat4d();
+      pose.get(translation);
+      pose.get(rotation);
+      Point3d point = new Point3d(translation.getX(), translation.getY(), translation.getZ());
+      setInput(new HandPosePacket(robotSide, frame, point, rotation, trajectoryTime));
    }
 
    @Override
@@ -48,8 +66,6 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          sendHandPoseToController();
       }
-
-      currentTime = yoTime.getDoubleValue();
    }
 
    private void sendHandPoseToController()
@@ -58,7 +74,8 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          sendPacketToController(outgoingHandPosePacket);
          packetHasBeenSent.set(true);
-         startTime = yoTime.getDoubleValue();
+         startTime.set(yoTime.getDoubleValue());
+         trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());
       }
    }
 
@@ -76,6 +93,12 @@ public class HandPoseBehavior extends BehaviorInterface
 
       isPaused.set(false);
       isStopped.set(false);
+
+      trajectoryTimeElapsed.set(false);
+      hasInputBeenSet.set(false);
+      
+      trajectoryTime.set(Double.NaN);
+      startTime.set(Double.NaN);
    }
 
    @Override
@@ -99,8 +122,12 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      boolean trajectoryTimeElapsed = currentTime - startTime > behaviorTime;
-      return trajectoryTimeElapsed && !isPaused.getBooleanValue();
+      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+         trajectoryTimeElapsed.set(false);
+      else
+         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
+
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -121,20 +148,6 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      if (outgoingHandPosePacket != null)
-         return true;
-      else
-         return false;
-   }
-
-   public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
-   {
-      Vector3d translation = new Vector3d();
-      Quat4d rotation = new Quat4d();
-      pose.get(translation);
-      pose.get(rotation);
-      Point3d point = new Point3d(translation.getX(), translation.getY(), translation.getZ());
-      this.outgoingHandPosePacket = new HandPosePacket(robotSide, frame, point, rotation, trajectoryTime);
-      behaviorTime = trajectoryTime;
+      return hasInputBeenSet.getBooleanValue();
    }
 }
