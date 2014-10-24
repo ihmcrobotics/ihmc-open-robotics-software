@@ -138,13 +138,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double getUpperNeckPitchLimit()
+   public double getNeckPitchUpperLimit()
    {
       return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;//1.14494;
    }
 
    @Override
-   public double getLowerNeckPitchLimit()
+   public double getNeckPitchLowerLimit()
    {
       return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;//-0.602139;
    }
@@ -206,12 +206,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double getGroundReactionWrenchBreakFrequencyHertz()
-   {
-      return 7.0;
-   }
-
-   @Override
    public boolean resetDesiredICPToCurrentAtStartOfSwing()
    {
       return false;
@@ -233,12 +227,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getFootBackwardOffset()
    {
       return ValkyriePhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getFootSwitchCoPThresholdFraction()
-   {
-      return 0.02;
    }
 
    @Override
@@ -270,12 +258,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
       return 0.1;
-   }
-
-   @Override
-   public double getFinalToeOffPitchAngularVelocity()
-   {
-      return 3.5;
    }
 
    @Override
@@ -611,18 +593,35 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return runningOnRealRobot ? 1.4 : 0.60;
    }
 
+   /** @inheritDoc */
+   @Override
+   public double getSpineYawLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   /** @inheritDoc */
    @Override
    public double getSpinePitchUpperLimit()
    {
       return 0.0872665;
    }
 
+   /** @inheritDoc */
    @Override
    public double getSpinePitchLowerLimit()
    {
       return -0.698132;
    }
 
+   /** @inheritDoc */
+   @Override
+   public double getSpineRollLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   /** @inheritDoc */
    @Override
    public boolean isSpinePitchReversed()
    {
