@@ -138,25 +138,19 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getGroundReactionWrenchBreakFrequencyHertz()
-   {
-      return 7.0;
-   }
-
-   @Override
    public boolean resetDesiredICPToCurrentAtStartOfSwing()
    {
       return false;
    }
 
    @Override
-   public double getUpperNeckPitchLimit()
+   public double getNeckPitchUpperLimit()
    {
       return 0.0;
    }
 
    @Override
-   public double getLowerNeckPitchLimit()
+   public double getNeckPitchLowerLimit()
    {
       return 0.0;
    }
@@ -223,12 +217,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getFinalToeOffPitchAngularVelocity()
-   {
-      return 3.5;
-   }
-
-   @Override
    public double getInPlaceWidth()
    {
       return 0.25;
@@ -250,12 +238,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getMinStepWidth()
    {
       return 0.15;
-   }
-
-   @Override
-   public double getFootSwitchCoPThresholdFraction()
-   {
-      return 0.02;
    }
 
    @Override
@@ -567,18 +549,37 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return 0.6; // 1.5; //
    }
 
+   /** @inheritDoc */
+   @Override
+   public double getSpineYawLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   /** @inheritDoc */
    @Override
    public double getSpinePitchUpperLimit()
    {
+      // TODO Auto-generated method stub
       return 0;
    }
 
+   /** @inheritDoc */
    @Override
    public double getSpinePitchLowerLimit()
    {
+      // TODO Auto-generated method stub
       return 0;
    }
 
+   /** @inheritDoc */
+   @Override
+   public double getSpineRollLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   /** @inheritDoc */
    @Override
    public boolean isSpinePitchReversed()
    {
