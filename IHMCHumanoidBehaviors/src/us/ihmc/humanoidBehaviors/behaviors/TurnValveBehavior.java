@@ -2,27 +2,31 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
-
-//~--- JDK imports ------------------------------------------------------------
-
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
+import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+//~--- JDK imports ------------------------------------------------------------
+import java.io.InputStream;
+
 public class TurnValveBehavior extends BehaviorInterface
 {
+   private final double MAX_WRIST_FORCE_THRESHOLD_N = 40.0;
    private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
    private Vector3d valveLocation = new Vector3d();
    private Vector3d valveOffsetInWorldFrame = new Vector3d();
@@ -37,10 +41,15 @@ public class TurnValveBehavior extends BehaviorInterface
    private YoFrameOrientation valveOrientation;
    private BehaviorInterface currentBehavior;
    private boolean isDone;
+   
+   private ForceSensorDataHolder globalForceSensorData;
+   private Wrench rightWristSensorWrench;
+   private Vector3d rightWristSensorForce;
+   private final DoubleYoVariable yoTime;
 
    // private final ModifiableValveModel valveModel;
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime)
+         DoubleYoVariable yoTime, ForceSensorDataHolder forceSensorDataHolder)
    {
       super(outgoingCommunicationBridge);
       targetWalkLocation = new Point3d();
@@ -49,13 +58,51 @@ public class TurnValveBehavior extends BehaviorInterface
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
+      globalForceSensorData = forceSensorDataHolder;
+      getForceSensorDefinition(fullRobotModel);
+      rightWristSensorWrench = new Wrench();
+      rightWristSensorForce = new Vector3d();
+      this.yoTime = yoTime;
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
    }
 
+   
+   public void getForceSensorDefinition(FullRobotModel fullRobotModel){
+      for(ForceSensorDefinition currentForceSensorDefinition : fullRobotModel.getForceSensorDefinitions()){
+         System.out.println("TurnValveBehavior: " + currentForceSensorDefinition.toString());
+      }
+   };
+   
+   public void updateWristSensorValues()
+   {
+      String rightWristForceSensorName = "r_arm_wrx";
+            //AtlasSensorInformation.handForceSensorNames.get(RobotSide.LEFT);
+      ForceSensorData rightWristForceSensor = globalForceSensorData.getByName(rightWristForceSensorName);
+      rightWristForceSensor.packWrench(rightWristSensorWrench);
+      
+      rightWristSensorWrench.packLinearPart(rightWristSensorForce);
+   }
+   
    @Override
    public void doControl()
    {
+      updateWristSensorValues();
+      
+      double rightWristForce = rightWristSensorForce.length();
+      
+      if ( rightWristForce > MAX_WRIST_FORCE_THRESHOLD_N )
+      {
+         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForce);
+      }
+      
 
+      if(this.yoTime.getDoubleValue() % 7.0 == 0.0)
+      {
+         System.out.println( "TurnValveBehavior: right wrist Fx : " + rightWristSensorWrench.getLinearPartX());
+         System.out.println( "TurnValveBehavior: right wrist Fy : " + rightWristSensorWrench.getLinearPartY());
+         System.out.println( "TurnValveBehavior: right wrist Fz : " + rightWristSensorWrench.getLinearPartZ());
+      }
+      
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
          ScriptBehaviorInputPacket scriptBehaviorInputPacket = scriptBehaviorInputPacketListener.getNewestPacket();
