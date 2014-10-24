@@ -612,19 +612,19 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double getPelvisPitchUpperLimit()
+   public double getSpinePitchUpperLimit()
    {
       return 0.0872665;
    }
 
    @Override
-   public double getPelvisPitchLowerLimit()
+   public double getSpinePitchLowerLimit()
    {
       return -0.698132;
    }
 
    @Override
-   public boolean isPelvisPitchReversed()
+   public boolean isSpinePitchReversed()
    {
       return true;
    }
