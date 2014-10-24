@@ -66,7 +66,7 @@ public class DropDebrisBehavior extends BehaviorInterface
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
    }
 
-   private void getMidPose(RobotSide side)
+   private void getMidPose()
    {
       midPose.translate(0.0, 0.0, zHeightOffsetFromChestFrameForMidPoint.getDoubleValue());
       midPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -92,7 +92,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    private void setPoses(RobotSide side)
    {
       initializePoses(side);
-      getMidPose(side);
+      getMidPose();
       posesForHandPoseBehavior[0] = new RigidBodyTransform();
       midPose.getPose(posesForHandPoseBehavior[0]);
 
@@ -164,13 +164,15 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      currentBehavior.consumeObjectFromNetworkProcessor(object);
+      if (currentBehavior != null)
+         currentBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      currentBehavior.consumeObjectFromController(object);
+      if (currentBehavior != null)
+         currentBehavior.consumeObjectFromController(object);
    }
 
    @Override
@@ -206,6 +208,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
+      currentBehavior = null;
       behaviors.clear();
       haveInputsBeenSet.set(false);
       isDone.set(false);
