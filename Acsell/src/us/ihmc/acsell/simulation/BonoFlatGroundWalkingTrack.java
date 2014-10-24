@@ -6,8 +6,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -17,8 +15,7 @@ public class BonoFlatGroundWalkingTrack
    public static void main(String[] args)
    {
       BonoRobotModel robotModel = new BonoRobotModel(false, false);
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
 
       final double groundHeight = 0.0;
