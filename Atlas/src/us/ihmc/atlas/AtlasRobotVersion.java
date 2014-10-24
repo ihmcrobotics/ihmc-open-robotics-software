@@ -11,7 +11,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 public enum AtlasRobotVersion {
-	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, ATLAS_ROBOTIQ, GAZEBO_ATLAS_NO_HANDS;
+	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, ATLAS_ROBOTIQ_HOOK, ATLAS_DUAL_ROBOTIQ, GAZEBO_ATLAS_NO_HANDS;
 
 	private static String[] resourceDirectories;
 	private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>(); 
@@ -27,7 +27,8 @@ public enum AtlasRobotVersion {
 		case DRC_HOOKS:
 			return DRCHandType.HOOK;
 			
-		case ATLAS_ROBOTIQ:
+		case ATLAS_ROBOTIQ_HOOK:
+		case ATLAS_DUAL_ROBOTIQ:
 			return DRCHandType.ROBOTIQ;
 			
 		case DRC_NO_HANDS:
@@ -68,8 +69,10 @@ public enum AtlasRobotVersion {
 	         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
 	         case DRC_NO_HANDS:
 	            return "models/GFE/drc_no_hands.sdf";
-	         case ATLAS_ROBOTIQ:
+	         case ATLAS_ROBOTIQ_HOOK:
 	            return "models/GFE/drc_task_hose_robotiq.sdf";
+	         case ATLAS_DUAL_ROBOTIQ:
+	            return "models/GFE/robotiq_dual_hands.sdf";
 	         case DRC_HANDS:
 	            return "models/GFE/drc_hands.sdf";
 	         case DRC_EXTENDED_HANDS:
