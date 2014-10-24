@@ -568,19 +568,19 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getPelvisPitchUpperLimit()
+   public double getSpinePitchUpperLimit()
    {
       return 0;
    }
 
    @Override
-   public double getPelvisPitchLowerLimit()
+   public double getSpinePitchLowerLimit()
    {
       return 0;
    }
 
    @Override
-   public boolean isPelvisPitchReversed()
+   public boolean isSpinePitchReversed()
    {
       return false;
    }
