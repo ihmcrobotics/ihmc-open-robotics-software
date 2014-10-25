@@ -18,6 +18,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -57,6 +58,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCRobotPhysicalProperties physicalProperties;
    private final DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
+   private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final RobotNetworkParameters networkParameters;
@@ -319,5 +321,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
    {
 	   return null;
+   }
+
+   @Override
+   public DRCHandType getDRCHandType()
+   {
+      return drcHandType;
    }
 }
