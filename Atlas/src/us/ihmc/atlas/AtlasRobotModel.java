@@ -331,4 +331,10 @@ public class AtlasRobotModel implements DRCRobotModel
 
       return null;
    }
+
+   @Override
+   public DRCHandType getDRCHandType()
+   {
+      return selectedVersion.getHandModel();
+   }
 }
