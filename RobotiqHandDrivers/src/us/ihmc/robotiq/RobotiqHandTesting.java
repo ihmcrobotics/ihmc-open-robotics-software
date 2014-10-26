@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
+import us.ihmc.utilities.ThreadTools;
 
 public class RobotiqHandTesting
 {
-	private static final long WAIT_TIME_MS = 60000;
-	
 	public static void main(String[] args) throws Exception
 	{
 		//testing the robot hand interface
@@ -16,35 +15,17 @@ public class RobotiqHandTesting
 		
 		long startTime = System.currentTimeMillis();
 		
-		do
-		{
-			if(!rightHand.isReady())
-			{
-//				System.out.println("starting connection");
-//				rightHand.connect();
-//				System.out.println("connected");
-						
-				System.out.println("Sending Activation Request");
-				rightHand.initialize();
-				System.out.println("Activation Request Sent");
-						
-//				System.out.println("Resetting Hand");
-//				rightHand.reset();
-//				System.out.println("Hand Reset");
-			}
-			
-			long timeDifference = System.currentTimeMillis() - startTime;
-			
-			if(timeDifference > WAIT_TIME_MS)
-				break;
-		}
-		while (true);
+		System.out.println("Initializing...");
+//		rightHand.initialize();
+		rightHand.testInit();
+		
+		ThreadTools.sleep(10000);
 		
 		System.out.println("Shutting Down Hand");
 		rightHand.shutdown();
 		System.out.println("Hand Shut Down");
 	}
-
+	
 	/**
 	 * @param hand
 	 * @throws InterruptedException

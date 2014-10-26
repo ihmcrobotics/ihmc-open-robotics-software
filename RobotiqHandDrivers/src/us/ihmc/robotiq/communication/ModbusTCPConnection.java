@@ -8,6 +8,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import us.ihmc.robotiq.RobotiqHandParameters;
+import us.ihmc.utilities.ThreadTools;
+
 public class ModbusTCPConnection
 {
 	private static final int HEADER_LENGTH = 7; // header length in bytes
@@ -18,6 +21,21 @@ public class ModbusTCPConnection
 	private byte[] outBuffer = new byte[32];
 	private byte[] inBuffer = new byte[32];
 	private int packetCounter;
+	
+	// TODO: this came for Stack Overflow
+	public static String bytesToHexString(byte[] bytes)
+	{
+		char[] hexArray = "0123456789ABCDEF".toCharArray();
+		char[] hexChars = new char[bytes.length * 2];
+		for(int i = 0; i < bytes.length; i++)
+		{
+			int hex = bytes[i] & 0xFF;
+			hexChars[i * 2] = hexArray[hex >>> 4];
+			hexChars[i * 2 + 1] = hexArray[hex & 0x0F];
+		}
+		
+		return new String(hexChars);
+	}
 	
 	public ModbusTCPConnection(String ip_address, int port) throws UnknownHostException, IOException
 	{
@@ -49,7 +67,7 @@ public class ModbusTCPConnection
 		 *
 		 *Data:
 		 *Function Code: 1 byte
-		 *Reference Number: 2 bytes
+		 *Address of first register: 2 bytes
 		 *Byte Count: 1 byte
 		 *Application Data: Up to 1449 Bytes
 		*/
@@ -75,7 +93,7 @@ public class ModbusTCPConnection
 		
 		for(int counter = 0; counter < data.length; counter++)
 		{
-			outBuffer[counter + HEADER_LENGTH] = data[counter];
+			outBuffer[HEADER_LENGTH + counter] = data[counter];
 		}
 		
 		int outBytes = HEADER_LENGTH + data.length; 
@@ -84,19 +102,22 @@ public class ModbusTCPConnection
 		
 		int inBytes = inStream.read(inBuffer, 0, 32); //reply
 		
-		if(inBytes < 9)
-		{
-			if(inBytes == 0)
-			{
-				//unexpected close of connection
-				throw new ModbusException("Connection appears to have closed unexpectedly");
-			}
-			else
-			{
-				//response too short
-				throw new ModbusResponseTooShortException(unitID);
-			}
-		}
+//		if(inBytes < 9)
+//		{
+//			if(inBytes == 0)
+//			{
+//				//unexpected close of connection
+//				throw new ModbusException("Connection appears to have closed unexpectedly");
+//			}
+//			else
+//			{
+//				//response too short
+//				throw new ModbusResponseTooShortException(unitID);
+//			}
+//		}
+		
+		System.out.println(bytesToHexString(outBuffer));
+		System.out.println(bytesToHexString(inBuffer));
 		
 		return Arrays.copyOfRange(inBuffer, HEADER_LENGTH, inBytes); //return the reply with the proper length (removes header)
 		
@@ -104,6 +125,11 @@ public class ModbusTCPConnection
 	
 	public byte[] sendLiteral(byte[] data, int length) throws IOException
 	{
+//		for(byte b : data)
+//		{
+//			b = (byte)(b & 0xFF);
+//		}
+		
 		outStream.write(data, 0, length); //request
 		outStream.flush();
 		inStream.read(inBuffer, 0, 32); //reply
