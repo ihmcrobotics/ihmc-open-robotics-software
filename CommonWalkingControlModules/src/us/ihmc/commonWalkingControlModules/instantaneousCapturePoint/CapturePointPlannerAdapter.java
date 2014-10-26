@@ -84,15 +84,15 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
-		   footstepList.clear();
-	      soleFrameList.clear();
-	      
-			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
-
-			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
-			newCapturePointPlanner.initializeSingleSupport(currentTime, footstepList);
+//		   footstepList.clear();
+//	      soleFrameList.clear();
+//	      
+//			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
+//					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
+//					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+//
+//			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
+//			newCapturePointPlanner.initializeSingleSupport(currentTime, footstepList);
 		}
 
 	}
@@ -205,7 +205,18 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
-			return newCapturePointPlanner.isDone(time);
+		   // This is a hack, and is needed for now because with the current icp planner, the single and double support 
+		   // durations are 0 on construction and then isDone() is called which returns true even though the 
+		   // planner has done nothing.
+		   if(newCapturePointPlanner.getHasBeenWokenUp())
+		   {
+		      return newCapturePointPlanner.isDone(time);
+		   }
+		   else
+		   {
+		      newCapturePointPlanner.wakeUp();
+		      return true;
+		   }
 		}
 	}
 
