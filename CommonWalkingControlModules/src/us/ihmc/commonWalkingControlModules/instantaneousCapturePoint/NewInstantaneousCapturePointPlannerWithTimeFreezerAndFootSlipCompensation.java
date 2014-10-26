@@ -251,4 +251,16 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    {
       return super.isDone(getTimeWithDelay(time));   
    }
+   
+   @Override
+   public boolean getHasBeenWokenUp()
+   {
+      return super.getHasBeenWokenUp();
+   }
+   
+   @Override
+   public void wakeUp()
+   {
+      super.wakeUp();
+   }
 }

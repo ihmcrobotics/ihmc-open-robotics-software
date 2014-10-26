@@ -43,6 +43,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
    private final BooleanYoVariable wasPushedInSingleSupport = new BooleanYoVariable("icpPlannerWasPushedInSingleSupport", registry);
    protected final BooleanYoVariable isDoubleSupport = new BooleanYoVariable("icpPlannerIsDoubleSupport", registry);
+   private final BooleanYoVariable hasBeenWokenUp = new BooleanYoVariable("icpPlannerHasBeenWokenUp", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable("icpPlannerTimeInCurrentState", registry);
    private final DoubleYoVariable isDoneTimeThreshold = new DoubleYoVariable("icpPlannerisDoneTimeThreshold", registry);
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("icpPlannerDoubleSupportTime", registry);
@@ -76,11 +77,11 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
          VISUALIZE = false;
       }
 
-      cancelPlan.set(false);
-
+      this.cancelPlan.set(false);
       this.capturePointPlannerParameters = capturePointPlannerParameters;
       this.atAStop.set(true);
       this.wasPushedInSingleSupport.set(false);
+      this.hasBeenWokenUp.set(false);
 
       this.doubleSupportCapturePointTrajectory = new DoubleSupportPolynomialTrajectory("icpPlannerDoubleSupportTrajectory",
             this.capturePointPlannerParameters.getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory(), worldFrame, registry);
@@ -576,18 +577,20 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    {
       comeToStop.set(true);
    }
+   
+   public boolean getHasBeenWokenUp()
+   {
+      return hasBeenWokenUp.getBooleanValue();
+   }
+   
+   public void wakeUp()
+   {
+      this.hasBeenWokenUp.set(true);
+   }
 
    public boolean isDone(double time)
    {
-      if(startDoneBecauseThisIsREALLYHACKY)
-      {
-         startDoneBecauseThisIsREALLYHACKY = false;
-         return true;
-      }
-      else
-      {
-         double timeRemaining = computeAndReturnTimeRemaining(time);
-         return (timeRemaining <= isDoneTimeThreshold.getDoubleValue());
-      }
+      double timeRemaining = computeAndReturnTimeRemaining(time);
+      return (timeRemaining <= isDoneTimeThreshold.getDoubleValue());
    }
 }
