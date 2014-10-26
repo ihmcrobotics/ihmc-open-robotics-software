@@ -15,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -40,7 +41,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
 
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
+   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || KEEP_SCS_UP || checkNothingChanged || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
@@ -187,14 +188,59 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
             fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
-
+      
+      verifyDesiredICPIsContinous(scs);
+      
       if (checkNothingChanged)
          checkNothingChanged(nothingChangedVerifier);
 
       createMovie(scs);
       BambooTools.reportTestFinishedMessage();
    }
- 
+
+   private void verifyDesiredICPIsContinous(SimulationConstructionSet scs)
+   {
+      DoubleYoVariable desiredICPX = (DoubleYoVariable) scs.getVariable("desiredICPX");
+      DoubleYoVariable desiredICPY = (DoubleYoVariable) scs.getVariable("desiredICPY");
+      DoubleYoVariable t = (DoubleYoVariable) scs.getVariable("t");
+      
+      scs.gotoInPointNow();
+      while(Math.abs(desiredICPX.getDoubleValue()) < 1e-4)
+      {
+         scs.tick(1);
+      }
+      scs.setInPoint();
+      
+      scs.cropBuffer();
+      double[] desiredICPXData = scs.getDataBuffer().getEntry(desiredICPX).getData();
+      double[] desiredICPYData = scs.getDataBuffer().getEntry(desiredICPY).getData();
+
+      
+      double[] tValues = scs.getDataBuffer().getEntry(t).getData();
+      double dt = tValues[1] - tValues[0];
+      
+      // Setting max velocity of desired ICP to 3.0. 
+      // This will need to increase once we start walking faster. 
+      // Then we'll need more clever icp continuity checks.
+      
+      double maxChangePerTick = 3.0 * dt;
+      
+      boolean icpXIsContinuous = ArrayTools.isContinuous(desiredICPXData, maxChangePerTick);
+      boolean icpYIsContinuous = ArrayTools.isContinuous(desiredICPYData, maxChangePerTick);
+      
+      if (!icpXIsContinuous || !icpYIsContinuous)
+      {
+         double xMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredICPXData);
+         double yMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredICPYData);
+         
+         System.err.println("Desired ICP xMaxChange = " + xMaxChange);
+         System.err.println("Desired ICP yMaxChange = " + yMaxChange);
+
+         fail("Desired ICP is not continuous!");
+      }
+   }
+   
+
    private void createMovie(SimulationConstructionSet scs)
    {
       if (CREATE_MOVIE)
