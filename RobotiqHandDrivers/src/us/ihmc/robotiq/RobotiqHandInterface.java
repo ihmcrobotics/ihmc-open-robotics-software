@@ -3,12 +3,14 @@ package us.ihmc.robotiq;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.BitSet;
 
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusException;
 import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.fixedPointRepresentation.BitSetTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 /* GENERAL INFO
@@ -46,7 +48,7 @@ public final class RobotiqHandInterface
 	private static final int FUNCTION_CODE = 0;
 	private static final int DATA_BYTES = 1;
 	private static final int GRIPPER_STATUS = 2;
-	private static final int OBJECT_STATUS = 3;
+	private static final int OBJECT_DETECTION = 3;
 	private static final int FAULT_STATUS = 4;
 	private static final int FINGER_A_REQUESTED_POSITION = 5;
 	private static final int FINGER_A_POSITION = 6;
@@ -69,7 +71,7 @@ public final class RobotiqHandInterface
 	
 	/*---FUNCTIONALITY REGISTER BITMASKS---*/
 	//byte 0 (action request)
-	private static final byte INITIALIZATON_MASK =		0b00000001;
+//	private static final byte INITIALIZATON_MASK =		0b00000001;
 	private static final byte OPERATION_MODE_MASK =		0b00000110;
 	private static final byte GO_TO_REQUESTED_MASK =	0b00001000;
 	private static final byte AUTOMATIC_RELEASE_MASK = 	0b00010000;
@@ -104,7 +106,7 @@ public final class RobotiqHandInterface
 	//bytes 2 to 14 do not require masks
 	
 	
-	/*---FUNCTIONALITY REGISTER VALUES---*/
+	/*---Robot output registers & functionalities (data going TO the hand)---*/
 	//byte 0 (action request)
 	//bit 0
 	private static final byte RESET = 			0b00000000;
@@ -118,15 +120,12 @@ public final class RobotiqHandInterface
 	private static final byte STANDBY = 		0b00000000;
 	private static final byte GO_TO_REQUESTED =	0b00001000;
 	//bit 4
-	private static final byte AUTO_RELEASE_DISABLED =	0b00010000;
+	private static final byte AUTO_RELEASE_DISABLED =	0b00000000;
 	private static final byte AUTO_RELEASE_ENABLED =	0b00010000;
 	//bits 5 to 7 reserved
 	
 	//byte 1 (gripper options 1)
-	//bit 0
-	private static final byte GLOVE_MODE_DISABLED = 	0b00000000;
-	private static final byte GLOVE_MODE_ENABLED = 		0b00000001;
-	//bit 1 reserved
+	//bits 0 & 1 reserved
 	//bit 2
 	private static final byte CONCURRENT_FINGER_CONTROL = 	0b00000000;
 	private static final byte INDIVIDUAL_FINGER_CONTROL = 	0b00000100;
@@ -199,7 +198,7 @@ public final class RobotiqHandInterface
 	 */
 	
 	
-	/*---STATUS REGISTER VALUES---*/
+	/*---Robot input registers & status (data coming FROM the hand)---*/
 	//byte 0 (gripper status)
 	//bit 0
 	/*
@@ -341,7 +340,34 @@ public final class RobotiqHandInterface
 	private boolean connected = false;
 	private String address;
 	
-	RobotiqHandInterface()
+	public static void main(String[] args)
+	{
+		RobotiqHandInterface hand = new RobotiqHandInterface();
+		
+		System.out.println("Connecting to hand...");
+		hand.connect();
+		ThreadTools.sleep(500);
+		System.out.println("Connected...");
+		
+		System.out.println("Sending command...");
+//		hand.sendRequest(SET_REGISTERS,
+//				REGISTER_START,
+//				//Action Request
+//				(byte)0b00000001,
+//				(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00);
+		byte[] response = hand.sendRequest(SET_REGISTERS,
+				REGISTER_START,
+				//Action Request
+				(byte)0b00000001);
+		System.out.print("Response: ");
+		BitSet store = new BitSet();
+		BitSetTools.putByteArray(store, 0, response);
+		BitSetTools.printBitSet(store);
+		System.out.println("Sleeping...");
+		ThreadTools.sleep(10000);
+	}
+	
+	public RobotiqHandInterface()
 	{
 		this(RobotSide.RIGHT);
 	}
@@ -349,6 +375,9 @@ public final class RobotiqHandInterface
 	public RobotiqHandInterface(RobotSide robotSide)
 	{
 		this.address = robotSide.equals(RobotSide.LEFT) ? RobotiqHandParameters.LEFT_HAND_ADDRESS : RobotiqHandParameters.RIGHT_HAND_ADDRESS;
+		
+		connect();
+//		reset();
 	}
 	
 	public boolean connect()
@@ -368,18 +397,18 @@ public final class RobotiqHandInterface
 	
 	public void initialize()
 	{
-	   if(!this.isConnected())
-			this.connect();
-			
-		status = this.getStatus();
-		
-		if(status == null)
-		   return;
-		
-		if(((status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
-		{
-			this.reset();
-		}
+//	   if(!this.isConnected())
+//			this.connect();
+//			
+//		status = this.getStatus();
+//		
+//		if(status == null)
+//		   return;
+//		
+//		if(((status[GRIPPER_STATUS] & INITIALIZE) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
+//		{
+//			this.reset();
+//		}
 		
 		//initialize arrays
 		Arrays.fill(position,(byte)0x00);
@@ -412,6 +441,58 @@ public final class RobotiqHandInterface
 		
 		blockDuringMotion();
 	}
+	
+	public void testInit() throws IOException
+	{
+		byte[] initMessage = new byte[]
+				{
+						// HEADER
+						// Transaction ID
+//						(byte) 0x99, (byte) 0x02,
+//						// Protocol ID
+//						(byte) 0x00, (byte) 0x00,
+//						// Message length
+//						(byte) 0x00, (byte) 0x17,
+//						// Slave ID
+//						(byte) 0x02, // <--- From example documentation
+						
+						// DATA
+						// Function code
+						0x10,
+						// Address of first register to write to
+						0x00, 0x00,
+						// Number of registers to write to
+						0x00, 0x08,
+						// Number of MESSAGE bytes
+						0x10,
+						
+						// MESSAGE
+						// Action request
+						0x01, // <---- 0b00000001 to initialize
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00,
+						0x00
+				};
+//		System.out.println(ModbusTCPConnection.bytesToHexString(initMessage));
+//		System.out.println(ModbusTCPConnection.bytesToHexString(connection.sendLiteral(initMessage, initMessage.length)));
+		
+		connection.transcieve(RobotiqHandParameters.UNIT_ID, initMessage);
+//		connection.sendLiteral(initMessage, initMessage.length);
+
+		blockDuringMotion();
+	}
 
 	public void reset()
 	{
@@ -430,7 +511,7 @@ public final class RobotiqHandInterface
 			ThreadTools.sleep(200);
 			status = this.getStatus();
 			errorCount++;
-		}while((status[GRIPPER_STATUS] & INITIALIZATON_MASK) != RESET); //check until reset
+		}while((status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
 	}
 	
 	public void shutdown()
@@ -535,12 +616,18 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 	}
 
-	void blockDuringMotion()
+	public void blockDuringMotion()
 	{
 		do
 		{
 			ThreadTools.sleep(200);
 			status = this.getStatus();
+			
+			System.out.println("Gripper status: " + status[GRIPPER_STATUS]);
+			System.out.println("Motion status mask: " + MOTION_STATUS_MASK);
+			System.out.println("Gripper status & motion status mask: " + (status[GRIPPER_STATUS] & MOTION_STATUS_MASK));
+			System.out.println("In motion mask: " + IN_MOTION);
+			
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
@@ -714,15 +801,15 @@ public final class RobotiqHandInterface
 		   status = getStatus();
 		}while(status.length < 22);
 		
-		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZATON_MASK);
+		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
 		data[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
 		data[2] = (byte) ((status[GRIPPER_STATUS] & GO_TO_REQUESTED_MASK) >> 3);
 		data[3] = (byte) ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) >> 4);
 		data[4] = (byte) ((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) >> 6);
-		data[5] = (byte) (status[OBJECT_STATUS] & OBJECT_DETECTION_A_MASK);
-		data[6] = (byte) ((status[OBJECT_STATUS] & OBJECT_DETECTION_B_MASK) >> 2);
-		data[7] = (byte) ((status[OBJECT_STATUS] & OBJECT_DETECTION_C_MASK) >> 4);
-		data[8] = (byte) ((status[OBJECT_STATUS] & OBJECT_DETECTION_S_MASK) >> 6);
+		data[5] = (byte) (status[OBJECT_DETECTION] & OBJECT_DETECTION_A_MASK);
+		data[6] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_B_MASK) >> 2);
+		data[7] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_C_MASK) >> 4);
+		data[8] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_S_MASK) >> 6);
 		data[9] = status[FAULT_STATUS];
 		data[10] = status[FINGER_A_REQUESTED_POSITION];
 		data[11] = status[FINGER_A_POSITION];
@@ -749,7 +836,7 @@ public final class RobotiqHandInterface
 		if(status == null)
 			return false;
 		else
-			return (status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED;
+			return (status[GRIPPER_STATUS] & INITIALIZE) == INITIALIZED;
 	}
 	
 	public boolean doneInitializing()
@@ -835,7 +922,7 @@ public final class RobotiqHandInterface
 			e.printStackTrace();
 		}
 		
-		return null; //should probably return something a bit more useful that won't break things
+		return null; //TODO: should probably return something a bit more useful that won't break things
 	}
 	
 	private void sendMotionRequest()
