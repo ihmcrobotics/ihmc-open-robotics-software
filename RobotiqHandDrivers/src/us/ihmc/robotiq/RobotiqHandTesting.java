@@ -1,29 +1,44 @@
 package us.ihmc.robotiq;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
-import us.ihmc.utilities.ThreadTools;
 
 public class RobotiqHandTesting
 {
 	public static void main(String[] args) throws Exception
 	{
-		//testing the robot hand interface
-		RobotiqHandInterface rightHand = new RobotiqHandInterface();
+		JFrame frame = new JFrame();
 		
-		long startTime = System.currentTimeMillis();
+		JPanel panel = new JPanel(new GridBagLayout());
+		frame.add(panel);
 		
-		System.out.println("Initializing...");
-//		rightHand.initialize();
-		rightHand.testInit();
+		GridBagConstraints c = new GridBagConstraints();
 		
-		ThreadTools.sleep(10000);
+		SliderWithTwoButtonsPanel finger1Panel = new SliderWithTwoButtonsPanel();
+		SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel();
+		SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel();
 		
-		System.out.println("Shutting Down Hand");
-		rightHand.shutdown();
-		System.out.println("Hand Shut Down");
+		c.gridx = 0;
+		c.gridy = 0;
+		
+		panel.add(finger1Panel, c);
+		
+		c.gridy++;
+		panel.add(finger2Panel, c);
+		
+		c.gridy++;
+		panel.add(finger3Panel, c);
+		
+		frame.pack();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
 	}
 	
 	/**
