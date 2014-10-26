@@ -234,8 +234,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    {
       comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
 
-      int numberOfCentersOfPressureToPlan = (footstepList.size() < numberFootstepsToConsider.getIntegerValue()) ? footstepList.size()
-            : numberFootstepsToConsider.getIntegerValue();
+      int numberOfCentersOfPressureToPlan = numberFootstepsToConsider.getIntegerValue();
 
       if (!wasPushedInSingleSupport.getBooleanValue())
       {
