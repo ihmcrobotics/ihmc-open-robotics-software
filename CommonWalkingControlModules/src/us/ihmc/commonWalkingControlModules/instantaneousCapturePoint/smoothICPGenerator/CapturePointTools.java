@@ -58,7 +58,7 @@ public class CapturePointTools
    {
       int numberFootstepsInList = footstepList.size();
 
-      for (int i = 0; i < numberFootstepsToConsider - 1; i++)
+      for (int i = 0; i < numberFootstepsToConsider; i++)
       {
          if (i < numberFootstepsInList - 1)
          {
@@ -72,9 +72,12 @@ public class CapturePointTools
          }
       }
 
-      arrayToPack.get(numberFootstepsToConsider - 1).setAndMatchFrame(footstepList.get(numberFootstepsToConsider - 2));
-      arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
-      arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
+      if(numberFootstepsToConsider <= numberFootstepsInList)
+      {
+         arrayToPack.get(numberFootstepsToConsider - 1).setAndMatchFrame(footstepList.get(numberFootstepsToConsider - 2));
+         arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
+         arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
+      }
    }
 
    /**
@@ -96,7 +99,7 @@ public class CapturePointTools
 
       int numberFootstepsInList = footstepList.size();
 
-      for (int i = 1; i < numberFootstepsToConsider - 1; i++)
+      for (int i = 1; i < numberFootstepsToConsider; i++)
       {
          if (i < numberFootstepsInList - 1)
          {
@@ -110,9 +113,12 @@ public class CapturePointTools
          }
       }
 
-      arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
-      arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
-      arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
+      if(numberFootstepsToConsider <= numberFootstepsInList)
+      {
+         arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
+         arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
+         arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
+      }
    }
 
    /**
