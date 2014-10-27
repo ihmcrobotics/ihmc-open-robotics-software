@@ -62,6 +62,10 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
    }
 
+   public void notifyWalkingComplete()
+   {
+   }
+
    public void setWalk(boolean walk)
    {
       this.walk.set(walk);

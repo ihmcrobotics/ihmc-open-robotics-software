@@ -64,6 +64,11 @@ public class SwitchableFootstepProvider implements FootstepProvider
       getFootstepProviderInUse().notifyComplete();
    }
 
+   public void notifyWalkingComplete()
+   {
+      getFootstepProviderInUse().notifyWalkingComplete();
+   }
+
    public int getNumberOfFootstepsToProvide()
    {
       return getFootstepProviderInUse().getNumberOfFootstepsToProvide();

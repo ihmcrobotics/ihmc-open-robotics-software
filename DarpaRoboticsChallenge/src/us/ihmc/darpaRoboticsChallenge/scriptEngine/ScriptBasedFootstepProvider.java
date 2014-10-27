@@ -221,6 +221,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    }
 
    @Override
+   public void notifyWalkingComplete()
+   {
+   }
+
+   @Override
    public int getNumberOfFootstepsToProvide()
    {
       return footstepQueue.size();

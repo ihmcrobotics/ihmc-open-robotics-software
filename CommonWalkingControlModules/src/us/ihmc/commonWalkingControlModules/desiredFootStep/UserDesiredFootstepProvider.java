@@ -184,6 +184,11 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    }
 
    @Override
+   public void notifyWalkingComplete()
+   {
+   }
+
+   @Override
    public int getNumberOfFootstepsToProvide()
    {
       return footstepList.size();
