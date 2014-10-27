@@ -141,13 +141,13 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		@Override
 		public boolean getDoTimeFreezing()
 		{
-			return false;
+			return true;
 		}
 
 		@Override
 		public boolean getDoFootSlipCompensation()
 		{
-			return false;
+			return true;
 		}
 
 		@Override
@@ -227,7 +227,8 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	@Test
 	public void visualizePlanner()
 	{
-		boolean testPush = false;
+		boolean testPush = true;
+		boolean changeSwingTimeWhenPushed = true;
 		boolean cancelPlanInDoubleSupport = false;
 		boolean cancelPlanInSingleSupport = false;
 		boolean breakAfterDoubleSupportPhase = cancelPlanInDoubleSupport || cancelPlanInSingleSupport;
@@ -344,7 +345,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 					null);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-					initialTime, omega0, initialICPPosition, footLocations, testPush, cancelPlanInSingleSupport);
+					initialTime, omega0, initialICPPosition, footLocations, testPush, changeSwingTimeWhenPushed, cancelPlanInSingleSupport);
 			if (testPush)
 			{
 				testPush = false;
@@ -507,7 +508,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 			FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
 			NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double singleSupportDuration,
 			double initialTime, double omega0, FramePoint initialICPPosition, ArrayList<FramePoint> footstepList, boolean testPush,
-			boolean cancelPlan)
+			boolean changeSwingTimeWhenPushed, boolean cancelPlan)
 	{
 		double time = initialTime + deltaT;
 		while (!icpPlanner.isDone(time))
@@ -558,7 +559,14 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 				if (time > initialTime + 0.2)
 				{
 					updateFootstepsFromPush(footstepList);
-					icpPlanner.updateForSingleSupportPush(footstepList, time);
+					if(changeSwingTimeWhenPushed)
+					{
+					   icpPlanner.updateForSingleSupportPush(footstepList, 0.5*((initialTime+singleSupportDuration)-time),time);
+					}
+					else
+					{
+					   icpPlanner.updateForSingleSupportPush(footstepList, time);
+					}
 					if (visualize)
 					{
 						for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
@@ -578,6 +586,11 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 			}
 
 			time += deltaT;
+		}
+		
+		if(testPush && changeSwingTimeWhenPushed)
+		{
+		   icpPlanner.resetParametersToDefault();
 		}
 	}
 
