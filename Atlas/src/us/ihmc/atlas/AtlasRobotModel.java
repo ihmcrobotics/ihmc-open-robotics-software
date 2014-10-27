@@ -145,26 +145,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return jointMap;
    }
 
-   public boolean hasIRobotHands()
-   {
-      return selectedVersion.getHandModel() == DRCHandType.IROBOT;
-   }
-
-   public boolean hasArmExtensions()
-   {
-      return selectedVersion.hasArmExtensions();
-   }
-
-   public boolean hasHookHands()
-   {
-      return selectedVersion.getHandModel() == DRCHandType.HOOK;
-   }
-
-   public boolean hasRobotiqHands()
-   {
-      return selectedVersion.getHandModel() == DRCHandType.ROBOTIQ;
-   }
-
    public DRCHandType getHandType()
    {
       return selectedVersion.getHandModel();
