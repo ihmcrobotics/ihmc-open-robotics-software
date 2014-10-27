@@ -82,6 +82,7 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
+         sendPacketToNetworkProcessor(outgoingFootstepDataList);
          sendPacketToController(outgoingFootstepDataList);
          packetHasBeenSent.set(true);
       }
