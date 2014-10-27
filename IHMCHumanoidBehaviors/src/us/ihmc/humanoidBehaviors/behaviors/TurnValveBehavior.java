@@ -59,13 +59,13 @@ public class TurnValveBehavior extends BehaviorInterface
    private Vector3d rightWristForce;
    private final DoubleYoVariable rightWristForceMagnitude;
    private final FilteredVelocityYoVariable rightWristForceHighPassFiltered;
-   private Double maxObservedWristForce;
+   private Double maxObservedWristForce = 0.0;
    private final DoubleYoVariable yoTime;
    
    private final YoFramePoint2d yoCapturePoint;
    private final YoFramePoint2d yoDesiredCapturePoint;
    private final DoubleYoVariable capturePointErrorMag;
-   private Double maxObservedCapturePointError;
+   private Double maxObservedCapturePointError = 0.0;
 
 
 
