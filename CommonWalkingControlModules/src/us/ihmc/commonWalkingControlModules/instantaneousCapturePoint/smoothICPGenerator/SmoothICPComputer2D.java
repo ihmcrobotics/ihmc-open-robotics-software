@@ -206,4 +206,10 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    {
       return super.getTimeInState(time);
    }
+
+   @Override
+   public void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time)
+   {
+      throw new RuntimeException("Not implemented.");      
+   }
 }
