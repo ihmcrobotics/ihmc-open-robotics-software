@@ -16,17 +16,28 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
+
+
+
+
 //~--- JDK imports ------------------------------------------------------------
 import java.io.InputStream;
 
 public class TurnValveBehavior extends BehaviorInterface
 {
+   private final double FORCE_SENSOR_HIGH_PASS_FILTER_CUTOFF_HZ = 0.1;
    private final double MAX_WRIST_FORCE_THRESHOLD_N = 40.0;
+   private final double MAX_CAPTURE_POINT_ERROR = 1.0;
+
    private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
    private Vector3d valveLocation = new Vector3d();
    private Vector3d valveOffsetInWorldFrame = new Vector3d();
@@ -41,15 +52,27 @@ public class TurnValveBehavior extends BehaviorInterface
    private YoFrameOrientation valveOrientation;
    private BehaviorInterface currentBehavior;
    private boolean isDone;
-   
+
+   private final String rightWristForceSensorName = "r_arm_wrx";  //AtlasSensorInformation.handForceSensorNames.get(RobotSide.RIGHT);
    private ForceSensorDataHolder globalForceSensorData;
-   private Wrench rightWristSensorWrench;
-   private Vector3d rightWristSensorForce;
+   private Wrench rightWristWrench;
+   private Vector3d rightWristForce;
+   private final DoubleYoVariable rightWristForceMagnitude;
+   private final FilteredVelocityYoVariable rightWristForceHighPassFiltered;
+   private Double maxObservedWristForce;
    private final DoubleYoVariable yoTime;
+   
+   private final YoFramePoint2d yoCapturePoint;
+   private final YoFramePoint2d yoDesiredCapturePoint;
+   private final DoubleYoVariable capturePointErrorMag;
+   private Double maxObservedCapturePointError;
+
+
+
 
    // private final ModifiableValveModel valveModel;
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, ForceSensorDataHolder forceSensorDataHolder)
+         DoubleYoVariable yoTime, YoFramePoint2d yoCapturePoint, YoFramePoint2d yoDesiredCapturePoint, ForceSensorDataHolder forceSensorDataHolder, double DT)
    {
       super(outgoingCommunicationBridge);
       targetWalkLocation = new Point3d();
@@ -60,49 +83,79 @@ public class TurnValveBehavior extends BehaviorInterface
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
       globalForceSensorData = forceSensorDataHolder;
       getForceSensorDefinition(fullRobotModel);
-      rightWristSensorWrench = new Wrench();
-      rightWristSensorForce = new Vector3d();
+      rightWristWrench = new Wrench();
+      rightWristForce = new Vector3d();
+      rightWristForceMagnitude = new DoubleYoVariable("rightWristForceMag", registry);
+      rightWristForceHighPassFiltered = new FilteredVelocityYoVariable("rightWristForceMagHighPass", "", AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(FORCE_SENSOR_HIGH_PASS_FILTER_CUTOFF_HZ, DT), rightWristForceMagnitude, DT, registry);
       this.yoTime = yoTime;
+      
+      this.yoCapturePoint = yoCapturePoint;
+      this.yoDesiredCapturePoint = yoDesiredCapturePoint;
+      this.capturePointErrorMag = new DoubleYoVariable("capturePointError", registry);
+
+      
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
    }
 
-   
-   public void getForceSensorDefinition(FullRobotModel fullRobotModel){
-      for(ForceSensorDefinition currentForceSensorDefinition : fullRobotModel.getForceSensorDefinitions()){
+   public void getForceSensorDefinition(FullRobotModel fullRobotModel)
+   {
+      for (ForceSensorDefinition currentForceSensorDefinition : fullRobotModel.getForceSensorDefinitions())
+      {
          System.out.println("TurnValveBehavior: " + currentForceSensorDefinition.toString());
       }
    };
-   
+
    public void updateWristSensorValues()
    {
-      String rightWristForceSensorName = "r_arm_wrx";
-            //AtlasSensorInformation.handForceSensorNames.get(RobotSide.LEFT);
-      ForceSensorData rightWristForceSensor = globalForceSensorData.getByName(rightWristForceSensorName);
-      rightWristForceSensor.packWrench(rightWristSensorWrench);
+      ForceSensorData rightWristForceSensorData = globalForceSensorData.getByName(rightWristForceSensorName);
+      rightWristForceSensorData.packWrench(rightWristWrench);
+
+      rightWristWrench.packLinearPart(rightWristForce);
       
-      rightWristSensorWrench.packLinearPart(rightWristSensorForce);
+      rightWristForceMagnitude.set(rightWristForce.length());
+      
+      rightWristForceHighPassFiltered.update();
+      
+      if (rightWristForceHighPassFiltered.getDoubleValue() > maxObservedWristForce)
+      {
+         maxObservedWristForce = rightWristForceHighPassFiltered.getDoubleValue();
+      }
+   }
+
+   FramePoint2d tempFramePoint2d = new FramePoint2d();
+   
+   private void updateCapturePointError()
+   {
+      tempFramePoint2d.set(yoDesiredCapturePoint.getX(), yoDesiredCapturePoint.getY());
+      
+      double error = Math.abs( yoCapturePoint.distance(tempFramePoint2d) );
+      
+      if (error > maxObservedCapturePointError)
+      {
+         maxObservedCapturePointError = error;
+      }
+      capturePointErrorMag.set(error);
    }
    
    @Override
    public void doControl()
    {
+      updateCapturePointError();
       updateWristSensorValues();
-      
-      double rightWristForce = rightWristSensorForce.length();
-      
-      if ( rightWristForce > MAX_WRIST_FORCE_THRESHOLD_N )
-      {
-         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForce);
-      }
-      
 
-      if(this.yoTime.getDoubleValue() % 7.0 == 0.0)
-      {
-         System.out.println( "TurnValveBehavior: right wrist Fx : " + rightWristSensorWrench.getLinearPartX());
-         System.out.println( "TurnValveBehavior: right wrist Fy : " + rightWristSensorWrench.getLinearPartY());
-         System.out.println( "TurnValveBehavior: right wrist Fz : " + rightWristSensorWrench.getLinearPartZ());
-      }
       
+      if (capturePointErrorMag.getDoubleValue() > MAX_CAPTURE_POINT_ERROR)
+      {
+         System.out.println("TurnValveBehavior: MAX CAPTURE POINT ERROR EXCEEDED!  Capture Point Error =  " + capturePointErrorMag.getDoubleValue());
+      }
+
+
+      if (rightWristForceHighPassFiltered.getDoubleValue() > MAX_WRIST_FORCE_THRESHOLD_N)
+      {
+         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForceHighPassFiltered.getDoubleValue());
+      }
+
+
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
          ScriptBehaviorInputPacket scriptBehaviorInputPacket = scriptBehaviorInputPacketListener.getNewestPacket();
@@ -118,9 +171,9 @@ public class TurnValveBehavior extends BehaviorInterface
          scriptResourceStream = this.getClass().getClassLoader().getResourceAsStream(scriptName);
 
          if (scriptResourceStream == null)
-            System.out.println("Script Resource Stream is null. Can't load script!");
+            System.out.println("TurnValveBehavior: Script Resource Stream is null. Can't load script!");
          else
-            System.out.println("Script " + scriptBehaviorInputPacket.getScriptName() + " loaded.");
+            System.out.println("TurnValveBehavior: Script " + scriptBehaviorInputPacket.getScriptName() + " loaded.");
 
          scriptBehavior.setScriptInputs(scriptResourceStream, worldToValveTransform);
       }
@@ -143,6 +196,7 @@ public class TurnValveBehavior extends BehaviorInterface
       currentBehavior.doControl();
    }
 
+
    private void setValveLocationAndOrientation(RigidBodyTransform worldToValveTransform)
    {
       worldToValveTransform.get(valveLocation);
@@ -153,11 +207,13 @@ public class TurnValveBehavior extends BehaviorInterface
    {
       targetWalkLocation.set(valveLocation);
       worldToValveTransform.transform(valveInteractionOffsetInValveFrame, valveOffsetInWorldFrame);
-      System.out.println("TurnValveBehavior:  ValveOffset in World Frame:" + valveOffsetInWorldFrame);
       targetWalkLocation.add(valveOffsetInWorldFrame);
       targetWalkOrientation.setYawPitchRoll(valveOrientation.getYaw().getDoubleValue() + 0.5 * Math.PI, valveOrientation.getPitch().getDoubleValue(),
             valveOrientation.getRoll().getDoubleValue());
       walkToLocationBehavior.setTarget(targetWalkLocation, targetWalkOrientation);
+      
+      
+      System.out.println("TurnValveBehavior:  ValveOffset in World Frame:" + valveOffsetInWorldFrame);
       System.out.println("TurnValveBehavior: Turn Valve Location Updated:" + valveLocation);
       System.out.println("TurnValveBehavior: Target Walk to Location Updated:" + targetWalkLocation);
    }
@@ -189,7 +245,20 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void enableActions()
    {
-      // currentBehavior.enableActions();
+      System.out.println("TurnValveBehavior: Current Child Behavior: " + currentBehavior.getName());
+      
+      System.out.println("TurnValveBehavior: Script Resource Stream" + scriptResourceStream);
+      
+      System.out.println("TurnValveBehavior: right wrist Fx : " + rightWristWrench.getLinearPartX());
+      System.out.println("TurnValveBehavior: right wrist Fy : " + rightWristWrench.getLinearPartY());
+      System.out.println("TurnValveBehavior: right wrist Fz : " + rightWristWrench.getLinearPartZ());
+      
+      System.out.println("TurnValveBehavior: max wrist force : " + maxObservedWristForce);
+      System.out.println("TurnValveBehavior: max capture point error : " + maxObservedCapturePointError);
+      
+      System.out.println("TurnValveBehavior: Valve Location: " + valveLocation);
+      System.out.println("TurnValveBehavior: ValveOffset in World Frame: " + valveOffsetInWorldFrame);
+      System.out.println("TurnValveBehavior: Target Walk to Location: " + targetWalkLocation);
    }
 
    @Override
