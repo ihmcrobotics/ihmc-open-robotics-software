@@ -276,7 +276,8 @@ public class FootstepPathCoordinatorTest
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, null, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), null, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+         
          footsteps.add(footstep);
       }
       return footsteps;

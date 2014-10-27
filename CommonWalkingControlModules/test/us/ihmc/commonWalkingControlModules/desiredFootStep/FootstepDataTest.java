@@ -333,7 +333,7 @@ public class FootstepDataTest
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, robotSide, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), robotSide, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -393,7 +393,7 @@ public class FootstepDataTest
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -421,7 +421,7 @@ public class FootstepDataTest
             PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
             boolean trustHeight = true;
-            Footstep footstep = new Footstep(contactablePlaneBody, footstepData.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+            Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), footstepData.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }

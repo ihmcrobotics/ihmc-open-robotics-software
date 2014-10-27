@@ -45,7 +45,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       String id = "footstep_" + currentIndex;
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
-      Footstep footstep = new Footstep(id, contactableBody, footstepData.getRobotSide(), contactableBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), poseReferenceFrame, trustHeight);
 
       footstepQueue.add(footstep);
 
