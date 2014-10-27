@@ -316,4 +316,27 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 			throw new RuntimeException("Not implemented");
 		}
 	}
+
+	@Override
+	public void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time) 
+	{
+		if(USE_OLD_HACKY_ICP_PLANNER)
+		{
+			oldCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, time);
+		}
+		else
+		{
+		   footstepList.clear();
+         soleFrameList.clear();
+         
+         transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
+               capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
+               capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+
+         newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
+         newCapturePointPlanner.initializeSingleSupport(time, footstepList);
+         
+			newCapturePointPlanner.updateForSingleSupportPush(footstepList, time);
+		}
+	}
 }

@@ -37,4 +37,6 @@ public interface InstantaneousCapturePointPlanner
    public abstract double getTimeInState(double time);
 
    public abstract void setDoHeelToToeTransfer(boolean doHeelToToeTransfer);
+   
+   public abstract void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time);
 }

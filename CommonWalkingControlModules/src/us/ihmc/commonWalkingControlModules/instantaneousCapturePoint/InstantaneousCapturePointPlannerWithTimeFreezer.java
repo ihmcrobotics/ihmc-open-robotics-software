@@ -199,4 +199,10 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       // TODO Auto-generated method stub
       return instantaneousCapturePointPlanner.getSingleSupportStartICP();
    }
+
+   @Override
+   public void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time)
+   {
+      throw new RuntimeException("Not implemented.");      
+   }
 }

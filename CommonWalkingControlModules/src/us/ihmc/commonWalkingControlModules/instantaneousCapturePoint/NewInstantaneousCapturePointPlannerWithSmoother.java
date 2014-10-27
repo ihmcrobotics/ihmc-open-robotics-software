@@ -193,11 +193,6 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
          initializeDoubleSupportCapturePointTrajectory(desiredCapturePointPosition, desiredCapturePointVelocity,
                singleSupportInitialDesiredCapturePointPosition, singleSupportInitialDesiredCapturePointVelocity, doubleSupportDuration);
       }
-
-      if (wasPushedInSingleSupport.getBooleanValue())
-      {
-         wasPushedInSingleSupport.set(false);
-      }
    }
 
    public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
@@ -418,6 +413,12 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
       desiredCentroidalMomentumPivotPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
+   
+   public void updateForSingleSupportPush(ArrayList<FramePoint> footstepList, double newSingleSupportDuration, double time)
+   {
+      this.setSingleSupportTime(newSingleSupportDuration);
+      updateForSingleSupportPush(footstepList, time);
+   }
 
    public void updateForSingleSupportPush(ArrayList<FramePoint> footstepList, double time)
    {
@@ -438,6 +439,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       singleSupportInitialDesiredCapturePointPosition.set(desiredCapturePointPosition);
 
       initialTime.set(time);
+      
+      this.wasPushedInSingleSupport.set(false);
    }
 
    public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
