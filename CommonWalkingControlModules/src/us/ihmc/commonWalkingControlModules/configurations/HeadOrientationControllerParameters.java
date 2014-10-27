@@ -12,13 +12,10 @@ public interface HeadOrientationControllerParameters
 
    public abstract double[] getInitialHeadYawPitchRoll();
 
-   public abstract String getJointNameForExtendedPitchRange();
-
    public abstract double getNeckPitchUpperLimit();
 
    public abstract double getNeckPitchLowerLimit();
 
-   
    public abstract double getHeadYawLimit();
 
    public abstract double getHeadRollLimit();

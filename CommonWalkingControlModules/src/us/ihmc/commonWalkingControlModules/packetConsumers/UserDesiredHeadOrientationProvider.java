@@ -10,34 +10,22 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 public class UserDesiredHeadOrientationProvider implements HeadOrientationProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable userDesiredHeadPitch, userDesiredHeadYaw, userDesiredNeckPitch, userDesiredHeadRoll;
+   private final DoubleYoVariable userDesiredHeadYaw, userDesiredHeadPitch, userDesiredHeadRoll;
    private final ReferenceFrame headOrientationFrame;
 
    private final AtomicBoolean isNewHeadOrientationInformationAvailable = new AtomicBoolean(true);
-   private final AtomicDouble desiredJointForExtendedNeckPitchRangeAngle = new AtomicDouble(0.0);
    private final FrameOrientation desiredHeadOrientation = new FrameOrientation();
 
    public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, YoVariableRegistry parentRegistry)
    {
       this.headOrientationFrame = headOrientationFrame;
 
-      userDesiredHeadPitch = new DoubleYoVariable("userDesiredHeadPitch", registry);
       userDesiredHeadYaw = new DoubleYoVariable("userDesiredHeadYaw", registry);
-      userDesiredNeckPitch = new DoubleYoVariable("userDesiredNeckPitch", registry);
+      userDesiredHeadPitch = new DoubleYoVariable("userDesiredHeadPitch", registry);
       userDesiredHeadRoll = new DoubleYoVariable("userDesiredHeadRoll", registry);
-
-      userDesiredHeadPitch.addVariableChangedListener(new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            desiredJointForExtendedNeckPitchRangeAngle.set(userDesiredHeadPitch.getDoubleValue());
-         }
-      });
 
       setupListeners();
 
@@ -48,32 +36,29 @@ public class UserDesiredHeadOrientationProvider implements HeadOrientationProvid
    {
       VariableChangedListener variableChangedListener = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             isNewHeadOrientationInformationAvailable.set(true);
-            desiredHeadOrientation.setIncludingFrame(headOrientationFrame, userDesiredHeadYaw.getDoubleValue(), userDesiredNeckPitch.getDoubleValue(),
+            desiredHeadOrientation.setIncludingFrame(headOrientationFrame, userDesiredHeadYaw.getDoubleValue(), userDesiredHeadPitch.getDoubleValue(),
                   userDesiredHeadRoll.getDoubleValue());
          }
       };
 
-      userDesiredHeadPitch.addVariableChangedListener(variableChangedListener);
       userDesiredHeadYaw.addVariableChangedListener(variableChangedListener);
-      userDesiredNeckPitch.addVariableChangedListener(variableChangedListener);
+      userDesiredHeadPitch.addVariableChangedListener(variableChangedListener);
       userDesiredHeadRoll.addVariableChangedListener(variableChangedListener);
 
       variableChangedListener.variableChanged(null);
    }
 
-   public double getDesiredExtendedNeckPitchJointAngle()
-   {
-      return desiredJointForExtendedNeckPitchRangeAngle.getAndSet(Double.NaN);
-   }
-
+   @Override
    public boolean isNewHeadOrientationInformationAvailable()
    {
       return isNewHeadOrientationInformationAvailable.getAndSet(false);
    }
 
+   @Override
    public FrameOrientation getDesiredHeadOrientation()
    {
       return desiredHeadOrientation;

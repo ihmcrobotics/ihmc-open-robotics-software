@@ -9,8 +9,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 public class DesiredHeadOrientationProvider implements HeadOrientationProvider
 {
    private final AtomicReference<LookAtPacket> lookAtPacket = new AtomicReference<LookAtPacket>();
@@ -19,9 +17,6 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    private final HeadOrientationPacketConsumer headOrientationPacketConsumer;
    private final LookAtPacketConsumer lookAtPacketConsumer;
    private final ReferenceFrame headOrientationFrame;
-
-   private AtomicDouble desiredJointForExtendedNeckPitchRangeAngle = new AtomicDouble(0.0);
-   private AtomicDouble desiredNeckPitchAngle = new AtomicDouble(0.0);
 
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
    private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
@@ -68,7 +63,6 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
       if (object != null)
       {
          pointToTrack.setIncludingFrame(lookAtFrame, object.getLookAtPoint());
-         desiredJointForExtendedNeckPitchRangeAngle.set(0.0);
          return true;
       }
       else
@@ -84,8 +78,6 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
       if (packet != null)
       {
          headOrientation.set(packet.getQuaternion());
-         desiredJointForExtendedNeckPitchRangeAngle.set(packet.getDesiredJointForExtendedNeckPitchRangeAngle());
-         desiredNeckPitchAngle.set(packet.getDesiredNeckPitchAngle());
          return true;
       }
       else
@@ -111,11 +103,5 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    public ReferenceFrame getHeadOrientationExpressedInFrame()
    {
       return headOrientationFrame;
-   }
-
-   @Override
-   public double getDesiredExtendedNeckPitchJointAngle()
-   {
-      return desiredJointForExtendedNeckPitchRangeAngle.getAndSet(Double.NaN);
    }
 }

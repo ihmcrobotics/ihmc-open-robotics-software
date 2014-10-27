@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -360,6 +361,11 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
 
    public static class AtlasControllerParametersGettingIntoTheCar extends AtlasRobotMultiContactControllerParameters
    {
+      public AtlasControllerParametersGettingIntoTheCar(AtlasJointMap jointMap)
+      {
+         super(jointMap);
+      }
+
       public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
       {
          Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
