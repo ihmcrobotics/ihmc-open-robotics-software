@@ -82,7 +82,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
 
       // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
-      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsLadder("Ladder"));
+      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
       combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
 
       combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
@@ -133,20 +133,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpFloatingStair(combinedTerrainObject3D, centerPoint, stepWidth, stepTread, stepThickness, stairTopHeight, courseAngle, app);
    }
 
-   private static CombinedTerrainObject3D setUpPathDRCTrialsLadder(String name)
+   private static CombinedTerrainObject3D setUpPathDRCTrialsSteps(String name)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       final double courseAngle = 3 * 45. / 2;
       final double courseStartDistance = 7;
-      AppearanceDefinition app = YoAppearance.Beige();
+      AppearanceDefinition app = YoAppearance.BlackMetalMaterial();
 
-      final double stepTread = 0.1524;
-      final double stepWidth = 0.812;
-      final double stepThickness = 0.0381;
-      final double stepRise = 0.3048;
-      final double stepRun = 0.17597;
-      final int nStairs = 9;
+      final double stepTread = 0.2794;
+      final double stepWidth = 1.06;
+      final double stepThickness = 0.1778;
+      final double stepRise = 0.1778;
+      final double stepRun = 0.2794;
+      final int nStairs = 3;
 
       final double landingRun = 0.61;
       final double stairSupportThickness = 0.0508;
@@ -204,11 +204,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
                      courseAngle, app);
 
+      
       final double railingDiameter = stairSupportThickness;
       final double topRailingHeight = 1.067;
-      final int nTopRailingCrossBars = 4;
+      final int nTopRailingCrossBars = 2;
       final double stairRailSupportLength = 0.5715;
-      final int nStairRailSupports = 5;
+      final int nStairRailSupports = 2;
       final boolean extendRailsToGround = true;
       final double stairRailSupportStartHeight = railingDiameter;
       final double stairRailSupportEndHeight = 2.438;
