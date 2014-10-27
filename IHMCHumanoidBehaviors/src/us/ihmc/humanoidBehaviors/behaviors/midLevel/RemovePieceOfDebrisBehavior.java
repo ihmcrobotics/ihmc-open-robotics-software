@@ -35,7 +35,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
 
    private final FullRobotModel fullRobotModel;
 
-   private double optimalDistanceToGrabObject = 0.3;
+   private double optimalDistanceToGrabObject = 0.4;
 
    public RemovePieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, DoubleYoVariable yoTime)
@@ -90,7 +90,8 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
 
    public void setInputs(RigidBodyTransform graspTransform, Point3d graspPosition, Vector3d graspVector)
    {
-      graspObject.setGraspPose(graspPosition, graspVector);
+      double rotationAngleAboutNormal = 0.0;
+      graspObject.setGraspPose(graspPosition, graspVector, rotationAngleAboutNormal);
       if (!isObjectCloseEnough(graspPosition))
       {
          calculateLocation(graspPosition);
@@ -104,8 +105,15 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
    private void calculateLocation(Point3d graspPosition)
    {
       FramePoint target = new FramePoint(fullRobotModel.getChest().getBodyFixedFrame());
+      
+      //
+      FramePoint graspPositionInChestFame = new FramePoint(ReferenceFrame.getWorldFrame());
+      graspPositionInChestFame.set(graspPosition);
+      graspPositionInChestFame.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      //      
+
       target.setToZero();
-      target.setX(graspPosition.getX()-optimalDistanceToGrabObject);
+      target.setX(graspPositionInChestFame.getX() - optimalDistanceToGrabObject);
       target.changeFrame(ReferenceFrame.getWorldFrame());
       targetLocation.set(target.getPoint());
       FrameOrientation frame = new FrameOrientation();
@@ -116,9 +124,14 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
 
    private boolean isObjectCloseEnough(Point3d graspPosition)
    {
-      FramePoint target = new FramePoint(ReferenceFrame.getWorldFrame(),graspPosition);
-      target.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
-      if(target.getX()>=optimalDistanceToGrabObject )
+      //
+      FramePoint graspPositionInChestFame = new FramePoint(ReferenceFrame.getWorldFrame());
+      graspPositionInChestFame.set(graspPosition);
+      graspPositionInChestFame.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      //      
+//      FramePoint target = new FramePoint(ReferenceFrame.getWorldFrame(), graspPositionInChestFame.getPointCopy());
+//      target.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      if (graspPositionInChestFame.getX() >= optimalDistanceToGrabObject)
          return false;
       return true;
    }
