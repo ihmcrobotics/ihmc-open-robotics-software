@@ -132,12 +132,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public String getJointNameForExtendedPitchRange()
-   {
-      return null; //jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
-   }
-
-   @Override
    public double getNeckPitchUpperLimit()
    {
       return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;//1.14494;
