@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -30,6 +29,7 @@ public class FootstepListBehavior extends BehaviorInterface
    private final IntegerYoVariable numberOfFootsteps = new IntegerYoVariable("numberOfFootsteps" + behaviorName, registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped", registry);
+   private final BooleanYoVariable hasLastStepBeenReached = new BooleanYoVariable("hasLastStepBeenReached", registry);
    private boolean isInitialized;
    
 
@@ -101,10 +101,12 @@ public class FootstepListBehavior extends BehaviorInterface
 	   if(!isInitialized)
 	   {
 		   packetHasBeenSent.set(false);
+		   hasLastStepBeenReached.set(false);
 		   
 		   isPaused.set(false);
 		   isStopped.set(false);
 		   isInitialized = true;
+		   
 	   }
    }
 
@@ -120,6 +122,7 @@ public class FootstepListBehavior extends BehaviorInterface
       isPaused.set(false);
       isStopped.set(false);
       isInitialized = false;
+      hasLastStepBeenReached.set(false);
    }
 
    @Override
@@ -156,11 +159,14 @@ public class FootstepListBehavior extends BehaviorInterface
          System.out.println("isLastFootstep returning: " + isLastFootstep + ", total nb of footsteps: " + numberOfFootsteps + ", current footstep: "
                + lastFootstepStatus.getFootstepIndex());
 
-      boolean isCompleted = lastFootstepStatus.getStatus() == Status.COMPLETED;
+      if (isLastFootstep)
+         hasLastStepBeenReached.set(true);
+      
+      boolean isCompleted = lastFootstepStatus.isDoneWalking();
       if (DEBUG)
          System.out.println("isCompleted returning: " + isCompleted);
 
-      boolean isDone = isLastFootstep && isCompleted && !isPaused.getBooleanValue();
+      boolean isDone = hasLastStepBeenReached.getBooleanValue() && isCompleted && !isPaused.getBooleanValue();
       if (DEBUG)
          System.out.println("isDone() returning: " + isDone);
 
