@@ -81,7 +81,7 @@ public class ScriptedFootstepGenerator
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      Footstep footstep = new Footstep(foot, robotSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
 
       return footstep;
    }
@@ -107,7 +107,7 @@ public class ScriptedFootstepGenerator
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      Footstep footstep = new Footstep(foot, robotSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
 
       return footstep;
    }

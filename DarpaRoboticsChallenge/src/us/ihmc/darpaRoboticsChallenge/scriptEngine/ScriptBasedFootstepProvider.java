@@ -163,7 +163,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
          String id = "scriptedFootstep_" + footstepCounter;
-         Footstep footstep = new Footstep(id, contactableBody, robotSide, contactableBody.getSoleFrame(), footstepPoseFrame, true);
+         Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), robotSide, contactableBody.getSoleFrame(), footstepPoseFrame, true);
 
          footsteps.add(footstep);
 
