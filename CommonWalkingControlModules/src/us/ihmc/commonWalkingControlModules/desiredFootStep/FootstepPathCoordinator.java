@@ -74,6 +74,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       footstepTimingParameters.setTransferTime(transferTime);
    }
 
+   @Override
    public Footstep poll()
    {
       if (isPaused.getBooleanValue())
@@ -128,6 +129,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
+   @Override
    public Footstep peek()
    {
       switch (walkMethod.getEnumValue())
@@ -154,6 +156,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
+   @Override
    public Footstep peekPeek()
    {
       switch (walkMethod.getEnumValue())
@@ -212,6 +215,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
+   @Override
    public boolean isEmpty()
    {
       switch (walkMethod.getEnumValue())
@@ -238,12 +242,23 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
+   @Override
    public void notifyComplete()
    {
       if (stepInProgress != null)
       {
          notifyConsumersOfStatus(FootstepStatus.Status.COMPLETED);
          currentFootstepIndex.increment();
+      }
+   }
+
+   @Override
+   public void notifyWalkingComplete()
+   {
+      if (footstepStatusDataProducer != null)
+      {
+         FootstepStatus footstepStatus = FootstepStatus.createWalkingIsDonePacket();
+         footstepStatusDataProducer.queueDataToSend(footstepStatus);
       }
    }
 
@@ -297,6 +312,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
    }
 
+   @Override
    public int getNumberOfFootstepsToProvide()
    {
       switch (walkMethod.getEnumValue())
@@ -437,6 +453,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       STOP, FOOTSTEP_PATH, BLIND;
    }
 
+   @Override
    public boolean isBlindWalking()
    {
       if (walkMethod.getEnumValue() == WalkMethod.BLIND)

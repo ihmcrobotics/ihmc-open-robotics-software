@@ -147,6 +147,14 @@ public class UpcomingFootstepList
       footstepProvider.notifyComplete();
    }
 
+   public void notifyWalkingComplete()
+   {
+      if (footstepProvider == null)
+         return;
+
+      footstepProvider.notifyWalkingComplete();
+   }
+
    public boolean isFootstepProviderEmpty()
    {
       if (footstepProvider == null)

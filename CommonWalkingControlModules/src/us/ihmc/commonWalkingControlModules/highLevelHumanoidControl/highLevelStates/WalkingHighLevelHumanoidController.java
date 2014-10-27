@@ -724,6 +724,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          icpStandOffsetX.set(0.0);
          icpStandOffsetY.set(0.0);
 
+         if (supportLeg.getEnumValue() == null) // Mean we are in double support (not transfer to side)
+            upcomingFootstepList.notifyWalkingComplete();
+
          desiredECMPinSupportPolygon.set(false);
          ecmpBasedToeOffHasBeenInitialized.set(false);
          trailingLeg.set(transferToSide); // FIXME
