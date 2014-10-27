@@ -122,8 +122,8 @@ public class DRCSimControllerFactory
       
       if(USE_GUI)
       {
-         URI rosMasterURI = robotModel.getNetworkParameters().getRosURI();
-         new DRCNetworkProcessor(rosMasterURI, robotModel);
+//         URI rosMasterURI = robotModel.getNetworkParameters().getRosURI();
+//         new DRCNetworkProcessor(rosMasterURI, robotModel);
       }
       try
       {

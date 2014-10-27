@@ -12,6 +12,7 @@ public class YoContactPoint extends ContactPoint
 {
    private final YoVariableRegistry registry;
    private final YoFramePoint yoPosition;
+   // TODO Needs to go away
    private final YoFramePoint2d yoPosition2d;
    private final BooleanYoVariable isInContact;
    private final String namePrefix;
@@ -26,6 +27,7 @@ public class YoContactPoint extends ContactPoint
       registry = parentRegistry;
 
       yoPosition = new YoFramePoint(namePrefix + "Contact" + index, point2d.getReferenceFrame(), registry);
+      // TODO Needs to go away
       yoPosition2d = new YoFramePoint2d(namePrefix + "Contact2d" + index, point2d.getReferenceFrame(), registry);
       isInContact = new BooleanYoVariable(namePrefix + "InContact" + index, registry);
    }
@@ -41,6 +43,7 @@ public class YoContactPoint extends ContactPoint
       isInContact.set(inContact);
    }
    
+   // TODO Needs to go away
    public FramePoint2d getPosition2d()
    {
       FramePoint2d position2d = super.getPosition2d();

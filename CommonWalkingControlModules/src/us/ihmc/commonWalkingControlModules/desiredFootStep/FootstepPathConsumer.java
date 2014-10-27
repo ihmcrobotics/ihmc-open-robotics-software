@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import javax.vecmath.Point2d;
 
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -64,7 +67,8 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-         Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true);
+         List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
+         Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
          
          footsteps.add(footstep);
          mapFromFootstepsToTrajectoryParameters.put(footstep, trajectoryParameters);
