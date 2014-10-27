@@ -73,7 +73,7 @@ public class IHMCHumanoidBehaviorManager
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoCapturePoint, yoDesiredCapturePoint, yoSupportPolygon, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
 
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, forceSensorDataHolder, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry);
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, forceSensorDataHolder, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, communicationBridge, yoGraphicsListRegistry, BEHAVIOR_YO_VARIABLE_SERVER_DT);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
@@ -96,7 +96,7 @@ public class IHMCHumanoidBehaviorManager
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
     */
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry)
+         DoubleYoVariable yoTime, YoFramePoint2d yoCapturePoint, YoFramePoint2d yoDesiredCapturePoint, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, double DT)
    {
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
@@ -112,7 +112,7 @@ public class IHMCHumanoidBehaviorManager
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
       
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, forceSensorDataHolder);
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, forceSensorDataHolder, DT);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
       RemoveDebrisBehavior removeDebrisBehavior = new RemoveDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
