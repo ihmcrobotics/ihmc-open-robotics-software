@@ -73,6 +73,7 @@ public class HandPoseBehavior extends BehaviorInterface
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          sendPacketToController(outgoingHandPosePacket);
+         sendPacketToNetworkProcessor(outgoingHandPosePacket);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());

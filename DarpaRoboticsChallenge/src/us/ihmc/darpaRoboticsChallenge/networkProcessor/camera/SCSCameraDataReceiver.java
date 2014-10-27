@@ -71,7 +71,7 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
          {
             while(leftParamPacket==null || numPacket<numInitialPacketsToIgnore)
             {
-               System.out.println("waiting for intrinsic information (ignoring first "+numInitialPacketsToIgnore+" packets)...");
+               //System.out.println("waiting for intrinsic information (ignoring first "+numInitialPacketsToIgnore+" packets)...");
                try
                {
                   Thread.sleep(1000);
