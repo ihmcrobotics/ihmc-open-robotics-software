@@ -148,7 +148,8 @@ public class PlaneContactWrenchMatrixCalculator
          if (planeContactState.getNumberOfContactPointsInContact() > nPointsPerPlane)
             throw new RuntimeException("Unhandled number of contact points: " + planeContactState.getNumberOfContactPointsInContact());
 
-         numberOfLoadedEndEffectors.increment();
+         if (planeContactState.inContact())
+            numberOfLoadedEndEffectors.increment();
 
          // Compute the orientation of the normal contact vector and the corresponding transformation matrix
          computeNormalContactVectorTransform(planeContactState);
@@ -265,11 +266,8 @@ public class PlaneContactWrenchMatrixCalculator
       rhoMean.zero();
       rhoTotal.set(0.0);
 
-      rhoMeanLoadedEndEffectors.reshape(numberOfLoadedEndEffectors.getIntegerValue(), 1);
       rhoMeanLoadedEndEffectors.zero();
 
-      int iLoadedEndEffector = 0;
-      
       // Reinintialize wrenches
       for (int i = 0; i < planeContactStates.size(); i++)
       {
@@ -292,7 +290,7 @@ public class PlaneContactWrenchMatrixCalculator
         	 DenseMatrix64F rhosSingleEndEffector = CommonOps.extract(rho, iRhoStart, iRhoFinal, 0, 1);
         	 double rhosAverage = CommonOps.elementSum(rhosSingleEndEffector) / rhoSizeInContact;
         	 rhoTotal.add(rhosAverage);
-        	 rhoMeanLoadedEndEffectors.set(iLoadedEndEffector, rhosAverage);
+        	 rhoMeanLoadedEndEffectors.set(i, rhosAverage);
 
         	 tempSum.zero();
         	 for (;iRho < iRhoFinal; iRho++)
@@ -302,8 +300,6 @@ public class PlaneContactWrenchMatrixCalculator
         		 CommonOps.extract(qRho, 0, SpatialForceVector.SIZE, iRho, iRho + 1, tempVector, 0, 0);
         		 MatrixTools.addMatrixBlock(tempSum, 0, 0, tempVector, 0, 0, SpatialForceVector.SIZE, 1, rho.get(iRho));
         	 }
-
-        	 iLoadedEndEffector++;
 
         	 RigidBody rigidBody = planeContactState.getRigidBody();
         	 ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
