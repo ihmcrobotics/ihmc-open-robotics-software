@@ -168,12 +168,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public String getJointNameForExtendedPitchRange()
-   {
-      return null;
-   }
-
-   @Override
    public boolean finishSwingWhenTrajectoryDone()
    {
       return false;
