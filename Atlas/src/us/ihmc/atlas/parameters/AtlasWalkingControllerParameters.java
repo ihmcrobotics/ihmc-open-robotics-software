@@ -1,17 +1,15 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -41,14 +39,17 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
    private final double min_mechanical_leg_length = 0.420; // corresponds to a q_kny that is close to knee limit
 
-   public AtlasWalkingControllerParameters()
+   private final AtlasJointMap jointMap;
+
+   public AtlasWalkingControllerParameters(AtlasJointMap jointMap)
    {
-      this(AtlasTarget.SIM);
+      this(AtlasTarget.SIM, jointMap);
    }
 
-   public AtlasWalkingControllerParameters(AtlasTarget target)
+   public AtlasWalkingControllerParameters(AtlasTarget target, AtlasJointMap jointMap)
    {
       this.target = target;
+      this.jointMap = jointMap;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -124,13 +125,25 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      return new String[] { jointNames[back_bkz], jointNames[neck_ry] };
+      String[] defaultHeadOrientationControlJointNames = new String[]
+      {
+            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
+      };
+
+      return defaultHeadOrientationControlJointNames;
    }
 
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[] {};
+      String[] defaultChestOrientationControlJointNames = new String[]
+      {
+            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+            jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
+      };
+
+      return defaultChestOrientationControlJointNames;
    }
 
    @Override
@@ -210,12 +223,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getHeadRollLimit()
    {
       return headRollLimit;
-   }
-
-   @Override
-   public String getJointNameForExtendedPitchRange()
-   {
-      return jointNames[back_bky];
    }
 
    @Override

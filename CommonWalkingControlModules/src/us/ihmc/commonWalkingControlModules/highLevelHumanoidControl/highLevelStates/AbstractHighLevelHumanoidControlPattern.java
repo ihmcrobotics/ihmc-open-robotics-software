@@ -14,13 +14,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -33,8 +30,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.math.trajectories.CubicPolynomialTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelBehavior
@@ -51,15 +46,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final TwistCalculator twistCalculator;
 
-   private final HeadOrientationProvider desiredHeadOrientationProvider;
-
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final ChestOrientationManager chestOrientationManager;
    protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
    protected final FeetManager feetManager;
 
-   private final OneDoFJoint jointForExtendedNeckPitchRange;
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    protected final OneDoFJoint[] positionControlJoints;
 
@@ -105,7 +97,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       handPalms = momentumBasedController.getContactableHands();
 
       this.pelvisOrientationManager = variousWalkingManagers.getPelvisOrientationManager();
-      this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();
@@ -120,55 +111,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
 
-      jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
-
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
 
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
-
-
-      if ((jointForExtendedNeckPitchRange != null) && (desiredHeadOrientationProvider != null))
-      {
-         DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(walkingControllerParameters.getTrajectoryTimeHeadOrientation());
-         extendedNeckPitchInitialAngle = new YoVariableDoubleProvider("extendedNeckPitchInitialAngle", registry);
-         extendedNeckPitchFinalAngle = new YoVariableDoubleProvider("extendedNeckPitchFinalAngle", registry);
-         extendedNeckPitchTrajectory = new CubicPolynomialTrajectoryGenerator("extendedNeckPitchTrajectory", extendedNeckPitchInitialAngle,
-                 extendedNeckPitchFinalAngle, trajectoryTimeProvider, registry);
-         extendedNeckPitchTrajectory.initialize();
-         extendedNeckPitchReceivedTime = new DoubleYoVariable("extendedNeckPitchReceived", registry);
-      }
-      else
-      {
-         extendedNeckPitchInitialAngle = null;
-         extendedNeckPitchFinalAngle = null;
-         extendedNeckPitchTrajectory = null;
-         extendedNeckPitchReceivedTime = null;
-      }
-   }
-
-   private final CubicPolynomialTrajectoryGenerator extendedNeckPitchTrajectory;
-   private final DoubleYoVariable extendedNeckPitchReceivedTime;
-   private final DoubleYoVariable extendedNeckPitchDesiredAngle = new DoubleYoVariable("extendedNeckPitchDesiredAngle", registry);
-   private final DoubleYoVariable extendedNeckPitchDesiredVelocity = new DoubleYoVariable("extendedNeckPitchDesiredVelocity", registry);
-   private final YoVariableDoubleProvider extendedNeckPitchInitialAngle;
-   private final YoVariableDoubleProvider extendedNeckPitchFinalAngle;
-
-   protected OneDoFJoint setupJointForExtendedNeckPitchRange()
-   {
-      if (walkingControllerParameters.getJointNameForExtendedPitchRange() == null)
-         return null;
-
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-
-      InverseDynamicsJoint[] inverseDynamicsJointForExtendedNeckPitchControl = ScrewTools.findJointsWithNames(allJoints, walkingControllerParameters.getJointNameForExtendedPitchRange());
-      OneDoFJoint[] jointForExtendedNeckPitchControl = ScrewTools.filterJoints(inverseDynamicsJointForExtendedNeckPitchControl, OneDoFJoint.class);
-
-      if (jointForExtendedNeckPitchControl.length == 1)
-         return jointForExtendedNeckPitchControl[0];
-      else
-         return null;
    }
 
    protected OneDoFJoint[] setupJointConstraints()
@@ -212,8 +159,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       // Head joints
       unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
-      if (jointForExtendedNeckPitchRange != null)
-         unconstrainedJoints.remove(jointForExtendedNeckPitchRange);
 
       // Chest joints
       unconstrainedJoints.removeAll(Arrays.asList(chestOrientationControlJoints));
@@ -271,39 +216,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       if (headOrientationManager != null)
       {
          headOrientationManager.compute();
-
-         if (jointForExtendedNeckPitchRange != null)
-         {
-            if ((desiredHeadOrientationProvider != null) && (extendedNeckPitchTrajectory != null))
-            {
-               double qDesired, qdDesired;
-               double desiredExtendedNeckPitchJointAngle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
-               if (!Double.isNaN(desiredExtendedNeckPitchJointAngle))
-               {
-                  extendedNeckPitchInitialAngle.set(extendedNeckPitchTrajectory.getValue());
-                  extendedNeckPitchFinalAngle.set(desiredExtendedNeckPitchJointAngle);
-                  extendedNeckPitchTrajectory.initialize();
-                  extendedNeckPitchTrajectory.compute(0.0);
-                  extendedNeckPitchReceivedTime.set(yoTime.getDoubleValue());
-               }
-               else
-               {
-                  extendedNeckPitchTrajectory.compute(yoTime.getDoubleValue() - extendedNeckPitchReceivedTime.getDoubleValue());
-               }
-
-               qDesired = extendedNeckPitchTrajectory.getValue();
-               qdDesired = extendedNeckPitchTrajectory.getVelocity();
-
-               extendedNeckPitchDesiredAngle.set(qDesired);
-               extendedNeckPitchDesiredVelocity.set(qdDesired);
-
-               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, qDesired, qdDesired, unconstrainedJointsControlGains);
-            }
-            else
-            {
-               momentumBasedController.doPDControl(jointForExtendedNeckPitchRange, 0.0, 0.0, unconstrainedJointsControlGains);
-            }
-         }
       }
    }
 

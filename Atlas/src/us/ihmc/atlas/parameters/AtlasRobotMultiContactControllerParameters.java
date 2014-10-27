@@ -5,10 +5,16 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
+import us.ihmc.atlas.AtlasJointMap;
 
 
 public class AtlasRobotMultiContactControllerParameters extends AtlasWalkingControllerParameters
 {
+   public AtlasRobotMultiContactControllerParameters(AtlasJointMap jointMap)
+   {
+      super(jointMap);
+   }
+
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
@@ -20,11 +26,4 @@ public class AtlasRobotMultiContactControllerParameters extends AtlasWalkingCont
    {
       return new String[] {jointNames[back_bkz], jointNames[back_bkx], jointNames[back_bky]};
    }
-
-   @Override
-   public String getJointNameForExtendedPitchRange()
-   {
-      return null;
-   }
-
 }
