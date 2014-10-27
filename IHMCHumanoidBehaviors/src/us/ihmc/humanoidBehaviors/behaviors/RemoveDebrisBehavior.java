@@ -22,7 +22,7 @@ public class RemoveDebrisBehavior extends BehaviorInterface
    private final ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket> inputListeningQueue = new ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket>();
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable haveInputsBeenSet;
-//   private final FullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
 
    private final ArrayList<DebrisData> debrisDataList = new ArrayList<>();
    private final ArrayList<DebrisData> sortedDebrisDataList = new ArrayList<>();
@@ -39,7 +39,7 @@ public class RemoveDebrisBehavior extends BehaviorInterface
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
 
-//      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModel = fullRobotModel;
       this.attachNetworkProcessorListeningQueue(inputListeningQueue, HumanoidBehaviorDebrisPacket.class);
 
    }
@@ -52,14 +52,14 @@ public class RemoveDebrisBehavior extends BehaviorInterface
       if (removePieceOfDebrisBehavior.isDone())
       {
          removePieceOfDebrisBehavior.finalize();
-         debrisDataList.remove(0);
-         if (debrisDataList.isEmpty())
+         sortedDebrisDataList.remove(0);
+         if (sortedDebrisDataList.isEmpty())
          {
             isDone.set(true);
             return;
          }
          removePieceOfDebrisBehavior.initialize();
-         removePieceOfDebrisBehavior.setInputs(debrisDataList.get(0).getTransform(), debrisDataList.get(0).getPosition(), debrisDataList.get(0).getVector());
+         removePieceOfDebrisBehavior.setInputs(sortedDebrisDataList.get(0).getTransform(), sortedDebrisDataList.get(0).getPosition(), sortedDebrisDataList.get(0).getVector());
       }
       removePieceOfDebrisBehavior.doControl();
    }
@@ -70,44 +70,44 @@ public class RemoveDebrisBehavior extends BehaviorInterface
       if (newestPacket != null)
       {
          debrisDataList.addAll(newestPacket.getDebrisDataList());
-//         sortDebrisFromCloserToFarther();
+         sortDebrisFromCloserToFarther();
          removePieceOfDebrisBehavior.initialize();
-         removePieceOfDebrisBehavior.setInputs(debrisDataList.get(0).getTransform(), debrisDataList.get(0).getPosition(), debrisDataList.get(0).getVector());
+         removePieceOfDebrisBehavior.setInputs(sortedDebrisDataList.get(0).getTransform(), sortedDebrisDataList.get(0).getPosition(), sortedDebrisDataList.get(0).getVector());
          haveInputsBeenSet.set(true);
       }
    }
 
-//   private void sortDebrisFromCloserToFarther()
-//   {
-//      for (int i = 0; i < debrisDataList.size(); i++)
-//      {
-//
-//         DebrisData currentDebrisData = debrisDataList.get(i);
-//         currentObjectPosition.changeFrame(ReferenceFrame.getWorldFrame());
-//         currentObjectPosition.set(currentDebrisData.getPosition());
-//         currentObjectPosition.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
-//         currentDistanceToObject = currentObjectPosition.getX();
-//
-//         debrisDistanceMap.put(currentDebrisData, currentDistanceToObject);
-//
-//      }
-//
-//      sortedDebrisDataList.clear();
-//      sortedDebrisDataList.add(debrisDataList.get(0));
-//      for (int i = 1; i < debrisDataList.size(); i++)
-//      {
-//         currentDistanceToObject = debrisDistanceMap.get(debrisDataList.get(i));
-//         int j = 0;
-//         while (j < sortedDebrisDataList.size() && currentDistanceToObject > debrisDistanceMap.get(sortedDebrisDataList.get(j)))
-//         {
-//            j++;
-//         }
-//         if (j == sortedDebrisDataList.size())
-//            sortedDebrisDataList.add(debrisDataList.get(i));
-//         else
-//            sortedDebrisDataList.add(j, debrisDataList.get(i));
-//      }
-//   }
+   private void sortDebrisFromCloserToFarther()
+   {
+      for (int i = 0; i < debrisDataList.size(); i++)
+      {
+
+         DebrisData currentDebrisData = debrisDataList.get(i);
+         currentObjectPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         currentObjectPosition.set(currentDebrisData.getPosition());
+         currentObjectPosition.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+         currentDistanceToObject = currentObjectPosition.getX();
+
+         debrisDistanceMap.put(currentDebrisData, currentDistanceToObject);
+
+      }
+
+      sortedDebrisDataList.clear();
+      sortedDebrisDataList.add(debrisDataList.get(0));
+      for (int i = 1; i < debrisDataList.size(); i++)
+      {
+         currentDistanceToObject = debrisDistanceMap.get(debrisDataList.get(i));
+         int j = 0;
+         while (j < sortedDebrisDataList.size() && currentDistanceToObject > debrisDistanceMap.get(sortedDebrisDataList.get(j)))
+         {
+            j++;
+         }
+         if (j == sortedDebrisDataList.size())
+            sortedDebrisDataList.add(debrisDataList.get(i));
+         else
+            sortedDebrisDataList.add(j, debrisDataList.get(i));
+      }
+   }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
