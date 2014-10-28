@@ -2,28 +2,44 @@ package us.ihmc.robotiq;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.IOException;
-import java.net.UnknownHostException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import us.ihmc.robotiq.communication.ModbusTCPConnection;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class RobotiqHandTesting
 {
+	private JFrame frame = new JFrame();
+	private JPanel panel = new JPanel(new GridBagLayout());
+	private GridBagConstraints c = new GridBagConstraints();
+	
+	private SliderWithTwoButtonsPanel finger1Panel = new SliderWithTwoButtonsPanel("Index Finger");
+	private SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel("Middle Finger");
+	private SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel("Thumb");
+	
+//	private RobotiqHandInterface hand = new RobotiqHandInterface();
+
 	public static void main(String[] args) throws Exception
 	{
-		JFrame frame = new JFrame();
+		new RobotiqHandTesting().init();
+	}
+	
+	private void init()
+	{
+//		setupSliderListeners();
 		
-		JPanel panel = new JPanel(new GridBagLayout());
+		setupButtonListeners();
+		
+		setupUI();
+	}
+	
+	private void setupUI()
+	{
 		frame.add(panel);
-		
-		GridBagConstraints c = new GridBagConstraints();
-		
-		SliderWithTwoButtonsPanel finger1Panel = new SliderWithTwoButtonsPanel();
-		SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel();
-		SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel();
 		
 		c.gridx = 0;
 		c.gridy = 0;
@@ -41,81 +57,94 @@ public class RobotiqHandTesting
 		frame.setVisible(true);
 	}
 	
-	/**
-	 * @param hand
-	 * @throws InterruptedException
-	 */
-	private static void testCycles(RobotiqHandInterface hand, int cycles) throws InterruptedException
+	private void setupSliderListeners()
 	{
-		System.out.println();
-		System.out.println("Starting test cycles: " + cycles + " cycles");
-		int counter;
-		for(counter = 0; counter < cycles; counter++)
+		finger1Panel.attachSliderActionListener(new ChangeListener()
 		{
-			System.out.println("Cycle: " + (counter + 1));
-			System.out.println("Closing Hand");
-			hand.close();
-			System.out.println("Hand Closed");
-			Thread.sleep(1000);
-			
-			System.out.println("Opening Hand");
-			hand.open();
-			System.out.println("Hand Open");
-			Thread.sleep(500);
-			
-			System.out.println();
-		}
-		System.out.println("Close cycles completed: " + counter);
-		System.out.println();
-		for(counter = 0; counter < cycles; counter++)
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				JSlider slider = (JSlider) e.getSource();
+				System.out.println(slider.getValue());
+			}
+		});
+		
+		finger2Panel.attachSliderActionListener(new ChangeListener()
 		{
-			System.out.println("Cycle: " + (counter + 1));
-			System.out.println("Crushing with Hand");
-			hand.crush();
-			System.out.println("Hand Crushing");
-			Thread.sleep(500);
-			
-			System.out.println("Opening Hand");
-			hand.open();
-			System.out.println("Hand Open");
-			Thread.sleep(500);
-			
-			System.out.println();
-		}
-		System.out.println("Crush cycles completed: " + counter);
-		System.out.println();
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				// TODO Auto-generated method stub
+				JSlider slider = (JSlider) e.getSource();
+				System.out.println(slider.getValue());
+			}
+		});
+		
+		finger3Panel.attachSliderActionListener(new ChangeListener()
+		{
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				// TODO Auto-generated method stub
+				JSlider slider = (JSlider) e.getSource();
+				System.out.println(slider.getValue());
+			}
+		});
 	}
 	
-	private static void testModbusTCP() throws InterruptedException, UnknownHostException, IOException
+	private void setupButtonListeners()
 	{
-		//testing of the underlying connection
-		ModbusTCPConnection connection;
-		System.out.println("starting connection");
-		connection = new ModbusTCPConnection("192.168.1.13", 502);
-		System.out.println("connected");
-		Thread.sleep(5000);
-//		byte[] activationRequest = {0x03,(byte)0xE8,0x00,0x03,0x06,0x01,0x00,0x00,0x00,0x00,0x00};
-		byte[] activationRequest = {0x10, 0x00,0x00,0x00,0x03,0x06,0x01,0x00,0x00,0x00,0x00,0x00};
-//		byte[] dataLiteral = {0x33, (byte)0x9A, 0x00, 0x00, 0x00, 0x0D, 0x02, 0x10, 0x03, (byte)0xE8, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-//		byte[] dataLiteral = {0x33, (byte)0x9A, 0x00, 0x00, 0x00, 0x0D, 0x02, 0x10, 0x00, 0x00, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
+		finger1Panel.attachTopButtonActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				JSlider slider = finger1Panel.getSlider();
+				System.out.println(slider.getValue());
+			}
+		});
 		
-//		System.out.println("sending data literal");
-//		connection.sendLiteral(dataLiteral, dataLiteral.length);
-		System.out.println("Sending Activation Request");
-		connection.transcieve(0x02, activationRequest);
-		System.out.println("activation data");
+		finger1Panel.attachBottomButtonActionListener(new ResetSliderActionListener(finger1Panel.getSlider()));
 		
-		Thread.sleep(20000);
+		finger2Panel.attachTopButtonActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
-		byte[] resetRequest = {0x10, 0x00,0x00,0x00,0x03,0x06,0x00,0x00,0x00,0x00,0x00,0x00};
-		System.out.println("Sending reset");
-		connection.transcieve(0x02, resetRequest);
-		System.out.println("Reset Sent");
+		finger2Panel.attachBottomButtonActionListener(new ResetSliderActionListener(finger2Panel.getSlider()));
 		
-		Thread.sleep(5000);
+		finger3Panel.attachTopButtonActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
-		System.out.println("closing socket");
-		connection.close();
-		System.out.println("socket closed");
+		finger3Panel.attachBottomButtonActionListener(new ResetSliderActionListener(finger3Panel.getSlider()));
+		
+	}
+	
+	class ResetSliderActionListener implements ActionListener
+	{
+		private final JSlider slider;
+		
+		public ResetSliderActionListener(JSlider slider)
+		{
+			this.slider = slider;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			slider.setValue(0);
+		}
 	}
 }

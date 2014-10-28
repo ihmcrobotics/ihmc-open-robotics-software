@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
-import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusException;
-import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.BitSetTools;
@@ -623,11 +621,6 @@ public final class RobotiqHandInterface
 			ThreadTools.sleep(200);
 			status = this.getStatus();
 			
-			System.out.println("Gripper status: " + status[GRIPPER_STATUS]);
-			System.out.println("Motion status mask: " + MOTION_STATUS_MASK);
-			System.out.println("Gripper status & motion status mask: " + (status[GRIPPER_STATUS] & MOTION_STATUS_MASK));
-			System.out.println("In motion mask: " + IN_MOTION);
-			
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
@@ -900,14 +893,6 @@ public final class RobotiqHandInterface
 		catch (SocketException e)
 		{
 			connected = false;
-			e.printStackTrace();
-		}
-		catch(ModbusResponseTooShortException e)
-		{
-			e.printStackTrace();
-		}
-		catch(ModbusException e)
-		{
 			e.printStackTrace();
 		}
 		catch (IOException e)
