@@ -1,14 +1,11 @@
 package us.ihmc.robotiq;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.Arrays;
-import java.util.BitSet;
 
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.fixedPointRepresentation.BitSetTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 /* GENERAL INFO
@@ -37,6 +34,7 @@ public final class RobotiqHandInterface
 	public static final byte MIN_SPEED = 0x00;
 	public static final byte MIN_FORCE = 0x00;
 	public static final byte FULLY_CLOSED = (byte)0xFF;
+	public static final byte PINCH_FULLY_CLOSED = (byte)0x78;
 	public static final byte DEFAULT_SPEED = (byte)(MAX_SPEED & 11000000);  //about 3/4 speed
 	public static final byte SCISSOR_POSITION_BASIC = 120; //approximate scissor position during basic grip
 	
@@ -88,7 +86,7 @@ public final class RobotiqHandInterface
 	/*---STATUS REGISTER BITMASKS---*/
 	//byte 0 (gripper status 
 	/*
-	private static final byte INITIALIZATON_MASK =		0b00000001; //same as functionality mask
+//	private static final byte INITIALIZATON_MASK =		0b00000001; //same as functionality mask
 	private static final byte OPERATION_MODE_MASK =		0b00000110; //same as functionality mask
 	private static final byte GO_TO_REQUESTED_MASK =	0b00001000; //same as functionality mask
 	 */
@@ -334,36 +332,9 @@ public final class RobotiqHandInterface
 	private byte[] speed = new byte[4];
 	private byte[] force = new byte[4];
 	private byte[] position = new byte[4];
-	private int faultCounter = 0;
+//	private int faultCounter = 0;
 	private boolean connected = false;
 	private String address;
-	
-	public static void main(String[] args)
-	{
-		RobotiqHandInterface hand = new RobotiqHandInterface();
-		
-		System.out.println("Connecting to hand...");
-		hand.connect();
-		ThreadTools.sleep(500);
-		System.out.println("Connected...");
-		
-		System.out.println("Sending command...");
-//		hand.sendRequest(SET_REGISTERS,
-//				REGISTER_START,
-//				//Action Request
-//				(byte)0b00000001,
-//				(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00);
-		byte[] response = hand.sendRequest(SET_REGISTERS,
-				REGISTER_START,
-				//Action Request
-				(byte)0b00000001);
-		System.out.print("Response: ");
-		BitSet store = new BitSet();
-		BitSetTools.putByteArray(store, 0, response);
-		BitSetTools.printBitSet(store);
-		System.out.println("Sleeping...");
-		ThreadTools.sleep(10000);
-	}
 	
 	public RobotiqHandInterface()
 	{
@@ -375,7 +346,7 @@ public final class RobotiqHandInterface
 		this.address = robotSide.equals(RobotSide.LEFT) ? RobotiqHandParameters.LEFT_HAND_ADDRESS : RobotiqHandParameters.RIGHT_HAND_ADDRESS;
 		
 		connect();
-//		reset();
+		reset();
 	}
 	
 	public boolean connect()
@@ -395,18 +366,23 @@ public final class RobotiqHandInterface
 	
 	public void initialize()
 	{
-//	   if(!this.isConnected())
-//			this.connect();
-//			
-//		status = this.getStatus();
-//		
-//		if(status == null)
-//		   return;
-//		
-//		if(((status[GRIPPER_STATUS] & INITIALIZE) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
-//		{
-//			this.reset();
-//		}
+	   if(!this.isConnected())
+			this.connect();
+			
+		try
+		{
+			status = this.getStatus();
+		}
+		catch (RobotiqConnectionException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
+		if(((status[GRIPPER_STATUS] & INITIALIZE) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
+		{
+			this.reset();
+		}
 		
 		//initialize arrays
 		Arrays.fill(position,(byte)0x00);
@@ -439,58 +415,6 @@ public final class RobotiqHandInterface
 		
 		blockDuringMotion();
 	}
-	
-	public void testInit() throws IOException
-	{
-		byte[] initMessage = new byte[]
-				{
-						// HEADER
-						// Transaction ID
-//						(byte) 0x99, (byte) 0x02,
-//						// Protocol ID
-//						(byte) 0x00, (byte) 0x00,
-//						// Message length
-//						(byte) 0x00, (byte) 0x17,
-//						// Slave ID
-//						(byte) 0x02, // <--- From example documentation
-						
-						// DATA
-						// Function code
-						0x10,
-						// Address of first register to write to
-						0x00, 0x00,
-						// Number of registers to write to
-						0x00, 0x08,
-						// Number of MESSAGE bytes
-						0x10,
-						
-						// MESSAGE
-						// Action request
-						0x01, // <---- 0b00000001 to initialize
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00,
-						0x00
-				};
-//		System.out.println(ModbusTCPConnection.bytesToHexString(initMessage));
-//		System.out.println(ModbusTCPConnection.bytesToHexString(connection.sendLiteral(initMessage, initMessage.length)));
-		
-		connection.transcieve(RobotiqHandParameters.UNIT_ID, initMessage);
-//		connection.sendLiteral(initMessage, initMessage.length);
-
-		blockDuringMotion();
-	}
 
 	public void reset()
 	{
@@ -507,7 +431,15 @@ public final class RobotiqHandInterface
 						(byte)(fingerControl | scissorControl));
 		
 			ThreadTools.sleep(200);
-			status = this.getStatus();
+			try
+			{
+				status = this.getStatus();
+			}
+			catch (RobotiqConnectionException e)
+			{
+				e.printStackTrace();
+				status[GRIPPER_STATUS] = INITIALIZE;
+			}
 			errorCount++;
 		}while((status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
 	}
@@ -533,6 +465,7 @@ public final class RobotiqHandInterface
 			position[FINGER_B] = FULLY_OPEN;
 			position[FINGER_C] = FULLY_OPEN;
 		}
+		
 		sendMotionRequest();
 	}
 	
@@ -544,6 +477,7 @@ public final class RobotiqHandInterface
 			position[FINGER_B] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
 			position[FINGER_C] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
 		}
+		
 		sendMotionRequest();
 	}
 	
@@ -551,7 +485,7 @@ public final class RobotiqHandInterface
 	{
 		if(operationMode == PINCH_MODE)
 		{
-			position[FINGER_A] = 120; //max closed position for pinch
+			position[FINGER_A] = PINCH_FULLY_CLOSED; //max closed position for pinch
 			force[FINGER_A] = MAX_FORCE/2;
 		}
 		else
@@ -574,7 +508,7 @@ public final class RobotiqHandInterface
 	{
 		if(operationMode == PINCH_MODE)
 		{
-			position[FINGER_A] = (byte)(percent * 120); //max closed position for pinch
+			position[FINGER_A] = (byte)(percent * PINCH_FULLY_CLOSED);
 			force[FINGER_A] = MAX_FORCE/2;
 		}
 		else
@@ -589,6 +523,7 @@ public final class RobotiqHandInterface
 				force[FINGER_C] = MAX_FORCE/2;
 			}
 		}
+		
 		sendMotionRequest();
 	}
 	
@@ -619,18 +554,36 @@ public final class RobotiqHandInterface
 		do
 		{
 			ThreadTools.sleep(200);
-			status = this.getStatus();
+			try
+			{
+				status = this.getStatus();
+			}
+			catch (RobotiqConnectionException e)
+			{
+				e.printStackTrace();
+				status[GRIPPER_STATUS] = IN_MOTION;
+			}
 			
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
 	public void stop()
 	{
-		status = getStatus();
+		try
+		{
+			status = getStatus();
+		}
+		catch (RobotiqConnectionException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
 		position[FINGER_A] = status[FINGER_A_POSITION];
 		position[FINGER_B] = status[FINGER_B_POSITION];
 		position[FINGER_C] = status[FINGER_C_POSITION];
 		position[SCISSOR] = status[SCISSOR_POSITION];
+		
 		sendMotionRequest();
 	}
 	
@@ -671,14 +624,31 @@ public final class RobotiqHandInterface
 		do
 		{
 			ThreadTools.sleep(50);
-			status = this.getStatus();
-		}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
+			try
+			{
+				status = this.getStatus();
+			}
+			catch (RobotiqConnectionException e)
+			{
+				e.printStackTrace();
+				status[GRIPPER_STATUS] = CHANGING_MODE;
+			}
+		}
+		while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
 	}
 	
 	public void setIndividualFinger(int finger, byte desiredForce, byte desiredPosition, byte desiredSpeed)
 	{
-		if(fingerControl == CONCURRENT_FINGER_CONTROL || scissorControl == CONCURRENT_SCISSOR_CONTROL)
+		try
+		{
 			status = getStatus();
+		}
+		catch (RobotiqConnectionException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
 		if(fingerControl == CONCURRENT_FINGER_CONTROL)
 		{
 			position[FINGER_A] = status[FINGER_A_REQUESTED_POSITION];
@@ -743,6 +713,7 @@ public final class RobotiqHandInterface
 		
 		fingerControl = INDIVIDUAL_FINGER_CONTROL;
 		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
+		
 		sendMotionRequest();
 	}
 	
@@ -754,25 +725,29 @@ public final class RobotiqHandInterface
 			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_CLOSED, speed[FINGER_B]);
 			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_OPEN, speed[FINGER_C]); //index finger of left Hand
 		}
-		else if(side == RobotSide.RIGHT)
+		else
 		{
 			setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
 			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_OPEN, speed[FINGER_B]); //index finger of right Hand
 			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_CLOSED, speed[FINGER_C]); 
 		}
-		else
-		{
-			setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_OPEN, speed[FINGER_A]);
-			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_CLOSED, speed[FINGER_B]);
-			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_CLOSED, speed[FINGER_C]);
-		}
+		
 		sendMotionRequest();
 	}
 	
 	private float[] positions = new float[4]; //only used in this method and is extracted for efficiency
 	public float[] positionStatus()
 	{
-		status = getStatus();
+		try
+		{
+			status = getStatus();
+		}
+		catch(RobotiqConnectionException e)
+		{
+			e.printStackTrace();
+			return positions;
+		}
+		
 		positions[FINGER_A] = status[FINGER_A_POSITION];
 		positions[FINGER_B] = status[FINGER_B_POSITION];
 		positions[FINGER_C] = status[FINGER_C_POSITION];
@@ -791,8 +766,17 @@ public final class RobotiqHandInterface
 	{
 		do
 		{
-		   status = getStatus();
-		}while(status.length < 22);
+			try
+			{
+				status = getStatus();
+			}
+			catch(RobotiqConnectionException e)
+			{
+				e.printStackTrace();
+				status = new byte[1];
+			}
+		}
+		while(status.length < 22);
 		
 		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
 		data[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
@@ -824,22 +808,32 @@ public final class RobotiqHandInterface
 	
 	public boolean isReady()
 	{
-		status = getStatus();
-		
-		if(status == null)
+		try
+		{
+			status = getStatus();
+		}
+		catch(RobotiqConnectionException e)
+		{
+			e.printStackTrace();
 			return false;
-		else
-			return (status[GRIPPER_STATUS] & INITIALIZE) == INITIALIZED;
+		}
+		
+		return (status[GRIPPER_STATUS] & INITIALIZE) == INITIALIZED;
 	}
 	
 	public boolean doneInitializing()
 	{
-		status = getStatus();
-		
-		if(status == null)
+		try
+		{
+			status = getStatus();
+		}
+		catch(RobotiqConnectionException e)
+		{
+			e.printStackTrace();
 			return false;
-		else
-			return (status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED;
+		}
+		
+		return (status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED;
 	}
 	
 	public boolean isConnected()
@@ -886,28 +880,23 @@ public final class RobotiqHandInterface
 			}
 			dataLength = counter+6;
 		}
+		
 		try
 		{
 			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(data, 0, dataLength));
 		}
-		catch (SocketException e)
-		{
-			connected = false;
-			e.printStackTrace();
-		}
 		catch (IOException e)
 		{
-			System.err.println("Unable to send Modbus request");
-			e.printStackTrace();
+			connected = false;
+			System.err.println("RobotiqHandInterface: Unable to send Modbus request to Robotiq hand");
 		}
 		catch(NullPointerException e)
 		{
 			connected = false;
-			System.err.println("Connection is null");
-			e.printStackTrace();
+			System.err.println("RobotiqHandInterface: Robotiq connection is null");
 		}
 		
-		return null; //TODO: should probably return something a bit more useful that won't break things
+		return null;
 	}
 	
 	private void sendMotionRequest()
@@ -943,15 +932,30 @@ public final class RobotiqHandInterface
 			data[15] = 0x00; //included to send an even number of registers. (see the sendRequest() warning)
 			dataLength = 16;
 		}
+		
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(data,0,dataLength));
 	}
 	
-	private byte[] getStatus() //gets the status of every register
+	private byte[] getStatus() throws RobotiqConnectionException
 	{
 		status = sendRequest(READ_REGISTERS,
 							 REGISTER_START,
 							 (byte)0x08);
+		
+		if(status == null)
+		{
+			throw new RobotiqConnectionException("Error occurred communicating with Robotiq hand");
+		}
+		
 		return status;
+	}
+	
+	class RobotiqConnectionException extends Exception
+	{
+		public RobotiqConnectionException(String msg)
+		{
+			super(msg);
+		}
 	}
 }
 
