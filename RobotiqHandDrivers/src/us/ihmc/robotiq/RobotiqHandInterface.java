@@ -438,10 +438,9 @@ public final class RobotiqHandInterface
 			catch (RobotiqConnectionException e)
 			{
 				e.printStackTrace();
-				status[GRIPPER_STATUS] = INITIALIZE;
 			}
 			errorCount++;
-		}while((status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
+		}while(status == null || (status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
 	}
 	
 	public void shutdown()
@@ -561,10 +560,9 @@ public final class RobotiqHandInterface
 			catch (RobotiqConnectionException e)
 			{
 				e.printStackTrace();
-				status[GRIPPER_STATUS] = IN_MOTION;
 			}
 			
-		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+		}while(status == null || (status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
 	public void stop()
@@ -631,10 +629,9 @@ public final class RobotiqHandInterface
 			catch (RobotiqConnectionException e)
 			{
 				e.printStackTrace();
-				status[GRIPPER_STATUS] = CHANGING_MODE;
 			}
 		}
-		while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
+		while(status == null || (status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
 	}
 	
 	public void setIndividualFinger(int finger, byte desiredForce, byte desiredPosition, byte desiredSpeed)
@@ -773,10 +770,9 @@ public final class RobotiqHandInterface
 			catch(RobotiqConnectionException e)
 			{
 				e.printStackTrace();
-				status = new byte[1];
 			}
 		}
-		while(status.length < 22);
+		while(status == null || status.length < 22);
 		
 		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
 		data[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
