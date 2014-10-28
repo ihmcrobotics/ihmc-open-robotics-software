@@ -26,6 +26,7 @@ import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -41,13 +42,16 @@ import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
+import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -316,5 +320,17 @@ public class AtlasRobotModel implements DRCRobotModel
    public DRCHandType getDRCHandType()
    {
       return selectedVersion.getHandModel();
+   }
+
+   @Override
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer, GlobalDataProducer globalDataProducer)
+   {
+      switch (getHandType())
+      {
+         case ROBOTIQ:
+            return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
+         default:
+            return null;
+      }
    }
 }

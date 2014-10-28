@@ -41,21 +41,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
-
 import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -102,6 +102,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public AtlasJointMap(AtlasRobotVersion atlasVersion)
    {
       this.atlasVersion = atlasVersion;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
@@ -301,8 +302,11 @@ public class AtlasJointMap implements DRCRobotJointMap
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      for (RobotSide robotSide : RobotSide.values)
-         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(WRIST_ROLL));
+      if (atlasVersion.getHandModel() != DRCHandType.ROBOTIQ)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+            lastSimulatedJoints.add(armJointStrings.get(robotSide).get(WRIST_ROLL));
+      }
       return lastSimulatedJoints;
    }
 
