@@ -1370,7 +1370,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          approximateCentroid[1] = ROCKS_START_Y + distancePerRow * row;
 
          int positionOnRow = position - row * ROCKS_PER_ROW;
-         approximateCentroid[0] = ROCK_FIELD_WIDTH * ((double) positionOnRow) / ((double) ROCKS_PER_ROW) - ROCK_FIELD_WIDTH / 2.0;
+         approximateCentroid[0] = ROCK_FIELD_WIDTH * positionOnRow / ROCKS_PER_ROW - ROCK_FIELD_WIDTH / 2.0;
       }
 
       return approximateCentroid;
@@ -1673,28 +1673,33 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
+   @Override
    public TerrainObject3D getTerrainObject3D()
    {
       return combinedTerrainObject3D;
    }
 
+   @Override
    public ArrayList<Robot> getEnvironmentRobots()
    {
       return new ArrayList<Robot>();
    }
 
+   @Override
    public void createAndSetContactControllerToARobot()
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void addContactPoints(ExternalForcePoint[] externalForcePoints)
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
       // TODO Auto-generated method stub

@@ -21,7 +21,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import com.yobotics.simulationconstructionset.GroundContactModel;
 import com.yobotics.simulationconstructionset.HeightMapFromGroundContactModel;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public abstract class DRCDemo03
@@ -31,16 +30,15 @@ public abstract class DRCDemo03
    private final DRCSimulationFactory drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
-   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup,
-                    DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      
+
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      
+
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(yoGraphicsListRegistry);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-      
+
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double dt = scsInitialSetup.getDT();
@@ -55,19 +53,13 @@ public abstract class DRCDemo03
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       HighLevelState initialBehavior = HighLevelState.DRIVING;
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(robotModel.getDrivingControllerParameters());
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters
+            .createForFastWalkingInSimulation(robotModel.getDrivingControllerParameters());
 
-      
-      MomentumBasedControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
-      TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
-      Graphics3DObject linkGraphics = null;
-      if (terrainObject3D != null)
-      {
-         linkGraphics = terrainObject3D.getLinkGraphics();
-      }
-      
-      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, linkGraphics, robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, dataProducer);
+      MomentumBasedControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer,
+            footstepTimingParameters, initialBehavior, robotModel);
+
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
@@ -87,16 +79,15 @@ public abstract class DRCDemo03
          }
       }
 
-
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
-//    showSeatGraphics(simulationConstructionSet);
+      //    showSeatGraphics(simulationConstructionSet);
 
       if (SHOW_HEIGHTMAP)
       {
          Graphics3DObject planeAtZ0 = new Graphics3DObject();
-         
+
          HeightMap heightMap = null;
          GroundContactModel groundContactModel = drcSimulation.getRobot().getGroundContactModel();
 
@@ -126,17 +117,15 @@ public abstract class DRCDemo03
       }
    }
 
-// private void showSeatGraphics(SimulationConstructionSet sim)
-// {
-//    Graphics3DObject seatGraphics = new Graphics3DObject();
-//    seatGraphics.scale(0.25);
-//    seatGraphics.translate(-1.25, 0, 3.25);
-//    seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
-//    seatGraphics.addModelFile(DRCDemo03.class.getClassLoader().getResource("models/seat.obj"));
-//    sim.addStaticLinkGraphics(seatGraphics);
-// }
-
-   
+   // private void showSeatGraphics(SimulationConstructionSet sim)
+   // {
+   //    Graphics3DObject seatGraphics = new Graphics3DObject();
+   //    seatGraphics.scale(0.25);
+   //    seatGraphics.translate(-1.25, 0, 3.25);
+   //    seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
+   //    seatGraphics.addModelFile(DRCDemo03.class.getClassLoader().getResource("models/seat.obj"));
+   //    sim.addStaticLinkGraphics(seatGraphics);
+   // }
 
    public SimulationConstructionSet getSimulationConstructionSet()
    {

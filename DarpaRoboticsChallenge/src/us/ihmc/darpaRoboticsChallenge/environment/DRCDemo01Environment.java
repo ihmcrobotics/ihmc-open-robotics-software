@@ -88,7 +88,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
          approximateCentroid[0] = WALL_START_X + distancePerRow * row;
 
          int positionOnRow = position - row * ROCKS_PER_ROW;
-         approximateCentroid[1] =  ROCK_FIELD_WIDTH * ((double) positionOnRow)/((double) ROCKS_PER_ROW)- ROCK_FIELD_WIDTH / 2.0;
+         approximateCentroid[1] =  ROCK_FIELD_WIDTH * positionOnRow/ROCKS_PER_ROW- ROCK_FIELD_WIDTH / 2.0;
       }
       return approximateCentroid;
    }
@@ -158,7 +158,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       Point2d topLeft = new Point2d(PILLAR_WIDTH/2.0, PILLAR_WIDTH/2.0);
       Point2d topRight = new Point2d(PILLAR_WIDTH/2.0, -PILLAR_WIDTH/2.0);
       
-      double pillarDistance = ((double) WALL_LENGTH)/((double) NUM_PILLARS - 1.0);
+      double pillarDistance = WALL_LENGTH/(NUM_PILLARS - 1.0);
       Vector2d offset = new Vector2d(0.0, -WALL_Y + PILLAR_WIDTH/2.0);
       
       for(int i = 0; i < NUM_PILLARS; i++)
@@ -188,28 +188,33 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       }
    }
    
+   @Override
    public TerrainObject3D getTerrainObject3D()
    {
       return combinedTerrainObject;
    }
 
+   @Override
    public ArrayList<Robot> getEnvironmentRobots()
    {
       return new ArrayList<Robot>();
    }
 
+   @Override
    public void createAndSetContactControllerToARobot()
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void addContactPoints(ExternalForcePoint[] externalForcePoints)
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
       // TODO Auto-generated method stub

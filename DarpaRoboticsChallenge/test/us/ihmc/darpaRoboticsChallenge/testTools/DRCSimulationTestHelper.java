@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -38,7 +39,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
@@ -57,7 +57,6 @@ public class DRCSimulationTestHelper
 
    private final boolean createMovie;
 
-   private final DRCRobotModel robotModel;
    private final FullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
@@ -67,18 +66,18 @@ public class DRCSimulationTestHelper
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment().getTerrainObject3D(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
             createMovie, false, robotModel);
    }
    
-   public DRCSimulationTestHelper(TerrainObject3D terrainObject, String name, String scriptFileName, DRCStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
          boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
    {
-      this(terrainObject, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
             createMovie, false, robotModel);
    }
          
-   public DRCSimulationTestHelper(TerrainObject3D terrainObject, ObjectCommunicator networkObjectCommunicator, String name, 
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, ObjectCommunicator networkObjectCommunicator, String name, 
          String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
    {
@@ -86,7 +85,6 @@ public class DRCSimulationTestHelper
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
-      this.robotModel = robotModel;
       if (createMovie)
          showGUI = true;
 
@@ -100,7 +98,7 @@ public class DRCSimulationTestHelper
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, showGUI);
 
-      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(terrainObject, scriptFileName, selectedLocation, guiInitialSetup,
+      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(commonAvatarEnvironmentInterface, scriptFileName, selectedLocation, guiInitialSetup,
             initializeEstimatorToActual, automaticallyStartSimulation, startNetworkProcessor, robotModel, networkObjectCommunicator);
 
       scs = drcSimulation.getSimulationConstructionSet();

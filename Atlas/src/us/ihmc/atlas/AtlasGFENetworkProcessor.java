@@ -37,7 +37,7 @@ public class AtlasGFENetworkProcessor
       ObjectCommunicator controllerCommunicator = new LocalObjectCommunicator();
       GlobalDataProducer dataProducer = new GlobalDataProducer(controllerCommunicator);
       
-      DRCObstacleCourseSimulation simulation = new DRCObstacleCourseSimulation(environment.getTerrainObject3D(), scriptToLoad, dataProducer, robotInitialSetup,
+      DRCObstacleCourseSimulation simulation = new DRCObstacleCourseSimulation(environment, scriptToLoad, dataProducer, robotInitialSetup,
             guiInitialSetup, robotModel.getControllerDT(), initializeEstimatorToActual, robotModel);
 
       simulation.getSimulation().simulate();

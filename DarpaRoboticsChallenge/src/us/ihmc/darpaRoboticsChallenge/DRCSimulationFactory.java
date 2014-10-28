@@ -14,11 +14,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -54,7 +54,7 @@ public class DRCSimulationFactory
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
-   public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, Graphics3DObject environmentGraphics,
+   public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
@@ -78,9 +78,9 @@ public class DRCSimulationFactory
 
       guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
 
-      if (environmentGraphics != null)
+      if (environment != null && environment.getTerrainObject3D() != null)
       {
-         scs.addStaticLinkGraphics(environmentGraphics);
+         scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
       scsInitialSetup.initializeRobot(simulatedRobot, null);

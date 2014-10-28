@@ -85,16 +85,19 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       
    }
    
+   @Override
    public TerrainObject3D getTerrainObject3D()
    {
       return combinedTerrainObject;
    }
 
+   @Override
    public List<Robot> getEnvironmentRobots()
    {
       return envRobots;
    }
 
+   @Override
    public void createAndSetContactControllerToARobot()
    {
       ContactController contactController = new ContactController();
@@ -104,6 +107,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       envRobots.get(0).setController(contactController);
    }
 
+   @Override
    public void addContactPoints(ExternalForcePoint[] externalForcePoints)
    {
       for (ExternalForcePoint pt : externalForcePoints)
@@ -112,6 +116,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       }
    }
 
+   @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
       for (Contactable contactable : contactables)

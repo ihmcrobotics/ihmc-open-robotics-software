@@ -76,7 +76,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       BigStepUpWithHandPlatformEnvironment environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment.getTerrainObject3D(), "testBigStepUpWithHandPlatform", "", selectedLocation, checkNothingChanged,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "testBigStepUpWithHandPlatform", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, getRobotModel());
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

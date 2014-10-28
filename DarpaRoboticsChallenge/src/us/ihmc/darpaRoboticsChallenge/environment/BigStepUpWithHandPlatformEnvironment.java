@@ -74,28 +74,33 @@ public class BigStepUpWithHandPlatformEnvironment implements CommonAvatarEnviron
       return combinedTerrainObject;
    }
    
+   @Override
    public TerrainObject3D getTerrainObject3D()
    {
       return combinedTerrainObject;
    }
 
+   @Override
    public List<Robot> getEnvironmentRobots()
    {
       return new ArrayList<Robot>();
    }
 
+   @Override
    public void createAndSetContactControllerToARobot()
    {
       // TODO Auto-generated method stub
       
    }
 
+   @Override
    public void addContactPoints(ExternalForcePoint[] externalForcePoints)
    {
       // TODO Auto-generated method stub
       
    }
 
+   @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
       // TODO Auto-generated method stub

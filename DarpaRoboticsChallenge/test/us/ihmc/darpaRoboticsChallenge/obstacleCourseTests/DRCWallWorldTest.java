@@ -75,7 +75,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 
       double wallMaxY = 2.5;
       DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-0.5, wallMaxY);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment.getTerrainObject3D(), "DRCWalkingUpToRampShortStepsTest", "", selectedLocation, checkNothingChanged,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, getRobotModel());
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

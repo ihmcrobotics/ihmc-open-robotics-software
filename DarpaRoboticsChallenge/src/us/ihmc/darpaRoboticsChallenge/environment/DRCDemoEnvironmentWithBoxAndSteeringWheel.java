@@ -137,16 +137,19 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       terrainObject.addRotatableBox(box, YoAppearance.DarkGray());
    }
    
+   @Override
    public TerrainObject3D getTerrainObject3D()
    {
       return combinedTerrainObject;
    }
 
+   @Override
    public List<Robot> getEnvironmentRobots()
    {
       return new ArrayList<Robot>(environmentRobots);
    }
 
+   @Override
    public void addContactPoints(ExternalForcePoint[] contactPoints)
    {
       for (ExternalForcePoint contactPoint : contactPoints)
@@ -155,6 +158,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       }
    }
 
+   @Override
    public void createAndSetContactControllerToARobot()
    {
       // add contact controller to any robot so it gets called
@@ -171,6 +175,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       steeringWheelRobot.setController(controller);
    }
 
+   @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
       for (Contactable contactable : contactables)
