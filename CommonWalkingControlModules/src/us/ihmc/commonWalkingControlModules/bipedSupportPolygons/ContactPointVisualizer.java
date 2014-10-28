@@ -72,7 +72,7 @@ public class ContactPointVisualizer
          tempFrameVector.changeFrame(worldFrame);
          tempFrameVector.scale(normalVectorScale);
 
-         List<? extends ContactPoint> contactPoints = contactState.getContactPoints();
+         List<? extends ContactPointInterface> contactPoints = contactState.getContactPoints();
          for (int k = 0; k < contactPoints.size(); k++)
          {
             updateContactPointDynamicGraphicObjects(i++, contactPoints.get(k));
@@ -80,7 +80,7 @@ public class ContactPointVisualizer
       }
    }
 
-   private void updateContactPointDynamicGraphicObjects(int i, ContactPoint contactPoint)
+   private void updateContactPointDynamicGraphicObjects(int i, ContactPointInterface contactPoint)
    {
       if (contactPoint.isInContact())
       {

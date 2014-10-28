@@ -6,12 +6,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -62,6 +64,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
@@ -834,6 +837,53 @@ public class MomentumBasedController
    public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
    {
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
+   }
+   
+   public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
+   {
+      RobotSide robotSide = nextFootstep.getRobotSide();
+      
+      List<Point2d> predictedContactPoints = nextFootstep.getPredictedContactPoints();
+      
+      if ((predictedContactPoints != null) && (!predictedContactPoints.isEmpty()))
+      {
+         setFootPlaneContactPoints(robotSide, predictedContactPoints);
+      }
+      else
+      {
+         resetFootPlaneContactPoint(robotSide);
+      }
+   }
+   
+   public void setFootstepsContactPointsBasedOnFootContactStatePoints(Footstep footstep)
+   {
+      RobotSide robotSide = footstep.getRobotSide();
+      ContactablePlaneBody foot = feet.get(robotSide);
+      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      List<YoContactPoint> contactPoints = footContactState.getContactPoints();
+      
+      ArrayList<FramePoint2d> contactPointList = new ArrayList<FramePoint2d>();
+      
+      for (YoContactPoint contactPoint : contactPoints)
+      {
+         contactPointList.add(contactPoint.getPosition2d());
+      }
+      
+      footstep.setPredictedContactPointsFromFramePoint2ds(contactPointList);
+   }
+
+   private void resetFootPlaneContactPoint(RobotSide robotSide)
+   {
+      ContactablePlaneBody foot = feet.get(robotSide);
+      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      footContactState.setContactFramePoints(foot.getContactPoints2d());
+   }
+   
+   private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2d> predictedContactPoints)
+   {
+      ContactablePlaneBody foot = feet.get(robotSide);
+      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      footContactState.setContactPoints(predictedContactPoints);
    }
 
    public void setPlaneContactCoefficientOfFriction(ContactablePlaneBody contactableBody, double coefficientOfFriction)

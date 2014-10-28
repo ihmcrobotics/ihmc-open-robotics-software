@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
@@ -589,7 +590,7 @@ public class FootExplorationControlModule
       double initialCoPTime;
       int lastContactPointNumber;
       double copTime;
-      ContactPoint contactPoint;
+      ContactPointInterface contactPoint;
       private final DoubleYoVariable CoPPositionPercentage = new DoubleYoVariable("CoPPositionPercentage", registry);
       private final DoubleYoVariable explorationTime = new DoubleYoVariable("explorationTime", registry);;
       private final BooleanYoVariable ankleJointIsMoving = new BooleanYoVariable("ankleJointIsMoving", registry);
@@ -765,7 +766,7 @@ public class FootExplorationControlModule
                   if (planeBody.equals(contactablePlaneRigidBody) && planeContactState.inContact()
                         && planeContactState.getTotalNumberOfContactPoints() >= minimumNumberOfContactPointsToHaveAPolygon)
                   {
-                     List<? extends ContactPoint> points = planeContactState.getContactPoints();
+                     List<? extends ContactPointInterface> points = planeContactState.getContactPoints();
 
                      FramePoint2d localCoP = momentumBasedController.getCoP(contactablePlaneBody);
                      double minDistance = getClosestEdgeDistance(points, localCoP);
@@ -793,7 +794,7 @@ public class FootExplorationControlModule
        * @param pointToCheck - the point that needs to be checked for the distance from each edge of the polygon
        * @return double - the distance of the point from the closest edge of the polygon
        */
-      private double getClosestEdgeDistance(List<? extends ContactPoint> points, FramePoint2d pointToCheck)
+      private double getClosestEdgeDistance(List<? extends ContactPointInterface> points, FramePoint2d pointToCheck)
       {
          double ret = Double.POSITIVE_INFINITY;
          FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
@@ -1203,7 +1204,7 @@ public class FootExplorationControlModule
       }
    }
 
-   private ArrayList<Point2d> getCopyOfContactPointLocation(List<? extends ContactPoint> contactPoints)
+   private ArrayList<Point2d> getCopyOfContactPointLocation(List<? extends ContactPointInterface> contactPoints)
    {
       ArrayList<Point2d> ret = new ArrayList<Point2d>();
 
@@ -1217,7 +1218,7 @@ public class FootExplorationControlModule
       return ret;
    }
 
-   private void resetContactPoints(ArrayList<Point2d> defaultPoint, List<? extends ContactPoint> oldPoints)
+   private void resetContactPoints(ArrayList<Point2d> defaultPoint, List<? extends ContactPointInterface> oldPoints)
    {
       for (int i = 0; i < defaultPoint.size(); i++)
       {
@@ -1236,14 +1237,14 @@ public class FootExplorationControlModule
 
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         ContactPoint contactPoint = currentPlaneContactState.getContactPoints().get(i);
+         ContactPointInterface contactPoint = currentPlaneContactState.getContactPoints().get(i);
          FramePoint2d scaledPoint = polygon.getFrameVertex(i);
          contactPoint.getPosition().set(scaledPoint.getX(), scaledPoint.getY(), 0.0);
          contactPoint.getPosition2d().set(scaledPoint.getX(), scaledPoint.getY());
       }
    }
 
-   private FrameConvexPolygon2d createAPolygonFromContactPoints(List<? extends ContactPoint> points)
+   private FrameConvexPolygon2d createAPolygonFromContactPoints(List<? extends ContactPointInterface> points)
    {
       ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
       for (int i = 0; i < points.size(); i++)

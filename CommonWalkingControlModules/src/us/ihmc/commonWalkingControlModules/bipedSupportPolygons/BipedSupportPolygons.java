@@ -226,7 +226,7 @@ public class BipedSupportPolygons
 
             for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
             {
-               ContactPoint contactPoint = contactState.getContactPoints().get(i);
+               ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
                if (!contactPoint.isInContact())
                   continue;
 
