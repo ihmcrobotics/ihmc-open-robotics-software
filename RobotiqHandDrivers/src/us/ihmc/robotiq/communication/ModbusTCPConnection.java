@@ -30,6 +30,7 @@ public class ModbusTCPConnection
 	private int packetCounter;
 	
 	private boolean autoReconnect = false;
+	private boolean connected = false;
 	
 	public static void main(String[] args)
 	{

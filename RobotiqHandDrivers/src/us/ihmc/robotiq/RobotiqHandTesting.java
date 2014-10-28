@@ -21,16 +21,20 @@ public class RobotiqHandTesting
 	private SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel("Middle Finger");
 	private SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel("Thumb");
 	
-//	private RobotiqHandInterface hand = new RobotiqHandInterface();
+	private RobotiqHandInterface hand;
 
 	public static void main(String[] args) throws Exception
 	{
+		
 		new RobotiqHandTesting().init();
+		
 	}
 	
 	private void init()
 	{
-//		setupSliderListeners();
+		hand = new RobotiqHandInterface();
+
+		//		setupSliderListeners();
 		
 		setupButtonListeners();
 		
@@ -112,7 +116,7 @@ public class RobotiqHandTesting
 			public void actionPerformed(ActionEvent e)
 			{
 				// TODO Auto-generated method stub
-				
+				hand.initialize();
 			}
 		});
 		
