@@ -56,6 +56,7 @@ class Mapper
 	ros::Publisher icpCorrectionPub;
 	ros::Publisher odomErrorPub;
 	ros::Publisher overlapPub;
+	ros::Publisher localizationStatusPub;
 	
 	// Services
 	ros::ServiceServer getPointMapSrv;
@@ -109,6 +110,7 @@ class Mapper
 	boost::thread publishThread;
 	boost::mutex publishLock;
 	ros::Time publishStamp;
+	std_msgs::String localizationStatus;
 	
 	tf::TransformListener tfListener;
 	tf::TransformBroadcaster tfBroadcaster;
@@ -263,6 +265,7 @@ Mapper::Mapper(ros::NodeHandle& n, ros::NodeHandle& pn):
 	icpCorrectionPub = n.advertise<geometry_msgs::PoseStamped>("icp_correction", 50, true);
 	odomErrorPub = n.advertise<nav_msgs::Odometry>("icp_error_odom", 50, true);
 	overlapPub = n.advertise<std_msgs::Float64>("localization_overlap", 1, true);
+	localizationStatusPub = n.advertise<std_msgs::String>("localization_status", 1, true);
 
 	getPointMapSrv = n.advertiseService("dynamic_point_map", &Mapper::getPointMap, this);
 	saveMapSrv = pn.advertiseService("save_map", &Mapper::saveMap, this);
@@ -424,6 +427,11 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 	if(ptsCount < minReadingPointCount)
 	{
 		ROS_ERROR_STREAM("Not enough points in newPointCloud: only " << ptsCount << " pts.");
+		localizationStatus.data = "Not enough points in newPointCloud";
+		localizationStatusPub.publish(localizationStatus);
+		std_msgs::Float64 overlap_msg;
+		overlap_msg.data = 0.0;
+		overlapPub.publish(overlap_msg);
 		return;
 	}
 
@@ -462,6 +470,8 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		if (estimatedOverlap < minOverlap)
 		{
 			ROS_ERROR_STREAM("Estimated overlap too small, ignoring ICP correction!");
+			localizationStatus.data = "Estimated overlap too small, ignoring ICP correction!";
+			localizationStatusPub.publish(localizationStatus);
 			return;
 		}
 		
@@ -528,6 +538,8 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 			mapCreationTime = stamp;
 			#if BOOST_VERSION >= 104100
 			ROS_INFO("Adding new points to the map in background");
+			localizationStatus.data = ("Adding new points to the map in background");
+			localizationStatusPub.publish(localizationStatus);
 			mapBuildingTask = MapBuildingTask(boost::bind(&Mapper::updateMap, this, newPointCloud.release(), Ticp, true));
 			mapBuildingFuture = mapBuildingTask.get_future();
 			mapBuildingThread = boost::thread(boost::move(boost::ref(mapBuildingTask)));
@@ -541,6 +553,8 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 	catch (PM::ConvergenceError error)
 	{
 		ROS_ERROR_STREAM("ICP failed to converge: " << error.what());
+		localizationStatus.data = ("ICP failed to converge");
+		localizationStatusPub.publish(localizationStatus);
 		return;
 	}
 	
@@ -553,6 +567,8 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		ROS_WARN_STREAM("[TIME] Real-time capability: " << realTimeRatio << "%");
 
 	lastPoinCloudTime = stamp;
+	localizationStatus.data = ("Robot localized successfully.");
+	localizationStatusPub.publish(localizationStatus);
 }
 
 void Mapper::processNewMapIfAvailable()
