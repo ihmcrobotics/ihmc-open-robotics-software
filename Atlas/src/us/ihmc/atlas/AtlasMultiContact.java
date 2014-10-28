@@ -128,7 +128,7 @@ public class AtlasMultiContact
       VariousWalkingProviderFactory variousWalkingProviderFactory = createVariousWalkingProviderFactory();
       controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
 
-      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject3D().getLinkGraphics(), robotInitialSetup, scsInitialSetup,
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup,
             guiInitialSetup, null);
 
       simulationConstructionSet = drcSimulation.getSimulationConstructionSet();

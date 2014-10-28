@@ -24,7 +24,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
@@ -154,7 +153,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant, new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
             simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -196,12 +195,11 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    public void testPelvisCorrectionWithOscillatingFeetWhileStanding() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      
-      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(
-            new IHMCCommunicationKryoNetClassList()),
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant, new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
             simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
-      
+
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       
@@ -241,11 +239,9 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    public void testInstantaneousPelvisCorrectionWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      
-      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(
-            new IHMCCommunicationKryoNetClassList()),
-            simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
-            false, getRobotModel());
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant, new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
+            simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie, false, getRobotModel());
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();

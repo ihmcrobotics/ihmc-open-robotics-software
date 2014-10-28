@@ -10,10 +10,12 @@ import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 public interface CommonAvatarEnvironmentInterface
 {
    public abstract TerrainObject3D getTerrainObject3D();
-   public abstract List<Robot> getEnvironmentRobots();  
+
+   public abstract List<Robot> getEnvironmentRobots();
+
    public abstract void createAndSetContactControllerToARobot();
-   
+
    public abstract void addContactPoints(ExternalForcePoint[] externalForcePoints);
-   
+
    public abstract void addSelectableListenerToSelectables(SelectableObjectListener selectedListener);
 }

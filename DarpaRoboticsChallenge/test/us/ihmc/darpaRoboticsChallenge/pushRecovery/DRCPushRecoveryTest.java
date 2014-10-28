@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -26,7 +27,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundTerrainObject;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCPushRecoveryTest
@@ -117,7 +117,7 @@ public abstract class DRCPushRecoveryTest
    
    private void setupTest(String scriptName)
    {
-      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation, false, showGUI, false, getRobotModel());

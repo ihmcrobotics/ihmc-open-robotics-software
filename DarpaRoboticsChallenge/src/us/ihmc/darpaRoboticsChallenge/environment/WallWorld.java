@@ -1,19 +1,23 @@
 package us.ihmc.darpaRoboticsChallenge.environment;
 
+import java.util.List;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class WallWorld extends CombinedTerrainObject3D
+public class WallWorld implements CommonAvatarEnvironmentInterface
 {
-
+   private final CombinedTerrainObject3D terrain = new CombinedTerrainObject3D("WallWorld");
    public WallWorld()
    {
-      super("WallWorld");
-
-//      addBox(-5, 0.75, 5, 2, 4);
-//      addRotatedRamp(0.0, 0.7, 0.2, 1.0, 4.0, 90.0, YoAppearance.DarkBlue());
+//     terrain.addBox(-5, 0.75, 5, 2, 4);
+//     terrain.addRotatedRamp(0.0, 0.7, 0.2, 1.0, 4.0, 90.0, YoAppearance.DarkBlue());
       
       setupWallSlightlyInFront();
       setupGroundPlane();
@@ -27,13 +31,38 @@ public class WallWorld extends CombinedTerrainObject3D
       AppearanceDefinition appearance = YoAppearance.Green();
       appearance.setTransparency(0.25);
       
-      addBox(xStart, -wallWidth/2.0, xStart + 0.1, wallWidth/2.0, 0.5, 1.8, appearance);
+      terrain.addBox(xStart, -wallWidth/2.0, xStart + 0.1, wallWidth/2.0, 0.5, 1.8, appearance);
    }
 
    private void setupGroundPlane()
    {
-      addBox(-10, -10, 10, 10, -0.1, 0.0, YoAppearance.Blue());
+      terrain.addBox(-10, -10, 10, 10, -0.1, 0.0, YoAppearance.Blue());
    }
 
-   
+   @Override
+   public TerrainObject3D getTerrainObject3D()
+   {
+      return terrain;
+   }
+
+   @Override
+   public List<Robot> getEnvironmentRobots()
+   {
+      return null;
+   }
+
+   @Override
+   public void createAndSetContactControllerToARobot()
+   {
+   }
+
+   @Override
+   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   {
+   }
+
+   @Override
+   public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
+   {
+   }
 }

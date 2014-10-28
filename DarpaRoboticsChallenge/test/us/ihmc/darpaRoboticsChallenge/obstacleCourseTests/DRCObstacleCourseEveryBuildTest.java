@@ -13,6 +13,7 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.utilities.MemoryTools;
@@ -21,7 +22,6 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundTerrainObject;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestInterface
@@ -65,7 +65,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
 
-      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
@@ -97,7 +97,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCWalkingUpToRampLongStepsTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());

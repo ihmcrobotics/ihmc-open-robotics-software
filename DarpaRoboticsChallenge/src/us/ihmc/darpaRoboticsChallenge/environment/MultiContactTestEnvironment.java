@@ -101,7 +101,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private ConvexPolygon2d createContactPolygon(Vector3d centroid, int nPoints, double radius)
    {
       List<Point2d> pointList = new ArrayList<Point2d>();
-      double angleIncrement = 2.0 * Math.PI / ((double) nPoints);
+      double angleIncrement = 2.0 * Math.PI / nPoints;
       for (int i = 0; i < nPoints; i++)
       {
          double angle = i * angleIncrement;
@@ -115,26 +115,31 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       return convexPolygon;
    }
    
+   @Override
    public TerrainObject3D getTerrainObject3D()
    {
       return combinedTerrainObject;
    }
 
+   @Override
    public List<Robot> getEnvironmentRobots()
    {
       return new ArrayList<Robot>();
    }
 
+   @Override
    public void addContactPoints(ExternalForcePoint[] contactPoints)
    {
       // empty
    }
 
+   @Override
    public void createAndSetContactControllerToARobot()
    {
       // empty
    }
 
+   @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
       // empty
