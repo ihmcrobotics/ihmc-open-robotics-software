@@ -4,6 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -72,6 +73,8 @@ public class HandPoseBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
+         outgoingHandPosePacket.setDestination(PacketDestination.UI);  
+         
          sendPacketToController(outgoingHandPosePacket);
          sendPacketToNetworkProcessor(outgoingHandPosePacket);
          packetHasBeenSent.set(true);

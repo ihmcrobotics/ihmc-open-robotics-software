@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public interface VisualizablePacket
+public interface VisualizablePacket 
 {
 	
 }
