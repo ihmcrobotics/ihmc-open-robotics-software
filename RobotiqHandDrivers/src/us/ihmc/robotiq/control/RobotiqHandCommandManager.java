@@ -17,9 +17,11 @@ public class RobotiqHandCommandManager extends HandCommandManager
 		
 		this.networkManager = networkManager;
 		
-		setupOutboundPacketListeners();
-		
-		setupInboundPacketListeners();
+		if(networkManager != null)
+		{
+			setupOutboundPacketListeners();
+			setupInboundPacketListeners();
+		}
 	}
 
    protected void setupInboundPacketListeners()

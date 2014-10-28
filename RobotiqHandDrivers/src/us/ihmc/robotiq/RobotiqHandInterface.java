@@ -834,7 +834,7 @@ public final class RobotiqHandInterface
 	
 	public boolean isConnected()
 	{
-		if(connected)
+		if(connection != null)
 		{
 		   connected = connection.testConnection();
 		}

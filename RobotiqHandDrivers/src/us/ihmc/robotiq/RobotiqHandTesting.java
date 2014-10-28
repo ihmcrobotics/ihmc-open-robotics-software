@@ -12,7 +12,11 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandTesting
 {
@@ -28,7 +32,6 @@ public class RobotiqHandTesting
 	private JButton initializeButton = new JButton("Initialize");
 	private JButton resetButton = new JButton("Reset");
 	
-	private RobotiqHandInterface hand;
 	private RobotiqHandCommandManager manager;
 
 	public static void main(String[] args) throws Exception
@@ -40,7 +43,6 @@ public class RobotiqHandTesting
 	
 	private void init()
 	{
-//		hand = new RobotiqHandInterface();
 		manager = new RobotiqHandCommandManager(null);
 
 		//		setupSliderListeners();
@@ -124,6 +126,7 @@ public class RobotiqHandTesting
 			{
 				JSlider slider = finger1Panel.getSlider();
 				System.out.println(slider.getValue());
+				ManualHandControlPacket packet = new ManualHandControlPacket();
 			}
 		});
 		
@@ -158,8 +161,7 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				hand.initialize();
-				System.out.println("Done initializing...");
+				manager.sendHandCommand(new FingerStatePacket(RobotSide.LEFT, FingerState.CALIBRATE));
 			}
 		});
 		
@@ -168,7 +170,7 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				hand.reset();
+				manager.sendHandCommand(new FingerStatePacket(RobotSide.LEFT, FingerState.RESET));
 			}
 		});
 	}
