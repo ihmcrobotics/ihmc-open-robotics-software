@@ -64,7 +64,6 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    DRCDemo01NavigationEnvironment demo01NavEnvironmant;
    
    private final String simpleFlatGroundScriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-   private final String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, simpleFlatGroundScriptName);
 
    private boolean sendPelvisCorrectionPackets = true;
 
@@ -107,7 +106,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
       
-      drcNetworkingSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(),demo01NavEnvironmant,fileName,showGUI,false);
+      drcNetworkingSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), demo01NavEnvironmant, simpleFlatGroundScriptName, showGUI, false);
       drcSimulationTestHelper = drcNetworkingSimulationTestHelper.getDRCSimulationTestHelper();
       
       ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
@@ -156,7 +155,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestStartedMessage();
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
-            simpleFlatGroundScriptName, fileName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
+            simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
@@ -200,7 +199,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(
             new IHMCCommunicationKryoNetClassList()),
-            simpleFlatGroundScriptName, fileName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
+            simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -245,7 +244,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       
       drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant.getTerrainObject3D(), new KryoLocalObjectCommunicator(
             new IHMCCommunicationKryoNetClassList()),
-            simpleFlatGroundScriptName, fileName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
+            simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
             false, getRobotModel());
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();

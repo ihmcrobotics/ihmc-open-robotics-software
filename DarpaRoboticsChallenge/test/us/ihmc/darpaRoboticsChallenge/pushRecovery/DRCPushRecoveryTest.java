@@ -117,19 +117,10 @@ public abstract class DRCPushRecoveryTest
    
    private void setupTest(String scriptName)
    {
-      String fileName;
-      if(scriptName == null)
-      {
-         fileName = null;
-      }
-      else
-      {
-         fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCPushRecoveryTest.class, scriptName);
-      }
       FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, false, showGUI, false, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation, false, showGUI, false, getRobotModel());
       SDFFullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       pushRobotController = new DRCPushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       

@@ -31,7 +31,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -64,11 +64,11 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
+
       FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
 
@@ -79,7 +79,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      
+
       Point3d center = new Point3d(0.6812851906440737, 0.09417744438175872, 0.8465619287124818);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
@@ -99,7 +99,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCWalkingUpToRampLongStepsTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -132,7 +132,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
- 
+
 
 
    private void setupCameraForWalkingUpToRamp(SimulationConstructionSet scs)
@@ -143,7 +143,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-  
+
 
    private FootstepDataList createFootstepsForWalkingOnFlatLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
@@ -178,5 +178,5 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 
-   
+
 }
