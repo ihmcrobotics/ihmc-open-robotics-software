@@ -8,5 +8,5 @@
 uint8 robotSide
 geometry_msgs/Vector3 location
 geometry_msgs/Quaternion orientation
-geometry_msgs/Vector3[] predictedContactPoints
+Point2dMessage[] predictedContactPoints
 
