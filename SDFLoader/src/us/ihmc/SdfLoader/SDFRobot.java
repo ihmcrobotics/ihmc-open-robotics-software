@@ -401,7 +401,8 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
 
    private boolean isFinger(SDFJointHolder pinJoint)
    {
-      return pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2") || pinJoint.getName().contains("f3");
+      String jointName = pinJoint.getName();
+      return jointName.contains("f0") || jointName.contains("f1") || jointName.contains("f2") || jointName.contains("f3") || jointName.contains("palm") || jointName.contains("finger");
    }
 
    private void addSensors(Joint scsJoint, SDFLinkHolder child)
