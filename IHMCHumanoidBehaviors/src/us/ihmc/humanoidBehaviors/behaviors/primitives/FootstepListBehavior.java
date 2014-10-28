@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
@@ -82,6 +83,8 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
+         outgoingFootstepDataList.setDestination(PacketDestination.UI);
+         
          sendPacketToNetworkProcessor(outgoingFootstepDataList);
          sendPacketToController(outgoingFootstepDataList);
          packetHasBeenSent.set(true);

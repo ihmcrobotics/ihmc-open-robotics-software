@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -59,7 +60,8 @@ public class ComHeightBehavior extends BehaviorInterface
    private void sendComHeightToController()
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
-      {
+      {      
+         outgoingComHeightPacket.setDestination(PacketDestination.UI);  
          sendPacketToController(outgoingComHeightPacket);
          sendPacketToNetworkProcessor(outgoingComHeightPacket);
          packetHasBeenSent.set(true);
