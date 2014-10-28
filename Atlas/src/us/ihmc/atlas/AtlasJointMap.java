@@ -159,7 +159,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      contactPointParameters = new AtlasContactPointParameters(this);
+      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion);
       
       for (RobotSide robtSide : RobotSide.values)
       {
