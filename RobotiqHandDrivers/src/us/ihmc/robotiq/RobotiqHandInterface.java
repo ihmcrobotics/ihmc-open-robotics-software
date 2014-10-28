@@ -338,15 +338,15 @@ public final class RobotiqHandInterface
 	
 	public RobotiqHandInterface()
 	{
-		this(RobotSide.RIGHT);
+		this(RobotSide.LEFT);
 	}
 	
 	public RobotiqHandInterface(RobotSide robotSide)
 	{
 		this.address = robotSide.equals(RobotSide.LEFT) ? RobotiqHandParameters.LEFT_HAND_ADDRESS : RobotiqHandParameters.RIGHT_HAND_ADDRESS;
 		
-		connect();
-		reset();
+		if(connect())
+			reset();
 	}
 	
 	public boolean connect()
@@ -413,7 +413,7 @@ public final class RobotiqHandInterface
 				(byte)speed[FINGER_A],
 				(byte)force[FINGER_A]);
 		
-		blockDuringMotion();
+//		blockDuringMotion();
 	}
 
 	public void reset()
@@ -561,8 +561,8 @@ public final class RobotiqHandInterface
 			{
 				e.printStackTrace();
 			}
-			
-		}while(status == null || (status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+		}
+		while(status == null || (status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
 	public void stop()
@@ -772,7 +772,7 @@ public final class RobotiqHandInterface
 				e.printStackTrace();
 			}
 		}
-		while(status == null || status.length < 22);
+		while(status == null/* || status.length < 22*/);
 		
 		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
 		data[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);

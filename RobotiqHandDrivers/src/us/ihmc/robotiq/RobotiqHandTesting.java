@@ -5,11 +5,14 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 
 public class RobotiqHandTesting
 {
@@ -21,7 +24,12 @@ public class RobotiqHandTesting
 	private SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel("Middle Finger");
 	private SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel("Thumb");
 	
+	private JPanel buttonPanel = new JPanel(new GridBagLayout());
+	private JButton initializeButton = new JButton("Initialize");
+	private JButton resetButton = new JButton("Reset");
+	
 	private RobotiqHandInterface hand;
+	private RobotiqHandCommandManager manager;
 
 	public static void main(String[] args) throws Exception
 	{
@@ -32,7 +40,8 @@ public class RobotiqHandTesting
 	
 	private void init()
 	{
-		hand = new RobotiqHandInterface();
+//		hand = new RobotiqHandInterface();
+		manager = new RobotiqHandCommandManager(null);
 
 		//		setupSliderListeners();
 		
@@ -55,6 +64,16 @@ public class RobotiqHandTesting
 		
 		c.gridy++;
 		panel.add(finger3Panel, c);
+		
+		c.gridy++;
+		panel.add(buttonPanel, c);
+		
+		c.gridx = 0;
+		c.gridy = 0;
+		buttonPanel.add(initializeButton, c);
+		
+		c.gridx++;
+		buttonPanel.add(resetButton, c);
 		
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -116,7 +135,7 @@ public class RobotiqHandTesting
 			public void actionPerformed(ActionEvent e)
 			{
 				// TODO Auto-generated method stub
-				hand.initialize();
+				
 			}
 		});
 		
@@ -134,6 +153,24 @@ public class RobotiqHandTesting
 		
 		finger3Panel.attachBottomButtonActionListener(new ResetSliderActionListener(finger3Panel.getSlider()));
 		
+		initializeButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				hand.initialize();
+				System.out.println("Done initializing...");
+			}
+		});
+		
+		resetButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				hand.reset();
+			}
+		});
 	}
 	
 	class ResetSliderActionListener implements ActionListener
