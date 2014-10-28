@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -67,7 +67,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
       int i = -1;
 
-      for (ContactPoint contactPoint : plane.getContactPoints())
+      for (ContactPointInterface contactPoint : plane.getContactPoints())
       {
          if (!contactPoint.isInContact())
             continue;

@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point2d;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -36,6 +40,9 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private final BooleanYoVariable userStepsTakeEm = new BooleanYoVariable("userStepsTakeEm", registry);
    private final IntegerYoVariable userStepsNotifyCompleteCount = new IntegerYoVariable("userStepsNotifyCompleteCount", registry);
 
+   private final DoubleYoVariable userStepHeelPercentage = new DoubleYoVariable("userStepHeelPercentage", registry);
+   private final DoubleYoVariable userStepToePercentage = new DoubleYoVariable("userStepToePercentage", registry);
+   
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
    
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
@@ -48,6 +55,9 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       userStepWidth.set(0.3);
       userStepMinWidth.set(0.22);
       userStepFirstSide.set(RobotSide.LEFT);
+      
+      userStepHeelPercentage.set(1.0);
+      userStepToePercentage.set(1.0);
    }
 
    @Override
@@ -145,6 +155,28 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
       boolean trustHeight = false;
       Footstep desiredFootstep = new Footstep(foot.getRigidBody(), swingLegSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
+      
+      
+      List<FramePoint2d> contactFramePoints = foot.getContactPoints2d();
+      ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
+
+      for (FramePoint2d contactFramePoint : contactFramePoints)
+      {
+         Point2d contactPoint = contactFramePoint.getPointCopy();
+
+         if (contactFramePoint.getX() > 0.0)
+         {
+            contactPoint.setX(contactPoint.getX() * userStepToePercentage.getDoubleValue());
+         }
+         else
+         {
+            contactPoint.setX(contactPoint.getX() * userStepHeelPercentage.getDoubleValue());
+         }
+
+         contactPoints.add(contactPoint);
+      }
+
+      desiredFootstep.setPredictedContactPointsFromPoint2ds(contactPoints);
 
       return desiredFootstep;
    }

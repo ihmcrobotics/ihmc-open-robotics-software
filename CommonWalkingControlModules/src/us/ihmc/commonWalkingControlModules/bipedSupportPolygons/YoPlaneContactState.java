@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -72,6 +74,39 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       return contactPoints;
    }
+   
+   public void setContactPoints(List<Point2d> contactPointLocations)
+   {
+      int contactPointLocationsSize = contactPointLocations.size();
+
+      if (contactPointLocationsSize != totalNumberOfContactPoints) throw new RuntimeException("contactPointLocationsSize != totalNumberOfContactPoints");
+
+      for (int i=0; i<contactPointLocationsSize; i++)
+      {
+         Point2d contactPointLocation = contactPointLocations.get(i);
+         YoContactPoint yoContactPoint = contactPoints.get(i);
+
+         yoContactPoint.setPosition(contactPointLocation);
+      }
+   }
+   
+   
+   public void setContactFramePoints(List<FramePoint2d> contactPointLocations)
+   {
+      int contactPointLocationsSize = contactPointLocations.size();
+
+      if (contactPointLocationsSize != totalNumberOfContactPoints) throw new RuntimeException("contactPointLocationsSize != totalNumberOfContactPoints");
+
+      for (int i=0; i<contactPointLocationsSize; i++)
+      {
+         FramePoint2d contactPointLocation = contactPointLocations.get(i);
+         YoContactPoint yoContactPoint = contactPoints.get(i);
+
+         yoContactPoint.setPosition(contactPointLocation);
+      }
+   }
+   
+   
    
    public List<FramePoint> getContactFramePointsInContactCopy()
    {

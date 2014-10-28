@@ -14,6 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -156,7 +157,7 @@ public class PlaneContactWrenchMatrixCalculator
 
          for (int j = 0; j < planeContactState.getTotalNumberOfContactPoints(); j++)
          {
-        	 ContactPoint contactPoint = planeContactState.getContactPoints().get(j);
+        	 ContactPointInterface contactPoint = planeContactState.getContactPoints().get(j);
         	 boolean isInContact = contactPoint.isInContact();
 
         	 for (int k = 0; k < nSupportVectors; k++)
@@ -215,7 +216,7 @@ public class PlaneContactWrenchMatrixCalculator
       tempNormalContactVectorRotationMatrix.set(normalContactVectorRotation);
    }
    
-   private void computeCoPBasisVector(PlaneContactState planeContactState, ContactPoint contactPoint, int k)
+   private void computeCoPBasisVector(PlaneContactState planeContactState, ContactPointInterface contactPoint, int k)
    {
       double angle = k * supportVectorAngleIncrement;
       double mu = planeContactState.getCoefficientOfFriction();
@@ -232,7 +233,7 @@ public class PlaneContactWrenchMatrixCalculator
       currentBasisVectorCoP.setUsingArm(footCoPReferenceFrame, tempLinearPartCoP, tempArmCoP);
    }
 
-   private void computeBasisVector(PlaneContactState planeContactState, ContactPoint contactPoint, int k)
+   private void computeBasisVector(PlaneContactState planeContactState, ContactPointInterface contactPoint, int k)
    {
       double angle = k * supportVectorAngleIncrement;
       double mu = planeContactState.getCoefficientOfFriction();

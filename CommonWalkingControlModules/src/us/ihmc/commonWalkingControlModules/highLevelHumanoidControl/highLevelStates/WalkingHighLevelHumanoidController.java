@@ -1058,6 +1058,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          //FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
          supportLeg.set(supportSide);
+         
+         // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
+         momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);
+         
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
 
          // Shouldn't have to do this init anymore since it's done above...
@@ -1686,6 +1690,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       boolean trustHeight = true;
       Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
 
+      momentumBasedController.setFootstepsContactPointsBasedOnFootContactStatePoints(footstep);
+      
       return footstep;
    }
 

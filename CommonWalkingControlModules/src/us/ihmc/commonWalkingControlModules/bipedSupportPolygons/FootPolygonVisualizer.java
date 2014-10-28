@@ -81,7 +81,7 @@ public class FootPolygonVisualizer implements Updatable
 
          for (int j = 0; j < contactState.getTotalNumberOfContactPoints(); j++)
          {
-            ContactPoint contactPoint = contactState.getContactPoints().get(j);
+            ContactPointInterface contactPoint = contactState.getContactPoints().get(j);
             if (contactPoint.isInContact())
             {
                footPolygon.addVertexByProjectionOntoXYPlane(contactPoint.getPosition());

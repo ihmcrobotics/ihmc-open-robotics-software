@@ -23,5 +23,5 @@ public interface PlaneContactState
    public abstract int getNumberOfContactPointsInContact();
    public abstract int getTotalNumberOfContactPoints(); 
    
-   public abstract List<? extends ContactPoint> getContactPoints();
+   public abstract List<? extends ContactPointInterface> getContactPoints();
 }
