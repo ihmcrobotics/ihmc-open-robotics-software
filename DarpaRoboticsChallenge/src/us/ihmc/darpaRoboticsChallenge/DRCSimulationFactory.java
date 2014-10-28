@@ -33,6 +33,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.robotController.AbstractThreadedRobotController;
+import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotController;
 import com.yobotics.simulationconstructionset.robotController.SingleThreadedRobotController;
 
@@ -133,6 +134,12 @@ public class DRCSimulationFactory
       int controllerTicksPerSimulationTick = (int) Math.round(drcRobotModel.getControllerDT() / drcRobotModel.getSimulateDT());
       multiThreadedRobotController.addController(drcEstimatorThread, estimatorTicksPerSimulationTick, false);
       multiThreadedRobotController.addController(drcControllerThread, controllerTicksPerSimulationTick, true);
+      MultiThreadedRobotControlElement simulatedHandController = drcRobotModel.createSimulatedHandController(simulatedRobot, threadDataSynchronizer, globalDataProducer);
+      if (simulatedHandController != null)
+      {
+         multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, true);
+      }
+
 
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {

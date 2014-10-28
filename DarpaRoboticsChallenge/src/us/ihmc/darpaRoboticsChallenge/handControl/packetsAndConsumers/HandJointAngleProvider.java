@@ -34,7 +34,7 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
 
             for (HandJointName jointName : handModel.getHandJointNames())
             {
-               joints.put(jointName, fullRobotModel.getOneDoFJointByName(side.getLowerCaseName() + "_" + jointName.toLowerCase()));
+               joints.put(jointName, fullRobotModel.getOneDoFJointByName(jointName.getJointName(side)));
             }
 
             handJoints.put(side, joints);
