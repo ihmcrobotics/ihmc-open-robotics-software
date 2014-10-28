@@ -8,60 +8,83 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ComHeightBehavior extends BehaviorInterface
 {
+   private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet" + behaviorName, registry);
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
+   private final BooleanYoVariable trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
    private ComHeightPacket outgoingComHeightPacket;
 
    private final DoubleYoVariable yoTime;
-   private double startTime = Double.NaN;
-   private double currentTime = Double.NaN;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
 
    // TODO: This is just an estimate of the time out. This needs to be dealt with
-   private double behaviorTime = 4.0;
 
    public ComHeightBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
-
+      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime.set(2.0);
       this.yoTime = yoTime;
    }
 
    public void setInput(ComHeightPacket comHeightPacket)
    {
       this.outgoingComHeightPacket = comHeightPacket;
+      hasInputBeenSet.set(true);
+   }
+
+   public void kneelDown()
+   {
+      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.15);
+      setInput(packet);
+   }
+
+   public void goToHomeHeight()
+   {
+      ComHeightPacket packet = new ComHeightPacket(0.0);
+      setInput(packet);
    }
 
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingComHeightPacket != null))
+      if (!packetHasBeenSent.getBooleanValue() &&  hasInputBeenSet())
       {
-         sendHandPoseToController();
+         sendComHeightToController();
       }
-
-      currentTime = yoTime.getDoubleValue();
    }
 
-   private void sendHandPoseToController()
+   private void sendComHeightToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          sendPacketToController(outgoingComHeightPacket);
+         sendPacketToNetworkProcessor(outgoingComHeightPacket);
          packetHasBeenSent.set(true);
-         startTime = yoTime.getDoubleValue();
+         startTime.set(yoTime.getDoubleValue());
       }
    }
 
    @Override
    public void initialize()
    {
+      packetHasBeenSent.set(false);
+      hasInputBeenSet.set(false);
+      trajectoryTimeElapsed.set(false);
    }
 
    @Override
    public void finalize()
    {
       packetHasBeenSent.set(false);
+      hasInputBeenSet.set(false);
+      trajectoryTimeElapsed.set(false);
       outgoingComHeightPacket = null;
 
+      startTime.set(Double.NaN);
+      
       isPaused.set(false);
       isStopped.set(false);
    }
@@ -87,9 +110,13 @@ public class ComHeightBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      boolean trajectoryTimeElapsed = currentTime - startTime > behaviorTime;
+      
+      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+         trajectoryTimeElapsed.set(false);
+      else
+         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed &&!isPaused.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -108,10 +135,8 @@ public class ComHeightBehavior extends BehaviorInterface
    }
 
    @Override
-   public boolean hasInputBeenSet() {
-	   if (outgoingComHeightPacket != null)
-		   return true;
-	   else
-		   return false;
+   public boolean hasInputBeenSet()
+   {
+      return hasInputBeenSet.getBooleanValue();
    }
 }

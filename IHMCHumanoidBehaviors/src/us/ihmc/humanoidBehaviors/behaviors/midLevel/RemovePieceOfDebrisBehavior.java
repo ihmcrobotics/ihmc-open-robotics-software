@@ -35,8 +35,11 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
 
    private final FullRobotModel fullRobotModel;
 
-   private double optimalDistanceToGrabObject = 0.4;
+   private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.5;
 
+
+
+   
    public RemovePieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, DoubleYoVariable yoTime)
    {
@@ -55,6 +58,8 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
       targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", ReferenceFrame.getWorldFrame(), registry);
 
    }
+
+
 
    @Override
    public void doControl()
@@ -78,6 +83,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
          {
             currentBehavior = behaviors.remove(0);
             currentBehavior.initialize();
+
             if (currentBehavior instanceof DropDebrisBehavior)
                dropMic.setInputs(graspObject.getSideToUse());
          }
@@ -92,6 +98,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
    {
       double rotationAngleAboutNormal = 0.0;
       graspObject.setGraspPose(graspPosition, graspVector, rotationAngleAboutNormal);
+//      checkStandHeight(graspPosition);
       if (!isObjectCloseEnough(graspPosition))
       {
          calculateLocation(graspPosition);
@@ -105,7 +112,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
    private void calculateLocation(Point3d graspPosition)
    {
       FramePoint target = new FramePoint(fullRobotModel.getChest().getBodyFixedFrame());
-      
+
       //
       FramePoint graspPositionInChestFame = new FramePoint(ReferenceFrame.getWorldFrame());
       graspPositionInChestFame.set(graspPosition);
@@ -113,7 +120,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
       //      
 
       target.setToZero();
-      target.setX(graspPositionInChestFame.getX() - optimalDistanceToGrabObject);
+      target.setX(graspPositionInChestFame.getX() - OPTIMAL_DISTANCE_TO_GRAB_OBJECT);
       target.changeFrame(ReferenceFrame.getWorldFrame());
       targetLocation.set(target.getPoint());
       FrameOrientation frame = new FrameOrientation();
@@ -129,9 +136,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
       graspPositionInChestFame.set(graspPosition);
       graspPositionInChestFame.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
       //      
-//      FramePoint target = new FramePoint(ReferenceFrame.getWorldFrame(), graspPositionInChestFame.getPointCopy());
-//      target.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
-      if (graspPositionInChestFame.getX() >= optimalDistanceToGrabObject)
+      if (graspPositionInChestFame.getX() >= OPTIMAL_DISTANCE_TO_GRAB_OBJECT)
          return false;
       return true;
    }
@@ -194,6 +199,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
    {
       behaviors.clear();
       isDone.set(false);
+
       walkCloseToObject.initialize();
       graspObject.initialize();
       dropMic.initialize();
@@ -202,7 +208,6 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
       behaviors.add(dropMic);
       currentBehavior = behaviors.remove(0);
       haveInputsBeenSet.set(false);
-
    }
 
    @Override
