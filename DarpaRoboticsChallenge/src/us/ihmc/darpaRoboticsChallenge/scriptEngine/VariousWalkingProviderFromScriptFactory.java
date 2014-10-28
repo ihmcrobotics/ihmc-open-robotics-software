@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.scriptEngine;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -52,6 +53,19 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       {
          e.printStackTrace();
          throw new RuntimeException("Could not load script file " + filename);
+      }
+   }
+
+   public VariousWalkingProviderFromScriptFactory(InputStream scriptInputStream)
+   {
+      try
+      {
+         this.scriptFileLoader = new ScriptFileLoader(scriptInputStream);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         throw new RuntimeException("Could not load script input stream");
       }
    }
 

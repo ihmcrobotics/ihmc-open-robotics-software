@@ -64,10 +64,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
+
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged,
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", scriptName, selectedLocation, checkNothingChanged,
               showGUI, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -99,10 +99,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
+
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged,
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", scriptName, selectedLocation, checkNothingChanged,
               showGUI, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
