@@ -4,8 +4,11 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
@@ -19,7 +22,10 @@ public class AtlasROSAPINetworkProcessor
 
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace)
    {
-      ObjectCommunicator controllerCommunicator = new LocalObjectCommunicator();
+      String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
+      ObjectCommunicator controllerCommunicator = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+            new IHMCCommunicationKryoNetClassList());
+      ((KryoObjectClient) controllerCommunicator).setReconnectAutomatically(true);
 
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
