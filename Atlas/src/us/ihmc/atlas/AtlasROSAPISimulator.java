@@ -3,29 +3,25 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import com.martiansoftware.jsap.*;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousGFENetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-
-public class AtlasGFENetworkProcessor
+public class AtlasROSAPISimulator
 {
    private static String defaultRosNameSpace = "atlas";
    private static String defaultRobotModel = "DRC_NO_HANDS";
    
-   public AtlasGFENetworkProcessor(DRCRobotModel robotModel, String nameSpace)
+   public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace)
    {
       boolean initializeEstimatorToActual = false;
       String scriptToLoad = null;
@@ -36,16 +32,16 @@ public class AtlasGFENetworkProcessor
       
       ObjectCommunicator controllerCommunicator = new LocalObjectCommunicator();
       GlobalDataProducer dataProducer = new GlobalDataProducer(controllerCommunicator);
-      
+
       DRCObstacleCourseSimulation simulation = new DRCObstacleCourseSimulation(environment, scriptToLoad, dataProducer, robotInitialSetup,
             guiInitialSetup, robotModel.getControllerDT(), initializeEstimatorToActual, robotModel);
 
       simulation.getSimulation().simulate();
-      
+
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
-      
+
       ObjectCommunicator sensorCommunicator = simulation.getLocalObjectCommunicator();
-      new ThePeoplesGloriousGFENetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, robotModel, nameSpace);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, robotModel, nameSpace);
    }
    
    public static void main(String[] args) throws JSAPException, IOException
@@ -65,6 +61,7 @@ public class AtlasGFENetworkProcessor
       JSAPResult config = jsap.parse(args);
 
       DRCRobotModel robotModel;
+
       try
       {
          robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
@@ -76,6 +73,6 @@ public class AtlasGFENetworkProcessor
          return;
       }
 
-      new AtlasGFENetworkProcessor(robotModel, config.getString("namespace"));
+      new AtlasROSAPISimulator(robotModel, config.getString("namespace"));
    }
 }
