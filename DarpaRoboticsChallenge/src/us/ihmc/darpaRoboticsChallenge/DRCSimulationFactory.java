@@ -98,14 +98,14 @@ public class DRCSimulationFactory
    {
       List<Robot> allSimulatedRobotList = new ArrayList<Robot>();
       allSimulatedRobotList.add(simulatedRobot);
-      if (environment.getEnvironmentRobots() != null)
+      if (environment != null && environment.getEnvironmentRobots() != null)
+      {
          allSimulatedRobotList.addAll(environment.getEnvironmentRobots());
-      Robot[] allSimulatedRobots = allSimulatedRobotList.toArray(new Robot[0]);
-      
-      environment.addContactPoints(simulatedRobot.getAllGroundContactPoints());
-      environment.createAndSetContactControllerToARobot();
-      
-      return allSimulatedRobots;
+
+         environment.addContactPoints(simulatedRobot.getAllGroundContactPoints());
+         environment.createAndSetContactControllerToARobot();
+      }
+      return allSimulatedRobotList.toArray(new Robot[0]);
    }
 
    public FullRobotModelCorruptor getFullRobotModelCorruptor()
