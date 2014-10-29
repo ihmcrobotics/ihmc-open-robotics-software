@@ -19,7 +19,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-
 /**
  * <p>Title: BipedSupportPolygons </p>
  *
@@ -86,8 +85,7 @@ public class BipedSupportPolygons
 
       ArtifactList artifactList = new ArtifactList("Biped Support Polygon");
 
-      YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon("Combined Polygon", supportPolygonViz, Color.pink,
-            false);
+      YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon("Combined Polygon", supportPolygonViz, Color.pink, false);
       artifactList.add(dynamicGraphicYoPolygonArtifact);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -200,6 +198,8 @@ public class BipedSupportPolygons
          visualize();
    }
 
+   private final FramePoint tempFramePoint = new FramePoint();
+
    public void updateUsingContactStates(SideDependentList<PlaneContactState> contactStates)
    {
       timer.startTimer();
@@ -230,8 +230,9 @@ public class BipedSupportPolygons
                if (!contactPoint.isInContact())
                   continue;
 
-               footPolygonInAnkleZUp.addVertexByProjectionOntoXYPlane(contactPoint.getPosition());
-               footPolygonInMidFeetZUp.addVertexByProjectionOntoXYPlane(contactPoint.getPosition());
+               contactPoint.getPosition(tempFramePoint);
+               footPolygonInAnkleZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
+               footPolygonInMidFeetZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
             }
 
             footPolygonInAnkleZUp.update();

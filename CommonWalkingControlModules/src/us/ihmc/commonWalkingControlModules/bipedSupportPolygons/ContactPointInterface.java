@@ -1,21 +1,28 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public interface ContactPointInterface
 {
-   public boolean isInContact();
+   public abstract boolean isInContact();
 
-   public void setInContact(boolean inContact);
+   public abstract void setInContact(boolean inContact);
 
-   // TODO Needs to go away
-   public FramePoint2d getPosition2d();
-
-   public FramePoint getPosition();
+   public abstract void getPosition(FramePoint framePointToPack);
    
-   public void setPosition(FramePoint position);
+   public abstract void getPosition2d(FramePoint2d framePoint2dToPack);
 
-   public PlaneContactState getParentContactState();
+   public abstract void getPosition2d(Point2d position2d);
 
+   public abstract void setPosition(FramePoint position);
+
+   public abstract void setPosition2d(FramePoint2d position2d);
+
+   public abstract ReferenceFrame getReferenceFrame();
+
+   public abstract PlaneContactState getParentContactState();
 }

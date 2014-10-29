@@ -4,85 +4,116 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
-
 
 public class YoContactPoint implements ContactPointInterface
 {
    private final YoVariableRegistry registry;
    private final YoFramePoint yoPosition;
-   // TODO Needs to go away
-   private final YoFramePoint2d yoPosition2d;
    private final BooleanYoVariable isInContact;
    private final String namePrefix;
    private final PlaneContactState parentContactState;
-   
-   public YoContactPoint(String namePrefix, int index, FramePoint2d point2d, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+
+   public YoContactPoint(String namePrefix, int index, FramePoint2d contactPointPosition2d, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, index, contactPointPosition2d.getReferenceFrame(), parentContactState, parentRegistry);
+      setPosition(contactPointPosition2d);
+   }
+
+   public YoContactPoint(String namePrefix, int index, FramePoint contactPointPosition, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, index, contactPointPosition.getReferenceFrame(), parentContactState, parentRegistry);
+      setPosition(contactPointPosition);
+   }
+
+   public YoContactPoint(String namePrefix, int index, ReferenceFrame pointFrame, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
    {
       this.parentContactState = parentContactState;
       this.namePrefix = namePrefix;
-      
+
       //TODO: Check if it is better to create an actual child registry
       registry = parentRegistry;
 
-      yoPosition = new YoFramePoint(namePrefix + "Contact" + index, point2d.getReferenceFrame(), registry);
-      // TODO Needs to go away
-      yoPosition2d = new YoFramePoint2d(namePrefix + "Contact2d" + index, point2d.getReferenceFrame(), registry);
+      yoPosition = new YoFramePoint(namePrefix + "Contact" + index, pointFrame, registry);
       isInContact = new BooleanYoVariable(namePrefix + "InContact" + index, registry);
-      
-      yoPosition.set(point2d.getX(), point2d.getY(), 0.0);
-      yoPosition2d.set(point2d.getX(), point2d.getY());
    }
 
+   @Override
    public boolean isInContact()
    {
       return isInContact.getBooleanValue();
    }
 
+   @Override
    public void setInContact(boolean inContact)
    {
       isInContact.set(inContact);
    }
-   
-   // TODO Needs to go away
-   public FramePoint2d getPosition2d()
+
+   @Override
+   public void getPosition2d(FramePoint2d framePoint2dToPack)
    {
-      return yoPosition2d.getFramePoint2dCopy();
+      yoPosition.getFrameTuple2dIncludingFrame(framePoint2dToPack);
    }
 
-   public FramePoint getPosition()
+   @Override
+   public void getPosition(FramePoint framePointToPack)
    {
-      return yoPosition.getFramePointCopy();
+      yoPosition.getFrameTupleIncludingFrame(framePointToPack);
    }
-   
+
+   @Override
+   public void getPosition2d(Point2d position2d)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
    public void setPosition(FramePoint position)
    {
       this.yoPosition.set(position);
    }
-   
-   public void setPosition(Point2d contactPointLocation)
+
+   @Override
+   public void setPosition2d(FramePoint2d position2d)
    {
-      yoPosition2d.set(contactPointLocation.getX(), contactPointLocation.getY());
-      yoPosition.set(contactPointLocation.getX(), contactPointLocation.getY(), 0.0);    
+      yoPosition.setXY(position2d);
    }
-   
-   public void setPosition(FramePoint2d contactPointLocation)
+
+   public void setPosition2d(Point2d contactPointLocation)
    {
-      yoPosition2d.set(contactPointLocation);
       yoPosition.setXY(contactPointLocation);
    }
-   
+
+   public void setPosition(FramePoint2d contactPointLocation)
+   {
+      yoPosition.setXY(contactPointLocation);
+   }
+
+   @Override
    public PlaneContactState getParentContactState()
    {
       return parentContactState;
    }
-   
-   public String toString()
+
+   public boolean epsilonEquals(FramePoint2d contactPointPosition2d, double threshold)
    {
-      return namePrefix + ", in contact: " + isInContact() + ", position: " + getPosition2d().toString();
+      return yoPosition.epsilonEquals(contactPointPosition2d, threshold);
    }
 
+   @Override
+   public String toString()
+   {
+      return namePrefix + ", in contact: " + isInContact() + ", position: " + yoPosition.toString();
+   }
+
+   @Override
+   public ReferenceFrame getReferenceFrame()
+   {
+      return yoPosition.getReferenceFrame();
+   }
 }

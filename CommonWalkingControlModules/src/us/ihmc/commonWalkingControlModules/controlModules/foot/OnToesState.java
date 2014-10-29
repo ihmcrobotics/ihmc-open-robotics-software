@@ -225,7 +225,9 @@ public class OnToesState extends AbstractFootControlState
    {
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         originalContactPointPositions.add(new FramePoint(contactPoints.get(i).getPosition()));
+         FramePoint e = new FramePoint();
+         contactPoints.get(i).getPosition(e);
+         originalContactPointPositions.add(e);
       }
    }
 
@@ -237,15 +239,17 @@ public class OnToesState extends AbstractFootControlState
       }
    }
 
+   private final FramePoint tempShrinkPoint = new FramePoint();
+
    private void shrinkFootSizeToMidToe()
    {
       double alphaShrink = alphaShrinkFootSizeForToeOff;
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         FramePoint position = contactPoints.get(i).getPosition();
-         position.setX(alphaShrink * position.getX() + (1.0 - alphaShrink) * singleToeContactPoint.getX());
-         position.setY(alphaShrink * position.getY() + (1.0 - alphaShrink) * singleToeContactPoint.getY());
-         contactPoints.get(i).setPosition(position);
+         contactPoints.get(i).getPosition(tempShrinkPoint);
+         tempShrinkPoint.setX(alphaShrink * tempShrinkPoint.getX() + (1.0 - alphaShrink) * singleToeContactPoint.getX());
+         tempShrinkPoint.setY(alphaShrink * tempShrinkPoint.getY() + (1.0 - alphaShrink) * singleToeContactPoint.getY());
+         contactPoints.get(i).setPosition(tempShrinkPoint);
       }
    }
 

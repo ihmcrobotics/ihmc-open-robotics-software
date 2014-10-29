@@ -31,7 +31,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    private final int totalNumberOfContactPoints;
 
    // Class enabling to update the contact points of a contactable rolling body as it is rolling on the ground or on another contactable surface
-   public YoRollingContactState(String namePrefix, ContactableRollingBody contactableCylinderBody, List<FramePoint2d> contactFramePoints, YoVariableRegistry parentRegistry)
+   public YoRollingContactState(String namePrefix, ContactableRollingBody contactableCylinderBody, List<FramePoint> contactFramePoints, YoVariableRegistry parentRegistry)
    {
       // The rolling contactable body
       this.contactableCylinderBody = contactableCylinderBody;
@@ -56,7 +56,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       
       this.contactNormalFrameVector = new FrameVector(updatableContactFrame, 0.0, 0.0, 1.0);
 
-      FramePoint2d tempFramePoint = new FramePoint2d(updatableContactFrame);
+      FramePoint tempFramePoint = new FramePoint(updatableContactFrame);
       
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
@@ -149,8 +149,9 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
 
          if (contactPoint.isInContact())
          {
-            FramePoint2d framePoint2d = contactPoint.getPosition2d();
-            FramePoint framePoint = new FramePoint(framePoint2d.getReferenceFrame(), framePoint2d.getX(), framePoint2d.getY(), 0.0);
+            FramePoint2d framePoint2d = new FramePoint2d();
+            contactPoint.getPosition2d(framePoint2d);
+            FramePoint framePoint = new FramePoint(framePoint2d);
             ret.add(framePoint);
          }
       }
@@ -171,7 +172,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
          if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
          
-         contactPointListToPack.get(counter).setIncludingFrame(contactPoint.getPosition());
+         contactPoint.getPosition(contactPointListToPack.get(counter));
       }
       
       for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
@@ -188,7 +189,9 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
          YoContactPoint contactPoint = contactPoints.get(i);
          if (contactPoint.isInContact())
          {
-            ret.add(new FramePoint2d(contactPoint.getPosition2d()));
+            FramePoint2d e = new FramePoint2d();
+            contactPoint.getPosition2d(e);
+            ret.add(e);
          }
       }
 

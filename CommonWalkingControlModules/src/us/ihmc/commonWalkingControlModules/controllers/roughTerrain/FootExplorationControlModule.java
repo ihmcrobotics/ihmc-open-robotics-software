@@ -10,7 +10,6 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -185,7 +184,7 @@ public class FootExplorationControlModule
    private FramePoint finalCoP;
    private ReferenceFrame CoPFrame;
    private RobotSide loadBearingSide;
-
+   private final FramePoint2d tempFramePoint2d = new FramePoint2d();
    // to delete
    static
    {
@@ -623,10 +622,10 @@ public class FootExplorationControlModule
                initialCoPTime = yoTime.getDoubleValue();
                lastContactPointNumber = currentContactPointNumber.getIntegerValue();
                contactPoint = currentPlaneContactStateToExplore.getContactPoints().get(currentContactPointNumber.getIntegerValue());
-               FramePoint2d position = contactPoint.getPosition2d();
+               contactPoint.getPosition2d(tempFramePoint2d);
                copVelocity = 1.0 / copShiftTime;
                initialCoP = new FramePoint(CoPFrame, startCoP.getX(), startCoP.getY(), 0.0);
-               finalCoP = new FramePoint(CoPFrame, position.getX(), position.getY(), 0.0);
+               finalCoP = new FramePoint(CoPFrame, tempFramePoint2d.getX(), tempFramePoint2d.getY(), 0.0);
                footExplorationCoPPlanner.initialize();
                CoPPositionPercentage.set(0.0);
                ankleJointVelocity.set(0.0);
@@ -722,15 +721,15 @@ public class FootExplorationControlModule
             Vector2d vector = new Vector2d(x, y);
             if (adjustContactPointInXNOnly)
             {
-               FramePoint contactPosition = contactPoint.getPosition();
-               contactPosition.setX(vector.getX());
-               contactPoint.setPosition(contactPosition);
+               contactPoint.getPosition2d(tempFramePoint2d);
+               tempFramePoint2d.setX(vector.getX());
+               contactPoint.setPosition2d(tempFramePoint2d);
             }
             else
             {
-               FramePoint contactPosition = contactPoint.getPosition();
-               contactPosition.set(vector.getX(), vector.getY(), 0.0);
-               contactPoint.setPosition(contactPosition);
+               contactPoint.getPosition2d(tempFramePoint2d);
+               tempFramePoint2d.set(vector);
+               contactPoint.setPosition2d(tempFramePoint2d);
             }
 
             updateNextFootstepCentroid();
@@ -1125,7 +1124,9 @@ public class FootExplorationControlModule
       ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>();
       for (int i = 0; i < currentPlaneContactStateToExplore.getTotalNumberOfContactPoints(); i++)
       {
-         points.add(currentPlaneContactStateToExplore.getContactPoints().get(i).getPosition2d());
+         FramePoint2d framePoint2d = new FramePoint2d();
+         currentPlaneContactStateToExplore.getContactPoints().get(i).getPosition2d(framePoint2d);
+         points.add(framePoint2d);
       }
 
       FrameConvexPolygon2d newPolygon = new FrameConvexPolygon2d(points);
@@ -1212,9 +1213,9 @@ public class FootExplorationControlModule
 
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         double x = contactPoints.get(i).getPosition().getX();
-         double y = contactPoints.get(i).getPosition().getY();
-         ret.add(new Point2d(x, y));
+         Point2d point2d = new Point2d();
+         contactPoints.get(i).getPosition2d(point2d);
+         ret.add(point2d);
       }
 
       return ret;
@@ -1226,9 +1227,9 @@ public class FootExplorationControlModule
       {
          double x = defaultPoint.get(i).getX();
          double y = defaultPoint.get(i).getY();
-         FramePoint contactPosition = oldPoints.get(i).getPosition();
-         contactPosition.set(x, y, 0.0);
-         oldPoints.get(i).setPosition(contactPosition);
+         oldPoints.get(i).getPosition2d(tempFramePoint2d);
+         tempFramePoint2d.set(x, y);
+         oldPoints.get(i).setPosition2d(tempFramePoint2d);
       }
    }
 
@@ -1242,21 +1243,18 @@ public class FootExplorationControlModule
       {
          ContactPointInterface contactPoint = currentPlaneContactState.getContactPoints().get(i);
          FramePoint2d scaledPoint = polygon.getFrameVertex(i);
-         
-         FramePoint contactPosition = contactPoint.getPosition();
-         contactPosition.set(scaledPoint.getX(), scaledPoint.getY(), 0.0);
-         contactPoint.setPosition(contactPosition);
+         contactPoint.setPosition2d(scaledPoint);
       }
    }
 
    private FrameConvexPolygon2d createAPolygonFromContactPoints(List<? extends ContactPointInterface> points)
    {
-      ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
+      FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(points.get(0).getReferenceFrame());
       for (int i = 0; i < points.size(); i++)
       {
-         frameVertices.add(points.get(i).getPosition2d());
+         points.get(i).getPosition2d(tempFramePoint2d);
+         polygon.addVertex(tempFramePoint2d);
       }
-      FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(frameVertices);
       polygon.update();
 
       return polygon;
