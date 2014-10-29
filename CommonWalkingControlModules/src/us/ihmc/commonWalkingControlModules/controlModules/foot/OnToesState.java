@@ -233,7 +233,7 @@ public class OnToesState extends AbstractFootControlState
    {
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         contactPoints.get(i).getPosition().set(originalContactPointPositions.get(i));
+         contactPoints.get(i).setPosition(originalContactPointPositions.get(i));
       }
    }
 
@@ -245,6 +245,7 @@ public class OnToesState extends AbstractFootControlState
          FramePoint position = contactPoints.get(i).getPosition();
          position.setX(alphaShrink * position.getX() + (1.0 - alphaShrink) * singleToeContactPoint.getX());
          position.setY(alphaShrink * position.getY() + (1.0 - alphaShrink) * singleToeContactPoint.getY());
+         contactPoints.get(i).setPosition(position);
       }
    }
 
