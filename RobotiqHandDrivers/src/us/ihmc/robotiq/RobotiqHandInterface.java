@@ -657,11 +657,13 @@ public final class RobotiqHandInterface
 			speed[FINGER_C] = speed[FINGER_A];
 			fingerControl = INDIVIDUAL_FINGER_CONTROL;
 		}
+		
 		if(finger == SCISSOR)
 		{
 			position[SCISSOR] = status[SCISSOR_REQUESTED_POSITION];
-			scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
+			scissorControl = CONCURRENT_SCISSOR_CONTROL;
 		}
+		
 		position[finger] = desiredPosition;
 		speed[finger] = desiredSpeed;
 		force[finger] = desiredForce;
@@ -713,7 +715,7 @@ public final class RobotiqHandInterface
 		}
 		
 		fingerControl = INDIVIDUAL_FINGER_CONTROL;
-		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
+//		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
 		
 		sendMotionRequest();
 	}
@@ -912,6 +914,7 @@ public final class RobotiqHandInterface
 		data[4] = speed[FINGER_A];
 		data[5] = force[FINGER_A];
 		dataLength = 6;
+		
 		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 		{
 			//update finger b
@@ -924,14 +927,15 @@ public final class RobotiqHandInterface
 			data[11] = force[FINGER_C];
 			dataLength = 12;
 		}
-		if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
-		{
-			data[12] = position[SCISSOR];
-			data[13] = speed[SCISSOR];
-			data[14] = force[SCISSOR];
-			data[15] = 0x00; //included to send an even number of registers. (see the sendRequest() warning)
-			dataLength = 16;
-		}
+		
+//		if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
+//		{
+//			data[12] = position[SCISSOR];
+//			data[13] = speed[SCISSOR];
+//			data[14] = force[SCISSOR];
+//			data[15] = 0x00; //included to send an even number of registers. (see the sendRequest() warning)
+//			dataLength = 16;
+//		}
 		
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(data,0,dataLength));
 	}
