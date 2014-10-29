@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -13,6 +15,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
@@ -26,6 +29,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final FrameVector contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
+   private final YoFramePoint2d contactPointCentroid;
 
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
@@ -51,6 +55,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       inContact.set(true);
       
       totalNumberOfContactPoints = contactPoints.size();
+      
+      contactPointCentroid = new YoFramePoint2d(namePrefix + "ContactPointCentroid", planeFrame, parentRegistry);
+      contactPointCentroid.setToNaN();
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -88,6 +95,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
          yoContactPoint.setPosition(contactPointLocation);
       }
+      
+      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(contactPointLocations);
+      Point2d centroid = convexPolygon.getCentroid();
+      this.contactPointCentroid.set(centroid);
    }
    
    
@@ -104,8 +115,17 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
          yoContactPoint.setPosition(contactPointLocation);
       }
+      
+      FrameConvexPolygon2d convexPolygon = new FrameConvexPolygon2d(contactPointLocations);
+      FramePoint2d centroid = convexPolygon.getCentroid();
+      this.contactPointCentroid.set(centroid);
    }
    
+   
+   public void getContactPointCentroid(FramePoint2d centroidToPack)
+   {
+      this.contactPointCentroid.getFrameTuple2dIncludingFrame(centroidToPack);
+   }
    
    
    public List<FramePoint> getContactFramePointsInContactCopy()

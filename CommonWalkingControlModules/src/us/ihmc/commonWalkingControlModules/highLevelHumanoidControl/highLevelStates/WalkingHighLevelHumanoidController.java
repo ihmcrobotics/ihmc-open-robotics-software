@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
@@ -166,6 +168,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable moveICPAwayAtEndOfSwingDistance = new DoubleYoVariable("moveICPAwayAtEndOfSwingDistance", registry);
    private final DoubleYoVariable singleSupportTimeLeftBeforeShift = new DoubleYoVariable("singleSupportTimeLeftBeforeShift", registry);
 
+   private final YoFrameVector2d icpAdjustment = new YoFrameVector2d("icpAdjustment", null, registry);
+   
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
 
@@ -194,6 +198,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingTimeRemainingForICPMoveViz = new DoubleYoVariable("swingTimeRemainingForICPMoveViz", registry);
    private final DoubleYoVariable amountToMoveICPAway = new DoubleYoVariable("amountToMoveICPAway", registry);
    private final DoubleYoVariable distanceFromLineToOriginalICP = new DoubleYoVariable("distanceFromLineToOriginalICP", registry);
+   private final DoubleYoVariable percentOfSwingTimeRemainingForICPMove = new DoubleYoVariable("percentOfSwingTimeRemainingForICPMove", registry);
 
    private final DoubleYoVariable controlledCoMHeightAcceleration;
    private final DoubleYoVariable controllerInitializationTime;
@@ -903,9 +908,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          if (!isInFlamingoStance.getBooleanValue())
-            moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
-                  desiredICPLocal);
-
+         {
+            moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining, desiredICPLocal);
+         }
+         
          desiredICP.set(desiredICPLocal);
          if (isInFlamingoStance.getBooleanValue())
             desiredICP.add(icpStandOffsetX.getDoubleValue(), icpStandOffsetY.getDoubleValue());
@@ -1375,7 +1381,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
       else
       {
-         footPolygon.setIncludingFrameAndUpdate(contactableBody.getContactPoints2d());
+         List<Point2d> predictedContactPoints = transferToFootstep.getPredictedContactPoints();
+         if ((predictedContactPoints == null) || (predictedContactPoints.isEmpty()))
+         {
+            footPolygon.setIncludingFrameAndUpdate(contactableBody.getContactPoints2d());
+         }
+         else
+         {
+            ArrayList<FramePoint2d> transferToContactPoints = new ArrayList<FramePoint2d>();
+            for (Point2d predictedContactPoint : predictedContactPoints)
+            {
+               transferToContactPoints.add(new FramePoint2d(contactableBody.getSoleFrame(), predictedContactPoint));
+            }
+            footPolygon.setIncludingFrameAndUpdate(transferToContactPoints);
+         }
       }
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, swingSide,
@@ -1708,24 +1727,44 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private final FrameVector2d stanceAnkleToOriginalICPVector = new FrameVector2d();
+   private final FrameVector2d stanceToOriginalICPVector = new FrameVector2d();
 
    private final FramePoint2d stanceToSwingPoint = new FramePoint2d();
-   private final FrameVector2d stanceToSwingVector = new FrameVector2d();
-
+   private final FrameVector2d stanceToSwingVector = new FrameVector2d(); 
+   private final FramePoint2d stanceContactCentroid2d = new FramePoint2d();
+   private final FramePoint stanceContactCentroid = new FramePoint();
+   
    private void moveICPToInsideOfFootAtEndOfSwing(RobotSide supportSide, FramePoint2d upcomingFootstepLocation, double swingTime, double swingTimeRemaining,
          FramePoint2d desiredICPToMove)
    {
-      swingTimeRemainingForICPMoveViz.set(swingTimeRemaining);
-
       ReferenceFrame supportAnkleFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      
+      momentumBasedController.getCenterOfFootContactPoints(supportSide, stanceContactCentroid2d);
+      if (stanceContactCentroid2d.containsNaN())
+      {
+         stanceContactCentroid2d.setToZero(momentumBasedController.getContactableFeet().get(supportSide).getSoleFrame());
+      }
+      
+      stanceContactCentroid.setToZero(stanceContactCentroid2d.getReferenceFrame());
+      stanceContactCentroid.setXY(stanceContactCentroid2d);
+      
+      stanceContactCentroid.changeFrame(supportAnkleFrame);
+      
+      stanceContactCentroid2d.setIncludingFrame(supportAnkleFrame, stanceContactCentroid.getX(), stanceContactCentroid.getY());
+
+      swingTimeRemainingForICPMoveViz.set(swingTimeRemaining);     
+      
       desiredICPToMove.changeFrame(supportAnkleFrame);
-      stanceAnkleToOriginalICPVector.setIncludingFrame(desiredICPToMove);
+
+      stanceToOriginalICPVector.setIncludingFrame(desiredICPToMove);
+      stanceToOriginalICPVector.sub(stanceContactCentroid2d);
 
       stanceToSwingPoint.setIncludingFrame(upcomingFootstepLocation);
       stanceToSwingPoint.changeFrame(supportAnkleFrame);
 
       stanceToSwingVector.setIncludingFrame(stanceToSwingPoint);
+      stanceToSwingVector.sub(stanceContactCentroid2d);
+
       double stanceToSwingDistance = stanceToSwingVector.length();
       if (stanceToSwingDistance < 0.001)
       {
@@ -1736,7 +1775,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stanceToSwingVector.normalize();
 
-      distanceFromLineToOriginalICP.set(stanceToSwingVector.dot(stanceAnkleToOriginalICPVector));
+      distanceFromLineToOriginalICP.set(stanceToSwingVector.dot(stanceToOriginalICPVector));
       double timeToUseBeforeShift = singleSupportTimeLeftBeforeShift.getDoubleValue();
       if (timeToUseBeforeShift < 0.01)
          timeToUseBeforeShift = 0.01;
@@ -1751,7 +1790,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-
+      percentOfSwingTimeRemainingForICPMove.set(percent);
+      
       double maxDistanceToMove = moveICPAwayDuringSwingDistance.getDoubleValue();
       maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
       double duringSwingDistance = (percent * maxDistanceToMove);
@@ -1775,6 +1815,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          amountToMoveICPAway.set(duringSwingDistance + (percent * maxDistanceToMove));
       }
 
+      // If already moved a long distance, then no need to move any more.
       if (distanceFromLineToOriginalICP.getDoubleValue() > amountToMoveICPAway.getDoubleValue())
       {
          desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
@@ -1785,8 +1826,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       double additionalDistance = amountToMoveICPAway.getDoubleValue() - distanceFromLineToOriginalICP.getDoubleValue();
 
       stanceToSwingVector.scale(additionalDistance);
+      icpAdjustment.set(stanceToSwingVector.getX(), stanceToSwingVector.getY());
+      
       desiredICPToMove.add(stanceToSwingVector);
-
       desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
    }
 
