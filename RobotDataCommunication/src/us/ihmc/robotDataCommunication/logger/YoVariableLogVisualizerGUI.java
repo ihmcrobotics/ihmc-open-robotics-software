@@ -34,10 +34,11 @@ public class YoVariableLogVisualizerGUI extends JPanel
    private final YoVariableLogPlaybackRobot robot;
    private final SimulationConstructionSet scs;
    private YoVariableLogCropper yoVariableLogCropper;
-   
+
    private final File directory;
 
-   public YoVariableLogVisualizerGUI(File directory, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper, SimulationConstructionSet scs)
+   public YoVariableLogVisualizerGUI(File directory, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper,
+         SimulationConstructionSet scs)
    {
       super();
 
@@ -47,7 +48,6 @@ public class YoVariableLogVisualizerGUI extends JPanel
       this.scs = scs;
       this.directory = directory;
 
-      
       setLayout(new GridLayout(1, 2));
 
       addGUIElements();
@@ -57,8 +57,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
    private void switchVideoUpdate(String videoName)
    {
-      if (multiPlayer != null) multiPlayer.setActivePlayer(videoName);
-      
+      if (multiPlayer != null)
+         multiPlayer.setActivePlayer(videoName);
+
    }
 
    private void seek(int newValue)
@@ -80,61 +81,57 @@ public class YoVariableLogVisualizerGUI extends JPanel
          multiPlayer.indexChanged(0, 0);
       }
    }
-   
+
    private long[] getInAndOut()
    {
-      if(scs.isSimulating())
+      if (scs.isSimulating())
       {
          scs.stop();
       }
-      
+
       scs.gotoInPointNow();
       long startTimestamp = multiPlayer.getCurrentTimestamp();
       scs.gotoOutPointNow();
       long endTimestamp = multiPlayer.getCurrentTimestamp();
-      
-      if(startTimestamp > endTimestamp)
+
+      if (startTimestamp > endTimestamp)
       {
-         
-         JOptionPane.showMessageDialog(this,
-               "startTimestamp > endTimestamp. Please set the in-point and out-point correctly",
-               "Timestmap error",
+
+         JOptionPane.showMessageDialog(this, "startTimestamp > endTimestamp. Please set the in-point and out-point correctly", "Timestmap error",
                JOptionPane.ERROR_MESSAGE);
-         
+
          return new long[0];
       }
-      
+
       return new long[] { startTimestamp, endTimestamp };
    }
-   
 
    private void exportVideo()
    {
-      if(multiPlayer != null)
+      if (multiPlayer != null)
       {
          long[] timestamps = getInAndOut();
-         if(timestamps.length != 2)
+         if (timestamps.length != 2)
          {
             return;
          }
-         
+
          final long startTimestamp = timestamps[0];
          final long endTimestamp = timestamps[1];
-         
+
          FileDialog saveDialog = new FileDialog((Frame) null, "Export video", FileDialog.SAVE);
-         
+
          MovieFileFilter filter = new MovieFileFilter();
-         saveDialog.setFilenameFilter(filter);         
+         saveDialog.setFilenameFilter(filter);
          saveDialog.setVisible(true);
-         
+
          String file = saveDialog.getFile();
          if (file != null)
          {
             final File selectedFile = new File(saveDialog.getDirectory(), saveDialog.getFile());
             if (!filter.accept(selectedFile))
             {
-               JOptionPane
-                     .showMessageDialog(scs.getJFrame(), "Unknown file type \"" + saveDialog.getFile() + "\"\nExcpected: \n" + filter.getDescription());
+               JOptionPane.showMessageDialog(scs.getJFrame(), "Unknown file type \"" + saveDialog.getFile() + "\"\nExcpected: \n" + filter.getDescription());
             }
             else
             {
@@ -148,60 +145,53 @@ public class YoVariableLogVisualizerGUI extends JPanel
                }.start();
             }
          }
-         
       }
-      
    }
-   
+
    private void crop()
    {
       long[] timestamps = getInAndOut();
-      if(timestamps.length != 2)
+      if (timestamps.length != 2)
       {
          return;
       }
-      
+
       final long startTimestamp = timestamps[0];
       final long endTimestamp = timestamps[1];
-      
-      
+
       JFileChooser saveDialog = new JFileChooser(directory);
       saveDialog.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
       if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(this))
       {
-         
+
          final File selectedFile = saveDialog.getSelectedFile();
          new Thread()
          {
             @Override
             public void run()
             {
-               yoVariableLogCropper.crop(selectedFile, startTimestamp, endTimestamp);               
+               yoVariableLogCropper.crop(selectedFile, startTimestamp, endTimestamp);
             }
          }.start();
-         
       }
    }
 
    private void addGUIElements()
    {
-      
-      
       final JComboBox<String> videoFiles = new JComboBox<>();
       videoFiles.addItem("-- Disabled --");
-      for(String video : multiPlayer.getVideos())
+      for (String video : multiPlayer.getVideos())
       {
          videoFiles.addItem(video);
       }
-      
+
       videoFiles.addActionListener(new ActionListener()
       {
-         
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if(videoFiles.getSelectedIndex() == 0)
+            if (videoFiles.getSelectedIndex() == 0)
             {
                switchVideoUpdate(null);
             }
@@ -211,19 +201,18 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
          }
       });
-      if(multiPlayer.getVideos().length > 0)
+      if (multiPlayer.getVideos().length > 0)
       {
          videoFiles.setSelectedIndex(1);
       }
 
-      add(videoFiles);
-//    timePanel.add(new JSeparator(JSeparator.VERTICAL));
+      //    timePanel.add(new JSeparator(JSeparator.VERTICAL));
 
       JPanel timePanel = new JPanel();
       timePanel.setLayout(new BorderLayout());
       timePanel.add(new JLabel("Position: "), BorderLayout.WEST);
 
-//    timePanel.add(new JLabel(String.valueOf(robot.getInitialTimestamp())));
+      //    timePanel.add(new JLabel(String.valueOf(robot.getInitialTimestamp())));
       final JSlider slider = new JSlider(0, robot.getNumberOfEntries(), 0);
 
       final JLabel currentTime = new JLabel(String.valueOf(robot.getFinalTimestamp()));
@@ -241,7 +230,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       robot.addCurrentRecordTickListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             if (scs.isSimulating())
             {
@@ -249,42 +238,38 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
          }
       });
-      
-      
+
       final JButton exportVideo = new JButton("Export video");
       exportVideo.setToolTipText("Export video starting from the in point till the out point.");
       exportVideo.addActionListener(new ActionListener()
       {
-         
          @Override
          public void actionPerformed(ActionEvent e)
          {
             exportVideo();
          }
-
       });
-      
+
       final JButton crop = new JButton("Crop data");
       crop.setToolTipText("Crop starting from the in point till the out point.");
       crop.addActionListener(new ActionListener()
       {
-         
          @Override
          public void actionPerformed(ActionEvent e)
          {
             crop();
          }
-         
       });
-      
+
       timePanel.add(slider, BorderLayout.CENTER);
       timePanel.add(currentTime, BorderLayout.EAST);
+      setLayout(new BorderLayout());
+      add(timePanel, BorderLayout.NORTH);
       
-      add(timePanel);
-      add(exportVideo);
-      add(crop);
-      
+      JPanel subPanel = new JPanel(new GridLayout(1, 3));
+      subPanel.add(videoFiles);
+      subPanel.add(exportVideo);
+      subPanel.add(crop);
+      add(subPanel);
    }
-
-
 }

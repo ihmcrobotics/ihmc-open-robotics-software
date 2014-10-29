@@ -151,33 +151,34 @@ public class YoVariableHandshakeParser
       for (int i = 0; i < yoProtoHandshake.getGraphicObjectCount(); i++)
       {
          listName = "default";
-         if (yoProtoHandshake.getGraphicObject(i).hasListName()) {
-            listName = yoProtoHandshake.getGraphicObject(i).getListName();
+         if (yoProtoHandshake.getGraphicObject(i).hasListName())
+         {
+            if (!yoProtoHandshake.getGraphicObject(i).getListName().isEmpty())
+               listName = yoProtoHandshake.getGraphicObject(i).getListName();
          }
-         
-         if (dgoListMap.containsKey(listName)) {
+
+         if (dgoListMap.containsKey(listName))
+         {
             dgoList = dgoListMap.get(listName);
          }
-         else 
+         else
          {
             dgoList = new YoGraphicsList(listName);
             dgoListMap.put(listName, dgoList);
          }
-         
-         
-         dgoList.add((YoGraphic)getRemoteGraphic(yoProtoHandshake.getGraphicObject(i)));
+
+         dgoList.add((YoGraphic) getRemoteGraphic(yoProtoHandshake.getGraphicObject(i)));
       }
-   
+
       for (String list : dgoListMap.keySet())
       {
          yoGraphicsListRegistry.registerYoGraphicsList(dgoListMap.get(list));
       }
-   
-      
+
       ArtifactList artifactList = new ArtifactList("remote");
       for (int i = 0; i < yoProtoHandshake.getArtifactCount(); i++)
       {
-         artifactList.add((Artifact)getRemoteGraphic(yoProtoHandshake.getArtifact(i)));
+         artifactList.add((Artifact) getRemoteGraphic(yoProtoHandshake.getArtifact(i)));
       }
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
