@@ -21,7 +21,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlanner
 {
 	ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-	boolean USE_OLD_HACKY_ICP_PLANNER = false;
+	boolean USE_OLD_HACKY_ICP_PLANNER = true;
 	private final ArrayList<ReferenceFrame> soleFrameList = new ArrayList<ReferenceFrame>();
 	private final ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 	private final FramePoint transferToFootLocation = new FramePoint(worldFrame);
