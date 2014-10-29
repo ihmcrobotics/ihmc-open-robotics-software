@@ -128,7 +128,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] contactPoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       // empty
    }

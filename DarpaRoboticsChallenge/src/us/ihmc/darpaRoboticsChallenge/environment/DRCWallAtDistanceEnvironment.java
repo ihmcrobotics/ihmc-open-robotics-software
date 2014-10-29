@@ -76,7 +76,7 @@ public class DRCWallAtDistanceEnvironment implements CommonAvatarEnvironmentInte
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       
    }

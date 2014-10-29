@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
@@ -208,7 +209,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       // TODO Auto-generated method stub
 

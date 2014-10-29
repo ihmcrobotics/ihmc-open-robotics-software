@@ -38,7 +38,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
    }
 

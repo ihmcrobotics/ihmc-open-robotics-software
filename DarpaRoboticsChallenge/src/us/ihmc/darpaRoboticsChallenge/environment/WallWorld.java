@@ -57,7 +57,7 @@ public class WallWorld implements CommonAvatarEnvironmentInterface
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
    }
 

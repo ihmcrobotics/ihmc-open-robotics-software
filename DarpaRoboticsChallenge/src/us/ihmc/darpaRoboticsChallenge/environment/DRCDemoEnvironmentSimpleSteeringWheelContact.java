@@ -1,9 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -74,14 +72,12 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       
       ExternalForcePoint[] pts = new ExternalForcePoint[wheelPts.size() + boxPts.size()];
       
-      Set<GroundContactPoint> set = new LinkedHashSet<GroundContactPoint>();
+      List<GroundContactPoint> list = new ArrayList<GroundContactPoint>();
       
-      set.addAll(wheelPts);
-      set.addAll(boxPts);
+      list.addAll(wheelPts);
+      list.addAll(boxPts);
       
-      set.toArray(pts);
-      
-      addContactPoints(pts);
+      addContactPoints(list);
       
    }
    
@@ -108,7 +104,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       for (ExternalForcePoint pt : externalForcePoints)
       {

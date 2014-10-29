@@ -94,7 +94,7 @@ public class BigStepUpWithHandPlatformEnvironment implements CommonAvatarEnviron
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       // TODO Auto-generated method stub
       
