@@ -72,6 +72,26 @@ public class WalkToLocationBehavior extends BehaviorInterface
          soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
       }
    }
+   
+   public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
+         ReferenceFrames referenceFrames, double WalkingYawOrientationAngle)
+   {
+      super(outgoingCommunicationBridge);
+
+      this.targetLocation.set(robotLocation);
+      this.targetOrientation.set(robotOrientation);
+      this.pathType = new SimplePathParameters(0.4, 0.30, WalkingYawOrientationAngle, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
+
+      this.fullRobotModel = fullRobotModel;
+      this.referenceFrames = referenceFrames;
+      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         feet.put(robotSide, fullRobotModel.getFoot(robotSide));
+         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
+      }
+   }
 
    public void setTarget(Point3d targetLocation, YoFrameOrientation targetOrientation)//(Point3d targetLocation, YoFrameOrientation targetOrientation)   //(YoFramePoint targetLocation, YoFrameOrientation targetOrientation)
    {
