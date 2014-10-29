@@ -2,8 +2,11 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 
 import java.util.ArrayList;
 
+import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -72,7 +75,7 @@ public class CapturePointTools
          }
       }
 
-      if(numberFootstepsToConsider <= numberFootstepsInList)
+      if (numberFootstepsToConsider <= numberFootstepsInList)
       {
          arrayToPack.get(numberFootstepsToConsider - 1).setAndMatchFrame(footstepList.get(numberFootstepsToConsider - 2));
          arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
@@ -113,7 +116,7 @@ public class CapturePointTools
          }
       }
 
-      if(numberFootstepsToConsider <= numberFootstepsInList)
+      if (numberFootstepsToConsider <= numberFootstepsInList)
       {
          arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
          arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
@@ -194,14 +197,14 @@ public class CapturePointTools
          ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
    {
       capturePointsToPack.get(capturePointsToPack.size() - 1).checkReferenceFrameMatch(constantCentersOfPressure.get(capturePointsToPack.size()));
-      
+
       computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime, constantCentersOfPressure.get(capturePointsToPack.size()),
             constantCentersOfPressure.get(capturePointsToPack.size() - 1), capturePointsToPack.get(capturePointsToPack.size() - 1));
 
       for (int i = capturePointsToPack.size() - 1; i > 0; i--)
       {
-         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i-1));
-         
+         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i - 1));
+
          double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX()) * (1 / Math.exp(omega0 * stepTime))
                + constantCentersOfPressure.get(i - 1).getX();
          double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY()) * (1 / Math.exp(omega0 * stepTime))
@@ -223,15 +226,16 @@ public class CapturePointTools
    public static void computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(ArrayList<YoFramePoint> constantCentersOfPressure,
          ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
    {
-      constantCentersOfPressure.get(capturePointsToPack.size()).checkReferenceFrameMatch(capturePointsToPack.get(capturePointsToPack.size() - 1).getReferenceFrame());
-            
+      constantCentersOfPressure.get(capturePointsToPack.size()).checkReferenceFrameMatch(
+            capturePointsToPack.get(capturePointsToPack.size() - 1).getReferenceFrame());
+
       computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime, constantCentersOfPressure.get(capturePointsToPack.size()),
             constantCentersOfPressure.get(capturePointsToPack.size() - 1), capturePointsToPack.get(capturePointsToPack.size() - 1));
 
       for (int i = capturePointsToPack.size() - 1; i > 1; i--)
       {
-         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i-1));
-         
+         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i - 1));
+
          double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX()) * (1 / Math.exp(omega0 * stepTime))
                + constantCentersOfPressure.get(i - 1).getX();
          double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY()) * (1 / Math.exp(omega0 * stepTime))
@@ -257,12 +261,12 @@ public class CapturePointTools
          YoFramePoint initialCapturePoint, YoFramePoint centerOfPressureToPack, double omega0, double stepTime)
    {
       initialCapturePoint.checkReferenceFrameMatch(finalDesiredCapturePoint.getReferenceFrame());
-      
+
       double exponentialTerm = Math.exp(omega0 * stepTime);
-      
+
       double x = (finalDesiredCapturePoint.getX() - initialCapturePoint.getX() * exponentialTerm) / (1 - exponentialTerm);
       double y = (finalDesiredCapturePoint.getY() - initialCapturePoint.getY() * exponentialTerm) / (1 - exponentialTerm);
-      
+
       centerOfPressureToPack.set(initialCapturePoint.getReferenceFrame(), x, y, 0.0);
    }
 
@@ -283,10 +287,10 @@ public class CapturePointTools
 
       double exponentialTerm = Math.exp(omega0 * -time);
 
-      double x = finalCapturePoint.getX()*exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getX();
-      double y = finalCapturePoint.getY()*exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getY();
-      
-      positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      double x = finalCapturePoint.getX() * exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getX();
+      double y = finalCapturePoint.getY() * exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getY();
+
+      positionToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
 
    }
 
@@ -306,13 +310,13 @@ public class CapturePointTools
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
       double exponentialTerm = Math.exp(omega0 * time);
-      
-      double x = initialCenterOfPressure.getX()*(1-exponentialTerm) + initialCapturePoint.getX()*exponentialTerm;
-      double y = initialCenterOfPressure.getY()*(1-exponentialTerm) + initialCapturePoint.getY()*exponentialTerm;
-      
-      positionToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+
+      double x = initialCenterOfPressure.getX() * (1 - exponentialTerm) + initialCapturePoint.getX() * exponentialTerm;
+      double y = initialCenterOfPressure.getY() * (1 - exponentialTerm) + initialCapturePoint.getY() * exponentialTerm;
+
+      positionToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
    }
-   
+
    /**
     * Compute the desired capture point position at a given time. ICP_d =
     * e^{w0*t}*ICP_0 + (1-e^{w0*t})*p0
@@ -329,11 +333,11 @@ public class CapturePointTools
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
       double exponentialTerm = Math.exp(omega0 * time);
-      
-      double x = initialCenterOfPressure.getX()*(1-exponentialTerm) + initialCapturePoint.getX()*exponentialTerm;
-      double y = initialCenterOfPressure.getY()*(1-exponentialTerm) + initialCapturePoint.getY()*exponentialTerm;
-      
-      positionToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+
+      double x = initialCenterOfPressure.getX() * (1 - exponentialTerm) + initialCapturePoint.getX() * exponentialTerm;
+      double y = initialCenterOfPressure.getY() * (1 - exponentialTerm) + initialCapturePoint.getY() * exponentialTerm;
+
+      positionToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
    }
 
    /**
@@ -356,9 +360,9 @@ public class CapturePointTools
       double x = omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
       double y = omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
-      velocityToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      velocityToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
    }
-   
+
    /**
     * Compute the desired capture point velocity at a given time. ICPv_d = w *
     * e^{w*t} * ICP0 - p0 * w * e^{w*t}
@@ -416,9 +420,9 @@ public class CapturePointTools
       double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
       double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
-      accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
    }
-   
+
    /**
     * Compute the desired capture point velocity at a given time. ICPv_d = w^2
     * * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
@@ -429,8 +433,8 @@ public class CapturePointTools
     * @param initialCenterOfPressure
     * @param accelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint,
-         FramePoint initialCenterOfPressure, FrameVector accelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
+         FrameVector accelerationToPack)
    {
       initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
 
@@ -439,7 +443,7 @@ public class CapturePointTools
       double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
       double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
 
-      accelerationToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(),x,y,0.0);
+      accelerationToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
    }
 
    /**
@@ -458,7 +462,7 @@ public class CapturePointTools
       desiredCentroidalMomentumPivotToPack.scale(-1 / omega0);
       desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
    }
-   
+
    /**
     * Computes the desired centroidal momentum pivot by,
     * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
@@ -490,12 +494,12 @@ public class CapturePointTools
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition.getReferenceFrame());
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition.getReferenceFrame());
-      
+
       double desiredCapturePointVelocityMagnitude = Math
             .sqrt(desiredCapturePointVelocity.getX() * desiredCapturePointVelocity.getX() + desiredCapturePointVelocity.getY()
                   * desiredCapturePointVelocity.getY() + desiredCapturePointVelocity.getZ() * desiredCapturePointVelocity.getZ());
 
-      if(desiredCapturePointVelocityMagnitude == 0.0)
+      if (desiredCapturePointVelocityMagnitude == 0.0)
       {
          return Double.NaN;
       }
@@ -504,14 +508,29 @@ public class CapturePointTools
          double normalizedCapturePointVelocityX = desiredCapturePointVelocity.getX() / desiredCapturePointVelocityMagnitude;
          double normalizedCapturePointVelocityY = desiredCapturePointVelocity.getY() / desiredCapturePointVelocityMagnitude;
          double normalizedCapturePointVelocityZ = desiredCapturePointVelocity.getZ() / desiredCapturePointVelocityMagnitude;
-         
-   
+
          double capturePointErrorX = currentCapturePointPosition.getX() - desiredCapturePointPosition.getX();
          double capturePointErrorY = currentCapturePointPosition.getY() - desiredCapturePointPosition.getY();
          double capturePointErrorZ = currentCapturePointPosition.getZ() - desiredCapturePointPosition.getZ();
-   
+
          return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY + normalizedCapturePointVelocityZ
                * capturePointErrorZ);
       }
+   }
+
+   /**
+    * Given a capture point trajectory line and the actual 
+    * capture point position, project the current capture point 
+    * onto the capture point trajectory line.
+    * 
+    * @param actualICP
+    * @param capturePointTrajectoryLine
+    * @param projectedCapturePoint
+    */
+   public static void computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(FramePoint actualICP, FrameLine2d capturePointTrajectoryLine,
+         FramePoint2d projectedCapturePoint)
+   {
+      projectedCapturePoint.set(actualICP.getX(),actualICP.getY());
+      capturePointTrajectoryLine.orthogonalProjection(projectedCapturePoint);
    }
 }

@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.atlas.t</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerRemainingTime,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.icpPlannerIsTimeBeingFrozen</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.q_y</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerDesiredCapturePointPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerDesiredCapturePointPositionY</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,21 +25,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.q_x</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerIsDoubleSupport,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.SmoothICPComputer2D.icpPlannerIsDoubleSupport,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerTimeInCurrentState</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.q_z</Variables>
-		<GraphConfiguration>
-			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -66,9 +54,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-7.0</Camera X>
- <Camera Y>-0.3575</Camera Y>
- <Camera Z>1.276</Camera Z>
+ <Camera X>10.0</Camera X>
+ <Camera Y>3.0</Camera Y>
+ <Camera Z>3.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -85,15 +73,15 @@ Plotter,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>false</Track>
+<Track>true</Track>
 <Track X>true</Track X>
-<Track Y>true</Track Y>
-<Track Z>false</Track Z>
+<Track Y>false</Track Y>
+<Track Z>true</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.00260151092213657</Fix X>
-<Fix Y>-0.024637456900168313</Fix Y>
-<Fix Z>0.869927155856219</Fix Z>
+<Fix X>4.248926301640797</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>

@@ -141,7 +141,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		@Override
 		public boolean getDoTimeFreezing()
 		{
-			return true;
+			return false;
 		}
 
 		@Override
@@ -228,7 +228,6 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	public void visualizePlanner()
 	{
 		boolean testPush = true;
-		boolean changeSwingTimeWhenPushed = true;
 		boolean cancelPlanInDoubleSupport = false;
 		boolean cancelPlanInSingleSupport = false;
 		boolean breakAfterDoubleSupportPhase = cancelPlanInDoubleSupport || cancelPlanInSingleSupport;
@@ -290,22 +289,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 		if (visualize)
 		{
-			for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
-			{
-				footstepYoFramePoints.get(i).set(footLocations.get(i));
-			}
-
-			plotFootPolygon(footLocations, listOfFootPolygons);
-
-			for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-			{
-				constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i));
-			}
-
-			for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-			{
-				icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
-			}
+			updatePointsVis(footLocations);
 		}
 
 		simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner,
@@ -315,10 +299,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 		footLocations.remove(0);
 
-		for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
-		{
-			footstepYoFramePoints.get(i).set(footLocations.get(i));
-		}
+		updatePointsVis(footLocations);
 
 		while (footLocations.size() >= 2)
 		{
@@ -328,24 +309,14 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 			if (visualize)
 			{
-				for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-				{
-					constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i).getFramePointCopy());
-				}
-
-				for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-				{
-					icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy());
-				}
-
-				plotFootPolygon(footLocations, listOfFootPolygons);
+				updatePointsVis(footLocations);
 			}
 
 			icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
 					null);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-					initialTime, omega0, initialICPPosition, footLocations, testPush, changeSwingTimeWhenPushed, cancelPlanInSingleSupport);
+					initialTime, omega0, initialICPPosition, footLocations, testPush, cancelPlanInSingleSupport);
 			if (testPush)
 			{
 				testPush = false;
@@ -364,17 +335,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 			if (visualize)
 			{
-				for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-				{
-					constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i).getFramePointCopy());
-				}
-
-				for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-				{
-					icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy());
-				}
-
-				plotFootPolygon(footLocations, listOfFootPolygons);
+				updatePointsVis(footLocations);
 			}
 
 			simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner,
@@ -389,11 +350,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 			footLocations.remove(0);
 
-			for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
-			{
-				footstepYoFramePoints.get(i).set(footLocations.get(i));
-			}
-			plotFootPolygon(footLocations, listOfFootPolygons);
+			updatePointsVis(footLocations);
 		}
 
 		if (visualize)
@@ -508,7 +465,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 			FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
 			NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double singleSupportDuration,
 			double initialTime, double omega0, FramePoint initialICPPosition, ArrayList<FramePoint> footstepList, boolean testPush,
-			boolean changeSwingTimeWhenPushed, boolean cancelPlan)
+			boolean cancelPlan)
 	{
 		double time = initialTime + deltaT;
 		while (!icpPlanner.isDone(time))
@@ -518,8 +475,8 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 			icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
 			actualICPPosition.set(icpPositionToPack);
-			actualICPPosition.setX(actualICPPosition.getX() - sineAmplitude * Math.sin(sineFrequency * (time - initialTime)));
-			actualICPPosition.setY(actualICPPosition.getY() - sineAmplitude * Math.sin(sineFrequency * (time - initialTime)));
+			actualICPPosition.setX(actualICPPosition.getX() + sineAmplitude * Math.sin(sineFrequency * (time - initialTime)));
+			actualICPPosition.setY(actualICPPosition.getY() + sineAmplitude * Math.sin(sineFrequency * (time - initialTime)));
 			actualICPPositionYoFramePoint.set(actualICPPosition);
 
 			if (icpPlanner.getIsTimeBeingFrozen())
@@ -540,15 +497,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 				if (visualize)
 				{
-					for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-					{
-						constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i));
-					}
-
-					for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-					{
-						icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
-					}
+					updatePointsVis(footstepList);
 				}
 			}
 
@@ -559,38 +508,17 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 				if (time > initialTime + 0.2)
 				{
 					updateFootstepsFromPush(footstepList);
-					if(changeSwingTimeWhenPushed)
-					{
-					   icpPlanner.updateForSingleSupportPush(footstepList, 0.5*((initialTime+singleSupportDuration)-time),time);
-					}
-					else
-					{
-					   icpPlanner.updateForSingleSupportPush(footstepList, time);
-					}
+
+				   icpPlanner.updatePlanForSingleSupportPush(footstepList, actualICPPosition, time);
 					if (visualize)
 					{
-						for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-						{
-							constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i));
-						}
-
-						for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-						{
-							icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
-						}
-
-						plotFootPolygon(footstepList, listOfFootPolygons);
+						updatePointsVis(footstepList);
 					}
 					testPush = false;
 				}
 			}
 
 			time += deltaT;
-		}
-		
-		if(testPush && changeSwingTimeWhenPushed)
-		{
-		   icpPlanner.resetParametersToDefault();
 		}
 	}
 
@@ -626,15 +554,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 				if (visualize)
 				{
-					for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-					{
-						constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i));
-					}
-
-					for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-					{
-						icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
-					}
+					updatePointsVis(footstepList);
 				}
 			}
 
@@ -645,8 +565,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
 				if (visualize)
 				{
-					footstepYoFramePoints.get(1).set(transferToFootstep);
-					plotFootPolygon(footstepList, listOfFootPolygons);
+					updatePointsVis(footstepList);
 				}
 			}
 
@@ -718,4 +637,24 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		}
 
 	}
+	
+	private void updatePointsVis(ArrayList<FramePoint> footLocations)
+   {
+      for(int i = 0; i < Math.min(footstepYoFramePoints.size(),footLocations.size()); i++)
+      {
+         footstepYoFramePoints.get(i).set(footLocations.get(i));
+      }
+      
+      plotFootPolygon(footLocations, listOfFootPolygons);
+      
+      for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
+      {
+         constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i).getFramePointCopy());
+      }
+
+      for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
+      {
+         icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i).getFramePointCopy());
+      }
+   }
 }

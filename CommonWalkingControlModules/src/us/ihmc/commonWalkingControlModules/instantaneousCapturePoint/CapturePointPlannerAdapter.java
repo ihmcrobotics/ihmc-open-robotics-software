@@ -21,7 +21,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlanner
 {
 	ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-	boolean USE_OLD_HACKY_ICP_PLANNER = true;
+	boolean USE_OLD_HACKY_ICP_PLANNER = false;
 	private final ArrayList<ReferenceFrame> soleFrameList = new ArrayList<ReferenceFrame>();
 	private final ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
 	private final FramePoint transferToFootLocation = new FramePoint(worldFrame);
@@ -84,15 +84,6 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		}
 		else
 		{
-//		   footstepList.clear();
-//	      soleFrameList.clear();
-//	      
-//			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-//					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-//					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
-//
-//			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
-//			newCapturePointPlanner.initializeSingleSupport(currentTime, footstepList);
 		}
 
 	}
@@ -318,7 +309,7 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 	}
 
 	@Override
-	public void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time) 
+	public void updatePlanForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition, double time) 
 	{
 		if(USE_OLD_HACKY_ICP_PLANNER)
 		{
@@ -336,7 +327,31 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
          newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
          newCapturePointPlanner.initializeSingleSupport(time, footstepList);
          
-			newCapturePointPlanner.updateForSingleSupportPush(footstepList, time);
+			newCapturePointPlanner.updatePlanForSingleSupportPush(footstepList, actualCapturePointPosition, time);
 		}
 	}
+	
+	@Override
+   public void updatePlanForDoubleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition,
+         double time)
+   {
+      if(USE_OLD_HACKY_ICP_PLANNER)
+      {
+         oldCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, time);
+      }
+      else
+      {
+         footstepList.clear();
+         soleFrameList.clear();
+         
+         transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
+               capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
+               capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+
+         newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
+         newCapturePointPlanner.initializeSingleSupport(time, footstepList);
+         
+         newCapturePointPlanner.updatePlanForDoubleSupportPush(footstepList, actualCapturePointPosition, time);
+      }
+   }
 }

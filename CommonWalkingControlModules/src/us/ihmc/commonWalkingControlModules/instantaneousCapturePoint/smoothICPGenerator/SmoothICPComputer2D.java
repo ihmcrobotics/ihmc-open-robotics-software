@@ -208,8 +208,14 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    }
 
    @Override
-   public void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time)
+   public void updatePlanForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition,double time)
    {
       throw new RuntimeException("Not implemented.");      
+   }
+
+   @Override
+   public void updatePlanForDoubleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition, double time)
+   {
+      throw new RuntimeException("Not implemented.");
    }
 }

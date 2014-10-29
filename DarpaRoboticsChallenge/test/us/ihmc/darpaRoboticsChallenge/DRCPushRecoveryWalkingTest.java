@@ -37,7 +37,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
-   private final static boolean SHOW_GUI = true;
+   private final static boolean SHOW_GUI = false;
    private final static boolean VISUALIZE_FORCE = false;
 
    private double swingTime, transferTime;
@@ -166,8 +166,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       // push the robot again with new parameters
-      forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      magnitude = 800.0;
+      forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      magnitude = 700.0;
       duration = 0.05;
       side = RobotSide.LEFT;
 
@@ -223,7 +223,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = 600.0;
       double duration = 0.05;
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
@@ -233,7 +233,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       
       // push the robot again with new parameters
       forceDirection = new Vector3d(0.5, -1.0, 0.0);
-      magnitude = 800.0;
+      magnitude = 700.0;
       duration = 0.05;
       double percentInSwing = 0.4;
       side = RobotSide.RIGHT;
@@ -252,7 +252,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = 600.0;
       double duration = 0.05;
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
@@ -262,7 +262,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       
       // push the robot again with new parameters
       forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      magnitude = 800.0;
+      magnitude = 600.0;
       duration = 0.05;
       double percentInSwing = 0.4;
       side = RobotSide.LEFT;
@@ -281,7 +281,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = 700.0;
       double duration = 0.05;
       double percentInTransferState = 0.9 * Math.random();
       RobotSide side = RobotSide.LEFT;

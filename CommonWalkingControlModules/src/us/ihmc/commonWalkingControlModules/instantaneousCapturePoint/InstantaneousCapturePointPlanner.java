@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 
@@ -38,5 +41,8 @@ public interface InstantaneousCapturePointPlanner
 
    public abstract void setDoHeelToToeTransfer(boolean doHeelToToeTransfer);
    
-   public abstract void updateForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double time);
+   public abstract void updatePlanForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition, double time);
+   
+   public abstract void updatePlanForDoubleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition,
+         double time);
 }

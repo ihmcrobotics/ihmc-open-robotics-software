@@ -83,7 +83,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.vectorFromActualToDesiredCapturePoint.setToZero();
       this.distanceToFreezeLine.set(0.0);
       this.doTimeFreezing.set(capturePointPlannerParameters.getDoTimeFreezing());
-      this.doFootSlipCompensation.set(capturePointPlannerParameters.getDoTimeFreezing());
+      this.doFootSlipCompensation.set(capturePointPlannerParameters.getDoFootSlipCompensation());
 
       this.maxCapturePointErrorAllowedToBeginSwingPhase.set(capturePointPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
       this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze.set(capturePointPlannerParameters.getMaxAllowedErrorWithoutPartialTimeFreeze());
@@ -213,10 +213,22 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    }
    
    @Override
-   public void updateForSingleSupportPush(ArrayList<FramePoint> footstepList, double time)
+   public void updatePlanForSingleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
    {
 	   timeDelay.set(0.0);
-	   super.updateForSingleSupportPush(footstepList, time);
+	   changeInTransferToFootPosition.reset();
+	   previousTime.set(time);
+	   super.updatePlanForSingleSupportPush(footstepList, actualCapturePointPosition, time);
+   }
+   
+   @Override
+   public void updatePlanForDoubleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition,
+         double time)
+   {
+      timeDelay.set(0.0);
+      changeInTransferToFootPosition.reset();
+      previousTime.set(time);
+      super.updatePlanForDoubleSupportPush(footstepList, actualCapturePointPosition, time);
    }
    
    @Override
