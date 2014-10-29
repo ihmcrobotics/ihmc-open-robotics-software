@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -44,6 +45,8 @@ public class PelvisPoseBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
+         outgoingPelvisPosePacket.setDestination(PacketDestination.UI);
+         sendPacketToNetworkProcessor(outgoingPelvisPosePacket);
          sendPacketToController(outgoingPelvisPosePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -45,6 +46,8 @@ public class ChestOrientationBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
+         outgoingChestOrientationPacket.setDestination(PacketDestination.UI);
+         sendPacketToNetworkProcessor(outgoingChestOrientationPacket);
          sendPacketToController(outgoingChestOrientationPacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();

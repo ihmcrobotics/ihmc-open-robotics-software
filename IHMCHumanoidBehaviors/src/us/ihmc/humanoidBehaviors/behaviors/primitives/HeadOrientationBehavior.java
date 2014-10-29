@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -45,7 +46,10 @@ public class HeadOrientationBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
+         outgoingHeadOrientationPacket.setDestination(PacketDestination.UI);
+         sendPacketToNetworkProcessor(outgoingHeadOrientationPacket);
          sendPacketToController(outgoingHeadOrientationPacket);
+         
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }
