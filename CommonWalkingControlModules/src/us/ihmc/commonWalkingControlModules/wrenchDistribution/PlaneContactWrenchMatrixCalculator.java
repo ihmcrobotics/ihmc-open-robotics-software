@@ -13,7 +13,6 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.MatrixTools;
@@ -221,7 +220,7 @@ public class PlaneContactWrenchMatrixCalculator
       double angle = k * supportVectorAngleIncrement;
       double mu = planeContactState.getCoefficientOfFriction();
 
-      tempFramePointCoP.setIncludingFrame(contactPoint.getPosition());
+      contactPoint.getPosition(tempFramePointCoP);
       tempFramePointCoP.changeFrame(footCoPReferenceFrame);
 
       // Compute the linear part considering a normal contact vector pointing up
@@ -238,7 +237,7 @@ public class PlaneContactWrenchMatrixCalculator
       double angle = k * supportVectorAngleIncrement;
       double mu = planeContactState.getCoefficientOfFriction();
 
-      tempFramePoint.setIncludingFrame(contactPoint.getPosition());
+      contactPoint.getPosition(tempFramePoint);
 
       // Compute the linear part considering a normal contact vector pointing up
       tempLinearPart.set(Math.cos(angle) * mu, Math.sin(angle) * mu, 1);

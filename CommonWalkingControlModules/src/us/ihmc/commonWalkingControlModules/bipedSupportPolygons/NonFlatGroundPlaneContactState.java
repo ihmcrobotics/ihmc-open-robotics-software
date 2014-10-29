@@ -92,7 +92,9 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          if (!contactPoint.isInContact())
             continue;
          
-         ret.add(new FramePoint(contactPoint.getPosition()));
+         FramePoint e = new FramePoint();
+         contactPoint.getPosition(e);
+         ret.add(e);
       }
       return ret;
    }
@@ -109,7 +111,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
          
-         contactPointListToPack.get(counter).setIncludingFrame(contactPoint.getPosition());
+         contactPoint.getPosition(contactPointListToPack.get(counter));
       }
       
       for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
@@ -128,7 +130,9 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          if (!contactPoint.isInContact())
             continue;
          
-         ret.add(new FramePoint2d(contactPoint.getPosition2d()));
+         FramePoint2d e = new FramePoint2d();
+         contactPoint.getPosition2d(e);
+         ret.add(e);
       }
       return ret;
    }

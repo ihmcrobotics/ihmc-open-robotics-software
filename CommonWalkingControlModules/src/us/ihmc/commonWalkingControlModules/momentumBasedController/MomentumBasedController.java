@@ -866,7 +866,9 @@ public class MomentumBasedController
       
       for (YoContactPoint contactPoint : contactPoints)
       {
-         contactPointList.add(contactPoint.getPosition2d());
+         FramePoint2d framePoint2 = new FramePoint2d();
+         contactPoint.getPosition2d(framePoint2);
+         contactPointList.add(framePoint2);
       }
       
       footstep.setPredictedContactPointsFromFramePoint2ds(contactPointList);

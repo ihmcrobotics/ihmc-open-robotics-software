@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -61,6 +62,7 @@ public class FootPolygonVisualizer implements Updatable
       parentRegistry.addChild(registry);
    }
 
+   private final FramePoint tempFramePoint = new FramePoint();
    public void update(double time)
    {
       for (int i = 0; i < contactStates.size(); i++)
@@ -84,7 +86,8 @@ public class FootPolygonVisualizer implements Updatable
             ContactPointInterface contactPoint = contactState.getContactPoints().get(j);
             if (contactPoint.isInContact())
             {
-               footPolygon.addVertexByProjectionOntoXYPlane(contactPoint.getPosition());
+               contactPoint.getPosition(tempFramePoint);
+               footPolygon.addVertexByProjectionOntoXYPlane(tempFramePoint);
             }
          }
          footPolygon.update();

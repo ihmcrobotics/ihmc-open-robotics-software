@@ -74,7 +74,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
          i++;
 
-         tempFramePoint.setIncludingFrame(contactPoint.getPosition());
+         contactPoint.getPosition(tempFramePoint);
 
          for (int j = 0; j < VECTORS; j++)
          {
