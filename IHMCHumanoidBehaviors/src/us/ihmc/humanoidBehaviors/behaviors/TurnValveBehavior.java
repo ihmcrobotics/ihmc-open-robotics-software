@@ -139,18 +139,7 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      updateCapturePointError();
-      updateWristSensorValues();
-
-      if (capturePointErrorMag.getDoubleValue() > MAX_CAPTURE_POINT_ERROR)
-      {
-         System.out.println("TurnValveBehavior: MAX CAPTURE POINT ERROR EXCEEDED!  Capture Point Error =  " + capturePointErrorMag.getDoubleValue());
-      }
-
-      if (rightWristForceBandPassFiltered.getDoubleValue() > MAX_WRIST_FORCE_THRESHOLD_N)
-      {
-         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForceBandPassFiltered.getDoubleValue());
-      }
+      checkForceSensorAndIcpForExcessiveForce();
 
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
@@ -190,6 +179,22 @@ public class TurnValveBehavior extends BehaviorInterface
          }
       }
       currentBehavior.doControl();
+   }
+
+   private void checkForceSensorAndIcpForExcessiveForce()
+   {
+      updateCapturePointError();
+      updateWristSensorValues();
+
+      if (capturePointErrorMag.getDoubleValue() > MAX_CAPTURE_POINT_ERROR)
+      {
+         System.out.println("TurnValveBehavior: MAX CAPTURE POINT ERROR EXCEEDED!  Capture Point Error =  " + capturePointErrorMag.getDoubleValue());
+      }
+
+      if (rightWristForceBandPassFiltered.getDoubleValue() > MAX_WRIST_FORCE_THRESHOLD_N)
+      {
+         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForceBandPassFiltered.getDoubleValue());
+      }
    }
 
    

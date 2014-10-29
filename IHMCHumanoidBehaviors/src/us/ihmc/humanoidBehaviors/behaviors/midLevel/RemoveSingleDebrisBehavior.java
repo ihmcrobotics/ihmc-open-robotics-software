@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
-public class RemovePieceOfDebrisBehavior extends BehaviorInterface
+public class RemoveSingleDebrisBehavior extends BehaviorInterface
 {
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
 
@@ -40,7 +40,7 @@ public class RemovePieceOfDebrisBehavior extends BehaviorInterface
 
 
    
-   public RemovePieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
+   public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);

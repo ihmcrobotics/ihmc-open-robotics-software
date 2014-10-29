@@ -35,19 +35,19 @@ public class PelvisPoseBehavior extends BehaviorInterface
    {
       if (!packetHasBeenSent.getBooleanValue() && (outgoingPelvisPosePacket != null))
       {
-         sendHandPoseToController();
+         sendPelvisPosePacketToController();
       }
 
       currentTime = yoTime.getDoubleValue();
    }
 
-   private void sendHandPoseToController()
+   private void sendPelvisPosePacketToController()
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
          outgoingPelvisPosePacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingPelvisPosePacket);
-         sendPacketToController(outgoingPelvisPosePacket);
+         sendThighStatePacketToController(outgoingPelvisPosePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }

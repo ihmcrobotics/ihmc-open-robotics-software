@@ -11,7 +11,7 @@ import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubsrciber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.RemoveDebrisBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationTrial;
@@ -115,7 +115,7 @@ public class IHMCHumanoidBehaviorManager
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, forceSensorDataHolder, DT);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
-      RemoveDebrisBehavior removeDebrisBehavior = new RemoveDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
+      RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
       
    }

@@ -33,7 +33,7 @@ public class HighLevelStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendPacketToController(outgoingHighLevelStatePacket);
+         sendThighStatePacketToController(outgoingHighLevelStatePacket);
          packetHasBeenSent.set(true);
       }
    }

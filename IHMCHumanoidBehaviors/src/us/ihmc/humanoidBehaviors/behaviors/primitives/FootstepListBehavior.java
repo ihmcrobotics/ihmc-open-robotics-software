@@ -86,7 +86,7 @@ public class FootstepListBehavior extends BehaviorInterface
          outgoingFootstepDataList.setDestination(PacketDestination.UI);
          
          sendPacketToNetworkProcessor(outgoingFootstepDataList);
-         sendPacketToController(outgoingFootstepDataList);
+         sendThighStatePacketToController(outgoingFootstepDataList);
          packetHasBeenSent.set(true);
       }
    }
@@ -138,14 +138,14 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
-      sendPacketToController(new PauseCommand(true));
+      sendThighStatePacketToController(new PauseCommand(true));
       isPaused.set(true);
    }
 
    @Override
    public void resume()
    {
-      sendPacketToController(new PauseCommand(false));
+      sendThighStatePacketToController(new PauseCommand(false));
       isPaused.set(false);
    }
 
