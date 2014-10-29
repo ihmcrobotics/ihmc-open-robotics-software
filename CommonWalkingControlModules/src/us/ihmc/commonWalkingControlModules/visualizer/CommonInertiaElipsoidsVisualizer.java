@@ -25,8 +25,8 @@ import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.mathworks.jama.Matrix;
-import com.mathworks.jama.SingularValueDecomposition;
+import Jama.Matrix;
+import Jama.SingularValueDecomposition;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController

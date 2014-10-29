@@ -1,15 +1,15 @@
 evaluationDependsOn(':IHMCUtilities')
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
-	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
-	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
-	compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
+	
+	
+	//compile group: 'cz.advel.jbullet', name: 'jbullet', version: '20101010-1'	//Disabled jbullet because it depends on vecmath 1.3.1. Jesper
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
-	compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x'
+	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 	//compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
@@ -17,7 +17,6 @@ dependencies {
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.5'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
-	compile group: 'javax.media', name: 'jmf', version: '2.1.1e'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.7'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-awt-util', version: '1.7'
@@ -34,7 +33,6 @@ dependencies {
 	compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '1.8.4'
 
 	compile group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
-	compile group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCYoUtilities')

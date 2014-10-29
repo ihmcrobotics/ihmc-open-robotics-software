@@ -3,9 +3,9 @@ evaluationDependsOn(':IHMCUtilities')
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
      
-    compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
-    compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
-    compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x' 
+    
+    
+    compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2' 
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.+' 
     ['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}

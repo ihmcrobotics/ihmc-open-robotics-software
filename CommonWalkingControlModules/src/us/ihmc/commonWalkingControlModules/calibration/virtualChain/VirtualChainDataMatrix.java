@@ -6,7 +6,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 
-import com.mathworks.jama.Matrix;
+import Jama.Matrix;
 
 public class VirtualChainDataMatrix
 {

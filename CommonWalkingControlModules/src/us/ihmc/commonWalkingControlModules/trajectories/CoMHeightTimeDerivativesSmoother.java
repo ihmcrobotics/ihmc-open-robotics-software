@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.mathworks.jama.Matrix;
+import Jama.Matrix;
 
 public class CoMHeightTimeDerivativesSmoother
 {

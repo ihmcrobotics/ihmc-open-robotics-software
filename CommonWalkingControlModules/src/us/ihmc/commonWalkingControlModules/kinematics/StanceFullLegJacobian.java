@@ -25,7 +25,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.mathworks.jama.Matrix;
+import Jama.Matrix;
 
 public class StanceFullLegJacobian
 {
