@@ -871,6 +871,13 @@ public class MomentumBasedController
       
       footstep.setPredictedContactPointsFromFramePoint2ds(contactPointList);
    }
+   
+   public void getCenterOfFootContactPoints(RobotSide robotSide, FramePoint2d centroidToPack)
+   {
+      ContactablePlaneBody foot = feet.get(robotSide);
+      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      footContactState.getContactPointCentroid(centroidToPack);
+   }
 
    private void resetFootPlaneContactPoint(RobotSide robotSide)
    {
