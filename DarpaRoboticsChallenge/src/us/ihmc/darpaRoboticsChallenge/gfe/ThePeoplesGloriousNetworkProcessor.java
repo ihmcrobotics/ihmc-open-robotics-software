@@ -33,7 +33,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.utilities.ros.subscriber.TimestampedPoseFootStepGenerator;
 
-public class ThePeoplesGloriousGFENetworkProcessor
+public class ThePeoplesGloriousNetworkProcessor
 {
    private static final String nodeName = "/Controller";
 
@@ -51,8 +51,8 @@ public class ThePeoplesGloriousGFENetworkProcessor
    private final MessageFactory messageFactory;
    private final FullRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousGFENetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge,
-         DRCRobotModel robotModel, String namespace)
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge,
+                                             DRCRobotModel robotModel, String namespace)
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
@@ -75,6 +75,11 @@ public class ThePeoplesGloriousGFENetworkProcessor
       rosMainNode.execute();
    }
 
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace)
+   {
+      this(rosUri, controllerCommunicationBridge, null, robotModel, namespace);
+   }
+
    private void setupOutputs(String namespace)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -88,15 +93,9 @@ public class ThePeoplesGloriousGFENetworkProcessor
             tfPublisher);
       new RosRobotJointStatePublisher(controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace);
 
-      if (sensorInformation.getCameraParameters().length > 0)
+      if(scsSensorCommunicationBridge != null)
       {
-         new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
-      }
-
-      if (sensorInformation.getLidarParameters().length > 0)
-      {
-         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
-               sensorInformation.getLidarParameters(), tfPublisher);
+         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher);
       }
 
       Map<String, Class> inputPacketList = IHMCMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
@@ -109,6 +108,20 @@ public class ThePeoplesGloriousGFENetworkProcessor
                controllerCommunicationBridge, e.getValue());
          publishers.add(publisher);
          rosMainNode.attachPublisher(namespace + "/" + e.getKey(), publisher);
+      }
+   }
+
+   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher)
+   {
+      if (sensorInformation.getCameraParameters().length > 0)
+      {
+         new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
+      }
+
+      if (sensorInformation.getLidarParameters().length > 0)
+      {
+         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
+               sensorInformation.getLidarParameters(), tfPublisher);
       }
    }
 

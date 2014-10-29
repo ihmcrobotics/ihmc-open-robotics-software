@@ -12,5 +12,31 @@ setupProjectSpecificDependencies()
 
 apply plugin: 'application'
 
-applicationName = "IHMCAtlasAPI"
-mainClassName = "us.ihmc.atlas.AtlasGFENetworkProcessor"
+if(project.hasProperty("appType"))
+{
+    switch (appType)
+    {
+        case "test":
+            println "Switching on build type seemingly working"
+            System.exit(0);
+            break;
+        case "robot":
+            applicationName = "IHMCAtlasAPI"
+            mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
+            break;
+
+        case "sim":
+        default:
+            applicationName = "IHMCAtlasAPISimulation"
+            mainClassName = "us.ihmc.atlas.AtlasROSAPISimulator"
+            break;
+    }
+}
+
+installApp {
+    outputs.upToDateWhen {false}
+}
+
+startScripts {
+    outputs.upToDateWhen {false}
+}
