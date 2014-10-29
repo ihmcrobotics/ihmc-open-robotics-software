@@ -48,7 +48,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
       {
          outgoingChestOrientationPacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingChestOrientationPacket);
-         sendPacketToController(outgoingChestOrientationPacket);
+         sendThighStatePacketToController(outgoingChestOrientationPacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }

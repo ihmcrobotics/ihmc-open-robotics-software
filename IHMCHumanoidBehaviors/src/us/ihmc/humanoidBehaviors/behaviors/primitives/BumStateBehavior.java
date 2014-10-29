@@ -25,15 +25,15 @@ public class BumStateBehavior extends BehaviorInterface
    {
       if (!packetHasBeenSent.getBooleanValue() && (outgoingBumStatePacket != null))
       {
-         sendFootStateToController();
+         sendBumStatePacketToController();
       }
    }
 
-   private void sendFootStateToController()
+   private void sendBumStatePacketToController()
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendPacketToController(outgoingBumStatePacket);
+         sendThighStatePacketToController(outgoingBumStatePacket);
          packetHasBeenSent.set(true);
       }
    }

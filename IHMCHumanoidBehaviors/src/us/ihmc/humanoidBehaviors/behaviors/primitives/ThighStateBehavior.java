@@ -33,7 +33,7 @@ public class ThighStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendPacketToController(outgoingThighStatePacket);
+         sendThighStatePacketToController(outgoingThighStatePacket);
          packetHasBeenSent.set(true);
       }
    }

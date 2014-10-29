@@ -75,7 +75,7 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          outgoingHandPosePacket.setDestination(PacketDestination.UI);  
          
-         sendPacketToController(outgoingHandPosePacket);
+         sendThighStatePacketToController(outgoingHandPosePacket);
          sendPacketToNetworkProcessor(outgoingHandPosePacket);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());

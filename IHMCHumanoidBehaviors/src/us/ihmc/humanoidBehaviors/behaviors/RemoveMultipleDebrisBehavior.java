@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.communication.packets.behaviors.DebrisData;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.RemovePieceOfDebrisBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.RemoveSingleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -15,9 +15,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class RemoveDebrisBehavior extends BehaviorInterface
+public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 {
-   private final RemovePieceOfDebrisBehavior removePieceOfDebrisBehavior;
+   private final RemoveSingleDebrisBehavior removePieceOfDebrisBehavior;
 
    private final ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket> inputListeningQueue = new ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket>();
    private final BooleanYoVariable isDone;
@@ -31,11 +31,11 @@ public class RemoveDebrisBehavior extends BehaviorInterface
    private double currentDistanceToObject;
    private final FramePoint currentObjectPosition = new FramePoint();
 
-   public RemoveDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrame,
+   public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrame,
          DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
-      removePieceOfDebrisBehavior = new RemovePieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime);
+      removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime);
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
 

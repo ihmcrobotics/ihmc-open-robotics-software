@@ -36,19 +36,19 @@ public class HeadOrientationBehavior extends BehaviorInterface
    {
       if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadOrientationPacket != null))
       {
-         sendHandPoseToController();
+         sendHeadOrientationPacketToController();
       }
 
       currentTime = yoTime.getDoubleValue();
    }
 
-   private void sendHandPoseToController()
+   private void sendHeadOrientationPacketToController()
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
          outgoingHeadOrientationPacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingHeadOrientationPacket);
-         sendPacketToController(outgoingHeadOrientationPacket);
+         sendThighStatePacketToController(outgoingHeadOrientationPacket);
          
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
