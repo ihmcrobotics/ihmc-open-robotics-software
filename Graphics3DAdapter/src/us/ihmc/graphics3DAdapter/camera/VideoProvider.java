@@ -2,7 +2,6 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.image.BufferedImage;
 
-import javax.media.j3d.QuadArray;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 

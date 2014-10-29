@@ -12,7 +12,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.mathworks.jama.Matrix;
+import Jama.Matrix;
 
 /**
  * This turns out to be exactly the same as TeeterTotterLegStrengthCalculator!

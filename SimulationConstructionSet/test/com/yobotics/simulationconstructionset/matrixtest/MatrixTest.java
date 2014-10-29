@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.math.MatrixTools;
 
-import com.mathworks.jama.Matrix;
+import Jama.Matrix;
 
 
 public class MatrixTest
