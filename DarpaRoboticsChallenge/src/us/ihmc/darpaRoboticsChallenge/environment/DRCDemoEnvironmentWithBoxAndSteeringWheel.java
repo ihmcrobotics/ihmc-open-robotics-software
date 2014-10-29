@@ -150,7 +150,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] contactPoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       for (ExternalForcePoint contactPoint : contactPoints)
       {

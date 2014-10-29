@@ -1,6 +1,8 @@
 package us.ihmc.robotiq.simulatedHand;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -11,6 +13,7 @@ import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotiq.model.RobotiqHandModel;
+import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
@@ -34,8 +37,9 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
    private final BooleanYoVariable sendFingerJointGains = new BooleanYoVariable("sendFingerJointGains", registry);
 
-   private final DoubleYoVariable kpFingerJoints = new DoubleYoVariable("kpFingerJoints", registry);
-   private final DoubleYoVariable kdFingerJoints = new DoubleYoVariable("kdFingerJoints", registry);
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> kpMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> kdMap = new LinkedHashMap<>();
+   
    private final DoubleYoVariable fingerTrajectoryTime = new DoubleYoVariable("FingerTrajectoryTime", registry);
 
    private final long controlDTInNS;
@@ -65,9 +69,12 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
       jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(globalDataProducer, simulatedRobot);
 
-      kpFingerJoints.set(100.0);
-      kdFingerJoints.set(10.0);
       fingerTrajectoryTime.set(0.5);
+
+      EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
+      EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
+
+      setupGains(kpEnumMap, kdEnumMap);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -79,6 +86,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             if (fingerJoint != null)
                hasRobotiqHand.put(robotSide, true);
             allFingerJoints.get(robotSide).add(fingerJoint);
+            kpMap.put(fingerJoint, kpEnumMap.get(jointEnum));
+            kdMap.put(fingerJoint, kdEnumMap.get(jointEnum));
          }
 
          if (hasRobotiqHand.get(robotSide))
@@ -93,6 +102,67 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             individualHandControllers.put(robotSide, individualHandController);
          }
       }
+   }
+
+   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kdEnumMap)
+   {
+      DoubleYoVariable kpFingerJoint1 = new DoubleYoVariable("kpFingerJoint1", registry);
+      DoubleYoVariable kpFingerJoint2 = new DoubleYoVariable("kpFingerJoint2", registry);
+      DoubleYoVariable kpFingerJoint3 = new DoubleYoVariable("kpFingerJoint3", registry);
+      DoubleYoVariable kpThumbJoint1 = new DoubleYoVariable("kpThumbJoint1", registry);
+      DoubleYoVariable kpThumbJoint2 = new DoubleYoVariable("kpThumbJoint2", registry);
+      DoubleYoVariable kpThumbJoint3 = new DoubleYoVariable("kpThumbJoint3", registry);
+
+      kpFingerJoint1.set(10.0);
+      kpFingerJoint2.set(5.0);
+      kpFingerJoint3.set(1.0);
+
+      kpThumbJoint1.set(20.0);
+      kpThumbJoint2.set(10.0);
+      kpThumbJoint3.set(2.0);
+
+      kpEnumMap.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, kpFingerJoint1);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, kpFingerJoint1);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, kpFingerJoint2);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, kpFingerJoint3);
+
+      kpEnumMap.put(RobotiqHandJointNameMinimal.PALM_FINGER_2_JOINT, kpFingerJoint1);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, kpFingerJoint1);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_2, kpFingerJoint2);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, kpFingerJoint3);
+
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, kpThumbJoint1);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, kpThumbJoint2);
+      kpEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, kpThumbJoint3);
+
+      DoubleYoVariable kdFingerJoint1 = new DoubleYoVariable("kdFingerJoint1", registry);
+      DoubleYoVariable kdFingerJoint2 = new DoubleYoVariable("kdFingerJoint2", registry);
+      DoubleYoVariable kdFingerJoint3 = new DoubleYoVariable("kdFingerJoint3", registry);
+      DoubleYoVariable kdThumbJoint1 = new DoubleYoVariable("kdThumbJoint1", registry);
+      DoubleYoVariable kdThumbJoint2 = new DoubleYoVariable("kdThumbJoint2", registry);
+      DoubleYoVariable kdThumbJoint3 = new DoubleYoVariable("kdThumbJoint3", registry);
+
+      kdFingerJoint1.set(0.5);
+      kdFingerJoint2.set(0.25);
+      kdFingerJoint3.set(0.1);
+
+      kdThumbJoint1.set(1.0);
+      kdThumbJoint2.set(0.5);
+      kdThumbJoint3.set(0.2);
+      
+      kdEnumMap.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, kdFingerJoint1);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, kdFingerJoint1);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, kdFingerJoint2);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, kdFingerJoint3);
+
+      kdEnumMap.put(RobotiqHandJointNameMinimal.PALM_FINGER_2_JOINT, kdFingerJoint1);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, kdFingerJoint1);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_2, kdFingerJoint2);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, kdFingerJoint3);
+
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, kdThumbJoint1);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, kdThumbJoint2);
+      kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, kdThumbJoint3);
    }
 
    @Override
@@ -206,8 +276,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             for (int i = 0; i < oneSideFingerJoints.size(); i++)
             {
                OneDegreeOfFreedomJoint joint = oneSideFingerJoints.get(i);
-               joint.setKp(kpFingerJoints.getDoubleValue());
-               joint.setKd(kdFingerJoints.getDoubleValue());
+               joint.setKp(kpMap.get(joint).getDoubleValue());
+               joint.setKd(kdMap.get(joint).getDoubleValue());
             }
          }
       }

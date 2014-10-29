@@ -1,5 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
@@ -61,7 +64,8 @@ public class DRCSimulationFactory
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
 
-      scs = new SimulationConstructionSet(simulatedRobot, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
+      Robot[] allSimulatedRobots = setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
+      scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
       scs.setDT(drcRobotModel.getSimulateDT(), 1);
 
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
@@ -88,6 +92,20 @@ public class DRCSimulationFactory
       simulatedRobot.update();
 
       setupJointDamping(simulatedRobot, drcRobotModel);
+   }
+
+   private Robot[] setupEnvironmentAndListSimulatedRobots(SDFRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
+   {
+      List<Robot> allSimulatedRobotList = new ArrayList<Robot>();
+      allSimulatedRobotList.add(simulatedRobot);
+      if (environment.getEnvironmentRobots() != null)
+         allSimulatedRobotList.addAll(environment.getEnvironmentRobots());
+      Robot[] allSimulatedRobots = allSimulatedRobotList.toArray(new Robot[0]);
+      
+      environment.addContactPoints(simulatedRobot.getAllGroundContactPoints());
+      environment.createAndSetContactControllerToARobot();
+      
+      return allSimulatedRobots;
    }
 
    public FullRobotModelCorruptor getFullRobotModelCorruptor()

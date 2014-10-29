@@ -84,7 +84,7 @@ public class DRCWallWorldEnvironment implements CommonAvatarEnvironmentInterface
    }
 
    @Override
-   public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+   public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
       // TODO Auto-generated method stub
       
