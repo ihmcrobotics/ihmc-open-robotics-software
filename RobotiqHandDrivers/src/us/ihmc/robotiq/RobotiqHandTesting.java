@@ -126,7 +126,8 @@ public class RobotiqHandTesting
 			{
 				JSlider slider = finger1Panel.getSlider();
 				System.out.println(slider.getValue());
-				ManualHandControlPacket packet = new ManualHandControlPacket();
+				ManualHandControlPacket packet = new ManualHandControlPacket(RobotSide.LEFT, finger1Panel.getSlider().getValue(), finger2Panel.getSlider().getValue(), finger3Panel.getSlider().getValue(), 0, 1);
+				manager.sendHandCommand(packet);
 			}
 		});
 		

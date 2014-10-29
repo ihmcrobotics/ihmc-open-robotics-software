@@ -667,12 +667,12 @@ public final class RobotiqHandInterface
 		force[finger] = desiredForce;
 	}
 	
-	public void velocityControl(int[] desiredSpeed, RobotSide side)
+	public void velocityControl(double[] desiredSpeed, RobotSide side)
 	{
 		
 		if(side == RobotSide.LEFT)
 		{
-			int temp = desiredSpeed[FINGER_C];
+			double temp = desiredSpeed[FINGER_C];
 			desiredSpeed[FINGER_C] = desiredSpeed[FINGER_B];
 			desiredSpeed[FINGER_B] = temp;
 		}
@@ -681,31 +681,35 @@ public final class RobotiqHandInterface
 		
 		for(int finger : fingers)
 		{
+			desiredSpeed[finger] = -(MAX_SPEED & 0xFF) + (2.0 * desiredSpeed[finger]) * (MAX_SPEED & 0xFF); // assuming range of [0,1] and mapping it to [-255,255]
 			desiredPosition = (desiredSpeed[finger] > 0) ? FULLY_CLOSED : FULLY_OPEN;
 			force[finger] = MAX_FORCE;
-			speed[finger] = (byte)(desiredSpeed[finger] & 0xFF);
+			speed[finger] = (byte)((int)desiredSpeed[finger] & 0xFF);
 			position[finger] = desiredPosition;
 		}
 		
 		fingerControl = INDIVIDUAL_FINGER_CONTROL;
 		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
+
 		sendMotionRequest();
 	}
 	
-	public void positionControl(int desiredPosition[], RobotSide side)
+	public void positionControl(double desiredPosition[], RobotSide side)
 	{
 		if(side == RobotSide.LEFT)
 		{
-			int temp = desiredPosition[FINGER_C];
+			double temp = desiredPosition[FINGER_C];
 			desiredPosition[FINGER_C] = desiredPosition[FINGER_B];
 			desiredPosition[FINGER_B] = temp;
 		}
 		
 		for(int finger : fingers)
 		{
+			desiredPosition[finger] = FULLY_OPEN + desiredPosition[finger] * (FULLY_CLOSED & 0xFF);
+			
+			position[finger] = (byte)((int)desiredPosition[finger] & 0xFF);
 			force[finger] = MAX_FORCE;
 			speed[finger] = DEFAULT_SPEED;
-			position[finger] = (byte)(desiredPosition[finger] & 0xFF);
 		}
 		
 		fingerControl = INDIVIDUAL_FINGER_CONTROL;
@@ -948,6 +952,8 @@ public final class RobotiqHandInterface
 	
 	class RobotiqConnectionException extends Exception
 	{
+		private static final long serialVersionUID = -8733823573411561362L;
+
 		public RobotiqConnectionException(String msg)
 		{
 			super(msg);
