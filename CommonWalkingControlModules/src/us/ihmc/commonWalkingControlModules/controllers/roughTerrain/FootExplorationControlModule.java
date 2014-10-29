@@ -722,13 +722,15 @@ public class FootExplorationControlModule
             Vector2d vector = new Vector2d(x, y);
             if (adjustContactPointInXNOnly)
             {
-               contactPoint.getPosition().setX(vector.getX());
-               contactPoint.getPosition2d().setX(vector.getX());
+               FramePoint contactPosition = contactPoint.getPosition();
+               contactPosition.setX(vector.getX());
+               contactPoint.setPosition(contactPosition);
             }
             else
             {
-               contactPoint.getPosition().set(vector.getX(), vector.getY(), 0.0);
-               contactPoint.getPosition2d().set(vector.getX(), vector.getY());
+               FramePoint contactPosition = contactPoint.getPosition();
+               contactPosition.set(vector.getX(), vector.getY(), 0.0);
+               contactPoint.setPosition(contactPosition);
             }
 
             updateNextFootstepCentroid();
@@ -1224,8 +1226,9 @@ public class FootExplorationControlModule
       {
          double x = defaultPoint.get(i).getX();
          double y = defaultPoint.get(i).getY();
-         oldPoints.get(i).getPosition().set(x, y, 0.0);
-         oldPoints.get(i).getPosition2d().set(x, y);
+         FramePoint contactPosition = oldPoints.get(i).getPosition();
+         contactPosition.set(x, y, 0.0);
+         oldPoints.get(i).setPosition(contactPosition);
       }
    }
 
@@ -1239,8 +1242,10 @@ public class FootExplorationControlModule
       {
          ContactPointInterface contactPoint = currentPlaneContactState.getContactPoints().get(i);
          FramePoint2d scaledPoint = polygon.getFrameVertex(i);
-         contactPoint.getPosition().set(scaledPoint.getX(), scaledPoint.getY(), 0.0);
-         contactPoint.getPosition2d().set(scaledPoint.getX(), scaledPoint.getY());
+         
+         FramePoint contactPosition = contactPoint.getPosition();
+         contactPosition.set(scaledPoint.getX(), scaledPoint.getY(), 0.0);
+         contactPoint.setPosition(contactPosition);
       }
    }
 

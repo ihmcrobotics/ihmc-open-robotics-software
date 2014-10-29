@@ -58,6 +58,11 @@ public class YoContactPoint implements ContactPointInterface
       return yoPosition.getFramePointCopy();
    }
    
+   public void setPosition(FramePoint position)
+   {
+      this.yoPosition.set(position);
+   }
+   
    public void setPosition(Point2d contactPointLocation)
    {
       yoPosition2d.set(contactPointLocation.getX(), contactPointLocation.getY());

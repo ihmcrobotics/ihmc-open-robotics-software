@@ -13,6 +13,8 @@ public interface ContactPointInterface
    public FramePoint2d getPosition2d();
 
    public FramePoint getPosition();
+   
+   public void setPosition(FramePoint position);
 
    public PlaneContactState getParentContactState();
 

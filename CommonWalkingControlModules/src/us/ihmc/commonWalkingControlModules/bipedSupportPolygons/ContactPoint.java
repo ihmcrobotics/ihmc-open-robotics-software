@@ -39,6 +39,11 @@ public class ContactPoint implements ContactPointInterface
    {
       return position;
    }
+   
+   public void setPosition(FramePoint position)
+   {
+      this.position.set(position);
+   }
 
    public PlaneContactState getParentContactState()
    {
