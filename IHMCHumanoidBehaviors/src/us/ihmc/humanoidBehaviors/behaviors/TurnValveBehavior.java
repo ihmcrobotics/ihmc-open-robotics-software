@@ -58,7 +58,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final FirstOrderBandPassFilteredYoVariable rightWristForceBandPassFiltered;
 
 
-   private Double maxObservedWristForce = 0.0;
+   private double maxObservedWristForce = 0.0;
    private final DoubleYoVariable yoTime;
    private final double DT;
 
@@ -86,7 +86,7 @@ public class TurnValveBehavior extends BehaviorInterface
       rightWristForce = new Vector3d();
       rightWristForceMagnitude = new DoubleYoVariable("rightWristForceMag", registry);
       
-      rightWristForceBandPassFiltered = new FirstOrderBandPassFilteredYoVariable("rightWristForceMag", "", forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, yoTime, registry);
+      rightWristForceBandPassFiltered = new FirstOrderBandPassFilteredYoVariable("rightWristForceMagBandPass", "", forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, yoTime, registry);
       
       this.yoTime = yoTime;
       this.DT = DT;
