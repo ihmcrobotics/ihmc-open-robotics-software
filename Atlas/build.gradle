@@ -32,6 +32,10 @@ if(project.hasProperty("appType"))
             break;
     }
 }
+else {
+    applicationName = "IHMCAtlasAPISimulation"
+    mainClassName = "us.ihmc.atlas.AtlasROSAPISimulator"
+}
 
 installApp {
     outputs.upToDateWhen {false}
