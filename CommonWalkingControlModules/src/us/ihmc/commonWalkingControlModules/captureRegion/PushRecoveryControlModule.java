@@ -46,11 +46,11 @@ public class PushRecoveryControlModule
 {
    private static final boolean ENABLE = false;
    private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
-   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = true;
+   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = false;
    private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 3.0;
-   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.75;
+   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;
@@ -74,7 +74,6 @@ public class PushRecoveryControlModule
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final StateMachine<?> stateMachine;
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
-   private final PushRecoveryICPPlanner pushRecoveryICPPlanner;
 
    private boolean recoveringFromDoubleSupportFall;
    private boolean usingReducedSwingTime;
@@ -111,8 +110,6 @@ public class PushRecoveryControlModule
       this.stateMachine = stateMachine;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.feet = feet;
-      this.pushRecoveryICPPlanner = new PushRecoveryICPPlanner("pushRecoveryICPPlanner", worldFrame, remainingSwingTimeProvider, initialICPPositionProvider,
-            finalICPPositionProvider, registry);
 
       this.enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
       this.enablePushRecovery.set(ENABLE);
@@ -361,62 +358,6 @@ public class PushRecoveryControlModule
    }
 
    /**
-    * This is a simple ICP planner that can work in two different ways. First way computes the desired ICP using a strait line position trajectory, while the second way 
-    * (active if enableProjectionInsidePushRecoveryICPPlanner is true) simply defines the desired ICP as the projection of the ICP on the capture point trajectory,
-    * which is the line connecting the initial ICP to the final). For the second way the desired ICP is set to be the previous desired ICP in order to try to slow down the current ICP.
-    *
-    */
-   public class PushRecoveryICPPlanner extends StraightLinePositionTrajectoryGenerator
-   {
-      private FramePoint tempPositionToPack;
-      private FrameVector tempVelocityToPack;
-      private FramePoint2d previousDesiredICP;
-
-      public PushRecoveryICPPlanner(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-            PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry)
-      {
-         super(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-         tempPositionToPack = new FramePoint(worldFrame);
-         tempVelocityToPack = new FrameVector(worldFrame);
-      }
-
-      public void getICPPosition(FramePoint2d desiredICPPositionToPack, FramePoint2d currentICP)
-      {
-         if (enableProjectionInsidePushRecoveryICPPlanner.getBooleanValue())
-         {
-            desiredICPPositionToPack.set(previousDesiredICP);
-            previousDesiredICP.set(capturePointTrajectoryLine.orthogonalProjectionCopy(currentICP));
-         }
-         else
-         {
-            get(tempPositionToPack);
-            tempPositionToPack.changeFrame(desiredICPPositionToPack.getReferenceFrame());
-            desiredICPPositionToPack.set(tempPositionToPack.getX(), tempPositionToPack.getY());
-         }
-      }
-
-      public void getICPVelocity(FrameVector2d desiredICPVelocityToPack)
-      {
-         if (enableProjectionInsidePushRecoveryICPPlanner.getBooleanValue())
-         {
-            desiredICPVelocityToPack.setToZero(worldFrame); // sure?
-         }
-         else
-         {
-            packVelocity(tempVelocityToPack);
-            tempVelocityToPack.changeFrame(desiredICPVelocityToPack.getReferenceFrame());
-            desiredICPVelocityToPack.set(tempVelocityToPack.getX(), tempVelocityToPack.getY());
-         }
-      }
-
-      public void initialize(FramePoint2d desiredICPPositionToPack, FramePoint2d currentICP)
-      {
-         super.initialize();
-         previousDesiredICP = new FramePoint2d(capturePointTrajectoryLine.orthogonalProjectionCopy(currentICP));
-      }
-   }
-
-   /**
     * This method checks if the next footstep is inside of the capture region. If is outside it will be re-projected inside of the capture region.
     * The method can also handle the capture region calculation for "uncertain recover". In this case the capture region is calculated with the
     * MINIMUM_TIME_TO_REPLAN even if we are performing the step with the MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY.
@@ -559,21 +500,6 @@ public class PushRecoveryControlModule
       return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, icpAndMomentumBasedController.getOmega0(), tempFootPolygon);
    }
 
-   public double computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(FramePoint2d capturePoint2d, FramePoint2d constantCenterOfPressure,
-         FramePoint2d initialICP, FramePoint2d finalDesiredICP, double omega0)
-   {
-      FrameLine2d capturePointTrajectoryLine = new FrameLine2d(finalDesiredICP, initialICP);
-      FramePoint2d tmpCapturePoint = new FramePoint2d(capturePoint2d.getReferenceFrame(), capturePoint2d.getX(), capturePoint2d.getY());
-      this.capturePointTrajectoryLine.setFrameLine2d(capturePointTrajectoryLine);
-
-      //project current capture point to desired capture point trajectory line
-      capturePointTrajectoryLine.orthogonalProjection(tmpCapturePoint);
-
-      projectedCapturePoint.set(tmpCapturePoint.getPointCopy());
-
-      return computeOffsetTimeToMoveDesiredICPToTrajectoryLine(tmpCapturePoint, constantCenterOfPressure, initialICP, finalDesiredICP, omega0);
-   }
-
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
@@ -599,29 +525,6 @@ public class PushRecoveryControlModule
       currentFootstep.getPositionIncludingFrame(framePointToPack2);
       
       return framePointToPack.getXYplaneDistance(framePointToPack2);
-   }
-
-   /**
-    * Given a desired capture point that is on the capture point trajectory, an initial capture point, a constant center of pressure, and omega, this 
-    * method computes a time offset that will move the desired capture point to a desired point on that trajectory given by the argument capturePoint.
-    * 
-    * @param capturePoint
-    * @param constantCenterOfPressure
-    * @param initialICP
-    * @param finalDesiredICP
-    * @param omega0
-    * @return
-    */
-   private double computeOffsetTimeToMoveDesiredICPToTrajectoryLine(FramePoint2d capturePoint, FramePoint2d constantCenterOfPressure, FramePoint2d initialICP,
-         FramePoint2d finalDesiredICP, double omega0)
-   {
-      FramePoint2d tmpNumerator = new FramePoint2d(capturePoint.getReferenceFrame(), capturePoint.getX(), capturePoint.getY());
-      tmpNumerator.sub(constantCenterOfPressure);
-
-      FramePoint2d tmpDenominator = initialICP;
-      tmpDenominator.sub(constantCenterOfPressure);
-
-      return (1 / omega0) * Math.log(Math.abs(tmpNumerator.getX()) / Math.abs(tmpDenominator.getX()));
    }
 
    private PositionProvider initialICPPositionProvider = new PositionProvider()
@@ -672,11 +575,6 @@ public class PushRecoveryControlModule
    public double getSwingTimeRemaining()
    {
       return this.swingTimeRemaining.getDoubleValue();
-   }
-
-   public PushRecoveryICPPlanner getICPPlanner()
-   {
-      return pushRecoveryICPPlanner;
    }
 
    public boolean isEnabled()

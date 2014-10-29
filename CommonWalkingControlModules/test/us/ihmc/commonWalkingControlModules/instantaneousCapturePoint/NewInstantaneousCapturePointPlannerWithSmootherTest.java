@@ -219,7 +219,6 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	@Test
 	public void testCapturePointPlannerWithSmootherNoPushOrCancelPlan()
 	{
-		boolean testPush = false;
 		boolean cancelPlan = false;
 		visualize = false;
 
@@ -283,7 +282,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 				initialTime);
 
 		simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-				initialTime, omega0, initialICPPosition, footLocations, testPush, false);
+				initialTime, omega0, initialICPPosition, footLocations, false);
 
 		cornerPoints = icpPlanner.getCapturePointCornerPoints();
 		constantCMPs = icpPlanner.getConstantCentroidalMomentumPivots();
@@ -296,93 +295,6 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		assertEquals(expectedICP.getX(), icpPosition.getX(), 1e-4);
 		assertEquals(expectedICP.getY(), icpPosition.getY(), 1e-4);
-	}
-
-	@Test
-	public void testCapturePointPlannerWithPush()
-	{
-		boolean testPush = true;
-		boolean cancelPlan = false;
-		visualize = false;
-
-		icpPlanner = new NewInstantaneousCapturePointPlannerWithSmoother(testICPPlannerParams, registry, yoGraphicsListRegistry);
-
-		RobotSide stepSide = RobotSide.LEFT;
-		double stepLength = 0.3;
-		double halfStepWidth = 0.1;
-		boolean startSquaredUp = true;
-
-		double comHeight = 1.0;
-		double gravitationalAcceleration = 9.81;
-
-		double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
-
-		ArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
-				stepLength, halfStepWidth);
-
-		FramePoint initialICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-		FrameVector initialICPVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-		FrameVector initialICPAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-
-		FramePoint icpPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-		FrameVector icpVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-		FrameVector icpAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-
-		FramePoint cmpPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-
-		double initialTime = 0.0;
-
-		initialICPPosition.set(footLocations.get(0));
-		initialICPPosition.add(footLocations.get(1));
-		initialICPPosition.scale(0.5);
-
-		icpPlanner.setOmega0(omega0);
-		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations);
-
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPosition, icpVelocity, icpAcceleration, initialTime);
-
-		JUnitTools.assertPoint3dEquals("", initialICPPosition.getPointCopy(), icpPosition.getPointCopy(), 1e-10);
-		JUnitTools.assertVector3dEquals("", initialICPVelocity.getVectorCopy(), icpVelocity.getVectorCopy(), 1e-10);
-
-		simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner,
-				doubleSupportInitialTransferDuration, initialTime, deltaT, omega0, initialICPPosition, false);
-
-		ArrayList<YoFramePoint> cornerPoints = icpPlanner.getCapturePointCornerPoints();
-		ArrayList<YoFramePoint> constantCMPs = icpPlanner.getConstantCentroidalMomentumPivots();
-
-		assertEquals(cmpPosition.getX(), constantCMPs.get(1).getX(), 1e-4);
-		assertEquals(cmpPosition.getY(), constantCMPs.get(1).getY(), 1e-4);
-		JUnitTools.assertPoint3dEquals("", cornerPoints.get(1).getPoint3dCopy(), icpPosition.getPointCopy(), 1e-4);
-
-		initialTime = initialTime + doubleSupportInitialTransferDuration;
-
-		footLocations.remove(0);
-
-		icpPlanner.initializeSingleSupport(initialTime, footLocations);
-
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
-				initialTime);
-
-		simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-				initialTime, omega0, initialICPPosition, footLocations, testPush, false);
-
-		initialTime = initialTime + singleSupportDuration;
-
-		icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations);
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
-				initialTime);
-
-		simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner,
-				doubleSupportDuration, initialTime, deltaT, omega0, initialICPPosition, cancelPlan);
-
-		assertEquals(footLocations.get(1).getX(), cmpPosition.getX(), 1e-4);
-		assertEquals(footLocations.get(1).getY(), cmpPosition.getY(), 1e-4);
-
-		cornerPoints = icpPlanner.getCapturePointCornerPoints();
-		constantCMPs = icpPlanner.getConstantCentroidalMomentumPivots();
-
-		assertEquals(cornerPoints.get(1).getX(), icpPosition.getX(), 1e-4);
-		assertEquals(cornerPoints.get(1).getY(), icpPosition.getY(), 1e-4);
 	}
 
 	@Test
@@ -451,7 +363,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 				initialTime);
 
 		simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-				initialTime, omega0, initialICPPosition, footLocations, testPush, false);
+				initialTime, omega0, initialICPPosition, footLocations, false);
 
 		initialTime = initialTime + singleSupportDuration;
 
@@ -475,7 +387,6 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	@Ignore
 	public void VisualizePlanner()
 	{
-		boolean testPush = false;
 		boolean cancelPlan = false;
 		visualize = true;
 
@@ -574,7 +485,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 					initialICPAcceleration, initialTime);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-					initialTime, omega0, initialICPPosition, footLocations, testPush, false);
+					initialTime, omega0, initialICPPosition, footLocations, false);
 
 			singleSupportFinalICPPosition.set(icpPosition);
 
@@ -724,7 +635,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	private void simulateForwardAndCheckSingleSupport(FramePoint icpPositionToPack, FrameVector icpVelocityToPack,
 			FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack, NewInstantaneousCapturePointPlannerWithSmoother icpPlanner,
 			double singleSupportDuration, double initialTime, double omega0, FramePoint initialICPPosition,
-			ArrayList<FramePoint> footstepList, boolean testPush, boolean cancelPlan)
+			ArrayList<FramePoint> footstepList, boolean cancelPlan)
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
 		{
@@ -754,28 +665,6 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 					{
 						icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
 					}
-				}
-			}
-
-			if (testPush)
-			{
-				if (time > initialTime + 0.2)
-				{
-					updateFootstepsFromPush(footstepList);
-					icpPlanner.updateForSingleSupportPush(footstepList, time);
-					if (visualize)
-					{
-						for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
-						{
-							constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i));
-						}
-
-						for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
-						{
-							icpFootCenterCornerPointsViz.get(i).set(icpPlanner.getCapturePointCornerPoints().get(i));
-						}
-					}
-					testPush = false;
 				}
 			}
 
