@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -45,6 +46,7 @@ public class FootPoseBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
+         outgoingFootPosePacket.setDestination(PacketDestination.UI);
          sendPacketToController(outgoingFootPosePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
