@@ -542,8 +542,10 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
 
       double alpha = distance2 / distanceSum;
 
-      Vector2d vector = connectingLine1.getNormalizedVectorCopy();
-      Vector2d vector2 = connectingLine2.getNormalizedVectorCopy();
+      Vector2d vector = new Vector2d();
+      connectingLine1.getNormalizedVector(vector);
+      Vector2d vector2 = new Vector2d();
+      connectingLine2.getNormalizedVector(vector2);
 
       vector.scale(alpha);
       vector2.scale(1.0 - alpha);
@@ -586,11 +588,15 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
     */
    public static final FrameLine2d[] mostConstrainingLines(FrameLine2d[] linesOfSightRight, FrameLine2d[] linesOfSightLeft)
    {
-      FrameVector2d leftFootLeft = linesOfSightLeft[0].getNormalizedFrameVector();
-      FrameVector2d leftFootRight = linesOfSightLeft[1].getNormalizedFrameVector();
+      FrameVector2d leftFootLeft = new FrameVector2d();
+      linesOfSightLeft[0].getNormalizedFrameVector(leftFootLeft);
+      FrameVector2d leftFootRight = new FrameVector2d();
+      linesOfSightLeft[1].getNormalizedFrameVector(leftFootRight);
 
-      FrameVector2d rightFootLeft = linesOfSightRight[0].getNormalizedFrameVector();
-      FrameVector2d rightFootRight = linesOfSightRight[1].getNormalizedFrameVector();
+      FrameVector2d rightFootLeft = new FrameVector2d();
+      linesOfSightRight[0].getNormalizedFrameVector(rightFootLeft);
+      FrameVector2d rightFootRight = new FrameVector2d();
+      linesOfSightRight[1].getNormalizedFrameVector(rightFootRight);
 
       if ((rightFootLeft.cross(leftFootLeft) < 0.0) && (rightFootRight.cross(leftFootLeft) > 0.0))
       {
@@ -609,10 +615,11 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       candidates.add(new FrameLine2d(linesOfSightRight[1]));
 
       FrameLine2d ref = candidates.get(0);
-
+      FrameVector2d vector = new FrameVector2d();
+      ref.getNormalizedFrameVector(vector);
       FrameLine2d min = ref;
-      double xMin = ref.getLine2dCopy().getNormalizedVectorCopy().x;
-      double yMin = ref.getLine2dCopy().getNormalizedVectorCopy().y;
+      double xMin = vector.getX();
+      double yMin = vector.getY();
       double xMax = xMin;
       double yMax = yMin;
 
@@ -620,8 +627,9 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
 
       for (FrameLine2d line : candidates)
       {
-         double xCur = line.getLine2dCopy().getNormalizedVectorCopy().x;
-         double yCur = line.getLine2dCopy().getNormalizedVectorCopy().y;
+         line.getNormalizedFrameVector(vector);
+         double xCur = vector.getX();
+         double yCur = vector.getY();
 
          double crossProductWithMin = xMin * yCur - yMin * xCur;
 

@@ -217,7 +217,8 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       startToEnd.changeFrame(ReferenceFrame.getWorldFrame());
       this.captureLine.setFrameLine2d(startToEnd);
 
-      FrameVector2d perpendicularVector = startToEnd.getFrameVectorCopy();
+      FrameVector2d perpendicularVector = new FrameVector2d();
+      startToEnd.getNormalizedFrameVector(perpendicularVector);
       perpendicularVector.rotate90();
 
       FramePoint2d endPointInWorld = new FramePoint2d(endPoint);

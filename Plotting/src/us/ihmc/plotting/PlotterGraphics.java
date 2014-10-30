@@ -86,16 +86,18 @@ public class PlotterGraphics
 
    public void drawLine(Graphics graphics, Line2d line2d)
    {
-      Point2d point2d = line2d.getPointCopy();
-      Vector2d vector2d = line2d.getNormalizedVectorCopy();
+      Vector2d vector2d = new Vector2d();
+      line2d.getNormalizedVector(vector2d);
 
       double bigNumber = 2000.0 / xScale;
       vector2d.scale(bigNumber);
 
-      Point2d farPoint1 = new Point2d(point2d);
+      Point2d farPoint1 = new Point2d();
+      line2d.getPoint(farPoint1);
       farPoint1.add(vector2d);
 
-      Point2d farPoint2 = new Point2d(point2d);
+      Point2d farPoint2 = new Point2d();
+      line2d.getPoint(farPoint2);
       farPoint2.sub(vector2d);
 
       drawLineSegment(graphics, farPoint1, farPoint2);

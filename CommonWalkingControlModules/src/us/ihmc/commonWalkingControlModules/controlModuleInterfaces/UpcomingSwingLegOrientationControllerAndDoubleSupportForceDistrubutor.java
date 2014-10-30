@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
+import javax.vecmath.Vector2d;
+
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
@@ -63,7 +65,9 @@ public class UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubut
       swingFootHeading2d.normalize();
       
       
-      footYawError.set(GeometryTools.getAngleFromFirstToSecondVector(swingFootHeading2d.getVector(), controlLine.getNormalizedFrameVector().getVector()));
+      Vector2d vector = new Vector2d();
+      controlLine.getNormalizedFrameVector(vector);
+      footYawError.set(GeometryTools.getAngleFromFirstToSecondVector(swingFootHeading2d.getVector(), vector));
       
       return -footYawError.getDoubleValue() * footYawKp.getDoubleValue();
       

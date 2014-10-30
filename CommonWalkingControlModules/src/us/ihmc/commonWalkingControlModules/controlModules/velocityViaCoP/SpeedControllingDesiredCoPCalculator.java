@@ -215,7 +215,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
             FrameVector2d comDirection = new FrameVector2d(desiredVelocity);
             comDirection.changeFrame(midFeetZUpFrame);
             comDirection.normalize();
-            FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
+            FrameVector2d controlDirection = new FrameVector2d();
+            controlLine.getNormalizedFrameVector(controlDirection);
 
             // If the scalar projection of the desired CoM direction on the desired iCP direction is negative
             // control only the iCP position and don't do speed control.
@@ -308,7 +309,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 //    ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
 //    desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
 
-      FrameVector2d guideLineUnitVector = guideLine.getNormalizedFrameVector();
+      FrameVector2d guideLineUnitVector = new FrameVector2d();
+      guideLine.getNormalizedFrameVector(guideLineUnitVector);
 
       FrameVector2d currentVelocityInFrame = new FrameVector2d(currentVelocity);
       currentVelocityInFrame.changeFrame(guideLineUnitVector.getReferenceFrame());
