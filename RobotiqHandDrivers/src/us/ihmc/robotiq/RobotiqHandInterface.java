@@ -691,7 +691,7 @@ public final class RobotiqHandInterface
 		}
 		
 		fingerControl = INDIVIDUAL_FINGER_CONTROL;
-		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
+//		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
 
 		sendMotionRequest();
 	}
