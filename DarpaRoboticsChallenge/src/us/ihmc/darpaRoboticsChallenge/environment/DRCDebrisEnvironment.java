@@ -49,7 +49,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       return combinedTerrainObject;
    }
 
-   ContactableSelectableBoxRobot table;
+//   ContactableSelectableBoxRobot table;
    private void createBoxes(double forceVectorScale, GroundProfile3D groundProfile)
    {
       debrisRobots.add(createDebris(1.0, -0.5, debrisHeight /2.0, 0.0, 0.0, 0.0));
@@ -57,16 +57,16 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       debrisRobots.add(createDebris(1.5, -0.5, debrisHeight / 2.0, 0.0, 0.0, 0.0));
       debrisRobots.add(createDebris(1.5, 0.5, debrisHeight / 2.0, 0.0, 0.0, 0.0));
 
-      table = ContactableSelectableBoxRobot.createContactable2By4Robot("Table", 0.55, 1.05, 0.05, 3.0);
-      table.setPosition(1.25, 0.0, debrisHeight + 0.025);
-      table.setYawPitchRoll(0.0, 0.0, 0.0);
-      debrisRobots.add(table);
+//      table = ContactableSelectableBoxRobot.createContactable2By4Robot("Table", 0.55, 1.05, 0.05, 3.0);
+//      table.setPosition(1.25, 0.0, debrisHeight + 0.025);
+//      table.setYawPitchRoll(0.0, 0.0, 0.0);
+//      debrisRobots.add(table);
     
       for (int i = 0; i < debrisRobots.size(); i++)
       {
          ContactableSelectableBoxRobot debrisRobot = debrisRobots.get(i);
          GroundContactModel groundContactModel = createGroundContactModel(debrisRobot, groundProfile);
-         debrisRobot.createAvailableContactPoints(1, 10, forceVectorScale, true);
+         debrisRobot.createAvailableContactPoints(1, 15, forceVectorScale, false);
          debrisRobot.setGroundContactModel(groundContactModel);
       }
    }
@@ -121,11 +121,11 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       debrisRobots.get(0).setController(contactController);
 
       // add contact controller to any robot so it gets called
-      ContactController contactController2 = new ContactController("2");
-      contactController2.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
-      contactController2.addContactPoints(table.getAllGroundContactPoints());
-      contactController2.addContactables(debrisRobots.subList(0, debrisRobots.size()-1));
-      table.setController(contactController2);
+//      ContactController contactController2 = new ContactController("2");
+//      contactController2.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
+//      contactController2.addContactPoints(table.getAllGroundContactPoints());
+//      contactController2.addContactables(debrisRobots.subList(0, debrisRobots.size()-1));
+//      table.setController(contactController2);
    }
 
    @Override
