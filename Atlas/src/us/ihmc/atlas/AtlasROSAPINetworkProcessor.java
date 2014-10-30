@@ -19,12 +19,13 @@ public class AtlasROSAPINetworkProcessor
    private static String defaultRosNameSpace = "atlas";
    private static String defaultRobotModel = "DRC_NO_HANDS";
 
-   public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace)
+   public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
       String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
       ObjectCommunicator controllerCommunicator = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList());
       ((KryoObjectClient) controllerCommunicator).setReconnectAutomatically(true);
+      controllerCommunicator.connect();
 
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
