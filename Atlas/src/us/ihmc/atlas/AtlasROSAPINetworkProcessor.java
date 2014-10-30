@@ -9,7 +9,6 @@ import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
 import java.io.IOException;
@@ -52,7 +51,9 @@ public class AtlasROSAPINetworkProcessor
 
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
+         // This should *ALWAYS* be set to REAL_ROBOT, as this network processor is designed to run only on the real robot.
+         // For sim, see AtlasROSAPISimulator
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.REAL_ROBOT, false);
       }
       catch (IllegalArgumentException e)
       {
