@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '1.0'
+version = '0.2.0-alpha'
 
 setupDefaultDirectoryStructure()
 
@@ -12,35 +12,27 @@ setupProjectSpecificDependencies()
 
 apply plugin: 'application'
 
-if(project.hasProperty("appType"))
-{
-    switch (appType)
-    {
-        case "test":
-            println "Switching on build type seemingly working"
-            System.exit(0);
-            break;
-        case "robot":
-            applicationName = "IHMCAtlasAPI"
-            mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
-            break;
-
-        case "sim":
-        default:
-            applicationName = "IHMCAtlasAPISimulation"
-            mainClassName = "us.ihmc.atlas.AtlasROSAPISimulator"
-            break;
-    }
-}
-else {
-    applicationName = "IHMCAtlasAPISimulation"
-    mainClassName = "us.ihmc.atlas.AtlasROSAPISimulator"
-}
-
-installApp {
-    outputs.upToDateWhen {false}
-}
+applicationName = "IHMCAtlasAPI"
+mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
 
 startScripts {
-    outputs.upToDateWhen {false}
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def simUnixScript = file(outputDir.canonicalPath + "/${applicationName}Simulator")
+        simUnixScript.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator")
+        simUnixScript.setExecutable(true)
+
+        def simWindowsScript = file(outputDir.canonicalPath + "/${applicationName}Simulator.bat")
+        simWindowsScript.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator")
+    }
+}
+
+applicationDistribution.from(startScripts.outputDir) {
+    into "bin"
+}
+
+applicationDistribution.from(file("Configurations")) {
+    include("*network_config.ini")
+    into "bin/Configurations"
 }
