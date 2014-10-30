@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
@@ -177,6 +178,10 @@ public class MomentumBasedController
    private final DoubleYoVariable userYawFeetTorque = new DoubleYoVariable("userYawFeetTorque", registry);
    private final Wrench userAdditionalFeetWrench = new Wrench();
 
+   private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
+   private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
+   private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies = new SideDependentList<>();
+   
    private final double totalMass;
    
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
@@ -359,6 +364,10 @@ public class MomentumBasedController
                      + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getSoleFrame()));
          yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(),
                registry));
+         
+         toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "ToolRigidBody", fullRobotModel
+               .getHand(robotSide).getParentJoint(), getFullRobotModel(), gravityZ, controlDT, registry, yoGraphicsListRegistry));
+         handWrenches.put(robotSide, new Wrench());
       }
 
       // friction variables for all robot
@@ -486,6 +495,22 @@ public class MomentumBasedController
          }
       }
 
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         Wrench handWrench = handWrenches.get(robotSide);
+         inverseDynamicsCalculator.getSpatialAccelerationCalculator().packAccelerationOfBody(tempAcceleration, hand);
+         toolRigidBodies.get(robotSide).control(tempAcceleration, handWrench);
+         if(externalWrenches.containsKey(hand))
+         {
+            externalWrenches.get(hand).add(handWrench);
+         }
+         else
+         {
+            externalWrenches.put(hand, handWrench);
+         }
+      }
+      
       for (RigidBody rigidBody : externalWrenches.keySet())
       {
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
