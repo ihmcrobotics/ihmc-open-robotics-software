@@ -523,7 +523,7 @@ public class CapturePointToolsTest
 			double omega0 = 3.4;
 			double time = 0.5;
 
-			CapturePointTools.computeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure(omega0, time, finalDesiredICP,
+			CapturePointTools.computeInitialCapturePointFromFinalDesiredCapturePointAndInitialCenterOfPressure(omega0, time, finalDesiredICP,
 					constantCenterOfPressure, initialICP);
 
 			p1.set(constantCenterOfPressure.getFramePoint2dCopy());

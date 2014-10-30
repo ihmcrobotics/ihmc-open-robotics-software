@@ -76,6 +76,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final DoubleYoVariable omega0 = new DoubleYoVariable("icpPlannerOmega0", registry);
    private final ArrayList<YoFramePoint> constantCentroidalMomentumPivots = new ArrayList<YoFramePoint>();
    private final ArrayList<YoFramePoint> capturePointCornerPoints = new ArrayList<YoFramePoint>();
+   private final ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
+   private final ArrayList<FramePoint> tmpArrayListOfFramePoints = new ArrayList<FramePoint>();
 
    private final DoubleSupportPolynomialTrajectory doubleSupportCapturePointTrajectory;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
@@ -169,6 +171,12 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity, double initialTime,
          ArrayList<FramePoint> footstepList)
    {
+      this.footstepList.clear();
+      for(int i = 0; i<footstepList.size(); i++)
+      {
+         this.footstepList.add(footstepList.get(i));
+      }
+      
       this.isDoubleSupport.set(true);
 
       if (cancelPlan.getBooleanValue())
@@ -212,6 +220,12 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
    public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
    {
+      this.footstepList.clear();
+      for(int i = 0; i<footstepList.size(); i++)
+      {
+         this.footstepList.add(footstepList.get(i));
+      }
+      
       atAStop.set(false);
       this.isDoubleSupport.set(false);
       this.initialTime.set(initialTime);
@@ -424,10 +438,17 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    public void updatePlanForDoubleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition,
          double time)
    {
+      this.footstepList.clear();
+      for(int i = 0; i<footstepList.size(); i++)
+      {
+         this.footstepList.add(footstepList.get(i));
+      }
+      
       this.initialTime.set(time);
       this.wasPushedInDoubleSupport.set(true);
       this.isDoubleSupport.set(false);
       this.atAStop.set(false);
+      this.comeToStop.set(true);
 
       computeConstantCentersOfPressure(footstepList);
       computeCapturePointCornerPoints(this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue());
@@ -454,6 +475,12 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
    public void updatePlanForSingleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
    {
+      this.footstepList.clear();
+      for(int i = 0; i<footstepList.size(); i++)
+      {
+         this.footstepList.add(footstepList.get(i));
+      }
+      
       computeTimeInCurrentState(time);
       double timeRemaining = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
       this.wasPushedInSingleSupport.set(true);
@@ -461,9 +488,6 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       computeConstantCentersOfPressure(footstepList);
       computeCapturePointCornerPoints(doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue());
 
-//      capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
-
-      // TEST CODE STARTS HERE
       tmp2dFramePoint1.setIncludingFrame(capturePointCornerPoints.get(1).getReferenceFrame(), capturePointCornerPoints.get(1).getX(), capturePointCornerPoints
             .get(1).getY());
       
@@ -474,8 +498,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       CapturePointTools.computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(actualCapturePointPosition, frameLine2d, tmp2dFramePoint3);
 
       capturePointCornerPoints.get(0).set(tmp2dFramePoint3.getX(), tmp2dFramePoint3.getY(), 0);
-      desiredCapturePointPosition.set(capturePointCornerPoints.get(0));
-      // TEST CODE ENDS HERE
+      desiredCapturePointPosition.set(tmp2dFramePoint3.getX(), tmp2dFramePoint3.getY(),0.0);
       
       CapturePointTools.computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(capturePointCornerPoints.get(1),
             capturePointCornerPoints.get(0), constantCentroidalMomentumPivots.get(0), this.omega0.getDoubleValue(),
@@ -489,7 +512,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    }
 
    public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
-   {
+   {  
       if (isDoubleSupport.getBooleanValue())
       {
          cancelPlanNow(time, footstepList);
@@ -502,6 +525,11 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
    private void cancelPlanNow(double time, ArrayList<FramePoint> footstepList)
    {
+      this.footstepList.clear();
+      for(int i = 0; i<footstepList.size(); i++)
+      {
+         this.footstepList.add(footstepList.get(i));
+      }
 
       capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
 
@@ -620,9 +648,22 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(constantCentroidalMomentumPositionToPack);
    }
 
-   public void reset()
+   public void reset(double time)
    {
       comeToStop.set(true);
+      atAStop.set(true);
+      
+      desiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
+      desiredCapturePointVelocity.getFrameTupleIncludingFrame(tmpFrameVector1);
+      
+      tmpArrayListOfFramePoints.clear();
+      
+      for(int i = 0; i<footstepList.size(); i++)
+      {
+         tmpArrayListOfFramePoints.add(footstepList.get(i));
+      }
+      
+      this.initializeDoubleSupport(tmpFramePoint1, tmpFrameVector1, time, tmpArrayListOfFramePoints);
    }
 
    public boolean getHasBeenWokenUp()

@@ -50,7 +50,7 @@ public class PushRecoveryControlModule
    private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 3.0;
-   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
+   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.75;
    private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;

@@ -876,11 +876,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             if (footstepHasBeenAdjusted)
             {
-//               if (pushRecoveryModule.isRecoveringFromDoubleSupportFall())
-//               {
-//                  neutralFootstepsData.setTransferToSide(swingSide.getOppositeSide());
-//                  instantaneousCapturePointPlanner.initializeDoubleSupport(neutralFootstepsData, yoTime.getDoubleValue());
-//               }
+               if (pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+               {
+                  neutralFootstepsData.setTransferToSide(swingSide.getOppositeSide());
+                  instantaneousCapturePointPlanner.initializeDoubleSupport(neutralFootstepsData, yoTime.getDoubleValue());
+               }
 
                updateFootstepParameters();
 
@@ -895,7 +895,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                if (pushRecoveryModule.isRecoveringFromDoubleSupportFall())
                {
                   instantaneousCapturePointPlanner.updatePlanForDoubleSupportPush(transferToAndNextFootstepsData, tmpFramePoint,
-                        yoTime.getDoubleValue());
+                        yoTime.getDoubleValue()-captureTime);
                }
                else
                {
