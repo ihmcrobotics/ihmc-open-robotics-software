@@ -14,12 +14,9 @@ import us.ihmc.utilities.math.geometry.Line2d;
 
 public class LineArtifact extends Artifact implements Serializable
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = -4292453853922762342L;
-   private Point2d point1 = new Point2d();
-   private Point2d point2 = new Point2d(0.01, 0.01);
+   private final Point2d point1 = new Point2d();
+   private final Point2d point2 = new Point2d(0.01, 0.01);
    private int lineThickness = 1;
 
    public LineArtifact(String id)
@@ -36,39 +33,38 @@ public class LineArtifact extends Artifact implements Serializable
    public LineArtifact(String id, Point2d point1, Point2d point2)
    {
       super(id);
-      this.point1 = point1;
-      this.point2 = point2;
+      this.point1.set(point1);
+      this.point2.set(point2);
    }
 
 
    public void setLine(Line2d line)
    {
-      setPoints(line.getPointCopy(), line.getNormalizedVectorCopy());
+      line.getTwoPointsOnLine(point1, point2);
    }
 
    public void setPoints(Point2d point1, Point2d point2)
    {
-      this.point1 = point1;
-      this.point2 = point2;
+      this.point1.set(point1);
+      this.point2.set(point2);
    }
 
    public void setPoints(Point2d point, Vector2d vector)
    {
-      this.point1 = point;
-      Point2d endOfVector = new Point2d(point);
-      endOfVector.add(vector);
-      this.point2 = endOfVector;
+      point1.set(point);
+      point2.add(point1, vector);
    }
 
    public void setLineThicknessInPixels(int pixels)
    {
-      this.lineThickness = pixels;
+      lineThickness = pixels;
    }
 
 
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -86,15 +82,18 @@ public class LineArtifact extends Artifact implements Serializable
       }
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
-   
+
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
-   
+
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
