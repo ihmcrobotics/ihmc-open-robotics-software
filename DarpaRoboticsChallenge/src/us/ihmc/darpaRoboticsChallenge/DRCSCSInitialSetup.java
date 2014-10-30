@@ -64,16 +64,6 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       this.simulateDT = simulateDT;
    }
 
-//   public ScsPhysics createPhysics(ScsCollisionConfigure collisionConfigure, YoVariableRegistry registry)
-//   {
-//      ScsCollisionDetector collision = new JBulletCollisionDetector(registry,10000);
-//      CollisionHandler handler = new SpringCollisionHandler(1,1000,10.0,registry);
-//      collision.initialize(handler);
-//
-//      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
-//
-//      return new ScsPhysics(collisionConfigure,collision,visualize);
-//   }
 
    public void initializeRobot(Robot robot, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
