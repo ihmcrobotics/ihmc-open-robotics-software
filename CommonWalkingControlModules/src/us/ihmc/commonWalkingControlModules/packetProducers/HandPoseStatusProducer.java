@@ -5,6 +5,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class HandPoseStatusProducer
 {
@@ -16,10 +17,10 @@ public class HandPoseStatusProducer
    }
 
    public void sendStatus(Point3d currentPosePosition, Quat4d currentPoseOrientationInWorldFrame, Point3d desiredPosePosition,
-         Quat4d desiredPoseOrientationInWorldFrame)
+         Quat4d desiredPoseOrientationInWorldFrame, RobotSide robotSide)
    {
       HandPoseStatus handPoseStatus = new HandPoseStatus(currentPosePosition, currentPoseOrientationInWorldFrame, desiredPosePosition,
-            desiredPoseOrientationInWorldFrame);
+            desiredPoseOrientationInWorldFrame, robotSide);
       objectCommunicator.queueDataToSend(handPoseStatus);
    }
 
