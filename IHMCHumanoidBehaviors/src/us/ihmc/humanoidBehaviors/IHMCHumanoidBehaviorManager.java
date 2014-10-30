@@ -27,26 +27,19 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 public class IHMCHumanoidBehaviorManager
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
    private final YoVariableServer yoVariableServer = new YoVariableServer(NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
-   private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("desiredCapturePoint", worldFrame, registry);
-   private final YoFramePoint2d yoCapturePoint = new YoFramePoint2d("capturePoint", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 30, registry);
 
    public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator)
    {
@@ -70,10 +63,13 @@ public class IHMCHumanoidBehaviorManager
 
       CapturabilityBasedStatusSubsrciber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubsrciber();
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
-      CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoCapturePoint, yoDesiredCapturePoint, yoSupportPolygon, yoGraphicsListRegistry, registry);
+      CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
 
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, forceSensorDataHolder, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, communicationBridge, yoGraphicsListRegistry, BEHAVIOR_YO_VARIABLE_SERVER_DT);
+      YoFramePoint2d yoCapturePoint = capturePointUpdatable.getYoCapturePoint();
+      YoFramePoint2d yoDesiredCapturePoint = capturePointUpdatable.getYoDesiredCapturePoint();
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, forceSensorDataHolder, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint,
+            communicationBridge, yoGraphicsListRegistry, BEHAVIOR_YO_VARIABLE_SERVER_DT);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);

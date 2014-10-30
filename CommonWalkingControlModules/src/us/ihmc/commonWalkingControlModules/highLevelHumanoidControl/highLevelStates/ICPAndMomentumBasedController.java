@@ -189,7 +189,20 @@ public class ICPAndMomentumBasedController
       {
          desiredICP.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInWorld();
-         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon);
+         
+         // Checking if we are in double support or transfer state
+         boolean inDoubleSupport = true;
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (!momentumBasedController.getContactState(bipedFeet.get(robotSide)).inContact())
+            {
+               inDoubleSupport = false;
+               break;
+            }
+         }
+         RobotSide supportLeg = inDoubleSupport ? null : this.supportLeg.getEnumValue();
+         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon, supportLeg);
       }
    }
 
