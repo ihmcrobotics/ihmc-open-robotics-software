@@ -50,7 +50,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
                   {
                      System.out.println("Net Proc Comm");
                   }
-//                  networkProcessorCommunicator.consumeObject(currentPacket);
+                  networkProcessorCommunicator.consumeObject(currentPacket);
                }
                packetRingBuffer.flush();
             }
