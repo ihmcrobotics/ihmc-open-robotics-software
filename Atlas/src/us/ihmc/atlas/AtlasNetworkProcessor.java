@@ -7,7 +7,6 @@ import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
-import us.ihmc.iRobot.control.iRobotNativeLibraryCommunicatorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -76,24 +75,25 @@ public class AtlasNetworkProcessor
     		  return;
     	  }
     	  
-    	  String leftHandInput = iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP;
-    	  String rightHandInput = iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP;
-    	  
-    	  if(config.contains("leftHandHost"))
-    	  {
-    	     leftHandInput = config.getString("leftHandHost");
-    	     iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP = leftHandInput;
-    	  }
-    	  
-    	  if(config.contains("rightHandHost"))
-    	  {
-    	     rightHandInput = config.getString("rightHandHost");
-    	     iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP = rightHandInput;
-    	  }
-    	  
-    	  System.out.println("Left hand: " + iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP);
-    	  System.out.println("Right hand: " + iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP);
     	  System.out.println("Using the " + model + " model");
+    	  
+//    	  String leftHandInput = iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP;
+//    	  String rightHandInput = iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP;
+//    	  
+//    	  if(config.contains("leftHandHost"))
+//    	  {
+//    		  leftHandInput = config.getString("leftHandHost");
+//    		  iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP = leftHandInput;
+//    	  }
+//    	  
+//    	  if(config.contains("rightHandHost"))
+//    	  {
+//    		  rightHandInput = config.getString("rightHandHost");
+//    		  iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP = rightHandInput;
+//    	  }
+//    	  
+//    	  System.out.println("Left hand: " + iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP);
+//    	  System.out.println("Right hand: " + iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP);
     	  
     	  URI rosMasterURI;
     	  if (config.getString(rosURIFlag.getID()) != null)
