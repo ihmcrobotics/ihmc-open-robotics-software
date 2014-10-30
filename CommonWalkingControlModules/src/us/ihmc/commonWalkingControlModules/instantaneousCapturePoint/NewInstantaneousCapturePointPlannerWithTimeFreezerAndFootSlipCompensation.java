@@ -252,10 +252,12 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       return time - timeDelay.getDoubleValue();
    }
    
-   public void reset()
+   public void reset(double time)
    {
 	   changeInTransferToFootPosition.reset();
-	   super.reset();
+	   timeDelay.set(0.0);
+	   previousTime.set(time);
+	   super.reset(time);
    }
 
    @Override
