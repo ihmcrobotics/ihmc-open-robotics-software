@@ -260,7 +260,7 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
       
-      if (isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
+      if (handPoseStatusProducer !=null && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
          handPoseStatusProducer.sendCompletedStatus();
          hasHandPoseStatusBeenSent.set(true);
