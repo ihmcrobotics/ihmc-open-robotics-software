@@ -241,6 +241,13 @@ public class SimulationConstructionSetProcessDataCallTest
       {
          return copyVariable;
       }
+
+      @Override
+      public void initializeProcessing()
+      {
+         // TODO Auto-generated method stub
+         
+      }
    }
    
    public static class CounterProcessingFunction implements DataProcessingFunction
@@ -262,6 +269,13 @@ public class SimulationConstructionSetProcessDataCallTest
       public DoubleYoVariable getCountVariable()
       {
          return countVariable;
+      }
+
+      @Override
+      public void initializeProcessing()
+      {
+         // TODO Auto-generated method stub
+         
       }
    }   
 }

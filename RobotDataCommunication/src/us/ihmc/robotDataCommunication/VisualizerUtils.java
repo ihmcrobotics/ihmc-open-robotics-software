@@ -15,12 +15,12 @@ import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter
 
 public class VisualizerUtils
 {
-   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... yoGraphicsListRegistries)
+   public static SimulationOverheadPlotter createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... yoGraphicsListRegistries)
    {
-      createOverheadPlotter(scs, showOverheadView, null, yoGraphicsListRegistries);
+      return createOverheadPlotter(scs, showOverheadView, null, yoGraphicsListRegistries);
    }
 
-   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, String variableNameToTrack, YoGraphicsListRegistry... yoGraphicsListRegistries)
+   public static SimulationOverheadPlotter createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, String variableNameToTrack, YoGraphicsListRegistry... yoGraphicsListRegistries)
    {
 
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
@@ -63,5 +63,7 @@ public class VisualizerUtils
 
       if (showOverheadView)
          scs.getStandardSimulationGUI().selectPanel(plotterName);
+      
+      return plotter;
    }
 }

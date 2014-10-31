@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
@@ -22,10 +24,12 @@ public class FullyConstrainedState extends AbstractFootControlState
    private final EnumYoVariable<ConstraintType> requestedState;
 
    private final YoSE3PIDGains gains;
+   private final FramePoint2d cop = new FramePoint2d();
+   private final partialFootholdControlModule partialFootholdControlModule;
 
    public FullyConstrainedState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, partialFootholdControlModule partialFootholdControlModule,
          FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, accelerationControlModule, momentumBasedController,
@@ -36,6 +40,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       this.doFancyOnToesControl = doFancyOnToesControl;
       this.requestedState = requestedState;
       this.gains = gains;
+      this.partialFootholdControlModule = partialFootholdControlModule;
    }
 
    public void doTransitionIntoAction()
@@ -51,6 +56,15 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    public void doSpecificAction()
    {
+      if (FootControlModule.USE_AUTOMATIC_FOOT_SHRINK)
+      {
+         momentumBasedController.getFootSwitches().get(robotSide).computeAndPackCoP(cop);
+         FramePoint2d desiredCoP = momentumBasedController.getCoP(contactableBody);
+         partialFootholdControlModule.compute(desiredCoP, cop);
+         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
+         partialFootholdControlModule.applyShrunkPolygon(contactState);
+      }
+
       if (doFancyOnToesControl.getBooleanValue())
          determineCoPOnEdge();
 

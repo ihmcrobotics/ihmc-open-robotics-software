@@ -1283,6 +1283,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
          {
             processDataHasBeenCalled.set(true);
          }
+
+         @Override
+         public void initializeProcessing()
+         {
+            // TODO Auto-generated method stub
+            
+         }
       };
       
       return dataProcessingFunction;

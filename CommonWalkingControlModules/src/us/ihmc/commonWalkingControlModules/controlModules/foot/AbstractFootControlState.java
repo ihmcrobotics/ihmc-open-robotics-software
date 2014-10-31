@@ -62,6 +62,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final DenseMatrix64F selectionMatrix;
    protected boolean isCoPOnEdge;
    protected FrameLineSegment2d edgeToRotateAbout;
+   protected final RobotSide robotSide;
 
    public AbstractFootControlState(ConstraintType stateEnum, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
@@ -79,6 +80,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.nullspaceMultiplier = nullspaceMultiplier;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.doSingularityEscape = doSingularityEscape;
+
+      this.robotSide = robotSide;
 
       edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getSoleFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
