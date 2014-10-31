@@ -48,7 +48,7 @@ task deploy(dependsOn: assemble) {
 
 	doLast {
 		sshexec {
-			session(remotes.atlasRealtimeComputer)
+			session(remotes.valkyrieRealtimeComputer)
 			{
 				execute("mkdir -p " + directory + "/lib")
 				execute("mkdir -p " + directory + "/Configrations")
