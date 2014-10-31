@@ -23,7 +23,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderBandPassFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
@@ -56,7 +59,8 @@ public class TurnValveBehavior extends BehaviorInterface
    private Vector3d rightWristForce;
    private final DoubleYoVariable rightWristForceMagnitude;
    private final FirstOrderBandPassFilteredYoVariable rightWristForceBandPassFiltered;
-
+   private final AlphaFilteredYoVariable rightWristForceAlphaFiltered;
+   private final FirstOrderFilteredYoVariable rightWristForceLowPass;
 
    private double maxObservedWristForce = 0.0;
    private final DoubleYoVariable yoTime;
@@ -86,7 +90,9 @@ public class TurnValveBehavior extends BehaviorInterface
       rightWristForce = new Vector3d();
       rightWristForceMagnitude = new DoubleYoVariable("rightWristForceMag", registry);
       
-      rightWristForceBandPassFiltered = new FirstOrderBandPassFilteredYoVariable("rightWristForceMagBandPass", "", forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, yoTime, registry);
+      rightWristForceBandPassFiltered = new FirstOrderBandPassFilteredYoVariable("rightWristForceMagBandPass", "", forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, DT, registry);
+      rightWristForceAlphaFiltered = new AlphaFilteredYoVariable("rightWristForceMagAlpha", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(10.0, DT), rightWristForceMagnitude);
+      rightWristForceLowPass = new FirstOrderFilteredYoVariable("rightWristForceMagLowPass", "", 10.0, DT, FirstOrderFilterType.LOW_PASS, registry);
       
       this.yoTime = yoTime;
       this.DT = DT;
@@ -112,7 +118,12 @@ public class TurnValveBehavior extends BehaviorInterface
       rightWristForceSensorData.packWrench(rightWristWrench);
 
       rightWristWrench.packLinearPart(rightWristForce);
+      
+      rightWristForceMagnitude.set(rightWristForce.length());
 
+      rightWristForceAlphaFiltered.update();
+      rightWristForceLowPass.update(rightWristForce.length());
+      
       rightWristForceBandPassFiltered.update(rightWristForceMagnitude.getDoubleValue());
 
       if (rightWristForceBandPassFiltered.getDoubleValue() > maxObservedWristForce)
@@ -191,10 +202,10 @@ public class TurnValveBehavior extends BehaviorInterface
          System.out.println("TurnValveBehavior: MAX CAPTURE POINT ERROR EXCEEDED!  Capture Point Error =  " + capturePointErrorMag.getDoubleValue());
       }
 
-      if (rightWristForceBandPassFiltered.getDoubleValue() > MAX_WRIST_FORCE_THRESHOLD_N)
-      {
-         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForceBandPassFiltered.getDoubleValue());
-      }
+//      if (rightWristForceBandPassFiltered.getDoubleValue() > MAX_WRIST_FORCE_THRESHOLD_N)
+//      {
+//         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForceBandPassFiltered.getDoubleValue());
+//      }
    }
 
    
