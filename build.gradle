@@ -42,6 +42,10 @@ jar {
 	}
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
 task deploy(dependsOn: assemble) {
 	
 	def directory = 'valkyrie'
