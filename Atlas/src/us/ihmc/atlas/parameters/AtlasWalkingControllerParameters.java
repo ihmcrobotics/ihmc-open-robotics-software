@@ -21,8 +21,10 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
+
+
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
-{
+{   
    private final AtlasTarget target;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
@@ -36,8 +38,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double spinePitchLowerLimit = -0.1; //-math.pi / 6.0;
    private final double spineRollLimit = Math.PI / 4.0;
 
-   private final double min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
-   private final double min_mechanical_leg_length = 0.420; // corresponds to a q_kny that is close to knee limit
+   private final double  min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
+   private final double  min_mechanical_leg_length = 0.420; // corresponds to a q_kny that is close to knee limit
 
    private final AtlasJointMap jointMap;
 
@@ -45,12 +47,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       this(AtlasTarget.SIM, jointMap);
    }
-
+   
    public AtlasWalkingControllerParameters(AtlasTarget target, AtlasJointMap jointMap)
    {
       this.target = target;
       this.jointMap = jointMap;
-
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -70,7 +72,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
          handPosesWithRespectToChestFrame.put(robotSide, transform);
       }
    }
-
+   
    @Override
    public boolean stayOnToes()
    {
@@ -80,16 +82,16 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean doToeOffIfPossible()
    {
-      return true;
+      return true; 
    }
 
    /**
-    * To enable that feature, doToeOffIfPossible() return true is required.
+    * To enable that feature, doToeOffIfPossible() return true is required. John parameter
     */
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -132,7 +134,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       return defaultHeadOrientationControlJointNames;
    }
-
+   
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
@@ -152,38 +154,38 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return false;
    }
 
-   // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595 + 0.03;
-   private double nominalHeightAboveGround = 0.675 + 0.03;
+// USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
+   private final double minimumHeightAboveGround = 0.595 + 0.03;                                       
+   private double nominalHeightAboveGround = 0.675 + 0.03; 
    private final double maximumHeightAboveGround = 0.735 + 0.03;
 
-   // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   //   private final double minimumHeightAboveGround = 0.785;                                       
-   //   private double nominalHeightAboveGround = 0.865; 
-   //   private final double maximumHeightAboveGround = 0.925; 
+// USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+//   private final double minimumHeightAboveGround = 0.785;                                       
+//   private double nominalHeightAboveGround = 0.865; 
+//   private final double maximumHeightAboveGround = 0.925; 
+   
+//   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+//   private double minimumHeightAboveGround = 0.68;                                       
+//   private double nominalHeightAboveGround = 0.76; 
+//   private double maximumHeightAboveGround = 0.82; 
 
-   //   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   //   private double minimumHeightAboveGround = 0.68;                                       
-   //   private double nominalHeightAboveGround = 0.76; 
-   //   private double maximumHeightAboveGround = 0.82; 
-
-   //   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
-   //   private double minimumHeightAboveGround = 0.68;                                       
-   //   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo        
-   //   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo        
-
+//   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
+//   private double minimumHeightAboveGround = 0.68;                                       
+//   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo        
+//   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo        
+   
    @Override
    public double minimumHeightAboveAnkle()
    {
       return minimumHeightAboveGround;
    }
-
+   
    @Override
    public double nominalHeightAboveAnkle()
    {
       return nominalHeightAboveGround;
    }
-
+   
    @Override
    public double maximumHeightAboveAnkle()
    {
@@ -236,13 +238,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return AtlasPhysicalProperties.footForward;
    }
-
+   
    @Override
    public double getFootBackwardOffset()
    {
       return AtlasPhysicalProperties.footBack;
    }
-
+   
    @Override
    public double getAnkleHeight()
    {
@@ -278,11 +280,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return 0.5; //0.35;
    }
-
+  
    @Override
    public double getMaxStepLength()
    {
-      return 0.6; //0.5; //0.35;
+       return 0.6; //0.5; //0.35;
    }
 
    @Override
@@ -308,31 +310,31 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       if (!(target == AtlasTarget.REAL_ROBOT))
          return 1.0;
-      return 1.0;
+      return 1.0; 
    }
 
    @Override
    public double getCaptureKpOrthogonalToMotion()
-   {
+   {      
       if (!(target == AtlasTarget.REAL_ROBOT))
          return 1.0;
-      return 1.0;
+      return 1.0; 
    }
-
+   
    @Override
    public double getCaptureKi()
-   {
+   {      
       if (!(target == AtlasTarget.REAL_ROBOT))
          return 4.0;
-      return 4.0;
+      return 4.0; 
    }
-
+   
    @Override
    public double getCaptureKiBleedoff()
-   {
-      return 0.9;
+   {      
+      return 0.9; 
    }
-
+   
    @Override
    public double getCaptureFilterBreakFrequencyInHz()
    {
@@ -340,7 +342,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
          return 16.0; //Double.POSITIVE_INFINITY;
       return 16.0;
    }
-
+   
    @Override
    public double getCMPRateLimit()
    {
@@ -372,7 +374,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       gains.setMaximumAcceleration(maxAcceleration);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-
+      
       return gains;
    }
 
@@ -443,7 +445,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double[] getInitialHeadYawPitchRoll()
    {
-      return new double[] { 0.0, 0.67, 0.0 };
+      return new double[]{0.0, 0.67, 0.0};
    }
 
    @Override
@@ -461,7 +463,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       gains.setMaximumAcceleration(maxAcceleration);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-
+      
       return gains;
    }
 
@@ -502,7 +504,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double maxPositionJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
-
+      
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
@@ -529,7 +531,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double maxLinearJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
-
+      
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -556,7 +558,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double maxLinearJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
-
+      
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -575,7 +577,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
-
+      
       gains.setOrientationDerivativeGains(20.0, 0.0, 0.0);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
 
@@ -587,12 +589,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return 0.12;
    }
-
+   
    public double getSwingMaxHeightForPushRecoveryTrajectory()
    {
-      return 0.15;
+	   return 0.15;
    }
-
+   
    @Override
    public double getSupportSingularityEscapeMultiplier()
    {
@@ -636,7 +638,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return spinePitchUpperLimit;
    }
-
+   
    /** @inheritDoc */
    @Override
    public double getSpinePitchLowerLimit()
@@ -687,7 +689,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset() + 0.25 * getFootWidth() * getFootWidth());
    }
-
+   
    @Override
    public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
    {
@@ -703,19 +705,19 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getContactThresholdForce()
    {
-      switch (target)
+      switch(target)
       {
-         case REAL_ROBOT:
-            return 80.0;
-         case GAZEBO:
-            return 50.0;
-         case SIM:
-            return 5.0;
+      case REAL_ROBOT:
+         return 80.0;
+      case GAZEBO:
+         return 50.0;
+      case SIM:
+         return 5.0;
          default:
             throw new RuntimeException();
       }
    }
-
+   
    @Override
    public double getCoPThresholdFraction()
    {
