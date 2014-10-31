@@ -30,5 +30,4 @@ public class DRCConfigParameters
    
    public static final boolean ALLOW_MODEL_CORRUPTION = false;
    public static final boolean SEND_ROBOT_DATA_TO_ROS = true;
-   public static final boolean SEND_SIMULATION_DATA_TO_ROS = false;
 }

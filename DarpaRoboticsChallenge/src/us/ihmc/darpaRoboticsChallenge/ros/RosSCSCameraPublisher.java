@@ -1,7 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
+import java.awt.image.BufferedImage;
+
 import org.ros.message.Time;
 
+import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
@@ -40,8 +43,8 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
 
          if (cameraParameters[sensorId].getRosCameraInfoTopicName() != null && cameraParameters[sensorId].getRosCameraInfoTopicName() != "")
          {
-            cameraInfoPublishers[sensorId] = new RosCameraInfoPublisher();
             String infoTopic = cameraParameters[sensorId].getRosCameraInfoTopicName();
+            cameraInfoPublishers[sensorId] = new RosCameraInfoPublisher();
             rosMainNode.attachPublisher(infoTopic, cameraInfoPublishers[sensorId]);
          }
       }
@@ -60,6 +63,21 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
          Time time = Time.fromNano(timestamp);
          String frameId = cameraParameters[sensorId].getPoseFrameForSdf();
          cameraPublisher[sensorId].publish(frameId, object.getImage(), time);
+         sendIntrinsicPacket(object, sensorId, frameId, time);
       }
+   }
+
+   public void sendIntrinsicPacket(LocalVideoPacket videoObject, int sensorId, String frameId, Time time)
+   {
+      if (cameraInfoPublishers[sensorId] == null)
+      {
+         return;
+      }
+
+      BufferedImage img = videoObject.getImage();
+      double f = videoObject.getImage().getWidth() / 2 / Math.tan(videoObject.getFieldOfView() / 2);
+      IntrinsicCameraParametersPacket packet = new IntrinsicCameraParametersPacket(f, f, 0, (img.getWidth() - 1) / 2f, (img.getHeight() - 1) / 2f,
+            img.getWidth(), img.getHeight());
+      cameraInfoPublishers[sensorId].publish(frameId, packet, time);
    }
 }

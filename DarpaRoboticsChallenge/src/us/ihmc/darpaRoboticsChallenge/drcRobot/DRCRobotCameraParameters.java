@@ -16,6 +16,11 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
       this(cameraName,rosTopic,null,poseFrameName,null,null,cameraId);
    }
 
+   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic, int cameraId)
+   {
+      this(cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
+   }
+
    public DRCRobotCameraParameters(String cameraName, String rosCameraTopic, String rosInfoTopic, String handOffFrameName, String rosBaseFrameName,
          String rosEndFrameName, int cameraId)
    {
@@ -28,6 +33,7 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
       this.cameraId = cameraId;
    }
    
+   @Override
    public String getRosTopic()
    {
       return rosCompressedTopicName;
@@ -38,11 +44,13 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
       return rosCameraInfoTopicName;
    }
 
+   @Override
    public String getSensorNameInSdf()
    {
       return cameraNameInSdf;
    }
 
+   @Override
    public int getSensorId()
    {
       return cameraId;
@@ -53,16 +61,19 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
       return (rosCameraInfoTopicName != null && rosCameraInfoTopicName != "");
    }
 
+   @Override
    public boolean useRosForTransformFromPoseToSensor()
    {
       return (rosBaseFrameName != null && rosBaseFrameName != "") && (rosEndFrameName != null && rosEndFrameName != "");
    }
 
+   @Override
    public String getBaseFrameForRosTransform()
    {
       return rosBaseFrameName;
    }
 
+   @Override
    public String getEndFrameForRosTransform()
    {
       return rosEndFrameName;
