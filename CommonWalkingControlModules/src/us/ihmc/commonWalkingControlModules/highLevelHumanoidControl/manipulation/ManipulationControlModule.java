@@ -23,10 +23,9 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
-
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * @author twan
@@ -78,7 +77,8 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
-               jointspaceControlGains, taskspaceGains, taskspaceLoadBearingGains, variousWalkingProviders.getControlStatusProducer(), registry);
+               jointspaceControlGains, taskspaceGains, taskspaceLoadBearingGains, variousWalkingProviders.getControlStatusProducer(),
+               variousWalkingProviders.getHandPoseStatusProducer(), registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
 
@@ -91,8 +91,7 @@ public class ManipulationControlModule
       parentRegistry.addChild(registry);
    }
 
-   private void createFrameVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, FullRobotModel fullRobotModel, String listName,
-         boolean enable)
+   private void createFrameVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, FullRobotModel fullRobotModel, String listName, boolean enable)
    {
       YoGraphicsList list = new YoGraphicsList(listName);
       if (yoGraphicsListRegistry != null)
@@ -142,6 +141,8 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handControlModules.get(robotSide).doControl();
+
+         handControlModules.get(robotSide).isDone();
       }
    }
 
@@ -182,8 +183,8 @@ public class ManipulationControlModule
 
          ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
          double swingTrajectoryTime = desiredHandstep.getSwingTrajectoryTime();
-         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(), swingTrajectoryTime,
-               trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue(), timeTransitionBeforeLoadBearing.getDoubleValue());
+         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(),
+               swingTrajectoryTime, trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue(), timeTransitionBeforeLoadBearing.getDoubleValue());
       }
    }
 
@@ -251,7 +252,7 @@ public class ManipulationControlModule
    {
       this.handSwingClearance.set(handSwingClearance);
    }
-   
+
    public double getHandSwingClearanceForHandsteps()
    {
       return handSwingClearance.getDoubleValue();

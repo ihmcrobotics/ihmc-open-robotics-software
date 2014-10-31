@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelJointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -41,11 +42,11 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-
 
 public class HandControlModule
 {
@@ -87,12 +88,30 @@ public class HandControlModule
 
    private final YoSE3PIDGains taskspaceGains, taskspaceLoadBearingGains;
 
+   private final StateChangedListener<HandControlState> stateChangedlistener;
+   private final HandPoseStatusProducer handPoseStatusProducer;
+   private final BooleanYoVariable hasHandPoseStatusBeenSent;
+
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
          YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains, ControlStatusProducer controlStatusProducer,
-         YoVariableRegistry parentRegistry)
+         HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
    {
-      this.controlDT = momentumBasedController.getControlDT();
+      this.handPoseStatusProducer = handPoseStatusProducer;
+     
+      hasHandPoseStatusBeenSent = new BooleanYoVariable(robotSide + "hasHandPoseStatusBeenSent", parentRegistry);
+      hasHandPoseStatusBeenSent.set(false);
       
+      stateChangedlistener = new StateChangedListener<HandControlState>()
+      {
+         @Override
+         public void stateChanged(State<HandControlState> oldState, State<HandControlState> newState, double time)
+         {
+            hasHandPoseStatusBeenSent.set(false);
+         }
+      };
+
+      this.controlDT = momentumBasedController.getControlDT();
+
       this.taskspaceGains = taskspaceGains;
       this.taskspaceLoadBearingGains = taskspaceLoadBearingGains;
 
@@ -134,9 +153,11 @@ public class HandControlModule
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       boolean visualize = true;
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
-      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
+            yoGraphicsListRegistry);
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, yoGraphicsListRegistry);
-      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize,
+            yoGraphicsListRegistry);
       leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
 
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
@@ -153,20 +174,19 @@ public class HandControlModule
                momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
       }
 
-
       if (armControlParameters.useInverseKinematicsTaskspaceControl())
       {
          if (armControlParameters.doLowLevelPositionControl())
          {
             taskSpacePositionControlState = new LowLevelInverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION,
-                  robotSide, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer,
-                  controlDT, registry);
+                  robotSide, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, controlDT,
+                  registry);
          }
          else
          {
             taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
-                  momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains, controlDT,
-                  registry);
+                  momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains,
+                  controlDT, registry);
          }
       }
       else
@@ -207,6 +227,8 @@ public class HandControlModule
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
       stateMachine.addState(loadBearingControlState);
+
+      stateMachine.attachStateChangedListener(stateChangedlistener);
    }
 
    private void setupTransitionToSupport(final State<HandControlState> fromState)
@@ -228,7 +250,8 @@ public class HandControlModule
             handSpatialAccelerationControlModule.setGains(taskspaceLoadBearingGains);
          }
       };
-      StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition, swingToSupportAction);
+      StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING,
+            swingToSupportCondition, swingToSupportAction);
       fromState.addStateTransition(swingToSupportTransition);
    }
 
@@ -236,6 +259,12 @@ public class HandControlModule
    {
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+      
+      if (isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
+      {
+         handPoseStatusProducer.sendCompletedStatus();
+         hasHandPoseStatusBeenSent.set(true);
+      }
    }
 
    public boolean isDone()
@@ -272,7 +301,9 @@ public class HandControlModule
 
    private final FrameVector initialDirection = new FrameVector();
    private final FrameVector finalDirection = new FrameVector();
-   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone, double holdPositionDuration)
+
+   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time,
+         ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone, double holdPositionDuration)
    {
       finalDirection.setIncludingFrame(surfaceNormal);
       finalDirection.negate();
@@ -314,7 +345,8 @@ public class HandControlModule
       executeTaskSpaceTrajectory(initialClearancePoseTrajectoryGenerator);
    }
 
-   private void moveAwayObjectTowardsOtherObject(FramePose finalDesiredPose, FrameVector initialDirection, FrameVector finalDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
+   private void moveAwayObjectTowardsOtherObject(FramePose finalDesiredPose, FrameVector initialDirection, FrameVector finalDirection, double clearance,
+         double time, ReferenceFrame trajectoryFrame)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame);
       leadInOutPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
