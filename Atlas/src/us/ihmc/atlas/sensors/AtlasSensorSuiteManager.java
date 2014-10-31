@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.communication.packets.sensing.RequestElevationMapPacket;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
@@ -24,6 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProces
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosFootstepServiceClient;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.RosElevationMapServiceClient;
 import us.ihmc.darpaRoboticsChallenge.ros.RosLocalizationServiceClient;
 import us.ihmc.darpaRoboticsChallenge.ros.RosLocalizationUpdateSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
@@ -99,6 +101,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
          networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
+         RosElevationMapServiceClient rosElevationMapServiceClient = new RosElevationMapServiceClient(rosMainNode);
+         fieldObjectCommunicator.attachListener(RequestElevationMapPacket.class, rosElevationMapServiceClient);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
