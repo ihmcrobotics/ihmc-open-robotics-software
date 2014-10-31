@@ -33,6 +33,8 @@ import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
+   private static final boolean CONSIDER_NEXT_FOOTSTEP = false;
+
    private boolean VISUALIZE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -271,7 +273,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
-      Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
+
+      Footstep nextFootstep = null;
+      
+      if (CONSIDER_NEXT_FOOTSTEP)
+         nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
+
 
       if (nextFootstep != null)
          hasBeenInitializedWithNextStep.set(true);
