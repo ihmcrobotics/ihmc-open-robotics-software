@@ -273,7 +273,7 @@ public class AtlasRobotModel implements DRCRobotModel
          return new AtlasPPSTimestampOffsetProvider(sensorInformation);
       }
 
-      if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
+      if (target == AtlasTarget.SIM && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }

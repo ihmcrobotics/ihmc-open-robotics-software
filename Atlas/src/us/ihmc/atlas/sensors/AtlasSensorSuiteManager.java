@@ -74,7 +74,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       RosTfPublisher tfPublisher;
       
       
-      if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
+      if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
          rosMainNode = new RosMainNode(rosCoreURI,
                "darpaRoboticsChallange/networkProcessor", true);
@@ -115,7 +115,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
     	  Thread lidarThread = new Thread(scsLidarDataReceiver);
     	  lidarThread.start();
          
-         if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
+         if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
          {
             new RosSCSLidarPublisher(scsCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
          }
