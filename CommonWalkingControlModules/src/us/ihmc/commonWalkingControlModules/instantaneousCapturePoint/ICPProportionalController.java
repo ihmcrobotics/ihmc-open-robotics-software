@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -10,6 +9,7 @@ import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -65,11 +65,11 @@ public class ICPProportionalController
    
    private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
-   private final SmartCMPProjector smartCMPProjector;
+   private final SmartCMPProjectorTwo smartCMPProjector;
 
    public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      smartCMPProjector = new SmartCMPProjector(parentRegistry, yoGraphicsListRegistry);
+      smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry, yoGraphicsListRegistry);
 
       this.controlDT = controlDT;
       
