@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/DarpaRoboticsChallenge/src/us/ihmc/darpaRoboticsChallenge/gazebo/AtlasROSControllerHelper.java"/>
+<listEntry value="/DarpaRoboticsChallenge"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="1"/>
+<listEntry value="4"/>
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="LD_LIBRARY_PATH" value="/usr/lib/gazebo-1.8/plugins:/usr/lib/drcsim-2.6/AtlasSimInterface_:/usr/lib/drcsim-2.6/plugins:/opt/ros/groovy/lib:/opt/ros/fuerte/lib"/>
