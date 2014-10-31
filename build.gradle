@@ -55,7 +55,7 @@ task deploy(dependsOn: assemble) {
 			session(remotes.valkyrieRealtimeComputer)
 			{
 				execute("mkdir -p " + directory + "/lib")
-				execute("mkdir -p " + directory + "/Configrations")
+				execute("mkdir -p " + directory + "/Configurations")
 				
 				configurations.runtime.each 
 				{
