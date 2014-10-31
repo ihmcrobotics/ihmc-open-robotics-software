@@ -7,5 +7,5 @@ dependencies {
 	compile project(':IHMCUtilities')
 	compile project(':Plotting')
 	compile project(':SimulationConstructionSet')
-	compile project(':ThirdParty')
+	//compile project(':ThirdParty')
 }
