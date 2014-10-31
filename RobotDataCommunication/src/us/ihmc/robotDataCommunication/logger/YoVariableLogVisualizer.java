@@ -15,6 +15,7 @@ import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 
 public class YoVariableLogVisualizer
 {
@@ -22,6 +23,7 @@ public class YoVariableLogVisualizer
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
    private final String timeVariableName;
    protected final SimulationConstructionSet scs;
+   private SimulationOverheadPlotter plotter;
 
    public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize,
          boolean showOverheadView, File logFile) throws IOException
@@ -83,7 +85,7 @@ public class YoVariableLogVisualizer
 
       YoGraphicsListRegistry yoGraphicsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
+      plotter = VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
 
@@ -112,6 +114,11 @@ public class YoVariableLogVisualizer
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return scs;
+   }
+
+   public SimulationOverheadPlotter getPlotter()
+   {
+      return plotter;
    }
 
    public void run()

@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -25,10 +27,12 @@ public class HoldPositionState extends AbstractFootControlState
    private final YoSE3PIDGains gains;
 
    private final RigidBody pelvisBody;
+   private final FramePoint2d cop = new FramePoint2d();
+   private final partialFootholdControlModule partialFootholdControlModule;
 
    public HoldPositionState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, partialFootholdControlModule partialFootholdControlModule,
          FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
@@ -39,6 +43,7 @@ public class HoldPositionState extends AbstractFootControlState
       this.requestedState = requestedState;
       this.gains = gains;
       this.pelvisBody = momentumBasedController.getFullRobotModel().getPelvis();
+      this.partialFootholdControlModule = partialFootholdControlModule;
    }
 
    @Override
@@ -68,6 +73,15 @@ public class HoldPositionState extends AbstractFootControlState
    @Override
    public void doSpecificAction()
    {
+      if (FootControlModule.USE_AUTOMATIC_FOOT_SHRINK)
+      {
+         momentumBasedController.getFootSwitches().get(robotSide).computeAndPackCoP(cop);
+         FramePoint2d desiredCoP = momentumBasedController.getCoP(contactableBody);
+         partialFootholdControlModule.compute(desiredCoP, cop);
+         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
+         partialFootholdControlModule.applyShrunkPolygon(contactState);
+      }
+
       accelerationControlModule.setGains(gains);
       determineCoPOnEdge();
 

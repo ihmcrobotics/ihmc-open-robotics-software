@@ -38,6 +38,7 @@ import us.ihmc.yoUtilities.stateMachines.StateTransition;
 
 public class FootControlModule
 {
+   public static final boolean USE_AUTOMATIC_FOOT_SHRINK = false;
    public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
 
    private final YoVariableRegistry registry;
@@ -82,6 +83,8 @@ public class FootControlModule
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
+   
+   private final partialFootholdControlModule partialFootholdControlModule;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
          YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains supportFootControlGains, DoubleProvider swingTimeProvider,
@@ -96,6 +99,10 @@ public class FootControlModule
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
+      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      double controlDT = momentumBasedController.getControlDT();
+      partialFootholdControlModule = new partialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
+      
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getPelvis(), foot, foot.getBodyFixedFrame());
 
@@ -114,7 +121,6 @@ public class FootControlModule
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       ReferenceFrame bodyFrame = contactableFoot.getFrameAfterParentJoint();
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, bodyFrame,
             momentumBasedController.getControlDT(), registry);
       doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
@@ -155,12 +161,13 @@ public class FootControlModule
       states.add(onToesState);
 
       FullyConstrainedState supportState = new FullyConstrainedState(accelerationControlModule, momentumBasedController, contactableFoot, requestHoldPosition,
-            requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector,
-            doFancyOnToesControl, supportFootControlGains, robotSide, registry);
+            requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, partialFootholdControlModule,
+            fullyConstrainedNormalContactVector, doFancyOnToesControl, supportFootControlGains, robotSide, registry);
       states.add(supportState);
 
       holdPositionState = new HoldPositionState(accelerationControlModule, momentumBasedController, contactableFoot, requestHoldPosition, requestedState,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector, holdPositionFootControlGains, robotSide, registry);
+            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, partialFootholdControlModule, fullyConstrainedNormalContactVector,
+            holdPositionFootControlGains, robotSide, registry);
       states.add(holdPositionState);
 
       swingState = new SwingState(swingTimeProvider, touchdownVelocityProvider, accelerationControlModule, momentumBasedController, contactableFoot,
@@ -298,7 +305,7 @@ public class FootControlModule
       if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
          requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
-
+      
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
    }

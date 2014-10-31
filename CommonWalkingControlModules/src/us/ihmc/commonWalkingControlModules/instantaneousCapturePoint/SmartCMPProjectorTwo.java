@@ -58,7 +58,7 @@ public class SmartCMPProjectorTwo
       if (supportPolygon.isPointInside(desiredCMP))
          return;
 
-      icpToCMPLine.setAndChangeFrame(capturePoint, desiredCMP);
+      icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
       FramePoint2d[] icpToCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
 
       if ((icpToCMPIntersections == null) || (icpToCMPIntersections.length == 0))

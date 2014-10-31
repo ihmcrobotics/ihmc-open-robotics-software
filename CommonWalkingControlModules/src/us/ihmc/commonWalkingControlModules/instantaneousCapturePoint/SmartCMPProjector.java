@@ -188,7 +188,7 @@ public class SmartCMPProjector
          return;
       }
      
-      icpToCMPLine.setAndChangeFrame(capturePoint, desiredCMP);
+      icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
       FramePoint2d[] icpToCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
       icpToCMPLine.negateDirection();
       FramePoint2d[] icpAwayFromCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
