@@ -24,4 +24,11 @@ public class HandPoseStatusProducer
       objectCommunicator.queueDataToSend(handPoseStatus);
    }
 
+   public void sendCompletedStatus()
+   {
+      HandPoseStatus handPoseStatus = new HandPoseStatus();
+      handPoseStatus.createPositionIsReachedPacket();
+      objectCommunicator.queueDataToSend(handPoseStatus);
+   }
+
 }
