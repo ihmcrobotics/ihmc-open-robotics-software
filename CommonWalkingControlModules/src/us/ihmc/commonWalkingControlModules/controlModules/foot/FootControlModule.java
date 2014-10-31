@@ -305,8 +305,12 @@ public class FootControlModule
       if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
          requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
-      
+
       stateMachine.checkTransitionConditions();
+
+      if (!isInFlatSupportState())
+         partialFootholdControlModule.reset();
+
       stateMachine.doAction();
    }
 
