@@ -125,6 +125,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d transferToFootstep = new YoFramePoint2d("transferToFootstep", worldFrame, registry);
 
    private final BooleanYoVariable resetIntegratorsAfterSwing = new BooleanYoVariable("resetIntegratorsAfterSwing", registry);
+   private final BooleanYoVariable alwaysIntegrateAnkleAcceleration = new BooleanYoVariable("alwaysIntegrateAnkleAcceleration", registry);  
 
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
    private final DoubleYoVariable dwellInSingleSupportDuration = new DoubleYoVariable("dwellInSingleSupportDuration",
@@ -358,6 +359,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       resetIntegratorsAfterSwing.set(true);
+      alwaysIntegrateAnkleAcceleration.set(true);
    }
 
    private void setupStateMachine()
@@ -502,7 +504,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doAction()
       {
-         doNotIntegrateAnkleAccelerations();
+         if (!alwaysIntegrateAnkleAcceleration.getBooleanValue()) doNotIntegrateAnkleAccelerations();
 
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
