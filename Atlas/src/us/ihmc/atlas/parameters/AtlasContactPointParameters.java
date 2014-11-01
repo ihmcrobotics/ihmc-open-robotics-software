@@ -190,8 +190,8 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 
          
          //SCS Sim contactPoints
-//          int numberOfSimContactPointsY = 2, numberOfSimContactPointsX = 2;
-         int numberOfSimContactPointsY = 3, numberOfSimContactPointsX = 4;
+         int numberOfSimContactPointsY = 2, numberOfSimContactPointsX = 2;
+//         int numberOfSimContactPointsY = 3, numberOfSimContactPointsX = 4;
          for (int ix = 0; ix < numberOfSimContactPointsX; ix++)
          {
             for (int iy = 0; iy < numberOfSimContactPointsY; iy++)
