@@ -13,6 +13,7 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
    private final ConstrainedQPSolver CQPsolver;
    private boolean firstCall;
    final boolean useBoxContraints;
+   double wCoP=1;
 
    DenseMatrix64F AtC, JstWs, Q, QBlk1, QBlk2, f, fBlk1, fBlk2, Aeq, negA, beq, Ain, bin, x0, IdentityMatrix;
    DenseMatrix64F lb, ub;
@@ -88,7 +89,7 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
 
       CommonOps.add(WRho, WRhoSmoother, QBlk2);
       CommonOps.add(QBlk2, WRhoCoPPenalty, QBlk2);
-      CommonOps.multAddTransA(QfeetCop, QfeetCop, QBlk2);
+      CommonOps.multAddTransA(wCoP,QfeetCop, QfeetCop, QBlk2);
 
       CommonOps.insert(QBlk1, Q, 0, 0);
       CommonOps.insert(QBlk2, Q, nDoF, nDoF);
