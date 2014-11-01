@@ -13,6 +13,7 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
@@ -73,15 +74,21 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       
+      Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
+
+      
       jsap.registerParameter(hostOption);
       jsap.registerParameter(portOption);
       jsap.registerParameter(robotModel);
-      
+      jsap.registerParameter(runningOnRealRobot);
+
       JSAPResult config = jsap.parse(args);
       
       if (config.success())
       {
-    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasTarget.SIM, false);
+        AtlasTarget target = config.getBoolean(runningOnRealRobot.getID()) ? AtlasTarget.REAL_ROBOT : AtlasTarget.SIM;
+        DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
+
     	  
     	  String host;
     	  if (config.getString("host") != null)
