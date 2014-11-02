@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '0.2.0-alpha'
+version = '0.2.1-alpha'
 
 setupDefaultDirectoryStructure()
 
@@ -35,4 +35,13 @@ applicationDistribution.from(startScripts.outputDir) {
 applicationDistribution.from(file("Configurations")) {
     include("*network_config.ini")
     into "bin/Configurations"
+}
+
+task pushBuild(type:Exec, dependsOn:distTar) {
+    def userName = "${bitbucket_user}"
+    def password = "${bitbucket_password}"
+    def repoUrl = "/ihmcrobotics/ihmc_msgs/downloads"
+    def targetFile = "build/distributions/${applicationName}-${version}.tar"
+
+    commandLine 'build_utilities/upload-to-bitbucket.sh', userName, password, repoUrl, targetFile
 }
