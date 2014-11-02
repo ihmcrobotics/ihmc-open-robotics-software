@@ -24,7 +24,6 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -39,7 +38,6 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
@@ -283,18 +281,18 @@ public class FootstepDataTest
    private NetClassList getNetClassList()
    {
       NetClassList netClassList = new NetClassList();
-      netClassList.addClass(FootstepData.class);
-      netClassList.addClass(FootstepDataList.class);
-      netClassList.addClass(PauseCommand.class);
-      netClassList.addClass(FootstepStatus.class);
+      netClassList.registerPacketClass(FootstepData.class);
+      netClassList.registerPacketClass(FootstepDataList.class);
+      netClassList.registerPacketClass(PauseCommand.class);
+      netClassList.registerPacketClass(FootstepStatus.class);
 
-      netClassList.addType(ArrayList.class);
-      netClassList.addType(Point3d.class);
-      netClassList.addType(Quat4d.class);
-      netClassList.addType(PacketDestination.class);
-      netClassList.addType(FootstepStatus.Status.class);
-      netClassList.addType(TrajectoryWaypointGenerationMethod.class);
-      netClassList.addType(RobotSide.class);
+      netClassList.registerPacketField(ArrayList.class);
+      netClassList.registerPacketField(Point3d.class);
+      netClassList.registerPacketField(Quat4d.class);
+      netClassList.registerPacketField(PacketDestination.class);
+      netClassList.registerPacketField(FootstepStatus.Status.class);
+      netClassList.registerPacketField(TrajectoryWaypointGenerationMethod.class);
+      netClassList.registerPacketField(RobotSide.class);
 
       return netClassList;
    }
