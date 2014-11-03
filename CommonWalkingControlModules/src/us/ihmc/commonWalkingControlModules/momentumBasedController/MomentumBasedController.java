@@ -365,9 +365,12 @@ public class MomentumBasedController
          yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(),
                registry));
          
-         toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "ToolRigidBody", fullRobotModel
-               .getHand(robotSide).getParentJoint(), getFullRobotModel(), gravityZ, controlDT, registry, yoGraphicsListRegistry));
-         handWrenches.put(robotSide, new Wrench());
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         if (hand != null)
+         {
+            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "ToolRigidBody", hand.getParentJoint(), getFullRobotModel(), gravityZ, controlDT, registry, yoGraphicsListRegistry));
+            handWrenches.put(robotSide, new Wrench());
+         }
       }
 
       // friction variables for all robot
@@ -498,16 +501,19 @@ public class MomentumBasedController
       for(RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
-         Wrench handWrench = handWrenches.get(robotSide);
-         inverseDynamicsCalculator.getSpatialAccelerationCalculator().packAccelerationOfBody(tempAcceleration, hand);
-         toolRigidBodies.get(robotSide).control(tempAcceleration, handWrench);
-         if(externalWrenches.containsKey(hand))
+         if (hand != null)
          {
-            externalWrenches.get(hand).add(handWrench);
-         }
-         else
-         {
-            externalWrenches.put(hand, handWrench);
+            Wrench handWrench = handWrenches.get(robotSide);
+            inverseDynamicsCalculator.getSpatialAccelerationCalculator().packAccelerationOfBody(tempAcceleration, hand);
+            toolRigidBodies.get(robotSide).control(tempAcceleration, handWrench);
+            if(externalWrenches.containsKey(hand))
+            {
+               externalWrenches.get(hand).add(handWrench);
+            }
+            else
+            {
+               externalWrenches.put(hand, handWrench);
+            }
          }
       }
       
