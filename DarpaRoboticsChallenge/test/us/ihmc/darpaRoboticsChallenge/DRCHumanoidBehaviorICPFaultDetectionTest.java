@@ -138,6 +138,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    @Test
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
+
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
 
@@ -150,8 +151,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-
       BambooTools.reportTestFinishedMessage();
+
    }
 
    @Ignore
@@ -192,17 +193,36 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       setupTest(getRobotModel());
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(-0.5, 1.0, 0.0);
-      double magnitude = 500;
       double duration = 0.05;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
+      double magnitude = 800;
+      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
 
       // apply the push
-      ThreadTools.sleep(16000);
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      blockingSimulationRunner.simulateAndBlock(15.0);
+      ThreadTools.sleep(25000);
+
+      for (int i = 0; i < 100; i++)
+      {
+         ThreadTools.sleep(5000);
+         if (i % 2 == 0)
+         {
+            magnitude = 800;
+            forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+            System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: Pushing with " + magnitude + " N of force from the front");
+         }
+         else
+         {
+            magnitude = 800;
+            forceDirection = new Vector3d(0.0, 1.0, 0.0);
+            System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: Pushing with " + magnitude + " N of force from the right");
+         }
+         testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+      }
+
+      blockingSimulationRunner.simulateAndBlock(100.0);
       BambooTools.reportTestFinishedMessage();
+
    }
 
    @Ignore
@@ -238,7 +258,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       DRCObstacleCourseSimulation track = DRCObstacleCourseDemo.startSimulationAndKryoObjectServer(environment, null,
             DRCObstacleCourseStartingLocation.DEFAULT, guiInitialSetup, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor,
             robotModel);
-            DRCOperatorInterface.startUserInterface(robotModel);
+      DRCOperatorInterface.startUserInterface(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
@@ -279,8 +299,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       }
 
       // simulate for a while
-//      enable.set(true);
-//      enableDS.set(true);
+      //      enable.set(true);
+      //      enableDS.set(true);
       //      walk.set(false);
       //      blockingSimulationRunner.simulateAndBlock(1.0);
       //      System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: Made it after the first simulate and block");
