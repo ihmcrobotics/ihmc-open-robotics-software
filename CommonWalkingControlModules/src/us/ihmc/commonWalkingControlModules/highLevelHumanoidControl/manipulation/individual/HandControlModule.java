@@ -266,7 +266,6 @@ public class HandControlModule
       if (handPoseStatusProducer !=null && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
          handPoseStatusProducer.sendCompletedStatus(robotSide);
-         System.out.println(robotSide);
          hasHandPoseStatusBeenSent.set(true);
       }
    }
