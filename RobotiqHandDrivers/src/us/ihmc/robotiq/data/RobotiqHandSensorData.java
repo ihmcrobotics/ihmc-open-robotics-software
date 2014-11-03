@@ -3,7 +3,6 @@ package us.ihmc.robotiq.data;
 import java.util.Arrays;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.robotiq.RobotiqHandInterface;
 
 public class RobotiqHandSensorData implements HandSensorData
 {
@@ -63,11 +62,11 @@ public class RobotiqHandSensorData implements HandSensorData
 	private boolean motionRequests;
 	private char modeStatus;
 	private char gripperStatus;
-	private char[] objectDetection = new char[4];
+	private int[] objectDetection = new int[4];
 	private byte error;
-	private char[] position = new char[4];
-	private char[] requestedPosition = new char[4];
-	private char[] current = new char[4];
+	private int[] position = new int[4];
+	private int[] requestedPosition = new int[4];
+	private int[] current = new int[4];
 	
 	public RobotiqHandSensorData(byte[] data)
 	{
@@ -88,15 +87,15 @@ public class RobotiqHandSensorData implements HandSensorData
 		}
 		for(counter = 0; counter < 4; counter++)
 		{
-			position[counter] = (char) (0xFF & data[9 + counter]);
+			position[counter] = (char) (0xFF & data[11 + counter * 3]);
 		}
 		for(counter = 0; counter < 4; counter++)
 		{
-			requestedPosition[counter] = (char) (0xFF & data[13 + counter]);
+			requestedPosition[counter] = (char) (0xFF & data[10 + counter * 3]);
 		}
 		for(counter = 0; counter < 4; counter++)
 		{
-			current[counter] = (char) (0xFF & data[17 + counter]);
+			current[counter] = (char) (0xFF & data[12 + counter * 3]);
 		}
 	}
 	
@@ -167,24 +166,24 @@ public class RobotiqHandSensorData implements HandSensorData
 		}
 	}
 	
-	public char[] getFingerStatus()
+	public int[] getFingerStatus()
 	{
 		return objectDetection;
 	}
 	
-	public char[] getFingerCurrents()
+	public int[] getFingerCurrents()
 	{
 		return current;
 	}
 	
-	public char[] getRequestedFingerPositions()
+	public int[] getRequestedFingerPositions()
 	{
 		return requestedPosition;
 	}
 	
-	public char[] getFingerPositions()
+	public int[] getFingerPositions()
 	{
-		return null;
+		return position;
 	}
 	
 	double[] temp = new double[4];
@@ -193,8 +192,8 @@ public class RobotiqHandSensorData implements HandSensorData
 		double[][] fingerJointAngles = new double[3][];
 		
 		temp[0] = -((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
-		temp[1] = (double)position[FINGER_B] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
-		temp[2] = (double)position[FINGER_B] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
+		temp[1] = (double)position[FINGER_A] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
+		temp[2] = (double)position[FINGER_A] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
 		fingerJointAngles[0] = Arrays.copyOf(temp, 4);
 		
@@ -204,8 +203,8 @@ public class RobotiqHandSensorData implements HandSensorData
 		temp[3] = 0.0;
 		fingerJointAngles[1] = Arrays.copyOf(temp, 4);
 		
-		temp[0] = (double)position[FINGER_A] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
-		temp[1] = (double)position[FINGER_A] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
+		temp[0] = (double)position[FINGER_C] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
+		temp[1] = (double)position[FINGER_C] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[2] = 0.0;
 		fingerJointAngles[2] = Arrays.copyOf(temp, 3);
 		
