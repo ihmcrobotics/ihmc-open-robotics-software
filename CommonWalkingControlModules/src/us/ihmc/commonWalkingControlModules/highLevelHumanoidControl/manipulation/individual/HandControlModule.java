@@ -260,8 +260,13 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
+      checkAndSendHandPoseStatusIsCompleted();
+   }
+
+   private void checkAndSendHandPoseStatusIsCompleted()
+   {
       boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_POSITION;
-//      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
+      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
 
       if (handPoseStatusProducer !=null && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
@@ -282,6 +287,8 @@ public class HandControlModule
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
+      
+      handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, double swingClearance)

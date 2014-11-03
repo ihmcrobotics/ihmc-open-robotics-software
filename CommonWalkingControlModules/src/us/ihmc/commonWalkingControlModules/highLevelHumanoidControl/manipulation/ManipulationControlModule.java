@@ -141,7 +141,6 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handControlModules.get(robotSide).doControl();
-//         handControlModules.get(robotSide).isDone();
       }
    }
 
