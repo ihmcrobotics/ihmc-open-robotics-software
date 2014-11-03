@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -24,9 +25,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 
@@ -43,6 +46,7 @@ public class ProvidedMassMatrixToolRigidBody
    
    private final YoFramePoint objectCenterOfMass;
    private final YoFramePoint objectCenterOfMassInWorld;
+   private final YoFrameVector objectForceInWorld;
    
    private final DoubleYoVariable objectMass;
    
@@ -51,6 +55,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final ReferenceFrame elevatorFrame;
    
    private final FramePoint temporaryPoint = new FramePoint();
+   private final FrameVector temporaryVector = new FrameVector();
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
 
    
@@ -86,6 +91,7 @@ public class ProvidedMassMatrixToolRigidBody
            
       objectCenterOfMass = new YoFramePoint(name + "CoMOffset", wristFrame, registry);
       objectMass = new DoubleYoVariable(name + "ObjectMass", registry);
+      objectForceInWorld = new YoFrameVector(name + "Force", ReferenceFrame.getWorldFrame(), registry);
       
       
       this.objectCenterOfMassInWorld = new YoFramePoint(name + "CoMInWorld", ReferenceFrame.getWorldFrame(), registry);
@@ -96,6 +102,9 @@ public class ProvidedMassMatrixToolRigidBody
          YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
          YoGraphic comViz = new YoGraphicPosition(name + "CenterOfMassViz", objectCenterOfMassInWorld, 0.05, YoAppearance.Red());
          yoGraphicsList.add(comViz);              
+                  
+         YoGraphic vectorViz = new YoGraphicVector(name + "ForceViz", objectCenterOfMassInWorld, objectForceInWorld, YoAppearance.Yellow());
+         yoGraphicsList.add(vectorViz);
          
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       }
@@ -143,6 +152,11 @@ public class ProvidedMassMatrixToolRigidBody
       
       toolWrench.changeFrame(handFixedFrame);
       toolWrench.changeBodyFrameAttachedToSameBody(handFixedFrame);
+      
+      temporaryVector.setIncludingFrame(handFixedFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
+      temporaryVector.changeFrame(ReferenceFrame.getWorldFrame());
+      temporaryVector.scale(0.01);
+      objectForceInWorld.set(temporaryVector);
       
    }
 
