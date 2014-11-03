@@ -83,9 +83,6 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 
    public void updateHandAngles(HandSensorData sensorDataFromHand)
    {
-//      fingers[0] = sensorDataFromHand.getIndexJointAngles();
-//      fingers[1] = sensorDataFromHand.getMiddleJointAngles();
-//      fingers[2] = sensorDataFromHand.getThumbJointAngles();
 	   fingers = sensorDataFromHand.getFingerJointAngles();
 	   
 	   connected.set(true);
