@@ -97,8 +97,10 @@ public class HandControlModule
          HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
    {
       this.handPoseStatusProducer = handPoseStatusProducer;
+      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+      name = namePrefix + getClass().getSimpleName();
      
-      hasHandPoseStatusBeenSent = new BooleanYoVariable(robotSide + "hasHandPoseStatusBeenSent", parentRegistry);
+      hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", parentRegistry);
       hasHandPoseStatusBeenSent.set(false);
       
       stateChangedlistener = new StateChangedListener<HandControlState>()
@@ -122,8 +124,6 @@ public class HandControlModule
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
 
       this.robotSide = robotSide;
-      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-      name = namePrefix + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       twistCalculator = momentumBasedController.getTwistCalculator();
 
@@ -259,10 +259,14 @@ public class HandControlModule
    {
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-      
-      if (handPoseStatusProducer !=null && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
+
+      boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_POSITION;
+//      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
+
+      if (handPoseStatusProducer !=null && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
-         handPoseStatusProducer.sendCompletedStatus();
+         handPoseStatusProducer.sendCompletedStatus(robotSide);
+         System.out.println(robotSide);
          hasHandPoseStatusBeenSent.set(true);
       }
    }
