@@ -20,8 +20,6 @@ public class DRCConfigParameters
 
    // LIDAR Processor
    public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
-   public static boolean USE_POINT_CLOUD_INSTEAD_OF_LIDAR = false;
-   public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
    public static final double GRID_RESOLUTION = 0.025; // in meters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
