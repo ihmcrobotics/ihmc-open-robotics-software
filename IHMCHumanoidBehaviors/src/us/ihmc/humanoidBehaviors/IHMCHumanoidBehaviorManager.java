@@ -13,6 +13,7 @@ import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
+
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -22,14 +23,17 @@ import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 public class IHMCHumanoidBehaviorManager
@@ -62,12 +66,22 @@ public class IHMCHumanoidBehaviorManager
 
       CapturabilityBasedStatusSubsrciber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubsrciber();
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
+      
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
-      dispatcher.addUpdatable(capturePointUpdatable);
+      dispatcher.addUpdatable(capturePointUpdatable);  
 
       YoFramePoint2d yoCapturePoint = capturePointUpdatable.getYoCapturePoint();
       YoFramePoint2d yoDesiredCapturePoint = capturePointUpdatable.getYoDesiredCapturePoint();
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, forceSensorDataHolder, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint,
+      YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
+      
+      WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(fullRobotModel, RobotSide.RIGHT, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, registry);
+      dispatcher.addUpdatable(wristSensorUpdatable); 
+      
+      DoubleYoVariable wristForceMagnitude = wristSensorUpdatable.getWristForceMagnitude();
+      DoubleYoVariable wristForceMagnitudeFiltered = wristSensorUpdatable.getWristForceBandPassFiltered();
+      
+      
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, yoSupportPolygon,
             communicationBridge, yoGraphicsListRegistry, BEHAVIOR_YO_VARIABLE_SERVER_DT);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
@@ -90,8 +104,8 @@ public class IHMCHumanoidBehaviorManager
     * @param outgoingCommunicationBridge used to send packets to the controller.
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
     */
-   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, YoFramePoint2d yoCapturePoint, YoFramePoint2d yoDesiredCapturePoint, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, double DT)
+   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, DoubleYoVariable wristForceFiltered, ReferenceFrames referenceFrames,
+         DoubleYoVariable yoTime, YoFramePoint2d yoCapturePoint, YoFramePoint2d yoDesiredCapturePoint, YoFrameConvexPolygon2d yoSupportPolygon, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, double DT)
    {
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
@@ -101,7 +115,7 @@ public class IHMCHumanoidBehaviorManager
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
       
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, forceSensorDataHolder, DT);
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, yoSupportPolygon, wristForceFiltered, DT);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
