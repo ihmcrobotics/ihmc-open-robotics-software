@@ -242,7 +242,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getFootBackwardOffset()
    {
-      return AtlasPhysicalProperties.footBack;
+      return AtlasPhysicalProperties.footBackForControl;
    }
    
    @Override
@@ -663,19 +663,31 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getFootWidth()
    {
-      return AtlasPhysicalProperties.footWidth;
+      return AtlasPhysicalProperties.footWidthForControl;
    }
 
    @Override
    public double getToeWidth()
    {
-      return AtlasPhysicalProperties.toeWidth;
+      return AtlasPhysicalProperties.toeWidthForControl;
    }
 
    @Override
    public double getFootLength()
    {
-      return AtlasPhysicalProperties.footLength;
+      return AtlasPhysicalProperties.footLengthForControl;
+   }
+   
+   @Override
+   public double getActualFootWidth()
+   {
+      return AtlasPhysicalProperties.actualFootWidth;
+   }
+
+   @Override
+   public double getActualFootLength()
+   {
+      return AtlasPhysicalProperties.actualFootLength;
    }
 
    @Override

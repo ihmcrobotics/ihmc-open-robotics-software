@@ -28,6 +28,10 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getToeWidth();
 
    public abstract double getFootLength();
+   
+   public abstract double getActualFootWidth();
+
+   public abstract double getActualFootLength();
 
    public abstract double getAnkleHeight();
 

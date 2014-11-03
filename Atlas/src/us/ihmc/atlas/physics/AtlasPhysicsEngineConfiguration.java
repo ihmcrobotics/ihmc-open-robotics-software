@@ -53,7 +53,7 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       Link rightLink = rightFootJoint.getLink();
 
       CollisionShapeFactory factoryShape = collisionDetector.getShapeFactory();
-      CollisionShapeDescription collisionFoot = factoryShape.createBox(AtlasPhysicalProperties.footLength / 2, AtlasPhysicalProperties.footWidth / 2, 0.05);
+      CollisionShapeDescription collisionFoot = factoryShape.createBox(AtlasPhysicalProperties.actualFootLength / 2, AtlasPhysicalProperties.actualFootWidth / 2, 0.05);
 
       //      public static final double ankleHeight = 0.084;
       RigidBodyTransform ankleToSole = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//AtlasPhysicalProperties.ankle_to_sole_frame_tranform;
