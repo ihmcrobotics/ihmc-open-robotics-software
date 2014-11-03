@@ -177,7 +177,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(22.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -223,7 +223,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(22.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
