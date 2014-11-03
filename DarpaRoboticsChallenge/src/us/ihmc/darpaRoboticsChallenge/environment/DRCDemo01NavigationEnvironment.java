@@ -54,8 +54,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private static final AppearanceDefinition cinderBlockAppearance = YoAppearance.DarkGray();
    private static final double cinderBlockLength = 0.40;    // 40 cm (approx 16 in, just less than 16in)
-   private static final double cinderBlockWidth = cinderBlockLength / 2;
+   private static final double cinderBlockWidth = cinderBlockLength / 2.0;
    private static final double cinderBlockHeight = 0.15;    // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
+   private static final double overlapToPreventGaps = 0.002;
+   
    private static final double cinderBlockTiltDegrees = 15;
    private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
 
@@ -1524,13 +1526,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       double xCenter = centerPoint[0];
       double yCenter = centerPoint[1];
 
-      // wall
       RigidBodyTransform location = new RigidBodyTransform();
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,
-                                                    cinderBlockHeight), app);
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps, cinderBlockWidth + overlapToPreventGaps,
+                                                    cinderBlockHeight + overlapToPreventGaps), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1584,7 +1585,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
            double yawDegrees)
    {
-      double xOffset = 0, yOffset = cinderBlockWidth / 2;
+      double xOffset = 0, yOffset = cinderBlockWidth / 2.0;
       double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
       double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
 
