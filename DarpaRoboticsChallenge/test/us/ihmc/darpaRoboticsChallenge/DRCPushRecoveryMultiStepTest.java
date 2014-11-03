@@ -34,7 +34,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = true;
+   private final static boolean KEEP_SCS_UP = false;
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean SHOW_GUI = KEEP_SCS_UP || CREATE_MOVIE;
    private final static boolean VISUALIZE_FORCE = false;
