@@ -2,9 +2,9 @@ package us.ihmc.atlas.parameters;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.footLength;
-import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.footWidth;
-import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.toeWidth;
+import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.footLengthForControl;
+import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.footWidthForControl;
+import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.toeWidthForControl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -182,10 +182,10 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
          
          //MomentumBasedControll ContactPoints
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         footGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, footWidth / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, -toeWidth / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, toeWidth / 2.0));
+         footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
+         footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, footWidthForControl / 2.0));
+         footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
+         footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, toeWidthForControl / 2.0));
          contactableBodiesFactory.addFootContactParameters(footGroundContactPoints); 
 
          
@@ -197,8 +197,8 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
             for (int iy = 0; iy < numberOfSimContactPointsY; iy++)
             {
                Point3d gcOffset = new Point3d(
-                     ix * footLength / (numberOfSimContactPointsX - 1) - footLength / 2,
-                     iy * footWidth / (numberOfSimContactPointsY - 1) - footWidth / 2, 
+                     ix * footLengthForControl / (numberOfSimContactPointsX - 1) - footLengthForControl / 2,
+                     iy * footWidthForControl / (numberOfSimContactPointsY - 1) - footWidthForControl / 2, 
                      0);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
