@@ -38,10 +38,12 @@ applicationDistribution.from(file("Configurations")) {
 }
 
 task pushBuild(type:Exec, dependsOn:distTar) {
-    def userName = "${bitbucket_user}"
-    def password = "${bitbucket_password}"
-    def repoUrl = "/ihmcrobotics/ihmc_msgs/downloads"
-    def targetFile = "build/distributions/${applicationName}-${version}.tar"
-
-    commandLine 'build_utilities/upload-to-bitbucket.sh', userName, password, repoUrl, targetFile
+    doLast {
+        def userName = "${bitbucket_user}"
+        def password = "${bitbucket_password}"
+        def repoUrl = "/ihmcrobotics/ihmc_msgs/downloads"
+        def targetFile = "build/distributions/${applicationName}-${version}.tar"
+    
+        commandLine 'build_utilities/upload-to-bitbucket.sh', userName, password, repoUrl, targetFile
+    }
 }
