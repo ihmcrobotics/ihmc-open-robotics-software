@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
@@ -17,7 +18,7 @@ import com.yobotics.simulationconstructionset.graphics.GraphicsRobot;
 public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>
 {
    private final SideDependentList<HashMap<HandJointName, OneDoFJoint>> handJoints = new SideDependentList<HashMap<HandJointName, OneDoFJoint>>();
-
+   private final AtomicReference<HandJointAnglePacket> packet = new AtomicReference<HandJointAnglePacket>();
    private final Object lock = new Object();
    private ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
    private HandModel handModel;
@@ -46,32 +47,43 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
    {
       graphicsToUpdate.add(updateable);
    }
+   
+   public void updateHandModel()
+   {
+	   HandJointAnglePacket handJointAngles = packet.getAndSet(null);
+	   
+	   if(handJointAngles == null)
+		   return;
+	   
+	   synchronized (lock)
+	   {
+		   HashMap<HandJointName, OneDoFJoint> joints = handJoints.get(handJointAngles.getRobotSide());
+		   if (joints != null)
+		   {
+			   for (HandJointName jointName : handModel.getHandJointNames())
+			   {
+				   if (jointName != null)
+				   {
+					   OneDoFJoint oneDoFJoint = joints.get(jointName);
+					   if (oneDoFJoint != null)
+					   {
+						   oneDoFJoint.setQ(handJointAngles.getJointAngle(jointName));
+					   }
+				   }
+			   }
+			   
+			   for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
+			   {
+				   if (graphicsUpdatable != null) graphicsUpdatable.update();
+			   }
+		   }
+	   }
+   }
 
    public void consumeObject(HandJointAnglePacket object)
    {
-      synchronized (lock)
-      {
-         HashMap<HandJointName, OneDoFJoint> joints = handJoints.get(object.getRobotSide());
-         if (joints != null)
-         {
-            for (HandJointName jointName : handModel.getHandJointNames())
-            {
-               if (jointName != null)
-               {
-                  OneDoFJoint oneDoFJoint = joints.get(jointName);
-                  if (oneDoFJoint != null)
-                  {
-                     oneDoFJoint.setQ(object.getJointAngle(jointName));
-                  }
-               }
-            }
-
-
-            for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
-            {
-               graphicsUpdatable.update();
-            }
-         }
-      }
+	   packet.set(object);
+	   
+	   updateHandModel();
    }
 }
