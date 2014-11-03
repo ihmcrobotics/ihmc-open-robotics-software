@@ -597,6 +597,18 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
    }
+   
+   @Override
+   public double getActualFootWidth()
+   {
+      return getFootWidth();
+   }
+
+   @Override
+   public double getActualFootLength()
+   {
+      return getFootLength();
+   }
 
    @Override
    public double getFoot_start_toetaper_from_back()
