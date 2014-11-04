@@ -6,10 +6,8 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
@@ -21,15 +19,11 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 public class TurnValveBehavior extends BehaviorInterface
 {
@@ -60,10 +54,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final DoubleYoVariable yoTime;
    private final double DT;
 
-   private final YoFramePoint2d yoCapturePoint;
-   private final YoFramePoint2d yoDesiredCapturePoint;
    private final DoubleYoVariable capturePointErrorMag;
-   private final YoFrameConvexPolygon2d yoSupportPolygon;
    private final DoubleYoVariable minIcpDistanceToSupportPolygon;
    private final DoubleYoVariable desiredMinIcpDistanceToSupportPolygon;
    
@@ -72,7 +63,7 @@ public class TurnValveBehavior extends BehaviorInterface
    // private final ModifiableValveModel valveModel;
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, YoFramePoint2d yoCapturePoint, YoFramePoint2d yoDesiredCapturePoint, YoFrameConvexPolygon2d yoSupportPolygon, DoubleYoVariable rightWristForceFiltered, double DT)
+         DoubleYoVariable yoTime, DoubleYoVariable icpError, DoubleYoVariable minIcpDistanceToSupportPolygon, DoubleYoVariable rightWristForceFiltered, double DT)
    {
       super(outgoingCommunicationBridge);
       targetWalkLocation = new Point3d();
@@ -89,12 +80,10 @@ public class TurnValveBehavior extends BehaviorInterface
 
       this.rightWristForceFiltered = rightWristForceFiltered;
 
-      this.yoCapturePoint = yoCapturePoint;
-      this.yoDesiredCapturePoint = yoDesiredCapturePoint;
-      this.capturePointErrorMag = new DoubleYoVariable("capturePointError", registry);
-      this.yoSupportPolygon = yoSupportPolygon;
-      this.minIcpDistanceToSupportPolygon = new DoubleYoVariable("minIcpDistanceToSupportPolygon", registry);
+      this.capturePointErrorMag = icpError;
+      this.minIcpDistanceToSupportPolygon = minIcpDistanceToSupportPolygon;
       this.desiredMinIcpDistanceToSupportPolygon = new DoubleYoVariable("desiredMinIcpDistanceToSupportPolygon", registry);
+      desiredMinIcpDistanceToSupportPolygon.set(MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_M);
       
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
    }
@@ -103,9 +92,6 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      updateCapturePointError();
-//      updateCapturePointDistanceToSupportPolygon();
-
       if (!currentBehavior.equals(walkToLocationBehavior))
       {
 //         pauseBehaviorIfCapturePointIsTooCloseToSupportPolygonEdge();
@@ -162,106 +148,9 @@ public class TurnValveBehavior extends BehaviorInterface
       currentBehavior.doControl();
    }
 
-   FramePoint2d tempFramePoint2d = new FramePoint2d();
-
-   private void updateCapturePointError()
-   {
-      tempFramePoint2d.set(yoDesiredCapturePoint.getX(), yoDesiredCapturePoint.getY());
-
-      double error = Math.abs(yoCapturePoint.distance(tempFramePoint2d));
-
-      if (error > maxObservedCapturePointError)
-      {
-         maxObservedCapturePointError = error;
-//         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
-      }
-      capturePointErrorMag.set(error);
-   }
-
-   private Point2d icp = new Point2d();
-   private Point2d centroid = new Point2d();
-   
-   private void updateCapturePointDistanceToSupportPolygon()
-   {
-      yoCapturePoint.get(icp); 
-      
-      ConvexPolygon2d supportPolygon = yoSupportPolygon.getConvexPolygon2d();
-
-      double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, supportPolygon);
-
-      minIcpDistanceToSupportPolygon.set( distanceToClosestEdgeOfSupportPolygon );
-      
-      desiredMinIcpDistanceToSupportPolygon.set( MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_M );
-      
-//      System.out.println("TurnValveBehavior: icp distance to polygon edge : " + icpDistanceToSupportPolygon.getDoubleValue());
-   }
 
 
-   private double computeDistanceToClosestEdge(Point2d pointInsideConvexPolygon, ConvexPolygon2d convexPolygon)
-   {
-      double minDistanceToEdge = Double.POSITIVE_INFINITY;
-
-      double distanceToEdge = 0.0;
-      int numberOfVertices = convexPolygon.getNumberOfVertices();
-      
-      for (int i=0; i<numberOfVertices-1; i++)
-      {
-         Point2d vertex = convexPolygon.getVertex(i);
-         Point2d vertex2 = convexPolygon.getVertex(i+1);
-
-         Point2d projectedPoint = projectPointOntoEdge(vertex, vertex2, pointInsideConvexPolygon);
-         
-         distanceToEdge = pointInsideConvexPolygon.distance(projectedPoint);
-         
-         if (distanceToEdge < minDistanceToEdge)
-         {
-            minDistanceToEdge = distanceToEdge;
-//            System.out.println("TurnValveBehavior: minDistanceToEdge = " + minDistanceToEdge);
-         }
-      }
-      return minDistanceToEdge;
-   }
-   
-   private Vector2d edgeVector = new Vector2d();
-   private Vector2d constuctEdgeFromTwoVertices(Point2d firstVertex, Point2d secondVertex)
-   {
-      edgeVector.set(secondVertex);
-      edgeVector.sub(firstVertex);
-      
-      return edgeVector;
-   }
-   
-   private Vector2d firstVertexToPoint = new Vector2d();
-   private Point2d projectedPoint = new Point2d();
-
-   private Point2d projectPointOntoEdge(Point2d firstVertex, Point2d secondVertex, Point2d point)
-   {
-      Vector2d edgeVector = constuctEdgeFromTwoVertices(firstVertex, secondVertex);
-
-      firstVertexToPoint.set(point);
-      firstVertexToPoint.sub(firstVertex);
-
-      projectedPoint.set(firstVertex);
-
-      if (edgeVector.lengthSquared() > 1e-10)
-      {
-         double dotProduct = edgeVector.dot(firstVertexToPoint);
-         double lengthSquared = edgeVector.lengthSquared();
-         double alpha = dotProduct / lengthSquared;
-
-         // Need to keep alpha between 0.0 and 1.0 since if only one edge is seen, the projection can be outside the edge.
-         if (alpha < 0.0)
-            alpha = 0.0;
-         if (alpha > 1.0)
-            alpha = 1.0;
-
-         edgeVector.scale(alpha);
-
-         projectedPoint.add(edgeVector);
-      }
-      
-      return projectedPoint;
-   }
+  
    
    private HandPosePacket createHandPosePacketToBumpTheValveToVerifyItsPosition(RigidBodyTransform worldToValveTransform)
    {
