@@ -168,7 +168,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       walkingParamaters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
-      contactableFeet = DRCOperatorInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
+      contactableFeet = robotModel.getContactPointParameters().getContactableBodiesFactory().createFootContactableBodies(fullRobotModel, referenceFrames);
 
       feet = new SideDependentList<RigidBody>();
       soleFrames = new SideDependentList<ReferenceFrame>();
