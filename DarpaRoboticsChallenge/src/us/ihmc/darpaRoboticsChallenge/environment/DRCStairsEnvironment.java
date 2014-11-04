@@ -107,22 +107,6 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       return combinedTerrainObject;
    }
 
-   private GroundContactModel createGroundContactModel(Robot robot, GroundProfile3D groundProfile)
-   {
-      double kXY = 5000.0;
-      double bXY = 100.0;
-      double kZ = 1000.0;
-      double bZ = 100.0;
-      double alphaStick = 0.7;
-      double alphaSlip = 0.5;
-
-      GroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, kXY, bXY, kZ, bZ, alphaSlip, alphaStick,
-            robot.getRobotsYoVariableRegistry());
-      groundContactModel.setGroundProfile3D(groundProfile);
-
-      return groundContactModel;
-   }
-
    private static double[] rotateAroundOrigin(double[] xy, double angdeg)
    {
       double x = xy[0];
