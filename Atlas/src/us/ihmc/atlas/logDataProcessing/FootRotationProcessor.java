@@ -2,11 +2,11 @@ package us.ihmc.atlas.logDataProcessing;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFootholdControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.CenterOfPressureVisualizer;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -22,7 +22,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 import com.yobotics.simulationconstructionset.DataProcessingFunction;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -34,9 +34,9 @@ public class FootRotationProcessor implements DataProcessingFunction
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final FullRobotModelUpdater fullRobotModelUpdater;
    private final TwistCalculator twistCalculator;
-   private final SideDependentList<YoFramePoint> cops = new SideDependentList<>();
-   private final SideDependentList<YoFramePoint> desiredCoPs = new SideDependentList<>();
-   private final SideDependentList<partialFootholdControlModule> partialFootholdControlModules = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint2d> desiredCoPs = new SideDependentList<>();
+   private final SideDependentList<PartialFootholdControlModule> partialFootholdControlModules = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<EnumYoVariable<?>> footStates = new SideDependentList<>();
    private final LongYoVariable controllerTimerCount;
@@ -56,7 +56,7 @@ public class FootRotationProcessor implements DataProcessingFunction
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
-         partialFootholdControlModule partialFootholdControlModule = new partialFootholdControlModule(namePrefix, model.getControllerDT(), contactableFeet.get(robotSide), twistCalculator, registry, yoGraphicsListRegistry);
+         PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, model.getControllerDT(), contactableFeet.get(robotSide), twistCalculator, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
 
          ReferenceFrame soleFrame = contactableFeet.get(robotSide).getSoleFrame();
@@ -66,18 +66,20 @@ public class FootRotationProcessor implements DataProcessingFunction
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         
-
-         DoubleYoVariable copx = (DoubleYoVariable) scs.getVariable(CenterOfPressureVisualizer.class.getSimpleName(), "raw" + side + "CoPPositionsInWorldX");
-         DoubleYoVariable copy = (DoubleYoVariable) scs.getVariable(CenterOfPressureVisualizer.class.getSimpleName(), "raw" + side + "CoPPositionsInWorldY");
-         DoubleYoVariable copz = (DoubleYoVariable) scs.getVariable(CenterOfPressureVisualizer.class.getSimpleName(), "raw" + side + "CoPPositionsInWorldZ");
-         YoFramePoint cop = new YoFramePoint(copx, copy, copz, ReferenceFrame.getWorldFrame());
+         String bodyName = contactableFeet.get(robotSide).getName();
+         String copNamePrefix = bodyName + "StateEstimator";
+         String copNameSpace = copNamePrefix + WrenchBasedFootSwitch.class.getSimpleName();
+         String copName = copNamePrefix + "ResolvedCoP";
+         DoubleYoVariable copx = (DoubleYoVariable) scs.getVariable(copNameSpace, copName + "X");
+         DoubleYoVariable copy = (DoubleYoVariable) scs.getVariable(copNameSpace, copName + "Y");
+         YoFramePoint2d cop = new YoFramePoint2d(copx, copy, soleFrames.get(robotSide));
          cops.put(robotSide, cop);
          
-         DoubleYoVariable desiredCoPx = (DoubleYoVariable) scs.getVariable(PlaneContactWrenchProcessor.class.getSimpleName(), side + "SoleCoPX");
-         DoubleYoVariable desiredCoPy = (DoubleYoVariable) scs.getVariable(PlaneContactWrenchProcessor.class.getSimpleName(), side + "SoleCoPY");
-         DoubleYoVariable desiredCoPz = (DoubleYoVariable) scs.getVariable(PlaneContactWrenchProcessor.class.getSimpleName(), side + "SoleCoPZ");
-         YoFramePoint desiredCoP = new YoFramePoint(desiredCoPx, desiredCoPy, desiredCoPz, ReferenceFrame.getWorldFrame());
+         String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
+         String desiredCoPName = side + "SoleCoP2d";
+         DoubleYoVariable desiredCoPx = (DoubleYoVariable) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
+         DoubleYoVariable desiredCoPy = (DoubleYoVariable) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
+         YoFramePoint2d desiredCoP = new YoFramePoint2d(desiredCoPx, desiredCoPy, soleFrames.get(robotSide));
          desiredCoPs.put(robotSide, desiredCoP);
          
          String namePrefix = robotSide.getShortLowerCaseName() + "_foot";
@@ -137,17 +139,10 @@ public class FootRotationProcessor implements DataProcessingFunction
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (footStates.get(robotSide).getEnumValue().toString().equals(ConstraintType.FULL.toString()) || footStates.get(robotSide).getEnumValue().toString().equals(ConstraintType.HOLD_POSITION.toString()))
+         if (footStates.get(robotSide).getEnumValue().toString().equals(ConstraintType.FULL.toString()))
          {
-            cops.get(robotSide).getFrameTupleIncludingFrame(tempCoP);
-            ReferenceFrame soleFrame = soleFrames.get(robotSide);
-            tempCoP.changeFrame(soleFrame);
-            tempCoP2d.setIncludingFrame(soleFrame, tempCoP.getX(), tempCoP.getY());
-            
-            desiredCoPs.get(robotSide).getFrameTupleIncludingFrame(tempCoP);
-            tempCoP.changeFrame(soleFrame);
-            tempDesiredCoP2d.setIncludingFrame(soleFrame, tempCoP.getX(), tempCoP.getY());
-            
+            cops.get(robotSide).getFrameTuple2dIncludingFrame(tempCoP2d);
+            desiredCoPs.get(robotSide).getFrameTuple2dIncludingFrame(tempDesiredCoP2d);
             partialFootholdControlModules.get(robotSide).compute(tempDesiredCoP2d, tempCoP2d);
          }
          else

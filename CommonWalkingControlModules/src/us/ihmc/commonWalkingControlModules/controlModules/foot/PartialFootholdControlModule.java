@@ -21,7 +21,7 @@ import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-public class partialFootholdControlModule
+public class PartialFootholdControlModule
 {
    private final String name = getClass().getSimpleName();
    public enum PartialFootholdState { FULL, UNSAFE_CORNER, PARTIAL, SAFE_PARTIAL};
@@ -44,7 +44,7 @@ public class partialFootholdControlModule
 
    private final FrameLine2d lineOfRotation;
    
-   public partialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
@@ -76,7 +76,7 @@ public class partialFootholdControlModule
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       unsafePolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
 
-      footRotationCalculator.compute(centerOfPressure);
+      footRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
       
       if (footRotationCalculator.isFootRotating())
       {

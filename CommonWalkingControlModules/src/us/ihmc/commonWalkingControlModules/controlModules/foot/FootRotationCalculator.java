@@ -20,13 +20,14 @@ import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
-import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoFrameVector2d;
+import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 /**
- * The ScrewAxisCalculator is a tool to compute the instantaneous axis of rotation of a rigid body.
+ * The FootRotationCalculator is a tool to detect if the foot is rotating around a steady line of rotation.
+ * It is used in the PartialFootholdControlModule to determine if the current foothold is only partial and if the foot support polygon should be shrunk.
+ * (In this class: LoR = Line of Rotation & CoR = Center of Rotation)
  * @author Sylvain
  *
  */
@@ -36,28 +37,60 @@ public class FootRotationCalculator
 
    private final String name = getClass().getSimpleName();
 
+   private final String generalDescription = "LoR = Line of Rotation & CoR = Center of Rotation";
+
    private final YoVariableRegistry registry;
 
-   private final YoFrameVector2d yoFootAngularVelocity;
-   private final DoubleYoVariable angularVelocityAroundLineOfRotation;
-   private final DoubleYoVariable alphaFilter;
-   private final AlphaFilteredYoFrameVector2d yoAngularVelocityFiltered;
-   private final AlphaFilteredYoFramePoint2d yoCenterOfRotationFiltered;
-   private final YoFrameVector yoScrewVector;
-   private final YoFrameLineSegment2d yoLineOfRotation;
-   private final DoubleYoVariable angularVelocityOfLineOfRotation;
-   private final DoubleYoVariable footAngularVelocityThreshold;
-   
-   private final DoubleYoVariable stableAngularVelocityThreshold;
-   private final BooleanYoVariable isLineOfRotationStable;
-   private final BooleanYoVariable isFootAngularVelocityPastThreshold;
-   private final GlitchFilteredBooleanYoVariable isLineOfRotationStableFiltered;
+   /** Alpha filter to filter the foot angular velocity. */
+   private final DoubleYoVariable yoAngularVelocityAlphaFilter;
+   /** Foot filtered angular velocity in the sole frame. The yaw rate is intentionally ignored. */
+   private final AlphaFilteredYoFrameVector2d yoFootAngularVelocityFiltered;
+   /** Foot angular velocity around the estimated line of rotation. */
+   private final DoubleYoVariable yoAngularVelocityAroundLoR;
+   /** Point located on the line of rotation. The measured center of pressure is used to compute it. */
 
-   private final BooleanYoVariable isFootRotating;
-   
-   private final FrameVector screwAxis = new FrameVector();
-   private final FrameVector2d screwAxis2d = new FrameVector2d();
-   private final FrameVector2d screwAxis2dPrevValue = new FrameVector2d();
+   /** Alpha filter to filter the foot angular velocity. */
+   private final DoubleYoVariable yoCoRPositionAlphaFilter;
+   private final AlphaFilteredYoFramePoint2d yoCoRPositionFiltered;
+   /** Alpha filter to filter the linear velocity of the center of rotation. */
+   private final DoubleYoVariable yoCoRVelocityAlphaFilter;
+   /** Filtered data of the center of rotation linear velocity. */
+   private final FilteredVelocityYoFrameVector2d yoCoRVelocityFiltered;
+   /** Linear velocity of the center of rotation that is transversal (perpendicular) to the line of rotation. */
+   private final DoubleYoVariable yoCoRTransversalVelocity;
+   /** Estimated line of rotation of the foot. It is actually here a line segment that remains contained in the foot. */
+   private final YoFrameLineSegment2d yoLineOfRotation;
+   /** Absolute angle of the line of rotation. */
+   private final DoubleYoVariable yoAngleOfLoR;
+   /** Alpha filter used to filter the yaw rate of the line of rotation. */
+   private final DoubleYoVariable yoLoRAngularVelocityAlphaFilter;
+   /** Filtered yaw rate of the line of rotation. */
+   private final FilteredVelocityYoVariable yoLoRAngularVelocityFiltered;
+
+   private final DoubleYoVariable yoCoPErrorAlphaFilter;
+   private final AlphaFilteredYoFrameVector2d yoCoPErrorFiltered;
+   private final DoubleYoVariable yoCoPErrorPerpendicularToRotation;
+
+   /** Threshold on the yaw rate of the line of rotation to determine whether or not the line of rotation is stable. */
+   private final DoubleYoVariable yoStableLoRAngularVelocityThreshold;
+   private final BooleanYoVariable yoIsLoRStable;
+
+   /** Threshold on the transversal velocity of the CoR w.r.t. the LoR to determine whether or not the CoR is stable. */
+   private final DoubleYoVariable yoStableCoRLinearVelocityThreshold;
+   private final BooleanYoVariable yoIsCoRStable;
+
+   /** Threshold on the foot angular velocity around the line of rotation. */
+   private final DoubleYoVariable yoAngularVelocityAroundLoRThreshold;
+   private final BooleanYoVariable yoIsAngularVelocityAroundLoRPastThreshold;
+
+   /** Main output of this class that informs on wether or not the foot is rotating. */
+   private final BooleanYoVariable yoIsFootRotating;
+
+   private final BooleanYoVariable hasBeenInitialized;
+
+   private final FrameVector angularVelocity = new FrameVector();
+   private final FrameVector2d angularVelocity2d = new FrameVector2d();
+   private final FrameVector2d copError2d = new FrameVector2d();
 
    private final FramePoint2d centerOfRotation = new FramePoint2d();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
@@ -68,99 +101,121 @@ public class FootRotationCalculator
    private final TwistCalculator twistCalculator;
 
    private final ReferenceFrame soleFrame;
-   
+
    private final Twist bodyTwist = new Twist();
    private final FrameConvexPolygon2d footPolygonInSoleFrame = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d footPolygonInWorldFrame = new FrameConvexPolygon2d();
-   private final Artifact lineOfRotationArtifact;
-   private final double dt;
 
-   public FootRotationCalculator(String namePrefix, double dt, ContactablePlaneBody rotatingFoot, TwistCalculator twistCalculator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootRotationCalculator(String namePrefix, double dt, ContactablePlaneBody rotatingFoot, TwistCalculator twistCalculator,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.twistCalculator = twistCalculator;
       this.rotatingBody = rotatingFoot;
       this.soleFrame = rotatingFoot.getSoleFrame();
-      this.dt = dt;
 
       footPolygonInSoleFrame.setIncludingFrameAndUpdate(rotatingFoot.getContactPoints2d());
-      
+
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
-      yoFootAngularVelocity = new YoFrameVector2d(namePrefix + "AngularVelocity", soleFrame, registry);
-      alphaFilter = new DoubleYoVariable(namePrefix + name + "AlphaFilter", registry);
-      yoAngularVelocityFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "", registry, alphaFilter, yoFootAngularVelocity);
-      yoCenterOfRotationFiltered = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(namePrefix + "CenterOfRotationFiltered", "", registry, alphaFilter, soleFrame);
-      yoScrewVector = new YoFrameVector(namePrefix + "ScrewVector", worldFrame, registry);
-      yoLineOfRotation = new YoFrameLineSegment2d(namePrefix + "LineOfRotation", "", worldFrame, registry);
-      angularVelocityOfLineOfRotation = new DoubleYoVariable(namePrefix + "AngularVelocityOfLineOfRotation", registry);
-      
-      angularVelocityAroundLineOfRotation = new DoubleYoVariable(namePrefix + "AngularVelocityAroundLineOfRotation", registry);
+      yoAngularVelocityAlphaFilter = new DoubleYoVariable(namePrefix + name + "AngularVelocityAlphaFilter", generalDescription, registry);
+      yoFootAngularVelocityFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "",
+            generalDescription, registry, yoAngularVelocityAlphaFilter, soleFrame);
 
-      stableAngularVelocityThreshold = new DoubleYoVariable(namePrefix + "StableAngularVelocityThreshold", registry);
-      stableAngularVelocityThreshold.set(1.0);
-      isFootAngularVelocityPastThreshold = new BooleanYoVariable(namePrefix + "IsFootAngularVelocityPastThreshold", registry);
-      isLineOfRotationStable = new BooleanYoVariable(namePrefix + "IsLineOfRotationStable", registry);
-      isLineOfRotationStableFiltered = new GlitchFilteredBooleanYoVariable(namePrefix + "IsLineOfRotationStableFiltered", registry, isLineOfRotationStable, 3);
+      yoCoRPositionAlphaFilter = new DoubleYoVariable(namePrefix + "CoRPositionAlphaFilter", registry);
+      yoCoRPositionFiltered = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(namePrefix + "CoRFiltered", "", generalDescription, registry,
+            yoCoRPositionAlphaFilter, soleFrame);
+      yoCoRVelocityAlphaFilter = new DoubleYoVariable(namePrefix + "CoRVelocityAlphaFilter", generalDescription, registry);
+      yoCoRTransversalVelocity = new DoubleYoVariable(namePrefix + "CoRTransversalVelocity", generalDescription, registry);
+      yoCoRVelocityFiltered = FilteredVelocityYoFrameVector2d.createFilteredVelocityYoFrameVector2d(namePrefix + "CoRVelocity", "", generalDescription,
+            yoCoRVelocityAlphaFilter, dt, registry, yoCoRPositionFiltered);
 
-      isFootRotating = new BooleanYoVariable(namePrefix + "IsFootRotating", registry);
+      yoLineOfRotation = new YoFrameLineSegment2d(namePrefix + "LoRPosition", "", generalDescription, worldFrame, registry);
+      yoAngleOfLoR = new DoubleYoVariable(namePrefix + "AngleOfLoR", generalDescription, registry);
+      yoLoRAngularVelocityAlphaFilter = new DoubleYoVariable(namePrefix + "LoRAngularVelocityAlphaFilter", generalDescription, registry);
+      yoLoRAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix + "LoRAngularVelocityFiltered", generalDescription,
+            yoLoRAngularVelocityAlphaFilter, yoAngleOfLoR, dt, registry);
 
-      footAngularVelocityThreshold = new DoubleYoVariable(namePrefix + "FootAngularVelocityThreshold", registry);
-      footAngularVelocityThreshold.set(0.5);
-      screwAxis2d.setToZero(soleFrame);
-      screwAxis2dPrevValue.setToZero(soleFrame);
+      yoAngularVelocityAroundLoR = new DoubleYoVariable(namePrefix + "AngularVelocityAroundLoR", generalDescription, registry);
+
+      yoCoPErrorAlphaFilter = new DoubleYoVariable(namePrefix + "CoPErrorAlphaFilter", registry);
+      yoCoPErrorFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "CoPErrorFilt", "", registry, yoCoPErrorAlphaFilter,
+            soleFrame);
+      yoCoPErrorPerpendicularToRotation = new DoubleYoVariable(namePrefix + "CoPErrorPerpendicularToRotation", registry);
+
+      yoStableLoRAngularVelocityThreshold = new DoubleYoVariable(namePrefix + "LoRStableAngularVelocityThreshold", generalDescription, registry);
+      yoStableLoRAngularVelocityThreshold.set(2.0);
+      yoIsLoRStable = new BooleanYoVariable(namePrefix + "IsLoRStable", generalDescription, registry);
+
+      yoStableCoRLinearVelocityThreshold = new DoubleYoVariable(namePrefix + "CoRStableLinearVelocityThreshold", generalDescription, registry);
+      yoStableCoRLinearVelocityThreshold.set(0.01);
+      yoIsCoRStable = new BooleanYoVariable(namePrefix + "IsCoRStable", generalDescription, registry);
+
+      yoAngularVelocityAroundLoRThreshold = new DoubleYoVariable(namePrefix + "AngularVelocityAroundLoRThreshold", generalDescription, registry);
+      yoAngularVelocityAroundLoRThreshold.set(0.5);
+      yoIsAngularVelocityAroundLoRPastThreshold = new BooleanYoVariable(namePrefix + "IsAngularVelocityAroundLoRPastThreshold", generalDescription, registry);
+
+      yoIsFootRotating = new BooleanYoVariable(namePrefix + "IsFootRotating", generalDescription, registry);
+
+      hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
+
+      angularVelocity2d.setToZero(soleFrame);
       lineOfRotationInSoleFrame.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0, 0.0);
-      
+
       if (yoGraphicsListRegistry != null)
       {
-         lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotation", yoLineOfRotation, Color.ORANGE);
+         Artifact lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotation", yoLineOfRotation, Color.ORANGE, 0.005, 0.01);
          yoGraphicsListRegistry.registerArtifact("FootRotation", lineOfRotationArtifact);
-      }
-      else
-      {
-         lineOfRotationArtifact = null;
       }
    }
 
-   private final FramePoint2d tempFramePoint2d = new FramePoint2d();
-   
-   public void compute(FramePoint2d centerOfPressureInSoleFrame)
+   public void compute(FramePoint2d desiredCoP, FramePoint2d cop)
    {
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
 
       twistCalculator.packTwistOfBody(bodyTwist, rotatingBody.getRigidBody());
-      bodyTwist.packAngularPart(screwAxis);
-      screwAxis.changeFrame(soleFrame);
-      screwAxis.setZ(0.0);
-      screwAxis2d.setIncludingFrame(soleFrame, screwAxis.getX(), screwAxis.getY());
-      yoFootAngularVelocity.set(screwAxis2d);
-      yoAngularVelocityFiltered.update();
-      yoAngularVelocityFiltered.getFrameTuple2dIncludingFrame(screwAxis2d);
-      angularVelocityOfLineOfRotation.set(screwAxis2d.angle(screwAxis2dPrevValue) / dt);
-      screwAxis2dPrevValue.setIncludingFrame(screwAxis2d);
+      bodyTwist.packAngularPart(angularVelocity);
 
-      screwAxis.changeFrame(worldFrame);
-      screwAxis.normalize();
-      yoScrewVector.set(screwAxis);
+      angularVelocity.changeFrame(soleFrame);
+      angularVelocity.setZ(0.0);
+      angularVelocity2d.setIncludingFrame(soleFrame, angularVelocity.getX(), angularVelocity.getY());
 
-      yoCenterOfRotationFiltered.update(centerOfPressureInSoleFrame);
-      yoCenterOfRotationFiltered.getFrameTuple2dIncludingFrame(centerOfRotation);
-      
-      isLineOfRotationStable.set(Math.abs(angularVelocityOfLineOfRotation.getDoubleValue()) < stableAngularVelocityThreshold.getDoubleValue());
-      isLineOfRotationStableFiltered.update();
-      
-      screwAxis2d.normalize();
-      angularVelocityAroundLineOfRotation.set(yoAngularVelocityFiltered.dot(screwAxis2d));
-      isFootAngularVelocityPastThreshold.set(angularVelocityAroundLineOfRotation.getDoubleValue() > footAngularVelocityThreshold.getDoubleValue());
-      
-      isFootRotating.set(isLineOfRotationStableFiltered.getBooleanValue() && isFootAngularVelocityPastThreshold.getBooleanValue());
-      
-      if (isFootRotating.getBooleanValue())
+      yoFootAngularVelocityFiltered.update(angularVelocity2d);
+      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(angularVelocity2d);
+
+      yoAngleOfLoR.set(Math.atan2(angularVelocity2d.getY(), angularVelocity2d.getX()));
+      yoLoRAngularVelocityFiltered.updateForAngles();
+
+      copError2d.setToZero(soleFrame);
+      copError2d.sub(desiredCoP, cop);
+
+      yoCoPErrorFiltered.update(copError2d);
+      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(yoFootAngularVelocityFiltered));
+
+      yoCoRPositionFiltered.update(cop);
+      yoCoRPositionFiltered.getFrameTuple2dIncludingFrame(centerOfRotation);
+      yoCoRVelocityFiltered.update();
+      yoCoRTransversalVelocity.set(yoCoRVelocityFiltered.cross(yoFootAngularVelocityFiltered));
+
+      if (!hasBeenInitialized.getBooleanValue())
       {
-         tempFramePoint2d.setIncludingFrame(centerOfRotation);
-         tempFramePoint2d.scaleAdd(-10000.0, screwAxis2d, centerOfRotation);
-         lineOfRotationInSoleFrame.set(tempFramePoint2d, screwAxis2d);
+         hasBeenInitialized.set(true);
+         return;
+      }
+
+      yoIsLoRStable.set(Math.abs(yoLoRAngularVelocityFiltered.getDoubleValue()) < yoStableLoRAngularVelocityThreshold.getDoubleValue());
+
+      yoIsCoRStable.set(Math.abs(yoCoRTransversalVelocity.getDoubleValue()) < yoStableCoRLinearVelocityThreshold.getDoubleValue());
+
+      yoAngularVelocityAroundLoR.set(yoFootAngularVelocityFiltered.length());
+      yoIsAngularVelocityAroundLoRPastThreshold.set(yoAngularVelocityAroundLoR.getDoubleValue() > yoAngularVelocityAroundLoRThreshold.getDoubleValue());
+
+      yoIsFootRotating.set(yoIsLoRStable.getBooleanValue() && yoIsCoRStable.getBooleanValue() && yoIsAngularVelocityAroundLoRPastThreshold.getBooleanValue());
+
+      if (yoIsFootRotating.getBooleanValue())
+      {
+         lineOfRotationInSoleFrame.set(centerOfRotation, angularVelocity2d);
          lineOfRotationInWorldFrame.setIncludingFrame(lineOfRotationInSoleFrame);
          lineOfRotationInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
          FramePoint2d[] intersections = footPolygonInWorldFrame.intersectionWith(lineOfRotationInWorldFrame);
@@ -183,7 +238,7 @@ public class FootRotationCalculator
 
    public boolean isFootRotating()
    {
-      return isFootRotating.getBooleanValue();
+      return yoIsFootRotating.getBooleanValue();
    }
 
    public void getLineOfRotation(FrameLine2d lineOfRotationToPack)
@@ -194,44 +249,38 @@ public class FootRotationCalculator
    public void reset()
    {
       yoLineOfRotation.setToNaN();
-      yoAngularVelocityFiltered.reset();
-      yoAngularVelocityFiltered.setToZero();
-      yoCenterOfRotationFiltered.reset();
-      yoCenterOfRotationFiltered.setToZero();
-      angularVelocityOfLineOfRotation.set(Double.NaN);
-      angularVelocityAroundLineOfRotation.set(Double.NaN);
-      isLineOfRotationStable.set(false);
-      isLineOfRotationStableFiltered.set(false);
-      isFootRotating.set(false);
-   }
+      yoFootAngularVelocityFiltered.reset();
+      yoFootAngularVelocityFiltered.setToNaN();
+      yoCoRPositionFiltered.reset();
+      yoCoRPositionFiltered.setToNaN();
 
-   public double getAlphaFilter()
-   {
-      return alphaFilter.getDoubleValue();
+      yoCoRVelocityFiltered.reset();
+      yoCoRVelocityFiltered.setToNaN();
+
+      yoAngleOfLoR.set(0.0);
+      yoLoRAngularVelocityFiltered.set(Double.NaN);
+      yoLoRAngularVelocityFiltered.reset();
+
+      yoAngularVelocityAroundLoR.set(Double.NaN);
+      yoIsLoRStable.set(false);
+      yoIsCoRStable.set(false);
+      yoIsFootRotating.set(false);
+
+      hasBeenInitialized.set(false);
    }
 
    public void setAlphaFilter(double alpha)
    {
-      alphaFilter.set(alpha);
-   }
-
-   public double getFootAngularVelocityThreshold()
-   {
-      return footAngularVelocityThreshold.getDoubleValue();
+      yoAngularVelocityAlphaFilter.set(alpha);
    }
 
    public void setFootAngularVelocityThreshold(double threshold)
    {
-      footAngularVelocityThreshold.set(threshold);
-   }
-
-   public double getStableAngularVelocityThreshold()
-   {
-      return stableAngularVelocityThreshold.getDoubleValue();
+      yoAngularVelocityAroundLoRThreshold.set(threshold);
    }
 
    public void setStableAngularVelocityThreshold(double threshold)
    {
-      stableAngularVelocityThreshold.set(threshold);
+      yoStableLoRAngularVelocityThreshold.set(threshold);
    }
 }

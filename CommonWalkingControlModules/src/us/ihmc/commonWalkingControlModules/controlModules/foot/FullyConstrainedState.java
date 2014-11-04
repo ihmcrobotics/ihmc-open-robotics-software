@@ -25,11 +25,11 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    private final YoSE3PIDGains gains;
    private final FramePoint2d cop = new FramePoint2d();
-   private final partialFootholdControlModule partialFootholdControlModule;
+   private final PartialFootholdControlModule partialFootholdControlModule;
 
    public FullyConstrainedState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, partialFootholdControlModule partialFootholdControlModule,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, PartialFootholdControlModule partialFootholdControlModule,
          FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, accelerationControlModule, momentumBasedController,
