@@ -99,10 +99,10 @@ public class HandControlModule
       this.handPoseStatusProducer = handPoseStatusProducer;
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       name = namePrefix + getClass().getSimpleName();
-     
+
       hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", parentRegistry);
       hasHandPoseStatusBeenSent.set(false);
-      
+
       stateChangedlistener = new StateChangedListener<HandControlState>()
       {
          @Override
@@ -268,7 +268,7 @@ public class HandControlModule
       boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_POSITION;
       isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
 
-      if (handPoseStatusProducer !=null && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
+      if (handPoseStatusProducer != null && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
          handPoseStatusProducer.sendCompletedStatus(robotSide);
          hasHandPoseStatusBeenSent.set(true);
@@ -287,8 +287,9 @@ public class HandControlModule
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
-      
-      handPoseStatusProducer.sendStartedStatus(robotSide);
+
+      if (handPoseStatusProducer != null)
+         handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, double swingClearance)
