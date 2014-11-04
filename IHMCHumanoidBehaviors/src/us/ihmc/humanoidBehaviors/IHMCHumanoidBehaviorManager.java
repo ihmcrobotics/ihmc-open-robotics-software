@@ -30,6 +30,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -65,18 +66,20 @@ public class IHMCHumanoidBehaviorManager
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
       
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
-      dispatcher.addUpdatable(capturePointUpdatable);  
+      dispatcher.addUpdatable(capturePointUpdatable);
+      BooleanYoVariable tippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
 
-      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
-      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
+//      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
+//      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
       
       WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(fullRobotModel, RobotSide.RIGHT, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, registry);
       dispatcher.addUpdatable(wristSensorUpdatable); 
       
       DoubleYoVariable wristForceMagnitudeFiltered = wristSensorUpdatable.getWristForceBandPassFiltered();
       
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime, icpError, minIcpDistanceToSupportPolygon,
-            communicationBridge, yoGraphicsListRegistry, BEHAVIOR_YO_VARIABLE_SERVER_DT);
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime,
+            communicationBridge, yoGraphicsListRegistry, tippingDetected);
+      
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
@@ -99,7 +102,7 @@ public class IHMCHumanoidBehaviorManager
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
     */
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, DoubleYoVariable wristForceFiltered, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, DoubleYoVariable icpError, DoubleYoVariable minIcpDistanceToSupportPolygon, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, double DT)
+         DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, BooleanYoVariable tippingDetectedBoolean)
    {
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
@@ -109,7 +112,7 @@ public class IHMCHumanoidBehaviorManager
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
       
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, icpError, minIcpDistanceToSupportPolygon, wristForceFiltered, DT);
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, tippingDetectedBoolean);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);

@@ -35,20 +35,24 @@ public class CapturePointUpdatable implements Updatable
    private final YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 30, registry);
    private final EnumYoVariable<RobotSide> yoSupportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
    private final BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
-   
+
    // Computed Stuff
    private final DoubleYoVariable icpError = new DoubleYoVariable("icpError", registry);
    private final DoubleYoVariable minIcpDistanceToSupportPolygon = new DoubleYoVariable("minIcpDistanceToSupportPolygon", registry);
-   
+   private final BooleanYoVariable tippingDetected = new BooleanYoVariable("tippingDetected", registry);
+   private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
+
    private final CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber;
 
-   public CapturePointUpdatable(CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CapturePointUpdatable(CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       this.capturabilityBasedStatusSubsrciber = capturabilityBasedStatusSubsrciber;
 
       YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
       yoGraphicsListRegistry.registerArtifact("Capturability", capturePointViz.createArtifact());
-      YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
+      YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, YoAppearance.Yellow(),
+            GraphicType.ROTATED_CROSS);
       yoGraphicsListRegistry.registerArtifact("Capturability", desiredCapturePointViz.createArtifact());
 
       YoArtifactPolygon supportPolygonViz = new YoArtifactPolygon("Combined Polygon", yoSupportPolygon, Color.pink, false);
@@ -61,7 +65,7 @@ public class CapturePointUpdatable implements Updatable
    public void update(double time)
    {
       FramePoint2d capturePoint = capturabilityBasedStatusSubsrciber.getCapturePoint();
-      if (capturePoint !=null)
+      if (capturePoint != null)
       {
          yoCapturePoint.set(capturePoint);
       }
@@ -71,7 +75,7 @@ public class CapturePointUpdatable implements Updatable
       {
          yoDesiredCapturePoint.set(desiredCapturePoint);
       }
-      
+
       FrameConvexPolygon2d supportPolygon = capturabilityBasedStatusSubsrciber.getSupportPolygon();
       if (supportPolygon != null)
       {
@@ -90,10 +94,29 @@ public class CapturePointUpdatable implements Updatable
          yoDoubleSupport.set(isInDoubleSupport);
          yoSupportLeg.set(null);
       }
-      
+
       updateCapturePointDistanceToSupportPolygon();
-      
+
       updateCapturePointError();
+
+      updateTipDetector();
+   }
+
+   private void updateTipDetector()
+   {
+      if (icpError.getDoubleValue() > MAX_CAPTURE_POINT_ERROR_M)
+      {
+         tippingDetected.set(true);
+      }
+      else
+      {
+         tippingDetected.set(false);
+      }
+   }
+
+   public BooleanYoVariable getTippingDetectedBoolean()
+   {
+      return tippingDetected;
    }
 
    public YoFramePoint2d getYoDesiredCapturePoint()
@@ -120,31 +143,29 @@ public class CapturePointUpdatable implements Updatable
    {
       return yoDoubleSupport;
    }
-   
+
    public DoubleYoVariable getMinIcpDistanceToSupportPolygon()
    {
       return minIcpDistanceToSupportPolygon;
    }
-   
+
    public DoubleYoVariable getIcpError()
    {
       return icpError;
    }
-   
-   
+
    private Point2d icp = new Point2d();
-   
+
    private void updateCapturePointDistanceToSupportPolygon()
    {
-      yoCapturePoint.get(icp); 
-      
+      yoCapturePoint.get(icp);
+
       ConvexPolygon2d supportPolygon = yoSupportPolygon.getConvexPolygon2d();
 
       double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, supportPolygon);
 
-      minIcpDistanceToSupportPolygon.set( distanceToClosestEdgeOfSupportPolygon );
+      minIcpDistanceToSupportPolygon.set(distanceToClosestEdgeOfSupportPolygon);
    }
-
 
    private double computeDistanceToClosestEdge(Point2d pointInsideConvexPolygon, ConvexPolygon2d convexPolygon)
    {
@@ -152,16 +173,16 @@ public class CapturePointUpdatable implements Updatable
 
       double distanceToEdge = 0.0;
       int numberOfVertices = convexPolygon.getNumberOfVertices();
-      
-      for (int i=0; i<numberOfVertices-1; i++)
+
+      for (int i = 0; i < numberOfVertices - 1; i++)
       {
          Point2d vertex = convexPolygon.getVertex(i);
-         Point2d vertex2 = convexPolygon.getVertex(i+1);
+         Point2d vertex2 = convexPolygon.getVertex(i + 1);
 
          Point2d projectedPoint = projectPointOntoEdge(vertex, vertex2, pointInsideConvexPolygon);
-         
+
          distanceToEdge = pointInsideConvexPolygon.distance(projectedPoint);
-         
+
          if (distanceToEdge < minDistanceToEdge)
          {
             minDistanceToEdge = distanceToEdge;
@@ -169,16 +190,17 @@ public class CapturePointUpdatable implements Updatable
       }
       return minDistanceToEdge;
    }
-   
+
    private Vector2d edgeVector = new Vector2d();
+
    private Vector2d constuctEdgeFromTwoVertices(Point2d firstVertex, Point2d secondVertex)
    {
       edgeVector.set(secondVertex);
       edgeVector.sub(firstVertex);
-      
+
       return edgeVector;
    }
-   
+
    private Vector2d firstVertexToPoint = new Vector2d();
    private Point2d projectedPoint = new Point2d();
 
@@ -207,10 +229,10 @@ public class CapturePointUpdatable implements Updatable
 
          projectedPoint.add(edgeVector);
       }
-      
+
       return projectedPoint;
    }
-   
+
    FramePoint2d tempFramePoint2d = new FramePoint2d();
 
    private void updateCapturePointError()
@@ -219,11 +241,11 @@ public class CapturePointUpdatable implements Updatable
 
       double error = Math.abs(yoCapturePoint.distance(tempFramePoint2d));
 
-//      if (error > maxObservedCapturePointError)
-//      {
-//         maxObservedCapturePointError = error;
-////         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
-//      }
+      //      if (error > maxObservedCapturePointError)
+      //      {
+      //         maxObservedCapturePointError = error;
+      ////         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
+      //      }
       icpError.set(error);
    }
 }

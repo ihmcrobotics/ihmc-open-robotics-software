@@ -51,6 +51,10 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
+   private SimulationConstructionSet scs;
+   
+   private  BooleanYoVariable enablePushing;
+
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -205,9 +209,11 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       for (int i = 0; i < 100; i++)
       {
          ThreadTools.sleep(5000);
+         if(enablePushing.getBooleanValue() == true){
+            
          if (i % 2 == 0)
          {
-            magnitude = 800;
+            magnitude = 400;
             forceDirection = new Vector3d(-1.0, 0.0, 0.0);
             System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: Pushing with " + magnitude + " N of force from the front");
          }
@@ -218,6 +224,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
             System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: Pushing with " + magnitude + " N of force from the right");
          }
          testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+         }
       }
 
       blockingSimulationRunner.simulateAndBlock(100.0);
@@ -271,6 +278,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       cameraConfiguration.setCameraTracking(true, true, false, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
+      enablePushing = new BooleanYoVariable("enablePushing", scs.getRootRegistry());
+      enablePushing.set(false);
 
       if (VISUALIZE_FORCE)
       {
