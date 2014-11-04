@@ -84,7 +84,7 @@ public class FootControlModule
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
    
-   private final partialFootholdControlModule partialFootholdControlModule;
+   private final PartialFootholdControlModule partialFootholdControlModule;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
          YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains supportFootControlGains, DoubleProvider swingTimeProvider,
@@ -101,7 +101,7 @@ public class FootControlModule
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       double controlDT = momentumBasedController.getControlDT();
-      partialFootholdControlModule = new partialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
+      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
       
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getPelvis(), foot, foot.getBodyFixedFrame());

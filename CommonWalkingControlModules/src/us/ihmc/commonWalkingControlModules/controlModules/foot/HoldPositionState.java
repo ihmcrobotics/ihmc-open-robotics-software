@@ -28,11 +28,11 @@ public class HoldPositionState extends AbstractFootControlState
 
    private final RigidBody pelvisBody;
    private final FramePoint2d cop = new FramePoint2d();
-   private final partialFootholdControlModule partialFootholdControlModule;
+   private final PartialFootholdControlModule partialFootholdControlModule;
 
    public HoldPositionState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, partialFootholdControlModule partialFootholdControlModule,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, PartialFootholdControlModule partialFootholdControlModule,
          FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
