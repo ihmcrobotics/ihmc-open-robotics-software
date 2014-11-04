@@ -270,10 +270,10 @@ public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParam
                ReconfigureRequest request = multiSenseClient.getMessage();
                StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
                resolutionParam.setName("resolution");
-               //resolutionParam.setValue("2048x1088x64");
-               //System.out.println("Setting multisense resolution to 2048x1088");
-               System.out.println("Setting multisense resolution to 1024x544x128");
-               resolutionParam.setValue("1024x544x128");
+               System.out.println("Setting multisense resolution to 2048x1088");
+               resolutionParam.setValue("2048x1088x64");
+//               System.out.println("Setting multisense resolution to 1024x544x128");
+//               resolutionParam.setValue("1024x544x128");
                request.getConfig().getStrs().add(resolutionParam);
 
                DoubleParameter fpsParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
