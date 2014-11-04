@@ -45,14 +45,13 @@ import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SliderJoint;
-import com.yobotics.simulationconstructionset.robot.HumanoidRobot;
 import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
-public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
+public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 {
   
    private static final boolean SHOW_CONTACT_POINTS = true;
