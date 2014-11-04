@@ -22,15 +22,13 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
 public class TurnValveBehavior extends BehaviorInterface
 {
-   private final double MAX_WRIST_FORCE_THRESHOLD_N = 140.0; // Sensor reads ~ 100 N after stand-prep with Robotiq hands
-   private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
-   private final double MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_M = 0.005;
-
+   private static final boolean DEBUG = true;
    private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
    private Vector3d valveLocation = new Vector3d();
    private Vector3d valveOffsetInWorldFrame = new Vector3d();
@@ -51,19 +49,14 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private DoubleYoVariable rightWristForceFiltered;
    private double maxObservedWristForce = 0.0;
-   private final DoubleYoVariable yoTime;
-   private final double DT;
 
-   private final DoubleYoVariable capturePointErrorMag;
-   private final DoubleYoVariable minIcpDistanceToSupportPolygon;
-   private final DoubleYoVariable desiredMinIcpDistanceToSupportPolygon;
-   
    private Double maxObservedCapturePointError = 0.0;
+   private BooleanYoVariable tippingDetected;
 
    // private final ModifiableValveModel valveModel;
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, DoubleYoVariable icpError, DoubleYoVariable minIcpDistanceToSupportPolygon, DoubleYoVariable rightWristForceFiltered, double DT)
+         DoubleYoVariable yoTime, BooleanYoVariable tippingDetectedBoolean)
    {
       super(outgoingCommunicationBridge);
       targetWalkLocation = new Point3d();
@@ -71,33 +64,19 @@ public class TurnValveBehavior extends BehaviorInterface
       targetWalkOrientation = new YoFrameOrientation(behaviorName + "WalkToOrientation", ReferenceFrame.getWorldFrame(), registry);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
-
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
-
-      this.yoTime = yoTime;
-      this.DT = DT;
-
-      this.rightWristForceFiltered = rightWristForceFiltered;
-
-      this.capturePointErrorMag = icpError;
-      this.minIcpDistanceToSupportPolygon = minIcpDistanceToSupportPolygon;
-      this.desiredMinIcpDistanceToSupportPolygon = new DoubleYoVariable("desiredMinIcpDistanceToSupportPolygon", registry);
-      desiredMinIcpDistanceToSupportPolygon.set(MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_M);
-      
+      this.tippingDetected = tippingDetectedBoolean;
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
    }
 
-   
    @Override
    public void doControl()
    {
-      if (!currentBehavior.equals(walkToLocationBehavior))
-      {
-//         pauseBehaviorIfCapturePointIsTooCloseToSupportPolygonEdge();
+//      if (!currentBehavior.equals(walkToLocationBehavior))
+//      {
          pauseBehaviorIfCapturePointErrorIsTooLarge();
-//         pauseBehaviorIfWristForceSensorSuddenlySpikes();
-      }
+//      }
 
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
@@ -148,10 +127,6 @@ public class TurnValveBehavior extends BehaviorInterface
       currentBehavior.doControl();
    }
 
-
-
-  
-   
    private HandPosePacket createHandPosePacketToBumpTheValveToVerifyItsPosition(RigidBodyTransform worldToValveTransform)
    {
       RigidBodyTransform worldToValveTransformWithYawCorrection = new RigidBodyTransform();
@@ -175,32 +150,15 @@ public class TurnValveBehavior extends BehaviorInterface
       return ret;
    }
 
-   private void pauseBehaviorIfCapturePointIsTooCloseToSupportPolygonEdge()
-   {
-      boolean icpIsTooCloseToSupportPolygonEdge = minIcpDistanceToSupportPolygon.getDoubleValue() < desiredMinIcpDistanceToSupportPolygon.getDoubleValue();
-      
-      if (icpIsTooCloseToSupportPolygonEdge)
-      {
-         this.pause();
-         System.out.println("TurnValveBehavior: ICP is too close to Support Polygon Edge!  Icp distance to edge : " + minIcpDistanceToSupportPolygon.getDoubleValue() + ".  Desired minimum distance to edge : " + desiredMinIcpDistanceToSupportPolygon.getDoubleValue());
-      }
-   }
-   
    private void pauseBehaviorIfCapturePointErrorIsTooLarge()
    {
-      if (capturePointErrorMag.getDoubleValue() > MAX_CAPTURE_POINT_ERROR_M)
+      if (tippingDetected.getBooleanValue() && !isPaused.getBooleanValue())
       {
          this.pause();
-         System.out.println("TurnValveBehavior: MAX CAPTURE POINT ERROR EXCEEDED!  Capture Point Error =  " + capturePointErrorMag.getDoubleValue());
-      }
-   }
-
-   private void pauseBehaviorIfWristForceSensorSuddenlySpikes()
-   {
-      if (rightWristForceFiltered.getDoubleValue() > MAX_WRIST_FORCE_THRESHOLD_N)
-      {
-         this.pause();
-         System.out.println("TurnValveBehavior: MAX WRIST FORCE EXCEEDED!  Force Magnitude =  " + rightWristForceFiltered.getDoubleValue());
+         if (DEBUG)
+         {
+            System.out.println("TurnValveBehavior: Tipping detected! Pausing behavior.");
+         }
       }
    }
 
@@ -301,7 +259,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
       behaviorQueue.clear();
       behaviorQueue.add(walkToLocationBehavior);
-//      behaviorQueue.add(handPoseBehavior);
+      //      behaviorQueue.add(handPoseBehavior);
       behaviorQueue.add(scriptBehavior);
       currentBehavior = behaviorQueue.remove(0);
    }
