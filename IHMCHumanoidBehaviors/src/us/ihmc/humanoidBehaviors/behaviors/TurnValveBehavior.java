@@ -33,7 +33,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 public class TurnValveBehavior extends BehaviorInterface
 {
    private final double MAX_WRIST_FORCE_THRESHOLD_N = 140.0; // Sensor reads ~ 100 N after stand-prep with Robotiq hands
-   private final double MAX_CAPTURE_POINT_ERROR = 0.075; // Reasonable value < 0.01   Max < 0.02
+   private final double MAX_CAPTURE_POINT_ERROR = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
    private final double MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_IN_TERMS_OF_SUPPORT_POLYGON_RADIUS = 0.05;
 
    private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
@@ -103,7 +103,7 @@ public class TurnValveBehavior extends BehaviorInterface
    public void doControl()
    {
       updateCapturePointError();
-      updateCapturePointDistanceToSupportPolygon();
+//      updateCapturePointDistanceToSupportPolygon();
 
       if (!currentBehavior.equals(walkToLocationBehavior))
       {
@@ -172,7 +172,7 @@ public class TurnValveBehavior extends BehaviorInterface
       if (error > maxObservedCapturePointError)
       {
          maxObservedCapturePointError = error;
-//         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
+         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
       }
       capturePointErrorMag.set(error);
    }
@@ -343,7 +343,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
       behaviorQueue.clear();
       behaviorQueue.add(walkToLocationBehavior);
-      behaviorQueue.add(handPoseBehavior);
+//      behaviorQueue.add(handPoseBehavior);
       behaviorQueue.add(scriptBehavior);
       currentBehavior = behaviorQueue.remove(0);
    }
