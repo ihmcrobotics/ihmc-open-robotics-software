@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
@@ -33,8 +34,8 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 public class TurnValveBehavior extends BehaviorInterface
 {
    private final double MAX_WRIST_FORCE_THRESHOLD_N = 140.0; // Sensor reads ~ 100 N after stand-prep with Robotiq hands
-   private final double MAX_CAPTURE_POINT_ERROR = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
-   private final double MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_IN_TERMS_OF_SUPPORT_POLYGON_RADIUS = 0.05;
+   private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
+   private final double MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_M = 0.005;
 
    private final Vector3d valveInteractionOffsetInValveFrame = new Vector3d(-0.13, 0.0, 0.64);
    private Vector3d valveLocation = new Vector3d();
@@ -63,8 +64,8 @@ public class TurnValveBehavior extends BehaviorInterface
    private final YoFramePoint2d yoDesiredCapturePoint;
    private final DoubleYoVariable capturePointErrorMag;
    private final YoFrameConvexPolygon2d yoSupportPolygon;
-   private final DoubleYoVariable icpDistanceToSupportPolygon;
-   private final DoubleYoVariable supportPolygonRadius;
+   private final DoubleYoVariable minIcpDistanceToSupportPolygon;
+   private final DoubleYoVariable desiredMinIcpDistanceToSupportPolygon;
    
    private Double maxObservedCapturePointError = 0.0;
 
@@ -92,9 +93,9 @@ public class TurnValveBehavior extends BehaviorInterface
       this.yoDesiredCapturePoint = yoDesiredCapturePoint;
       this.capturePointErrorMag = new DoubleYoVariable("capturePointError", registry);
       this.yoSupportPolygon = yoSupportPolygon;
-      this.icpDistanceToSupportPolygon = new DoubleYoVariable("icpDistanceToSupportPolygon", registry);
-      this.supportPolygonRadius = new DoubleYoVariable("supportPolygonRadius", registry);
-
+      this.minIcpDistanceToSupportPolygon = new DoubleYoVariable("minIcpDistanceToSupportPolygon", registry);
+      this.desiredMinIcpDistanceToSupportPolygon = new DoubleYoVariable("desiredMinIcpDistanceToSupportPolygon", registry);
+      
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
    }
 
@@ -172,7 +173,7 @@ public class TurnValveBehavior extends BehaviorInterface
       if (error > maxObservedCapturePointError)
       {
          maxObservedCapturePointError = error;
-         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
+//         System.out.println("TurnValveBehavior: Max Capture Point Error : " + maxObservedCapturePointError);
       }
       capturePointErrorMag.set(error);
    }
@@ -185,13 +186,81 @@ public class TurnValveBehavior extends BehaviorInterface
       yoCapturePoint.get(icp); 
       
       ConvexPolygon2d supportPolygon = yoSupportPolygon.getConvexPolygon2d();
-      
-      icpDistanceToSupportPolygon.set( supportPolygon.distance(icp) );
 
-      supportPolygon.getCentroid(centroid);
-      supportPolygonRadius.set(supportPolygon.distance(centroid));
+      double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, supportPolygon);
+
+      minIcpDistanceToSupportPolygon.set( distanceToClosestEdgeOfSupportPolygon );
+      
+      desiredMinIcpDistanceToSupportPolygon.set( MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_M );
       
 //      System.out.println("TurnValveBehavior: icp distance to polygon edge : " + icpDistanceToSupportPolygon.getDoubleValue());
+   }
+
+
+   private double computeDistanceToClosestEdge(Point2d pointInsideConvexPolygon, ConvexPolygon2d convexPolygon)
+   {
+      double minDistanceToEdge = Double.POSITIVE_INFINITY;
+
+      double distanceToEdge = 0.0;
+      int numberOfVertices = convexPolygon.getNumberOfVertices();
+      
+      for (int i=0; i<numberOfVertices-1; i++)
+      {
+         Point2d vertex = convexPolygon.getVertex(i);
+         Point2d vertex2 = convexPolygon.getVertex(i+1);
+
+         Point2d projectedPoint = projectPointOntoEdge(vertex, vertex2, pointInsideConvexPolygon);
+         
+         distanceToEdge = pointInsideConvexPolygon.distance(projectedPoint);
+         
+         if (distanceToEdge < minDistanceToEdge)
+         {
+            minDistanceToEdge = distanceToEdge;
+//            System.out.println("TurnValveBehavior: minDistanceToEdge = " + minDistanceToEdge);
+         }
+      }
+      return minDistanceToEdge;
+   }
+   
+   private Vector2d edgeVector = new Vector2d();
+   private Vector2d constuctEdgeFromTwoVertices(Point2d firstVertex, Point2d secondVertex)
+   {
+      edgeVector.set(secondVertex);
+      edgeVector.sub(firstVertex);
+      
+      return edgeVector;
+   }
+   
+   private Vector2d firstVertexToPoint = new Vector2d();
+   private Point2d projectedPoint = new Point2d();
+
+   private Point2d projectPointOntoEdge(Point2d firstVertex, Point2d secondVertex, Point2d point)
+   {
+      Vector2d edgeVector = constuctEdgeFromTwoVertices(firstVertex, secondVertex);
+
+      firstVertexToPoint.set(point);
+      firstVertexToPoint.sub(firstVertex);
+
+      projectedPoint.set(firstVertex);
+
+      if (edgeVector.lengthSquared() > 1e-10)
+      {
+         double dotProduct = edgeVector.dot(firstVertexToPoint);
+         double lengthSquared = edgeVector.lengthSquared();
+         double alpha = dotProduct / lengthSquared;
+
+         // Need to keep alpha between 0.0 and 1.0 since if only one edge is seen, the projection can be outside the edge.
+         if (alpha < 0.0)
+            alpha = 0.0;
+         if (alpha > 1.0)
+            alpha = 1.0;
+
+         edgeVector.scale(alpha);
+
+         projectedPoint.add(edgeVector);
+      }
+      
+      return projectedPoint;
    }
    
    private HandPosePacket createHandPosePacketToBumpTheValveToVerifyItsPosition(RigidBodyTransform worldToValveTransform)
@@ -219,18 +288,18 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private void pauseBehaviorIfCapturePointIsTooCloseToSupportPolygonEdge()
    {
-      boolean icpIsTooCloseToSupportPolygonEdge = icpDistanceToSupportPolygon.getDoubleValue() < (MIN_DISTANCE_CAPTURE_POINT_TO_SUPPORT_POLYGON_IN_TERMS_OF_SUPPORT_POLYGON_RADIUS * supportPolygonRadius.getDoubleValue());
+      boolean icpIsTooCloseToSupportPolygonEdge = minIcpDistanceToSupportPolygon.getDoubleValue() < desiredMinIcpDistanceToSupportPolygon.getDoubleValue();
       
       if (icpIsTooCloseToSupportPolygonEdge)
       {
          this.pause();
-         System.out.println("TurnValveBehavior: ICP is too close to Support Polygon Edge!  Icp distance to edge : " + icpDistanceToSupportPolygon.getDoubleValue() + ".  Support Polygon Radius: " + supportPolygonRadius.getDoubleValue());
+         System.out.println("TurnValveBehavior: ICP is too close to Support Polygon Edge!  Icp distance to edge : " + minIcpDistanceToSupportPolygon.getDoubleValue() + ".  Desired minimum distance to edge : " + desiredMinIcpDistanceToSupportPolygon.getDoubleValue());
       }
    }
    
    private void pauseBehaviorIfCapturePointErrorIsTooLarge()
    {
-      if (capturePointErrorMag.getDoubleValue() > MAX_CAPTURE_POINT_ERROR)
+      if (capturePointErrorMag.getDoubleValue() > MAX_CAPTURE_POINT_ERROR_M)
       {
          this.pause();
          System.out.println("TurnValveBehavior: MAX CAPTURE POINT ERROR EXCEEDED!  Capture Point Error =  " + capturePointErrorMag.getDoubleValue());
