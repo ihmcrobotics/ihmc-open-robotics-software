@@ -32,8 +32,6 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 public class IHMCHumanoidBehaviorManager
 {
@@ -69,18 +67,15 @@ public class IHMCHumanoidBehaviorManager
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);  
 
-      YoFramePoint2d yoCapturePoint = capturePointUpdatable.getYoCapturePoint();
-      YoFramePoint2d yoDesiredCapturePoint = capturePointUpdatable.getYoDesiredCapturePoint();
-      YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
+      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
+      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
       
       WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(fullRobotModel, RobotSide.RIGHT, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, registry);
       dispatcher.addUpdatable(wristSensorUpdatable); 
       
-      DoubleYoVariable wristForceMagnitude = wristSensorUpdatable.getWristForceMagnitude();
       DoubleYoVariable wristForceMagnitudeFiltered = wristSensorUpdatable.getWristForceBandPassFiltered();
       
-      
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, yoSupportPolygon,
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime, icpError, minIcpDistanceToSupportPolygon,
             communicationBridge, yoGraphicsListRegistry, BEHAVIOR_YO_VARIABLE_SERVER_DT);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
@@ -104,7 +99,7 @@ public class IHMCHumanoidBehaviorManager
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
     */
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, DoubleYoVariable wristForceFiltered, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, YoFramePoint2d yoCapturePoint, YoFramePoint2d yoDesiredCapturePoint, YoFrameConvexPolygon2d yoSupportPolygon, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, double DT)
+         DoubleYoVariable yoTime, DoubleYoVariable icpError, DoubleYoVariable minIcpDistanceToSupportPolygon, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, double DT)
    {
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
@@ -114,7 +109,7 @@ public class IHMCHumanoidBehaviorManager
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
       
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, yoCapturePoint, yoDesiredCapturePoint, yoSupportPolygon, wristForceFiltered, DT);
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, icpError, minIcpDistanceToSupportPolygon, wristForceFiltered, DT);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
