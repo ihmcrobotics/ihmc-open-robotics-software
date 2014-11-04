@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubsrciber;
+import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -31,9 +31,9 @@ public class CapturePointUpdatable implements Updatable
    private final EnumYoVariable<RobotSide> yoSupportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
    private final BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
    
-   private final CapturabilityBasedStatusSubsrciber capturabilityBasedStatusSubsrciber;
+   private final CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber;
 
-   public CapturePointUpdatable(CapturabilityBasedStatusSubsrciber capturabilityBasedStatusSubsrciber, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CapturePointUpdatable(CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.capturabilityBasedStatusSubsrciber = capturabilityBasedStatusSubsrciber;
 
