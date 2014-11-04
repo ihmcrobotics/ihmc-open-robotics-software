@@ -7,13 +7,12 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubsrciber;
+import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
-
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -64,7 +63,7 @@ public class IHMCHumanoidBehaviorManager
       BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
             desiredBehaviorSubscriber, communicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
 
-      CapturabilityBasedStatusSubsrciber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubsrciber();
+      CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
       
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
