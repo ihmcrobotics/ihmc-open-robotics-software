@@ -58,6 +58,11 @@ public class PelvisPoseHistoryCorrection
    private final double[] tempRots = new double[3];
    private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
 
+   private final Quat4d interpolationRotation = new Quat4d();
+   private final Quat4d nonProcessedRotation = new Quat4d();
+   private final Vector3d interpolatedTranslation = new Vector3d();
+   private final Vector3d nonProcessedTranslation = new Vector3d();
+   
    private final YoFramePoint externalPelvisPosition;
    private final YoFrameQuaternion externalPelvisQuaternion;
    private final DoubleYoVariable externalPelvisPitch;
@@ -97,16 +102,22 @@ public class PelvisPoseHistoryCorrection
 
    private final DoubleYoVariable interpolationAlphaFilterAlphaValue;
 
-   public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
-         final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
+   public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
+         int pelvisBufferSize)
    {
-      this(inverseDynamicsStructure, null, dt, parentRegistry, pelvisBufferSize);
+      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, null);
    }
    
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
          ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
    {
-      this.rootJoint = inverseDynamicsStructure.getRootJoint();
+      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, externalPelvisPoseSubscriber);
+   }
+
+   public PelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+         ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+   {
+      this.rootJoint = sixDofJoint;
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
       this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
       this.registry = new YoVariableRegistry("PelvisPoseHistoryCorrection");
@@ -205,8 +216,16 @@ public class PelvisPoseHistoryCorrection
    private void calculateCorrectedPelvisPose()
    {
       correctedPelvisPoseWorkingArea.set(getInterpolatedPelvisError());
-      correctedPelvisPoseWorkingArea.multiply(pelvisPose);
-      pelvisPose.set(correctedPelvisPoseWorkingArea);
+      correctedPelvisPoseWorkingArea.getRotation(interpolationRotation);
+      pelvisPose.getRotation(nonProcessedRotation);
+      interpolationRotation.mul(nonProcessedRotation);
+
+      correctedPelvisPoseWorkingArea.getTranslation(interpolatedTranslation);
+      pelvisPose.getTranslation(nonProcessedTranslation);
+      interpolatedTranslation.add(nonProcessedTranslation);
+
+      pelvisPose.setTranslation(interpolatedTranslation);
+      pelvisPose.setRotation(interpolationRotation);
    }
    
    /**
@@ -299,15 +318,29 @@ public class PelvisPoseHistoryCorrection
       long timeStamp = localizationPose.getTimeStamp();
       errorToPack.setTimeStamp(timeStamp);
       TimeStampedTransform3D sePose = stateEstimatorPelvisPoseBuffer.interpolate(timeStamp);
-      RigidBodyTransform error = localizationPose.getTransform3D();
       tempTransform.set(sePose.getTransform3D());
-      tempTransform.invert();
-      error.multiply(tempTransform);
+      RigidBodyTransform error = localizationPose.getTransform3D();
+
+      Vector3d translationError = new Vector3d();
+      Vector3d seTranslation = new Vector3d();
+
+      tempTransform.getTranslation(seTranslation);
+      error.getTranslation(translationError);
+      translationError.sub(seTranslation);
+
+      Quat4d rotationError = new Quat4d();
+      Quat4d localizationRotation = new Quat4d();
+      tempTransform.getRotation(rotationError);
+      error.getRotation(localizationRotation);
+
+      rotationError.inverse();
+      rotationError.mul(localizationRotation);
       
+      error.setTranslation(translationError);
+      error.setRotation(rotationError);
       error.get(rotationMatrix);
       RotationFunctions.setYawPitchRoll(rotationMatrix, RotationFunctions.getYaw(rotationMatrix), 0, 0);
       error.setRotation(rotationMatrix);
-      
       errorToPack.setTransform3D(error);
    }
    
