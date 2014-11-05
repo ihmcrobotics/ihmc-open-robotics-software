@@ -26,6 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.humanoidBehaviors.planning.FootstepParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -337,4 +338,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return null;
    }
+
+@Override
+public FootstepParameters getFootstepParameters() {
+	// TODO Auto-generated method stub
+	return null;
+}
 }
