@@ -25,7 +25,6 @@ public class AtlasROSAPINetworkProcessor
       ObjectCommunicator controllerCommunicator = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList());
       ((KryoObjectClient) controllerCommunicator).setReconnectAutomatically(true);
-      controllerCommunicator.connect();
 
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
