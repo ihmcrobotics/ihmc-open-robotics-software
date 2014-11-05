@@ -457,94 +457,90 @@ public final class RobotiqHandInterface
 
 	public void open()
 	{
-		
+		fingerControl = CONCURRENT_FINGER_CONTROL;
 		position[FINGER_A] = FULLY_OPEN; //all fingers
-		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-		{
-			position[FINGER_B] = FULLY_OPEN;
-			position[FINGER_C] = FULLY_OPEN;
-		}
+//		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
+//		{
+//			position[FINGER_B] = FULLY_OPEN;
+//			position[FINGER_C] = FULLY_OPEN;
+//		}
 		
 		sendMotionRequest();
 	}
 	
 	public void open(double percent)
 	{
+		fingerControl = CONCURRENT_FINGER_CONTROL;
 		position[FINGER_A] = (byte)((1-percent) * (0xFF & FULLY_CLOSED)); //all fingers
-		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-		{
-			position[FINGER_B] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
-			position[FINGER_C] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
-		}
+//		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
+//		{
+//			position[FINGER_B] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
+//			position[FINGER_C] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
+//		}
 		
 		sendMotionRequest();
 	}
 	
 	public void close()
 	{
-		if(operationMode == PINCH_MODE)
-		{
-			position[FINGER_A] = PINCH_FULLY_CLOSED; //max closed position for pinch
-			force[FINGER_A] = MAX_FORCE/2;
-		}
-		else
-		{
-			position[FINGER_A] = FULLY_CLOSED; // also all fingers
-			force[FINGER_A] = MAX_FORCE/2;
-			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-			{
-				position[FINGER_B] = FULLY_CLOSED;
-				force[FINGER_B] = MAX_FORCE/2;
-				position[FINGER_C] = FULLY_CLOSED;
-				force[FINGER_C] = MAX_FORCE/2;
-			}
-		}
+//		if(operationMode == PINCH_MODE)
+//		{
+//			position[FINGER_A] = PINCH_FULLY_CLOSED; //max closed position for pinch
+//			force[FINGER_A] = MAX_FORCE/2;
+//		}
+//		else
+//		{
+//			position[FINGER_A] = FULLY_CLOSED; // also all fingers
+//			force[FINGER_A] = MAX_FORCE/2;
+//			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
+//			{
+//				position[FINGER_B] = FULLY_CLOSED;
+//				force[FINGER_B] = MAX_FORCE/2;
+//				position[FINGER_C] = FULLY_CLOSED;
+//				force[FINGER_C] = MAX_FORCE/2;
+//			}
+//		}
+		
+		fingerControl = CONCURRENT_FINGER_CONTROL;
+		position[FINGER_A] = FULLY_CLOSED;
+		force[FINGER_A] = MAX_FORCE/2;
 		
 		sendMotionRequest();
 	}
 	
 	public void close(double percent) throws InterruptedException
 	{
-		if(operationMode == PINCH_MODE)
-		{
-			position[FINGER_A] = (byte)(percent * PINCH_FULLY_CLOSED);
-			force[FINGER_A] = MAX_FORCE/2;
-		}
-		else
-		{
-			position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED)); // also all fingers
-			force[FINGER_A] = MAX_FORCE/2;
-			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-			{
-				position[FINGER_B] = (byte)(percent * (0xFF & FULLY_CLOSED));
-				force[FINGER_B] = MAX_FORCE/2;
-				position[FINGER_C] = (byte)(percent * (0xFF & FULLY_CLOSED));
-				force[FINGER_C] = MAX_FORCE/2;
-			}
-		}
+//		if(operationMode == PINCH_MODE)
+//		{
+//			position[FINGER_A] = (byte)(percent * PINCH_FULLY_CLOSED);
+//			force[FINGER_A] = MAX_FORCE/2;
+//		}
+//		else
+//		{
+//			position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED)); // also all fingers
+//			force[FINGER_A] = MAX_FORCE/2;
+//			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
+//			{
+//				position[FINGER_B] = (byte)(percent * (0xFF & FULLY_CLOSED));
+//				force[FINGER_B] = MAX_FORCE/2;
+//				position[FINGER_C] = (byte)(percent * (0xFF & FULLY_CLOSED));
+//				force[FINGER_C] = MAX_FORCE/2;
+//			}
+//		}
+		
+		fingerControl = CONCURRENT_FINGER_CONTROL;
+		position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED));
+		force[FINGER_A] = MAX_FORCE/2;
 		
 		sendMotionRequest();
 	}
 	
 	public void crush()
 	{
-		if(operationMode == PINCH_MODE)
-		{
-			position[FINGER_A] = 120; //max closed position for pinch
-			force[FINGER_A] = MAX_FORCE;
-		}
-		else
-		{
-			position[FINGER_A] = FULLY_CLOSED; // also all fingers
-			force[FINGER_A] = MAX_FORCE;
-			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-			{
-				position[FINGER_B] = FULLY_CLOSED;
-				force[FINGER_B] = MAX_FORCE;
-				position[FINGER_C] = FULLY_CLOSED;
-				force[FINGER_C] = MAX_FORCE;
-			}
-		}
+		fingerControl = CONCURRENT_FINGER_CONTROL;
+		position[FINGER_A] = FULLY_CLOSED; // also all fingers
+		force[FINGER_A] = MAX_FORCE;
+
 		sendMotionRequest();
 	}
 
