@@ -15,7 +15,7 @@
 // Grid map
 #include <grid_map_msg/GridMap.h>
 #include <grid_map/GridMap.hpp>
-#include <grid_map_lib/PolygonIterator.hpp>
+#include <grid_map_lib/iterators/PolygonIterator.hpp>
 
 // Foothold finder
 #include <foothold_finding_msg/AdaptFootholds.h>
@@ -23,6 +23,7 @@
 // ROS
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 // Kindr
 #include <kindr/phys_quant/PhysicalQuantitiesEigen.hpp>

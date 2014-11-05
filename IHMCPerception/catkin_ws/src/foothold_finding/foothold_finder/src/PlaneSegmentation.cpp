@@ -8,7 +8,7 @@
 #include "foothold_finder/PlaneSegmentation.hpp"
 
 // Grid Map
-#include <grid_map_lib/GridMapIterator.hpp>
+#include <grid_map_lib/iterators/GridMapIterator.hpp>
 
 // ROS
 #include <sensor_msgs/PointCloud2.h>

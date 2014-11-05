@@ -567,8 +567,6 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		ROS_WARN_STREAM("[TIME] Real-time capability: " << realTimeRatio << "%");
 
 	lastPoinCloudTime = stamp;
-	localizationStatus.data = ("Robot localized successfully.");
-	localizationStatusPub.publish(localizationStatus);
 }
 
 void Mapper::processNewMapIfAvailable()
