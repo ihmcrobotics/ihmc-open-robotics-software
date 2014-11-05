@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.communication.packets.sensing.RequestElevationMapPacket;
+import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
@@ -25,7 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProces
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosFootstepServiceClient;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.RosElevationMapServiceClient;
+import us.ihmc.darpaRoboticsChallenge.ros.FootstepPathPlannerService;
 import us.ihmc.darpaRoboticsChallenge.ros.RosLocalizationServiceClient;
 import us.ihmc.darpaRoboticsChallenge.ros.RosLocalizationUpdateSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
@@ -58,7 +58,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldObjectCommunicator, RobotPoseBuffer robotPoseBuffer,
-                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
+                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotModel robotModel)
    {
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
 
@@ -97,13 +97,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, networkingManager, ppsTimestampOffsetProvider);
 
          
-         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
+         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, robotModel.getPhysicalProperties());
          networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
          networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-         RosElevationMapServiceClient rosElevationMapServiceClient = new RosElevationMapServiceClient(rosMainNode);
-         fieldObjectCommunicator.attachListener(RequestElevationMapPacket.class, rosElevationMapServiceClient);
-
+         FootstepPathPlannerService footstepPathPlannerService = new FootstepPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), fieldObjectCommunicator);
+         fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
+         
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
       }
@@ -130,7 +130,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
+                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotModel robotModel)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);

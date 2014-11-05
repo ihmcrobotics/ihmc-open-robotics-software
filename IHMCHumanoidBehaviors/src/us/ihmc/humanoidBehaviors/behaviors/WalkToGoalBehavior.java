@@ -1,26 +1,19 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
-import us.ihmc.communication.packets.sensing.RequestElevationMapPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
+import us.ihmc.communication.packets.walking.PlannedPathPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.planning.configurationSpace.CostFunction;
-import us.ihmc.planning.footstepPlan.AtlasFootstepParameters;
-import us.ihmc.planning.footstepPlan.AtlasFootstepPlanState;
-import us.ihmc.planning.footstepPlan.AtlasManeuverabilityFunction;
-import us.ihmc.planning.footstepPlan.AtlasPlanCostFunction;
-import us.ihmc.planning.plan.astar.AStar;
-import us.ihmc.planning.plan.astar.maneuverability.ManeuverabilityFunction;
+import us.ihmc.humanoidBehaviors.planning.FootstepPlanState;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -33,29 +26,22 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private final BooleanYoVariable DEBUG = new BooleanYoVariable("DEBUG", registry);
 	
 	private final ConcurrentListeningQueue<WalkToGoalBehaviorPacket> inputListeningQueue = new ConcurrentListeningQueue<WalkToGoalBehaviorPacket>();
+	private final ConcurrentListeningQueue<PlannedPathPacket> plannedPathListeningQueue = new ConcurrentListeningQueue<PlannedPathPacket>();
 	private final BooleanYoVariable isDone;
 	private final BooleanYoVariable hasInputBeenSet;
 	private final FullRobotModel fullRobotModel;
 	
-	private AtlasFootstepPlanState startState;
-	private AtlasFootstepPlanState goalState;
+	private FootstepPlanState startState;
+	private FootstepPlanState goalState;
 	
 	private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	
 	private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
-	private final BooleanYoVariable hasFootstepsBeenGenerated = new BooleanYoVariable("hasFootstepsBeenGenerated", registry);
-	private final BooleanYoVariable hasSearchFinished = new BooleanYoVariable("hasSearchFinished", registry);
+	private final BooleanYoVariable hasSearchRequestBeenSent = new BooleanYoVariable("hasSearchRequestBeenSent", registry);
 	private final BooleanYoVariable hasNewFootsteps = new BooleanYoVariable("hasNewFootsteps", registry);;
-	
 	
 	private ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
 	private FootstepListBehavior footstepListBehavior;
-	
-	private Object map = new Object();
-	private final AtlasFootstepParameters footstepParameters = new AtlasFootstepParameters();
-	private final CostFunction<AtlasFootstepPlanState> costFunction = new AtlasPlanCostFunction(map);
-	private final ManeuverabilityFunction<AtlasFootstepPlanState> maneuverabilityFunction = new AtlasManeuverabilityFunction(map, footstepParameters);
-	private final AStar<AtlasFootstepPlanState> atlasPathFinder = new AStar<AtlasFootstepPlanState>(costFunction, maneuverabilityFunction);
 	
 	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
 	{
@@ -67,7 +53,9 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
 		
 		this.fullRobotModel = fullRobotModel;
+		
 		this.attachNetworkProcessorListeningQueue(inputListeningQueue, WalkToGoalBehaviorPacket.class);
+		this.attachNetworkProcessorListeningQueue(plannedPathListeningQueue, PlannedPathPacket.class);
 	}
 	
 	@Override
@@ -75,70 +63,34 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		if (!isDone.getBooleanValue()){
 			checkForNewInputs();
 		}
-			
-		if (!hasFootstepsBeenGenerated.getBooleanValue() && hasInputBeenSet())
-		{
-	        generateFootsteps(); //Should be Single Iteration of Search to be able to interrupt and/or pause.
+		if (!hasInputBeenSet()){
+			return;
 		}
-		else if (hasNewFootsteps.getBooleanValue())
+		if (!hasSearchRequestBeenSent.getBooleanValue())
 		{
-	        FootstepDataList footsepDataList = new FootstepDataList();
-	        footsepDataList.footstepDataList = footsteps;
-	        footstepListBehavior.set(footsepDataList);
-	        hasNewFootsteps.set(false);
+			requestFootstepPlan(); //Should be Single Iteration of Search to be able to interrupt and/or pause.
 		}
-		else
-		{
-			footstepListBehavior.doControl();
-		}
-	}
-	
-	private void generateFootsteps() {
-		//Do Search
-		atlasPathFinder.setCumulativeCostValid(true);
-		atlasPathFinder.USE_CONSIDERED_NODES = false;
-
-		System.out.println("Starting location is: " + startState.toString());
-		System.out.println("Goal location is: " + goalState.toString());
-
-		List<AtlasFootstepPlanState> footPath = atlasPathFinder.computePath(startState, goalState);
-		if (footPath.size() == 0)
-		{
-			System.out.println("No path found from " + startState + " to " + goalState);
-		}
-
-		if (DEBUG.getBooleanValue())
-		{
-			for (AtlasFootstepPlanState state : footPath)
+		else {
+			checkForPlannedPath();
+			if (hasNewFootsteps.getBooleanValue())
 			{
-				System.out.println(state.toString());
+				FootstepDataList footsepDataList = new FootstepDataList();
+				footsepDataList.footstepDataList = footsteps;
+				footstepListBehavior.set(footsepDataList);
+				hasNewFootsteps.set(false);
 			}
-		}
-		
-		ArrayList<FootstepData> footstepData = generateFootstepList(footPath);
-		hasSearchFinished.set(true);
-				
-		if (hasSearchFinished.getBooleanValue()){
-			//footsteps = null; 
-			hasFootstepsBeenGenerated.set(true);
-			if (footstepData != footsteps){ //TODO: Change so it actually checks values, not the reference
-				footsteps = footstepData;
-				hasNewFootsteps.set(true);
+			else
+			{
+				footstepListBehavior.doControl();
 			}
 		}
 	}
-	
-	public ArrayList<FootstepData> generateFootstepList(List<AtlasFootstepPlanState> footstepLocations )
+
+	private void requestFootstepPlan()
 	{
-		ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
-		for (AtlasFootstepPlanState footstep : footstepLocations)
-		{
-			Quat4d orientation = new Quat4d();
-			RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, footstep.theta, 0, 0);
-			FootstepData current = new FootstepData(footstep.getRobotSide(), footstep.getPoint3d(), orientation);
-			footsteps.add(current);
-		}
-		return footsteps;
+		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startState.x, startState.y, startState.theta, startState.side, goalState.x, goalState.y, goalState.theta, goalState.side);
+		outgoingCommunicationBridge.sendPacketToNetworkProcessor(footstepPlanRequestPacket);
+		hasSearchRequestBeenSent.set(true);
 	}
 
 	private void checkForNewInputs()
@@ -147,8 +99,17 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		if (newestPacket != null)
 		{
 			set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], newestPacket.getGoalSide());
-			RequestElevationMapPacket requestMap = new RequestElevationMapPacket(0,0,6,6);
-			outgoingCommunicationBridge.sendPacketToNetworkProcessor(requestMap);
+			hasSearchRequestBeenSent.set(false);
+		}
+	}
+	
+	private void checkForPlannedPath()
+	{
+		PlannedPathPacket newestPacket = plannedPathListeningQueue.getNewestPacket();
+		if (newestPacket != null)
+		{
+			footsteps = newestPacket.getPlannedPath();
+			hasNewFootsteps.set(true);
 		}
 	}
 	
@@ -162,8 +123,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		double thetaStart = RotationFunctions.getYaw(startRotation);
 		double xStart = startTranslation.x;
 		double yStart = startTranslation.y;
-		startState = new AtlasFootstepPlanState(xStart,yStart,thetaStart,startSide);
-		goalState = new AtlasFootstepPlanState(xGoal, yGoal, thetaGoal, goalSide);
+		startState = new FootstepPlanState(xStart,yStart,thetaStart,startSide);
+		goalState = new FootstepPlanState(xGoal, yGoal, thetaGoal, goalSide);
 		hasInputBeenSet.set(true);
 	}
 	
@@ -171,7 +132,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	public void initialize()
 	{
 		hasInputBeenSet.set(false);
-		hasFootstepsBeenGenerated.set(false);
+		hasSearchRequestBeenSent.set(false);
+		hasNewFootsteps.set(false);
 		footstepListBehavior.initialize();
 		startState = null;
 		goalState = null;
@@ -222,7 +184,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	@Override
 	public boolean isDone()
 	{
-		if (!hasFootstepsBeenGenerated.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
+		if (!hasNewFootsteps.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
 			return false;
 		return footstepListBehavior.isDone();
 	}
@@ -233,7 +195,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		isPaused.set(false);
 		isStopped.set(false);
 		hasTargetBeenProvided.set(false);
-		hasFootstepsBeenGenerated.set(false);
+		hasNewFootsteps.set(false);
+		hasSearchRequestBeenSent.set(false);
 		footstepListBehavior.finalize();
 	}
 	
