@@ -21,7 +21,7 @@ public class AtlasROSAPISimulator
    private static String defaultRosNameSpace = "atlas";
    private static String defaultRobotModel = "DRC_NO_HANDS";
    
-   public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace)
+   public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
       boolean initializeEstimatorToActual = false;
       String scriptToLoad = null;

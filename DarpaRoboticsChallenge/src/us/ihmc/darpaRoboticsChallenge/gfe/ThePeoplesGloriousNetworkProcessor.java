@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.gfe;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final FullRobotModel fullRobotModel;
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge,
-                                             DRCRobotModel robotModel, String namespace)
+                                             DRCRobotModel robotModel, String namespace) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
@@ -73,9 +74,12 @@ public class ThePeoplesGloriousNetworkProcessor
       setupInputs(namespace + "/inputs", referenceFrames, fullRobotModel);
       setupOutputs(namespace + "/outputs");
       rosMainNode.execute();
+
+      controllerCommunicationBridge.connect();
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace)
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
+         IOException
    {
       this(rosUri, controllerCommunicationBridge, null, robotModel, namespace);
    }
