@@ -23,4 +23,5 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':RobotDataCommunication')
 	compile project(':IHMCRealtime')
+	compile project(':IHMCHumanoidBehaviors')
 }
