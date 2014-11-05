@@ -12,7 +12,7 @@
 
 // Grid Map
 #include <grid_map/GridMap.hpp>
-#include <grid_map_lib/PolygonIterator.hpp>
+#include <grid_map_lib/iterators/PolygonIterator.hpp>
 
 // Eigen
 #include <Eigen/Core>

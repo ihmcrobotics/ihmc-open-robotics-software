@@ -11,7 +11,7 @@
 
 // Grid Map
 #include <grid_map_msg/GetGridMap.h>
-#include <grid_map_lib/GridMapIterator.hpp>
+#include <grid_map_lib/iterators/GridMapIterator.hpp>
 
 // Boost
 #include <boost/assign/std/vector.hpp>
@@ -96,6 +96,7 @@ bool FootholdFinder::initialize()
   footShapeMarker_.type = visualization_msgs::Marker::LINE_STRIP;
   footShapeMarker_.scale.x = footShapeLineWidth_;
   footShapeMarker_.header.frame_id = mapFrame_;
+  footShapeMarker_.header.stamp = Time(0.0);
 
   unsigned int nVertices = footShape_.size() + 1;
   footShapeMarker_.points.resize(nVertices);
@@ -112,7 +113,7 @@ bool FootholdFinder::adaptCallback(foothold_finding_msg::AdaptFootholds::Request
 {
   ROS_INFO("Received footholds. Adapting...");
 
-  // TODO Add conversion of position in elevation map frame.
+  // TODO Add conversion of position to map frame.
   // TODO Where is the time in the header gone?
 
   for (const auto& foothold : request.initialFootholds) {
@@ -182,12 +183,12 @@ bool FootholdFinder::localSearch(PlaneSegmentation& segmentation, foothold_findi
   getPolygonInMapFrame(searchRegion_, pose, searchRegion);
   vector<Eigen::Array2i> indices;
 
+  indices.push_back(requestedIndex); // The requested index is twice in the list, but that's ok.
   for (grid_map_lib::PolygonIterator iterator(*segmentation.getMap(), searchRegion);
       !iterator.isPassedEnd(); ++iterator) {
     indices.push_back(*iterator);
   }
-  std::random_shuffle(indices.begin(), indices.end());
-  indices.push_back(requestedIndex); // The requested index is twice in the list, but that's ok.
+  std::random_shuffle((indices.begin()) + 1, indices.end());
 
   // Search.
   foothold_finding_msg::Foothold candidate;
@@ -288,7 +289,6 @@ void FootholdFinder::publishFootShape(const Polygon& footShape, Plane& plane)
 {
   if (footShapePublisher_.getNumSubscribers () < 1) return;
   ROS_DEBUG("Publishing foot shape for visualization.");
-  footShapeMarker_.header.stamp = Time::now();
   unsigned i = 0;
   for( ; i < footShape.size(); i++) {
     footShapeMarker_.points[i].x = footShape[i].x();
@@ -299,6 +299,8 @@ void FootholdFinder::publishFootShape(const Polygon& footShape, Plane& plane)
   footShapeMarker_.points[i].y = footShapeMarker_.points[0].y;
   footShapeMarker_.points[i].z = footShapeMarker_.points[0].z;
   footShapePublisher_.publish(footShapeMarker_);
+  Duration test(0.01);
+  test.sleep();
 }
 
 void FootholdFinder::matchToSurfaceNormal(const Eigen::Vector3d& normal, Rotation& rotation)

@@ -188,10 +188,26 @@ void ElevationMapping::pointCloudCallback(
 
   // Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud.
   // TODO Double check with http://wiki.ros.org/hydro/Migration
-  pcl::PCLPointCloud2 pcl_pc;
-  pcl_conversions::toPCL(rawPointCloud, pcl_pc);
-  PointCloud<PointXYZRGB>::Ptr pointCloud(new PointCloud<PointXYZRGB>);
-  pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
+
+
+   PointCloud<PointXYZ>::Ptr xyzPointCloud(new PointCloud<PointXYZ>);
+   fromROSMsg(rawPointCloud, *xyzPointCloud);
+
+   PointCloud<PointXYZRGB>::Ptr pointCloud(new PointCloud<PointXYZRGB>);
+
+   pointCloud->points.resize(xyzPointCloud->size());
+   pointCloud->header = xyzPointCloud->header;
+   for (uint i = 0; i < xyzPointCloud->points.size(); i++) {
+ 	  pointCloud->points[i].x = xyzPointCloud->points[i].x;
+ 	  pointCloud->points[i].y = xyzPointCloud->points[i].y;
+ 	  pointCloud->points[i].z = xyzPointCloud->points[i].z;
+   }
+
+
+//  pcl::PCLPointCloud2 pcl_pc;
+//  pcl_conversions::toPCL(rawPointCloud, pcl_pc);
+//  PointCloud<PointXYZRGB>::Ptr pointCloud(new PointCloud<PointXYZRGB>);
+//  pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
   Time time;
   time.fromNSec(1000 * pointCloud->header.stamp);
 

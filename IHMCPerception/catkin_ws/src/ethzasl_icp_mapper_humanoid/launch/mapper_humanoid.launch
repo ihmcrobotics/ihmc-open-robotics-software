@@ -10,7 +10,7 @@
 		<param name="icp_correction_frame" value="/pelvis" />
 		<param name="publish_tf_correction" value="true" />
 		<param name="useROSLogger" value="true" />
-		<param name="minOverlap" value="0.2" /> 
+		<param name="minOverlap" value="0.5" /> 
 		<param name="maxOverlapToMerge" value="0.9" /> 
 		<param name="minReadingPointCount" value="1000" /> 
 		<param name="minMapPointCount" value="1000" /> 
