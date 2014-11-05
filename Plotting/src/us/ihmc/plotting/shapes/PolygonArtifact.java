@@ -1,15 +1,13 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.vecmath.Point2d;
-
 import us.ihmc.plotting.Artifact;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+
+import javax.vecmath.Point2d;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PolygonArtifact extends Artifact
 {
@@ -125,24 +123,25 @@ public class PolygonArtifact extends Artifact
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      int nPoints = points.size();
+      ArrayList<Point2d> pointsCopy = new ArrayList<>(points);
+      int nPoints = pointsCopy.size();
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];
 
       if (nPoints == 1)
       {
-         int x = Xcenter + (int) Math.round(points.get(0).x * scaleFactor);
-         int y = Ycenter - (int) Math.round(points.get(0).y * scaleFactor);
+         int x = Xcenter + (int) Math.round(pointsCopy.get(0).x * scaleFactor);
+         int y = Ycenter - (int) Math.round(pointsCopy.get(0).y * scaleFactor);
          g.fillOval(x, y, 4, 4);
       }
       else
       {
          for (int i = 0; i < nPoints; i++)
          {
-            if (points.get(i) != null)
+            if (pointsCopy.get(i) != null)
             {
-               int x = Xcenter + (int) Math.round(points.get(i).x * scaleFactor);
-               int y = Ycenter - (int) Math.round(points.get(i).y * scaleFactor);
+               int x = Xcenter + (int) Math.round(pointsCopy.get(i).x * scaleFactor);
+               int y = Ycenter - (int) Math.round(pointsCopy.get(i).y * scaleFactor);
                xPoints[i] = x;
                yPoints[i] = y;
             }
