@@ -3,19 +3,17 @@ package us.ihmc.steppr.hardware.state;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import us.ihmc.steppr.hardware.state.slowSensors.BusVoltage;
 import us.ihmc.steppr.hardware.state.slowSensors.MotorTemperature;
 import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensor;
 import us.ihmc.steppr.hardware.state.slowSensors.mcbTemperature1;
 import us.ihmc.steppr.hardware.state.slowSensors.mcbTemperature2;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class StepprActuatorState
 {
-   private final StepprSlowSensor[] slowSensors = new StepprSlowSensor[4];
+   private final StepprSlowSensor[] slowSensors = new StepprSlowSensor[27];
 
    private final YoVariableRegistry registry;
 
@@ -23,28 +21,21 @@ public class StepprActuatorState
    
    private final LongYoVariable microControllerTime;
 
-   private final IntegerYoVariable rawEncoder;
-   private final IntegerYoVariable rawPhaseACurrent;
-   private final IntegerYoVariable rawPhaseBCurrent;
-   private final IntegerYoVariable rawPhaseCCurrent;
-
+   
    private final DoubleYoVariable inphaseCompositeStatorCurrent;
    private final DoubleYoVariable quadratureCompositeStatorCurrent;
 
    private final DoubleYoVariable controlTarget;
-   private final DoubleYoVariable inphaseControlEffort;
-   private final DoubleYoVariable quadratureControlEffort;
 
-   private final DoubleYoVariable motorEncoder;
-
-   private final DoubleYoVariable estimatedTorqueStrainGauge0;
-   private final DoubleYoVariable estimatedTorqueStrainGauge1;
-
+   private final DoubleYoVariable motorEncoderPosition;
    private final DoubleYoVariable motorVelocityEstimate;
+   
+   private final DoubleYoVariable jointEncoderPosition;
+   private final DoubleYoVariable jointEncoderVelocity;
 
    private final LongYoVariable lastReceivedControlID;
-   private final IntegerYoVariable halSensors;
-   private final IntegerYoVariable controlMode;
+
+   private final int[] slowSensorSlotIDs = new int[5];
 
    public StepprActuatorState(String name, double motorKt, YoVariableRegistry parentRegistry)
    {
@@ -52,26 +43,20 @@ public class StepprActuatorState
       this.motorKt = motorKt;
       this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
 
-      this.rawEncoder = new IntegerYoVariable(name + "RawEncoder", registry);
-      this.rawPhaseACurrent = new IntegerYoVariable(name + "RawPhaseACurrent", registry);
-      this.rawPhaseBCurrent = new IntegerYoVariable(name + "RawPhaseBCurrent", registry);
-      this.rawPhaseCCurrent = new IntegerYoVariable(name + "RawPhaseCCurrent", registry);
 
       this.inphaseCompositeStatorCurrent = new DoubleYoVariable(name + "InphaseCompositeStatorCurrent", registry);
       this.quadratureCompositeStatorCurrent = new DoubleYoVariable(name + "QuadtratureCompositeStatorCurrent", registry);
       this.controlTarget = new DoubleYoVariable(name + "ControlTarget", registry);
-      this.inphaseControlEffort = new DoubleYoVariable(name + "InphaseControlEffort", registry);
-      this.quadratureControlEffort = new DoubleYoVariable(name + "QuadratureControlEffort", registry);
-      this.motorEncoder = new DoubleYoVariable(name + "MotorEncoder", registry);
-      this.estimatedTorqueStrainGauge0 = new DoubleYoVariable(name + "EstimatedTorqueStrainGauge0", registry);
-      this.estimatedTorqueStrainGauge1 = new DoubleYoVariable(name + "EstimatedTorqueStrainGauge1", registry);
 
+      this.motorEncoderPosition = new DoubleYoVariable(name + "MotorEncoderPosition", registry);
       this.motorVelocityEstimate = new DoubleYoVariable(name + "MotorVelocityEstimate", registry);
+      
+      this.jointEncoderPosition = new DoubleYoVariable(name + "JointEncoderPosition", registry);
+      this.jointEncoderVelocity = new DoubleYoVariable(name + "JointEncoderVelocity", registry);
+      
 
       this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
 
-      this.halSensors = new IntegerYoVariable(name + "HalSensors", registry);
-      this.controlMode = new IntegerYoVariable(name + "ControlMode", registry);
 
       createSlowSensors(name);
 
@@ -80,10 +65,9 @@ public class StepprActuatorState
 
    private void createSlowSensors(String name)
    {
-      slowSensors[0] = new MotorTemperature(name, registry);
-      slowSensors[1] = new mcbTemperature1(name, registry);
-      slowSensors[2] = new BusVoltage(name, registry);
-      slowSensors[3] = new mcbTemperature2(name, registry);
+      slowSensors[6] = new MotorTemperature(name, registry);
+      slowSensors[7] = new mcbTemperature1(name, registry);
+      slowSensors[8] = new mcbTemperature2(name, registry);
    }
 
    public void update(ByteBuffer buffer) throws IOException
@@ -102,40 +86,34 @@ public class StepprActuatorState
       @SuppressWarnings("unused")
       int stateFormat = buffer.get() & 0xFF;
       
-      int slowSensor = buffer.get() & 0xFF;
-
-      slowSensors[slowSensor].update(buffer.getShort() & 0xFFFF);
+      for(int i = 0; i < slowSensorSlotIDs.length; i++)
+      {
+         slowSensorSlotIDs[i] = buffer.get() & 0xFF;
+      }
+      
 
       microControllerTime.set(buffer.getInt() & 0xFFFFFFFFl);
-
-      rawEncoder.set(buffer.getShort() & 0xFFFF);
-      rawPhaseACurrent.set(buffer.getShort());
-
-      rawPhaseBCurrent.set(buffer.getShort());
-      rawPhaseCCurrent.set(buffer.getShort());
-
       inphaseCompositeStatorCurrent.set(buffer.getFloat());
-      
       quadratureCompositeStatorCurrent.set(buffer.getFloat());
-      
       controlTarget.set(buffer.getFloat());
-      
-      inphaseControlEffort.set(buffer.getFloat());
-      
-      quadratureControlEffort.set(buffer.getFloat());
-      
-      motorEncoder.set(buffer.getFloat());
-      
-      estimatedTorqueStrainGauge0.set(buffer.getFloat());
-      
-      estimatedTorqueStrainGauge1.set(buffer.getFloat());
-      
+      motorEncoderPosition.set(buffer.getFloat());
       motorVelocityEstimate.set(buffer.getFloat());
+
+      jointEncoderPosition.set(buffer.getFloat());
+      jointEncoderVelocity.set(buffer.getFloat());
       
       lastReceivedControlID.set(buffer.getInt() & 0xFFFFFFFFl);
       
-      halSensors.set(buffer.get() & 0xFF);
-      controlMode.set(buffer.get() & 0xFF);
+      
+      
+      for(int i = 0; i < slowSensorSlotIDs.length; i++)
+      {
+         int id = slowSensorSlotIDs[i];
+         if(slowSensors[id] != null)
+         {
+            slowSensors[id].update(buffer.getShort() & 0xFFFF);            
+         }
+      }
 
       int checksumOffset = buffer.position();
       buffer.reset();
@@ -147,9 +125,10 @@ public class StepprActuatorState
          calculatedChecksum = (calculatedChecksum + (buffer.get() & 0xFF)) & 0xFF;
       }
       
-      int checksum = buffer.get() & 0xFF;
       @SuppressWarnings("unused")
       int unused = buffer.get();
+
+      int checksum = buffer.get() & 0xFF;
       
       if(calculatedChecksum != checksum)
       {
@@ -160,7 +139,7 @@ public class StepprActuatorState
 
    public double getMotorPosition()
    {
-      return motorEncoder.getDoubleValue();
+      return motorEncoderPosition.getDoubleValue();
    }
 
    public double getMotorVelocity()
@@ -168,6 +147,16 @@ public class StepprActuatorState
       return motorVelocityEstimate.getDoubleValue();
    }
 
+   public double getJointPosition()
+   {
+      return jointEncoderPosition.getDoubleValue();
+   }
+   
+   public double getJointVelocity()
+   {
+      return jointEncoderVelocity.getDoubleValue();
+   }
+   
    public double getMotorTorque()
    {
       return quadratureCompositeStatorCurrent.getDoubleValue() / motorKt;

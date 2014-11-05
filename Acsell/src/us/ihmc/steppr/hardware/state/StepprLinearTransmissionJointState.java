@@ -53,8 +53,8 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    {
       
       motorAngle = actuator.getMotorPosition();
-      q.set(motorAngle / ratio);
-      qd.set(actuator.getMotorVelocity() / ratio);
+      q.set(actuator.getJointPosition());
+      qd.set(actuator.getJointVelocity());
       tau.set(actuator.getMotorTorque() * ratio);
    }
 
