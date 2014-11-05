@@ -109,19 +109,19 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
          networkingManager.getControllerCommandHandler().attachListener(TestbedClientPacket.class, testbed);
          new Thread(testbed).start();
       }
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel.getPhysicalProperties());
+      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel);
       connect();
    }
 
-   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
+   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI, DRCRobotModel robotModel)
    {
       if (useSimulatedSensors)
       {
-         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI, physicalProperties);
+         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI, robotModel);
       }
       else
       {
-         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI, physicalProperties);
+         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI, robotModel);
       }
    }
    

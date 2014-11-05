@@ -11,6 +11,7 @@ import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
@@ -38,6 +39,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPST
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.humanoidBehaviors.planning.FootstepParameters;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
@@ -338,4 +340,10 @@ public class AtlasRobotModel implements DRCRobotModel
             return null;
       }
    }
+
+@Override
+public FootstepParameters getFootstepParameters() {
+	// TODO Auto-generated method stub
+	return new AtlasFootstepParameters();
+}
 }

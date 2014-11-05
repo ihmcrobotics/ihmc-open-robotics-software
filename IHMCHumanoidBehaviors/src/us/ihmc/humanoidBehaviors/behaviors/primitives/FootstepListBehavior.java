@@ -46,6 +46,7 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       outgoingFootstepDataList = footStepList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      packetHasBeenSent.set(false);
    }
 
    public void set(ArrayList<Footstep> footsteps)
@@ -63,8 +64,7 @@ public class FootstepListBehavior extends BehaviorInterface
          FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
          footsepDataList.add(footstepData);
       }
-      outgoingFootstepDataList = footsepDataList;
-      numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      set(footsepDataList);
    }
 
    @Override
