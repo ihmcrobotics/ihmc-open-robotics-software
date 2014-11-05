@@ -11,104 +11,60 @@ import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
 
-import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
-public class UDPStepprStateReader extends RealtimeThread
+public class UDPStepprStateReader
 {
    private final StepprState state;
-   private final StepprStateProcessor stateProcessor;
 
    private DatagramChannel receiveChannel;
-   private MembershipKey receiveKey; 
+   private MembershipKey receiveKey;
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
 
-   private volatile boolean requestStop = false;
-   private boolean stateProcessorHasRun = false;
-
-   
-   public UDPStepprStateReader(PriorityParameters priority, StepprState state, StepprStateProcessor stateProcessor)
+   public UDPStepprStateReader(StepprState state)
    {
-      super(priority);
       this.state = state;
-      this.stateProcessor = stateProcessor;
-      
       receiveBuffer.order(ByteOrder.LITTLE_ENDIAN);
-      
    }
-   
-   @Override
-   public void run()
+
+   /**
+    * Receive data from steppr
+    * @return Current time or -1 if invalid
+    * @throws IOException
+    */
+   public long receive() throws IOException
    {
-      try
-      {
-         connect();
-      }
-      catch (IOException e)
-      {
-         disconnect();
+      receiveBuffer.clear();
+      receiveChannel.receive(receiveBuffer);
+      receiveBuffer.flip();
 
-         throw new RuntimeException(e);
+      if (receiveBuffer.remaining() != 1048)
+      {
+         throw new IOException("ReceiveBuffer is not the correct size");
       }
 
-      System.gc();
-      System.gc();
-      
-      try
-      {
-
-         while (!requestStop)
-         {
-            receiveBuffer.clear();
-            receiveChannel.receive(receiveBuffer);
-            receiveBuffer.flip();
-            
-            if(receiveBuffer.remaining() != 1048)
-            {
-               continue;
-            }
-            
-            long currentTime = RealtimeThread.getCurrentMonotonicClockTime();
-            if(state.update(receiveBuffer, currentTime))
-            {
-               if (!stateProcessorHasRun)
-               {
-                  stateProcessor.initialize(currentTime);
-                  stateProcessorHasRun = true;
-               }
-               stateProcessor.process(currentTime);
-            }                  
-         }
-      }
-      catch (IOException e)
-      {
-         disconnect();
-
-         throw new RuntimeException(e);
-      }
-
-      disconnect();
+      long currentTime = RealtimeThread.getCurrentMonotonicClockTime();
+      state.update(receiveBuffer, currentTime);
+      return currentTime;
    }
-   
-   private void connect() throws IOException
+
+   public void connect() throws IOException
    {
-      
+
       NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(StepprNetworkParameters.CONTROL_COMPUTER_HOST));
       System.out.println("Binding to interface: " + iface);
-      
+
       InetSocketAddress receiveAddress = new InetSocketAddress(StepprNetworkParameters.UDP_MULTICAST_STATE_PORT);
-      
-      receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET)
-            .setOption(StandardSocketOptions.SO_REUSEADDR, true)
-            .bind(receiveAddress);
+
+      receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(receiveAddress);
       receiveChannel.socket().setReceiveBufferSize(65535);
-      
+
       InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
       receiveKey = receiveChannel.join(group, iface);
    }
 
-   private void disconnect()
+   public void disconnect()
    {
       try
       {

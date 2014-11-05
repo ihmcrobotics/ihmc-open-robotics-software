@@ -9,7 +9,6 @@ import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class StepprState
@@ -18,9 +17,7 @@ public class StepprState
    
    private final LongYoVariable lastReceivedTime = new LongYoVariable("lastReceivedTime", registry);
    private final LongYoVariable timeSincePreviousPacket = new LongYoVariable("timeSincePreviousPacket", registry);
-   
-   private final IntegerYoVariable corruptedPackets = new IntegerYoVariable("corruptedPackets", registry);
-   
+     
    private final LongYoVariable stateCollectionStartTime = new LongYoVariable("stateCollectionStartTime", registry);
    private final LongYoVariable stateCollectionFinishTime = new LongYoVariable("stateCollectionFinishTime", registry);
    
@@ -71,36 +68,25 @@ public class StepprState
       }
    }
    
-   public boolean update(ByteBuffer buffer, long timestamp) throws IOException
+   public void update(ByteBuffer buffer, long timestamp) throws IOException
    {
       timeSincePreviousPacket.set(timestamp - lastReceivedTime.getLongValue());
       lastReceivedTime.set(timestamp);
 
-      try
+      stateCollectionStartTime.set(buffer.getLong());
+      stateCollectionFinishTime.set(buffer.getLong());
+      for(StepprActuator actuatorName : StepprActuator.values)
       {
-         stateCollectionStartTime.set(buffer.getLong());
-         stateCollectionFinishTime.set(buffer.getLong());
-         for(StepprActuator actuatorName : StepprActuator.values)
-         {
-            actuatorStates.get(actuatorName).update(buffer);
-         }
-         powerDistributionState.update(buffer);
-         xsens.update(buffer);
-         
-         for(StepprJoint joint : StepprJoint.values)
-         {
-            jointStates.get(joint).update();
-         }
-         
-         return true;
-         
+         actuatorStates.get(actuatorName).update(buffer);
       }
-      catch(IOException e)
+      powerDistributionState.update(buffer);
+      xsens.update(buffer);
+      
+      for(StepprJoint joint : StepprJoint.values)
       {
-         System.err.println(e.getMessage());
-         corruptedPackets.increment();
-         return false;
+         jointStates.get(joint).update();
       }
+         
    }
    
    

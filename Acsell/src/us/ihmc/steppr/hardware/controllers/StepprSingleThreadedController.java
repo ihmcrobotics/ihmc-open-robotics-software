@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.controllers;
 
+import java.io.IOException;
 import java.util.EnumMap;
 
 import javax.vecmath.Quat4d;
@@ -7,6 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
@@ -19,7 +21,6 @@ import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
-import us.ihmc.steppr.hardware.state.StepprStateProcessor;
 import us.ihmc.steppr.hardware.state.StepprXSensState;
 import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
 import us.ihmc.utilities.ThreadTools;
@@ -28,7 +29,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
-public class StepprSingleThreadedController implements StepprStateProcessor
+public class StepprSingleThreadedController extends RealtimeThread
 {
 
    public static void startController(StepprController stepprController)
@@ -37,20 +38,18 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       
       YoVariableRegistry registry = new YoVariableRegistry("steppr");
       
-      StepprState state = new StepprState(registry);      
       YoVariableServer variableServer = new YoVariableServer(5555, 0.01);
 
       StepprSetup stepprSetup = new StepprSetup(variableServer);
-      StepprSingleThreadedController communicator = new StepprSingleThreadedController(state, variableServer, stepprController, registry);
-
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
-      UDPStepprStateReader reader = new UDPStepprStateReader(priority, state, communicator);
+      StepprSingleThreadedController communicator = new StepprSingleThreadedController(priority, variableServer, stepprController, registry);
+
       
       variableServer.start();
       YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, stepprController.getClass().getSimpleName());
       
       stepprSetup.start();
-      reader.start();
+      communicator.start();
       
       
       ThreadTools.sleepForever();
@@ -69,10 +68,17 @@ public class StepprSingleThreadedController implements StepprStateProcessor
    private final RawJointSensorDataHolderMap rawSensors;
 
    private boolean initialized = false;
+   private final UDPStepprStateReader reader;
    
-   private StepprSingleThreadedController(StepprState state, RobotVisualizer visualizer, StepprController stepprController, YoVariableRegistry registry)
+   private volatile boolean requestStop = false;
+
+   
+   private StepprSingleThreadedController(PriorityParameters priorityParameters, RobotVisualizer visualizer, StepprController stepprController, YoVariableRegistry registry)
    {
-      this.state = state;
+      super(priorityParameters);
+      this.state = new StepprState(registry);
+      this.reader = new UDPStepprStateReader(state);
+      
       this.visualizer = visualizer;
       
       this.command = new StepprCommand(registry);
@@ -109,8 +115,46 @@ public class StepprSingleThreadedController implements StepprStateProcessor
       outputWriter.connect();
 
    }
-
+   
    @Override
+   public void run()
+   {
+      try
+      {
+         reader.connect();
+      }
+      catch (IOException e)
+      {
+         reader.disconnect();
+
+         throw new RuntimeException(e);
+      }
+
+      System.gc();
+      System.gc();
+      
+      try
+      {
+
+         while (!requestStop)
+         {
+            long receiveTime = reader.receive();
+            if(receiveTime != -1)
+            {
+               process(receiveTime);
+            }
+         }
+      }
+      catch (IOException e)
+      {
+         reader.disconnect();
+
+         throw new RuntimeException(e);
+      }
+
+      reader.disconnect();
+   }
+
    public void process(long timestamp)
    {
       for (StepprJoint joint : StepprJoint.values)
@@ -161,9 +205,4 @@ public class StepprSingleThreadedController implements StepprStateProcessor
    }
 
 
-   @Override
-   public void initialize(long timestamp)
-   {
-      
-   }
 }
