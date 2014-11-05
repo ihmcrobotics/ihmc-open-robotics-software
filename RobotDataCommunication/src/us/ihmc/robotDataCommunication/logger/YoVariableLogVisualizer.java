@@ -9,6 +9,8 @@ import java.nio.channels.FileChannel;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
@@ -23,7 +25,13 @@ public class YoVariableLogVisualizer
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
    private final String timeVariableName;
    protected final SimulationConstructionSet scs;
+   private YoVariableLogPlaybackRobot robot;
    private SimulationOverheadPlotter plotter;
+
+   public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName) throws IOException
+   {
+      this(generalizedSDFRobotModel, jointNameMap, timeVariableName, 32768, false, null);
+   }
 
    public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize,
          boolean showOverheadView, File logFile) throws IOException
@@ -75,8 +83,7 @@ public class YoVariableLogVisualizer
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();
 
       scs.setTimeVariableName(timeVariableName);
-      YoVariableLogPlaybackRobot robot = new YoVariableLogPlaybackRobot(generalizedSDFRobotModel, jointNameMap, parser.getJointStates(),
-            parser.getYoVariablesList(), logChannel, scs);
+      robot = new YoVariableLogPlaybackRobot(generalizedSDFRobotModel, jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
 
       double dt = parser.getDt();
       System.out.println(getClass().getSimpleName() + ": dt set to " + dt);
@@ -107,8 +114,8 @@ public class YoVariableLogVisualizer
       YoVariableLogCropper yoVariableLogCropper = new YoVariableLogCropper(players, selectedFile, logProperties);
 
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
-      scs.getStandardSimulationGUI().addJComponentToMainPanel(new YoVariableLogVisualizerGUI(selectedFile, players, robot, yoVariableLogCropper, scs),
-            BorderLayout.SOUTH);
+      YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, players, robot, yoVariableLogCropper, scs);
+      scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
@@ -116,9 +123,14 @@ public class YoVariableLogVisualizer
       return scs;
    }
 
-   public SimulationOverheadPlotter getPlotter()
+   public SDFRobot getSDFRobot()
    {
-      return plotter;
+      return robot;
+   }
+
+   public Plotter getPlotter()
+   {
+      return plotter.getPlotter();
    }
 
    public void run()
