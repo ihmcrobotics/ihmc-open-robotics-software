@@ -9,7 +9,9 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
+import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -135,6 +137,10 @@ public class DRCSimulationFactory
       
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
             null, gravity);
+      
+      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
+      globalDataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
+      drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, null, gravity);
