@@ -327,7 +327,8 @@ public final class RobotiqHandInterface
 	private byte commandedStatus;
 	private byte fingerControl;
 	private byte scissorControl;
-	private byte[] data = new byte[32]; //buffer extracted for efficiency
+	private byte[] dataFromHand = new byte[32]; //buffer extracted for efficiency
+	private byte[] dataToSend = new byte[32]; //buffer extracted for efficiency
 	private byte[] status;
 	private byte[] speed = new byte[4];
 	private byte[] force = new byte[4];
@@ -503,6 +504,7 @@ public final class RobotiqHandInterface
 		
 		fingerControl = CONCURRENT_FINGER_CONTROL;
 		position[FINGER_A] = FULLY_CLOSED;
+		speed[FINGER_A] = MAX_SPEED;
 		force[FINGER_A] = MAX_FORCE/2;
 		
 		sendMotionRequest();
@@ -530,6 +532,7 @@ public final class RobotiqHandInterface
 		
 		fingerControl = CONCURRENT_FINGER_CONTROL;
 		position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED));
+		speed[FINGER_A] = MAX_SPEED;
 		force[FINGER_A] = MAX_FORCE/2;
 		
 		sendMotionRequest();
@@ -539,6 +542,7 @@ public final class RobotiqHandInterface
 	{
 		fingerControl = CONCURRENT_FINGER_CONTROL;
 		position[FINGER_A] = FULLY_CLOSED; // also all fingers
+		speed[FINGER_A] = MAX_SPEED;
 		force[FINGER_A] = MAX_FORCE;
 
 		sendMotionRequest();
@@ -776,30 +780,30 @@ public final class RobotiqHandInterface
 		}
 		while(status == null/* || status.length < 22*/);
 		
-		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
-		data[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
-		data[2] = (byte) ((status[GRIPPER_STATUS] & GO_TO_REQUESTED_MASK) >> 3);
-		data[3] = (byte) ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) >> 4);
-		data[4] = (byte) ((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) >> 6);
-		data[5] = (byte) (status[OBJECT_DETECTION] & OBJECT_DETECTION_A_MASK);
-		data[6] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_B_MASK) >> 2);
-		data[7] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_C_MASK) >> 4);
-		data[8] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_S_MASK) >> 6);
-		data[9] = status[FAULT_STATUS];
-		data[10] = status[FINGER_A_REQUESTED_POSITION];
-		data[11] = status[FINGER_A_POSITION];
-		data[12] = status[FINGER_A_CURRENT];
-		data[13] = status[FINGER_B_REQUESTED_POSITION];
-		data[14] = status[FINGER_B_POSITION];
-		data[15] = status[FINGER_B_CURRENT];
-		data[16] = status[FINGER_C_REQUESTED_POSITION];
-		data[17] = status[FINGER_C_POSITION];
-		data[18] = status[FINGER_C_CURRENT];
-		data[19] = status[SCISSOR_REQUESTED_POSITION];
-		data[20] = status[SCISSOR_POSITION];
-		data[21] = status[SCISSOR_CURRENT];
+		dataFromHand[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
+		dataFromHand[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
+		dataFromHand[2] = (byte) ((status[GRIPPER_STATUS] & GO_TO_REQUESTED_MASK) >> 3);
+		dataFromHand[3] = (byte) ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) >> 4);
+		dataFromHand[4] = (byte) ((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) >> 6);
+		dataFromHand[5] = (byte) (status[OBJECT_DETECTION] & OBJECT_DETECTION_A_MASK);
+		dataFromHand[6] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_B_MASK) >> 2);
+		dataFromHand[7] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_C_MASK) >> 4);
+		dataFromHand[8] = (byte) ((status[OBJECT_DETECTION] & OBJECT_DETECTION_S_MASK) >> 6);
+		dataFromHand[9] = status[FAULT_STATUS];
+		dataFromHand[10] = status[FINGER_A_REQUESTED_POSITION];
+		dataFromHand[11] = status[FINGER_A_POSITION];
+		dataFromHand[12] = status[FINGER_A_CURRENT];
+		dataFromHand[13] = status[FINGER_B_REQUESTED_POSITION];
+		dataFromHand[14] = status[FINGER_B_POSITION];
+		dataFromHand[15] = status[FINGER_B_CURRENT];
+		dataFromHand[16] = status[FINGER_C_REQUESTED_POSITION];
+		dataFromHand[17] = status[FINGER_C_POSITION];
+		dataFromHand[18] = status[FINGER_C_CURRENT];
+		dataFromHand[19] = status[SCISSOR_REQUESTED_POSITION];
+		dataFromHand[20] = status[SCISSOR_POSITION];
+		dataFromHand[21] = status[SCISSOR_CURRENT];
 		
-		handData.update(data);
+		handData.update(dataFromHand);
 		
 		return handData;
 	}
@@ -845,7 +849,7 @@ public final class RobotiqHandInterface
 	}
 	
 	public void doControl()
-	{
+	{  
 		sendMotionRequest();
 	}
 	
@@ -857,31 +861,31 @@ public final class RobotiqHandInterface
 	private byte[] sendRequest(byte functionCode, int startRegister, byte ... dataRegisters)
 	{
 		int dataLength = 0;
-		data[0] = functionCode;
-		data[1] = (byte)(startRegister >> 8);
-		data[2] = (byte)startRegister;
+		dataToSend[0] = functionCode;
+		dataToSend[1] = (byte)(startRegister >> 8);
+		dataToSend[2] = (byte)startRegister;
 		if(functionCode == READ_REGISTERS)
 		{
-			data[3] = (byte)(dataRegisters[0] >> 8);
-			data[4] = (byte)(dataRegisters[0]);
+			dataToSend[3] = (byte)(dataRegisters[0] >> 8);
+			dataToSend[4] = (byte)(dataRegisters[0]);
 			dataLength = 5;
 		}
 		else
 		{
-			data[3] = (byte)((dataRegisters.length/2) >> 8);
-			data[4] = (byte)(dataRegisters.length/2);
-			data[5] = (byte)(dataRegisters.length); //number of bytes to follow
+			dataToSend[3] = (byte)((dataRegisters.length/2) >> 8);
+			dataToSend[4] = (byte)(dataRegisters.length/2);
+			dataToSend[5] = (byte)(dataRegisters.length); //number of bytes to follow
 			int counter;
 			for(counter = 0; counter < dataRegisters.length; counter++)
 			{
-				data[counter+6] = dataRegisters[counter];
+				dataToSend[counter+6] = dataRegisters[counter];
 			}
 			dataLength = counter+6;
 		}
 		
 		try
 		{
-			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(data, 0, dataLength));
+			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(dataToSend, 0, dataLength));
 		}
 		catch (IOException e)
 		{
@@ -902,25 +906,25 @@ public final class RobotiqHandInterface
 		int dataLength;
 		commandedStatus = GO_TO_REQUESTED;
 		
-		data[0] = (byte)(initializedStatus | operationMode | commandedStatus); //Whenever sending a motion request, the command hand positions bit (GO_TO_REQUESTED) must be sent
-		data[1] = (byte)(fingerControl | scissorControl);
-		data[2] = 0x00; //reserved byte
+		dataToSend[0] = (byte)(initializedStatus | operationMode | commandedStatus); //Whenever sending a motion request, the command hand positions bit (GO_TO_REQUESTED) must be sent
+		dataToSend[1] = (byte)(fingerControl | scissorControl);
+		dataToSend[2] = 0x00; //reserved byte
 		//update finger a/all fingers
-		data[3] = position[FINGER_A];
-		data[4] = speed[FINGER_A];
-		data[5] = force[FINGER_A];
+		dataToSend[3] = position[FINGER_A];
+		dataToSend[4] = speed[FINGER_A];
+		dataToSend[5] = force[FINGER_A];
 		dataLength = 6;
 		
 		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 		{
 			//update finger b
-			data[6] = position[FINGER_B];
-			data[7] = speed[FINGER_B];
-			data[8] = force[FINGER_B];
+			dataToSend[6] = position[FINGER_B];
+			dataToSend[7] = speed[FINGER_B];
+			dataToSend[8] = force[FINGER_B];
 			//update finger c
-			data[9] = position[FINGER_C];
-			data[10] = speed[FINGER_C];
-			data[11] = force[FINGER_C];
+			dataToSend[9] = position[FINGER_C];
+			dataToSend[10] = speed[FINGER_C];
+			dataToSend[11] = force[FINGER_C];
 			dataLength = 12;
 		}
 		
@@ -933,7 +937,7 @@ public final class RobotiqHandInterface
 //			dataLength = 16;
 //		}
 		
-		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(data,0,dataLength));
+		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(dataToSend,0,dataLength));
 	}
 	
 	private byte[] getStatus() throws RobotiqConnectionException
