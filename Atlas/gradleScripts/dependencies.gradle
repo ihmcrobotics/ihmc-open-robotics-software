@@ -1,7 +1,6 @@
 evaluationDependsOn(':DarpaRoboticsChallenge')
 evaluationDependsOn(':CommonWalkingControlModules')
 evaluationDependsOn(':JMEGraphics3DAdapter')
-evaluationDependsOn(':Planning')
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -42,7 +41,6 @@ dependencies {
     compile project(':DarpaRoboticsChallenge')
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output
-    testCompile project(':Planning').sourceSets.test.output
     compile project(':Graphics3DAdapter')
     compile project(':IHMCROSTools')
     compile project(':ImageProcessing')
@@ -57,4 +55,5 @@ dependencies {
     compile project(':SimulationConstructionSet')
     compile project(':UserInterface')
     compile project(':ROSJNIWrapper')
+    compile project(':Planning')
   }
