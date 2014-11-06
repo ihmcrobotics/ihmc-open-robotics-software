@@ -3,10 +3,21 @@ package us.ihmc.steppr.hardware.state;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import us.ihmc.steppr.hardware.state.slowSensors.ControlMode;
+import us.ihmc.steppr.hardware.state.slowSensors.IMUAccelSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.IMUGyroSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.IMUMagSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.InphaseControlEffort;
 import us.ihmc.steppr.hardware.state.slowSensors.MotorTemperature;
+import us.ihmc.steppr.hardware.state.slowSensors.PressureSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.QuadratureControlEffort;
+import us.ihmc.steppr.hardware.state.slowSensors.RawEncoderTicks;
+import us.ihmc.steppr.hardware.state.slowSensors.RawPhaseCurrentADTicks;
+import us.ihmc.steppr.hardware.state.slowSensors.StatorHalSwitches;
 import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensor;
-import us.ihmc.steppr.hardware.state.slowSensors.mcbTemperature1;
-import us.ihmc.steppr.hardware.state.slowSensors.mcbTemperature2;
+import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.controllerTemperature1;
+import us.ihmc.steppr.hardware.state.slowSensors.controllerTemperature2;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -65,10 +76,48 @@ public class StepprActuatorState
 
    private void createSlowSensors(String name)
    {
-      slowSensors[6] = new MotorTemperature(name, registry);
-      slowSensors[7] = new mcbTemperature1(name, registry);
-      slowSensors[8] = new mcbTemperature2(name, registry);
+      
+      YoVariableRegistry slowSensorRegistry = new YoVariableRegistry("SlowSensors");
+      slowSensors[0] = new StatorHalSwitches(name, slowSensorRegistry);
+      slowSensors[1] = new RawEncoderTicks(name, slowSensorRegistry);
+      
+      slowSensors[2] = new RawPhaseCurrentADTicks(name, "A", slowSensorRegistry);
+      slowSensors[3] = new RawPhaseCurrentADTicks(name, "B", slowSensorRegistry);
+      slowSensors[4] = new RawPhaseCurrentADTicks(name, "C", slowSensorRegistry);
+      
+      slowSensors[5] = new ControlMode(name, slowSensorRegistry);
+      
+      slowSensors[6] = new MotorTemperature(name, slowSensorRegistry);
+      slowSensors[7] = new controllerTemperature1(name, slowSensorRegistry);
+      slowSensors[8] = new controllerTemperature2(name, slowSensorRegistry);
+      
+      slowSensors[9] = new InphaseControlEffort(name, slowSensorRegistry);
+      slowSensors[10] = new QuadratureControlEffort(name, slowSensorRegistry);
+      
+      slowSensors[11] = new PressureSensor(name, 0, slowSensorRegistry);
+      slowSensors[12] = new PressureSensor(name, 1, slowSensorRegistry);
+      slowSensors[13] = new PressureSensor(name, 2, slowSensorRegistry);
+      slowSensors[14] = new PressureSensor(name, 3, slowSensorRegistry);
+      
+      slowSensors[15] = new StrainSensor(name, 0, slowSensorRegistry);
+      slowSensors[16] = new StrainSensor(name, 1, slowSensorRegistry);
+      slowSensors[17] = new StrainSensor(name, 2, slowSensorRegistry);
+      
+      slowSensors[18] = new IMUAccelSensor(name, "X", slowSensorRegistry);
+      slowSensors[19] = new IMUAccelSensor(name, "Y", slowSensorRegistry);
+      slowSensors[20] = new IMUAccelSensor(name, "Z", slowSensorRegistry);
+
+      slowSensors[21] = new IMUGyroSensor(name, "X", slowSensorRegistry);
+      slowSensors[22] = new IMUGyroSensor(name, "Y", slowSensorRegistry);
+      slowSensors[23] = new IMUGyroSensor(name, "Z", slowSensorRegistry);
+      
+      slowSensors[24] = new IMUMagSensor(name, "X", slowSensorRegistry);
+      slowSensors[25] = new IMUMagSensor(name, "Y", slowSensorRegistry);
+      slowSensors[26] = new IMUMagSensor(name, "Z", slowSensorRegistry);
+      
+      this.registry.addChild(slowSensorRegistry);
    }
+   
 
    public void update(ByteBuffer buffer) throws IOException
    {
