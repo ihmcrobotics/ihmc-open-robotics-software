@@ -58,28 +58,23 @@ public class RobotiqHandSensorData implements HandSensorData
 //		}
 //	}
 	private boolean activated;
-	private char operationMode;
+	private int operationMode;
 	private boolean motionRequests;
-	private char modeStatus;
-	private char gripperStatus;
+	private byte modeStatus;
+	private byte gripperStatus;
 	private int[] objectDetection = new int[4];
 	private byte error;
 	private int[] position = new int[4];
 	private int[] requestedPosition = new int[4];
 	private int[] current = new int[4];
 	
-	public RobotiqHandSensorData(byte[] data)
-	{
-		if(data != null) update(data);
-	}
-	
 	public void update(byte[] data)
 	{
 		activated = (data[0] == 0) ? false : true;
-		operationMode = (char) data[1];
+		operationMode = (int) data[1];
 		motionRequests = (data[2] == 0) ? false : true;
-		modeStatus = (char) data[3];
-		gripperStatus = (char) data[4];
+		modeStatus = (byte) data[3];
+		gripperStatus = (byte) data[4];
 		int counter;
 		for(counter = 0; counter < 4; counter++)
 		{
@@ -104,7 +99,7 @@ public class RobotiqHandSensorData implements HandSensorData
 		return activated;
 	}
 	
-	public char getOperationMode()
+	public int getOperationMode()
 	{
 		return operationMode;
 	}
@@ -114,12 +109,12 @@ public class RobotiqHandSensorData implements HandSensorData
 		return motionRequests;
 	}
 	
-	public char getModeStatus()
+	public byte getModeStatus()
 	{
 		return modeStatus;
 	}
 	
-	public char getGripperStatus()
+	public byte getGripperStatus()
 	{
 		return gripperStatus;
 	}
