@@ -17,7 +17,15 @@ import us.ihmc.utilities.robotSide.RobotSide;
  */
 
 public final class RobotiqHandInterface
-{	
+{
+   enum RobotiqGraspMode
+   {
+      BASIC_MODE,
+      PINCH_MODE,
+      WIDE_MODE,
+      SCISSOR_MODE
+   }
+   
 	/*---LOCATION DATA---*/
 	private static final int REGISTER_START = 0x0000;
 	
@@ -26,18 +34,24 @@ public final class RobotiqHandInterface
 	private static final byte SET_REGISTERS = 0x10;
 	private static final byte READ_REGISTERS = 0x04;
 	
+	/*---CONTROL PARAMETER INDEX---*/
+	private static final int FINGER_A = 0;
+	private static final int FINGER_B = 1;
+	private static final int FINGER_C = 2;
+	private static final int SCISSOR = 3;
+	
 	
 	/*---CONTROL PARAMETERS---*/
 	public static final byte MAX_SPEED = (byte) 0xFF;
-	public static final byte MAX_FORCE = (byte) 0xFF;
-	public static final byte FULLY_OPEN = 0x00;
 	public static final byte MIN_SPEED = 0x00;
+	public static final byte MAX_FORCE = (byte) 0xFF;
+	public static final byte DEFAULT_FORCE = (byte) 0x7F; //half of MAX_FORCE
 	public static final byte MIN_FORCE = 0x00;
-	public static final byte FULLY_CLOSED = (byte)0xFF;
-	public static final byte PINCH_FULLY_CLOSED = (byte)0x78;
-	public static final byte DEFAULT_SPEED = (byte)(MAX_SPEED & 11000000);  //about 3/4 speed
-	public static final byte SCISSOR_POSITION_BASIC = 120; //approximate scissor position during basic grip
 	
+	public static final byte[] BASIC_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x8C};
+	public static final byte[] BASIC_MODE_FULLY_CLOSED = new byte[]{(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x8C};
+	public static final byte[] PINCH_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0xDC};
+	public static final byte[] PINCH_MODE_FULLY_CLOSED = new byte[]{(byte)0x78, (byte)0x78, (byte)0x78, (byte)0xDC};
 	
 	/*---DATA INDICES---*/
 	//status response index (from hand start register) 
@@ -59,15 +73,9 @@ public final class RobotiqHandInterface
 	private static final int SCISSOR_POSITION = 15;
 	private static final int SCISSOR_CURRENT = 16;
 	
-	//control parameter index
-	private static final int FINGER_A = 0;
-	private static final int FINGER_B = 1;
-	private static final int FINGER_C = 2;
-	private static final int SCISSOR = 3;
-	
 	/*---FUNCTIONALITY REGISTER BITMASKS---*/
 	//byte 0 (action request)
-//	private static final byte INITIALIZATON_MASK =		0b00000001;
+	private static final byte INITIALIZATON_MASK =		0b00000001;
 	private static final byte OPERATION_MODE_MASK =		0b00000110;
 	private static final byte GO_TO_REQUESTED_MASK =	0b00001000;
 	private static final byte AUTOMATIC_RELEASE_MASK = 	0b00010000;
@@ -111,7 +119,7 @@ public final class RobotiqHandInterface
 	private static final byte BASIC_MODE = 		0b00000000;
 	private static final byte PINCH_MODE = 		0b00000010;
 	private static final byte WIDE_MODE = 		0b00000100;
-	private static final byte SCISSOR_MODE = 	0b00000110; 
+	private static final byte SCISSOR_MODE = 	0b00000110;
 	//bit 3
 	private static final byte STANDBY = 		0b00000000;
 	private static final byte GO_TO_REQUESTED =	0b00001000;
@@ -123,11 +131,11 @@ public final class RobotiqHandInterface
 	//byte 1 (gripper options 1)
 	//bits 0 & 1 reserved
 	//bit 2
-	private static final byte CONCURRENT_FINGER_CONTROL = 	0b00000000;
+//	private static final byte CONCURRENT_FINGER_CONTROL = 	0b00000000;
 	private static final byte INDIVIDUAL_FINGER_CONTROL = 	0b00000100;
 	//bit 3
 	private static final byte CONCURRENT_SCISSOR_CONTROL = 	0b00000000;
-	private static final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
+//	private static final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
 	//bits 4 to 7 reserved
 	
 	//byte 2 (gripper options 2)
@@ -325,8 +333,8 @@ public final class RobotiqHandInterface
 	private byte initializedStatus;
 	private byte operationMode;
 	private byte commandedStatus;
-	private byte fingerControl;
-	private byte scissorControl;
+//	private byte fingerControl;
+//	private byte scissorControl;
 	private byte[] dataFromHand = new byte[32]; //buffer extracted for efficiency
 	private byte[] dataToSend = new byte[32]; //buffer extracted for efficiency
 	private byte[] status;
@@ -336,6 +344,8 @@ public final class RobotiqHandInterface
 //	private int faultCounter = 0;
 	private boolean connected = false;
 	private String address;
+	
+	private RobotiqHandSensorData handData = new RobotiqHandSensorData();
 	
 	public RobotiqHandInterface()
 	{
@@ -390,31 +400,45 @@ public final class RobotiqHandInterface
 		Arrays.fill(speed,(byte)0x00);
 		Arrays.fill(force,(byte)0x00);
 		
-		position[FINGER_A] = FULLY_OPEN;
-		speed[FINGER_A] = DEFAULT_SPEED;
-		force[FINGER_A] = MAX_FORCE/2;
+		position[FINGER_A] = BASIC_MODE_FULLY_OPEN[FINGER_A];
+		speed[FINGER_A] = MAX_SPEED;
+		force[FINGER_A] = DEFAULT_FORCE;
 		
-		speed[FINGER_B] = DEFAULT_SPEED;
-		force[FINGER_B] = MAX_FORCE/2;
-		speed[FINGER_C] = DEFAULT_SPEED;
-		force[FINGER_C] = MAX_FORCE/2;
+		position[FINGER_B] = BASIC_MODE_FULLY_OPEN[FINGER_B];
+		speed[FINGER_B] = MAX_SPEED;
+		force[FINGER_B] = DEFAULT_FORCE;
+		
+		position[FINGER_C] = BASIC_MODE_FULLY_OPEN[FINGER_C];
+		speed[FINGER_C] = MAX_SPEED;
+		force[FINGER_C] = DEFAULT_FORCE;
+		
+		position[SCISSOR] = BASIC_MODE_FULLY_OPEN[SCISSOR];
+		speed[SCISSOR] = MAX_SPEED;
+		force[SCISSOR] = DEFAULT_FORCE;
 		
 		initializedStatus = INITIALIZED;
 		operationMode = BASIC_MODE;
 		commandedStatus = STANDBY;
-		fingerControl = CONCURRENT_FINGER_CONTROL;
-		scissorControl = CONCURRENT_SCISSOR_CONTROL;
+//		fingerControl = CONCURRENT_FINGER_CONTROL;
+//		scissorControl = CONCURRENT_SCISSOR_CONTROL;
 		
 		sendRequest(SET_REGISTERS,
 				REGISTER_START,
 				(byte)(initializedStatus | operationMode | commandedStatus),
-				(byte)(fingerControl | scissorControl),
+				(byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL),
 				(byte)0x00,	//reserved byte
-				(byte)position[FINGER_A], //all finger control
+				(byte)position[FINGER_A],
 				(byte)speed[FINGER_A],
-				(byte)force[FINGER_A]);
-		
-//		blockDuringMotion();
+				(byte)force[FINGER_A],
+				(byte)position[FINGER_B],
+				(byte)speed[FINGER_B],
+				(byte)force[FINGER_B],
+				(byte)position[FINGER_C],
+				(byte)speed[FINGER_C],
+				(byte)force[FINGER_C],
+				(byte)position[SCISSOR],
+				(byte)speed[SCISSOR],
+				(byte)force[SCISSOR]);
 	}
 
 	public void reset()
@@ -429,7 +453,7 @@ public final class RobotiqHandInterface
 			sendRequest(SET_REGISTERS,
 						REGISTER_START,
 						(byte)(initializedStatus | operationMode | commandedStatus),
-						(byte)(fingerControl | scissorControl));
+						(byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL));
 		
 			ThreadTools.sleep(200);
 			try
@@ -458,93 +482,117 @@ public final class RobotiqHandInterface
 
 	public void open()
 	{
-		fingerControl = CONCURRENT_FINGER_CONTROL;
-		position[FINGER_A] = FULLY_OPEN; //all fingers
-//		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-//		{
-//			position[FINGER_B] = FULLY_OPEN;
-//			position[FINGER_C] = FULLY_OPEN;
-//		}
-		
+	   int operationMode = handData.getOperationMode();
+	   
+	   if(operationMode == RobotiqGraspMode.PINCH_MODE.ordinal())
+	   {
+	      position[FINGER_A] = PINCH_MODE_FULLY_OPEN[FINGER_A];
+	      position[FINGER_B] = PINCH_MODE_FULLY_OPEN[FINGER_B];
+	      position[FINGER_C] = PINCH_MODE_FULLY_OPEN[FINGER_C];
+	   }
+	   else if(operationMode == RobotiqGraspMode.BASIC_MODE.ordinal())
+	   {
+	      position[FINGER_A] = BASIC_MODE_FULLY_OPEN[FINGER_A];
+	      position[FINGER_B] = BASIC_MODE_FULLY_OPEN[FINGER_B];
+	      position[FINGER_C] = BASIC_MODE_FULLY_OPEN[FINGER_C];
+	   }
+	   
+		speed[FINGER_A] = MAX_SPEED;
+		force[FINGER_A] = DEFAULT_FORCE;
+		speed[FINGER_B] = MAX_SPEED;
+		force[FINGER_B] = DEFAULT_FORCE;
+		speed[FINGER_C] = MAX_SPEED;
+		force[FINGER_C] = DEFAULT_FORCE;
+	   
 		sendMotionRequest();
 	}
-	
-	public void open(double percent)
-	{
-		fingerControl = CONCURRENT_FINGER_CONTROL;
-		position[FINGER_A] = (byte)((1-percent) * (0xFF & FULLY_CLOSED)); //all fingers
-//		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-//		{
-//			position[FINGER_B] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
-//			position[FINGER_C] = (byte)((1-percent) * (0xFF & FULLY_CLOSED));
-//		}
-		
-		sendMotionRequest();
-	}
+
+//	public void open(double percent)
+//	{
+//		position[FINGER_A] = (byte)((1-percent) * (0xFF & FULLY_CLOSED)); //all fingers
+//		
+//		sendMotionRequest();
+//	}
 	
 	public void close()
 	{
-//		if(operationMode == PINCH_MODE)
-//		{
-//			position[FINGER_A] = PINCH_FULLY_CLOSED; //max closed position for pinch
-//			force[FINGER_A] = MAX_FORCE/2;
-//		}
-//		else
-//		{
-//			position[FINGER_A] = FULLY_CLOSED; // also all fingers
-//			force[FINGER_A] = MAX_FORCE/2;
-//			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-//			{
-//				position[FINGER_B] = FULLY_CLOSED;
-//				force[FINGER_B] = MAX_FORCE/2;
-//				position[FINGER_C] = FULLY_CLOSED;
-//				force[FINGER_C] = MAX_FORCE/2;
-//			}
-//		}
-		
-		fingerControl = CONCURRENT_FINGER_CONTROL;
-		position[FINGER_A] = FULLY_CLOSED;
-		speed[FINGER_A] = MAX_SPEED;
-		force[FINGER_A] = MAX_FORCE/2;
+		int operationMode = handData.getOperationMode();
+      
+      if(operationMode == RobotiqGraspMode.PINCH_MODE.ordinal())
+      {
+         position[FINGER_A] = PINCH_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = PINCH_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = PINCH_MODE_FULLY_CLOSED[FINGER_C];
+      }
+      else if(operationMode == RobotiqGraspMode.BASIC_MODE.ordinal())
+      {
+         position[FINGER_A] = BASIC_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = BASIC_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = BASIC_MODE_FULLY_CLOSED[FINGER_C];
+      }
+      
+      speed[FINGER_A] = MAX_SPEED;
+      force[FINGER_A] = DEFAULT_FORCE;
+      speed[FINGER_B] = MAX_SPEED;
+      force[FINGER_B] = DEFAULT_FORCE;
+      speed[FINGER_C] = MAX_SPEED;
+      force[FINGER_C] = DEFAULT_FORCE;
 		
 		sendMotionRequest();
 	}
 	
-	public void close(double percent) throws InterruptedException
-	{
-//		if(operationMode == PINCH_MODE)
-//		{
-//			position[FINGER_A] = (byte)(percent * PINCH_FULLY_CLOSED);
-//			force[FINGER_A] = MAX_FORCE/2;
-//		}
-//		else
-//		{
-//			position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED)); // also all fingers
-//			force[FINGER_A] = MAX_FORCE/2;
-//			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-//			{
-//				position[FINGER_B] = (byte)(percent * (0xFF & FULLY_CLOSED));
-//				force[FINGER_B] = MAX_FORCE/2;
-//				position[FINGER_C] = (byte)(percent * (0xFF & FULLY_CLOSED));
-//				force[FINGER_C] = MAX_FORCE/2;
-//			}
-//		}
-		
-		fingerControl = CONCURRENT_FINGER_CONTROL;
-		position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED));
-		speed[FINGER_A] = MAX_SPEED;
-		force[FINGER_A] = MAX_FORCE/2;
-		
-		sendMotionRequest();
-	}
+//	public void close(double percent) throws InterruptedException
+//	{
+////		if(operationMode == PINCH_MODE)
+////		{
+////			position[FINGER_A] = (byte)(percent * PINCH_FULLY_CLOSED);
+////			force[FINGER_A] = MAX_FORCE/2;
+////		}
+////		else
+////		{
+////			position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED)); // also all fingers
+////			force[FINGER_A] = MAX_FORCE/2;
+////			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
+////			{
+////				position[FINGER_B] = (byte)(percent * (0xFF & FULLY_CLOSED));
+////				force[FINGER_B] = MAX_FORCE/2;
+////				position[FINGER_C] = (byte)(percent * (0xFF & FULLY_CLOSED));
+////				force[FINGER_C] = MAX_FORCE/2;
+////			}
+////		}
+//		
+//		fingerControl = CONCURRENT_FINGER_CONTROL;
+//		position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED));
+//		speed[FINGER_A] = MAX_SPEED;
+//		force[FINGER_A] = MAX_FORCE/2;
+//		
+//		sendMotionRequest();
+//	}
 	
 	public void crush()
 	{
-		fingerControl = CONCURRENT_FINGER_CONTROL;
-		position[FINGER_A] = FULLY_CLOSED; // also all fingers
-		speed[FINGER_A] = MAX_SPEED;
-		force[FINGER_A] = MAX_FORCE;
-
+	   int operationMode = handData.getOperationMode();
+      
+      if(operationMode == RobotiqGraspMode.PINCH_MODE.ordinal())
+      {
+         position[FINGER_A] = PINCH_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = PINCH_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = PINCH_MODE_FULLY_CLOSED[FINGER_C];
+      }
+      else if(operationMode == RobotiqGraspMode.BASIC_MODE.ordinal())
+      {
+         position[FINGER_A] = BASIC_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = BASIC_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = BASIC_MODE_FULLY_CLOSED[FINGER_C];
+      }
+      
+      speed[FINGER_A] = MAX_SPEED;
+      force[FINGER_A] = MAX_FORCE;
+      speed[FINGER_B] = MAX_SPEED;
+      force[FINGER_B] = MAX_FORCE;
+      speed[FINGER_C] = MAX_SPEED;
+      force[FINGER_C] = MAX_FORCE;
+      
 		sendMotionRequest();
 	}
 
@@ -609,8 +657,6 @@ public final class RobotiqHandInterface
 	{
 		if(operationMode != mode)
 		{
-			fingerControl = CONCURRENT_FINGER_CONTROL;
-			scissorControl = CONCURRENT_SCISSOR_CONTROL;
 			operationMode = mode;
 			sendMotionRequest();
 			blockDuringGripChange();
@@ -636,34 +682,6 @@ public final class RobotiqHandInterface
 	
 	public void setIndividualFinger(int finger, byte desiredForce, byte desiredPosition, byte desiredSpeed)
 	{
-		try
-		{
-			status = getStatus();
-		}
-		catch (RobotiqConnectionException e)
-		{
-			e.printStackTrace();
-			return;
-		}
-		
-		if(fingerControl == CONCURRENT_FINGER_CONTROL)
-		{
-			position[FINGER_A] = status[FINGER_A_REQUESTED_POSITION];
-			position[FINGER_B] = status[FINGER_B_REQUESTED_POSITION];
-			position[FINGER_C] = status[FINGER_C_REQUESTED_POSITION];
-			force[FINGER_B] = force[FINGER_A];
-			force[FINGER_C] = force[FINGER_A];
-			speed[FINGER_B] = speed[FINGER_A];
-			speed[FINGER_C] = speed[FINGER_A];
-			fingerControl = INDIVIDUAL_FINGER_CONTROL;
-		}
-		
-		if(finger == SCISSOR)
-		{
-			position[SCISSOR] = status[SCISSOR_REQUESTED_POSITION];
-			scissorControl = CONCURRENT_SCISSOR_CONTROL;
-		}
-		
 		position[finger] = desiredPosition;
 		speed[finger] = desiredSpeed;
 		force[finger] = desiredForce;
@@ -684,15 +702,12 @@ public final class RobotiqHandInterface
 		for(int finger : fingers)
 		{
 			desiredSpeed[finger] = -(MAX_SPEED & 0xFF) + (2.0 * desiredSpeed[finger]) * (MAX_SPEED & 0xFF); // assuming range of [0,1] and mapping it to [-255,255]
-			desiredPosition = (desiredSpeed[finger] > 0) ? FULLY_CLOSED : FULLY_OPEN;
+			desiredPosition = (desiredSpeed[finger] > 0) ? (byte)0x00 : (byte)0xFF;
 			force[finger] = MAX_FORCE;
 			speed[finger] = (byte)((int)desiredSpeed[finger] & 0xFF);
 			position[finger] = desiredPosition;
 		}
 		
-		fingerControl = INDIVIDUAL_FINGER_CONTROL;
-//		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
-
 		sendMotionRequest();
 	}
 	
@@ -707,15 +722,10 @@ public final class RobotiqHandInterface
 		
 		for(int finger : fingers)
 		{
-			desiredPosition[finger] = FULLY_OPEN + desiredPosition[finger] * (FULLY_CLOSED & 0xFF);
-			
 			position[finger] = (byte)((int)desiredPosition[finger] & 0xFF);
 			force[finger] = MAX_FORCE;
-			speed[finger] = DEFAULT_SPEED;
+			speed[finger] = MAX_SPEED;
 		}
-		
-		fingerControl = INDIVIDUAL_FINGER_CONTROL;
-//		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
 		
 		sendMotionRequest();
 	}
@@ -724,15 +734,15 @@ public final class RobotiqHandInterface
 	{
 		if(side == RobotSide.LEFT)
 		{
-			setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
-			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_CLOSED, speed[FINGER_B]);
-			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_OPEN, speed[FINGER_C]); //index finger of left Hand
+			setIndividualFinger(FINGER_A, force[FINGER_A], BASIC_MODE_FULLY_CLOSED[FINGER_A], speed[FINGER_A]);
+			setIndividualFinger(FINGER_B, force[FINGER_B], BASIC_MODE_FULLY_CLOSED[FINGER_B], speed[FINGER_B]);
+			setIndividualFinger(FINGER_C, force[FINGER_C], BASIC_MODE_FULLY_OPEN[FINGER_C], speed[FINGER_C]); //index finger of left Hand
 		}
 		else
 		{
-			setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
-			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_OPEN, speed[FINGER_B]); //index finger of right Hand
-			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_CLOSED, speed[FINGER_C]); 
+			setIndividualFinger(FINGER_A, force[FINGER_A], BASIC_MODE_FULLY_CLOSED[FINGER_A], speed[FINGER_A]);
+			setIndividualFinger(FINGER_B, force[FINGER_B], BASIC_MODE_FULLY_OPEN[FINGER_B], speed[FINGER_B]); //index finger of right Hand
+			setIndividualFinger(FINGER_C, force[FINGER_C], BASIC_MODE_FULLY_CLOSED[FINGER_C], speed[FINGER_C]); 
 		}
 		
 		sendMotionRequest();
@@ -764,7 +774,6 @@ public final class RobotiqHandInterface
 		return positions;
 	}
 	
-	private RobotiqHandSensorData handData = new RobotiqHandSensorData(null);
 	public RobotiqHandSensorData getHandStatus()
 	{
 		do
@@ -778,9 +787,9 @@ public final class RobotiqHandInterface
 				e.printStackTrace();
 			}
 		}
-		while(status == null/* || status.length < 22*/);
+		while(status == null);
 		
-		dataFromHand[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZE);
+		dataFromHand[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZATON_MASK);
 		dataFromHand[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
 		dataFromHand[2] = (byte) ((status[GRIPPER_STATUS] & GO_TO_REQUESTED_MASK) >> 3);
 		dataFromHand[3] = (byte) ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) >> 4);
@@ -907,35 +916,29 @@ public final class RobotiqHandInterface
 		commandedStatus = GO_TO_REQUESTED;
 		
 		dataToSend[0] = (byte)(initializedStatus | operationMode | commandedStatus); //Whenever sending a motion request, the command hand positions bit (GO_TO_REQUESTED) must be sent
-		dataToSend[1] = (byte)(fingerControl | scissorControl);
+		dataToSend[1] = (byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL);
 		dataToSend[2] = 0x00; //reserved byte
 		//update finger a/all fingers
 		dataToSend[3] = position[FINGER_A];
 		dataToSend[4] = speed[FINGER_A];
 		dataToSend[5] = force[FINGER_A];
-		dataLength = 6;
 		
-		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
-		{
-			//update finger b
-			dataToSend[6] = position[FINGER_B];
-			dataToSend[7] = speed[FINGER_B];
-			dataToSend[8] = force[FINGER_B];
-			//update finger c
-			dataToSend[9] = position[FINGER_C];
-			dataToSend[10] = speed[FINGER_C];
-			dataToSend[11] = force[FINGER_C];
-			dataLength = 12;
-		}
+		//update finger b
+		dataToSend[6] = position[FINGER_B];
+		dataToSend[7] = speed[FINGER_B];
+		dataToSend[8] = force[FINGER_B];
 		
-//		if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
-//		{
-//			data[12] = position[SCISSOR];
-//			data[13] = speed[SCISSOR];
-//			data[14] = force[SCISSOR];
-//			data[15] = 0x00; //included to send an even number of registers. (see the sendRequest() warning)
-//			dataLength = 16;
-//		}
+		//update finger c
+		dataToSend[9] = position[FINGER_C];
+		dataToSend[10] = speed[FINGER_C];
+		dataToSend[11] = force[FINGER_C];
+		
+		//update scissor
+		dataToSend[12] = position[SCISSOR];
+		dataToSend[13] = speed[SCISSOR];
+		dataToSend[14] = force[SCISSOR];
+		dataToSend[15] = 0x00; //included to send an even number of registers. (see the sendRequest() warning)
+		dataLength = 16;
 		
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(dataToSend,0,dataLength));
 	}
