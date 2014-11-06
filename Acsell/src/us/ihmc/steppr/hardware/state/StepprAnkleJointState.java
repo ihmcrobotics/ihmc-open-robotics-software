@@ -18,10 +18,16 @@ public class StepprAnkleJointState
 
    private final DoubleYoVariable q_y;
    private final DoubleYoVariable qd_y;
+   private final DoubleYoVariable q_calc_y;
+   private final DoubleYoVariable qd_calc_y;
    private final DoubleYoVariable tau_y;
 
    private final DoubleYoVariable q_x;
    private final DoubleYoVariable qd_x;
+   
+   private final DoubleYoVariable q_calc_x;
+   private final DoubleYoVariable qd_calc_x;
+   
    private final DoubleYoVariable tau_x;
 
    private double motorAngle[] = new double[2];
@@ -37,10 +43,14 @@ public class StepprAnkleJointState
       
       this.q_y = new DoubleYoVariable(name + "_q_y", registry);
       this.qd_y = new DoubleYoVariable(name + "_qd_y", registry);
+      this.q_calc_y = new DoubleYoVariable(name + "_q_calc_y", registry);
+      this.qd_calc_y = new DoubleYoVariable(name + "_qd_calc_y", registry);
       this.tau_y = new DoubleYoVariable(name + "_tau_y", registry);
 
       this.q_x = new DoubleYoVariable(name + "_q_x", registry);
       this.qd_x = new DoubleYoVariable(name + "_qd_x", registry);
+      this.q_calc_x = new DoubleYoVariable(name + "_q_calc_x", registry);
+      this.qd_calc_x = new DoubleYoVariable(name + "_qd_calc_x", registry);
       this.tau_x = new DoubleYoVariable(name + "_tau_x", registry);
 
       parentRegistry.addChild(registry);
@@ -54,11 +64,17 @@ public class StepprAnkleJointState
       interpolator.updateAnkleState(motorAngle[0], motorAngle[1], rightActuator.getMotorVelocity(),
             leftActuator.getMotorVelocity());
 
-      this.q_x.set(interpolator.getQAnkleX());
-      this.q_y.set(interpolator.getQAnkleY());
+      this.q_calc_x.set(interpolator.getQAnkleX());
+      this.q_calc_y.set(interpolator.getQAnkleY());
 
-      this.qd_x.set(interpolator.getQdAnkleX());
-      this.qd_y.set(interpolator.getQdAnkleY());
+      this.qd_calc_x.set(interpolator.getQdAnkleX());
+      this.qd_calc_y.set(interpolator.getQdAnkleY());
+      
+      //TODO: Check right/left
+      this.q_x.set(rightActuator.getJointPosition());
+      this.qd_x.set(rightActuator.getJointVelocity());
+      this.q_y.set(leftActuator.getJointPosition());
+      this.qd_y.set(leftActuator.getJointVelocity());
    }
 
    public StepprJointState ankleY()

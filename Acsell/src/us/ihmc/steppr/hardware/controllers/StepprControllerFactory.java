@@ -44,12 +44,9 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class StepprControllerFactory
 {   
-   private static final double gravity = -9.792; //Tuned on Valkyrie 9.785; // Measured with IMUs on real robot
+   private static final double gravity = -9.81;
 
-   private static final boolean LOG_VALKYRIE_DATA = true;
    private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false;
-
-//   private static final boolean AUTO_CALIBRATE_TORQUE_OFFSETS = false;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {
