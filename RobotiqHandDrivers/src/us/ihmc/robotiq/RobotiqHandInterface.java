@@ -468,6 +468,16 @@ public final class RobotiqHandInterface
 		}while(status == null || (status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
 	}
 	
+	public void standby()
+	{
+		commandedStatus = STANDBY;
+		
+		sendRequest(SET_REGISTERS,
+				REGISTER_START,
+				(byte)(initializedStatus | operationMode | commandedStatus),
+				(byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL));
+	}
+	
 	public void shutdown()
 	{
 		try
@@ -722,6 +732,8 @@ public final class RobotiqHandInterface
 		
 		for(int finger : fingers)
 		{
+			desiredPosition[finger] = 0x00 + desiredPosition[finger] * 0xFF;
+			
 			position[finger] = (byte)((int)desiredPosition[finger] & 0xFF);
 			force[finger] = MAX_FORCE;
 			speed[finger] = MAX_SPEED;
@@ -858,8 +870,12 @@ public final class RobotiqHandInterface
 	}
 	
 	public void doControl()
-	{  
-		sendMotionRequest();
+	{
+		if(handData.objectDetected())
+			standby();
+		else
+			sendMotionRequest();
+		
 	}
 	
 	/* WARNING:
