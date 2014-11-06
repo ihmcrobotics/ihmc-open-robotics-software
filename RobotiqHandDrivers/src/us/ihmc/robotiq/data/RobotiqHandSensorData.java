@@ -78,19 +78,19 @@ public class RobotiqHandSensorData implements HandSensorData
 		int counter;
 		for(counter = 0; counter < 4; counter++)
 		{
-			objectDetection[counter] = (char) data[5 + counter];
+			objectDetection[counter] = (int) data[5 + counter];
 		}
 		for(counter = 0; counter < 4; counter++)
 		{
-			position[counter] = (char) (0xFF & data[11 + counter * 3]);
+			position[counter] = (int) (0xFF & data[11 + counter * 3]);
 		}
 		for(counter = 0; counter < 4; counter++)
 		{
-			requestedPosition[counter] = (char) (0xFF & data[10 + counter * 3]);
+			requestedPosition[counter] = (int) (0xFF & data[10 + counter * 3]);
 		}
 		for(counter = 0; counter < 4; counter++)
 		{
-			current[counter] = (char) (0xFF & data[12 + counter * 3]);
+			current[counter] = (int) (0xFF & data[12 + counter * 3]);
 		}
 	}
 	
@@ -127,6 +127,18 @@ public class RobotiqHandSensorData implements HandSensorData
 	public boolean hasStoppedShort()
 	{
 		return !(gripperStatus == IN_MOTION) && !(gripperStatus == STOPPED_AT_REQUESTED);
+	}
+	
+	public boolean objectDetected()
+	{
+		boolean ret = true;
+		
+		for(int i : objectDetection)
+		{
+			ret &= i == 1 || i == 2;
+		}
+		
+		return ret;
 	}
 	
 	public boolean isInitializing()
