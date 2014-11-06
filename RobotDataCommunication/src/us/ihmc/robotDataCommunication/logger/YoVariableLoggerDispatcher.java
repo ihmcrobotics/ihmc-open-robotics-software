@@ -88,7 +88,7 @@ public class YoVariableLoggerDispatcher
 
    public static void requestLogSession(String host, String logName)
    {
-      System.out.println("Requesting logging session");
+      System.out.println("Requesting logging session from " + host);
       InetAddress myIP;
       try
       {
