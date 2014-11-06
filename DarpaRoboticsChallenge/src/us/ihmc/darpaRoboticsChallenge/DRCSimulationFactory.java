@@ -139,7 +139,7 @@ public class DRCSimulationFactory
             null, gravity);
       
       ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
-      globalDataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
+      if (globalDataProducer != null) globalDataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
       drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
