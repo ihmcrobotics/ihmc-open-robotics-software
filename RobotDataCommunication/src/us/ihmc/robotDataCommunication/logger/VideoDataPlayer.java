@@ -20,8 +20,10 @@ import javax.swing.SwingUtilities;
 
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.yuv.YUVPicture;
+import us.ihmc.robotDataCommunication.logger.util.ExternalProgramHelpers;
 import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+import us.ihmc.utilities.operatingSystem.OperatingSystem;
 
 public class VideoDataPlayer
 {
@@ -297,11 +299,23 @@ public class VideoDataPlayer
       
       ffMpeg.setStarttime(startTime);
       ffMpeg.setEndtime(endTime);
-      ffMpeg.setInputFile("'"+videoFile.getAbsolutePath()+"'");
+
+      String filePathEncloser;
+
+      if (ExternalProgramHelpers.getOS() == OperatingSystem.WINDOWS)
+      {
+         filePathEncloser = "\"";
+      }
+      else
+      {
+         filePathEncloser = "'";
+      }
+
+      ffMpeg.setInputFile(filePathEncloser + videoFile.getAbsolutePath() + filePathEncloser);
       ffMpeg.setVideoCodec("copy");
       ffMpeg.setAudioCodec("copy");
       ffMpeg.enableExperimentalCodecs(true);
-      ffMpeg.setOutputFile("'"+outputFile.getAbsolutePath()+"'");
+      ffMpeg.setOutputFile(filePathEncloser + outputFile.getAbsolutePath() + filePathEncloser);
       
       PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
       try
