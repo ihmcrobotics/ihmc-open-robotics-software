@@ -940,6 +940,11 @@ public final class RobotiqHandInterface
 		dataToSend[15] = 0x00; //included to send an even number of registers. (see the sendRequest() warning)
 		dataLength = 16;
 		
+//		System.out.println("Sending:");
+//		System.out.println(position[FINGER_A]);
+//		System.out.println(position[FINGER_B]);
+//		System.out.println(position[FINGER_C]);
+		
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(dataToSend,0,dataLength));
 	}
 	
