@@ -84,7 +84,7 @@ public class StepprControllerFactory
        * Create output writer
        */
 
-      DRCOutputWriter drcOutputWriter = new StepprOutputWriter();
+      DRCOutputWriter drcOutputWriter = new StepprOutputWriter(robotModel);
       
       ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
@@ -126,7 +126,10 @@ public class StepprControllerFactory
       
       
       yoVariableServer.start();
-      YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, this.getClass().getSimpleName());
+      if(StepprNetworkParameters.LOGGER_HOST != null)
+      {
+         YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, this.getClass().getSimpleName());         
+      }
       
       robotController.start();
       StepprRunner runner = new StepprRunner(estimatorPriority, sensorReaderFactory, robotController);

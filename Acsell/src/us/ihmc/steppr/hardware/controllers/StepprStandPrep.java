@@ -44,7 +44,7 @@ public class StepprStandPrep implements StepprController
 
    private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
+   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
 
    @Override
    public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
@@ -89,6 +89,14 @@ public class StepprStandPrep implements StepprController
       switch (standPrepState.getEnumValue())
       {
       case WAIT:
+         
+         for (int i = 0; i < StepprJoint.values.length; i++)
+         {
+            StepprJoint joint = StepprJoint.values[i];
+            OneDoFJoint oneDoFJoint = joints.get(joint);
+            oneDoFJoint.setTau(0.0);
+         }
+         
          if (startStandprep.getBooleanValue())
          {
             standPrepState.set(StandPrepState.INITIALIZE);
