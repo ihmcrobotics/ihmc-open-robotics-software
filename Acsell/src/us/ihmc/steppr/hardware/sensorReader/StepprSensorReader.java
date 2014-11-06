@@ -17,6 +17,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.steppr.hardware.StepprJoint;
+import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.hardware.state.StepprXSensState;
@@ -36,7 +37,7 @@ public class StepprSensorReader implements SensorReader
 
    private final SensorProcessing sensorProcessing;
    private final RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
-   private final EnumMap<StepprJoint, OneDoFJoint> stepprJoints = new EnumMap<>(StepprJoint.class);
+   private final EnumMap<StepprJoint, OneDoFJoint> stepprJoints;
 
    private final IMUDefinition pelvisIMU;
    
@@ -58,16 +59,7 @@ public class StepprSensorReader implements SensorReader
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
 
       List<OneDoFJoint> jointList = stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions();
-      for (OneDoFJoint oneDoFJoint : jointList)
-      {
-         for (StepprJoint joint : StepprJoint.values)
-         {
-            if (joint.getSdfName().equals(oneDoFJoint.getName()))
-            {
-               stepprJoints.put(joint, oneDoFJoint);
-            }
-         }
-      }
+      stepprJoints = StepprUtil.createJointMap(jointList);
 
       List<IMUDefinition> imuList = stateEstimatorSensorDefinitions.getOrientationSensorDefinitions();
       IMUDefinition pelvisIMU = null;
@@ -98,12 +90,7 @@ public class StepprSensorReader implements SensorReader
             
             RawJointSensorDataHolder rawJoint = rawJointSensorDataHolderMap.get(joint);
             
-            rawJoint.setQ_raw(jointState.getQ());
-            rawJoint.setQd_raw(jointState.getQd());
-            for(int i = 0; i < jointState.getNumberOfActuators(); i++)
-            {
-               rawJoint.setMotorAngle(i, jointState.getMotorAngle(i));
-            }
+            state.updateRawSensorData(jointId, rawJoint);
             
             sensorProcessing.setJointPositionSensorValue(joint, jointState.getQ());
             sensorProcessing.setJointTauSensorValue(joint, jointState.getTau());
