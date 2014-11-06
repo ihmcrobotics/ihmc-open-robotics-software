@@ -441,6 +441,8 @@ public class PelvisPoseHistoryCorrection
          {
             if (randomlyGenerateATransform.getBooleanValue())
             {
+               confidenceFactor.set(1.0);
+               
                long midTimeStamp = stateEstimatorPelvisPoseBuffer.getOldestTimestamp()
                      + ((stateEstimatorPelvisPoseBuffer.getNewestTimestamp() - stateEstimatorPelvisPoseBuffer.getOldestTimestamp()) / 2);
                RigidBodyTransform pelvisPose = new RigidBodyTransform(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
@@ -458,6 +460,12 @@ public class PelvisPoseHistoryCorrection
 
                TimeStampedTransform3D testTransform = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
                addNewExternalPose(testTransform);
+                              
+               interpolatorStartingPosition.set(previousInterpolatedError);
+               previousInterpolatedError.setIdentity();
+               
+               updatePreviousInterpoledPelvisErrorYoVariables();
+               
                randomlyGenerateATransform.set(false);
             }
          }
