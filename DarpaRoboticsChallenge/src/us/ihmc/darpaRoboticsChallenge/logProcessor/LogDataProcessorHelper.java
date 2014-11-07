@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.logProcessor;
 
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
@@ -27,6 +28,11 @@ public class LogDataProcessorHelper
    private final ReferenceFrames referenceFrames;
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final TwistCalculator twistCalculator;
+   public WalkingControllerParameters getWalkingControllerParameters()
+   {
+      return walkingControllerParameters;
+   }
+
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
@@ -34,6 +40,7 @@ public class LogDataProcessorHelper
    private final SideDependentList<EnumYoVariable<?>> footStates = new SideDependentList<>();
 
    private final double controllerDT;
+   private final WalkingControllerParameters walkingControllerParameters;
 
    public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, SDFRobot sdfRobot)
    {
@@ -43,6 +50,7 @@ public class LogDataProcessorHelper
       twistCalculator = new TwistCalculator(fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator());
 
       controllerDT = model.getControllerDT();
+      this.walkingControllerParameters = model.getWalkingControllerParameters();
 
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
       contactableFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
