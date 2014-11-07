@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -48,6 +49,10 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable shrinkMaxLimit;
    private final IntegerYoVariable shrinkCounter;
 
+   private final IntegerYoVariable thresholdForCoPCellOccupancy;
+   private final IntegerYoVariable thresholdForCoPRegionOccupancy;
+   private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
+
    private final FrameLine2d lineOfRotation;
 
    public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
@@ -77,7 +82,16 @@ public class PartialFootholdControlModule
 
       footRotationCalculator = new FootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
       footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(), walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
-      footCoPOccupancyGrid.setThresholdForCellActivation(3);
+      
+      thresholdForCoPCellOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPCellOccupancy", registry);
+      thresholdForCoPCellOccupancy.set(3);
+      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
+
+      thresholdForCoPRegionOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
+      thresholdForCoPRegionOccupancy.set(2);
+      distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleYoVariable(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry);
+      distanceFromLineOfRotationToComputeCoPOccupancy.set(0.02);
+      
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -122,7 +136,8 @@ public class PartialFootholdControlModule
 
    private void shrinkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      boolean wasCoPInThatRegion = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT) >= 2;
+      int numberOfCellsOccupiedOnSideOfLine = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT, distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue());
+      boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine >= thresholdForCoPRegionOccupancy.getIntegerValue();
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
          footholdState.set(PartialFootholdState.PARTIAL);
@@ -169,5 +184,6 @@ public class PartialFootholdControlModule
       yoUnsafePolygon.hide();
       footRotationCalculator.reset();
       footCoPOccupancyGrid.reset();
+      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
    }
 }
