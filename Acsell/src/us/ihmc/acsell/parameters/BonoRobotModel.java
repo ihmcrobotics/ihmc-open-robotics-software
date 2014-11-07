@@ -43,7 +43,7 @@ import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobot
 public class BonoRobotModel implements DRCRobotModel
 {
    private static final double SIMULATE_DT = 0.0001;
-   private static final double CONTROLLER_DT = 0.006;
+   private static final double CONTROLLER_DT = 0.004;
    private static final double ESTIMATOR_DT = 0.001;
 
    private final String[] resourceDirectories = new String[] {

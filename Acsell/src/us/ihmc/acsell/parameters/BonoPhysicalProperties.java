@@ -11,7 +11,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
 {
-   public static final double ankleHeight = 0.00;
+   public static final double ankleHeight = 2.0 * 0.0254;
    public static final double footForward = 0.202;
    public static final double footBack = 0.05;
    public static final double footLength = footForward + footBack;
