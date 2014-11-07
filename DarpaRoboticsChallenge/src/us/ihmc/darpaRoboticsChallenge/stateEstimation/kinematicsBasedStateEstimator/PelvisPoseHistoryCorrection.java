@@ -100,6 +100,15 @@ public class PelvisPoseHistoryCorrection
    private final DoubleYoVariable correctedPelvisRoll;
    private final DoubleYoVariable correctedPelvisYaw;
 
+   private final DoubleYoVariable clippedAlphaValue;
+   private final DoubleYoVariable distanceTraveled;
+   private final DoubleYoVariable previousAlphaValue;
+   private final DoubleYoVariable maxVelocityClip;
+   private final DoubleYoVariable maxAlpha;
+
+   private final DoubleYoVariable distanceToTravel;
+   //   private final DoubleYoVariable distanceError;
+
    private final DoubleYoVariable interpolationAlphaFilterAlphaValue;
 
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
@@ -183,6 +192,15 @@ public class PelvisPoseHistoryCorrection
       correctedPelvisYaw = new DoubleYoVariable("correctedPelvis_yaw", registry);
       correctedPelvisPitch = new DoubleYoVariable("correctedPelvis_pitch", registry);
       correctedPelvisRoll = new DoubleYoVariable("correctedPelvis_roll", registry);
+
+      clippedAlphaValue = new DoubleYoVariable("clippedAlphaValue", registry);
+      distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
+      maxVelocityClip = new DoubleYoVariable("maxVelocityClip", registry);
+      maxVelocityClip.set(.0005);
+      previousAlphaValue = new DoubleYoVariable("previousAlphaValue", registry);
+      maxAlpha = new DoubleYoVariable("maxAlpha", registry);
+      distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
+      //      distanceError = new DoubleYoVariable("distanceError", registry);
       
       setupYoVariableManualTranslationBoolean();
    }
@@ -228,6 +246,7 @@ public class PelvisPoseHistoryCorrection
       pelvisPose.setRotation(interpolationRotation);
    }
    
+   RigidBodyTransform errorBetweenCurrentPositionAndCorrected = new RigidBodyTransform();
    /**
     * Calculates the instantaneous offset for this tick
     * @return
@@ -238,11 +257,20 @@ public class PelvisPoseHistoryCorrection
       RigidBodyTransform totalError = getTotalError();
       updateTotalErrorYoVariables(totalError);
 
-      transformInterpolationCalculator.computeInterpolation(interpolatorStartingPosition, totalError, interpolatedError,
-            interpolationAlphaFilter.getDoubleValue());
-      
+      errorBetweenCurrentPositionAndCorrected.invert(interpolatedError);
+      errorBetweenCurrentPositionAndCorrected.multiply(totalError);
+      errorBetweenCurrentPositionAndCorrected.getTranslation(tempVector);
+      distanceToTravel.set(tempVector.length());
+
+      maxAlpha.set((maxVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousAlphaValue.getDoubleValue());
+      clippedAlphaValue.set(MathTools.clipToMinMax(interpolationAlphaFilter.getDoubleValue(), 0.0, maxAlpha.getDoubleValue()));
+
+      transformInterpolationCalculator.computeInterpolation(interpolatorStartingPosition, totalError, interpolatedError, clippedAlphaValue.getDoubleValue());
       updateInterpoledPelvisErrorYoVariables();
+
       previousInterpolatedError.set(interpolatedError);
+      previousAlphaValue.set(clippedAlphaValue.getDoubleValue());
+
       return interpolatedError;
    }
    
@@ -294,6 +322,7 @@ public class PelvisPoseHistoryCorrection
    private void addNewExternalPose(TimeStampedTransform3D newPelvisPoseWithTime)
    {
       interpolationAlphaFilter.set(0);
+      distanceTraveled.set(0);
       calculateErrorInPast(newPelvisPoseWithTime, errorBuffer[bufferIndex]);
       incrementBufferIndex();
    }
@@ -339,7 +368,7 @@ public class PelvisPoseHistoryCorrection
       error.setTranslation(translationError);
       error.setRotation(rotationError);
       error.get(rotationMatrix);
-      RotationFunctions.setYawPitchRoll(rotationMatrix, RotationFunctions.getYaw(rotationMatrix), 0, 0);
+      RotationFunctions.setYawPitchRoll(rotationMatrix, 0, 0, 0);
       error.setRotation(rotationMatrix);
       errorToPack.setTransform3D(error);
    }
