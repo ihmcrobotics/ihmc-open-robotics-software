@@ -14,6 +14,8 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
+
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
@@ -51,6 +53,8 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
    private final DRCRobotJointMap jointMap;
    private final AtlasRobotVersion atlasVersion;
+
+   private boolean useSoftGroundContactParameters = false;
 
    public AtlasContactPointParameters(DRCRobotJointMap jointMap, AtlasRobotVersion atlasVersion)
    {
@@ -179,34 +183,73 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         
          //MomentumBasedControll ContactPoints
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
          footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
          footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
          footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, toeWidthForControl / 2.0));
-         contactableBodiesFactory.addFootContactParameters(footGroundContactPoints); 
+         contactableBodiesFactory.addFootContactParameters(footGroundContactPoints);
 
-         
          //SCS Sim contactPoints
-         int numberOfSimContactPointsY = 2, numberOfSimContactPointsX = 2;
-//         int numberOfSimContactPointsY = 3, numberOfSimContactPointsX = 4;
-         for (int ix = 0; ix < numberOfSimContactPointsX; ix++)
+         int nContactPointsX = 2;
+         int nContactPointsY = 2;
+
+         double dx = 1.01 * footLengthForControl / (nContactPointsX - 1.0);
+         double xOffset = 1.01 * footLengthForControl / 2.0;
+
+         for (int ix = 1; ix <= nContactPointsX; ix++)
          {
-            for (int iy = 0; iy < numberOfSimContactPointsY; iy++)
+            double alpha = (ix - 1.0) / (nContactPointsX - 1.0);
+            double footWidthAtCurrentX = (1.0 - alpha) * 1.01 * footWidthForControl + alpha * 1.01 * toeWidthForControl;
+            double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
+            double yOffset = footWidthAtCurrentX / 2.0;
+
+            for (int iy = 1; iy <= nContactPointsY; iy++)
             {
-               Point3d gcOffset = new Point3d(
-                     ix * footLengthForControl / (numberOfSimContactPointsX - 1) - footLengthForControl / 2,
-                     iy * footWidthForControl / (numberOfSimContactPointsY - 1) - footWidthForControl / 2, 
-                     0);
+               double x = (ix - 1.0) * dx - xOffset;
+               double y = (iy - 1.0) * dy - yOffset;
+               Point3d gcOffset = new Point3d(x, y, 0.0);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
                jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS
             }
          }
-
       }
+   }
+
+   public void addMoreFootContactPointsSimOnly()
+   {
+      int nContactPointsX = 8;
+      int nContactPointsY = 3;
+
+      double dx = 1.01 * footLengthForControl / (nContactPointsX - 1.0);
+      double xOffset = 1.01 * footLengthForControl / 2.0;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (int ix = 1; ix <= nContactPointsX; ix++)
+         {
+            double alpha = (ix - 1.0) / (nContactPointsX - 1.0);
+            double footWidthAtCurrentX = (1.0 - alpha) * 1.01 * footWidthForControl + alpha * 1.01 * toeWidthForControl;
+            double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
+            double yOffset = footWidthAtCurrentX / 2.0;
+
+            for (int iy = 1; iy <= nContactPointsY; iy++)
+            {
+               if ((ix == 1 || ix == nContactPointsX) && (iy == 1 || iy == nContactPointsY)) // Avoid adding corners a second time
+                  continue;
+               double x = (ix - 1) * dx - xOffset;
+               double y = (iy - 1) * dy - yOffset;
+               Point3d gcOffset = new Point3d(x, y, 0);
+
+               AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
+               jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS
+            }
+         }
+      }
+
+      useSoftGroundContactParameters = true;
    }
 
    public void createInvisibleHandContactPoints()
@@ -422,5 +465,24 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    public ContactableBodiesFactory getContactableBodiesFactory()
    {
       return contactableBodiesFactory;
+   }
+
+   @Override
+   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
+   {
+      if (useSoftGroundContactParameters)
+      {
+         linearGroundContactModel.setZStiffness(1000.0);
+         linearGroundContactModel.setZDamping(750.0);
+         linearGroundContactModel.setXYStiffness(50000.0);
+         linearGroundContactModel.setXYDamping(1000.0);
+      }
+      else
+      {
+         linearGroundContactModel.setZStiffness(2000.0);
+         linearGroundContactModel.setZDamping(1500.0);
+         linearGroundContactModel.setXYStiffness(50000.0);
+         linearGroundContactModel.setXYDamping(2000.0);
+      }
    }
 }

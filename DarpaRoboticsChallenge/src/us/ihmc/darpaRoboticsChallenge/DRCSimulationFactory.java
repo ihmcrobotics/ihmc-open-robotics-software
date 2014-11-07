@@ -89,7 +89,7 @@ public class DRCSimulationFactory
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      scsInitialSetup.initializeRobot(simulatedRobot, null);
+      scsInitialSetup.initializeRobot(simulatedRobot, drcRobotModel, null);
       robotInitialSetup.initializeRobot(simulatedRobot, drcRobotModel.getJointMap());
       simulatedRobot.update();
 

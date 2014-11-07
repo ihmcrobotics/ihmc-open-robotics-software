@@ -202,6 +202,11 @@ public class AtlasRobotModel implements DRCRobotModel
       jointMap.getContactPointParameters().createHandContactPoints();
    }
 
+   public void addMoreFootContactPointsSimOnly()
+   {
+      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly();
+   }
+
    @Override
    public void setJointDamping(SDFRobot simulatedRobot)
    {

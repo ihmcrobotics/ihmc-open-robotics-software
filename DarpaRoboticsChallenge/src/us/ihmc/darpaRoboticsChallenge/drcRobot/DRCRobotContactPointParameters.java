@@ -3,14 +3,15 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.SideDependentList;
-
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.SideDependentList;
+
+import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class DRCRobotContactPointParameters
 {
@@ -39,4 +40,6 @@ public abstract class DRCRobotContactPointParameters
    public abstract SideDependentList<RigidBodyTransform> getHandContactPointTransforms();
 
    public abstract SideDependentList<List<Point2d>> getHandContactPoints();
+
+   public abstract void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel);
 }
