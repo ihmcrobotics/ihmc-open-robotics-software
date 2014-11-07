@@ -30,6 +30,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 public class PelvisPoseHistoryCorrection
 {
+   private final boolean CORRECT_YAW = false;
    
    private final TimeStampedPelvisPoseBuffer stateEstimatorPelvisPoseBuffer;
    private ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber;
@@ -45,7 +46,6 @@ public class PelvisPoseHistoryCorrection
    private final RigidBodyTransform interpolatedError = new RigidBodyTransform();
    private final RigidBodyTransform previousInterpolatedError = new RigidBodyTransform();
    private final RigidBodyTransform interpolatorStartingPosition = new RigidBodyTransform();
-   private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
    private final RigidBodyTransform correctedPelvisPoseWorkingArea = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
@@ -111,6 +111,14 @@ public class PelvisPoseHistoryCorrection
 
    private final DoubleYoVariable interpolationAlphaFilterAlphaValue;
 
+   private final BooleanYoVariable manuallyTriggerLocalizationUpdate;
+
+   private final DoubleYoVariable manualTranslationOffsetX, manualTranslationOffsetY, manualTranslationOffsetZ;
+   private final DoubleYoVariable manualRotationOffsetInRadX, manualRotationOffsetInRadY, manualRotationOffsetInRadZ;
+   
+   private final double estimatorDT;
+   private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
+
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
    {
@@ -123,9 +131,11 @@ public class PelvisPoseHistoryCorrection
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, externalPelvisPoseSubscriber);
    }
 
-   public PelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public PelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
          ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
    {
+      this.estimatorDT = estimatorDT;
+      
       this.rootJoint = sixDofJoint;
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
       this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
@@ -148,7 +158,7 @@ public class PelvisPoseHistoryCorrection
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(interpolationAlphaFilterBreakFrequency.getDoubleValue(), dt);
+            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(interpolationAlphaFilterBreakFrequency.getDoubleValue(), estimatorDT);
             interpolationAlphaFilter.setAlpha(alpha);
          }
       });
@@ -196,13 +206,20 @@ public class PelvisPoseHistoryCorrection
       clippedAlphaValue = new DoubleYoVariable("clippedAlphaValue", registry);
       distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
       maxVelocityClip = new DoubleYoVariable("maxVelocityClip", registry);
-      maxVelocityClip.set(.0005);
+      maxVelocityClip.set(0.01);
       previousAlphaValue = new DoubleYoVariable("previousAlphaValue", registry);
       maxAlpha = new DoubleYoVariable("maxAlpha", registry);
       distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
       //      distanceError = new DoubleYoVariable("distanceError", registry);
       
-      setupYoVariableManualTranslationBoolean();
+      manuallyTriggerLocalizationUpdate = new BooleanYoVariable("manuallyTriggerLocalizationUpdate", registry);
+
+      manualTranslationOffsetX = new DoubleYoVariable("manualTranslationOffset_X", registry);
+      manualTranslationOffsetY = new DoubleYoVariable("manualTranslationOffset_Y", registry);
+      manualTranslationOffsetZ = new DoubleYoVariable("manualTranslationOffset_Z", registry);
+      manualRotationOffsetInRadX = new DoubleYoVariable("manualRotationOffsetInRad_X", registry);
+      manualRotationOffsetInRadY = new DoubleYoVariable("manualRotationOffsetInRad_Y", registry);
+      manualRotationOffsetInRadZ = new DoubleYoVariable("manualRotationOffsetInRad_Z", registry);
    }
    
    /**
@@ -211,6 +228,11 @@ public class PelvisPoseHistoryCorrection
     */
    public void doControl(long visionSensorTimestamp)
    {
+      if (manuallyTriggerLocalizationUpdate.getBooleanValue())
+      {
+         manuallyTriggerLocalizationUpdate();
+      }
+      
       if (externalPelvisPoseSubscriber != null)
       {
          if (externalPelvisPoseSubscriber.hasNewPose())
@@ -221,17 +243,17 @@ public class PelvisPoseHistoryCorrection
          rootJointFrame.getTransformToParent(pelvisPose);
          interpolationAlphaFilter.update(confidenceFactor.getDoubleValue());
 
-         addPelvisePoseToPelvisBuffer(visionSensorTimestamp);
-         updateNonProcessedYoVariables();
-         calculateCorrectedPelvisPose();
-         updateProcessedYoVariables();
+         addPelvisePoseToPelvisBuffer(pelvisPose, visionSensorTimestamp);
+         updateNonProcessedYoVariables(pelvisPose);
+         calculateCorrectedPelvisPose(pelvisPose);
+         updateProcessedYoVariables(pelvisPose);
 
          rootJoint.setPositionAndRotation(pelvisPose);
          rootJointFrame.update();
       }
    }
    
-   private void calculateCorrectedPelvisPose()
+   private void calculateCorrectedPelvisPose(RigidBodyTransform pelvisPose)
    {
       correctedPelvisPoseWorkingArea.set(getInterpolatedPelvisError());
       correctedPelvisPoseWorkingArea.getRotation(interpolationRotation);
@@ -262,7 +284,7 @@ public class PelvisPoseHistoryCorrection
       errorBetweenCurrentPositionAndCorrected.getTranslation(tempVector);
       distanceToTravel.set(tempVector.length());
 
-      maxAlpha.set((maxVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousAlphaValue.getDoubleValue());
+      maxAlpha.set((estimatorDT * maxVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousAlphaValue.getDoubleValue());
       clippedAlphaValue.set(MathTools.clipToMinMax(interpolationAlphaFilter.getDoubleValue(), 0.0, maxAlpha.getDoubleValue()));
 
       transformInterpolationCalculator.computeInterpolation(interpolatorStartingPosition, totalError, interpolatedError, clippedAlphaValue.getDoubleValue());
@@ -288,7 +310,7 @@ public class PelvisPoseHistoryCorrection
       return errorBuffer[index].getTransform3D();
    }
 
-   private void addPelvisePoseToPelvisBuffer(long timeStamp)
+   private void addPelvisePoseToPelvisBuffer(RigidBodyTransform pelvisPose, long timeStamp)
    {
       seNonProcessedPelvisTimeStamp.set(timeStamp);
       stateEstimatorPelvisPoseBuffer.put(pelvisPose, timeStamp);
@@ -321,8 +343,9 @@ public class PelvisPoseHistoryCorrection
     */
    private void addNewExternalPose(TimeStampedTransform3D newPelvisPoseWithTime)
    {
-      interpolationAlphaFilter.set(0);
-      distanceTraveled.set(0);
+      previousAlphaValue.set(0.0);
+      interpolationAlphaFilter.set(0.0);
+      distanceTraveled.set(0.0);
       calculateErrorInPast(newPelvisPoseWithTime, errorBuffer[bufferIndex]);
       incrementBufferIndex();
    }
@@ -368,13 +391,22 @@ public class PelvisPoseHistoryCorrection
       error.setTranslation(translationError);
       error.setRotation(rotationError);
       error.get(rotationMatrix);
-      RotationFunctions.setYawPitchRoll(rotationMatrix, 0, 0, 0);
+      
+      if (CORRECT_YAW)
+      {
+         RotationFunctions.setYawPitchRoll(rotationMatrix, RotationFunctions.getYaw(rotationMatrix), 0, 0);
+      }
+      else
+      {
+         RotationFunctions.setYawPitchRoll(rotationMatrix, 0, 0, 0);
+      }
+      
       error.setRotation(rotationMatrix);
       errorToPack.setTransform3D(error);
    }
    
 
-   private void updateNonProcessedYoVariables()
+   private void updateNonProcessedYoVariables(RigidBodyTransform pelvisPose)
    {
       pelvisPose.get(tempVector);
       pelvisPose.get(rot);
@@ -439,7 +471,7 @@ public class PelvisPoseHistoryCorrection
       totalErrorPelvisRoll.set(tempRots[2]);
    }
    
-   private void updateProcessedYoVariables()
+   private void updateProcessedYoVariables(RigidBodyTransform pelvisPose)
    {
       pelvisPose.get(tempVector);
       pelvisPose.get(rot);
@@ -451,54 +483,36 @@ public class PelvisPoseHistoryCorrection
       correctedPelvisPitch.set(tempRots[1]);
       correctedPelvisRoll.set(tempRots[2]);
    }
-
-   private void setupYoVariableManualTranslationBoolean()
+   
+   public void manuallyTriggerLocalizationUpdate()
    {
-      final DoubleYoVariable manualTranslationOffsetX = new DoubleYoVariable("manualTranslationOffset_X", registry);
-      final DoubleYoVariable manualTranslationOffsetY = new DoubleYoVariable("manualTranslationOffset_Y", registry);
-      final DoubleYoVariable manualTranslationOffsetZ = new DoubleYoVariable("manualTranslationOffset_Z", registry);
-      final DoubleYoVariable manualRotationOffsetInRadX = new DoubleYoVariable("manualRotationOffsetInRad_X", registry);
-      final DoubleYoVariable manualRotationOffsetInRadY = new DoubleYoVariable("manualRotationOffsetInRad_Y", registry);
-      final DoubleYoVariable manualRotationOffsetInRadZ = new DoubleYoVariable("manualRotationOffsetInRad_Z", registry);
+      confidenceFactor.set(1.0);
       
-      final BooleanYoVariable randomlyGenerateATransform = new BooleanYoVariable("PelvisErrorCorrector_RandomlyGenerateOffset", registry);
-      randomlyGenerateATransform.addVariableChangedListener(new VariableChangedListener()
-      {
+      long midTimeStamp = stateEstimatorPelvisPoseBuffer.getOldestTimestamp()
+            + ((stateEstimatorPelvisPoseBuffer.getNewestTimestamp() - stateEstimatorPelvisPoseBuffer.getOldestTimestamp()) / 2);
+      RigidBodyTransform pelvisPose = new RigidBodyTransform(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
 
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if (randomlyGenerateATransform.getBooleanValue())
-            {
-               confidenceFactor.set(1.0);
-               
-               long midTimeStamp = stateEstimatorPelvisPoseBuffer.getOldestTimestamp()
-                     + ((stateEstimatorPelvisPoseBuffer.getNewestTimestamp() - stateEstimatorPelvisPoseBuffer.getOldestTimestamp()) / 2);
-               RigidBodyTransform pelvisPose = new RigidBodyTransform(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
+      TransformTools.rotate(pelvisPose, manualRotationOffsetInRadX.getDoubleValue(), Axis.X);
+      TransformTools.rotate(pelvisPose, manualRotationOffsetInRadY.getDoubleValue(), Axis.Y);
+      TransformTools.rotate(pelvisPose, manualRotationOffsetInRadZ.getDoubleValue(), Axis.Z);
 
-               TransformTools.rotate(pelvisPose, manualRotationOffsetInRadX.getDoubleValue(), Axis.X);
-               TransformTools.rotate(pelvisPose, manualRotationOffsetInRadY.getDoubleValue(), Axis.Y);
-               TransformTools.rotate(pelvisPose, manualRotationOffsetInRadZ.getDoubleValue(), Axis.Z);
+      Vector3d translation = new Vector3d();
+      pelvisPose.get(translation);
+      translation.setX(translation.getX() - manualTranslationOffsetX.getDoubleValue());
+      translation.setY(translation.getY() - manualTranslationOffsetY.getDoubleValue());
+      translation.setZ(translation.getZ() - manualTranslationOffsetZ.getDoubleValue());
+      pelvisPose.setTranslation(translation);
 
-               Vector3d translation = new Vector3d();
-               pelvisPose.get(translation);
-               translation.setX(translation.getX() - manualTranslationOffsetX.getDoubleValue());
-               translation.setY(translation.getY() - manualTranslationOffsetY.getDoubleValue());
-               translation.setZ(translation.getZ() - manualTranslationOffsetZ.getDoubleValue());
-               pelvisPose.setTranslation(translation);
+      TimeStampedTransform3D testTransform = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
+      addNewExternalPose(testTransform);
+                     
+      interpolatorStartingPosition.set(previousInterpolatedError);
+      previousInterpolatedError.setIdentity();
+      
+      updatePreviousInterpoledPelvisErrorYoVariables();
+      
+      manuallyTriggerLocalizationUpdate.set(false);
 
-               TimeStampedTransform3D testTransform = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
-               addNewExternalPose(testTransform);
-                              
-               interpolatorStartingPosition.set(previousInterpolatedError);
-               previousInterpolatedError.setIdentity();
-               
-               updatePreviousInterpoledPelvisErrorYoVariables();
-               
-               randomlyGenerateATransform.set(false);
-            }
-         }
-      });
    }
 
    public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
