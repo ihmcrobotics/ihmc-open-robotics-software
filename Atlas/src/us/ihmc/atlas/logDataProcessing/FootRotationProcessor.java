@@ -1,5 +1,6 @@
 package us.ihmc.atlas.logDataProcessing;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
@@ -27,12 +28,13 @@ public class FootRotationProcessor implements LogDataProcessorFunction
       SideDependentList<ContactablePlaneBody> contactableFeet = logDataProcessorHelper.getContactableFeet();
       double controllerDT = logDataProcessorHelper.getControllerDT();
       TwistCalculator twistCalculator = logDataProcessorHelper.getTwistCalculator();
+      WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
          PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controllerDT, contactableFeet.get(robotSide),
-               twistCalculator, registry, yoGraphicsListRegistry);
+               twistCalculator, walkingControllerParameters, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
       }
    }
