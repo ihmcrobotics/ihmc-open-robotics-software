@@ -4,29 +4,22 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.physics.CollisionHandler;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
-import com.yobotics.simulationconstructionset.physics.ScsPhysics;
-import com.yobotics.simulationconstructionset.physics.collision.SpringCollisionHandler;
-import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCSCSInitialSetup implements ScsInitialSetup
+public class DRCSCSInitialSetup
 {
    private static final boolean SHOW_WORLD_COORDINATE_FRAME = false;
    private final double simulateDT;// = 0.0001;    // 0.00005; //
@@ -65,19 +58,12 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    }
 
 
-   public void initializeRobot(Robot robot, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void initializeRobot(Robot robot, DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       robot.setGravity(gravity);
 
-      double groundKz, groundBz, groundKxy, groundBxy;
-
-      groundKz = 2000.0;
-      groundBz = 1500.0;
-      groundKxy = 50000.0;
-      groundBxy = 2000.0;
-
-      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
-            robot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
+      robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel);
 
 //      if ((commonTerrain.getSteppingStones() != null) && (yoGraphicsListRegistry != null))
 //         commonTerrain.registerSteppingStonesArtifact(yoGraphicsListRegistry);

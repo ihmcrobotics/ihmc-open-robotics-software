@@ -12,10 +12,10 @@ public class AtlasFootExplorationTest extends DRCFootExplorationTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
       AtlasContactPointParameters contactPointParameters = (AtlasContactPointParameters) robotModel.getContactPointParameters();
-      contactPointParameters.createHandKnobContactPoints();
+      contactPointParameters.addMoreFootContactPointsSimOnly();
       return robotModel;
    }
 
