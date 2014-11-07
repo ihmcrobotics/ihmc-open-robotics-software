@@ -78,22 +78,60 @@ public class StepprXSensState
    
    public void update(ByteBuffer buffer)
    {
-      accelX.set(buffer.getFloat());
+      //Commented because IMU coordinates are not equivalent to Pelvis Coordinates
+//      accelX.set(buffer.getFloat());
+//      accelY.set(buffer.getFloat());
+//      accelZ.set(buffer.getFloat());
+//      
+//      gyroX.set(buffer.getFloat());
+//      gyroY.set(buffer.getFloat());
+//      gyroZ.set(buffer.getFloat());
+//      
+//      magX.set(buffer.getFloat());
+//      magY.set(buffer.getFloat());
+//      magZ.set(buffer.getFloat());
+//
+//      qs.set(buffer.getFloat());
+//      qx.set(buffer.getFloat());
+//      qy.set(buffer.getFloat());
+//      qz.set(buffer.getFloat());
+//      
+//      sample.set(buffer.getShort() & 0xFFFF);
+      
+      
+      //simple re-mappping of IMU Coordinates to Pelvis Coordinates  (Steve Spencer)
+      //Robot Z is IMU -X
+      //Robot Y is IMU Y
+      //Robot X is IMU Z
+      accelZ.set(-buffer.getFloat());
       accelY.set(buffer.getFloat());
-      accelZ.set(buffer.getFloat());
+      accelX.set(buffer.getFloat());
 
-      gyroX.set(buffer.getFloat());
+      gyroZ.set(-buffer.getFloat());
       gyroY.set(buffer.getFloat());
-      gyroZ.set(buffer.getFloat());
+      gyroX.set(buffer.getFloat());
       
-      magX.set(buffer.getFloat());
+      magZ.set(-buffer.getFloat());
       magY.set(buffer.getFloat());
-      magZ.set(buffer.getFloat());
-      
-      qs.set(buffer.getFloat());
-      qx.set(buffer.getFloat());
-      qy.set(buffer.getFloat());
-      qz.set(buffer.getFloat());
+      magX.set(buffer.getFloat());
+
+      //Quaternions aren't as simple to re-map   (Steve Spencer)
+      //IMU output maps IMU body coords to Spatial coords (Qsi)
+      //We want to map Pelvis coords to Spatial coords (Qsp)
+      //This can be done using Qsp = Qsi*Qip where Qip is a -90deg rotation about Y
+      double qstemp = buffer.getFloat();
+      double qxtemp = buffer.getFloat();
+      double qytemp = buffer.getFloat();
+      double qztemp = buffer.getFloat();
+      Quat4d Qsi = new Quat4d();
+      Quat4d Qip = new Quat4d();
+      Qsi.set(qxtemp,qytemp,qztemp,qstemp);
+      Qip.set(0,.707106781186548,0,-.707106781186548);
+      Qsi.mul(Qip);
+      qs.set(Qsi.w);
+      qx.set(Qsi.x);
+      qy.set(Qsi.y);
+      qz.set(Qsi.z);
       
       sample.set(buffer.getShort() & 0xFFFF);
       
