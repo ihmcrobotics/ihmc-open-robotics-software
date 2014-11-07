@@ -4,16 +4,13 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.GroundContactModel;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
@@ -25,7 +22,7 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private double courseAngle = 0.0;
-   private double courseStartDistance = 3.0;
+   private double courseStartDistance = 0.5;
 
    private double stepTread = 0.2794;
    private double stepWidth = 1.06;
