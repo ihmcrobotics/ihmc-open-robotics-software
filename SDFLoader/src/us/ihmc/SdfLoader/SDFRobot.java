@@ -23,6 +23,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
@@ -190,7 +191,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
-      System.out.println("SDFRobot: Total robot mass: " + totalMass);
+      System.out.println("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
 
    }
 
