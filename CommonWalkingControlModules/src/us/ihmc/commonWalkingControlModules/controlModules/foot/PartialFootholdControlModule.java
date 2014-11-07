@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
@@ -24,13 +25,18 @@ import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 public class PartialFootholdControlModule
 {
    private final String name = getClass().getSimpleName();
-   public enum PartialFootholdState { FULL, UNSAFE_CORNER, PARTIAL, SAFE_PARTIAL};
-   
+
+   public enum PartialFootholdState
+   {
+      FULL, UNSAFE_CORNER, PARTIAL, SAFE_PARTIAL
+   };
+
    private final YoVariableRegistry registry;
 
    private final EnumYoVariable<PartialFootholdState> footholdState;
 
    private final FootRotationCalculator footRotationCalculator;
+   private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
    private final ReferenceFrame soleFrame;
 
@@ -43,18 +49,19 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable shrinkCounter;
 
    private final FrameLine2d lineOfRotation;
-   
-   public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+
+   public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
+         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
       shrunkFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       lineOfRotation = new FrameLine2d(soleFrame);
-      
+
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
-      
+
       footholdState = new EnumYoVariable<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
 
@@ -69,21 +76,24 @@ public class PartialFootholdControlModule
       }
 
       footRotationCalculator = new FootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(), walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid.setThresholdForCellActivation(3);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
    {
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       unsafePolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
+      footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
 
       footRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
-      
+
       if (footRotationCalculator.isFootRotating())
       {
          footRotationCalculator.getLineOfRotation(lineOfRotation);
-         
+
          int numberOfVerticesRemoved = ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT);
-         
+
          if (numberOfVerticesRemoved <= 0)
          {
             doNothing();
@@ -91,11 +101,10 @@ public class PartialFootholdControlModule
          else if (numberOfVerticesRemoved == 1)
          {
             footholdState.set(PartialFootholdState.UNSAFE_CORNER);
-            shrinkFoothold(desiredCenterOfPressure);
+            doNothing(); // TODO Implement me!
          }
          else
          {
-            footholdState.set(PartialFootholdState.PARTIAL);
             shrinkFoothold(desiredCenterOfPressure);
          }
       }
@@ -113,8 +122,10 @@ public class PartialFootholdControlModule
 
    private void shrinkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3))
+      boolean wasCoPInThatRegion = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT) >= 2;
+      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
+         footholdState.set(PartialFootholdState.PARTIAL);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
          unsafePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
          yoUnsafePolygon.setFrameConvexPolygon2d(unsafePolygon);
@@ -126,7 +137,7 @@ public class PartialFootholdControlModule
    }
 
    private final FramePoint tempPosition = new FramePoint();
-   
+
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
       if (footholdState.getEnumValue() != PartialFootholdState.PARTIAL)
@@ -146,16 +157,17 @@ public class PartialFootholdControlModule
          tempPosition.setIncludingFrame(vertex.getReferenceFrame(), vertex.getX(), vertex.getY(), 0.0);
          contactPoints.get(i).setPosition(tempPosition);
       }
-      
+
       shrinkCounter.increment();
       return true;
    }
-   
+
    public void reset()
    {
       shrinkCounter.set(0);
       footholdState.set(null);
       yoUnsafePolygon.hide();
       footRotationCalculator.reset();
+      footCoPOccupancyGrid.reset();
    }
 }

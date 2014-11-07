@@ -18,8 +18,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
@@ -34,6 +36,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 public class FootRotationCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean VISUALIZE = false;
 
    private final String name = getClass().getSimpleName();
 
@@ -70,6 +73,8 @@ public class FootRotationCalculator
    private final DoubleYoVariable yoCoPErrorAlphaFilter;
    private final AlphaFilteredYoFrameVector2d yoCoPErrorFiltered;
    private final DoubleYoVariable yoCoPErrorPerpendicularToRotation;
+
+   private final Footstep currentDesiredFootstep;
 
    /** Threshold on the yaw rate of the line of rotation to determine whether or not the line of rotation is stable. */
    private final DoubleYoVariable yoStableLoRAngularVelocityThreshold;
@@ -113,12 +118,15 @@ public class FootRotationCalculator
       this.rotatingBody = rotatingFoot;
       this.soleFrame = rotatingFoot.getSoleFrame();
 
+      currentDesiredFootstep = new Footstep(rotatingFoot.getRigidBody(), null, soleFrame);
+
       footPolygonInSoleFrame.setIncludingFrameAndUpdate(rotatingFoot.getContactPoints2d());
 
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
       yoAngularVelocityAlphaFilter = new DoubleYoVariable(namePrefix + name + "AngularVelocityAlphaFilter", generalDescription, registry);
+      yoAngularVelocityAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(16.0, dt));
       yoFootAngularVelocityFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "",
             generalDescription, registry, yoAngularVelocityAlphaFilter, soleFrame);
 
@@ -169,6 +177,11 @@ public class FootRotationCalculator
       }
    }
 
+   public void setCurrentDesiredFootstep(Footstep currentDesiredFootstep)
+   {
+      this.currentDesiredFootstep.setPose(currentDesiredFootstep);
+   }
+
    public void compute(FramePoint2d desiredCoP, FramePoint2d cop)
    {
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
@@ -213,7 +226,7 @@ public class FootRotationCalculator
 
       yoIsFootRotating.set(yoIsLoRStable.getBooleanValue() && yoIsCoRStable.getBooleanValue() && yoIsAngularVelocityAroundLoRPastThreshold.getBooleanValue());
 
-      if (yoIsFootRotating.getBooleanValue())
+      if (VISUALIZE || yoIsFootRotating.getBooleanValue())
       {
          lineOfRotationInSoleFrame.set(centerOfRotation, angularVelocity2d);
          lineOfRotationInWorldFrame.setIncludingFrame(lineOfRotationInSoleFrame);
