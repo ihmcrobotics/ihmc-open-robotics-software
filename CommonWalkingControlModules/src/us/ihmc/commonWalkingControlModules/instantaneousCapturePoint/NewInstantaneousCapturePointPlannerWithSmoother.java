@@ -194,15 +194,17 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       computeConstantCentersOfPressure(footstepList);
       computeCapturePointCornerPoints(this.doubleSupportDuration.getDoubleValue() + this.singleSupportDuration.getDoubleValue());
 
-      computeUpcomingSingleSupportInitialDesiredCapturePointPosition(capturePointCornerPoints.get(1), constantCentroidalMomentumPivots.get(1),
-            singleSupportInitialDesiredCapturePointPosition, doubleSupportSplitFraction.getDoubleValue() * doubleSupportDuration.getDoubleValue());
 
       if (comeToStop.getBooleanValue())
       {
+         singleSupportInitialDesiredCapturePointPosition.set(constantCentroidalMomentumPivots.get(0));
          singleSupportInitialDesiredCapturePointVelocity.set(0.0, 0.0, 0.0);
       }
       else
       {
+         computeUpcomingSingleSupportInitialDesiredCapturePointPosition(capturePointCornerPoints.get(1), constantCentroidalMomentumPivots.get(1),
+               singleSupportInitialDesiredCapturePointPosition, doubleSupportSplitFraction.getDoubleValue() * doubleSupportDuration.getDoubleValue());
+         
          computeInitialVelocityOfUpcomingSingleSupportPhase();
       }
 
