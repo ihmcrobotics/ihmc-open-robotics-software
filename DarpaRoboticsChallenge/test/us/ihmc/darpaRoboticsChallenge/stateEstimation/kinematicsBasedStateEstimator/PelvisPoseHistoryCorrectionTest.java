@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import javax.vecmath.Matrix3d;
@@ -15,20 +17,27 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
 import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
 import us.ihmc.communication.subscribers.TimeStampedPelvisPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
@@ -41,11 +50,14 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestInterface
@@ -185,6 +197,153 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
       
+      sendPelvisCorrectionPackets = false;
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test
+   public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant, new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList()),
+            simpleFlatGroundScriptName, simpleFlatGroundScriptName, DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie,
+            false, robotModel);
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      final SDFRobot robot = drcSimulationTestHelper.getRobot();
+
+      ExternalPelvisPoseCreator externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
+      DRCSimulationFactory drcSimulationFactory = drcSimulationTestHelper.getDRCSimulationFactory();
+      drcSimulationFactory.setExternelPelvisCorrectorSubscriber(externalPelvisPoseCreator);
+      @SuppressWarnings("unchecked")
+      EnumYoVariable<HighLevelState> requestedHighLevelState = (EnumYoVariable<HighLevelState>) simulationConstructionSet.getVariable(
+            HighLevelHumanoidControllerManager.class.getSimpleName(), "requestedHighLevelState");
+      requestedHighLevelState.set(HighLevelState.DO_NOTHING_BEHAVIOR);
+
+      final DRCRobotJointMap jointMap = robotModel.getJointMap();
+
+      final LinkedHashMap<OneDegreeOfFreedomJoint, Double> qDesireds = new LinkedHashMap<>();
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<>();
+      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+
+      for (OneDegreeOfFreedomJoint joint : oneDegreeOfFreedomJoints)
+         qDesireds.put(joint, joint.getQ().getDoubleValue());
+
+      robot.setController(new RobotController()
+      {
+         @Override
+         public void initialize()
+         {
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return new YoVariableRegistry("Dummy");
+         }
+
+         @Override
+         public String getName()
+         {
+            return "Dummy";
+         }
+
+         @Override
+         public String getDescription()
+         {
+            return null;
+         }
+
+         @Override
+         public void doControl()
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               OneDegreeOfFreedomJoint shoulderPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH));
+               shoulderPitch.setKp(200.0);
+               shoulderPitch.setKd(20.0);
+               shoulderPitch.setqDesired(qDesireds.get(shoulderPitch));
+               OneDegreeOfFreedomJoint shoulderRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL));
+               shoulderRoll.setKp(200.0);
+               shoulderRoll.setKd(20.0);
+               shoulderRoll.setqDesired(qDesireds.get(shoulderRoll));
+               OneDegreeOfFreedomJoint elbowPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH));
+               elbowPitch.setKp(200.0);
+               elbowPitch.setKd(20.0);
+               elbowPitch.setqDesired(qDesireds.get(elbowPitch));
+               OneDegreeOfFreedomJoint elbowRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL));
+               elbowRoll.setKp(200.0);
+               elbowRoll.setKd(20.0);
+               elbowRoll.setqDesired(qDesireds.get(elbowRoll));
+               OneDegreeOfFreedomJoint wristPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_PITCH));
+               wristPitch.setKp(20.0);
+               wristPitch.setKd(2.0);
+               wristPitch.setqDesired(qDesireds.get(wristPitch));
+               OneDegreeOfFreedomJoint wristRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL));
+               wristRoll.setKp(20.0);
+               wristRoll.setKd(2.0);
+               wristRoll.setqDesired(qDesireds.get(wristRoll));
+
+               OneDegreeOfFreedomJoint hipPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
+               hipPitch.setKp(5000.0);
+               hipPitch.setKd(150.0);
+               hipPitch.setqDesired(qDesireds.get(hipPitch));
+               OneDegreeOfFreedomJoint hipRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
+               hipRoll.setKp(500.0);
+               hipRoll.setKd(50.0);
+               hipRoll.setqDesired(qDesireds.get(hipRoll));
+               OneDegreeOfFreedomJoint hipYaw = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+               hipYaw.setKp(100.0);
+               hipYaw.setKd(10.0);
+               hipYaw.setqDesired(qDesireds.get(hipYaw));
+               OneDegreeOfFreedomJoint knee = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE));
+               knee.setKp(5000.0);
+               knee.setKd(300.0);
+               knee.setqDesired(qDesireds.get(knee));
+               OneDegreeOfFreedomJoint anklePitch = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
+               anklePitch.setKp(2000.0);
+               anklePitch.setKd(200.0);
+               anklePitch.setqDesired(qDesireds.get(anklePitch));
+               OneDegreeOfFreedomJoint ankleRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL));
+               ankleRoll.setKp(100.0);
+               ankleRoll.setKd(10.0);
+               ankleRoll.setqDesired(qDesireds.get(ankleRoll));
+            }
+
+            OneDegreeOfFreedomJoint spinePitch = robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH));
+            spinePitch.setKp(5000.0);
+            spinePitch.setKd(300.0);
+            spinePitch.setqDesired(qDesireds.get(spinePitch));
+            OneDegreeOfFreedomJoint spineRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL));
+            spineRoll.setKp(1000.0);
+            spineRoll.setKd(100.0);
+            spineRoll.setqDesired(qDesireds.get(spineRoll));
+            OneDegreeOfFreedomJoint spineYaw = robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW));
+            spineYaw.setKp(500.0);
+            spineYaw.setKd(50.0);
+            spineYaw.setqDesired(qDesireds.get(spineYaw));
+         }
+      });
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+
+      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015);
+      activatePelvisPoseHistoryCorrector(registry, true);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
       sendPelvisCorrectionPackets = false;
       assertTrue(success);
 
