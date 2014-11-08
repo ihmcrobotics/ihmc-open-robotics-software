@@ -56,14 +56,11 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    public void doSpecificAction()
    {
-      if (FootControlModule.USE_AUTOMATIC_FOOT_SHRINK)
-      {
-         momentumBasedController.getFootSwitches().get(robotSide).computeAndPackCoP(cop);
-         FramePoint2d desiredCoP = momentumBasedController.getCoP(contactableBody);
-         partialFootholdControlModule.compute(desiredCoP, cop);
-         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
-         partialFootholdControlModule.applyShrunkPolygon(contactState);
-      }
+      momentumBasedController.getFootSwitches().get(robotSide).computeAndPackCoP(cop);
+      FramePoint2d desiredCoP = momentumBasedController.getCoP(contactableBody);
+      partialFootholdControlModule.compute(desiredCoP, cop);
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
+      partialFootholdControlModule.applyShrunkPolygon(contactState);
 
       if (doFancyOnToesControl.getBooleanValue())
          determineCoPOnEdge();
