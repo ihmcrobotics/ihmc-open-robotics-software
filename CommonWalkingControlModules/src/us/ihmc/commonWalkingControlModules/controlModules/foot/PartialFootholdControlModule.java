@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -52,6 +53,8 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable thresholdForCoPCellOccupancy;
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
+
+   private final BooleanYoVariable doPartialFootholdDetection;
 
    private final FrameLine2d lineOfRotation;
 
@@ -92,6 +95,8 @@ public class PartialFootholdControlModule
       distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleYoVariable(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry);
       distanceFromLineOfRotationToComputeCoPOccupancy.set(0.02);
       
+      doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
+      doPartialFootholdDetection.set(false);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -155,6 +160,9 @@ public class PartialFootholdControlModule
 
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
+      if (!doPartialFootholdDetection.getBooleanValue())
+         return false;
+
       if (footholdState.getEnumValue() != PartialFootholdState.PARTIAL)
          return false;
 
