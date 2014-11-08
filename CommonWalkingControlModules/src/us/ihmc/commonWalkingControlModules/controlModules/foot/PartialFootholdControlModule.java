@@ -96,7 +96,7 @@ public class PartialFootholdControlModule
       distanceFromLineOfRotationToComputeCoPOccupancy.set(0.02);
       
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
-      doPartialFootholdDetection.set(false);
+      doPartialFootholdDetection.set(true);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -120,11 +120,12 @@ public class PartialFootholdControlModule
          else if (numberOfVerticesRemoved == 1)
          {
             footholdState.set(PartialFootholdState.UNSAFE_CORNER);
-            doNothing(); // TODO Implement me!
+            computeShrunkFoothold(desiredCenterOfPressure);
          }
          else
          {
-            shrinkFoothold(desiredCenterOfPressure);
+            footholdState.set(PartialFootholdState.PARTIAL);
+            computeShrunkFoothold(desiredCenterOfPressure);
          }
       }
       else
@@ -139,13 +140,12 @@ public class PartialFootholdControlModule
       yoUnsafePolygon.hide();
    }
 
-   private void shrinkFoothold(FramePoint2d desiredCenterOfPressure)
+   private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
    {
       int numberOfCellsOccupiedOnSideOfLine = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT, distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue());
       boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine >= thresholdForCoPRegionOccupancy.getIntegerValue();
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
-         footholdState.set(PartialFootholdState.PARTIAL);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
          unsafePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
          yoUnsafePolygon.setFrameConvexPolygon2d(unsafePolygon);
