@@ -31,19 +31,6 @@ public class ModbusTCPConnection
 	
 	private boolean autoReconnect = false;
 	
-	public static void main(String[] args)
-	{
-		try
-		{
-			ModbusTCPConnection connection = new ModbusTCPConnection(RobotiqHandParameters.RIGHT_HAND_ADDRESS);
-			connection.setAutoReconnect(true);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	public ModbusTCPConnection(String ipAddress) throws UnknownHostException, IOException
 	{
 		this(ipAddress, 502);
@@ -66,7 +53,6 @@ public class ModbusTCPConnection
 		connection.connect(new InetSocketAddress(ipAddress, port), 200);
 		outStream = connection.getOutputStream();
 		inStream = new BufferedInputStream(connection.getInputStream());
-//		connection.setTcpNoDelay(true);
 		connection.setSoTimeout(500);
 		
 		setAutoReconnect(true);
