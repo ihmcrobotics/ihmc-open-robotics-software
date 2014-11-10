@@ -198,13 +198,13 @@ public class RobotiqHandSensorData implements HandSensorData
 	{
 		double[][] fingerJointAngles = new double[3][];
 		
-		temp[0] = -((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
+		temp[0] = ((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
 		temp[1] = (double)position[FINGER_A] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
 		temp[2] = (double)position[FINGER_A] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
 		fingerJointAngles[0] = Arrays.copyOf(temp, 4);
 		
-		temp[0] = ((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
+		temp[0] = -((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
 		temp[1] = (double)position[FINGER_B] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
 		temp[2] = (double)position[FINGER_B] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
