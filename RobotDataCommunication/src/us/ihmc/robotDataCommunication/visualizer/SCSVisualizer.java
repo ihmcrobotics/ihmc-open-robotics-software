@@ -138,7 +138,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    public void setYoVariableClient(final YoVariableClient client)
    {
-      final JButton disconnectButton = new JButton("disconnect");
+      final JButton disconnectButton = new JButton("Disconnect");
       scs.addButton(disconnectButton);
       disconnectButton.addActionListener(new ActionListener()
       {
