@@ -163,13 +163,19 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       return imuUSBSerialIds;
    }
-   
+
    @Override
-   public String[] getIMUSensorsToUse()
+   public String[] getIMUSensorsToUseInStateEstimator()
    {
       return imuSensorsToUse;
    }
 
+   @Override
+   public String[] getIMUSensorsToProcess()
+   {
+      return imuSensorsToUse;
+   }
+   
    @Override
    public String[] getForceSensorNames()
    {
