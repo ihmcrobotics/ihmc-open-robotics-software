@@ -41,7 +41,13 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String[] getIMUSensorsToUse()
+   public String[] getIMUSensorsToUseInStateEstimator()
+   {
+      return imuSensorsToUse;
+   }
+
+   @Override
+   public String[] getIMUSensorsToProcess()
    {
       return imuSensorsToUse;
    }
