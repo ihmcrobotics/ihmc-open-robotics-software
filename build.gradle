@@ -12,7 +12,9 @@ setupProjectSpecificDependencies()
 
 buildscript {
   repositories {
-      mavenCentral() 
+	  maven{
+		  url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+	  }
   }  
   dependencies {
       classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
