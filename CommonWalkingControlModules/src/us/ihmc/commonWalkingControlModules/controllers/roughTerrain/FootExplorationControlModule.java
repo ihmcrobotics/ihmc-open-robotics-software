@@ -8,6 +8,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.antlr.runtime.tree.RewriteRuleTokenStream;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
@@ -92,14 +93,15 @@ public class FootExplorationControlModule
    private static boolean adjustContactPointInXNOnly = false;
    
    // swing state parameters
-   private static double icpBiasToInnerSole = 0.0;
+   private static double icpBiasToInnerSole = 0.01;
    private static double swingTimeForExploration = 4;
    private static double safetyScalingOfContactPoints = 1.0; //0.85
    private static boolean forceFootCoPOverCMP = true;
    private static double footCoPOverCMPGainForQPSolver = 2.0;
 
    // unstable situations
-   private static double maxICPAbsError = 0.04;
+   private static double initialMaxICPAbsError = 0.04;
+   private DoubleYoVariable maxICPAbsError;
    private static double maxICPAbsErrorForSingleSupport = 0.01;
    private static double minCoPDistanceFromBorder = 0.01;
    private static double recoverStateContactPointsScaleFactor = 0.9;
@@ -107,7 +109,7 @@ public class FootExplorationControlModule
    private static int minimumNumberOfContactPointsToHaveAPolygon = 3;
 
    // parameter of tilt foot
-   private static double zeroVelocity = 0.1;
+   private static double zeroVelocity = 0.2;
    private static double alphaForJointVelocity = 0.95;
    private static double alphaForFootAngularRate = 0.95;
    private static int numberOfJointCheckedForZeroVelocity = 2;
@@ -210,6 +212,8 @@ public class FootExplorationControlModule
       finalICPPositionPercentage = new DoubleYoVariable("finalICPPositionPercentage", registry);
       icpIsCloseEnoughToDesired = new BooleanYoVariable("icpIsCloseEnoughToDesired", registry);
       explorationICPErrorAbs = new DoubleYoVariable("explorationICPErrorAbs", registry);
+      maxICPAbsError = new DoubleYoVariable("maxICPAbsError", registry);
+      maxICPAbsError.set(initialMaxICPAbsError);
       footExplorationICPPlanner = new FootExplorationICPPlanner("footExplorationICPPlanner", worldFrame, totalPercentageProvider, initialICPPositionProvider,
             finalICPPositionProvider, registry);
       planeContactStates = momentumBasedController.getPlaneContactStates();
@@ -292,7 +296,7 @@ public class FootExplorationControlModule
       desiredICPToPack.set(desiredICPLocal.getX(), desiredICPLocal.getY());
       desiredICPVelocityToPack.set(desiredICPVelocityLocal.getX(), desiredICPVelocityLocal.getY());
       explorationICPErrorAbs.set(Math.abs(currentCapturePoint.distance(desiredICPLocal)));
-      icpIsCloseEnoughToDesired.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsError);
+      icpIsCloseEnoughToDesired.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsError.getDoubleValue());
       icpIsCloseEnoughForSingleSupport.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsErrorForSingleSupport);
 
       boolean explorationIsFinishedAndICPIsCloseToFinalPosition = checkIfExplorationIsFinished();
