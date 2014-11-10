@@ -208,13 +208,15 @@ public class CapturePointUpdatable implements Updatable
    {
       Vector2d edgeVector = constuctEdgeFromTwoVertices(firstVertex, secondVertex);
 
-      firstVertexToPoint.set(point);
-      firstVertexToPoint.sub(firstVertex);
-
       projectedPoint.set(firstVertex);
 
-      if (edgeVector.lengthSquared() > 1e-10)
+      boolean edgeIsNotTrivial = edgeVector.lengthSquared() > 1e-10;
+      
+      if ( edgeIsNotTrivial )
       {
+         firstVertexToPoint.set(point);
+         firstVertexToPoint.sub(firstVertex);
+         
          double dotProduct = edgeVector.dot(firstVertexToPoint);
          double lengthSquared = edgeVector.lengthSquared();
          double alpha = dotProduct / lengthSquared;
