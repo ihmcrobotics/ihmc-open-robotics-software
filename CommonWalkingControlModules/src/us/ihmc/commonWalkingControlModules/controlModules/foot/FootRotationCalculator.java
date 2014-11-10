@@ -233,7 +233,7 @@ public class FootRotationCalculator
          lineOfRotationInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
          FramePoint2d[] intersections = footPolygonInWorldFrame.intersectionWith(lineOfRotationInWorldFrame);
 
-         if (intersections == null || intersections.length == 1)
+         if (intersections == null || intersections.length == 1 || intersections[0].epsilonEquals(intersections[1], 1.0e-3))
          {
             yoLineOfRotation.setToNaN();
          }
