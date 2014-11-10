@@ -361,7 +361,11 @@ public final class RobotiqHandInterface
 		this.address = robotSide.equals(RobotSide.LEFT) ? RobotiqHandParameters.LEFT_HAND_ADDRESS : RobotiqHandParameters.RIGHT_HAND_ADDRESS;
 		
 		if(connect())
+		{
 			reset();
+			new Thread(new ConnectionListener(connection)).start();
+		}
+		
 	}
 	
 	public boolean connect()
@@ -390,7 +394,7 @@ public final class RobotiqHandInterface
 		}
 		catch (RobotiqConnectionException e)
 		{
-			e.printStackTrace();
+//			e.printStackTrace();
 			return;
 		}
 		
@@ -443,6 +447,7 @@ public final class RobotiqHandInterface
 				(byte)position[SCISSOR],
 				(byte)speed[SCISSOR],
 				(byte)force[SCISSOR]);
+		
 	}
 
 	public void reset()
@@ -825,8 +830,9 @@ public final class RobotiqHandInterface
 		return positions;
 	}
 	
-	public RobotiqHandSensorData getHandStatus()
+	public RobotiqHandSensorData getHandStatus() throws IOException
 	{
+		int faultCount = 0;
 		do
 		{
 			try
@@ -835,10 +841,15 @@ public final class RobotiqHandInterface
 			}
 			catch(RobotiqConnectionException e)
 			{
-				e.printStackTrace();
+				System.out.println("RobotiqHandInterface: Unable to read data from hand at " + address);
+				faultCount++;
+				ThreadTools.sleep(500);
 			}
 		}
-		while(status == null);
+		while(status == null && faultCount <= 5);
+		
+		if(status == null)
+			throw new IOException("Unable to read hand status at " + address);
 		
 		dataFromHand[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZATON_MASK);
 		dataFromHand[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
@@ -1015,6 +1026,41 @@ public final class RobotiqHandInterface
 		}
 		
 		return status;
+	}
+	
+	class ConnectionListener implements Runnable
+	{
+		public ModbusTCPConnection connection;
+		
+		public ConnectionListener(ModbusTCPConnection connection)
+		{
+			this.connection = connection;
+		}
+		
+		@Override
+		public void run()
+		{
+			while(true)
+			{
+				while(!connection.testConnection())
+				{
+					try
+					{
+						connection.setupConnectionFields(address, RobotiqHandParameters.PORT);
+					}
+					catch (IOException e)
+					{
+						System.out.println("RobotiqHandInterface: lost connection at " + address);
+						System.out.println("Attempting to reconnect...");
+						initializedStatus = 0x00;
+					}
+					
+					ThreadTools.sleep(200);
+				}
+				
+				ThreadTools.sleep(1000);
+			}
+		}
 	}
 	
 	class RobotiqConnectionException extends Exception
