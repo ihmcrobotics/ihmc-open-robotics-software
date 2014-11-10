@@ -10,17 +10,11 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import us.ihmc.robotiq.RobotiqHandParameters;
-import us.ihmc.utilities.ThreadTools;
-
 public class ModbusTCPConnection
 {
 	private static final int HEADER_LENGTH = 7; // header length in bytes
 	
 	private final Object lock = new Object();
-	
-	private final String ipAddress;
-	private final int port;
 	
 	private Socket connection;
 	private OutputStream outStream;
@@ -29,8 +23,6 @@ public class ModbusTCPConnection
 	private byte[] inBuffer = new byte[32];
 	private int packetCounter;
 	
-	private boolean autoReconnect = false;
-	
 	public ModbusTCPConnection(String ipAddress) throws UnknownHostException, IOException
 	{
 		this(ipAddress, 502);
@@ -38,24 +30,18 @@ public class ModbusTCPConnection
 	
 	public ModbusTCPConnection(String ipAddress, int port) throws UnknownHostException, IOException
 	{
-		this.ipAddress = ipAddress;
-		this.port = port;
-		
-		// TODO might not want timeout on initial connection
 		setupConnectionFields(ipAddress, port);
 		
 		packetCounter = 0;
 	}
 	
-	private void setupConnectionFields(String ipAddress, int port) throws IOException
+	public void setupConnectionFields(String ipAddress, int port) throws IOException
 	{
 		connection = new Socket();
 		connection.connect(new InetSocketAddress(ipAddress, port), 200);
 		outStream = connection.getOutputStream();
 		inStream = new BufferedInputStream(connection.getInputStream());
 		connection.setSoTimeout(500);
-		
-		setAutoReconnect(true);
 	}
 	
 	public void transcieve(int unitID, byte[] data) throws IOException
@@ -162,43 +148,5 @@ public class ModbusTCPConnection
 		}
 		
 		return true;
-	}
-	
-	public void setAutoReconnect(boolean autoReconnect)
-	{
-		if(this.autoReconnect != autoReconnect)
-		{
-			this.autoReconnect = autoReconnect;
-			
-			if(autoReconnect)
-				new Thread(new ConnectionListener()).start();
-		}
-	}
-	
-	class ConnectionListener implements Runnable
-	{
-		@Override
-		public void run()
-		{
-			while(autoReconnect)
-			{
-				while(!testConnection())
-				{
-					try
-					{
-						setupConnectionFields(ipAddress, port);
-					}
-					catch (IOException e)
-					{
-						System.out.println("ModbusTCPConnection: lost connection at " + ipAddress + ":" + port);
-						System.out.println("Attempting to reconnect...");
-					}
-					
-					ThreadTools.sleep(200);
-				}
-				
-				ThreadTools.sleep(1000);
-			}
-		}
 	}
 }
