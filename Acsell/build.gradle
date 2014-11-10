@@ -10,7 +10,9 @@ configurations {
 
 buildscript {
   repositories {
-      mavenCentral() 
+	  maven{
+		  url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+	  }
   }  
   dependencies {
       classpath "org.apache.maven.wagon:wagon-ssh:2.7" 
