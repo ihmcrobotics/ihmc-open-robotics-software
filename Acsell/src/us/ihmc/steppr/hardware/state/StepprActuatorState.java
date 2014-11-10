@@ -16,8 +16,8 @@ import us.ihmc.steppr.hardware.state.slowSensors.RawPhaseCurrentADTicks;
 import us.ihmc.steppr.hardware.state.slowSensors.StatorHalSwitches;
 import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensor;
 import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.steppr.hardware.state.slowSensors.controllerTemperature1;
-import us.ihmc.steppr.hardware.state.slowSensors.controllerTemperature2;
+import us.ihmc.steppr.hardware.state.slowSensors.ControllerTemperature1;
+import us.ihmc.steppr.hardware.state.slowSensors.ControllerTemperature2;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -88,8 +88,8 @@ public class StepprActuatorState
       slowSensors[5] = new ControlMode(name, slowSensorRegistry);
       
       slowSensors[6] = new MotorTemperature(name, slowSensorRegistry);
-      slowSensors[7] = new controllerTemperature1(name, slowSensorRegistry);
-      slowSensors[8] = new controllerTemperature2(name, slowSensorRegistry);
+      slowSensors[7] = new ControllerTemperature1(name, slowSensorRegistry);
+      slowSensors[8] = new ControllerTemperature2(name, slowSensorRegistry);
       
       slowSensors[9] = new InphaseControlEffort(name, slowSensorRegistry);
       slowSensors[10] = new QuadratureControlEffort(name, slowSensorRegistry);
