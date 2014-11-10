@@ -33,7 +33,7 @@ public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParam
    private static double dutyCycle;
    private static boolean autoExposure;
    private static boolean autoWhitebalance;
-   private static String resolution = new String("1024x544x128");
+   private static String resolution = new String("2048x1088x64");
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private RosMainNode rosMainNode;
    private AbstractNetworkProcessorNetworkingManager networkingManager;
