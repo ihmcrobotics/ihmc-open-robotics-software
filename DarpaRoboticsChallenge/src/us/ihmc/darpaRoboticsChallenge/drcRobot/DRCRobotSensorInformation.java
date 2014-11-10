@@ -4,7 +4,9 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 public interface DRCRobotSensorInformation
 {
-   public String[] getIMUSensorsToUse();
+   public String[] getIMUSensorsToUseInStateEstimator();
+
+   public String[] getIMUSensorsToProcess();
 
    public String[] getForceSensorNames();
 

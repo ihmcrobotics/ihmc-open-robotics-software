@@ -74,7 +74,9 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
    private static final String bodyIMUSensor = "pelvis_imu_sensor";
-   private static final String[] imuSensorsToUse = { bodyIMUSensor };
+   private static final String headIMUSensor = "head_head_imu_sensor";
+   private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
+   private static final String[] imuSensorsToProcess = { bodyIMUSensor, headIMUSensor };
    
    /**
     * Stereo Parameters
@@ -145,9 +147,15 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String[] getIMUSensorsToUse()
+   public String[] getIMUSensorsToUseInStateEstimator()
    {
-      return imuSensorsToUse;
+      return imuSensorsToUseInStateEstimator;
+   }
+
+   @Override
+   public String[] getIMUSensorsToProcess()
+   {
+      return imuSensorsToProcess;
    }
    
    @Override

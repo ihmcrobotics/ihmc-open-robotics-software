@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -29,7 +30,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
-
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
@@ -56,20 +56,26 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-         SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
+         SensorOutputMapReadOnly sensorOutputMapReadOnly, String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
+         SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
-      
+
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
-      this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
-            stateEstimatorParameters.getEstimatorDT(), registry, 1000);
+      this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
 
-      List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
+      List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
+      List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);
+      for (IMUSensorReadOnly imu : sensorOutputMapReadOnly.getIMUProcessedOutputs())
+      {
+         if (imuSensorsToUse.contains(imu.getSensorName()))
+            imuProcessedOutputs.add(imu);
+      }
+
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>();
 
       if (stateEstimatorParameters.createFusedIMUSensor())
@@ -111,8 +117,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          setupDynamicGraphicObjects(yoGraphicsListRegistry, imusToDisplay);
    }
 
-   private void setupDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry,
-         List<? extends IMUSensorReadOnly> imuProcessedOutputs)
+   private void setupDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
@@ -147,7 +152,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater.updateJointState();
       pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
       pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
-      
+
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
          pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getVisionSensorTimestamp());

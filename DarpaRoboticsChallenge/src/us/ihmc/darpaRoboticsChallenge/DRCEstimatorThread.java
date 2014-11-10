@@ -81,7 +81,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParameters();
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      final List<String> imuSensorsToUse = Arrays.asList(sensorInformation.getIMUSensorsToUse());
+      final List<String> imuSensorsToUse = Arrays.asList(sensorInformation.getIMUSensorsToProcess());
       IMUDefinition[] imuDefinitions = new IMUDefinition[imuSensorsToUse.size()];
       int index = 0;
       for (IMUDefinition imuDefinition : estimatorFullRobotModel.getIMUDefinitions())
@@ -216,7 +216,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          //         double footSwitchCoPThresholdFraction = 0.01;
-         WalkingControllerParameters walkingControllerParameters = drcRobotModel.getWalkingControllerParameters();
          double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
          double contactTresholdForce = stateEstimatorParameters.getContactThresholdForce();
          WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
@@ -224,9 +223,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          footSwitchesForEstimator.put(robotSide, wrenchBasedFootSwitchForEstimator);
       }
       
+      String[] imuSensorsToUseInStateEstimator = drcRobotModel.getSensorInformation().getIMUSensorsToUseInStateEstimator();
+      
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, yoGraphicsListRegistry);
+            sensorOutputMapReadOnly, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchesForEstimator, bipedFeet, yoGraphicsListRegistry);
 
       return drcStateEstimator;
    }
