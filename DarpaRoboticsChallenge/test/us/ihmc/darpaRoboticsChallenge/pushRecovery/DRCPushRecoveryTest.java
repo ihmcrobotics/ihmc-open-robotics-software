@@ -77,12 +77,12 @@ public abstract class DRCPushRecoveryTest
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
       // push timing:
-      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * transferTime;
       
       // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double magnitude = 600.0;
+      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      double magnitude = 500.0;
       double duration = 0.1;
       
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
