@@ -15,7 +15,7 @@ public class InphaseControlEffort implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      inphaseControlEffort.set(value);
+      inphaseControlEffort.set(((double)((short) value)) / 100.0);
    }
 
 }
