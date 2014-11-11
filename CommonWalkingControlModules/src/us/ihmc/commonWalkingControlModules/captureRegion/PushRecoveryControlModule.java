@@ -13,17 +13,13 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -37,7 +33,6 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
-import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
@@ -156,7 +151,6 @@ public class PushRecoveryControlModule
       private RobotSide transferToSide = null;
 
       private final RigidBodyTransform fromWorldToPelvis = new RigidBodyTransform();
-      private final Transform3d scaleTransformation = new Transform3d();
       private final FrameConvexPolygon2d reducedSupportPolygon;
       private final ReferenceFrame midFeetZUp;
       private double regularSwingTime;
@@ -173,7 +167,6 @@ public class PushRecoveryControlModule
       public IsFallingFromDoubleSupportCondition(RobotSide robotSide)
       {
          this.transferToSide = robotSide;
-         this.scaleTransformation.setScale(DOUBLESUPPORT_SUPPORT_POLYGON_SCALE);
          this.reducedSupportPolygon = new FrameConvexPolygon2d(icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp());
          this.projectedCapturePoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
          this.projectedCapturePoint2d = new FramePoint2d(worldFrame, 0.0, 0.0);
@@ -206,10 +199,10 @@ public class PushRecoveryControlModule
                // get current robot status
                reducedSupportPolygon.changeFrame(midFeetZUp);
                reducedSupportPolygon.setAndUpdate(supportPolygonInMidFeetZUp);
+               reducedSupportPolygon.scale(DOUBLESUPPORT_SUPPORT_POLYGON_SCALE);
                icpAndMomentumBasedController.getCapturePoint().getFrameTuple2dIncludingFrame(capturePoint2d);
 
                capturePoint2d.changeFrame(midFeetZUp);
-               reducedSupportPolygon.applyTransform(scaleTransformation);
 
                // update the visualization
                momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(fromWorldToPelvis, worldFrame);
