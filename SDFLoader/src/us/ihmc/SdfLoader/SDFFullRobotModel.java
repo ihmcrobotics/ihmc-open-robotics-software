@@ -265,7 +265,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
       oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
 
-      SDFLinkHolder childLink = joint.getChild();
+      SDFLinkHolder childLink = joint.getChildLinkHolder();
 
       checkLinkIsNeededForSensor(inverseDynamicsJoint, childLink);
       

@@ -51,7 +51,7 @@ public class SDFModelVisual extends Graphics3DObject
       
       for(SDFJointHolder joint: link.getChildren())
       {
-         recursivelyAddLinks(joint.getChild(), modelTransform, useCollisionMeshes);
+         recursivelyAddLinks(joint.getChildLinkHolder(), modelTransform, useCollisionMeshes);
       }
    }
 }

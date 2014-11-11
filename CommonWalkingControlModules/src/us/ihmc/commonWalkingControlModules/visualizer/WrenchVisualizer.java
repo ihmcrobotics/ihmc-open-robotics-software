@@ -41,12 +41,12 @@ public class WrenchVisualizer
    private final FramePoint tempPoint = new FramePoint();
    private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
 
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(name, rigidBodies, yoGraphicsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
+      this(name, rigidBodies, vizScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
    }
    
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry, 
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry, 
          AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
@@ -64,12 +64,12 @@ public class WrenchVisualizer
          YoFramePoint pointOfApplication = new YoFramePoint(prefix + "PointOfApplication" , ReferenceFrame.getWorldFrame(), registry);
          pointsOfApplication.put(rigidBody, pointOfApplication);
 
-         YoGraphicVector forceVisualizer = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE,
+         YoGraphicVector forceVisualizer = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE * vizScaling,
                                                   forceAppearance, true);
          forceVisualizers.put(rigidBody, forceVisualizer);
          yoGraphicsList.add(forceVisualizer);
 
-         YoGraphicVector torqueVisualizer = new YoGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, TORQUE_VECTOR_SCALE,
+         YoGraphicVector torqueVisualizer = new YoGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, TORQUE_VECTOR_SCALE * vizScaling,
                                                     torqueAppearance, true);
          torqueVisualizers.put(rigidBody, torqueVisualizer);
          yoGraphicsList.add(torqueVisualizer);

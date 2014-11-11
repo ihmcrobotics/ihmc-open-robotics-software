@@ -32,8 +32,8 @@ public class SDFJointHolder
    private final ArrayList<SDFForceSensor> forceSensors = new ArrayList<>();
    
    // Set by loader
-   private SDFLinkHolder parent;
-   private SDFLinkHolder child;
+   private SDFLinkHolder parentLinkHolder;
+   private SDFLinkHolder childLinkHolder;
 
    //Calculated 
    private RigidBodyTransform transformToParentJoint = null;
@@ -119,8 +119,8 @@ public class SDFJointHolder
          throw new IOException("Cannot make joint with null parent or child links, joint name is " + sdfJoint.getName());
       }
       
-      this.parent = parent;
-      this.child = child;
+      this.parentLinkHolder = parent;
+      this.childLinkHolder = child;
       parent.addChild(this);
       child.setJoint(this);
       
@@ -135,8 +135,8 @@ public class SDFJointHolder
    
    private void calculateContactGains()
    {
-      double parentKp = parent.getContactKp();
-      double childKp = child.getContactKp();
+      double parentKp = parentLinkHolder.getContactKp();
+      double childKp = childLinkHolder.getContactKp();
       
       if(Math.abs(parentKp) > 1e-3 && Math.abs(childKp) > 1e-3)
       {
@@ -151,23 +151,23 @@ public class SDFJointHolder
          contactKp = childKp;
       }
       
-      contactKd = parent.getContactKd() + child.getContactKd();
+      contactKd = parentLinkHolder.getContactKd() + childLinkHolder.getContactKd();
       
-      maxVel = Math.min(parent.getContactMaxVel(), child.getContactMaxVel());
+      maxVel = Math.min(parentLinkHolder.getContactMaxVel(), childLinkHolder.getContactMaxVel());
       
    }
 
-   public void calculateTransformToParent()
+   public void calculateTransformToParentJoint()
    {
 
 
-      RigidBodyTransform modelToParentLink = getParent().getTransformFromModelReferenceFrame();
-      RigidBodyTransform modelToChildLink = getChild().getTransformFromModelReferenceFrame();
+      RigidBodyTransform modelToParentLink = getParentLinkHolder().getTransformFromModelReferenceFrame();
+      RigidBodyTransform modelToChildLink = getChildLinkHolder().getTransformFromModelReferenceFrame();
 
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
       RigidBodyTransform parentLinkToParentJoint;
       
-      SDFJointHolder parentJoint = parent.getJoint();
+      SDFJointHolder parentJoint = parentLinkHolder.getJoint();
       if (parentJoint != null)
       {
          rotationTransform.setRotation(parentJoint.getLinkRotation());
@@ -240,14 +240,14 @@ public class SDFJointHolder
       return transformFromChildLink;
    }
 
-   public SDFLinkHolder getParent()
+   public SDFLinkHolder getParentLinkHolder()
    {
-      return parent;
+      return parentLinkHolder;
    }
 
-   public SDFLinkHolder getChild()
+   public SDFLinkHolder getChildLinkHolder()
    {
-      return child;
+      return childLinkHolder;
    }
 
    public RigidBodyTransform getTransformToParentJoint()
