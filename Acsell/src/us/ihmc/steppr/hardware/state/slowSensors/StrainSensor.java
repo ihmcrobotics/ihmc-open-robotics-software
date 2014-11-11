@@ -15,7 +15,7 @@ public class StrainSensor implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      strainSensor.set(value);
+      strainSensor.set(((double) value) * 5.0/65535.0);
    }
 
 }

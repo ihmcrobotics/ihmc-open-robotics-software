@@ -15,7 +15,7 @@ public class QuadratureControlEffort implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      quadratureControlEffort.set(value);
+      quadratureControlEffort.set(((double)((short) value)) / 100.0);
    }
 
 }

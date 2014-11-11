@@ -15,7 +15,7 @@ public class PressureSensor implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      pressureSensor.set(value);
+      pressureSensor.set(((double) value) * 5.0/4095.0);
    }
 
 }
