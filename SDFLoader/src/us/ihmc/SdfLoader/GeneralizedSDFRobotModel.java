@@ -61,7 +61,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       // Calculate transformations between joints
       for (Entry<String, SDFJointHolder> joint : joints.entrySet())
       {
-         joint.getValue().calculateTransformToParent();
+         joint.getValue().calculateTransformToParentJoint();
       }
 
       for (Entry<String, SDFLinkHolder> link : links.entrySet())
@@ -122,7 +122,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
          }
       }
       
-      return new SDFGraphics3DObject(joints.get(name).getChild().getCollisions(), resourceDirectories);
+      return new SDFGraphics3DObject(joints.get(name).getChildLinkHolder().getCollisions(), resourceDirectories);
    }
 
    public Graphics3DObject getGraphicsObject(String name)
@@ -139,7 +139,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       SDFJointHolder joint = joints.get(name);
       RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
-      return new SDFGraphics3DObject(joint.getChild().getVisuals(), resourceDirectories, visualTransform);
+      return new SDFGraphics3DObject(joint.getChildLinkHolder().getVisuals(), resourceDirectories, visualTransform);
    }
 
    public void addForceSensor(String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)

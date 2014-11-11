@@ -305,7 +305,7 @@ public class MomentumBasedController
          contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry,
                registry);
          List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
-         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, yoGraphicsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, 1.0, yoGraphicsListRegistry, registry);
       }
       else
       {
