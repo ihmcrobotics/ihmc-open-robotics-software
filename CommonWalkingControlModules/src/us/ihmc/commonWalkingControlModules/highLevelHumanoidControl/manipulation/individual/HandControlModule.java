@@ -408,6 +408,9 @@ public class HandControlModule
       jointSpaceHandControlState.setTrajectories(quinticPolynomialTrajectoryGenerators);
       requestedState.set(jointSpaceHandControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
+      
+      if (handPoseStatusProducer != null)
+         handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
    public boolean isLoadBearing()
