@@ -1,0 +1,74 @@
+package us.ihmc.darpaRoboticsChallenge.controllers;
+
+import java.util.List;
+
+import us.ihmc.communication.packets.sensing.RawIMUPacket;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+
+import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+
+public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElement {
+
+	GlobalDataProducer globalDataProducer;
+	RawIMUPacket packet = new RawIMUPacket();
+	IMUSensorReadOnly imuSensorReader;
+
+	public DRCSimulatedIMUPublisher(GlobalDataProducer globalDataProducer,
+			List<? extends IMUSensorReadOnly> simulatedIMUOutput,
+			DRCRobotSensorInformation sensorInformation) {
+
+		for (int i = 0; i < simulatedIMUOutput.size(); i++) {
+			if (simulatedIMUOutput.get(i).getSensorName().contains("head")) {
+				imuSensorReader = simulatedIMUOutput.get(i);
+				break;
+			}
+		}
+		this.globalDataProducer = globalDataProducer;
+	}
+
+	@Override
+	public void initialize() {
+	}
+
+	@Override
+	public void read(long currentClockTime) {
+		imuSensorReader.getLinearAccelerationMeasurement(packet.linearAcceleration);
+		packet.timestampInNanoSecond = currentClockTime;
+		globalDataProducer.getObjectCommunicator().consumeObject(packet);
+	}
+
+	@Override
+	public void run() {
+
+	}
+
+	@Override
+	public void write(long timestamp) {
+		//not writing to robot
+	}
+
+	@Override
+	public YoVariableRegistry getYoVariableRegistry() {
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		return "SlowPublisher";
+	}
+
+	@Override
+	public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry() {
+		return null;
+	}
+
+	@Override
+	public long nextWakeupTime() {
+		return 0;
+	}
+
+}

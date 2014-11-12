@@ -126,6 +126,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(scsCommunicator, networkingManager, jointMap);
          cameraReceiver.registerCameraListener(armCalibrationHelper);
       }
+
+      IMUBasedHeadPoseCalculatorFactory.create(networkingManager.getControllerStateHandler(), fieldObjectCommunicator);
    }
 
    @Override
@@ -181,7 +183,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       }
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-      rosMainNode.execute();     
          
             
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
@@ -191,7 +192,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       }
       
       multiSenseSensorManager.initializeParameterListeners();
-      
+
+      IMUBasedHeadPoseCalculatorFactory.create(networkingManager.getControllerStateHandler(), rosMainNode);
+      rosMainNode.execute();     
    }
 
 }
