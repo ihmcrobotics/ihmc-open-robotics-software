@@ -6,8 +6,6 @@ public interface DRCRobotSensorInformation
 {
    public String[] getIMUSensorsToUseInStateEstimator();
 
-   public String[] getIMUSensorsToProcess();
-
    public String[] getForceSensorNames();
 
    public SideDependentList<String> getFeetForceSensorNames();
@@ -35,4 +33,5 @@ public interface DRCRobotSensorInformation
    public boolean setupROSParameterSetters();
    
    public boolean isMultisenseHead();
+   
 }

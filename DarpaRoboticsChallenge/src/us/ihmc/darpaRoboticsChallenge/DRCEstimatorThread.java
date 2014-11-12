@@ -81,18 +81,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParameters();
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      final List<String> imuSensorsToUse = Arrays.asList(sensorInformation.getIMUSensorsToProcess());
-      IMUDefinition[] imuDefinitions = new IMUDefinition[imuSensorsToUse.size()];
-      int index = 0;
-      for (IMUDefinition imuDefinition : estimatorFullRobotModel.getIMUDefinitions())
-      {
-         if (imuSensorsToUse.contains(imuDefinition.getName()))
-         {
-            imuDefinitions[index++] = imuDefinition;
-         }
-      }
-
-      sensorReaderFactory.build(estimatorFullRobotModel.getRootJoint(), imuDefinitions, estimatorFullRobotModel.getForceSensorDefinitions(),
+      sensorReaderFactory.build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
             forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
       

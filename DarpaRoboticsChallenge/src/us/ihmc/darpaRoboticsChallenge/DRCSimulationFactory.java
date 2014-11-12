@@ -123,7 +123,7 @@ public class DRCSimulationFactory
       SensorNoiseParameters sensorNoiseParameters = scsInitialSetup.getSimulatedSensorNoiseParameters();
 
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, sensorNoiseParameters,
-            stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToProcess());
+            stateEstimatorParameters.getSensorFilterParameters());
 
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);

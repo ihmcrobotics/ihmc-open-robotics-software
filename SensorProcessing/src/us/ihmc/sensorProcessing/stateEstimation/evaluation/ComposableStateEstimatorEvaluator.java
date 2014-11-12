@@ -67,8 +67,7 @@ public class ComposableStateEstimatorEvaluator
             orientationFilterFrequencyInHertz, angularVelocityFilterFrequencyInHertz, linearAccelerationFilterFrequencyInHertz,
             jointVelocitySlopTimeForBacklashCompensation, controlDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, false, Double.POSITIVE_INFINITY, null);
       
-      SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
-            simulatedSensorNoiseParameters, sensorFilterParameters, null);
+      SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot, simulatedSensorNoiseParameters, sensorFilterParameters);
       
       simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, null, null, null, registry);
       
