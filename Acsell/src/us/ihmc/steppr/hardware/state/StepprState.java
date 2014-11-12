@@ -46,6 +46,13 @@ public class StepprState
          }
       }
       
+      // Create knees
+      StepprKneeJointState leftKnee = new StepprKneeJointState(StepprJoint.LEFT_KNEE_Y, actuatorStates.get(StepprActuator.LEFT_KNEE), actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), registry);
+      StepprKneeJointState rightKnee = new StepprKneeJointState(StepprJoint.RIGHT_KNEE_Y, actuatorStates.get(StepprActuator.RIGHT_KNEE), actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT), registry);
+      
+      jointStates.put(StepprJoint.LEFT_KNEE_Y, leftKnee);
+      jointStates.put(StepprJoint.RIGHT_KNEE_Y, rightKnee);
+      
       // Create ankles
       
       StepprAnkleJointState leftAnkle = new StepprAnkleJointState(RobotSide.LEFT, actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT),

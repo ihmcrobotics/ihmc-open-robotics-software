@@ -136,8 +136,8 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       for (StepprActuator actuator : StepprActuator.values)
       {
          YoVariable<?> nudgeVariable = yoVariableHolder.getVariable("StepprSetup", actuator.getName() + "Nudge");
-         motorEncoders.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorEncoder"));
-         motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorTemperature"));
+         motorEncoders.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorEncoderPosition"));
+         motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MotorTemperature"));
 
          table.setValueAt(actuator.getName(), row, col);
 
