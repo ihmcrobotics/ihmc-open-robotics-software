@@ -38,7 +38,8 @@ public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElemen
 	public void read(long currentClockTime) {
 		imuSensorReader.getLinearAccelerationMeasurement(packet.linearAcceleration);
 		packet.timestampInNanoSecond = currentClockTime;
-		globalDataProducer.getObjectCommunicator().consumeObject(packet);
+		if(globalDataProducer!=null)
+			globalDataProducer.getObjectCommunicator().consumeObject(packet);
 	}
 
 	@Override
