@@ -78,7 +78,8 @@ public class YoVariableLogVisualizerGUI extends JPanel
             e.printStackTrace();
          }
 
-         multiPlayer.indexChanged(0, 0);
+         if (multiPlayer != null)
+            multiPlayer.indexChanged(0, 0);
       }
    }
 
@@ -90,11 +91,15 @@ public class YoVariableLogVisualizerGUI extends JPanel
       }
 
       scs.gotoInPointNow();
-      long startTimestamp = multiPlayer.getCurrentTimestamp();
+      long startTimestamp = -1;
+      if (multiPlayer != null)
+         startTimestamp = multiPlayer.getCurrentTimestamp();
       scs.gotoOutPointNow();
-      long endTimestamp = multiPlayer.getCurrentTimestamp();
+      long endTimestamp = -1;
+      if (multiPlayer != null)
+         endTimestamp = multiPlayer.getCurrentTimestamp();
 
-      if (startTimestamp > endTimestamp)
+      if (startTimestamp > -1 && endTimestamp > -1 && startTimestamp > endTimestamp)
       {
 
          JOptionPane.showMessageDialog(this, "startTimestamp > endTimestamp. Please set the in-point and out-point correctly", "Timestmap error",
@@ -181,11 +186,14 @@ public class YoVariableLogVisualizerGUI extends JPanel
    {
       final JComboBox<String> videoFiles = new JComboBox<>();
       videoFiles.addItem("-- Disabled --");
-      for (String video : multiPlayer.getVideos())
-      {
-         videoFiles.addItem(video);
-      }
 
+      if (multiPlayer != null)
+      {
+         for (String video : multiPlayer.getVideos())
+         {
+            videoFiles.addItem(video);
+         }
+      }
       videoFiles.addActionListener(new ActionListener()
       {
          @Override
@@ -201,7 +209,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
          }
       });
-      if (multiPlayer.getVideos().length > 0)
+      if (multiPlayer != null && multiPlayer.getVideos().length > 0)
       {
          videoFiles.setSelectedIndex(1);
       }

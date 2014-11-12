@@ -161,7 +161,8 @@ public class YoVariableLogCropper
          
          monitor.setNote("Cropping video files");
          
-         player.crop(destination, inStamp, outStamp, monitor);
+         if (player != null)
+            player.crop(destination, inStamp, outStamp, monitor);
          monitor.close();
       }
       catch (IOException e)
