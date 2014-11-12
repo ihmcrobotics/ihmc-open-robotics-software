@@ -42,7 +42,7 @@ public class StepprState
          if(joint.isLinear())
          {
             StepprActuatorState actuator = actuatorStates.get(joint.getActuators()[0]);
-            jointStates.put(joint, new StepprLinearTransmissionJointState(joint.getSdfName(), joint.getRatio(), actuator, registry));            
+            jointStates.put(joint, new StepprLinearTransmissionJointState(joint.getSdfName(), joint.getRatio(), joint.hasOutputEncoder(), actuator, registry));            
          }
       }
       

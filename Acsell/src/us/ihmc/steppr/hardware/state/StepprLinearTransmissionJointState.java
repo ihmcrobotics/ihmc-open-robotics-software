@@ -10,6 +10,7 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    private final StepprActuatorState actuator;
 
    private final double ratio;
+   private final boolean hasOutputEncoder;
 
    private double motorAngle;
    
@@ -17,11 +18,12 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    private final DoubleYoVariable qd;
    private final DoubleYoVariable tau;
 
-   public StepprLinearTransmissionJointState(String name, double ratio, StepprActuatorState actuator, YoVariableRegistry parentRegistry)
+   public StepprLinearTransmissionJointState(String name, double ratio, boolean hasOutputEncoder, StepprActuatorState actuator, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.ratio = ratio;
       this.actuator = actuator;
+      this.hasOutputEncoder = hasOutputEncoder;
 
       this.q = new DoubleYoVariable(name + "_q", registry);
       this.qd = new DoubleYoVariable(name + "_qd", registry);
@@ -53,8 +55,16 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    {
       
       motorAngle = actuator.getMotorPosition();
-      q.set(actuator.getJointPosition());
-      qd.set(actuator.getJointVelocity());
+      if(hasOutputEncoder)
+      {
+         q.set(actuator.getJointPosition());
+         qd.set(actuator.getJointVelocity());
+      }
+      else
+      {
+         q.set(actuator.getMotorPosition() / ratio); 
+         qd.set(actuator.getMotorVelocity() / ratio); 
+      }
       tau.set(actuator.getMotorTorque() * ratio);
    }
 
