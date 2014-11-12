@@ -1,6 +1,8 @@
 package us.ihmc.steppr.hardware.state;
 
 import us.ihmc.steppr.hardware.StepprJoint;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
