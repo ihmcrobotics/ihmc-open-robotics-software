@@ -30,7 +30,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 public class PelvisPoseHistoryCorrection
 {
-   private final boolean CORRECT_YAW = false;
+   private final boolean CORRECT_YAW = true;
    
    private final TimeStampedPelvisPoseBuffer stateEstimatorPelvisPoseBuffer;
    private ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber;
@@ -43,6 +43,7 @@ public class PelvisPoseHistoryCorrection
    private final TimeStampedTransform3D[] errorBuffer = new TimeStampedTransform3D[3];
    private int bufferIndex = 0;
 
+   private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
    private final RigidBodyTransform interpolatedError = new RigidBodyTransform();
    private final RigidBodyTransform previousInterpolatedError = new RigidBodyTransform();
    private final RigidBodyTransform interpolatorStartingPosition = new RigidBodyTransform();
@@ -117,7 +118,6 @@ public class PelvisPoseHistoryCorrection
    private final DoubleYoVariable manualRotationOffsetInRadX, manualRotationOffsetInRadY, manualRotationOffsetInRadZ;
    
    private final double estimatorDT;
-   private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
 
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
