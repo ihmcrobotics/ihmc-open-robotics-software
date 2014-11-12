@@ -15,7 +15,7 @@ public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElemen
 
 	GlobalDataProducer globalDataProducer;
 	RawIMUPacket packet = new RawIMUPacket();
-	IMUSensorReadOnly imuSensorReader;
+	IMUSensorReadOnly imuSensorReader=null;
 
 	public DRCSimulatedIMUPublisher(GlobalDataProducer globalDataProducer,
 			List<? extends IMUSensorReadOnly> simulatedIMUOutput,
@@ -36,10 +36,13 @@ public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElemen
 
 	@Override
 	public void read(long currentClockTime) {
-		imuSensorReader.getLinearAccelerationMeasurement(packet.linearAcceleration);
-		packet.timestampInNanoSecond = currentClockTime;
-		if(globalDataProducer!=null)
-			globalDataProducer.getObjectCommunicator().consumeObject(packet);
+		if(imuSensorReader!=null)
+		{
+			imuSensorReader.getLinearAccelerationMeasurement(packet.linearAcceleration);
+			packet.timestampInNanoSecond = currentClockTime;
+			if(globalDataProducer!=null)
+				globalDataProducer.getObjectCommunicator().consumeObject(packet);
+		}
 	}
 
 	@Override
