@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -41,6 +42,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
+   private final SideDependentList<ReferenceFrame> soleFrames;
 
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
    private final YoFrameVector controlledCoMAcceleration;
@@ -53,13 +55,14 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
 
-   public ICPBasedLinearMomentumRateOfChangeControlModule(ReferenceFrame centerOfMassFrame,
+   public ICPBasedLinearMomentumRateOfChangeControlModule(ReferenceFrame centerOfMassFrame, SideDependentList<ReferenceFrame> soleFrames,
            double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
       this.centerOfMassFrame = centerOfMassFrame;
+      this.soleFrames = soleFrames;
       this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.totalMass = totalMass;
       this.centerOfMass = new FramePoint(centerOfMassFrame);
@@ -78,7 +81,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       
    public void startComputation()
    {
-      if (supportLegInputPort.getData() != supportLegPreviousTick.getEnumValue())
+      RobotSide supportSide = supportLegInputPort.getData();
+      if (supportSide != supportLegPreviousTick.getEnumValue())
       {
          icpProportionalController.reset();
       }
@@ -92,9 +96,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       boolean keepCmpInsideSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
       keepCMPInsideSupportPolygon.set(keepCmpInsideSupportPolygon);
 
+      ReferenceFrame swingSoleFrame = null;
+      if (supportSide != null) swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
+
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
                                    desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
-                                   capturePointData.getOmega0(), keepCmpInsideSupportPolygon, supportPolygon);
+                                   capturePointData.getOmega0(), keepCmpInsideSupportPolygon, supportPolygon, swingSoleFrame);
       
 
       desiredCMP.changeFrame(this.controlledCMP.getReferenceFrame());
@@ -106,7 +113,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       centerOfMass.setToZero(centerOfMassFrame);
       visualizer.setCenterOfMass(centerOfMass);
 
-      supportLegPreviousTick.set(supportLegInputPort.getData());
+      supportLegPreviousTick.set(supportSide);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCenterOfMassHeightAccelerationInputPort.getData());
       FrameVector linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
