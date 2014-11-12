@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
@@ -35,6 +35,9 @@ public class CommonHumanoidReferenceFramesVisualizer implements Updatable, Robot
       YoGraphicReferenceFrame comFrame = new YoGraphicReferenceFrame(referenceFrames.getCenterOfMassFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, comFrame);
       referenceFramesVisualizers.add(comFrame);
+      YoGraphicReferenceFrame pelvisFrame = new YoGraphicReferenceFrame(referenceFrames.getPelvisFrame(), registry, 0.2);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, pelvisFrame);
+      referenceFramesVisualizers.add(pelvisFrame);
 
    }
 
