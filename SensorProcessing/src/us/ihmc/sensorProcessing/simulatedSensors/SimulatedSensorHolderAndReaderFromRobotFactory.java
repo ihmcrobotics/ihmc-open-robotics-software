@@ -44,7 +44,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private final SensorFilterParameters sensorFilterParameters;
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
-         SensorFilterParameters sensorFilterParameters, String[] imuSensorsToUse)
+         SensorFilterParameters sensorFilterParameters)
    {
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
@@ -52,28 +52,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       
       this.estimateDT = sensorFilterParameters.getEstimatorDT();
 
-      if(imuSensorsToUse != null)
-      {
-         ArrayList<IMUMount> allIMUMounts = new ArrayList<IMUMount>();
-         robot.getIMUMounts(allIMUMounts);
-         
-         for (IMUMount imuMount : allIMUMounts)
-         {
-            // Only add the main one now. Not the head one.
-            //                   if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
-            for (String imuSensorName : imuSensorsToUse)
-            {
-               if (imuMount.getName().equals(imuSensorName))
-               {
-                  imuMounts.add(imuMount);
-               }
-            }
-         }         
-      }
-      else
-      {
-         robot.getIMUMounts(imuMounts);
-      }
+      robot.getIMUMounts(imuMounts);
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
    }
 

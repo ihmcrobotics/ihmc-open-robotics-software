@@ -76,7 +76,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String bodyIMUSensor = "pelvis_imu_sensor";
    private static final String headIMUSensor = "head_head_imu_sensor";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
-   private static final String[] imuSensorsToProcess = { bodyIMUSensor, headIMUSensor };
    
    /**
     * Stereo Parameters
@@ -152,11 +151,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       return imuSensorsToUseInStateEstimator;
    }
 
-   @Override
-   public String[] getIMUSensorsToProcess()
-   {
-      return imuSensorsToProcess;
-   }
    
    @Override
    public String getPrimaryBodyImu()
