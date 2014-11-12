@@ -480,7 +480,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double zetaXYZ = runningOnRealRobot ? 0.7 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 160.0 : 200.0;
-      double zetaOrientation = runningOnRealRobot ? 0.7 : 0.7;
+      double zetaOrientationXY = runningOnRealRobot ? 0.4 : 0.4;
+      double zetaOrientationZ = runningOnRealRobot ? 0.7 : 0.7;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
@@ -490,7 +491,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
@@ -704,7 +705,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12); //0.06);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
-   
+
    @Override
    public boolean doFancyOnToesControl()
    {
