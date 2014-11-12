@@ -131,7 +131,7 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
       ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
-            referenceFrames.getCenterOfMassFrame(), controlDT, totalMass, gravityZ, registry, yoGraphicsListRegistry);
+            referenceFrames.getCenterOfMassFrame(), referenceFrames.getSoleFrames(), controlDT, totalMass, gravityZ, registry, yoGraphicsListRegistry);
 
       iCPBasedLinearMomentumRateOfChangeControlModule.setGains(walkingControllerParameters.getCaptureKpParallelToMotion(),
             walkingControllerParameters.getCaptureKpOrthogonalToMotion(), walkingControllerParameters.getCaptureKi(),

@@ -13,16 +13,18 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SmartCMPProjectorTwo
 {
-   private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedOrthogonally;
+   private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardSwingFoot, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
+   private final FrameLine2d swingSoleToICPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
+   private final FramePoint2d swingSoleLocation = new FramePoint2d();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       cmpProjectedAlongRay = new BooleanYoVariable("cmpProjectedAlongRay", registry);
-      cmpProjectedOrthogonally = new BooleanYoVariable("cmpProjectedOrthogonally", registry);
-
+      cmpProjectedToPushTowardSwingFoot = new BooleanYoVariable("cmpProjectedToPushTowardSwingFoot", registry);
+      cmpProjectedToVertex = new BooleanYoVariable("cmpProjectedToVertex", registry);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -37,23 +39,26 @@ public class SmartCMPProjectorTwo
     * and we can no longer push the ICP in the originally intended direction.
     * Therefore the best to do without thinking about where to step is to just project the CMP into the foot polygon.
     */
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d desiredCMP)
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, ReferenceFrame swingSoleFrame, FramePoint2d desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
       desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
       capturePoint.changeFrame(supportPolygon.getReferenceFrame());
 
-      projectCMPIntoSupportPolygonIfOutsideLocal(capturePoint, supportPolygon, desiredCMP);
+      projectCMPIntoSupportPolygonIfOutsideLocal(capturePoint, supportPolygon, swingSoleFrame, desiredCMP);
 
       desiredCMP.changeFrame(returnFrame);
       capturePoint.changeFrame(returnFrame);
    }
 
-   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d desiredCMP)
+   
+   
+   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, ReferenceFrame swingSoleFrame, FramePoint2d desiredCMP)
    {
       cmpProjectedAlongRay.set(false);
-      cmpProjectedOrthogonally.set(false);
+      cmpProjectedToPushTowardSwingFoot.set(false);
+      cmpProjectedToVertex.set(false);
 
       if (supportPolygon.isPointInside(desiredCMP))
          return;
@@ -61,19 +66,49 @@ public class SmartCMPProjectorTwo
       icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
       FramePoint2d[] icpToCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
 
-      if ((icpToCMPIntersections == null) || (icpToCMPIntersections.length == 0))
+      if ((icpToCMPIntersections != null) && (icpToCMPIntersections.length > 0))
       {
-         supportPolygon.orthogonalProjection(desiredCMP);
-         cmpProjectedOrthogonally.set(true);
+         cmpProjectedAlongRay.set(true);
 
+         FramePoint2d closestIntersection = findClosestIntersection(icpToCMPIntersections, desiredCMP);
+         desiredCMP.set(closestIntersection);
          return;
       }
 
+      if (swingSoleFrame != null)
+      {
+         swingSoleLocation.setToZero(swingSoleFrame);
+         swingSoleLocation.changeFrameAndProjectToXYPlane(supportPolygon.getReferenceFrame());
+         swingSoleToICPLine.setIncludingFrame(swingSoleLocation, capturePoint);
+
+         FramePoint2d[] swingSoleToICPIntersections = supportPolygon.intersectionWith(swingSoleToICPLine);
+
+         if ((swingSoleToICPIntersections != null) && (swingSoleToICPIntersections.length >= 0))
+         {
+            cmpProjectedToPushTowardSwingFoot.set(true);
+
+            FramePoint2d closestIntersection = findClosestIntersection(swingSoleToICPIntersections, capturePoint);
+            desiredCMP.set(closestIntersection);
+            return;
+         }
+
+         FramePoint2d closestVertex = supportPolygon.getClosestVertexCopy(swingSoleToICPLine);
+         desiredCMP.set(closestVertex);
+
+         cmpProjectedToVertex.set(true);
+         return;
+      }
+      
+      supportPolygon.orthogonalProjection(desiredCMP);
+   }
+
+   public FramePoint2d findClosestIntersection(FramePoint2d[] potentialIntersections, FramePoint2d closestToPoint)
+   {
       FramePoint2d closestIntersection = null;
       double closestDistanceSquared = Double.POSITIVE_INFINITY;
-      for (FramePoint2d framePoint2d : icpToCMPIntersections)
+      for (FramePoint2d framePoint2d : potentialIntersections)
       {
-         double distanceSquared = framePoint2d.distanceSquared(desiredCMP);
+         double distanceSquared = framePoint2d.distanceSquared(closestToPoint);
          if (distanceSquared < closestDistanceSquared)
          {
             closestIntersection = framePoint2d;
@@ -81,29 +116,22 @@ public class SmartCMPProjectorTwo
          }
       }
 
-      cmpProjectedAlongRay.set(true);
-      desiredCMP.set(closestIntersection);
+      return closestIntersection;
    }
-
-
 
    public boolean getWasCMPProjected()
    {
-      return (cmpProjectedAlongRay.getBooleanValue() || cmpProjectedOrthogonally.getBooleanValue());
+      return (cmpProjectedAlongRay.getBooleanValue() || cmpProjectedToVertex.getBooleanValue());
    }
 
 
    public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
-   {
-      // TODO Auto-generated method stub
-      
+   {      
    }
 
 
    public void setMinICPToCMPProjection(double minICPToCMPProjection)
-   {
-      // TODO Auto-generated method stub
-      
+   {      
    }
 
 }

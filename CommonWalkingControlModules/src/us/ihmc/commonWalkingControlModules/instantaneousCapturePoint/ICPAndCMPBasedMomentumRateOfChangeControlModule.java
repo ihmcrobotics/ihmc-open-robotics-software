@@ -24,6 +24,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.MomentumCalculator;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -60,6 +61,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
+   private final SideDependentList<ReferenceFrame> soleFrames;
 
    private final YoFramePoint2d controlledCoP = new YoFramePoint2d("controlledCoP", "", worldFrame, registry);
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
@@ -73,8 +75,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
    private final MomentumCalculator momentumCalculator;
 
-   public ICPAndCMPBasedMomentumRateOfChangeControlModule(ReferenceFrame pelvisFrame,
-           ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ,
+   public ICPAndCMPBasedMomentumRateOfChangeControlModule(ReferenceFrame pelvisFrame, ReferenceFrame centerOfMassFrame, 
+         SideDependentList<ReferenceFrame> soleFrames,
+           TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ,
            YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -87,6 +90,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.pelvisFrame = pelvisFrame;
       this.centerOfMassFrame = centerOfMassFrame;
+      this.soleFrames = soleFrames;
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
       this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
@@ -97,7 +101,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 
    public void startComputation()
    {
-      if (supportLegInputPort.getData() != supportLegPreviousTick.getEnumValue())
+      RobotSide supportSide = supportLegInputPort.getData();
+      if (supportSide != supportLegPreviousTick.getEnumValue())
       {
          icpProportionalController.reset();
       }
@@ -107,9 +112,12 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
       boolean projectIntoSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
 
+      ReferenceFrame swingSoleFrame = null;
+      if (supportSide != null) swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
+      
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(), desiredCapturePointTrajectory.getFinalDesiredCapturePoint(),
                                    desiredCapturePointTrajectory.getDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
-                                   capturePointData.getOmega0(), projectIntoSupportPolygon, supportPolygon);
+                                   capturePointData.getOmega0(), projectIntoSupportPolygon, supportPolygon, swingSoleFrame);
 
       this.controlledCMP.set(desiredCMP);
 
@@ -140,7 +148,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       visualizer.setDesiredCoP(desiredCoP);
       visualizer.setDesiredCMP(desiredCMP);
 
-      supportLegPreviousTick.set(supportLegInputPort.getData());
+      supportLegPreviousTick.set(supportSide);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCenterOfMassHeightAccelerationInputPort.getData());
 
