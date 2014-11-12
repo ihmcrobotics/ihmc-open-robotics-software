@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstima
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.IMUDefinition;
@@ -69,6 +70,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    
+   private final DRCRobotSensorInformation sensorInformation;
+   
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
          GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
@@ -77,7 +80,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
       
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      sensorInformation = robotModel.getSensorInformation();
       DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParameters();
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
@@ -238,8 +241,15 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
    }
    
+   
    public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
    {
       drcStateEstimator.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
+   
+   public  List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
+   {
+	   return sensorOutputMapReadOnly.getIMUProcessedOutputs();
+   }
+   
 }

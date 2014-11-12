@@ -56,6 +56,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String fisheye_right_camera_topic = "/blackfly/camera/right/compressed";
    private static final String right_fisheye_camera_name = "r_situational_awareness_camera_sensor_r_situational_awareness_camera";
    
+   public static final String head_imu_acceleration_topic = "/multisense/imu/accelerometer";
+   
    /**
     * Lidar Parameters
     */
@@ -157,6 +159,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    {
       return bodyIMUSensor;
    }
+   
    
    @Override
    public String[] getForceSensorNames()

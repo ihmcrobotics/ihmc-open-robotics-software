@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
 import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
+import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -124,6 +125,7 @@ public class DRCSimulationFactory
 
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, sensorNoiseParameters,
             stateEstimatorParameters.getSensorFilterParameters());
+      DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
@@ -144,6 +146,7 @@ public class DRCSimulationFactory
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, null, gravity);
+      
 
       if (RUN_MULTI_THREADED)
       {
@@ -156,6 +159,8 @@ public class DRCSimulationFactory
       }
       int estimatorTicksPerSimulationTick = (int) Math.round(drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
       int controllerTicksPerSimulationTick = (int) Math.round(drcRobotModel.getControllerDT() / drcRobotModel.getSimulateDT());
+      int slowPublisherTicksPerSimulationTick = (int) Math.round(100*drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
+
       multiThreadedRobotController.addController(drcEstimatorThread, estimatorTicksPerSimulationTick, false);
       multiThreadedRobotController.addController(drcControllerThread, controllerTicksPerSimulationTick, true);
       MultiThreadedRobotControlElement simulatedHandController = drcRobotModel.createSimulatedHandController(simulatedRobot, threadDataSynchronizer, globalDataProducer);
@@ -163,6 +168,8 @@ public class DRCSimulationFactory
       {
          multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, true);
       }
+      DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), sensorInformation);
+      multiThreadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
 
 
       if (scsInitialSetup.getInitializeEstimatorToActual())
@@ -172,7 +179,6 @@ public class DRCSimulationFactory
       }
 
       simulatedRobot.setController(multiThreadedRobotController);
-      DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParams = sensorInformation.getLidarParameters(0);
       if(lidarParams != null && lidarParams.getLidarSpindleJointName() != null)
       {
