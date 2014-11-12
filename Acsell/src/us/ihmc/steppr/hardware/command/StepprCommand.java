@@ -21,7 +21,7 @@ public class StepprCommand
          StepprJointCommand jointCommand = new StepprJointCommand(joint.getSdfName(), joint.getActuators().length, registry);
          jointCommands.put(joint, jointCommand);
 
-         if (joint.isLinear())
+         if (joint.isLinear() || joint == StepprJoint.LEFT_KNEE_Y || joint == StepprJoint.RIGHT_KNEE_Y)
          {
             StepprActuator actuator = joint.getActuators()[0];
             StepprLinearTransmissionActuatorCommand actuatorCommand = new StepprLinearTransmissionActuatorCommand(actuator.getName(), actuator.getKt(),

@@ -27,7 +27,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class StepprActuatorState
 {
-   private final StepprSlowSensor[] slowSensors = new StepprSlowSensor[27];
+   private final StepprSlowSensor[] slowSensors = new StepprSlowSensor[30];
 
    private final YoVariableRegistry registry;
 
@@ -49,6 +49,8 @@ public class StepprActuatorState
    private final LongYoVariable lastReceivedControlID;
 
    private final int[] slowSensorSlotIDs = new int[7];
+   
+   private final LongYoVariable checksumFailures;
 
    public StepprActuatorState(String name, double motorKt, YoVariableRegistry parentRegistry)
    {
@@ -68,6 +70,8 @@ public class StepprActuatorState
 
       this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
 
+      this.checksumFailures = new LongYoVariable("checksumFailures", registry);
+      
       createSlowSensors(name);
 
       parentRegistry.addChild(registry);
@@ -156,9 +160,14 @@ public class StepprActuatorState
       for (int i = 0; i < slowSensorSlotIDs.length; i++)
       {
          int id = slowSensorSlotIDs[i];
-         if (slowSensors[id] != null)
+         int slowSensorValue = buffer.getShort() & 0xFFFF;
+         
+         if (id < slowSensors.length)
          {
-            slowSensors[id].update(buffer.getShort() & 0xFFFF);
+            if (slowSensors[id] != null)
+            {
+               slowSensors[id].update(slowSensorValue);
+            }
          }
       }
 
@@ -179,7 +188,9 @@ public class StepprActuatorState
 
       if (calculatedChecksum != checksum)
       {
-         throw new IOException("Checksum failure. Frame size: " + checksumOffset + ". Expected: " + calculatedChecksum + ", received " + checksum);
+         checksumFailures.increment();
+//         throw new RuntimeException(registry.getName() + ": Checksum failure. Frame size: " + checksumOffset + ". Expected: " + calculatedChecksum
+//               + ", received " + checksum);
       }
 
    }

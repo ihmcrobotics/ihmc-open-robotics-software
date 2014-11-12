@@ -56,12 +56,12 @@ task deploy(dependsOn: assemble) {
 			wagon.put(it, "lib/" + it.name)
 		}
 		
-//		def scriptDir = new File("scripts")
-//		def scriptDirCollection = files { scriptDir.listFiles() }
-//		scriptDirCollection.each
-//		{
-//			wagon.put(it, it.name)
-//		}	
+		def scriptDir = new File("scripts")
+		def scriptDirCollection = files { scriptDir.listFiles() }
+		scriptDirCollection.each
+		{
+			wagon.put(it, it.name)
+		}	
 		
 		wagon.put(jar.archivePath, "StepprController.jar")
 	}
