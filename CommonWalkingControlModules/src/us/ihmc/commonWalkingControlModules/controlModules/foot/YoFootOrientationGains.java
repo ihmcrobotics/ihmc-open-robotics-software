@@ -16,7 +16,7 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
 {
    private final DoubleYoVariable proportionalXYGain, proportionalZGain;
    private final DoubleYoVariable derivativeXYGain, derivativeZGain;
-   private final DoubleYoVariable dampingRatio;
+   private final DoubleYoVariable dampingRatioXY, dampingRatioZ;
 
    private final DoubleYoVariable maximumAcceleration;
    private final DoubleYoVariable maximumJerk;
@@ -27,7 +27,8 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
       proportionalZGain = new DoubleYoVariable("kpZAngular" + suffix, registry);
       derivativeXYGain = new DoubleYoVariable("kdXYAngular" + suffix, registry);
       derivativeZGain = new DoubleYoVariable("kdZAngular" + suffix, registry);
-      dampingRatio = new DoubleYoVariable("zetaAngular" + suffix, registry);
+      dampingRatioXY = new DoubleYoVariable("zetaXYAngular" + suffix, registry);
+      dampingRatioZ = new DoubleYoVariable("zetaZAngular" + suffix, registry);
 
       maximumAcceleration = new DoubleYoVariable("maximumAngularAcceleration" + suffix, registry);
       maximumJerk = new DoubleYoVariable("maximumAngularJerk" + suffix, registry);
@@ -42,7 +43,8 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
       proportionalZGain.set(0.0);
       derivativeXYGain.set(0.0);
       derivativeZGain.set(0.0);
-      dampingRatio.set(0.0);
+      dampingRatioXY.set(0.0);
+      dampingRatioZ.set(0.0);
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
@@ -86,12 +88,12 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
       {
          public void variableChanged(YoVariable<?> v)
          {
-            derivativeXYGain.set(GainCalculator.computeDerivativeGain(proportionalXYGain.getDoubleValue(), dampingRatio.getDoubleValue()));
+            derivativeXYGain.set(GainCalculator.computeDerivativeGain(proportionalXYGain.getDoubleValue(), dampingRatioXY.getDoubleValue()));
          }
       };
 
       proportionalXYGain.addVariableChangedListener(kdXYUpdater);
-      dampingRatio.addVariableChangedListener(kdXYUpdater);
+      dampingRatioXY.addVariableChangedListener(kdXYUpdater);
       
       if (updateNow) kdXYUpdater.variableChanged(null);
 
@@ -99,12 +101,12 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
       {
          public void variableChanged(YoVariable<?> v)
          {
-            derivativeZGain.set(GainCalculator.computeDerivativeGain(proportionalZGain.getDoubleValue(), dampingRatio.getDoubleValue()));
+            derivativeZGain.set(GainCalculator.computeDerivativeGain(proportionalZGain.getDoubleValue(), dampingRatioZ.getDoubleValue()));
          }
       };
 
       proportionalZGain.addVariableChangedListener(kdZUpdater);
-      dampingRatio.addVariableChangedListener(kdZUpdater);
+      dampingRatioZ.addVariableChangedListener(kdZUpdater);
       
       if (updateNow) kdZUpdater.variableChanged(null);
    }
@@ -135,7 +137,14 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
 
    public void setDampingRatio(double dampingRatio)
    {
-      this.dampingRatio.set(dampingRatio);
+      this.dampingRatioXY.set(dampingRatio);
+      this.dampingRatioZ.set(dampingRatio);
+   }
+   
+   public void setDampingRatios(double dampingRatioXY, double dampingRatioZ)
+   {
+      this.dampingRatioXY.set(dampingRatioXY);
+      this.dampingRatioZ.set(dampingRatioZ);
    }
 
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)

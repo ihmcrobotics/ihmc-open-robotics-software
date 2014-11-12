@@ -66,6 +66,11 @@ public class YoFootSE3Gains implements YoSE3PIDGains
       orientationGains.setDampingRatio(dampingRatio);
    }
 
+   public void setOrientationDampingRatios(double dampingRatioXY, double dampingRatioZ)
+   {
+      orientationGains.setDampingRatios(dampingRatioXY, dampingRatioZ);
+   }
+
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
