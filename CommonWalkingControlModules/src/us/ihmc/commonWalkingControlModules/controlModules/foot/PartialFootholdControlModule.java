@@ -101,6 +101,12 @@ public class PartialFootholdControlModule
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
    {
+      if (desiredCenterOfPressure.containsNaN() || centerOfPressure.containsNaN())
+      {
+         doNothing();
+         return;
+      }
+
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       unsafePolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
