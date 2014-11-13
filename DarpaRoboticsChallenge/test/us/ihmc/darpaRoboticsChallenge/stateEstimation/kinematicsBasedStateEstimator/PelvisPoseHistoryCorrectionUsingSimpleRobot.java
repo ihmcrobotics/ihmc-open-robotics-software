@@ -46,61 +46,52 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
    private SimulationConstructionSet simulationConstructionSet;
    private RigidBodyTransform robotPose = new RigidBodyTransform();
 
-   private DoubleYoVariable seNonProcessedPelvisQuaternionX;
-   private DoubleYoVariable seNonProcessedPelvisQuaternionY;
-   private DoubleYoVariable seNonProcessedPelvisQuaternionZ;
-   private DoubleYoVariable seNonProcessedPelvisQuaternionS;
-
    private DoubleYoVariable confidenceFactor; // target for alpha filter
    private DoubleYoVariable interpolationAlphaFilterBreakFrequency;
    private DoubleYoVariable interpolationAlphaFilterAlphaValue;
    private DoubleYoVariable interpolationAlphaFilter;
 
-   private DoubleYoVariable externalPelvisPositionX;
-   private DoubleYoVariable externalPelvisPositionY;
-   private DoubleYoVariable externalPelvisPositionZ;
-   private DoubleYoVariable externalPelvisPitch;
-   private DoubleYoVariable externalPelvisRoll;
-   private DoubleYoVariable externalPelvisYaw;
-
-   private DoubleYoVariable totalErrorPelvisPositionX;
-   private DoubleYoVariable totalErrorPelvisPositionY;
-   private DoubleYoVariable totalErrorPelvisPositionZ;
-   private DoubleYoVariable totalErrorPelvisPitch;
-   private DoubleYoVariable totalErrorPelvisRoll;
-   private DoubleYoVariable totalErrorPelvisYaw;
-
-   private DoubleYoVariable interpolatedPelvisErrorPositionX;
-   private DoubleYoVariable interpolatedPelvisErrorPositionY;
-   private DoubleYoVariable interpolatedPelvisErrorPositionZ;
-   private DoubleYoVariable interpolatedPelvisErrorPitch;
-   private DoubleYoVariable interpolatedPelvisErrorRoll;
-   private DoubleYoVariable interpolatedPelvisErrorYaw;
-
-   private DoubleYoVariable previousInterpolatedPelvisErrorPositionX;
-   private DoubleYoVariable previousInterpolatedPelvisErrorPositionY;
-   private DoubleYoVariable previousInterpolatedPelvisErrorPositionZ;
-   private DoubleYoVariable previousInterpolatedPelvisErrorPitch;
-   private DoubleYoVariable previousInterpolatedPelvisErrorRoll;
-   private DoubleYoVariable previousInterpolatedPelvisErrorYaw;
-
-   private DoubleYoVariable seNonProcessedPelvisPositionX;
-   private DoubleYoVariable seNonProcessedPelvisPositionY;
-   private DoubleYoVariable seNonProcessedPelvisPositionZ;
-   private DoubleYoVariable seNonProcessedPelvisPitch;
-   private DoubleYoVariable seNonProcessedPelvisRoll;
-   private DoubleYoVariable seNonProcessedPelvisYaw;
    private LongYoVariable seNonProcessedPelvisTimeStamp;
-
-   private DoubleYoVariable correctedPelvisPositionX;
-   private DoubleYoVariable correctedPelvisPositionY;
-   private DoubleYoVariable correctedPelvisPositionZ;
-   private DoubleYoVariable correctedPelvisPitch;
-   private DoubleYoVariable correctedPelvisRoll;
-   private DoubleYoVariable correctedPelvisYaw;
 
    private DoubleYoVariable maxVelocityClip;
    private DoubleYoVariable clippedAlphaValue;
+
+   private DoubleYoVariable correctedPelvis_x;
+   private DoubleYoVariable correctedPelvis_y;
+   private DoubleYoVariable correctedPelvis_z;
+   private DoubleYoVariable correctedPelvis_yaw;
+   private DoubleYoVariable correctedPelvis_pitch;
+   private DoubleYoVariable correctedPelvis_roll;
+   private DoubleYoVariable seBackInTimeFrame_x;
+   private DoubleYoVariable seBackInTimeFrame_y;
+   private DoubleYoVariable seBackInTimeFrame_z;
+   private DoubleYoVariable seBackInTimeFrame_yaw;
+   private DoubleYoVariable seBackInTimeFrame_pitch;
+   private DoubleYoVariable seBackInTimeFrame_roll;
+   private DoubleYoVariable localizationBackInTimeFrame_x;
+   private DoubleYoVariable localizationBackInTimeFrame_y;
+   private DoubleYoVariable localizationBackInTimeFrame_z;
+   private DoubleYoVariable localizationBackInTimeFrame_yaw;
+   private DoubleYoVariable localizationBackInTimeFrame_pitch;
+   private DoubleYoVariable localizationBackInTimeFrame_roll;
+   private DoubleYoVariable totalErrorFrame_x;
+   private DoubleYoVariable totalErrorFrame_y;
+   private DoubleYoVariable totalErrorFrame_z;
+   private DoubleYoVariable totalErrorFrame_yaw;
+   private DoubleYoVariable totalErrorFrame_pitch;
+   private DoubleYoVariable totalErrorFrame_roll;
+   private DoubleYoVariable interpolatedCorrectionFrame_x;
+   private DoubleYoVariable interpolatedCorrectionFrame_y;
+   private DoubleYoVariable interpolatedCorrectionFrame_z;
+   private DoubleYoVariable interpolatedCorrectionFrame_yaw;
+   private DoubleYoVariable interpolatedCorrectionFrame_pitch;
+   private DoubleYoVariable interpolatedCorrectionFrame_roll;
+   private DoubleYoVariable interpolationStartFrame_x;
+   private DoubleYoVariable interpolationStartFrame_y;
+   private DoubleYoVariable interpolationStartFrame_z;
+   private DoubleYoVariable interpolationStartFrame_yaw;
+   private DoubleYoVariable interpolationStartFrame_pitch;
+   private DoubleYoVariable interpolationStartFrame_roll;
 
    private BlockingSimulationRunner bsr;
    private SixDoFJoint sixDofPelvisJoint;
@@ -115,65 +106,68 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
+   public static void main(String[] args)
+   {
+      String[] vars = new String[] { "correctedPelvis", "seBackInTimeFrame", "localizationBackInTimeFrame", "totalErrorFrame", "interpolatedCorrectionFrame",
+            "interpolationStartFrame" };
+      String[] postFix = new String[] { "_x", "_y", "_z", "_yaw", "_pitch", "_roll" };
+
+      for (int i = 0; i < vars.length; i++)
+      {
+         for (int j = 0; j < vars.length; j++)
+         {
+            //            System.out.println("private DoubleYoVariable " + vars[i] + postFix[j] + ";");
+            System.out.println(vars[i] + postFix[j] + " = (DoubleYoVariable) registry.getVariable(nameSpace, \"" + vars[i] + postFix[j] + "\"); ");
+         }
+      }
+   }
+
    private void setupYoVariables(YoVariableRegistry registry, String nameSpace)
    {
       interpolationAlphaFilter = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisErrorCorrectionAlphaFilter");
       interpolationAlphaFilterAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationAlphaFilterAlphaValue");
       interpolationAlphaFilterBreakFrequency = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationAlphaFilterBreakFrequency");
-
       confidenceFactor = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisErrorCorrectionConfidenceFactor");
-
-      externalPelvisPositionX = (DoubleYoVariable) registry.getVariable(nameSpace, "newExternalPelvis_positionX");
-      externalPelvisPositionY = (DoubleYoVariable) registry.getVariable(nameSpace, "newExternalPelvis_positionY");
-      externalPelvisPositionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "newExternalPelvis_positionZ");
-      externalPelvisYaw = (DoubleYoVariable) registry.getVariable(nameSpace, "newExternalPelvis_yaw");
-      externalPelvisPitch = (DoubleYoVariable) registry.getVariable(nameSpace, "newExternalPelvis_pitch");
-      externalPelvisRoll = (DoubleYoVariable) registry.getVariable(nameSpace, "newExternalPelvis_roll");
-
-      totalErrorPelvisPositionX = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorPelvis_positionX");
-      totalErrorPelvisPositionY = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorPelvis_positionY");
-      totalErrorPelvisPositionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorPelvis_positionZ");
-      totalErrorPelvisYaw = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorPelvis_yaw");
-      totalErrorPelvisPitch = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorPelvis_pitch");
-      totalErrorPelvisRoll = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorPelvis_roll");
-
-      interpolatedPelvisErrorPositionX = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedPelvisError_positionX");
-      interpolatedPelvisErrorPositionY = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedPelvisError_positionY");
-      interpolatedPelvisErrorPositionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedPelvisError_positionZ");
-      interpolatedPelvisErrorYaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedPelvisError_yaw");
-      interpolatedPelvisErrorPitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedPelvisError_pitch");
-      interpolatedPelvisErrorRoll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedPelvisError_roll");
-
-      previousInterpolatedPelvisErrorPositionX = (DoubleYoVariable) registry.getVariable(nameSpace, "previousInterpolatedPelvisError_positionX");
-      previousInterpolatedPelvisErrorPositionY = (DoubleYoVariable) registry.getVariable(nameSpace, "previousInterpolatedPelvisError_positionY");
-      previousInterpolatedPelvisErrorPositionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "previousInterpolatedPelvisError_positionZ");
-      previousInterpolatedPelvisErrorYaw = (DoubleYoVariable) registry.getVariable(nameSpace, "previousInterpolatedPelvisError_yaw");
-      previousInterpolatedPelvisErrorPitch = (DoubleYoVariable) registry.getVariable(nameSpace, "previousInterpolatedPelvisError_pitch");
-      previousInterpolatedPelvisErrorRoll = (DoubleYoVariable) registry.getVariable(nameSpace, "previousInterpolatedPelvisError_roll");
-
-      seNonProcessedPelvisPositionX = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_positionX");
-      seNonProcessedPelvisPositionY = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_positionY");
-      seNonProcessedPelvisPositionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_positionZ");
-      seNonProcessedPelvisYaw = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_yaw");
-      seNonProcessedPelvisPitch = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_pitch");
-      seNonProcessedPelvisRoll = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_roll");
-
       seNonProcessedPelvisTimeStamp = (LongYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_timestamp");
-
-      correctedPelvisPositionX = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_positionX");
-      correctedPelvisPositionY = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_positionY");
-      correctedPelvisPositionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_positionZ");
-      correctedPelvisYaw = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_yaw");
-      correctedPelvisPitch = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_pitch");
-      correctedPelvisRoll = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_roll");
-
-      seNonProcessedPelvisQuaternionX = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_quaternionQx");
-      seNonProcessedPelvisQuaternionY = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_quaternionQy");
-      seNonProcessedPelvisQuaternionZ = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_quaternionQz");
-      seNonProcessedPelvisQuaternionS = (DoubleYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_quaternionQs");
-
       maxVelocityClip = (DoubleYoVariable) registry.getVariable(nameSpace, "maxVelocityClip");
       clippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "clippedAlphaValue");
+
+      correctedPelvis_x = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_x");
+      correctedPelvis_y = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_y");
+      correctedPelvis_z = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_z");
+      correctedPelvis_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_yaw");
+      correctedPelvis_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_pitch");
+      correctedPelvis_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_roll");
+      seBackInTimeFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_x");
+      seBackInTimeFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_y");
+      seBackInTimeFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_z");
+      seBackInTimeFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_yaw");
+      seBackInTimeFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_pitch");
+      seBackInTimeFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_roll");
+      localizationBackInTimeFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_x");
+      localizationBackInTimeFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_y");
+      localizationBackInTimeFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_z");
+      localizationBackInTimeFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_yaw");
+      localizationBackInTimeFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_pitch");
+      localizationBackInTimeFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_roll");
+      totalErrorFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorFrame_x");
+      totalErrorFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorFrame_y");
+      totalErrorFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorFrame_z");
+      totalErrorFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorFrame_yaw");
+      totalErrorFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorFrame_pitch");
+      totalErrorFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "totalErrorFrame_roll");
+      interpolatedCorrectionFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_x");
+      interpolatedCorrectionFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_y");
+      interpolatedCorrectionFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_z");
+      interpolatedCorrectionFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_yaw");
+      interpolatedCorrectionFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_pitch");
+      interpolatedCorrectionFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_roll");
+      interpolationStartFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_x");
+      interpolationStartFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_y");
+      interpolationStartFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_z");
+      interpolationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_yaw");
+      interpolationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_pitch");
+      interpolationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_roll");
    }
 
    private void setupRobot()
@@ -298,10 +292,10 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
             ;
          }
 
-         double xError = Math.abs(correctedPelvisPositionX.getDoubleValue() - error.getX());
-         double yError = Math.abs(correctedPelvisPositionY.getDoubleValue() - error.getY());
-         double zError = Math.abs(correctedPelvisPositionZ.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvisYaw.getDoubleValue() - error.getW());
+         double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
+         double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
+         double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
 
          if (xError > largestError)
             largestError = xError;
@@ -347,7 +341,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
          targetYaw = RotationFunctions.getYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
-         robotPose.setTranslation(i, i, i / numTargets);
+         robotPose.setTranslation(i, i, i);
 
          long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
@@ -367,10 +361,10 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
             ;
          }
 
-         double xError = Math.abs(correctedPelvisPositionX.getDoubleValue() - error.getX());
-         double yError = Math.abs(correctedPelvisPositionY.getDoubleValue() - error.getY());
-         double zError = Math.abs(correctedPelvisPositionZ.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvisYaw.getDoubleValue() - error.getW());
+         double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
+         double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
+         double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
 
          if (xError > largestError)
             largestError = xError;
@@ -437,10 +431,10 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
             ;
          }
 
-         double xError = Math.abs(correctedPelvisPositionX.getDoubleValue() - error.getX());
-         double yError = Math.abs(correctedPelvisPositionY.getDoubleValue() - error.getY());
-         double zError = Math.abs(correctedPelvisPositionZ.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvisYaw.getDoubleValue() - error.getW());
+         double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
+         double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
+         double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
 
          if (xError > largestError)
             largestError = xError;
@@ -502,14 +496,14 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       @Override
       public void consumeObject(StampedPosePacket object)
       {
-    	  //doNothing
+         //doNothing
       }
       
       @Override
       public void sendPelvisPoseErrorPacket(
-    		  PelvisPoseErrorPacket pelvisPoseErrorPacket) 
+           PelvisPoseErrorPacket pelvisPoseErrorPacket) 
       {
-    	  //doNothing
+        //doNothing
       }
    }
 
