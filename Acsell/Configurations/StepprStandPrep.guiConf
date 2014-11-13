@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_x</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJointPair</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightAnkleCommand.rightAnkleCommandRightActuator.rightAnkleCommandRightActuatorTauDesired</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_q_d</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightAnkleCommand.rightAnkleCommandLeftActuator.rightAnkleCommandLeftActuatorTauDesired</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorQuadtratureCompositeStatorCurrent,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.powerDistribution.ADC2</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_kp</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorMotorEncoderPosition</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort</Variables>
+		<Variables>root.bono.q_l_leg_uay,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_calc_y</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.bono.q_l_leg_lax,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_calc_x</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseACurrentADTicks,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseBCurrentADTicks,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseCCurrentADTicks</Variables>
+		<Variables>root.bono.q_r_leg_uay,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_calc_y</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightKneeActuator.rightKneeActuatorTauDesired,root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightHipYActuator.rightHipYActuatorTauDesired</Variables>
+		<Variables>root.bono.q_r_leg_lax,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_calc_x</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -120,8 +120,23 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+<Entry Boxes>rightKneeActuatorEnabled,selectedJointPair,startStandprep</Entry Boxes>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>3</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>1</ScreenID>
+<WindowLocation>3840.0, 711.0</WindowLocation>
+<WindowSize>804.0, 545.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isLeftFootTrusted,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isRightFootTrusted</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +148,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorPressureSensor0,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorPressureSensor1</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,7 +160,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorPressureSensor0,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorPressureSensor1</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -169,22 +184,14 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
-
-<Number of ViewPorts>1</Number of ViewPorts>
- <Main Viewport> 
-<Visible> true</Visible>
-</Main Viewport>
-
-<Graph Array Window Size>2</Graph Array Window Size>
-<Graph Array Window1>
+</Graph Array Window1><Graph Array Window2>
 <ScreenID>0</ScreenID>
-<WindowLocation>1910.0, 50.0</WindowLocation>
-<WindowSize>1880.0, 1115.0</WindowSize>
+<WindowLocation>2896.0, 252.0</WindowLocation>
+<WindowSize>800.0, 534.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorStrainSensor1,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorStrainSensor1,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.SlowSensors.leftAnkleLeftActuatorStrainSensor1,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorStrainSensor1</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -195,8 +202,15 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>3</ScreenID>
+<WindowLocation>370.0, 87.0</WindowLocation>
+<WindowSize>1455.0, 1047.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.xsens.accelX,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.xsens.accelY,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.xsens.accelZ</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -208,7 +222,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.SlowSensors.torsoZActuatorIMUAccelX,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.SlowSensors.torsoZActuatorIMUAccelY,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.SlowSensors.torsoZActuatorIMUAccelZ</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -219,15 +233,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>0</ScreenID>
-<WindowLocation>2722.0, 373.0</WindowLocation>
-<WindowSize>804.0, 533.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch.l_footStateEstimatorForceX</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -238,55 +245,19 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config20</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config21</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
-</Graph Array Window2>
+</Graph Array Window3>
 
 <Extra Panels>
 <Main Viewport>
-
+Dashboard,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.683602811395187</Camera X>
- <Camera Y>-2.5275993682828943</Camera Y>
- <Camera Z>0.010020087624635354</Camera Z>
+ <Camera X>-3.990979598918705</Camera X>
+ <Camera Y>1.7889254572390791</Camera Y>
+ <Camera Z>1.3138089568759173</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

@@ -50,6 +50,13 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
       YoVariable<?> crouch = registry.getVariable("StepprStandPrep", "crouch");
+      
+      YoVariable<?> controlRatio = registry.getVariable("StepprOutputWriter", "controlRatio");
+      YoVariable<?> height = registry.getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
+      YoVariable<?> icpX = registry.getVariable("WalkingHighLevelHumanoidController", "icpStandOffsetX");
+      YoVariable<?> icpY = registry.getVariable("WalkingHighLevelHumanoidController", "icpStandOffsetY");
+      
+      
       for (StepprStandPrepSetpoints setpoint : StepprStandPrepSetpoints.values)
       {
          StandPrepVariables variables = new StandPrepVariables(setpoint, registry);
@@ -58,11 +65,17 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(aJoint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJointPair, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
-         sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 100 * aJoint.getRatio() * aJoint.getRatio());
-         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 1 * aJoint.getRatio() * aJoint.getRatio());
-         sliderBoardConfigurationManager.setSlider(6, variables.damping, 0, 5 * aJoint.getRatio() * aJoint.getRatio());
-         sliderBoardConfigurationManager.setSlider(7, crouch, 0, 1);
+         sliderBoardConfigurationManager.setSlider(2, variables.kp, 0, 100 * aJoint.getRatio() * aJoint.getRatio());
+         sliderBoardConfigurationManager.setSlider(3, variables.damping, 0, 5 * aJoint.getRatio() * aJoint.getRatio());
+         sliderBoardConfigurationManager.setSlider(4, crouch, 0, 1);
+         sliderBoardConfigurationManager.setSlider(5, controlRatio, 0, 1);
+         sliderBoardConfigurationManager.setSlider(6, height, -0.3, 0.3);
+         sliderBoardConfigurationManager.setSlider(7, icpX, -0.3, 0.3);
+         sliderBoardConfigurationManager.setSlider(8, icpY, -0.3, 0.3);
+         
 
+         
+         
          sliderBoardConfigurationManager.saveConfiguration(setpoint.toString());
 
          allSetpoints.put(setpoint, variables);

@@ -219,4 +219,9 @@ public class StepprActuatorState
    {
       return quadratureCompositeStatorCurrent.getDoubleValue() / motorKt;
    }
+
+   public StepprSlowSensor getSlowSensor(int value)
+   {
+      return slowSensors[value];
+   }
 }

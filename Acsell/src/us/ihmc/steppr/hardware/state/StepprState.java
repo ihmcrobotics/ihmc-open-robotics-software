@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.EnumMap;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
+import us.ihmc.steppr.hardware.state.slowSensors.PressureSensor;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
@@ -26,11 +30,18 @@ public class StepprState
    private final StepprXSensState xsens = new StepprXSensState("xsens", registry);
    
    private final EnumMap<StepprJoint, StepprJointState> jointStates = new EnumMap<>(StepprJoint.class);
+   
+   private final SideDependentList<DenseMatrix64F> footWrenches = new SideDependentList<>();
 
    public StepprState(YoVariableRegistry parentRegistry)
    {
       createActuators();
       createJoints();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         footWrenches.put(robotSide, new DenseMatrix64F(6, 1));
+      }
       
       parentRegistry.addChild(registry);
    }
@@ -89,6 +100,19 @@ public class StepprState
       powerDistributionState.update(buffer);
       xsens.update(buffer);
       
+      StepprActuatorState leftFootSensorState = actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT);
+      double leftForce0 = ((PressureSensor) leftFootSensorState.getSlowSensor(11)).getValue();
+      double leftForce1 = ((PressureSensor) leftFootSensorState.getSlowSensor(12)).getValue();
+      footWrenches.get(RobotSide.LEFT).set(5, leftForce0 + leftForce1);
+
+      StepprActuatorState rightFootSensorState = actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT);
+      double rightForce0 = ((PressureSensor) rightFootSensorState.getSlowSensor(11)).getValue();
+      double rightForce1 = ((PressureSensor) rightFootSensorState.getSlowSensor(12)).getValue();
+      footWrenches.get(RobotSide.RIGHT).set(5, rightForce0 + rightForce1);
+      
+      
+      
+      
       for(StepprJoint joint : StepprJoint.values)
       {
          jointStates.get(joint).update();
@@ -101,6 +125,7 @@ public class StepprState
    {
       return jointStates.get(joint);
    }
+   
    
    public void updateRawSensorData(StepprJoint joint, RawJointSensorDataHolder dataHolder)
    {
@@ -116,5 +141,10 @@ public class StepprState
    public StepprXSensState getXSensState()
    {
       return xsens;
+   }
+
+   public DenseMatrix64F getFootWrench(RobotSide robotSide)
+   {
+      return footWrenches.get(robotSide);
    }
 }

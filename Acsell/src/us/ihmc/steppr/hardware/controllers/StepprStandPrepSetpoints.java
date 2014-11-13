@@ -7,7 +7,7 @@ public enum StepprStandPrepSetpoints
    TORSO_Z(0, 11820, 0, 455.04, 1, StepprJoint.TORSO_Z),
    TORSO_Y(0, 16800, 0, 648, 1, StepprJoint.TORSO_Y),
    TORSO_X(0, 14890, 0, 573.12, 1, StepprJoint.TORSO_X),
-   HIP_X(0.12, 2600, 0, 100, -1, StepprJoint.LEFT_HIP_X, StepprJoint.RIGHT_HIP_X),
+   HIP_X(0.03, 2600, 0, 100, -1, StepprJoint.LEFT_HIP_X, StepprJoint.RIGHT_HIP_X),
    HIP_Z(0, 390, 0, 4, -1, StepprJoint.LEFT_HIP_Z, StepprJoint.RIGHT_HIP_Z),
    HIP_Y(-0.24, 1546, 0, 89.3, 1, StepprJoint.LEFT_HIP_Y, StepprJoint.RIGHT_HIP_Y),
    KNEE(0.45, 866, 0, 75, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y),
