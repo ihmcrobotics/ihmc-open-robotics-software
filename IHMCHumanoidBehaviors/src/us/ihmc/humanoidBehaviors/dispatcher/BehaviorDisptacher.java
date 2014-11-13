@@ -214,7 +214,10 @@ public class BehaviorDisptacher implements Runnable
 
          doControl();
 
-         yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
+         if(yoVaribleServer != null)
+         {
+            yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
+         }
 
          ThreadTools.sleep(1);
       }

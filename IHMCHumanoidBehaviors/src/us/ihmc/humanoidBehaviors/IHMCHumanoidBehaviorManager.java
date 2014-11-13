@@ -39,13 +39,21 @@ public class IHMCHumanoidBehaviorManager
 {
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
-   private final YoVariableServer yoVariableServer = new YoVariableServer(NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
+
+   private YoVariableServer yoVariableServer = null;
+
+   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
    public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator)
    {
       System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
+
+      if(ENABLE_BEHAVIOR_VISUALIZATION)
+      {
+         yoVariableServer = new YoVariableServer(NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
+      }
 
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(networkProcessorCommunicator, controllerCommunicator, registry);
 
@@ -85,8 +93,11 @@ public class IHMCHumanoidBehaviorManager
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
-      yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
-      yoVariableServer.start();
+      if(ENABLE_BEHAVIOR_VISUALIZATION)
+      {
+         yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
+         yoVariableServer.start();
+      }
 
       Thread dispatcherThread = new Thread(dispatcher, "BehaviorDispatcher");
       dispatcherThread.start();
