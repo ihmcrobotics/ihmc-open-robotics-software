@@ -655,7 +655,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       
       tmpArrayListOfFramePoints.clear();
       
-      for(int i = 0; i<footstepList.size(); i++)
+      for(int i = 0; i<2; i++)
       {
          tmpArrayListOfFramePoints.add(footstepList.get(i));
       }
