@@ -24,6 +24,9 @@ import us.ihmc.steppr.hardware.state.StepprXSensState;
 import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -38,6 +41,9 @@ public class StepprSensorReader implements SensorReader
    private final SensorProcessing sensorProcessing;
    private final RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
    private final EnumMap<StepprJoint, OneDoFJoint> stepprJoints;
+   
+   private final SideDependentList<ForceSensorDefinition> forceSensorDefinitions = new SideDependentList<>(); 
+   private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
 
    private final IMUDefinition pelvisIMU;
    
@@ -57,6 +63,7 @@ public class StepprSensorReader implements SensorReader
 
       sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
+      this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
 
       List<OneDoFJoint> jointList = stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions();
       stepprJoints = StepprUtil.createJointMap(jointList);
@@ -72,6 +79,20 @@ public class StepprSensorReader implements SensorReader
          }
       }
       this.pelvisIMU = pelvisIMU;
+      
+      
+      
+      for(ForceSensorDefinition definition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+      {
+         for(RobotSide robotSide : RobotSide.values)
+         {
+            if(definition.getSensorName().equals(sensorInformation.getFeetForceSensorNames().get(robotSide)))
+            {
+               forceSensorDefinitions.put(robotSide, definition);
+            }
+            
+         }
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -102,6 +123,13 @@ public class StepprSensorReader implements SensorReader
          xSensState.getQuaternion(quaternion);
          xSensState.getGyro(angularVelocity);
          xSensState.getAccel(linearAcceleration);
+
+         
+         for(RobotSide robotSide : RobotSide.values)
+         {
+            forceSensorDataHolderForEstimator.setForceSensorValue(forceSensorDefinitions.get(robotSide), state.getFootWrench(robotSide));
+            
+         }
          
          sensorProcessing.setOrientationSensorValue(pelvisIMU, quaternion);
          sensorProcessing.setAngularVelocitySensorValue(pelvisIMU, angularVelocity);

@@ -253,6 +253,6 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getFootSwitchCoPThresholdFraction()
    {
-      return 0.02;
+      return Double.NaN;
    }
 }

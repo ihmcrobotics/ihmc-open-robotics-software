@@ -22,7 +22,7 @@ public class StepprStandPrep implements StepprController
       WAIT, INITIALIZE, EXECUTE
    }
 
-   private final static double trajectoryTime = 10.0;
+   private final static double trajectoryTime = 3.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprStandPrep");
 

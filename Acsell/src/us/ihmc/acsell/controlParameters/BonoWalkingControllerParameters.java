@@ -124,9 +124,9 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    private final double minimumHeightAboveGround = 0.595 + 0.03;
-   private double nominalHeightAboveGround = 0.675 + 0.03 + 0.12;
+   private double nominalHeightAboveGround = 0.675 + 0.03;
    private final double maximumHeightAboveGround = 0.735 + 0.03;
-   private final double additionalOffsetHeightBono = 0.05;
+   private final double additionalOffsetHeightBono = 0.05 + 0.12;
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -263,13 +263,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getCaptureKpParallelToMotion()
    {
-      return 0.5; //1.0;
+      return 1.5;
    }
 
    @Override
    public double getCaptureKpOrthogonalToMotion()
    {
-      return 0.5; //1.0;
+      return 1.5;
    }
 
    @Override
@@ -659,7 +659,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getCoPThresholdFraction()
    {
-      return 0.02;
+      return Double.NaN;
    }
 
    @Override
