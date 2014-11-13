@@ -18,8 +18,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Yo
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
-import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
@@ -88,7 +88,7 @@ public class StepprControllerFactory
 
       DRCOutputWriter drcOutputWriter = new StepprOutputWriter(robotModel);
       
-      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
+      PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer.getObjectCommunicator());
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
 
       /*
