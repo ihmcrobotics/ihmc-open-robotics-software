@@ -55,7 +55,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("icpPlannerDoubleSupportTime", registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("icpPlannerSingleSupportTime", registry);
    private final DoubleYoVariable doubleSupportInitialTransferDuration = new DoubleYoVariable("icpPlannerInitialTransferDuration", registry);
-   private final DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable("icpPlannerDoubleSupportSplitFractior", registry);
+   private final DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable("icpPlannerDoubleSupportSplitFraction", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable("icpPlannerInitialTime", registry);
    private final DoubleYoVariable remainingTime = new DoubleYoVariable("icpPlannerRemainingTime", registry);
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable("", registry);

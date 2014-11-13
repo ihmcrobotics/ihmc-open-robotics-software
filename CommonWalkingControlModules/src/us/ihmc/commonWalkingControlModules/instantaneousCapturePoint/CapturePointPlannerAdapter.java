@@ -70,6 +70,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
 					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
 
+
+         newCapturePointPlanner.setDoubleSupportTime(transferToAndNextFootstepsData.getDoubleSupportDuration());
+         newCapturePointPlanner.setSingleSupportTime(transferToAndNextFootstepsData.getSingleSupportDuration());
 			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
 			newCapturePointPlanner.initializeSingleSupport(initialTime, footstepList);
 		}
@@ -112,6 +115,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 			transferToFootLocation.setToZero(referenceFrames.getSoleFrame(transferToAndNextFootstepsData.getTransferToSide()));
 			transferToFootLocation.changeFrame(worldFrame);
 
+			newCapturePointPlanner.setDoubleSupportTime(transferToAndNextFootstepsData.getDoubleSupportDuration());
+			newCapturePointPlanner.setSingleSupportTime(transferToAndNextFootstepsData.getSingleSupportDuration());
 			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
 			newCapturePointPlanner.initializeDoubleSupport(tmpFramePoint, tmpFrameVector, initialTime, footstepList, transferToAndNextFootstepsData.getTransferToSide(), transferToFootLocation);
 		}
@@ -143,6 +148,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 			transferToFootLocation.setToZero(referenceFrames.getSoleFrame(transferToAndNextFootstepsData.getTransferToSide()));
          transferToFootLocation.changeFrame(worldFrame);
 
+         newCapturePointPlanner.setDoubleSupportTime(transferToAndNextFootstepsData.getDoubleSupportDuration());
+         newCapturePointPlanner.setSingleSupportTime(transferToAndNextFootstepsData.getSingleSupportDuration());
 			newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
 			newCapturePointPlanner.initializeDoubleSupport(tmpFramePoint, tmpFrameVector, initialTime, footstepList,transferToAndNextFootstepsData.getTransferToSide(), transferToFootLocation);
 		}
