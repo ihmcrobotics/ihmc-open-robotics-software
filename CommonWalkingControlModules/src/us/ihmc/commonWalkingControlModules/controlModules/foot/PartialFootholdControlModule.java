@@ -96,7 +96,7 @@ public class PartialFootholdControlModule
       distanceFromLineOfRotationToComputeCoPOccupancy.set(0.02);
       
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
-      doPartialFootholdDetection.set(true);
+      doPartialFootholdDetection.set(false);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
