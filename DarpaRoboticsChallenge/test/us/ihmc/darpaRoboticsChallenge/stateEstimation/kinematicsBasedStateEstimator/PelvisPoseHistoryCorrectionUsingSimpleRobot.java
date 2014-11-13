@@ -13,7 +13,8 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.packets.StampedPosePacket;
-import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
+import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -474,7 +475,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       maxVelocityCap.set(maxVel);
    }
 
-   private class ExternalPelvisPoseCreator implements ExternalPelvisPoseSubscriberInterface
+   private class ExternalPelvisPoseCreator implements PelvisPoseCorrectionCommunicatorInterface
    {
       private StampedPosePacket newestStampedPosePacket;
       boolean newPose;
@@ -501,7 +502,14 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       @Override
       public void consumeObject(StampedPosePacket object)
       {
-         //doNothing
+    	  //doNothing
+      }
+      
+      @Override
+      public void sendPelvisPoseErrorPacket(
+    		  PelvisPoseErrorPacket pelvisPoseErrorPacket) 
+      {
+    	  //doNothing
       }
    }
 

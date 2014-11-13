@@ -22,7 +22,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHum
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
+import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.TimeStampedPelvisPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
@@ -70,13 +71,13 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
-
+   
    private final Random random = new Random();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCSimulationNetworkTestHelper drcNetworkingSimulationTestHelper;
    private FlatGroundEnvironment flatGroundEnvironment;
    private YoVariableRegistry registry;
-
+   
    private final String simpleFlatGroundScriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
 
    private boolean sendPelvisCorrectionPackets = true;
@@ -151,7 +152,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-
+   
    @Before
    public void setUp()
    {
@@ -233,10 +234,10 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       {
          ThreadTools.sleepForever();
       }
-
+      
       if (drcNetworkingSimulationTestHelper != null)
       {
-         //         drcNetworkingSimulationTestHelper.disconnect();
+//         drcNetworkingSimulationTestHelper.disconnect();
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
@@ -247,28 +248,28 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       }
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
+   
    @Test
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
+      
       setupSimulationWithStandingControllerAndCreateExternalPelvisThread();
       setupYoVariables(registry, "PelvisPoseHistoryCorrection");
-
+      
       ThreadTools.sleep(1000);
-
-      setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015);
+      
+      setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry,0.015);
       maxVelocityClip.set(1.0);
-      activatePelvisPoseHistoryCorrector(registry, true);
-
+      activatePelvisPoseHistoryCorrector(registry,true);
+      
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(testInterpolationToRandomTargetsWithFastAlphaValue(robot, registry, 30));
-
+      
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
       sendPelvisCorrectionPackets = false;
-      
+
       assertTrue(success);
       BambooTools.reportTestFinishedMessage();
    }
@@ -281,24 +282,24 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       Runnable pelvisCorrectorSource = setupSimulationWithFeetPertuberAndCreateExternalPelvisThread();
       Thread t = new Thread(pelvisCorrectorSource);
       t.start();
-
+      
       ThreadTools.sleep(1000);
-
-      setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015);
-      activatePelvisPoseHistoryCorrector(registry, true);
+      
+      setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry,0.015);
+      activatePelvisPoseHistoryCorrector(registry,true);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
-
+      
       sendPelvisCorrectionPackets = false;
       assertTrue(success);
 
       BambooTools.reportTestFinishedMessage();
    }
-
+   
    private void setupCameraForWalkingUpToRamp()
    {
       Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
@@ -306,7 +307,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-
+   
    private boolean testNewExternalPelvisTransformAfterUpdate(SDFRobot robot, YoVariableRegistry registry, SimulationConstructionSet simulationConstructionSet,
          ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
@@ -316,33 +317,33 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       RigidBodyTransform groundTruthPelvisTransform = new RigidBodyTransform();
       Vector3d translation = new Vector3d();
       Matrix3d rotation = new Matrix3d();
-
+      
       final Boolean[] pelvisPoseHistoryChanged = new Boolean[1];
       pelvisPoseHistoryChanged[0] = false;
       externalPelvisPositionX.addVariableChangedListener(new VariableChangedListener()
       {
-
+         
          @Override
          public void variableChanged(YoVariable<?> v)
          {
             pelvisPoseHistoryChanged[0] = true;
          }
       });
-
+      
       int numberOfTicks = 0;
       int tickThresholdForNewPacket = 4;
       long timeStamp = 0;
       int numberOfIterations = 100;
       boolean isFirstRun = true;
-      for (int i = 0; i < numberOfIterations; i++)
+      for(int i = 0 ; i < numberOfIterations ; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT());
          numberOfTicks++;
-
-         if (pelvisPoseHistoryChanged[0])
+         
+         if(pelvisPoseHistoryChanged[0])
          {
             pelvisPoseHistoryChanged[0] = false;
-            if (!isFirstRun)
+            if(!isFirstRun)
             {
                double epsilon = 0.00000001;
                success &= MathTools.epsilonEquals(translation.getX(), externalPelvisPositionX.getDoubleValue(), epsilon);
@@ -357,20 +358,20 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
                isFirstRun = false;
             }
          }
-
-         if (numberOfTicks < 4)
+         
+         if(numberOfTicks < 4)
          {
             groundTruthPelvisTransform.set(pelvis.getJointTransform3D());
             groundTruthPelvisTransform.get(translation);
             groundTruthPelvisTransform.get(rotation);
             timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
          }
-
-         if ((numberOfTicks % tickThresholdForNewPacket) == 0 && numberOfTicks > 4)
+         
+         if((numberOfTicks % tickThresholdForNewPacket) == 0 && numberOfTicks > 4)
          {
             groundTruthPelvisTransform.get(translation);
             groundTruthPelvisTransform.get(rotation);
-            TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(groundTruthPelvisTransform, timeStamp);
+            TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(groundTruthPelvisTransform,timeStamp);
             StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
             externalPelvisPoseCreator.setNewestPose(posePacket);
 
@@ -380,7 +381,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       }
       return success;
    }
-
+   
    public void createSCS()
    {
       Robot robot = new PointMassRobot();
@@ -489,15 +490,16 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       RigidBodyTransform tempTransform = new RigidBodyTransform();
       Vector3d translation = new Vector3d();
       Matrix3d rotation = new Matrix3d();
-
+      
       Vector3d seNonProcessedTranslation = new Vector3d();
       Quat4d seNonProcessedQuat4d = new Quat4d();
-
+      
       setupYoVariables(registry, "PelvisPoseHistoryCorrection");
       final Boolean[] pelvisPoseHistoryChanged = new Boolean[1];
       pelvisPoseHistoryChanged[0] = false;
       externalPelvisPositionX.addVariableChangedListener(new VariableChangedListener()
       {
+         
          @Override
          public void variableChanged(YoVariable<?> v)
          {
@@ -510,26 +512,26 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       long timeStamp = 0;
       int numberOfIterations = 100;
       long lastNonProcessedSePoseTimestamp = 0;
-      for (int i = 0; i < numberOfIterations; i++)
+      for(int i = 0 ; i < numberOfIterations ; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT());
          numberOfTicks++;
-
+         
          seNonProcessedQuat4d.set(seNonProcessedPelvisQuaternionX.getDoubleValue(), seNonProcessedPelvisQuaternionY.getDoubleValue(),
                seNonProcessedPelvisQuaternionZ.getDoubleValue(), seNonProcessedPelvisQuaternionS.getDoubleValue());
          seNonProcessedPelvisPose.setRotation(seNonProcessedQuat4d);
-
+         
          seNonProcessedTranslation.setX(seNonProcessedPelvisPositionX.getDoubleValue());
          seNonProcessedTranslation.setY(seNonProcessedPelvisPositionY.getDoubleValue());
          seNonProcessedTranslation.setZ(seNonProcessedPelvisPositionZ.getDoubleValue());
          seNonProcessedPelvisPose.setTranslation(seNonProcessedTranslation);
          lastNonProcessedSePoseTimestamp = seNonProcessedPelvisTimeStamp.getLongValue();
          pelvisPoseBuffer.put(seNonProcessedPelvisPose, lastNonProcessedSePoseTimestamp);
-
-         if (pelvisPoseHistoryChanged[0])
+         
+         if(pelvisPoseHistoryChanged[0])
          {
             pelvisPoseHistoryChanged[0] = false;
-            if (!isFirstRun)
+            if(!isFirstRun)
             {
                double epsilon = 0.000001;
                success &= MathTools.epsilonEquals(translation.getX(), totalErrorPelvisPositionX.getDoubleValue(), epsilon);
@@ -544,14 +546,14 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
                isFirstRun = false;
             }
          }
-
-         if (numberOfTicks < 4)
+         
+         if(numberOfTicks < 4)
          {
             groundTruthPelvisTransform.set(pelvis.getJointTransform3D());
             timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
          }
-
-         if ((numberOfTicks % tickThresholdForNewPacket) == 0 && numberOfTicks > 4)
+         
+         if((numberOfTicks % tickThresholdForNewPacket) == 0 && numberOfTicks > 4)
          {
             TimeStampedTransform3D nonProcessedSePose = pelvisPoseBuffer.interpolate(timeStamp);
             totalError.set(groundTruthPelvisTransform);
@@ -560,31 +562,31 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
             totalError.multiply(tempTransform);
             totalError.get(translation);
             totalError.get(rotation);
-
-            TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(groundTruthPelvisTransform, timeStamp);
+            
+            TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(groundTruthPelvisTransform,timeStamp);
             StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
             externalPelvisPoseCreator.setNewestPose(posePacket);
-
+            
             groundTruthPelvisTransform.set(pelvis.getJointTransform3D());
             timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
          }
       }
       return success;
    }
-
+   
    private Runnable createPelvisCorrectorProducerUsingSCSActual(final SDFRobot robot,
          final ExternalPelvisPoseCreator externalPelvisPoseCreator)
    {
       Runnable pelvisCorrectorSource = new Runnable()
       {
-
+         
          FloatingJoint pelvis = robot.getPelvisJoint();
          RigidBodyTransform pelvisTransform = new RigidBodyTransform();
 
          @Override
          public void run()
          {
-            while (running())
+            while(running())
             {
                try
                {
@@ -592,8 +594,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
                   pelvisTransform.set(pelvis.getJointTransform3D());
                   long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
                   Thread.sleep((int) (random.nextDouble() * 200));
-                  TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(pelvisTransform, timeStamp);
-                  StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+                  TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(pelvisTransform,timeStamp);
+                  StampedPosePacket posePacket = new StampedPosePacket("/pelvis",timeStampedTransform,1.0);
                   externalPelvisPoseCreator.setNewestPose(posePacket);
                }
                catch (InterruptedException e)
@@ -605,33 +607,33 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       };
       return pelvisCorrectorSource;
    }
-
+   
    private OscillateFeetPerturber generateFeetPertuber(final SimulationConstructionSet simulationConstructionSet, SDFRobot robot, int ticksPerPerturbation)
    {
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
-      oscillateFeetPerturber.setTranslationMagnitude(new double[] { 0.008, 0.012, 0.005 });
-      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] { 0.010, 0.06, 0.010 });
-
-      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[] { 1.0, 2.5, 3.3 });
-      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[] { 2.0, 0.5, 1.3 });
-
-      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[] { 5.0, 0.5, 0.3 });
-      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] { 0.2, 3.4, 1.11 });
+      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.008, 0.012, 0.005});
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.010, 0.06, 0.010});
+      
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{1.0, 2.5, 3.3});
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{2.0, 0.5, 1.3});
+      
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{5.0, 0.5, 0.3});
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0.2, 3.4, 1.11});
       return oscillateFeetPerturber;
    }
-
+   
    private boolean running()
    {
       return sendPelvisCorrectionPackets;
    }
-
+   
    private void setPelvisPoseHistoryCorrectorAlphaBreakFreq(YoVariableRegistry registry, double breakFrequency)
    {
       DoubleYoVariable pelvisCorrectorAlphaFilterBF = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
             "interpolationAlphaFilterBreakFrequency");
       pelvisCorrectorAlphaFilterBF.set(breakFrequency);
    }
-
+   
    private void setPelvisPoseHistoryCorrectorMaxVelocity(YoVariableRegistry registry, double maxVel)
    {
       DoubleYoVariable maxVelocityCap = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
@@ -680,23 +682,23 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       registry = robot.getRobotsYoVariableRegistry();
    }
 
-   private class ExternalPelvisPoseCreator implements ExternalPelvisPoseSubscriberInterface
+   private class ExternalPelvisPoseCreator implements PelvisPoseCorrectionCommunicatorInterface
    {
       private StampedPosePacket newestStampedPosePacket;
       boolean newPose;
-
+      
       public void setNewestPose(StampedPosePacket newestStampedPosePacket)
       {
          this.newestStampedPosePacket = newestStampedPosePacket;
          newPose = true;
       }
-
+      
       @Override
       public boolean hasNewPose()
       {
          return newPose;
       }
-
+      
       @Override
       public StampedPosePacket getNewExternalPose()
       {
@@ -707,7 +709,14 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       @Override
       public void consumeObject(StampedPosePacket object)
       {
-         //doNothing
+    	  //doNothing
+      }
+      
+      @Override
+      public void sendPelvisPoseErrorPacket(
+    		  PelvisPoseErrorPacket pelvisPoseErrorPacket) 
+      {
+    	  //doNothing
       }
    }
 

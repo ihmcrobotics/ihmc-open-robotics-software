@@ -10,8 +10,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.packets.StampedPosePacket;
-import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
-import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
@@ -140,9 +140,14 @@ public class DRCSimulationFactory
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
             null, gravity);
       
-      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
-      if (globalDataProducer != null) globalDataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
-      drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+      PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = null;
+      
+      if (globalDataProducer != null)
+      {
+    	  pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(globalDataProducer.getObjectCommunicator());
+    	  globalDataProducer.attachListener(StampedPosePacket.class, pelvisPoseCorrectionCommunicator);
+      }
+      drcEstimatorThread.setExternelPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, null, gravity);
@@ -265,7 +270,7 @@ public class DRCSimulationFactory
       return simulatedDRCRobotTimeProvider;
    }
    
-   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externelPelvisCorrectorSubscriber)
+   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externelPelvisCorrectorSubscriber)
    {
       drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externelPelvisCorrectorSubscriber);
    }
