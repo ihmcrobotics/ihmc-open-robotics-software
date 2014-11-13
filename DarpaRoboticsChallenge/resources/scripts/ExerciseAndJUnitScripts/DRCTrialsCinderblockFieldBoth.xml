@@ -275,7 +275,7 @@
       <us.ihmc.communication.packets.walking.FootstepData><!-- 20 -->
         <robotSide>LEFT</robotSide>
         <location>
-          <x>4.63</x>
+          <x>4.59</x>
           <y>0.32715285370602036</y>
           <z>.22</z>
         </location>
@@ -289,7 +289,7 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>4.63</x>
+          <x>4.59</x>
           <y>0.12715285370602036</y>
           <z>.22</z>
         </location>
