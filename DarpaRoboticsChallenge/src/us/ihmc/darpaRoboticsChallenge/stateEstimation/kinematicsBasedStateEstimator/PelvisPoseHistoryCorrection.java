@@ -5,7 +5,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.StampedPosePacket;
-import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
+import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.TimeStampedPelvisPoseBuffer;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.Axis;
@@ -33,10 +34,14 @@ public class PelvisPoseHistoryCorrection
    private final boolean CORRECT_YAW = true;
    
    private final TimeStampedPelvisPoseBuffer stateEstimatorPelvisPoseBuffer;
-   private ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber;
+   private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
    private final YoVariableRegistry registry;
+   
+   private RigidBodyTransform totalErrorPelvisPose = new RigidBodyTransform();
+   private Quat4d totalErrorRotation = new Quat4d();
+   private double maxCorrectionVelocity;
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.015;
    
@@ -119,6 +124,8 @@ public class PelvisPoseHistoryCorrection
    
    private final double estimatorDT;
 
+   private boolean packetProcessed = false;
+
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
    {
@@ -126,19 +133,19 @@ public class PelvisPoseHistoryCorrection
    }
    
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
-         ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
+         PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
    {
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, externalPelvisPoseSubscriber);
    }
 
    public PelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
-         ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+         PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.estimatorDT = estimatorDT;
       
       this.rootJoint = sixDofJoint;
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
-      this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
+      this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
       this.registry = new YoVariableRegistry("PelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
       
@@ -233,11 +240,12 @@ public class PelvisPoseHistoryCorrection
          manuallyTriggerLocalizationUpdate();
       }
       
-      if (externalPelvisPoseSubscriber != null)
+      if (pelvisPoseCorrectionCommunicator != null)
       {
-         if (externalPelvisPoseSubscriber.hasNewPose())
+         if (pelvisPoseCorrectionCommunicator.hasNewPose())
          {
             processNewPacket();
+            packetProcessed = true;
          }
 
          rootJointFrame.getTransformToParent(pelvisPose);
@@ -250,7 +258,23 @@ public class PelvisPoseHistoryCorrection
 
          rootJoint.setPositionAndRotation(pelvisPose);
          rootJointFrame.update();
+         
+         if (packetProcessed)
+         {
+        	 sendCorrectionUpdatePacket();
+        	 packetProcessed = false;
+         }
       }
+   }
+   
+   private void sendCorrectionUpdatePacket()
+   {
+	   Vector3d totalErrorPosition = totalErrorPelvisPosition.getVector3dCopy();
+	   totalErrorPelvisQuaternion.get(totalErrorRotation);
+	   totalErrorPelvisPose.set(totalErrorRotation, totalErrorPosition);
+	   maxCorrectionVelocity = maxVelocityClip.getDoubleValue();
+	   PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorPelvisPose, errorBetweenCurrentPositionAndCorrected, maxCorrectionVelocity);
+	   pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
    
    private void calculateCorrectedPelvisPose(RigidBodyTransform pelvisPose)
@@ -318,7 +342,7 @@ public class PelvisPoseHistoryCorrection
 
    private void processNewPacket()
    {
-      StampedPosePacket newPacket = externalPelvisPoseSubscriber.getNewExternalPose();
+      StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
       TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {
@@ -512,11 +536,12 @@ public class PelvisPoseHistoryCorrection
       updatePreviousInterpoledPelvisErrorYoVariables();
       
       manuallyTriggerLocalizationUpdate.set(false);
+      sendCorrectionUpdatePacket();
 
    }
 
-   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
-      this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
+      this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
    }
 }

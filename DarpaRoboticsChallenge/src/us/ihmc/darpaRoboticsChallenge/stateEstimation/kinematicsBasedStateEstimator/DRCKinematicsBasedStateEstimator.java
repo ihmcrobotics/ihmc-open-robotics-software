@@ -10,7 +10,7 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
-import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -262,7 +262,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       // Do nothing
    }
 
-   public void setExternelPelvisCorrectorSubscriber(ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber)
+   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
