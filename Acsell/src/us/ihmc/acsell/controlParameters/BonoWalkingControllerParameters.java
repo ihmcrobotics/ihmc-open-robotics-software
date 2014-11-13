@@ -1,9 +1,12 @@
 package us.ihmc.acsell.controlParameters;
 
+import us.ihmc.acsell.parameters.BonoJointMap;
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -23,9 +26,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    private final boolean runningOnRealRobot;
+   private final DRCRobotJointMap jointMap;
 
-   public BonoWalkingControllerParameters(boolean runningOnRealRobot)
+   public BonoWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
+      this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
 
       for (RobotSide robotSide : RobotSide.values())
@@ -33,6 +38,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
          handPosesWithRespectToChestFrame.put(robotSide, new RigidBodyTransform());
       }
    }
+   
+   
 
    @Override
    public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
@@ -100,7 +107,14 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[0];
+      String[] defaultChestOrientationControlJointNames = new String[]
+            {
+                  jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+                  jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+                  jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
+            };
+
+            return defaultChestOrientationControlJointNames;
    }
 
    @Override
@@ -110,7 +124,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    private final double minimumHeightAboveGround = 0.595 + 0.03;
-   private double nominalHeightAboveGround = 0.675 + 0.03;
+   private double nominalHeightAboveGround = 0.675 + 0.03 + 0.12;
    private final double maximumHeightAboveGround = 0.735 + 0.03;
    private final double additionalOffsetHeightBono = 0.05;
 
@@ -249,13 +263,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getCaptureKpParallelToMotion()
    {
-      return 1.0;
+      return 0.5; //1.0;
    }
 
    @Override
    public double getCaptureKpOrthogonalToMotion()
    {
-      return 1.0;
+      return 0.5; //1.0;
    }
 
    @Override
@@ -279,13 +293,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getCMPRateLimit()
    {
-      return 60.0;
+      return 6.0;
    }
 
    @Override
    public double getCMPAccelerationLimit()
    {
-      return 2000.0;
+      return 200.0;
    }
 
    @Override

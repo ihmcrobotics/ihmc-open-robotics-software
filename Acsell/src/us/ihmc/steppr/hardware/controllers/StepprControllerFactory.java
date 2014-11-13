@@ -33,6 +33,7 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
 import us.ihmc.steppr.hardware.StepprAffinity;
+import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
@@ -44,12 +45,13 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class StepprControllerFactory
 {   
-   private static final double gravity = -9.81;
+   private static final double gravity = -9.80; // From xsens
 
-   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false;
+   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = true;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {
+      
       /*
        * Create registries
        */
@@ -124,12 +126,17 @@ public class StepprControllerFactory
          e.printStackTrace();
       }
       
+      StepprSetup stepprSetup = new StepprSetup(yoVariableServer);
       
       yoVariableServer.start();
       if(StepprNetworkParameters.LOGGER_HOST != null)
       {
          YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, this.getClass().getSimpleName());         
       }
+      
+      StepprSetup.startStreamingData();
+      stepprSetup.start();
+
       
       robotController.start();
       StepprRunner runner = new StepprRunner(estimatorPriority, sensorReaderFactory, robotController);

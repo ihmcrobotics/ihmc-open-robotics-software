@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.standPrepState</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJointPair</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJointPair</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_q_d</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_q_d</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_kp</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_kp</Variables>
+		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
+		<Variables>root.bono.q_l_leg_uay,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_calc_y</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.rightKneeActuator.rightKneeActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftKneeActuator.leftKneeActuatorMotorTemperature</Variables>
+		<Variables>root.bono.q_l_leg_lax,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_calc_x</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.crouch</Variables>
+		<Variables>root.bono.q_r_leg_uay,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_calc_y</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.r_leg_kny.r_leg_kny_q</Variables>
+		<Variables>root.bono.q_r_leg_lax,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_calc_x</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprCommand.rightKneeActuator.rightKneeActuatorTauDesired,root.remotemain.steppr.StepprCommand.leftKneeActuator.leftKneeActuatorTauDesired</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.positionError_comHeight</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorTemperature</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isLeftFootTrusted,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isRightFootTrusted</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -144,8 +144,32 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-<Entry Boxes>rightKneeActuatorEnabled,selectedJointPair,startStandprep</Entry Boxes>
+<Entry Boxes>rightKneeActuatorEnabled,selectedJointPair,startStandprep,enableOutput,requestedHighLevelState,controlRatio,offsetHeightAboveGround,icpStandOffsetX,icpStandOffsetY,captureKpParallel,captureKpOrthogonal</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -160,31 +184,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.kp_l_leg_lax</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.kp_l_leg_uay</Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.positionError_l_leg_lax</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -196,9 +196,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprStandPrep.positionError_l_leg_uay</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -217,7 +241,7 @@
 	<Graph>
 		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
 		<GraphConfiguration>
-			<Name>config17</Name>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -234,33 +258,33 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.leftAnkleRightActuator.leftAnkleRightActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftKneeActuator.leftKneeActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftHipYActuator.leftHipYActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftHipZActuator.leftHipZActuatorMotorTemperature,root.remotemain.steppr.Steppr.leftHipXActuator.leftHipXActuatorMotorTemperature</Variables>
-		<GraphConfiguration>
-			<Name>config18</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorMotorTemperature,root.remotemain.steppr.Steppr.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorTemperature,root.remotemain.steppr.Steppr.rightKneeActuator.rightKneeActuatorMotorTemperature,root.remotemain.steppr.Steppr.rightHipYActuator.rightHipYActuatorMotorTemperature,root.remotemain.steppr.Steppr.rightHipZActuator.rightHipZActuatorMotorTemperature,root.remotemain.steppr.Steppr.rightHipXActuator.rightHipXActuatorMotorTemperature</Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.torsoXActuator.torsoXActuatorMotorTemperature,root.remotemain.steppr.Steppr.torsoYActuator.torsoYActuatorMotorTemperature,root.remotemain.steppr.Steppr.torsoZActuator.torsoZActuatorMotorTemperature</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.centerOfMassX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.centerOfMassY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.CapturabilityBasedDesiredCoPVisualizer.centerOfMassZ</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -274,14 +298,14 @@
 
 <Extra Panels>
 <Main Viewport>
-Dashboard,
+Dashboard,Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.934837370863431</Camera X>
- <Camera Y>-0.6898506557546029</Camera Y>
- <Camera Z>1.2777673480109057</Camera Z>
+ <Camera X>3.4106876282873166</Camera X>
+ <Camera Y>-0.3347736927659541</Camera Y>
+ <Camera Z>0.3545248983647252</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -305,8 +329,8 @@ Dashboard,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>-0.01751188892860478</Fix X>
+<Fix Y>-0.027972697456475737</Fix Y>
+<Fix Z>0.7671431989399143</Fix Z>
 </Fix Position>
 </Canvas 1>

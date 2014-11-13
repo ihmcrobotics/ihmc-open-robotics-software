@@ -11,6 +11,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.command.StepprCommand;
 import us.ihmc.steppr.hardware.command.StepprJointCommand;
+import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -35,14 +36,21 @@ public class StepprOutputWriter implements DRCOutputWriter
    
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
    
+   private final UDPStepprOutputWriter outputWriter;
+
+   
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
 
       SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
+      outputWriter = new UDPStepprOutputWriter(command);
+      
       standPrep.setFullRobotModel(standPrepFullRobotModel);
       registry.addChild(standPrep.getYoVariableRegistry());
+      
+      outputWriter.connect();
    }
 
    @Override
@@ -97,6 +105,8 @@ public class StepprOutputWriter implements DRCOutputWriter
 
          }
       }
+      
+      outputWriter.write();
 
    }
 
