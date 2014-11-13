@@ -23,14 +23,14 @@ public enum StepprActuator
    public static final StepprActuator[] values = values();
    
    private final String name;
-   private final double kt;
+   private final double ktSinesoidal;
    private final int bus;
    private final int index;
    
-   private StepprActuator(String name, double kt, int bus, int index)
+   private StepprActuator(String name, double ktPeak, int bus, int index)
    {
       this.name = name;
-      this.kt = kt;
+      this.ktSinesoidal = ktPeak * Math.sqrt(3.0) / 2.0;
       this.bus = bus;
       this.index = index;
    }
@@ -42,7 +42,7 @@ public enum StepprActuator
    
    public double getKt()
    {
-      return kt;
+      return ktSinesoidal;
    }
 
    public int getBus()

@@ -1,7 +1,6 @@
 package us.ihmc.steppr.hardware.state;
 
 import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -64,7 +63,7 @@ public class StepprKneeJointState implements StepprJointState
       double ankleAngle = ankle.getMotorPosition();
       double ankleVelocity = ankle.getMotorVelocity();
       
-      q.set(actuator.getJointPosition() + ankleAngle);
+      q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition() + ankleAngle));
       qd.set(actuator.getJointVelocity() + ankleVelocity);
       tau.set(actuator.getMotorTorque() * ratio);
    }

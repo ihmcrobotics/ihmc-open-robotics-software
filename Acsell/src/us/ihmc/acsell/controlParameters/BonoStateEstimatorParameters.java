@@ -57,7 +57,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       }
       else
       {
-         defaultFilterBreakFrequency = 16.0;
+         defaultFilterBreakFrequency = 16.0; //50.0;
       }
 
       jointPositionFilterFrequencyHz = defaultFilterBreakFrequency;
@@ -66,7 +66,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       angularVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
       linearAccelerationFilterFrequencyHz = defaultFilterBreakFrequency;
 
-      jointVelocitySlopTimeForBacklashCompensation = 0.03;
+      jointVelocitySlopTimeForBacklashCompensation = 0.06;
 
       pointVelocityXYMeasurementStandardDeviation = 2.0;
       pointVelocityZMeasurementStandardDeviation = 2.0;
@@ -75,7 +75,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       pointPositionZMeasurementStandardDeviation = 0.1;
 
       boolean useTwoPolesForIMUFiltering = false;
-      boolean doFiniteDifferenceForJointVelocities = false;
+      boolean doFiniteDifferenceForJointVelocities = true;
 
       doElasticityCompensation = false;
       defaultJointStiffness = Double.POSITIVE_INFINITY;
@@ -139,7 +139,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
    {
-      return 16.0;
+      return 16.0; //50.0;
    }
 
    @Override
@@ -151,7 +151,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean useAccelerometerForEstimation()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -223,7 +223,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
    {
-      return true;
+      return false;
    }
 
    @Override
