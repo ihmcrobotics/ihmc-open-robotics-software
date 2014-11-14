@@ -36,6 +36,7 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':UserInterface')
 	compile project(':ROSJNIWrapper')
+    compile project(':IHMCPerception')
 	
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
