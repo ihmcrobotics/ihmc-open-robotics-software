@@ -1,6 +1,6 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class SimpleRobotToOptimize extends Robot
 {

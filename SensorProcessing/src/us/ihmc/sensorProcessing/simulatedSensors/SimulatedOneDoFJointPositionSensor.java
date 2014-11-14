@@ -4,7 +4,7 @@ import org.apache.commons.lang.mutable.MutableDouble;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableDouble>
 {

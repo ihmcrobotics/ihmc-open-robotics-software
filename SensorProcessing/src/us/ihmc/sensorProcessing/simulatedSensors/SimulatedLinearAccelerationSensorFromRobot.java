@@ -7,7 +7,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.IMUMount;
+import us.ihmc.simulationconstructionset.IMUMount;
 
 public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<Tuple3d>
 {

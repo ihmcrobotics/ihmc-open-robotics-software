@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.StringTokenizer;
 
-import com.yobotics.simulationconstructionset.gui.XMLReaderUtility;
+import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 
 public class SdfToMaxXML
 {

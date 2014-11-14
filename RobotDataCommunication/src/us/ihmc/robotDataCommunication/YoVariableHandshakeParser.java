@@ -34,7 +34,7 @@ import us.ihmc.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.yobotics.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Joint;
 
 public class YoVariableHandshakeParser
 {

@@ -18,7 +18,7 @@ import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Joint;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {

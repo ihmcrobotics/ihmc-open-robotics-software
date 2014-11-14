@@ -2,7 +2,7 @@ package us.ihmc.robotDataCommunication.jointState;
 
 import java.nio.LongBuffer;
 
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
 {
