@@ -48,12 +48,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public boolean stayOnToes()
-   {
-      return false; // Not working for now
-   }
-
-   @Override
    public boolean doToeOffIfPossible()
    {
       return true;
