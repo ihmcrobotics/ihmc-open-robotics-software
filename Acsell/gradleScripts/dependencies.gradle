@@ -24,5 +24,5 @@ dependencies {
 	compile project(':RobotDataCommunication')
 	compile project(':IHMCRealtime')
 	compile project(':IHMCHumanoidBehaviors')
-    compile project(':IHMCHPerception')
+    compile project(':IHMCPerception')
 }
