@@ -12,9 +12,9 @@ import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
-import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class DRCPerfectSensorReader implements SensorReader, RobotController
 {

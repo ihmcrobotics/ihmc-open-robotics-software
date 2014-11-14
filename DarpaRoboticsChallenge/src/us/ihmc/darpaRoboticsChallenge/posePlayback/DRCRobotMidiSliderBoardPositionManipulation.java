@@ -47,10 +47,10 @@ import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {

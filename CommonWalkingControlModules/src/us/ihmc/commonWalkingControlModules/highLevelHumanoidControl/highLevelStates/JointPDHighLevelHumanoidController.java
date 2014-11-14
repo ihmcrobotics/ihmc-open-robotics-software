@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 
 public class JointPDHighLevelHumanoidController extends HighLevelBehavior
 {

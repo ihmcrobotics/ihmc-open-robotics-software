@@ -22,7 +22,7 @@ import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
 
-import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
+import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 
 public class DRCLidar
 {

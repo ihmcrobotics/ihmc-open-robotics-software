@@ -10,14 +10,14 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.physics.CollisionShapeDescription;
-import com.yobotics.simulationconstructionset.physics.CollisionShapeFactory;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 
 /**
  * @author Peter Abeles

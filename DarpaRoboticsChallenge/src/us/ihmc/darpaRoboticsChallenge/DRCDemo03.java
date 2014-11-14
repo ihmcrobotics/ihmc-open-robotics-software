@@ -18,10 +18,10 @@ import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.GroundContactModel;
-import com.yobotics.simulationconstructionset.HeightMapFromGroundContactModel;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.simulationconstructionset.GroundContactModel;
+import us.ihmc.simulationconstructionset.HeightMapFromGroundContactModel;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public abstract class DRCDemo03
 {

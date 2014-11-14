@@ -25,9 +25,9 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 
 public class SmartCMPProjectorTest
 {

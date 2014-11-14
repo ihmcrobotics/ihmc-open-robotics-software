@@ -14,7 +14,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;

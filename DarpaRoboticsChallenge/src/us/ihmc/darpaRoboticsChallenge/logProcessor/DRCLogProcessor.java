@@ -14,8 +14,8 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizer;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.DataProcessingFunction;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.DataProcessingFunction;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public abstract class DRCLogProcessor
 {

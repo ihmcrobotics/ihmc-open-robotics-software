@@ -23,8 +23,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class HeadingAndVelocityEvaluationScriptTest
 {

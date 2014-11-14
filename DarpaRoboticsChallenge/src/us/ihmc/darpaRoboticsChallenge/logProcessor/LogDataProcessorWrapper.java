@@ -9,9 +9,9 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.DataProcessingFunction;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.scripts.Script;
+import us.ihmc.simulationconstructionset.DataProcessingFunction;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.scripts.Script;
 
 public class LogDataProcessorWrapper implements DataProcessingFunction, Script
 {

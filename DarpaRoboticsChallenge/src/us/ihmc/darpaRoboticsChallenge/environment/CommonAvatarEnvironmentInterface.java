@@ -2,10 +2,10 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.List;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public interface CommonAvatarEnvironmentInterface
 {

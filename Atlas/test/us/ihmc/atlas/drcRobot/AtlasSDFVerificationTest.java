@@ -36,11 +36,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
 /**
  * Created by dstephen on 2/11/14.

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.communication.packets.SCSListenerPacket;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
-import com.yobotics.simulationconstructionset.PlaybackListener;
+import us.ihmc.simulationconstructionset.PlaybackListener;
 
 
 public class SCSPlaybackListener implements PlaybackListener

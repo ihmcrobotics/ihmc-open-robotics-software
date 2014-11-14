@@ -16,16 +16,16 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromFile;
-import com.yobotics.simulationconstructionset.util.ground.RandomRockyGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.RollingGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.StairGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStone;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStonesGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromFile;
+import us.ihmc.simulationconstructionset.util.ground.RandomRockyGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.StairGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStone;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStonesGroundProfile;
 
 public class CommonTerrain
 {

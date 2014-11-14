@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
+import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 
 public class CommonHumanoidReferenceFramesUpdater implements SensorProcessor
 {

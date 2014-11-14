@@ -7,8 +7,8 @@ import java.util.Set;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJointHolder;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 
 public class PlaybackPose
 {

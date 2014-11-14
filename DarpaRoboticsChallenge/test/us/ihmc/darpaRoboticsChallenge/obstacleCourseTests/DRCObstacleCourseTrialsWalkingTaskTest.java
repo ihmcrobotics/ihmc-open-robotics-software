@@ -18,8 +18,8 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @SuppressWarnings("deprecation")
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface

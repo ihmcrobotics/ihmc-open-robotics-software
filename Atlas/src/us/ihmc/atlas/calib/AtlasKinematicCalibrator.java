@@ -15,7 +15,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class AtlasKinematicCalibrator
 {

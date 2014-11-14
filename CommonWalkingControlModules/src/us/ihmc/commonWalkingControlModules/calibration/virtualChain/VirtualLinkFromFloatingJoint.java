@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
 
 public class VirtualLinkFromFloatingJoint extends VirtualLinkFromJoint
 {

@@ -17,7 +17,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
+import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class DRCPoseCommunicator implements RawOutputWriter

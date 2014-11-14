@@ -18,8 +18,8 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.IndexChangedListener;
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.IndexChangedListener;
 
 public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewer
 {

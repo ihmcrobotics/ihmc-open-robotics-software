@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {

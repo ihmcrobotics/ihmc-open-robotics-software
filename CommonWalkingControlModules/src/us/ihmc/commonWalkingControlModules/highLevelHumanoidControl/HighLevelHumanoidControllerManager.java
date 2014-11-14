@@ -14,7 +14,7 @@ import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class HighLevelHumanoidControllerManager implements RobotController
 {

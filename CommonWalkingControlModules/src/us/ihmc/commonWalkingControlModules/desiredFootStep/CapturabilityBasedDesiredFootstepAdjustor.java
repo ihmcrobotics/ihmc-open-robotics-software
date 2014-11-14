@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootstepAdjustor
 {

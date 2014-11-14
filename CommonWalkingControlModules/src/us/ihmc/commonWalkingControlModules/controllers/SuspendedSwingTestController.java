@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SuspendedSwingTestController implements RobotController
 {

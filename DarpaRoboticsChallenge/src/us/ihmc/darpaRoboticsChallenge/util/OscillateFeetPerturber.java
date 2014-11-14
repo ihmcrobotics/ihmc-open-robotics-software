@@ -11,9 +11,9 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 
 public class OscillateFeetPerturber extends ModularRobotController
 {

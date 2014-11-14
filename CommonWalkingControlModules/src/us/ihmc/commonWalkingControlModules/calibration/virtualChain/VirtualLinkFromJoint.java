@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Joint;
 
 public abstract class VirtualLinkFromJoint
 {

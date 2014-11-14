@@ -2,8 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 /*
  * GUI Initial Setup

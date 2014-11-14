@@ -8,7 +8,7 @@ import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
-import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
+import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
 
 public class VaryingStairGroundProfile extends GroundProfileFromHeightMap

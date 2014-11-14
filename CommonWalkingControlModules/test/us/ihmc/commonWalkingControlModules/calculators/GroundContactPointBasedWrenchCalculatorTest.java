@@ -15,12 +15,12 @@ import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class GroundContactPointBasedWrenchCalculatorTest
 {

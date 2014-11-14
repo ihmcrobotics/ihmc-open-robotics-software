@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * <p>Title: </p>

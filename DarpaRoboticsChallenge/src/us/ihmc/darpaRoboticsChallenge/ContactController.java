@@ -4,10 +4,10 @@ import java.util.List;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.ground.Contactable;
-import com.yobotics.simulationconstructionset.util.ground.SimpleStickSlipContactModel;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.ground.Contactable;
+import us.ihmc.simulationconstructionset.util.ground.SimpleStickSlipContactModel;
 
 public class ContactController implements RobotController
 {

@@ -15,9 +15,9 @@ import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class DRCSimulationVisualizer implements RobotController
 {

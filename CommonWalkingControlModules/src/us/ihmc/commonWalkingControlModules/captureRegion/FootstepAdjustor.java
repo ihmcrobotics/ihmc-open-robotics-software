@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * Provides the function adjustFootstep which takes a footstep and a capture region

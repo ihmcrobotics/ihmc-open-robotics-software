@@ -7,12 +7,12 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.Axis;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SliderJoint;
 
 public abstract class VirtualChainExampleRobot extends Robot implements RobotRandomPositionMover
 {

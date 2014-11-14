@@ -29,7 +29,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 {

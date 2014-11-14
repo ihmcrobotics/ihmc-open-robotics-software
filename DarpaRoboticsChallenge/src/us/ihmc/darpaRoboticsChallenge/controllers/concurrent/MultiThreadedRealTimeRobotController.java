@@ -8,7 +8,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.utilities.Tuple;
 
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class MultiThreadedRealTimeRobotController
 {

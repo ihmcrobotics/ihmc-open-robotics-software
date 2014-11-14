@@ -6,11 +6,11 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 
-import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01EnvironmentViewer
 {

@@ -12,12 +12,12 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 {

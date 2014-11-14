@@ -4,7 +4,7 @@ import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvider implements RobotController
 {

@@ -9,7 +9,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElement {
 

@@ -47,8 +47,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class AtlasMultiContact
 {

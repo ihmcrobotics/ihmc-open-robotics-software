@@ -16,7 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCFlatGroundWalkingTrack
 {

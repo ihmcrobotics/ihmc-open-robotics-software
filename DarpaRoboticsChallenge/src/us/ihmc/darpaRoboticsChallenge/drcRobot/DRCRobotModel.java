@@ -24,8 +24,8 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 import com.jme3.math.Transform;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public interface DRCRobotModel
 {

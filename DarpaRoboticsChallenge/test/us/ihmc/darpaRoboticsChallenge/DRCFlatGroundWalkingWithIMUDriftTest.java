@@ -24,11 +24,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
 @SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobotTestInterface

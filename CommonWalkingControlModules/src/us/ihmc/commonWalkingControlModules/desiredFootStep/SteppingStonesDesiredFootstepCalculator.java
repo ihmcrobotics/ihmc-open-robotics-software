@@ -27,7 +27,7 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * <p>Title: SteppingStonesDesiredStepLocationCalculator</p>

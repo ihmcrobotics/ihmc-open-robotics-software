@@ -25,11 +25,11 @@ import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVelocityProvider;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.SupportedGraphics3DAdapter;
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
+import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 {

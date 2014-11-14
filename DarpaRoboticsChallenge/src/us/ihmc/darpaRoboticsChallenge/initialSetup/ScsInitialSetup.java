@@ -4,11 +4,11 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 
 /*
  * SCS Initial Setup

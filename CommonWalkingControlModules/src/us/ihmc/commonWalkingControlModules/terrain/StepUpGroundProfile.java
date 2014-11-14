@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
-import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
+import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
 
 public class StepUpGroundProfile extends GroundProfileFromHeightMap

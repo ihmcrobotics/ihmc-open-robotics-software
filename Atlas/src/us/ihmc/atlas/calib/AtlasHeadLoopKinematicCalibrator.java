@@ -58,7 +58,7 @@ import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 
-import com.yobotics.simulationconstructionset.IndexChangedListener;
+import us.ihmc.simulationconstructionset.IndexChangedListener;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   

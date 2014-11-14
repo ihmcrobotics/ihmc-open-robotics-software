@@ -1,8 +1,8 @@
 package us.ihmc.atlas.drcsim;
 
-import com.yobotics.simulationconstructionset.robotController.AbstractThreadedRobotController;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControllerExecutor;
+import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControllerExecutor;
 
 public class DRCSimThreadedRobotController extends AbstractThreadedRobotController implements Runnable
 {
