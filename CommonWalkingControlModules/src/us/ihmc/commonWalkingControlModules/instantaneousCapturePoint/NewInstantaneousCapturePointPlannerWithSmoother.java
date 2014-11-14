@@ -27,7 +27,7 @@ import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedPositionTrajecto
 
 public class NewInstantaneousCapturePointPlannerWithSmoother
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private boolean VISUALIZE = true;
