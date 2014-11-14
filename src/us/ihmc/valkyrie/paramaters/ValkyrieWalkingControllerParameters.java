@@ -57,12 +57,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public boolean stayOnToes()
-   {
-      return false; // Not working for now
-   }
-
-   @Override
    public boolean doToeOffIfPossible()
    {
       return !runningOnRealRobot;
