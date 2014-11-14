@@ -15,10 +15,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
 
-   public abstract boolean checkOrbitalEnergyCondition();
-
-   public abstract boolean resetDesiredICPToCurrentAtStartOfSwing();
-
    public abstract double getFootForwardOffset();
 
    public abstract double getFootBackwardOffset();
@@ -46,8 +42,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double nominalHeightAboveAnkle();
 
    public abstract double maximumHeightAboveAnkle();
-
-   public abstract boolean finishSwingWhenTrajectoryDone();
 
    public abstract boolean doToeOffIfPossible();
 
@@ -88,8 +82,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getCMPRateLimit();
 
    public abstract double getCMPAccelerationLimit();
-
-   public abstract double getDefaultDesiredPelvisPitch();
 
    public abstract YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry);
 

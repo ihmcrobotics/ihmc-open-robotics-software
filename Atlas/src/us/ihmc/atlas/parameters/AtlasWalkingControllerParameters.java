@@ -142,12 +142,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return defaultChestOrientationControlJointNames;
    }
 
-   @Override
-   public boolean checkOrbitalEnergyCondition()
-   {
-      return false;
-   }
-
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.595 + 0.03;                                       
    private double nominalHeightAboveGround = 0.675 + 0.03; 
@@ -192,12 +186,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public boolean resetDesiredICPToCurrentAtStartOfSwing()
-   {
-      return false;
-   }
-
-   @Override
    public double getNeckPitchUpperLimit()
    {
       return neckPitchUpperLimit;
@@ -219,12 +207,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getHeadRollLimit()
    {
       return headRollLimit;
-   }
-
-   @Override
-   public boolean finishSwingWhenTrajectoryDone()
-   {
-      return false;
    }
 
    @Override
@@ -376,12 +358,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public boolean getCoMHeightDriftCompensation()
    {
       return false;
-   }
-
-   @Override
-   public double getDefaultDesiredPelvisPitch()
-   {
-      return 0.0;
    }
 
    @Override
