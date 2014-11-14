@@ -3,4 +3,5 @@ dependencies {
 	
 	compile project(':IHMCUtilities')
 	compile project(':IHMCCommunication')
+    compile project(':Planning')
 }
