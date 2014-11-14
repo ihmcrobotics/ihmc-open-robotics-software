@@ -44,9 +44,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    private final AlphaFilteredYoFrameVector changeInTransferToFootPosition;
 
    public NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(CapturePointPlannerParameters capturePointPlannerParameters,
-         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      super(capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
       this.timeDelay = new DoubleYoVariable("icpPlannerTimeDelayFromeFreezer", registry);
       this.capturePointPositionError = new DoubleYoVariable("icpPlannerCapturePointPositionError", registry);
@@ -205,7 +205,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    private void computeCapturePointDistantToFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
          FrameVector desiredCapturePointVelocity)
    {
-      distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLine(currentCapturePointPosition, desiredCapturePointPosition,
+      distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLineIn2d(currentCapturePointPosition, desiredCapturePointPosition,
             desiredCapturePointVelocity));
    }
    

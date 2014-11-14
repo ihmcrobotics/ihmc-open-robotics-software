@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.ArrayList;
 
 import us.ihmc.utilities.lists.RecyclingArrayList;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -266,12 +267,12 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity)
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
 
-      double desiredCapturePointVelocityMagnitude = desiredCapturePointVelocity.length();
+      double desiredCapturePointVelocityMagnitude = Math.sqrt(MathTools.square(desiredCapturePointVelocity.getX()) + MathTools.square(desiredCapturePointVelocity.getY()));
 
       if (desiredCapturePointVelocityMagnitude == 0.0)
       {
@@ -281,13 +282,11 @@ public class CapturePointTools
       {
          double normalizedCapturePointVelocityX = desiredCapturePointVelocity.getX() / desiredCapturePointVelocityMagnitude;
          double normalizedCapturePointVelocityY = desiredCapturePointVelocity.getY() / desiredCapturePointVelocityMagnitude;
-         double normalizedCapturePointVelocityZ = desiredCapturePointVelocity.getZ() / desiredCapturePointVelocityMagnitude;
 
          double capturePointErrorX = currentCapturePointPosition.getX() - desiredCapturePointPosition.getX();
          double capturePointErrorY = currentCapturePointPosition.getY() - desiredCapturePointPosition.getY();
-         double capturePointErrorZ = currentCapturePointPosition.getZ() - desiredCapturePointPosition.getZ();
 
-         return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY + normalizedCapturePointVelocityZ * capturePointErrorZ);
+         return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY);
       }
    }
 
