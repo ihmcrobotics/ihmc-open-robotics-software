@@ -1,6 +1,5 @@
 package us.ihmc.acsell.controlParameters;
 
-import us.ihmc.acsell.parameters.BonoJointMap;
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -111,12 +110,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
             return defaultChestOrientationControlJointNames;
    }
 
-   @Override
-   public boolean checkOrbitalEnergyCondition()
-   {
-      return false;
-   }
-
    private final double minimumHeightAboveGround = 0.595 + 0.03;
    private double nominalHeightAboveGround = 0.675 + 0.03;
    private final double maximumHeightAboveGround = 0.735 + 0.03;
@@ -146,12 +139,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public boolean resetDesiredICPToCurrentAtStartOfSwing()
-   {
-      return false;
-   }
-
-   @Override
    public double getNeckPitchUpperLimit()
    {
       return 0.0;
@@ -173,12 +160,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getHeadRollLimit()
    {
       return 0.0;
-   }
-
-   @Override
-   public boolean finishSwingWhenTrajectoryDone()
-   {
-      return false;
    }
 
    @Override
@@ -319,12 +300,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public boolean getCoMHeightDriftCompensation()
    {
       return false;
-   }
-
-   @Override
-   public double getDefaultDesiredPelvisPitch()
-   {
-      return 0.0;
    }
 
    @Override
