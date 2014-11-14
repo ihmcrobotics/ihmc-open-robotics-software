@@ -13,8 +13,8 @@ import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.util.virtualHoist.VirtualHoist;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
 
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {

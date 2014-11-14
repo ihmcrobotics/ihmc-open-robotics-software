@@ -45,8 +45,8 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {

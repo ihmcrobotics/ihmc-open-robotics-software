@@ -16,8 +16,8 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class ValkyriePushRecoveryTrack
 {
