@@ -19,8 +19,8 @@ import javax.swing.table.TableCellRenderer;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.PlaybackListener;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.PlaybackListener;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class StepprDashboard extends JPanel implements PlaybackListener
 {
