@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
 public interface DRCRobotSensorInformation
@@ -25,6 +26,8 @@ public interface DRCRobotSensorInformation
    public DRCRobotLidarParameters getLidarParameters(int lidarId);
 
    public DRCRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
+   
+   public ReferenceFrame getHeadIMUFrameWhenLevel();
 
    public String[] getSensorFramesToTrack();
    
