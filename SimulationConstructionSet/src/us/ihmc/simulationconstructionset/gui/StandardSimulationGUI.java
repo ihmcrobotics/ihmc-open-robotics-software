@@ -523,7 +523,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, myDataBuffer, jFrame);
       }
 
-      // frame = new JFrame("Yobotics!  Simulation Construction Set");
       if (jFrame != null)
       {
          jFrame.addWindowListener(new WindowAdapter()

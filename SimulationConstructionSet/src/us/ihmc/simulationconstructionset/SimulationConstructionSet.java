@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -41,23 +42,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.net.TimestampProvider;
-import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
-import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
-import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
-import us.ihmc.yoUtilities.graphics.GraphicsUpdatable;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.stateMachines.StateMachinesJPanel;
-
-import com.jme3.renderer.Camera;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
@@ -101,6 +85,23 @@ import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFra
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.net.TimestampProvider;
+import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
+import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
+import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
+import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.yoUtilities.graphics.GraphicsUpdatable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.stateMachines.StateMachinesJPanel;
+
+import com.jme3.renderer.Camera;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -1817,7 +1818,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          // StandardSimulationGUI.disposeSplashWindow();
       }
 
-      jFrame = new JFrame("Yobotics!  Simulation Construction Set");
+      jFrame = new JFrame("Simulation Construction Set");
+      jFrame.setIconImage(new ImageIcon(ClassLoader.getSystemResource("running-man-32x32.png").getPath()).getImage());
 
       try
       {
