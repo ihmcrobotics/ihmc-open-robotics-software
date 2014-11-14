@@ -1,6 +1,11 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix3f;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -8,6 +13,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class AtlasSensorInformation implements DRCRobotSensorInformation
@@ -76,10 +83,12 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
    private static final String bodyIMUSensor = "pelvis_imu_sensor";
-   private static final String headIMUSensor = "head_head_imu_sensor";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
+   private static EnumMap<AtlasTarget, ReferenceFrame> headIMUFramesWhenLevel=new EnumMap<>(AtlasTarget.class);
    
-   /**
+
+
+/**
     * Stereo Parameters
     */
    private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
@@ -92,15 +101,19 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private final boolean isMultisenseHead;
    private final boolean setupROSLocationService;
    private final boolean setupROSParameterSetters;
+   private final AtlasTarget target;
    
    public AtlasSensorInformation(AtlasTarget target)
    {      
+	   this.target = target;
       if(target == AtlasTarget.REAL_ROBOT)
       {
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, left_frame_name, baseTfName, MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, right_frame_name, baseTfName, MULTISENSE_SL_RIGHT_CAMERA_ID);
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+         
+         
       } 
       else if (target == AtlasTarget.GAZEBO)
       {
@@ -126,15 +139,40 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic,  multisenseHandoffFrame, right_info_camera_topic, MULTISENSE_SL_RIGHT_CAMERA_ID);
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, MULTISENSE_STEREO_ID);
+;
       }
+      setupHeadIMUFrames();
       cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, BLACKFLY_LEFT_CAMERA_ID);
       cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, BLACKFLY_RIGHT_CAMERA_ID);
       
       setupROSLocationService = target == AtlasTarget.REAL_ROBOT;
       setupROSParameterSetters = target == AtlasTarget.REAL_ROBOT;
       isMultisenseHead = target == AtlasTarget.REAL_ROBOT;
-   }
-   
+      
+      
+      
+	}
+
+	private void setupHeadIMUFrames() {
+		for (AtlasTarget target : AtlasTarget.values()) {
+			Matrix3d headIMUBasisWhenLevel;
+			if (target == AtlasTarget.REAL_ROBOT) {
+				// each column is the unit vector of X,Y,Z axis in world frame
+				headIMUBasisWhenLevel = new Matrix3d( 0, 0, 1, 
+						                              0,  1, 0, 
+						                             -1,  0, 0);
+
+			} else {
+				headIMUBasisWhenLevel = new Matrix3d(1, 0, 0, 0, 1, 0, 0, 0, 1);
+
+			}
+			headIMUFramesWhenLevel.put(target, ReferenceFrame .constructBodyFrameWithUnchangingTransformToParent(
+							"head_imu", ReferenceFrame.getWorldFrame(),
+							new RigidBodyTransform(headIMUBasisWhenLevel, new Vector3d())));
+		}
+
+	}
+
    @Override
    public DRCRobotLidarParameters[] getLidarParameters()
    {
@@ -258,4 +296,16 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    {
       return isMultisenseHead;
    }
+   
+
+   @Override
+   public ReferenceFrame getHeadIMUFrameWhenLevel() {
+	   return headIMUFramesWhenLevel.get(target);
+   
+	}
+
+	public static EnumMap<AtlasTarget, ReferenceFrame> getHeadIMUFramesWhenLevel() {
+		return headIMUFramesWhenLevel;
+	}
+
 }

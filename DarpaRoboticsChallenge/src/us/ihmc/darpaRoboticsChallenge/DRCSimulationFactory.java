@@ -164,7 +164,7 @@ public class DRCSimulationFactory
       }
       int estimatorTicksPerSimulationTick = (int) Math.round(drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
       int controllerTicksPerSimulationTick = (int) Math.round(drcRobotModel.getControllerDT() / drcRobotModel.getSimulateDT());
-      int slowPublisherTicksPerSimulationTick = (int) Math.round(100*drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
+      int slowPublisherTicksPerSimulationTick = (int) Math.round(10*drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
 
       multiThreadedRobotController.addController(drcEstimatorThread, estimatorTicksPerSimulationTick, false);
       multiThreadedRobotController.addController(drcControllerThread, controllerTicksPerSimulationTick, true);
@@ -173,7 +173,7 @@ public class DRCSimulationFactory
       {
          multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, true);
       }
-      DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), sensorInformation);
+      DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), drcRobotModel.getJointMap().getHeadName());
       multiThreadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
 
 

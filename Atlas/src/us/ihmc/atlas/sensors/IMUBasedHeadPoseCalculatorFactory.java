@@ -1,63 +1,167 @@
 package us.ihmc.atlas.sensors;
 
+import java.util.LinkedList;
+
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import multisense_ros.RawImuData;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
+import us.ihmc.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class IMUBasedHeadPoseCalculatorFactory {
+	
 	
 	private IMUBasedHeadPoseCalculatorFactory() 
 	{
 	}
 	
-	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, ObjectCommunicator scsCommunicator)
+	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation, ObjectCommunicator scsCommunicator)
 	{
-		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator);
-		scsCommunicator.attachListener(RawIMUPacket.class, calculator);
-		return calculator;
+		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator, sensorInformation);
+		scsCommunicator.attachListener(RawIMUPacket.class, calculator); return calculator;
 	}
 
-	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, RosMainNode rosMainNode)
+	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation, RosMainNode rosMainNode)
 	{
 		
-		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator);
+		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator, sensorInformation);
 		rosMainNode.attachSubscriber(AtlasSensorInformation.head_imu_acceleration_topic, calculator);
+		boolean USE_REAL_ROBOT_TRANSFORM=true;
+		if(USE_REAL_ROBOT_TRANSFORM)
+		{
+			calculator.setHeadIMUFrameWhenLevel(AtlasSensorInformation.getHeadIMUFramesWhenLevel().get(AtlasTarget.REAL_ROBOT));
+		}
 		return calculator;
 	}
 
 
 } 
 
+class RunningStatistics
+{
+	LinkedList<Vector3d> data;
+	Vector3d sum;
+	Vector3d squared_sum;
+	int windowSize=0;
+	public RunningStatistics(int windowSize)
+	{
+		data = new LinkedList<>();
+		sum=new Vector3d();
+		squared_sum=new Vector3d();
+		this.windowSize =windowSize;
+	}
+	
+	public void update(Vector3d newData)
+	{
+		sum.add(newData);
+		squared_sum.add(new Vector3d(newData.x*newData.x, newData.y*newData.y, newData.z*newData.z));
+		data.addLast(newData);
+
+		if(data.size()>windowSize)
+		{
+                  Vector3d removeData=data.removeFirst();
+                  sum.sub(removeData);
+                  squared_sum.sub(new Vector3d(removeData.x*removeData.x, removeData.y*removeData.y, removeData.z*removeData.z));
+		}
+
+	}
+	
+	public Vector3d getMean()
+	{
+		Vector3d mean=new Vector3d();
+		mean.x = sum.x/windowSize;
+		mean.y = sum.y/windowSize;
+		mean.z = sum.z/windowSize;
+		return mean;
+	}
+	
+	public Vector3d getStdEv()
+	{
+		Vector3d stdev = new Vector3d();
+		Vector3d mean = getMean();
+		stdev.x = Math.sqrt(squared_sum.x/windowSize - mean.x*mean.x);
+		stdev.y = Math.sqrt(squared_sum.y/windowSize - mean.y*mean.y);
+		stdev.z = Math.sqrt(squared_sum.z/windowSize - mean.z*mean.z);
+		return stdev;
+	}
+	
+}
+
 class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_ros.RawImuData> implements ObjectConsumer<RawIMUPacket>
 {
 	
 	NetworkProcessorControllerStateHandler uiCommunicator;
-	YoVariableRegistry registry;
-	Vector3d lastMeasurement;
 	HeadPosePacket headPosePacket=new HeadPosePacket();
+	DRCRobotSensorInformation sensorInformation;
+	ReferenceFrame headIMUFrameWhenLevel;
+	RunningStatistics stat = new RunningStatistics(10);
 	
-	public IMUBasedHeadPoseCalculator(NetworkProcessorControllerStateHandler uiCommunicator) {
+
+	public IMUBasedHeadPoseCalculator(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation) {
 		super(multisense_ros.RawImuData._TYPE);
 		this.uiCommunicator = uiCommunicator;
-		registry  = new YoVariableRegistry(getClass().getSimpleName());
-		lastMeasurement = new Vector3d();
+		this.sensorInformation = sensorInformation;
+		
+		headIMUFrameWhenLevel = sensorInformation.getHeadIMUFrameWhenLevel();
+	}
+	
+	public void setHeadIMUFrameWhenLevel(ReferenceFrame frame)
+	{
+		headIMUFrameWhenLevel = frame;
 	}
 
-	private void process(long timestampInNanoSeconds, Vector3d acceleration)
+	private boolean checkMeasurementStability(Vector3d newMeasurement)
 	{
-		//TODO: hardcoded from Multisense IMU frame to Head frame, should take fullRobotModel and use the transform there.
-		headPosePacket.pitch = Math.acos(acceleration.x / acceleration.length())-Math.PI/2;
+		stat.update(newMeasurement);
+		Vector3d stdev= stat.getStdEv();
+		return stdev.length() < 1e-2;
+	}
+
+	private void process(long timestampInNanoSeconds, Vector3d rawAcceleration)
+	{
+			//stability detection
+			
+			if (checkMeasurementStability(rawAcceleration)) {
+				Vector3d gravityInducedAcceleration = new Vector3d(0.0, 0.0, +9.82);
+				FrameVector accel = new FrameVector(headIMUFrameWhenLevel,rawAcceleration);
+				accel.changeFrame(ReferenceFrame.getWorldFrame());
+				double[] eulerAngles = EulerAnglesFromVectors(accel.getVector(), gravityInducedAcceleration);
+				headPosePacket.setEulerAngles(eulerAngles);
+				headPosePacket.status = MeasurementStatus.STABLE;
+				headPosePacket.measuredGravityInWorld.set(rawAcceleration);
+			} else {
+                headPosePacket.reset();
+				headPosePacket.status = MeasurementStatus.UNSTABLE_WAIT;
+			}
+
 		uiCommunicator.sendSerializableObject(headPosePacket);
-		lastMeasurement.set(acceleration);
+	}
+	private static double[] EulerAnglesFromVectors(Vector3d vectorPreTransform, Vector3d vectorPostTransform)
+	{
+		Vector3d rotationAxis = new Vector3d();
+		rotationAxis.cross(vectorPreTransform,vectorPostTransform);
+		double angle = Math.acos(vectorPreTransform.dot(vectorPostTransform)/vectorPreTransform.length()/vectorPostTransform.length());
+		AxisAngle4d aRotation = new AxisAngle4d(rotationAxis, angle);
+		Quat4d qRotation = new Quat4d();
+		qRotation.set(aRotation);
+		double[] eulerAngles =new double[3];
+		RotationFunctions.setYawPitchRollBasedOnQuaternion(eulerAngles, qRotation);
+		return eulerAngles;
 	}
 	
 	@Override

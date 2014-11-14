@@ -19,10 +19,11 @@ public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElemen
 
 	public DRCSimulatedIMUPublisher(GlobalDataProducer globalDataProducer,
 			List<? extends IMUSensorReadOnly> simulatedIMUOutput,
-			DRCRobotSensorInformation sensorInformation) {
+			String headLinkName) {
+		
 
 		for (int i = 0; i < simulatedIMUOutput.size(); i++) {
-			if (simulatedIMUOutput.get(i).getSensorName().contains("head")) {
+			if (simulatedIMUOutput.get(i).getSensorName().contains(headLinkName)) {
 				imuSensorReader = simulatedIMUOutput.get(i);
 				break;
 			}
