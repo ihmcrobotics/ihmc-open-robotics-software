@@ -4,6 +4,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
@@ -118,5 +119,10 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    public boolean isMultisenseHead()
    {
       return false;
+   }
+   
+   @Override
+   public ReferenceFrame getHeadIMUFrameWhenLevel(){
+	   return null;
    }
 }
