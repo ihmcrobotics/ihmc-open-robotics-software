@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
+import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 
 public interface BodyPositionAndVelocityEstimator extends SensorProcessor
 {

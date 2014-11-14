@@ -7,9 +7,9 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
-import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
-import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
+import us.ihmc.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
+import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
+import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 
 public class PerfectIMUSensorProcessor implements SensorProcessor
 {

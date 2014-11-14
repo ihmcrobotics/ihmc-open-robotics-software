@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.DataBuffer;
 
 public class YoVariableConnectionBurstTest
 {

@@ -8,7 +8,7 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Joint;
 
 public interface YoVariablesUpdatedListener
 {

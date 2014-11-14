@@ -6,7 +6,7 @@ import java.net.MalformedURLException;
 
 import javax.xml.bind.JAXBException;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class TestPrimitiveLoader
 {

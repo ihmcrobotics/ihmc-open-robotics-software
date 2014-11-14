@@ -5,9 +5,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class StateEstimatorErrorCalculatorController implements RobotController
 {

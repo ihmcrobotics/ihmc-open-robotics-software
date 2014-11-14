@@ -10,7 +10,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedRobotiqHandJointAngleProducer
 {

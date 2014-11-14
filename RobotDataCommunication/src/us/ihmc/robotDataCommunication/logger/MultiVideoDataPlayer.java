@@ -9,7 +9,7 @@ import us.ihmc.utilities.gui.CustomProgressMonitor;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-import com.yobotics.simulationconstructionset.PlaybackListener;
+import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {

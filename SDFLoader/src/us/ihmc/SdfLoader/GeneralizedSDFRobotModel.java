@@ -14,7 +14,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
-import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
+import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {

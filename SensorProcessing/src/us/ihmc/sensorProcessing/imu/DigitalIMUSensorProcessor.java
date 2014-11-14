@@ -8,8 +8,8 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
-import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
+import us.ihmc.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
+import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
 public class DigitalIMUSensorProcessor implements IMUSensorProcessor
 {

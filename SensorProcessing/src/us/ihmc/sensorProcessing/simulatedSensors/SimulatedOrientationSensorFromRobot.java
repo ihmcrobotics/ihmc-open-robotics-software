@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
-import com.yobotics.simulationconstructionset.IMUMount;
+import us.ihmc.simulationconstructionset.IMUMount;
 
 public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Matrix3d>
 {

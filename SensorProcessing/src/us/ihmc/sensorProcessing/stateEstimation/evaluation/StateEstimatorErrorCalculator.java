@@ -17,8 +17,8 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
 
 
 public class StateEstimatorErrorCalculator

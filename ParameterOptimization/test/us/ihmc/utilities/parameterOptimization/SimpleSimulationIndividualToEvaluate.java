@@ -1,7 +1,7 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import com.yobotics.simulationconstructionset.Simulation;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.Simulation;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
 public class SimpleSimulationIndividualToEvaluate extends IndividualToEvaluate
 {

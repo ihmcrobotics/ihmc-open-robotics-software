@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class ControlFlowGraphExecutorController implements RobotController
 {

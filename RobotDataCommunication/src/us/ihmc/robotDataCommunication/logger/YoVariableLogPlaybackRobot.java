@@ -17,8 +17,8 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener
 {

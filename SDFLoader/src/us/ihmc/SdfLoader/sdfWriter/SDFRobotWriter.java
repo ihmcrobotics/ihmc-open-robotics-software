@@ -32,11 +32,11 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileIns
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public abstract class SDFRobotWriter
 {

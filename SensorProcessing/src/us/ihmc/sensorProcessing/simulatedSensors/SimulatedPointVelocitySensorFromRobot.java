@@ -12,7 +12,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.KinematicPoint;
+import us.ihmc.simulationconstructionset.KinematicPoint;
 
 public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple3d>
 {

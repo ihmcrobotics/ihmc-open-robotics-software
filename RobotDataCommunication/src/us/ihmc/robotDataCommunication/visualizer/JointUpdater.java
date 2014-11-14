@@ -6,7 +6,7 @@ import java.util.List;
 
 import us.ihmc.robotDataCommunication.jointState.JointState;
 
-import com.yobotics.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Joint;
 
 @SuppressWarnings("rawtypes") 
 public class JointUpdater

@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 import us.ihmc.sensorProcessing.ProcessedPositionSensor;
 import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
 
-import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
+import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 
 /**
  * An EncoderProcessor should be constructed with the objects required to know the encoder raw state so that

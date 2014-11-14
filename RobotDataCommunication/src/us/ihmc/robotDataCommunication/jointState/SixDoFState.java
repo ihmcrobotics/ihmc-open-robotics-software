@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.screwTheory.Twist;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
 
 public class SixDoFState extends JointState<FloatingJoint>
 {

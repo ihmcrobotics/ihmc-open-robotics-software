@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
 
-import com.yobotics.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Joint;
 
 public abstract class JointState<U extends Joint>
 {

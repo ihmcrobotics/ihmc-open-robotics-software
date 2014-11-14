@@ -17,7 +17,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class IndividualRobotiqHandController
 {
