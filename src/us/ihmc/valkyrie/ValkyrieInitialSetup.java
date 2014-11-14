@@ -16,7 +16,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 
 public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
