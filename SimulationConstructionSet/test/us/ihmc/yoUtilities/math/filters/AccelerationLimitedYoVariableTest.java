@@ -16,10 +16,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AccelerationLimitedYoVariable;
 import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public class AccelerationLimitedYoVariableTest
 {

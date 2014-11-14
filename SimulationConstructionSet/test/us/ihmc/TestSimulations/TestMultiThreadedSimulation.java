@@ -1,7 +1,7 @@
 package us.ihmc.TestSimulations;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotController;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 
 public class TestMultiThreadedSimulation
 {
