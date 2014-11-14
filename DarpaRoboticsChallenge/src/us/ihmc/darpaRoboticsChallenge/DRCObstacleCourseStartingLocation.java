@@ -9,7 +9,32 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCDemo01RobotOnPlat
 
 public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
 {
-   DEFAULT, DRC_TRIALS_TRAINING_WALKING, DRC_TRIALS_QUALS, MID_LADDER, RAMP_BOTTOM, RAMP_TOP, NARROW_DOORWAY, BARRIERS, SMALL_PLATFORM, MEDIUM_PLATFORM, ON_MEDIUM_PLATFORM, EASY_STEPPING_STONES, STEPPING_STONES, STAIRS, ROCKS, LADDER, IN_FRONT_OF_ZIGZAG_BLOCKS, SINGLE_CYLINDERBLOCKS, TOP_OF_SLOPES, DEFAULT_BUT_ALMOST_PI, IN_FRONT_OF_CINDERBLOCK_FIELD, IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS, IN_FRONT_OF_CYLINDER_BLOCKS, IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
+   DEFAULT,
+   DRC_TRIALS_TRAINING_WALKING,
+   DRC_TRIALS_QUALS,
+   MID_LADDER,
+   RAMP_BOTTOM,
+   RAMP_TOP,
+   NARROW_DOORWAY,
+   BARRIERS,
+   SMALL_PLATFORM,
+   MEDIUM_PLATFORM,
+   ON_MEDIUM_PLATFORM,
+   EASY_STEPPING_STONES,
+   STEPPING_STONES,
+   STAIRS,
+   ROCKS,
+   LADDER,
+   IN_FRONT_OF_ZIGZAG_BLOCKS,
+   SINGLE_CYLINDERBLOCKS,
+   TOP_OF_SLOPES,
+   DEFAULT_BUT_ALMOST_PI,
+   IN_FRONT_OF_CINDERBLOCK_FIELD,
+   IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS,
+   IN_FRONT_OF_CYLINDER_BLOCKS,
+   IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD,
+   OFFSET_ONE_METER_X_AND_Y,
+   OFFSET_ONE_METER_X_AND_Y_ROTATED_PI;
 
    public static final HashMap<String, OffsetAndYawRobotInitialSetup> initialSetupMap = new HashMap<String, OffsetAndYawRobotInitialSetup>();
 
@@ -17,6 +42,8 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    {
       addMapping(DRCObstacleCourseStartingLocation.BARRIERS, new SquaredUpDRCDemo01Robot(0.0, 1.88, Math.toRadians(-135.0), 0));
       addMapping(DRCObstacleCourseStartingLocation.DEFAULT, new OffsetAndYawRobotInitialSetup());
+      addMapping(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y, new SquaredUpDRCDemo01Robot(1.0, 1.0));
+      addMapping(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, new OffsetAndYawRobotInitialSetup(1.0, 1.0, 0, Math.PI));
       addMapping(DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES, new OffsetAndYawRobotInitialSetup(-7.22, -0.8, 0.3, Math.PI - 0.01));
       addMapping(DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthPlatformToesTouching(3));
       addMapping(DRCObstacleCourseStartingLocation.DRC_TRIALS_QUALS, new SquaredUpDRCDemo01Robot(0.0, 2.708, Math.toRadians(-41.1147), 0.0));
@@ -46,6 +73,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       initialSetupMap.put(drcDemo01StartingLocation.toString(), robotInitialSetup);
    }
 
+   @Override
    public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
    {
       OffsetAndYawRobotInitialSetup startingLocation = initialSetupMap.get(this.toString());

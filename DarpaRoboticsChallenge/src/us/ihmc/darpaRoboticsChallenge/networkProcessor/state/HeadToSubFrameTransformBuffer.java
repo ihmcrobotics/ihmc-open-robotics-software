@@ -1,8 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.state;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class HeadToSubFrameTransformBuffer implements PendableBuffer
 {
@@ -74,11 +73,11 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
       return ((timestamp >= oldestTimestamp) && (timestamp <= newestTimestamp));
    }
 
-   public synchronized TimeStampedTransform3D interpolate(long timestamp)
+   public synchronized boolean interpolate(long timestamp, TimeStampedTransform3D timeStampedTransform3DToPack)
    {
       if (!isInRange(timestamp))
       {
-         return null;
+         return false;
       }
 
       for (int i = currentIndex - 1; i >= -size + currentIndex; i--)
@@ -93,7 +92,8 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
 
          if (floorData.getTimeStamp() == timestamp)
          {
-            return floorData;
+            timeStampedTransform3DToPack.set(floorData);
+            return true;
          }
          else if (floorData.getTimeStamp() < timestamp)
          {
@@ -110,11 +110,12 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
             long ceiling = ceilingData.getTimeStamp();
             double percentage = ((double) (timestamp - floor)) / ((double) (ceiling - floor));
 
-            return floorData.interpolateTo(ceilingData, percentage);
+            floorData.interpolateTo(ceilingData, percentage, timeStampedTransform3DToPack);
+            return true;
          }
       }
 
-      return null;
+      return false;
    }
 
    @Override
@@ -129,6 +130,7 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
       return newestTimestamp;
    }
    
+   @Override
    public long oldestTimestamp()
    {
       return oldestTimestamp;

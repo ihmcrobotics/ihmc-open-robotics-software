@@ -39,7 +39,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobot
 {
-   private static final boolean showGUI = true;//KEEP_SCS_UP || createMovie;
+   private static final boolean showGUI = false;
 
    private YoVariableRegistry registry;
    private RectangleRobot robot;
@@ -50,12 +50,16 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
    private DoubleYoVariable interpolationAlphaFilterBreakFrequency;
    private DoubleYoVariable interpolationAlphaFilterAlphaValue;
    private DoubleYoVariable interpolationAlphaFilter;
-
    private LongYoVariable seNonProcessedPelvisTimeStamp;
-
    private DoubleYoVariable maxVelocityClip;
    private DoubleYoVariable clippedAlphaValue;
 
+   private DoubleYoVariable nonCorrectedPelvis_x;
+   private DoubleYoVariable nonCorrectedPelvis_y;
+   private DoubleYoVariable nonCorrectedPelvis_z;
+   private DoubleYoVariable nonCorrectedPelvis_yaw;
+   private DoubleYoVariable nonCorrectedPelvis_pitch;
+   private DoubleYoVariable nonCorrectedPelvis_roll;
    private DoubleYoVariable correctedPelvis_x;
    private DoubleYoVariable correctedPelvis_y;
    private DoubleYoVariable correctedPelvis_z;
@@ -108,15 +112,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
 
    public static void main(String[] args)
    {
-      String[] vars = new String[] { "correctedPelvis", "seBackInTimeFrame", "localizationBackInTimeFrame", "totalErrorFrame", "interpolatedCorrectionFrame",
-            "interpolationStartFrame" };
+      String[] vars = new String[] { "nonCorrectedPelvis", "correctedPelvis", "seBackInTimeFrame", "localizationBackInTimeFrame", "totalErrorFrame",
+            "interpolatedCorrectionFrame", "interpolationStartFrame" };
       String[] postFix = new String[] { "_x", "_y", "_z", "_yaw", "_pitch", "_roll" };
 
       for (int i = 0; i < vars.length; i++)
       {
-         for (int j = 0; j < vars.length; j++)
+         for (int j = 0; j < postFix.length; j++)
          {
-            //            System.out.println("private DoubleYoVariable " + vars[i] + postFix[j] + ";");
+            System.out.println("private DoubleYoVariable " + vars[i] + postFix[j] + ";");
+         }
+      }
+      for (int i = 0; i < vars.length; i++)
+      {
+         for (int j = 0; j < postFix.length; j++)
+         {
             System.out.println(vars[i] + postFix[j] + " = (DoubleYoVariable) registry.getVariable(nameSpace, \"" + vars[i] + postFix[j] + "\"); ");
          }
       }
@@ -132,6 +142,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       maxVelocityClip = (DoubleYoVariable) registry.getVariable(nameSpace, "maxVelocityClip");
       clippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "clippedAlphaValue");
 
+      nonCorrectedPelvis_x = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_x");
+      nonCorrectedPelvis_y = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_y");
+      nonCorrectedPelvis_z = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_z");
+      nonCorrectedPelvis_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_yaw");
+      nonCorrectedPelvis_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_pitch");
+      nonCorrectedPelvis_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_roll");
       correctedPelvis_x = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_x");
       correctedPelvis_y = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_y");
       correctedPelvis_z = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_z");
@@ -168,6 +184,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       interpolationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_yaw");
       interpolationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_pitch");
       interpolationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_roll");
+
    }
 
    private void setupRobot()
