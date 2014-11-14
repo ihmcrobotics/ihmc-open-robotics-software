@@ -2,296 +2,127 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 
 import java.util.ArrayList;
 
+import us.ihmc.utilities.lists.RecyclingArrayList;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
+/**
+ * Note: CMP stands for Centroidal Momentum Pivot
+ *
+ */
 public class CapturePointTools
 {
    /**
-    * Compute constant centers of pressure, placing the initial COP between the
-    * feet and all of the rest on the footsteps.
+    * Compute the constant CMP locations and store them in constantCMPsToPack.
     * 
-    * @param arrayToPack ArrayList that will be packed with the constant center
-    *            of pressure locations
+    * @param constantCMPsToPack ArrayList that will be packed with the constant CMP locations
     * @param footstepList ArrayList containing the footsteps
-    * @param numberFootstepsToConsider Integer describing the number of
-    *            footsteps to consider when laying out the COP's
+    * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
+    * @param lastFootstepIndex Integer describing the index of the last footstep to consider when laying out the CMP's
+    * @param startStanding If true, the first constant CMP will be between the 2 first footsteps, else it will at the first footstep. 
+    * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else it will at the last footstep. 
     */
-   public static void computeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet(ArrayList<YoFramePoint> arrayToPack,
-         ArrayList<FramePoint> footstepList, int numberFootstepsToConsider)
+   public static void computeConstantCMPs(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex, int lastFootstepIndex, boolean startStanding, boolean endStanding)
    {
-      arrayToPack.get(0).setAndMatchFrame(footstepList.get(0));
-      arrayToPack.get(0).add(footstepList.get(1));
-      arrayToPack.get(0).scale(0.5);
-
-      int numberFootstepsInList = footstepList.size();
-
-      for (int i = 1; i < numberFootstepsToConsider; i++)
+      if (startStanding)
       {
-         if (i < numberFootstepsInList - 1)
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
-         }
-         else
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
-            arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
-            arrayToPack.get(i).scale(0.5);
-         }
+         // Start with the first constant CMP located between the feet.
+         YoFramePoint firstConstantCMPPlanned = constantCMPsToPack.get(firstFootstepIndex);
+         FramePoint firstFootstepToConsider = footstepList.get(firstFootstepIndex);
+         FramePoint secondFootstepToConsider = footstepList.get(firstFootstepIndex + 1);
+         putConstantCMPBetweenFeet(firstConstantCMPPlanned, firstFootstepToConsider, secondFootstepToConsider);
+         firstFootstepIndex++;
+      }
+
+      if (endStanding)
+      {
+         // End with the last constant CMP located between the feet.
+         YoFramePoint lastConstantCMPPlanned = constantCMPsToPack.get(lastFootstepIndex);
+         FramePoint lastFootstepToConsider = footstepList.get(lastFootstepIndex);
+         FramePoint beforeLastFootstepToConsider = footstepList.get(lastFootstepIndex - 1);
+         putConstantCMPBetweenFeet(lastConstantCMPPlanned, beforeLastFootstepToConsider, lastFootstepToConsider);
+         lastFootstepIndex--;
+      }
+
+      computeConstantCMPsOnFeet(constantCMPsToPack, footstepList, firstFootstepIndex, lastFootstepIndex);
+   }
+
+   /**
+    * Put the constant CMP's on the footsteps.
+    * 
+    * @param constantCMPsToPack ArrayList that will be packed with the constant CMP locations
+    * @param footstepList ArrayList containing the footsteps
+    * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
+    * @param lastFootstepIndex Integer describing the index of the last footstep to consider when laying out the CMP's
+    */
+   public static void computeConstantCMPsOnFeet(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex, int lastFootstepIndex)
+   {
+      for (int i = firstFootstepIndex; i <= lastFootstepIndex; i++)
+      {
+         YoFramePoint constantCMP = constantCMPsToPack.get(i);
+         // Put the constant CMP at the footstep location
+         constantCMP.setAndMatchFrame(footstepList.get(i));
       }
    }
 
    /**
-    * Put the constant COP'S except the last one on the footsteps. Put the last
-    * COP between the feet.
-    * 
-    * @param arrayToPack ArrayList that will be packed with the constant center
-    *            of pressure locations
-    * @param footstepList ArrayList containing the footsteps
-    * @param numberFootstepsToConsider Integer describing the number of
-    *            footsteps to consider when laying out the COP's
+    * Put the constant CMP in the middle of the two given footsteps.
+    * @param constantCMPToPack YoFramePoint that will be packed with the constant CMP location
+    * @param firstFootstep FramePoint holding the position of the first footstep
+    * @param secondFootstep FramePoint holding the position of the second footstep
     */
-   public static void computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<FramePoint> footstepList,
-         int numberFootstepsToConsider)
+   public static void putConstantCMPBetweenFeet(YoFramePoint constantCMPToPack, FramePoint firstFootstep, FramePoint secondFootstep)
    {
-      int numberFootstepsInList = footstepList.size();
-
-      for (int i = 0; i < numberFootstepsToConsider; i++)
-      {
-         if (i < numberFootstepsInList - 1)
-         {
-            arrayToPack.get(i).set(footstepList.get(i));
-         }
-         else
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
-            arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
-            arrayToPack.get(i).scale(0.5);
-         }
-      }
-
-      if (numberFootstepsToConsider <= numberFootstepsInList)
-      {
-         arrayToPack.get(numberFootstepsToConsider - 1).setAndMatchFrame(footstepList.get(numberFootstepsToConsider - 2));
-         arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
-         arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
-      }
-   }
-
-   /**
-    * Put the first and last COP between the footsteps, all the rest go on the
-    * footsteps.
-    * 
-    * @param arrayToPack ArrayList that will be packed with the constant center
-    *            of pressure locations
-    * @param footstepList ArrayList containing the footsteps
-    * @param numberFootstepsToConsider Integer describing the number of
-    *            footsteps to consider when laying out the COP's
-    */
-   public static void computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(ArrayList<YoFramePoint> arrayToPack,
-         ArrayList<FramePoint> footstepList, int numberFootstepsToConsider)
-   {
-      arrayToPack.get(0).setAndMatchFrame(footstepList.get(0));
-      arrayToPack.get(0).add(footstepList.get(1));
-      arrayToPack.get(0).scale(0.5);
-
-      int numberFootstepsInList = footstepList.size();
-
-      for (int i = 1; i < numberFootstepsToConsider; i++)
-      {
-         if (i < numberFootstepsInList - 1)
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
-         }
-         else
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
-            arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
-            arrayToPack.get(i).scale(0.5);
-         }
-      }
-
-      if (numberFootstepsToConsider <= numberFootstepsInList)
-      {
-         arrayToPack.get(numberFootstepsToConsider - 1).set(footstepList.get(numberFootstepsToConsider - 2));
-         arrayToPack.get(numberFootstepsToConsider - 1).add(footstepList.get(numberFootstepsToConsider - 1));
-         arrayToPack.get(numberFootstepsToConsider - 1).scale(0.5);
-      }
-   }
-
-   /**
-    * Put the constant COP'S on the footsteps.
-    * 
-    * @param arrayToPack ArrayList that will be packed with the constant center
-    *            of pressure locations
-    * @param footstepList ArrayList containing the footsteps
-    * @param numberFootstepsToConsider Integer describing the number of
-    *            footsteps to consider when laying out the COP's
-    */
-   public static void computeConstantCentersOfPressuresOnFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<FramePoint> footstepList,
-         int numberFootstepsToConsider)
-   {
-
-      int numberFootstepsInList = footstepList.size();
-
-      for (int i = 0; i < numberFootstepsToConsider; i++)
-      {
-         if (i < numberFootstepsInList - 1)
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
-         }
-         else
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
-            arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
-            arrayToPack.get(i).scale(0.5);
-         }
-      }
-   }
-
-   /**
-    * Put the constant COP'S on the feet except the first one. The first one 
-    * goes unset. This is useful for single support push recovery.
-    * 
-    * @param arrayToPack ArrayList that will be packed with the constant center
-    *            of pressure locations
-    * @param footstepList ArrayList containing the footsteps
-    * @param numberFootstepsToConsider Integer describing the number of
-    *            footsteps to consider when laying out the COP's
-    */
-   public static void computeConstantCentersOfPressuresExceptFirstOnFeet(ArrayList<YoFramePoint> arrayToPack, ArrayList<FramePoint> footstepList,
-         int numberFootstepsToConsider)
-   {
-
-      int numberFootstepsInList = footstepList.size();
-
-      for (int i = 1; i < numberFootstepsToConsider; i++)
-      {
-         if (i < numberFootstepsInList - 1)
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(i));
-         }
-         else
-         {
-            arrayToPack.get(i).setAndMatchFrame(footstepList.get(numberFootstepsInList - 1));
-            arrayToPack.get(i).add(footstepList.get(numberFootstepsInList - 2));
-            arrayToPack.get(i).scale(0.5);
-         }
-      }
+      constantCMPToPack.setAndMatchFrame(firstFootstep);
+      constantCMPToPack.add(secondFootstep);
+      constantCMPToPack.scale(0.5);
    }
 
    /**
     * Backward calculation of desired end of step capture point locations.
     * 
-    * @param constantCentersOfPressure
-    * @param capturePointsToPack
+    * @param constantCMPs
+    * @param cornerPointsToPack
     * @param stepTime
     * @param omega0
     */
-   public static void computeDesiredEndOfStepCapturePointLocations(ArrayList<YoFramePoint> constantCentersOfPressure,
-         ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
+   public static void computeDesiredCornerPoints(ArrayList<YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs, boolean skipFirstCornerPoint, double stepTime, double omega0)
    {
-      capturePointsToPack.get(capturePointsToPack.size() - 1).checkReferenceFrameMatch(constantCentersOfPressure.get(capturePointsToPack.size()));
-
-      computeInitialCapturePointFromFinalDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime, constantCentersOfPressure.get(capturePointsToPack.size()),
-            constantCentersOfPressure.get(capturePointsToPack.size() - 1), capturePointsToPack.get(capturePointsToPack.size() - 1));
-
-      for (int i = capturePointsToPack.size() - 1; i > 0; i--)
+      double exponentialTerm = Math.exp(- omega0 * stepTime);
+      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+      
+      int firstCornerPointIndex = skipFirstCornerPoint ? 1 : 0;
+      for (int i = cornerPointsToPack.size() - 1; i >= firstCornerPointIndex; i--)
       {
-         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i - 1));
+         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
+         YoFramePoint initialCMP = constantCMPs.get(i);
 
-         double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX()) * (1 / Math.exp(omega0 * stepTime))
-               + constantCentersOfPressure.get(i - 1).getX();
-         double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY()) * (1 / Math.exp(omega0 * stepTime))
-               + constantCentersOfPressure.get(i - 1).getY();
-
-         capturePointsToPack.get(i - 1).setX(tmpX);
-         capturePointsToPack.get(i - 1).setY(tmpY);
-      }
-   }
-
-   /**
-    * Backward calculation of desired end of step capture point locations.
-    * 
-    * @param constantCentersOfPressure
-    * @param capturePointsToPack
-    * @param stepTime
-    * @param omega0
-    */
-   public static void computeDesiredEndOfStepCapturePointLocationsWithFirstLeftUnset(ArrayList<YoFramePoint> constantCentersOfPressure,
-         ArrayList<YoFramePoint> capturePointsToPack, double stepTime, double omega0)
-   {
-      constantCentersOfPressure.get(capturePointsToPack.size()).checkReferenceFrameMatch(
-            capturePointsToPack.get(capturePointsToPack.size() - 1).getReferenceFrame());
-
-      computeInitialCapturePointFromFinalDesiredCapturePointAndInitialCenterOfPressure(omega0, stepTime, constantCentersOfPressure.get(capturePointsToPack.size()),
-            constantCentersOfPressure.get(capturePointsToPack.size() - 1), capturePointsToPack.get(capturePointsToPack.size() - 1));
-
-      for (int i = capturePointsToPack.size() - 1; i > 1; i--)
-      {
-         capturePointsToPack.get(i).checkReferenceFrameMatch(constantCentersOfPressure.get(i - 1));
-
-         double tmpX = (capturePointsToPack.get(i).getX() - constantCentersOfPressure.get(i - 1).getX()) * (1 / Math.exp(omega0 * stepTime))
-               + constantCentersOfPressure.get(i - 1).getX();
-         double tmpY = (capturePointsToPack.get(i).getY() - constantCentersOfPressure.get(i - 1).getY()) * (1 / Math.exp(omega0 * stepTime))
-               + constantCentersOfPressure.get(i - 1).getY();
-
-         capturePointsToPack.get(i - 1).setX(tmpX);
-         capturePointsToPack.get(i - 1).setY(tmpY);
+         cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
+         
+         nextCornerPoint = cornerPoint;
       }
    }
 
    /**
     * Given a desired capturePoint location and an initial position of the capture point,
-    * compute the constant center of pressure that will drive the capture point from the 
+    * compute the constant CMP that will drive the capture point from the 
     * initial position to the final position.
-    * 
+    * @param cmpToPack
     * @param finalDesiredCapturePoint
     * @param initialCapturePoint
-    * @param centerOfPressureToPack
     * @param omega0
     * @param stepTime
     */
-   public static void computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(YoFramePoint finalDesiredCapturePoint,
-         YoFramePoint initialCapturePoint, YoFramePoint centerOfPressureToPack, double omega0, double stepTime)
+   public static void computeConstantCMPFromInitialAndFinalCapturePointLocations(YoFramePoint cmpToPack,
+         YoFramePoint finalDesiredCapturePoint, YoFramePoint initialCapturePoint, double omega0, double stepTime)
    {
-      initialCapturePoint.checkReferenceFrameMatch(finalDesiredCapturePoint.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * stepTime);
-
-      double x = (finalDesiredCapturePoint.getX() - initialCapturePoint.getX() * exponentialTerm) / (1 - exponentialTerm);
-      double y = (finalDesiredCapturePoint.getY() - initialCapturePoint.getY() * exponentialTerm) / (1 - exponentialTerm);
-
-      centerOfPressureToPack.set(initialCapturePoint.getReferenceFrame(), x, y, 0.0);
-   }
-
-   /**
-    * Given an initial center of pressure location, a final capture point location, 
-    * and the step time, compute the initial capture point location. 
-    * 
-    * @param omega0
-    * @param time
-    * @param finalCapturePoint
-    * @param initialCenterOfPressure
-    * @param positionToPack
-    */
-   public static void computeInitialCapturePointFromFinalDesiredCapturePointAndInitialCenterOfPressure(double omega0, double time, YoFramePoint finalCapturePoint,
-         YoFramePoint initialCenterOfPressure, YoFramePoint positionToPack)
-   {
-      finalCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * -time);
-
-      double x = finalCapturePoint.getX() * exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getX();
-      double y = finalCapturePoint.getY() * exponentialTerm + (1 - exponentialTerm) * initialCenterOfPressure.getY();
-
-      positionToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
-
+      double exponentialTerm = Math.exp(- omega0 * stepTime);
+      cmpToPack.scaleSub(exponentialTerm, finalDesiredCapturePoint, initialCapturePoint);
+      cmpToPack.scale(1.0 / (exponentialTerm - 1.0));
    }
 
    /**
@@ -301,20 +132,12 @@ public class CapturePointTools
     * @param omega0
     * @param time
     * @param initialCapturePoint
-    * @param initialCenterOfPressure
-    * @param positionToPack
+    * @param initialCMP
+    * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCenterOfPressure,
-         YoFramePoint positionToPack)
+   public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFramePoint desiredCapturePointToPack)
    {
-      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * time);
-
-      double x = initialCenterOfPressure.getX() * (1 - exponentialTerm) + initialCapturePoint.getX() * exponentialTerm;
-      double y = initialCenterOfPressure.getY() * (1 - exponentialTerm) + initialCapturePoint.getY() * exponentialTerm;
-
-      positionToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
+      desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
    }
 
    /**
@@ -324,66 +147,42 @@ public class CapturePointTools
     * @param omega0
     * @param time
     * @param initialCapturePoint
-    * @param initialCenterOfPressure
-    * @param positionToPack
+    * @param initialCMP
+    * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
-         FramePoint positionToPack)
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FramePoint desiredCapturePointToPack)
    {
-      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * time);
-
-      double x = initialCenterOfPressure.getX() * (1 - exponentialTerm) + initialCapturePoint.getX() * exponentialTerm;
-      double y = initialCenterOfPressure.getY() * (1 - exponentialTerm) + initialCapturePoint.getY() * exponentialTerm;
-
-      positionToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
+      desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
    }
 
    /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w *
-    * e^{w*t} * ICP0 - p0 * w * e^{w*t}
+    * Compute the desired capture point velocity at a given time. 
+    * ICPv_d = w * e^{w*t} * ICP0 - p0 * w * e^{w*t}
     * 
     * @param omega0
     * @param time
     * @param initialCapturePoint
-    * @param initialCenterOfPressure
-    * @param velocityToPack
+    * @param initialCMP
+    * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCenterOfPressure,
-         YoFrameVector velocityToPack)
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFrameVector desiredCapturePointVelocityToPack)
    {
-      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * time);
-
-      double x = omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
-      double y = omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
-
-      velocityToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
+      desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
    }
 
    /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w *
-    * e^{w*t} * ICP0 - p0 * w * e^{w*t}
+    * Compute the desired capture point velocity at a given time.
+    * ICPv_d = w * * e^{w*t} * ICP0 - p0 * w * e^{w*t}
     * 
     * @param omega0
     * @param time
     * @param initialCapturePoint
-    * @param initialCenterOfPressure
-    * @param velocityToPack
+    * @param initialCMP
+    * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
-         FrameVector velocityToPack)
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointVelocityToPack)
    {
-      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * time);
-
-      double x = omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
-      double y = omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
-
-      velocityToPack.setIncludingFrame(initialCapturePoint.getReferenceFrame(), x, y, 0.0);
+      desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
    }
 
    /**
@@ -392,58 +191,42 @@ public class CapturePointTools
     * 
     * @param omega0
     * @param desiredCapturePointVelocity
-    * @param accelerationToPack
+    * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, YoFrameVector desiredCapturePointVelocity, YoFrameVector accelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, YoFrameVector desiredCapturePointVelocity, YoFrameVector desiredCapturePointAccelerationToPack)
    {
-      accelerationToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
-      accelerationToPack.scale(omega0);
+      desiredCapturePointAccelerationToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
+      desiredCapturePointAccelerationToPack.scale(omega0);
    }
 
    /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w^2
-    * * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
+    * Compute the desired capture point velocity at a given time.
+    * ICPv_d = w^2 * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
     * 
     * @param omega0
     * @param time
     * @param initialCapturePoint
-    * @param initialCenterOfPressure
-    * @param accelerationToPack
+    * @param initialCMP
+    * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint,
-         YoFramePoint initialCenterOfPressure, YoFrameVector accelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFrameVector desiredCapturePointAccelerationToPack)
    {
-      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * time);
-
-      double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
-      double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
-
-      accelerationToPack.set(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
+      desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
    }
 
    /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w^2
-    * * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
+    * Compute the desired capture point velocity at a given time.
+    * ICPv_d = w^2 * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
     * 
     * @param omega0
     * @param time
     * @param initialCapturePoint
-    * @param initialCenterOfPressure
-    * @param accelerationToPack
+    * @param initialCMP
+    * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCenterOfPressure,
-         FrameVector accelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointAccelerationToPack)
    {
-      initialCapturePoint.checkReferenceFrameMatch(initialCenterOfPressure.getReferenceFrame());
-
-      double exponentialTerm = Math.exp(omega0 * time);
-
-      double x = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getX() - initialCenterOfPressure.getX());
-      double y = omega0 * omega0 * exponentialTerm * (initialCapturePoint.getY() - initialCenterOfPressure.getY());
-
-      accelerationToPack.setIncludingFrame(initialCenterOfPressure.getReferenceFrame(), x, y, 0.0);
+      desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
    }
 
    /**
@@ -453,14 +236,11 @@ public class CapturePointTools
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
     * @param omega0
-    * @param desiredCentroidalMomentumPivotToPack
+    * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0,
-         YoFramePoint desiredCentroidalMomentumPivotToPack)
+   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0, YoFramePoint desiredCMPToPack)
    {
-      desiredCentroidalMomentumPivotToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
-      desiredCentroidalMomentumPivotToPack.scale(-1 / omega0);
-      desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
+      desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
 
    /**
@@ -470,14 +250,11 @@ public class CapturePointTools
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
     * @param omega0
-    * @param desiredCentroidalMomentumPivotToPack
+    * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0,
-         YoFramePoint desiredCentroidalMomentumPivotToPack)
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0, YoFramePoint desiredCMPToPack)
    {
-      desiredCentroidalMomentumPivotToPack.setAndMatchFrame(desiredCapturePointVelocity);
-      desiredCentroidalMomentumPivotToPack.scale(-1 / omega0);
-      desiredCentroidalMomentumPivotToPack.add(desiredCapturePointPosition);
+      desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
 
    /**
@@ -489,15 +266,12 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
-         FrameVector desiredCapturePointVelocity)
+   public static double computeDistanceToCapturePointFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity)
    {
-      currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition.getReferenceFrame());
-      desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition.getReferenceFrame());
+      currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
+      desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
 
-      double desiredCapturePointVelocityMagnitude = Math
-            .sqrt(desiredCapturePointVelocity.getX() * desiredCapturePointVelocity.getX() + desiredCapturePointVelocity.getY()
-                  * desiredCapturePointVelocity.getY() + desiredCapturePointVelocity.getZ() * desiredCapturePointVelocity.getZ());
+      double desiredCapturePointVelocityMagnitude = desiredCapturePointVelocity.length();
 
       if (desiredCapturePointVelocityMagnitude == 0.0)
       {
@@ -513,8 +287,7 @@ public class CapturePointTools
          double capturePointErrorY = currentCapturePointPosition.getY() - desiredCapturePointPosition.getY();
          double capturePointErrorZ = currentCapturePointPosition.getZ() - desiredCapturePointPosition.getZ();
 
-         return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY + normalizedCapturePointVelocityZ
-               * capturePointErrorZ);
+         return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY + normalizedCapturePointVelocityZ * capturePointErrorZ);
       }
    }
 

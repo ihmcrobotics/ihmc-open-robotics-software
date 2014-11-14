@@ -10,13 +10,13 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -28,14 +28,14 @@ public class CapturePointToolsTest
 	Random random = new Random();
 	YoVariableRegistry registry = new YoVariableRegistry("");
 
-	@Test
-	public void ComputeConstantCMPPointsWithBeginningAndEndBetweenFeetWith2StepsTest()
-	{
-	   ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
+   @Test
+   public void testComputeConstantCMPPointsWithBeginningAndEndBetweenFeetWith2Steps()
+   {
+      int nFootsteps = 2;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
-      int nFootsteps = 2;
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
@@ -53,32 +53,34 @@ public class CapturePointToolsTest
          Quat4d orientation = new Quat4d();
          poseReferenceFrame.getPosition(pointToPack);
          poseReferenceFrame.getOrientation(orientation);
-         FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-         footstepData.set(pointToPack);
-         footstepList.add(footstepData);
+         FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
+         footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
       }
 
-      CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(arrayToPack, footstepList, numberFootstepsToConsider);
+      boolean startStanding = true;
+      boolean endStanding = true;
+      int lastFootstepIndex = Math.min(footstepList.size(), numberFootstepsToConsider) - 1;
+      CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
       Point3d pointBetweenFeet = new Point3d();
       pointBetweenFeet.set(footstepList.get(0).getPointCopy());
       pointBetweenFeet.add(footstepList.get(1).getPointCopy());
       pointBetweenFeet.scale(0.5);
       
-      for (int i = 0; i < arrayToPack.size(); i++)
+      for (int i = 0; i < footstepList.size(); i++)
       {
          JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), pointBetweenFeet, 1e-10);
       }
-	}
-	
-	@Test
-   public void ComputeConstantCMPPointsOnFeetAndEndBetweenFeetWith2StepsTest()
+   }
+
+   @Test
+   public void testComputeConstantCMPPointsOnFeetAndEndBetweenFeetWith2Steps()
    {
-      ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
+      int nFootsteps = 2;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
-      int nFootsteps = 2;
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
@@ -96,12 +98,14 @@ public class CapturePointToolsTest
          Quat4d orientation = new Quat4d();
          poseReferenceFrame.getPosition(pointToPack);
          poseReferenceFrame.getOrientation(orientation);
-         FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-         footstepData.set(pointToPack);
-         footstepList.add(footstepData);
+         FramePoint footstepData = footstepList.get(i);
+         footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
       }
 
-      CapturePointTools.computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(arrayToPack, footstepList, numberFootstepsToConsider);
+      boolean startStanding = false;
+      boolean endStanding = true;
+      int lastFootstepIndex = Math.min(footstepList.size(), numberFootstepsToConsider) - 1;
+      CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
       Point3d pointBetweenFeet = new Point3d();
       pointBetweenFeet.set(footstepList.get(0).getPointCopy());
@@ -110,20 +114,20 @@ public class CapturePointToolsTest
       
       JUnitTools.assertPoint3dEquals("", footstepList.get(0).getPointCopy(), arrayToPack.get(0).getPoint3dCopy(), 1e-10);
       
-      for (int i = 1; i < arrayToPack.size(); i++)
+      for (int i = 1; i < footstepList.size(); i++)
       {
          JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), pointBetweenFeet, 1e-10);
       }
    }
-	
+   
 	@Test
-	public void TestComputeConstantCentersOfPressuresOnFeet()
+	public void testComputeConstantCentersOfPressuresOnFeet()
 	{
-		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
+	   int nFootsteps = 10;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
 		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
 
-		int nFootsteps = 10;
 		int numberFootstepsToConsider = 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
@@ -144,12 +148,11 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-				footstepData.set(pointToPack);
-				footstepList.add(footstepData);
+	         FramePoint footstepData = footstepList.get(i);
+	         footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
 			}
 
-			CapturePointTools.computeConstantCentersOfPressuresOnFeet(arrayToPack, footstepList, numberFootstepsToConsider);
+			CapturePointTools.computeConstantCMPsOnFeet(arrayToPack, footstepList, 0, numberFootstepsToConsider - 1);
 
 			for (int i = 0; i < arrayToPack.size(); i++)
 			{
@@ -158,161 +161,165 @@ public class CapturePointToolsTest
 		}
 	}
 
+   @Test
+   public void testComputeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet()
+   {
+      int nFootsteps = 10;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
+      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+
+      int numberFootstepsToConsider = 3;
+      for (int i = 0; i < numberFootstepsToConsider; i++)
+      {
+         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+      }
+
+      for (int j = 0; j < nTests; j++)
+      {
+         for (int i = 0; i < nFootsteps; i++)
+         {
+            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(),
+                  random.nextDouble()),
+                  new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+
+            poseReferenceFrame.setPoseAndUpdate(pose);
+
+            Point3d pointToPack = new Point3d();
+            Quat4d orientation = new Quat4d();
+            poseReferenceFrame.getPosition(pointToPack);
+            poseReferenceFrame.getOrientation(orientation);
+            FramePoint footstepData = footstepList.get(i);
+            footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
+         }
+
+         boolean startStanding = true;
+         boolean endStanding = false;
+         int lastFootstepIndex = Math.min(footstepList.size(), numberFootstepsToConsider) - 1;
+         CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
+
+         Point3d copPos1 = new Point3d();
+         copPos1.set(footstepList.get(0).getPointCopy());
+         copPos1.add(footstepList.get(1).getPointCopy());
+         copPos1.scale(0.5);
+         JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+         for (int i = 1; i < arrayToPack.size() - 1; i++)
+         {
+            JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+         }
+      }
+   }
+
+   @Test
+   public void testComputeConstantCentersOfPressureWithEndBetweenFeetAndRestOnFeet()
+   {
+      int nFootsteps = 10;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
+      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+
+      int numberFootstepsToConsider = 3;
+      for (int i = 0; i < numberFootstepsToConsider; i++)
+      {
+         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+      }
+
+      for (int j = 0; j < nTests; j++)
+      {
+         for (int i = 0; i < nFootsteps; i++)
+         {
+            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(),
+                  random.nextDouble()),
+                  new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+
+            poseReferenceFrame.setPoseAndUpdate(pose);
+
+            Point3d pointToPack = new Point3d();
+            Quat4d orientation = new Quat4d();
+            poseReferenceFrame.getPosition(pointToPack);
+            poseReferenceFrame.getOrientation(orientation);
+            FramePoint footstepData = footstepList.get(i);
+            footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
+         }
+
+         boolean startStanding = false;
+         boolean endStanding = true;
+         int lastFootstepIndex = Math.min(footstepList.size(), numberFootstepsToConsider) - 1;
+         CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
+
+
+         Point3d copPos1 = new Point3d();
+         copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
+         copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
+         copPos1.scale(0.5);
+         JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
+         for (int i = 0; i < arrayToPack.size() - 2; i++)
+         {
+            JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+         }
+      }
+   }
+
+   @Test
+   public void testComputeConstantCentersOfPressureWithEndAndBeginningBetweenFeet()
+   {
+      int nFootsteps = 10;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
+      ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+
+      int numberFootstepsToConsider = 3;
+      for (int i = 0; i < numberFootstepsToConsider; i++)
+      {
+         arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
+      }
+
+      for (int j = 0; j < nTests; j++)
+      {
+         for (int i = 0; i < nFootsteps; i++)
+         {
+            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(),
+                  random.nextDouble()),
+                  new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+
+            poseReferenceFrame.setPoseAndUpdate(pose);
+
+            Point3d pointToPack = new Point3d();
+            Quat4d orientation = new Quat4d();
+            poseReferenceFrame.getPosition(pointToPack);
+            poseReferenceFrame.getOrientation(orientation);
+            FramePoint footstepData = footstepList.get(i);
+            footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
+         }
+
+         boolean startStanding = true;
+         boolean endStanding = true;
+         int lastFootstepIndex = Math.min(footstepList.size(), numberFootstepsToConsider) - 1;
+         CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
+
+         Point3d copPos1 = new Point3d();
+         copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
+         copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
+         copPos1.scale(0.5);
+         JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
+
+         copPos1.set(footstepList.get(0).getPointCopy());
+         copPos1.add(footstepList.get(1).getPointCopy());
+         copPos1.scale(0.5);
+         JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+
+         for (int i = 1; i < arrayToPack.size() - 2; i++)
+         {
+            JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+         }
+      }
+   }
+
 	@Test
-	public void TestComputeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet()
+	public void testComputeDesiredEndOfStepCapturePointLocations()
 	{
-		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
-		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
-
-		int nFootsteps = 10;
-		int numberFootstepsToConsider = 3;
-		for (int i = 0; i < numberFootstepsToConsider; i++)
-		{
-			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
-		}
-
-		for (int j = 0; j < nTests; j++)
-		{
-			for (int i = 0; i < nFootsteps; i++)
-			{
-				FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(),
-						random.nextDouble()),
-						new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-
-				poseReferenceFrame.setPoseAndUpdate(pose);
-
-				Point3d pointToPack = new Point3d();
-				Quat4d orientation = new Quat4d();
-				poseReferenceFrame.getPosition(pointToPack);
-				poseReferenceFrame.getOrientation(orientation);
-				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-				footstepData.set(pointToPack);
-				footstepList.add(footstepData);
-			}
-
-			CapturePointTools.computeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet(arrayToPack, footstepList,
-					numberFootstepsToConsider);
-
-			Point3d copPos1 = new Point3d();
-			copPos1.set(footstepList.get(0).getPointCopy());
-			copPos1.add(footstepList.get(1).getPointCopy());
-			copPos1.scale(0.5);
-			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
-			for (int i = 1; i < arrayToPack.size() - 1; i++)
-			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
-			}
-		}
-	}
-
-	@Test
-	public void TestComputeConstantCentersOfPressureWithEndBetweenFeetAndRestOnFeet()
-	{
-		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
-		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
-
-		int nFootsteps = 10;
-		int numberFootstepsToConsider = 3;
-		for (int i = 0; i < numberFootstepsToConsider; i++)
-		{
-			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
-		}
-
-		for (int j = 0; j < nTests; j++)
-		{
-			for (int i = 0; i < nFootsteps; i++)
-			{
-				FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(),
-						random.nextDouble()),
-						new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-
-				poseReferenceFrame.setPoseAndUpdate(pose);
-
-				Point3d pointToPack = new Point3d();
-				Quat4d orientation = new Quat4d();
-				poseReferenceFrame.getPosition(pointToPack);
-				poseReferenceFrame.getOrientation(orientation);
-				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-				footstepData.set(pointToPack);
-				footstepList.add(footstepData);
-			}
-
-			CapturePointTools.computeConstantCentersOfPressuresOnFeetWithEndBetweenFeet(arrayToPack, footstepList,
-					numberFootstepsToConsider);
-
-			Point3d copPos1 = new Point3d();
-			copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
-			copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
-			copPos1.scale(0.5);
-			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
-			for (int i = 0; i < arrayToPack.size() - 2; i++)
-			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
-			}
-		}
-	}
-
-	@Test
-	public void TestComputeConstantCentersOfPressureWithEndAndBeginningBetweenFeet()
-	{
-		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
-		ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
-
-		int nFootsteps = 10;
-		int numberFootstepsToConsider = 3;
-		for (int i = 0; i < numberFootstepsToConsider; i++)
-		{
-			arrayToPack.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
-		}
-
-		for (int j = 0; j < nTests; j++)
-		{
-			for (int i = 0; i < nFootsteps; i++)
-			{
-				FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(random.nextDouble(), random.nextDouble(),
-						random.nextDouble()),
-						new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-
-				poseReferenceFrame.setPoseAndUpdate(pose);
-
-				Point3d pointToPack = new Point3d();
-				Quat4d orientation = new Quat4d();
-				poseReferenceFrame.getPosition(pointToPack);
-				poseReferenceFrame.getOrientation(orientation);
-				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-
-				footstepData.set(pointToPack);
-				footstepList.add(footstepData);
-			}
-
-			CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(arrayToPack, footstepList,
-					numberFootstepsToConsider);
-
-			Point3d copPos1 = new Point3d();
-			copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
-			copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
-			copPos1.scale(0.5);
-			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
-
-			copPos1.set(footstepList.get(0).getPointCopy());
-			copPos1.add(footstepList.get(1).getPointCopy());
-			copPos1.scale(0.5);
-			JUnitTools.assertPoint3dEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
-
-			for (int i = 1; i < arrayToPack.size() - 2; i++)
-			{
-				JUnitTools.assertPoint3dEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
-			}
-		}
-	}
-
-	@Test
-	public void TestComputeDesiredEndOfStepCapturePointLocations()
-	{
-		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
+	   int nFootsteps = 10;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
 		ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
 		ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
 		YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
@@ -320,13 +327,13 @@ public class CapturePointToolsTest
 		FramePoint2d p1 = new FramePoint2d();
 		FramePoint2d p2 = new FramePoint2d();
 
-		int nFootsteps = 10;
 		int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
 			constantCentersOfPressures.add(new YoFramePoint("test" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
 		}
-		for (int i = 0; i < numberFootstepsToConsider - 1; i++)
+		int lastFootstepIndex = numberFootstepsToConsider - 1;
+      for (int i = 0; i < lastFootstepIndex; i++)
 		{
 			capturePointsToPack.add(new YoFramePoint("testICP" + Integer.toString(i), ReferenceFrame.getWorldFrame(), registry));
 		}
@@ -345,16 +352,16 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-				footstepData.set(pointToPack);
-				footstepList.add(footstepData);
+	         FramePoint footstepData = footstepList.get(i);
+	         footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
 			}
 
-			CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(constantCentersOfPressures,
-					footstepList, numberFootstepsToConsider);
+			CapturePointTools.putConstantCMPBetweenFeet(constantCentersOfPressures.get(0), footstepList.get(0), footstepList.get(1));
+			CapturePointTools.computeConstantCMPsOnFeet(constantCentersOfPressures, footstepList, 1, lastFootstepIndex);
+			CapturePointTools.putConstantCMPBetweenFeet(constantCentersOfPressures.get(lastFootstepIndex), footstepList.get(lastFootstepIndex - 1), footstepList.get(lastFootstepIndex));
 			double omega0 = 0.5;
 			double time = 0.5;
-			CapturePointTools.computeDesiredEndOfStepCapturePointLocations(constantCentersOfPressures, capturePointsToPack, time, omega0);
+			CapturePointTools.computeDesiredCornerPoints(capturePointsToPack, constantCentersOfPressures, false, time, omega0);
 
 			CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0),
 					icpToCheck);
@@ -374,9 +381,10 @@ public class CapturePointToolsTest
 	}
 
 	@Test
-	public void TestComputeDesiredCapturePointLocations()
+	public void testComputeDesiredCapturePointLocations()
 	{
-		ArrayList<FramePoint> footstepList = new ArrayList<FramePoint>();
+	   int nFootsteps = 10;
+      FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
 		ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
 		ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
 		PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
@@ -384,7 +392,6 @@ public class CapturePointToolsTest
 		FramePoint2d p2 = new FramePoint2d();
 		YoFramePoint desiredICP = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
 
-		int nFootsteps = 10;
 		int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
 		for (int i = 0; i < numberFootstepsToConsider; i++)
 		{
@@ -409,16 +416,17 @@ public class CapturePointToolsTest
 				Quat4d orientation = new Quat4d();
 				poseReferenceFrame.getPosition(pointToPack);
 				poseReferenceFrame.getOrientation(orientation);
-				FramePoint footstepData = new FramePoint(poseReferenceFrame.getRootFrame());
-				footstepData.set(pointToPack);
-				footstepList.add(footstepData);
+	         FramePoint footstepData = footstepList.get(i);
+	         footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
 			}
 
-			CapturePointTools.computeConstantCentersOfPressuresWithBeginningAndEndBetweenFeetRestOnFeet(constantCentersOfPressures,
-					footstepList, numberFootstepsToConsider);
+			int lastFootstepIndex = numberFootstepsToConsider - 1;
+         CapturePointTools.putConstantCMPBetweenFeet(constantCentersOfPressures.get(0), footstepList.get(0), footstepList.get(1));
+         CapturePointTools.computeConstantCMPsOnFeet(constantCentersOfPressures, footstepList, 1, lastFootstepIndex);
+         CapturePointTools.putConstantCMPBetweenFeet(constantCentersOfPressures.get(lastFootstepIndex), footstepList.get(lastFootstepIndex - 1), footstepList.get(lastFootstepIndex));
 			double omega0 = 0.5;
 			double time = 0.5;
-			CapturePointTools.computeDesiredEndOfStepCapturePointLocations(constantCentersOfPressures, capturePointsToPack, time, omega0);
+			CapturePointTools.computeDesiredCornerPoints(capturePointsToPack, constantCentersOfPressures, false, time, omega0);
 
 			for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
 			{
@@ -437,7 +445,7 @@ public class CapturePointToolsTest
 	}
 
 	@Test
-	public void TestComputeDesiredCapturePointVelocity()
+	public void testComputeDesiredCapturePointVelocity()
 	{
 		YoFramePoint initialCapturePointPosition = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
 		YoFramePoint computedCapturePoint1 = new YoFramePoint("1", ReferenceFrame.getWorldFrame(), registry);
@@ -473,7 +481,7 @@ public class CapturePointToolsTest
 	}
 
 	@Test
-	public void TestComputeDesiredCapturePointAcceleration()
+	public void testComputeDesiredCapturePointAcceleration()
 	{
 		YoFramePoint initialCapturePointPosition = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
 		YoFramePoint initialCenterOfPressure = new YoFramePoint("3", ReferenceFrame.getWorldFrame(), registry);
@@ -507,36 +515,7 @@ public class CapturePointToolsTest
 	}
 
 	@Test
-	public void TestComputeInitialCapturePointFromDesiredCapturePointAndInitialCenterOfPressure()
-	{
-		YoFramePoint constantCenterOfPressure = new YoFramePoint("COP", ReferenceFrame.getWorldFrame(), registry);
-		YoFramePoint finalDesiredICP = new YoFramePoint("finalICP", ReferenceFrame.getWorldFrame(), registry);
-		YoFramePoint initialICP = new YoFramePoint("initialICP", ReferenceFrame.getWorldFrame(), registry);
-		FramePoint2d p1 = new FramePoint2d();
-		FramePoint2d p2 = new FramePoint2d();
-
-		for (int j = 0; j < nTests; j++)
-		{
-			constantCenterOfPressure.set(new Point3d(random.nextDouble(), random.nextDouble(), 0));
-			finalDesiredICP.set(new Point3d(random.nextDouble(), random.nextDouble(), 0));
-
-			double omega0 = 3.4;
-			double time = 0.5;
-
-			CapturePointTools.computeInitialCapturePointFromFinalDesiredCapturePointAndInitialCenterOfPressure(omega0, time, finalDesiredICP,
-					constantCenterOfPressure, initialICP);
-
-			p1.set(constantCenterOfPressure.getFramePoint2dCopy());
-			p2.set(finalDesiredICP.getFramePoint2dCopy());
-			Line2d line = new Line2d(p1.getPointCopy(), p2.getPointCopy());
-			p1.set(initialICP.getFramePoint2dCopy());
-			boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
-			assertTrue(isPointOnLine);
-		}
-	}
-
-	@Test
-	public void TestComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
+	public void testComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
 	{
 		YoFramePoint constantCenterOfPressure = new YoFramePoint("COP", ReferenceFrame.getWorldFrame(), registry);
 		YoFramePoint finalDesiredICP = new YoFramePoint("finalICP", ReferenceFrame.getWorldFrame(), registry);
@@ -552,8 +531,8 @@ public class CapturePointToolsTest
 			double omega0 = 3.4;
 			double time = 0.5;
 
-			CapturePointTools.computeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations(finalDesiredICP, initialICP,
-					constantCenterOfPressure, omega0, time);
+			CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCenterOfPressure, finalDesiredICP,
+					initialICP, omega0, time);
 
 			p1.set(initialICP.getFramePoint2dCopy());
 			p2.set(finalDesiredICP.getFramePoint2dCopy());
