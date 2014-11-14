@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
@@ -15,7 +17,6 @@ import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.planning.FootstepPlanState;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -32,10 +33,14 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private final BooleanYoVariable isDone;
 	private final BooleanYoVariable hasInputBeenSet;
 	private final FullRobotModel fullRobotModel;
-	
-	private FootstepPlanState startState;
-	private FootstepPlanState goalState;
-	
+
+   private FootstepData startFootstep;
+   private double startYaw;
+   private double goalX;
+   private double goalY;
+   private double goalYaw;
+   private RobotSide goalSide;
+
 	private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	
 	private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
@@ -100,13 +105,14 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 
 	private void requestFootstepPlan()
 	{
-		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startState.x, startState.y, startState.z, startState.theta, startState.side, goalState.x, goalState.y, goalState.theta, goalState.side);
+
+		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startFootstep,startYaw,goalX,goalY, goalYaw,goalSide);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(footstepPlanRequestPacket);
 		hasSearchRequestBeenSent.set(true);
 	}
 	
 	private void requestSearchStop(){
-		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,0,0,0,0,RobotSide.LEFT,0,0,0,RobotSide.RIGHT);
+		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,new FootstepData(),0,0,0,0,RobotSide.RIGHT);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(stopSearchRequestPacket);
 	}
 
@@ -141,15 +147,17 @@ public class WalkToGoalBehavior extends BehaviorInterface {
     	Matrix3d startRotation = new Matrix3d();
 		fullRobotModel.getFoot(startSide).getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).getTranslation(startTranslation);
 		fullRobotModel.getFoot(startSide).getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).getRotation(startRotation);
-		double thetaStart = RotationFunctions.getYaw(startRotation);
-		double xStart = startTranslation.x;
-		double yStart = startTranslation.y;
-		double zStart = startTranslation.z;
-		startState = new FootstepPlanState(xStart,yStart,zStart,thetaStart,startSide);
-		goalState = new FootstepPlanState(xGoal, yGoal, thetaGoal, goalSide);
+		startYaw = RotationFunctions.getYaw(startRotation);
+      Quat4d startOrientation = new Quat4d();
+      RotationFunctions.setQuaternionBasedOnMatrix3d(startOrientation, startRotation);
+      startFootstep = new FootstepData(startSide, new Point3d(startTranslation), startOrientation);
+      goalX = xGoal;
+      goalY = yGoal;
+      goalYaw = thetaGoal;
+      this.goalSide = goalSide;
 		hasInputBeenSet.set(true);
 	}
-	
+
 	@Override
 	public void initialize()
 	{
@@ -158,8 +166,6 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		hasNewFootsteps.set(false);
 		executePlan.set(false);
 		footstepListBehavior.initialize();
-		startState = null;
-		goalState = null;
 	}
 	
 	@Override
