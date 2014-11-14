@@ -70,7 +70,9 @@ dependencies {
 	compile project(':IHMCHumanoidBehaviors')
 	compile project(':ROSJNIWrapper')
 	compile project(':Planning')
-	
+    compile project(':IHMCPerception')
+
+
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':IHMCCommunication').sourceSets.test.output
