@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class LinkComIDActionListener implements ActionListener
 {

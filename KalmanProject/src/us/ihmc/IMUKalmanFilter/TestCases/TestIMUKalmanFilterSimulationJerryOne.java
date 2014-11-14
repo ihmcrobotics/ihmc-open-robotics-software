@@ -6,9 +6,9 @@ import us.ihmc.IMUKalmanFilter.QuaternionBasedJamaFullIMUKalmanFilter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class TestIMUKalmanFilterSimulationJerryOne
 {
