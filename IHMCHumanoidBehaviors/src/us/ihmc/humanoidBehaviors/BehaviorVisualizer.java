@@ -4,7 +4,7 @@ import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Robot;
 
 public abstract class BehaviorVisualizer extends SCSVisualizer
 {

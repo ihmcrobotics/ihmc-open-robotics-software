@@ -15,8 +15,8 @@ import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListe
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 
 public class YoKalmanFilterTest
 {

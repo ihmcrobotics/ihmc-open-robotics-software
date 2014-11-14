@@ -1,7 +1,7 @@
 package us.ihmc.kalman.comparisons;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class CompareYoKalmanSetups
 {

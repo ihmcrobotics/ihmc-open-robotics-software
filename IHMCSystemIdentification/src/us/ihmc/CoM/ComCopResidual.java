@@ -23,9 +23,9 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.CircleArtifact;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
 
 /** Todo
  * 
