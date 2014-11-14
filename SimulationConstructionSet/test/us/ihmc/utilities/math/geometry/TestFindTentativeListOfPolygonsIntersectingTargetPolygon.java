@@ -16,7 +16,7 @@ import org.junit.Test;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PolygonArtifact;
 
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * <p>Title: </p>
