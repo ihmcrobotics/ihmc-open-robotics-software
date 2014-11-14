@@ -114,7 +114,6 @@ public class PelvisOrientationManager
       };      
 
       desiredPelvisOrientationOffset = new YoFrameQuaternion("desiredPelvis", "Offset", desiredPelvisFrame, registry);
-      desiredPelvisOrientationOffset.set(0.0, walkingControllerParameters.getDefaultDesiredPelvisPitch(), 0.0);
 
       offsetTrajectoryTime.set(defaultTrajectoryTime);
       initialPelvisOrientationOffset = new YoFrameQuaternion("initialPelvis", "Offset", desiredPelvisFrame, registry);
