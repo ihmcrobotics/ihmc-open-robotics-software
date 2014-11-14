@@ -44,7 +44,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class MomentumBasedControllerFactory
 {

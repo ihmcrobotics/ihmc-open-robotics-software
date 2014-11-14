@@ -23,9 +23,9 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 
 public class CaptureRegionCalculatorTest
 {

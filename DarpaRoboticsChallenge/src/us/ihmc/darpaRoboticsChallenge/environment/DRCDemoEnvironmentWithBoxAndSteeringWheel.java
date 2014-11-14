@@ -14,16 +14,16 @@ import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
-import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.Contactable;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
+import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObject;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.Contactable;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {

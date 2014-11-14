@@ -11,7 +11,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /*
  * Compute YoVariables of ForceSensor measurement projected onto it's predecessor joints. Useful for checking sensor consistence.

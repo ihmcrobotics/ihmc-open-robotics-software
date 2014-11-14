@@ -19,7 +19,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
 
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class VirtualChainBuilderTest
 {

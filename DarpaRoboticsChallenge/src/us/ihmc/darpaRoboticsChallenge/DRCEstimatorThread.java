@@ -43,8 +43,8 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.ExecutionTimer;
 
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {

@@ -34,8 +34,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 
 public class PosePlaybackSCSBridge
 {

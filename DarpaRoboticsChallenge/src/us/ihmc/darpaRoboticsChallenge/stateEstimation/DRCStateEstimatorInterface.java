@@ -5,7 +5,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public interface DRCStateEstimatorInterface extends RobotController
 {

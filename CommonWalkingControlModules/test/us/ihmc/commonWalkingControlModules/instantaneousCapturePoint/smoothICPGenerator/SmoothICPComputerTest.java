@@ -30,8 +30,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SmoothICPComputerTest
 {

@@ -9,7 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasInverseDynamicsControllerDemo
 {

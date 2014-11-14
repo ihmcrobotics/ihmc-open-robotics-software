@@ -8,7 +8,7 @@ import java.awt.Graphics2D;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterGraphics;
 
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 
 /**

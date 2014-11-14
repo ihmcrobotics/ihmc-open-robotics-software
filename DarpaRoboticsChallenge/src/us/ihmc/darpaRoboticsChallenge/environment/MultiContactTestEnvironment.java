@@ -23,12 +23,12 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
 {

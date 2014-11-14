@@ -27,9 +27,9 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpper;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.GUISetterUpper;
+import us.ihmc.simulationconstructionset.gui.GUISetterUpperRegistry;
 
 public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorqueControlOnlyModule
 {

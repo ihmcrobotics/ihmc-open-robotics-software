@@ -59,8 +59,8 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.trajectories.ConstantPoseTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 /**
  * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.

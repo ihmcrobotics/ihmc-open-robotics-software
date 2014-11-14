@@ -50,10 +50,10 @@ import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class DesiredFootstepVisualizer
 {

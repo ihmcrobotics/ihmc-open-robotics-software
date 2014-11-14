@@ -20,7 +20,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class VisualizePoseWorkspace
 {

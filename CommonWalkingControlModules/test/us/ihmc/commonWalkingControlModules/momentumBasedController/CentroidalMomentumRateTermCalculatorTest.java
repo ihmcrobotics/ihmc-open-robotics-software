@@ -24,8 +24,8 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.yobotics.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
 public class CentroidalMomentumRateTermCalculatorTest
 {

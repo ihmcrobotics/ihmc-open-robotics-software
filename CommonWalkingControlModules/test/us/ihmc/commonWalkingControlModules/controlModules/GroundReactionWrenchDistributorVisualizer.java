@@ -26,7 +26,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class GroundReactionWrenchDistributorVisualizer
 {

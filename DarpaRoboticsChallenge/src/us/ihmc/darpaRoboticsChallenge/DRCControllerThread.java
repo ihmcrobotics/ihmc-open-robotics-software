@@ -38,12 +38,12 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.ExecutionTimer;
 
-import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
-import com.yobotics.simulationconstructionset.JointAxisVisualizer;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import us.ihmc.simulationconstructionset.JointAxisVisualizer;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {

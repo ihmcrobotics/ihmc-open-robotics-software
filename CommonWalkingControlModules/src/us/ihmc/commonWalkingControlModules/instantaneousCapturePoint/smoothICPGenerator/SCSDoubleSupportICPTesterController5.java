@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SCSDoubleSupportICPTesterController5 implements RobotController
 {

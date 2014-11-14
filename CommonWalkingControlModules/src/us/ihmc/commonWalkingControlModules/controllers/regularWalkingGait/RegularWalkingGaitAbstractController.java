@@ -40,7 +40,7 @@ import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public abstract class RegularWalkingGaitAbstractController implements RobotController
 {

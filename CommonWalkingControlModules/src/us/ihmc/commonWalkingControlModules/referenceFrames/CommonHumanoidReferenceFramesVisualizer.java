@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class CommonHumanoidReferenceFramesVisualizer implements Updatable, RobotController
 {

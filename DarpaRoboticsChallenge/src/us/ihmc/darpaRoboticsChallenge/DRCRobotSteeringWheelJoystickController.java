@@ -8,8 +8,8 @@ import us.ihmc.utilities.jinput.JInputLibraryLoader;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
-import com.yobotics.simulationconstructionset.joystick.JoystickUpdater;
+import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
+import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 
 
 public class DRCRobotSteeringWheelJoystickController

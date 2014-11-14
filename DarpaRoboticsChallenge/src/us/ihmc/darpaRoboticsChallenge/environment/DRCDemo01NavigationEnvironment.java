@@ -16,16 +16,16 @@ import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 
 public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
 {

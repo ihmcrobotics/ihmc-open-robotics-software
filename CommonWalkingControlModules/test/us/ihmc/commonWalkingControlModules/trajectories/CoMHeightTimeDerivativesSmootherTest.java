@@ -13,8 +13,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class CoMHeightTimeDerivativesSmootherTest
 {

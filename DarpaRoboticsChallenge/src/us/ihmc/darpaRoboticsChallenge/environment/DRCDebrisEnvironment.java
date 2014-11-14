@@ -7,14 +7,14 @@ import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.GroundContactModel;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import com.yobotics.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.GroundContactModel;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
+import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {

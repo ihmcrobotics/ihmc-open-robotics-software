@@ -14,7 +14,7 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-import com.yobotics.simulationconstructionset.util.ground.DoubleStepGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.DoubleStepGroundProfile;
 
 public class DRCDoubleElevationChangeSimulation
 {   

@@ -34,14 +34,14 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.TimestampProvider;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.robotController.AbstractThreadedRobotController;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotController;
-import com.yobotics.simulationconstructionset.robotController.SingleThreadedRobotController;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
+import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 
 public class DRCSimulationFactory
 {

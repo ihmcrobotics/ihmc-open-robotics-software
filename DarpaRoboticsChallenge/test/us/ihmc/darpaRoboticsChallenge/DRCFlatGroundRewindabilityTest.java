@@ -18,13 +18,13 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import com.yobotics.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
-import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
+import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 
 @SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface

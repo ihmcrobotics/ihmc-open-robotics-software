@@ -37,7 +37,7 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepValidityMetric;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurningThenStraightFootstepGenerator;
 
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Robot;
 
 public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTestInterface
 {

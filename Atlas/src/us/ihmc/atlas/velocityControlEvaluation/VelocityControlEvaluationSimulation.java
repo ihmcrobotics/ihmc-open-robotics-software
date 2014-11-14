@@ -1,6 +1,6 @@
 package us.ihmc.atlas.velocityControlEvaluation;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class VelocityControlEvaluationSimulation
 {

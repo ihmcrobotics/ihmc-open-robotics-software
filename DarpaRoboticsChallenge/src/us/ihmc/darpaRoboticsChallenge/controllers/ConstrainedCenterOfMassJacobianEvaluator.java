@@ -31,7 +31,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.google.common.primitives.Doubles;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * See: L. Sentis. Synthesis and Control of Whole-Body Behaviors in Humanoid Systems (2007)

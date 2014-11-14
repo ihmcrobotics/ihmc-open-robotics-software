@@ -9,11 +9,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RevoluteJointReferenceFrame;
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class VirtualChainConstructorFromARobot
 {

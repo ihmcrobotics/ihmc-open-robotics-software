@@ -13,7 +13,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.graphics.GraphicsUpdatable;
 
-import com.yobotics.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
 public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>
 {

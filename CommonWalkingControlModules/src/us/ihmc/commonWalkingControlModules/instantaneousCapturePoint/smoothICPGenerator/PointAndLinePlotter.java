@@ -26,8 +26,8 @@ import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 
 
 public class PointAndLinePlotter

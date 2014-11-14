@@ -34,7 +34,7 @@ public class YoVariableThreadAccessValidator
       try
       {
          
-         CtClass yoVariable = pool.get("com.yobotics.simulationconstructionset.YoVariable");
+         CtClass yoVariable = pool.get("us.ihmc.simulationconstructionset.YoVariable");
          CtClass yoVariableThreadAccessValidator = pool.get(YoVariableThreadAccessValidator.class.getCanonicalName());
          CtField validatorField = new CtField(yoVariableThreadAccessValidator, "validator", yoVariable);
          validatorField.setModifiers(Modifier.PUBLIC);
@@ -42,7 +42,7 @@ public class YoVariableThreadAccessValidator
          yoVariable.toClass();
 
          
-         CtClass doubleYoVariable = pool.get("com.yobotics.simulationconstructionset.DoubleYoVariable");
+         CtClass doubleYoVariable = pool.get("us.ihmc.simulationconstructionset.DoubleYoVariable");
          CtMethod method = doubleYoVariable.getDeclaredMethod("getDoubleValue");
          method.insertBefore("if(validator != null) { validator.validateReadAccess(this); }");
          doubleYoVariable.toClass();

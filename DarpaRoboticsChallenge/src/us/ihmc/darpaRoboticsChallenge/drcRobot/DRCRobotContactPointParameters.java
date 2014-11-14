@@ -11,7 +11,7 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class DRCRobotContactPointParameters
 {

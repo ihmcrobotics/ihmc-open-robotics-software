@@ -3,8 +3,8 @@ package us.ihmc.atlas;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class JointAngleOffsetSliderBoard
 {

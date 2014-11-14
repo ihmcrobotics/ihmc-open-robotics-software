@@ -27,7 +27,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
 {

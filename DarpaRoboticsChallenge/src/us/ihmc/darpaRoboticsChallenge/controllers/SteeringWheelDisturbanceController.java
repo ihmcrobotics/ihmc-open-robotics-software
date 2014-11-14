@@ -2,10 +2,10 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public class SteeringWheelDisturbanceController implements RobotController
 {  

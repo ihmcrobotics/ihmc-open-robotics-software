@@ -2,7 +2,7 @@ package us.ihmc.atlas;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class AtlasSDFViewer
 {
