@@ -101,7 +101,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
          networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-         FootstepPathPlannerService footstepPathPlannerService = new FootstepPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), fieldObjectCommunicator);
+         FootstepPathPlannerService footstepPathPlannerService = new FootstepPathPlannerService(rosMainNode, robotModel, fieldObjectCommunicator);
          fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
