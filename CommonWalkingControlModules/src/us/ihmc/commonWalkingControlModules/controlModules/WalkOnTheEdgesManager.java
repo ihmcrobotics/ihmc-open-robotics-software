@@ -48,8 +48,6 @@ public class WalkOnTheEdgesManager
 
    public static final SwitchToToeOffMethods TOEOFF_TRIGGER_METHOD = SwitchToToeOffMethods.USE_ECMP;
 
-   private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
-
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
@@ -111,7 +109,6 @@ public class WalkOnTheEdgesManager
    public WalkOnTheEdgesManager(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
          SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
    {
-      this.stayOnToes.set(walkingControllerParameters.stayOnToes());
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
       this.doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
@@ -145,7 +142,7 @@ public class WalkOnTheEdgesManager
 
    public void updateToeOffStatusBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
-      if (!doToeOffIfPossible.getBooleanValue() || stayOnToes.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ECMP)
+      if (!doToeOffIfPossible.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ECMP)
       {
          doToeOff.set(false);
          isDesiredECMPOKForToeOff.set(false);
@@ -200,7 +197,7 @@ public class WalkOnTheEdgesManager
 
    public void updateToeOffStatusBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP)
    {
-      if (!doToeOffIfPossible.getBooleanValue() || stayOnToes.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ICP)
+      if (!doToeOffIfPossible.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ICP)
       {
          doToeOff.set(false);
          isDesiredICPOKForToeOff.set(false);
@@ -437,9 +434,6 @@ public class WalkOnTheEdgesManager
 
    public boolean willDoToeOff(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      if (stayOnToes.getBooleanValue())
-         return true;
-
       if (!doToeOffIfPossible.getBooleanValue())
          return false;
 
@@ -454,11 +448,6 @@ public class WalkOnTheEdgesManager
       boolean frontFootWellPositionedForToeOff = isFrontFootWellPositionedForToeOff(nextTrailingLeg, nextFrontFootFrame);
 
       return frontFootWellPositionedForToeOff;
-   }
-
-   public boolean stayOnToes()
-   {
-      return stayOnToes.getBooleanValue();
    }
 
    public boolean doToeOff()
