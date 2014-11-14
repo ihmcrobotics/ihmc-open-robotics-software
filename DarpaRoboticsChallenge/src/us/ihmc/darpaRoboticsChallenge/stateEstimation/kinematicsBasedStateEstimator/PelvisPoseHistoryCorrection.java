@@ -8,14 +8,12 @@ import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.TimeStampedPelvisPoseBuffer;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -38,21 +36,29 @@ public class PelvisPoseHistoryCorrection
    private static final double DEFAULT_BREAK_FREQUENCY = 0.015;
    
    private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
-   private final RigidBodyTransform interpolatedError = new RigidBodyTransform();
    private final RigidBodyTransform errorBetweenCurrentPositionAndCorrected = new RigidBodyTransform();
    private final RigidBodyTransform totalError = new RigidBodyTransform();
+   private final RigidBodyTransform translationErrorInPastTransform = new RigidBodyTransform();
+   private final RigidBodyTransform rotationErrorInPastTransform = new RigidBodyTransform();
+   private final RigidBodyTransform interpolatedTranslationError = new RigidBodyTransform();
+   private final RigidBodyTransform interpolatedRotationError = new RigidBodyTransform();
 
-   RigidBodyTransform errorInPastTransform = new RigidBodyTransform();
+   private final TimeStampedTransform3D seTimeStampedPose = new TimeStampedTransform3D();
 
+   private final YoReferencePose translationCorrection;
+   private final YoReferencePose orientationCorrection;
    private final YoReferencePose nonCorrectedPelvis;
    private final YoReferencePose correctedPelvis;
-   private final YoReferencePose seBackInTimeFrame;
-   private final YoReferencePose localizationBackInTimeFrame;
-   private final YoReferencePose totalErrorFrame;
-   private final YoReferencePose interpolatedCorrectionFrame;
-   private final YoReferencePose interpolationStartFrame;
-
-
+   private final YoReferencePose seBackInTimeTranslationFrame;
+   private final YoReferencePose seBackInTimeRotationFrame;
+   private final YoReferencePose localizationBackInTimeTranslationFrame;
+   private final YoReferencePose localizationBackInTimeRotationFrame;
+   private final YoReferencePose totalRotationErrorFrame;
+   private final YoReferencePose totalTranslationErrorFrame;
+   private final YoReferencePose interpolatedRotationCorrectionFrame;
+   private final YoReferencePose interpolatedTranslationCorrectionFrame;
+   private final YoReferencePose interpolationRotationStartFrame;
+   private final YoReferencePose interpolationTranslationStartFrame;
    private final Vector3d distanceToTravelVector = new Vector3d();
    
    private final LongYoVariable seNonProcessedPelvisTimeStamp;
@@ -62,7 +68,7 @@ public class PelvisPoseHistoryCorrection
    private final DoubleYoVariable interpolationAlphaFilterBreakFrequency;
    private final DoubleYoVariable distanceToTravel;
    private final DoubleYoVariable distanceTraveled;
-   private final DoubleYoVariable previousAlphaValue;
+   private final DoubleYoVariable previousClippedAlphaValue;
    private final DoubleYoVariable clippedAlphaValue;
    private final DoubleYoVariable maxVelocityClip;
    private final DoubleYoVariable maxAlpha;
@@ -75,6 +81,8 @@ public class PelvisPoseHistoryCorrection
    
    private final double estimatorDT;
    private boolean sendCorrectionUpdate = false;
+   private final Quat4d totalRotationError = new Quat4d();
+   private final Vector3d totalTranslationError = new Vector3d();
 
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
@@ -101,12 +109,20 @@ public class PelvisPoseHistoryCorrection
       
       stateEstimatorPelvisPoseBuffer = new TimeStampedPelvisPoseBuffer(pelvisBufferSize);
       
-      seBackInTimeFrame = new YoReferencePose("seBackInTimeFrame", ReferenceFrame.getWorldFrame(), registry);
-      localizationBackInTimeFrame = new YoReferencePose("localizationBackInTimeFrame", ReferenceFrame.getWorldFrame(), registry);
-      totalErrorFrame = new YoReferencePose("totalErrorFrame", pelvisReferenceFrame, registry);
-      interpolationStartFrame = new YoReferencePose("interpolationStartFrame", pelvisReferenceFrame, registry);
-      interpolatedCorrectionFrame = new YoReferencePose("interpolatedCorrectionFrame", pelvisReferenceFrame, registry);
-      nonCorrectedPelvis = new YoReferencePose("nonCorrectedPelvis", ReferenceFrame.getWorldFrame(), registry);
+      seBackInTimeTranslationFrame = new YoReferencePose("seBackInTimeTranslationFrame", ReferenceFrame.getWorldFrame(), registry);
+      seBackInTimeRotationFrame = new YoReferencePose("seBackInTimeRotationFrame", ReferenceFrame.getWorldFrame(), registry);
+      localizationBackInTimeTranslationFrame = new YoReferencePose("localizationBackInTimeTranslationFrame", ReferenceFrame.getWorldFrame(), registry);
+      localizationBackInTimeRotationFrame = new YoReferencePose("localizationBackInTimeRotationFrame", ReferenceFrame.getWorldFrame(), registry);
+      interpolationRotationStartFrame = new YoReferencePose("interpolationStartFrame", ReferenceFrame.getWorldFrame(), registry);
+      interpolationTranslationStartFrame = new YoReferencePose("interpolationTranslationStartFrame", ReferenceFrame.getWorldFrame(), registry);
+      totalRotationErrorFrame = new YoReferencePose("totalRotationErrorFrame", ReferenceFrame.getWorldFrame(), registry);
+      totalTranslationErrorFrame = new YoReferencePose("totalTranslationErrorFrame", ReferenceFrame.getWorldFrame(), registry);
+      interpolatedTranslationCorrectionFrame = new YoReferencePose("interpolatedTranslationCorrectionFrame", ReferenceFrame.getWorldFrame(), registry);
+      interpolatedRotationCorrectionFrame = new YoReferencePose("interpolatedCorrectionFrame", ReferenceFrame.getWorldFrame(), registry);
+
+      translationCorrection = new YoReferencePose("translationCorrection", ReferenceFrame.getWorldFrame(), registry);
+      nonCorrectedPelvis = new YoReferencePose("nonCorrectedPelvis", translationCorrection, registry);
+      orientationCorrection = new YoReferencePose("orientationCorrection", nonCorrectedPelvis, registry);
       correctedPelvis = new YoReferencePose("correctedPelvis", ReferenceFrame.getWorldFrame(), registry);
 
       interpolationAlphaFilterAlphaValue = new DoubleYoVariable("interpolationAlphaFilterAlphaValue", registry);
@@ -132,7 +148,7 @@ public class PelvisPoseHistoryCorrection
       distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
       maxVelocityClip = new DoubleYoVariable("maxVelocityClip", registry);
       maxVelocityClip.set(0.01);
-      previousAlphaValue = new DoubleYoVariable("previousAlphaValue", registry);
+      previousClippedAlphaValue = new DoubleYoVariable("previousClippedAlphaValue", registry);
       maxAlpha = new DoubleYoVariable("maxAlpha", registry);
       distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
       //      distanceError = new DoubleYoVariable("distanceError", registry);
@@ -155,10 +171,10 @@ public class PelvisPoseHistoryCorrection
    {
       if (pelvisPoseCorrectionCommunicator != null)
       {
+         pelvisReferenceFrame.update();
          checkForManualTrigger();
          checkForNewPacket();
 
-         pelvisReferenceFrame.update();
          interpolationAlphaFilter.update(confidenceFactor.getDoubleValue());
 
          pelvisReferenceFrame.getTransformToParent(pelvisPose);
@@ -215,9 +231,19 @@ public class PelvisPoseHistoryCorrection
    private void correctPelvisPose(RigidBodyTransform pelvisPose)
    {
       updateTranslationalMaxVelocityClip();
-      interpolatedCorrectionFrame.interpolate(interpolationStartFrame, totalErrorFrame, pelvisReferenceFrame, clippedAlphaValue.getDoubleValue());
-      interpolatedCorrectionFrame.getTransformToParent(interpolatedError);
-      pelvisPose.multiply(interpolatedError);
+      interpolatedRotationCorrectionFrame.interpolate(interpolationRotationStartFrame, totalRotationErrorFrame, ReferenceFrame.getWorldFrame(),
+            clippedAlphaValue.getDoubleValue());
+
+      interpolatedTranslationCorrectionFrame.interpolate(interpolationTranslationStartFrame, totalTranslationErrorFrame, ReferenceFrame.getWorldFrame(),
+            clippedAlphaValue.getDoubleValue());
+
+      interpolatedRotationCorrectionFrame.getTransformToParent(interpolatedRotationError);
+      orientationCorrection.setAndUpdate(interpolatedRotationError);
+
+      interpolatedTranslationCorrectionFrame.getTransformToParent(interpolatedTranslationError);
+      translationCorrection.setAndUpdate(interpolatedTranslationError);
+      
+      orientationCorrection.getTransformToDesiredFrame(pelvisPose, ReferenceFrame.getWorldFrame());
    }
    
    /**
@@ -225,12 +251,12 @@ public class PelvisPoseHistoryCorrection
     */
    private void updateTranslationalMaxVelocityClip()
    {
-      interpolatedCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, totalErrorFrame);
+      interpolatedTranslationCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, ReferenceFrame.getWorldFrame());
       errorBetweenCurrentPositionAndCorrected.getTranslation(distanceToTravelVector);
       distanceToTravel.set(distanceToTravelVector.length());
-      maxAlpha.set((estimatorDT * maxVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousAlphaValue.getDoubleValue());
+      maxAlpha.set((estimatorDT * maxVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousClippedAlphaValue.getDoubleValue());
       clippedAlphaValue.set(MathTools.clipToMinMax(interpolationAlphaFilter.getDoubleValue(), 0.0, maxAlpha.getDoubleValue()));
-      previousAlphaValue.set(clippedAlphaValue.getDoubleValue());
+      previousClippedAlphaValue.set(clippedAlphaValue.getDoubleValue());
    }
 
    /**
@@ -268,58 +294,80 @@ public class PelvisPoseHistoryCorrection
     */
    private void addNewExternalPose(TimeStampedTransform3D newPelvisPoseWithTime)
    {
-      previousAlphaValue.set(0.0);
+      previousClippedAlphaValue.set(0.0);
       interpolationAlphaFilter.set(0.0);
       distanceTraveled.set(0.0);
       calculateAndStoreErrorInPast(newPelvisPoseWithTime);
-      interpolationStartFrame.setAndUpdate(interpolatedCorrectionFrame.getTransformToParent());
+      interpolationRotationStartFrame.setAndUpdate(interpolatedRotationCorrectionFrame.getTransformToParent());
+      interpolationTranslationStartFrame.setAndUpdate(interpolatedTranslationCorrectionFrame.getTransformToParent());
    }
-
 
    /**
     * Calculates the difference between the external at t with the state estimated pelvis pose at t and stores it
     * @param localizationPose - the corrected pelvis pose
     */
-   public void calculateAndStoreErrorInPast(TimeStampedTransform3D localizationPose)
+   public void calculateAndStoreErrorInPast(TimeStampedTransform3D timestampedlocalizationPose)
    {
-      long timeStamp = localizationPose.getTimeStamp();
-      TimeStampedTransform3D sePose = stateEstimatorPelvisPoseBuffer.interpolate(timeStamp);
+      long timeStamp = timestampedlocalizationPose.getTimeStamp();
+      RigidBodyTransform localizationPose = timestampedlocalizationPose.getTransform3D();
+
+      Vector3d localizationTranslation = new Vector3d();
+      localizationPose.getTranslation(localizationTranslation);
+      localizationBackInTimeTranslationFrame.setAndUpdate(localizationTranslation);
+
+      Quat4d localizationRotation = new Quat4d();
+      localizationPose.getRotation(localizationRotation);
+      localizationBackInTimeRotationFrame.setAndUpdate(localizationRotation);
+
+      stateEstimatorPelvisPoseBuffer.interpolate(timeStamp, seTimeStampedPose);
+      RigidBodyTransform sePose = seTimeStampedPose.getTransform3D();
+
+      Vector3d seTranslation = new Vector3d();
+      sePose.getTranslation(seTranslation);
+      seBackInTimeTranslationFrame.setAndUpdate(seTranslation);
+
+      Quat4d seRotation = new Quat4d();
+      sePose.getRotation(seRotation);
+      seBackInTimeRotationFrame.setAndUpdate(seRotation);
       
-      localizationBackInTimeFrame.setAndUpdate(localizationPose.getTransform3D());
-      seBackInTimeFrame.setAndUpdate(sePose.getTransform3D());
-      
-      localizationBackInTimeFrame.getTransformToDesiredFrame(errorInPastTransform, seBackInTimeFrame);
-      totalErrorFrame.setAndUpdate(errorInPastTransform);
+      localizationBackInTimeTranslationFrame.getTransformToDesiredFrame(translationErrorInPastTransform, seBackInTimeTranslationFrame);
+      localizationBackInTimeRotationFrame.getTransformToDesiredFrame(rotationErrorInPastTransform, seBackInTimeRotationFrame);
+
+      totalTranslationErrorFrame.setAndUpdate(translationErrorInPastTransform);
+      totalRotationErrorFrame.setAndUpdate(rotationErrorInPastTransform);
    }
 
+   
    public void manuallyTriggerLocalizationUpdate()
    {
       confidenceFactor.set(1.0);
       
-      long midTimeStamp = stateEstimatorPelvisPoseBuffer.getOldestTimestamp()
-            + ((stateEstimatorPelvisPoseBuffer.getNewestTimestamp() - stateEstimatorPelvisPoseBuffer.getOldestTimestamp()) / 2);
-      RigidBodyTransform pelvisPose = new RigidBodyTransform(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
+      RigidBodyTransform pelvisPose = new RigidBodyTransform();
 
-      TransformTools.rotate(pelvisPose, manualRotationOffsetInRadX.getDoubleValue(), Axis.X);
-      TransformTools.rotate(pelvisPose, manualRotationOffsetInRadY.getDoubleValue(), Axis.Y);
-      TransformTools.rotate(pelvisPose, manualRotationOffsetInRadZ.getDoubleValue(), Axis.Z);
-
+      Quat4d rotation = new Quat4d();
+      pelvisPose.getRotation(rotation);
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadX.getDoubleValue(),
+            manualRotationOffsetInRadY.getDoubleValue());
+      pelvisPose.setRotation(rotation);
+      
       Vector3d translation = new Vector3d();
       pelvisPose.get(translation);
-      translation.setX(translation.getX() - manualTranslationOffsetX.getDoubleValue());
-      translation.setY(translation.getY() - manualTranslationOffsetY.getDoubleValue());
-      translation.setZ(translation.getZ() - manualTranslationOffsetZ.getDoubleValue());
+      translation.setX(manualTranslationOffsetX.getDoubleValue());
+      translation.setY(manualTranslationOffsetY.getDoubleValue());
+      translation.setZ(manualTranslationOffsetZ.getDoubleValue());
       pelvisPose.setTranslation(translation);
 
-      TimeStampedTransform3D testTransform = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
-      addNewExternalPose(testTransform);
+      TimeStampedTransform3D manualTimeStampedTransform3D = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
+      addNewExternalPose(manualTimeStampedTransform3D);
       manuallyTriggerLocalizationUpdate.set(false);
-
    }
    
    private void sendCorrectionUpdatePacket()
    {
-      totalErrorFrame.getTransformToParent(totalError);
+      totalRotationErrorFrame.get(totalRotationError);
+      totalTranslationErrorFrame.get(totalTranslationError);
+      totalError.set(totalRotationError, totalTranslationError);
+
       double maxCorrectionVelocity = maxVelocityClip.getDoubleValue();
       PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected, maxCorrectionVelocity);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
@@ -368,6 +416,17 @@ public class PelvisPoseHistoryCorrection
          setAndUpdate(rotation, translation);
       }
 
+      public void setAndUpdate(Vector3d newTranslation)
+      {
+         set(newTranslation);
+         update();
+      }
+
+      public void setAndUpdate(Quat4d newRotation)
+      {
+         set(newRotation);
+         update();
+      }
       public void setAndUpdate(Quat4d newRotation, Vector3d newTranslation)
       {
          set(newRotation);
@@ -393,6 +452,16 @@ public class PelvisPoseHistoryCorrection
          
          transformInterpolationCalculator.computeInterpolation(interpolationStartingPosition, interpolationGoalPosition, output, alpha);
          setAndUpdate(output);
+      }
+
+      public void get(Quat4d rotation)
+      {
+         yoFramePose.getOrientation().getQuaternion(rotation);
+      }
+
+      public void get(Vector3d translation)
+      {
+         yoFramePose.getPosition().get(translation);
       }
    }
 }
