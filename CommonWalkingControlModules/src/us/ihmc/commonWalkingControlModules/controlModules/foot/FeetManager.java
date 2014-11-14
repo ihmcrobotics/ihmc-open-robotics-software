@@ -195,12 +195,7 @@ public class FeetManager
 
    public void initializeContactStatesForDoubleSupport(RobotSide transferToSide)
    {
-      if (stayOnToes())
-      {
-         for (RobotSide robotSide : RobotSide.values)
-            setOnToesContactState(robotSide);
-      }
-      else if (transferToSide == null)
+      if (transferToSide == null)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -325,11 +320,6 @@ public class FeetManager
       walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP, desiredICP, currentICP);
       if (doToeOff())
          setOnToesContactState(trailingLeg);
-   }
-
-   public boolean stayOnToes()
-   {
-      return walkOnTheEdgesManager.stayOnToes();
    }
 
    public boolean willLandOnToes()

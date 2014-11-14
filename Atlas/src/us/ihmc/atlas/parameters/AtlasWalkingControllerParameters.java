@@ -74,12 +74,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
    
    @Override
-   public boolean stayOnToes()
-   {
-      return false; // Not working for now
-   }
-
-   @Override
    public boolean doToeOffIfPossible()
    {
       return true; 

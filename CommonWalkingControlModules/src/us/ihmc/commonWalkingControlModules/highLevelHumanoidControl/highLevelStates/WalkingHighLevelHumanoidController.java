@@ -1376,27 +1376,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
       ContactablePlaneBody contactableBody = feet.get(swingSide);
-      if (feetManager.stayOnToes())
+      List<Point2d> predictedContactPoints = transferToFootstep.getPredictedContactPoints();
+      if ((predictedContactPoints == null) || (predictedContactPoints.isEmpty()))
       {
-         List<FramePoint> contactPoints = getToePoints(contactableBody);
-         footPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(referenceFrames.getSoleFrame(swingSide), contactPoints);
+         footPolygon.setIncludingFrameAndUpdate(contactableBody.getContactPoints2d());
       }
       else
       {
-         List<Point2d> predictedContactPoints = transferToFootstep.getPredictedContactPoints();
-         if ((predictedContactPoints == null) || (predictedContactPoints.isEmpty()))
+         ArrayList<FramePoint2d> transferToContactPoints = new ArrayList<FramePoint2d>();
+         for (Point2d predictedContactPoint : predictedContactPoints)
          {
-            footPolygon.setIncludingFrameAndUpdate(contactableBody.getContactPoints2d());
+            transferToContactPoints.add(new FramePoint2d(contactableBody.getSoleFrame(), predictedContactPoint));
          }
-         else
-         {
-            ArrayList<FramePoint2d> transferToContactPoints = new ArrayList<FramePoint2d>();
-            for (Point2d predictedContactPoint : predictedContactPoints)
-            {
-               transferToContactPoints.add(new FramePoint2d(contactableBody.getSoleFrame(), predictedContactPoint));
-            }
-            footPolygon.setIncludingFrameAndUpdate(transferToContactPoints);
-         }
+         footPolygon.setIncludingFrameAndUpdate(transferToContactPoints);
       }
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, swingSide,
@@ -1507,8 +1499,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
 
       boolean keepCMPInsideSupportPolygon = true;
-      if (feetManager.stayOnToes())
-         keepCMPInsideSupportPolygon = false;
       if ((manipulationControlModule != null) && (manipulationControlModule.isAtLeastOneHandLoadBearing()))
          keepCMPInsideSupportPolygon = false;
 
