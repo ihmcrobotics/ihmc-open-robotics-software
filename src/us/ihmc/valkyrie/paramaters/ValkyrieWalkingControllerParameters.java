@@ -149,12 +149,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return Math.PI / 4.0;
    }
 
-   @Override
-   public boolean checkOrbitalEnergyCondition()
-   {
-      return false;
-   }
-
    // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.595 + 0.23;
    private double nominalHeightAboveGround = 0.675 + 0.23;
@@ -191,18 +185,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double maximumHeightAboveAnkle()
    {
       return maximumHeightAboveGround;
-   }
-
-   @Override
-   public boolean resetDesiredICPToCurrentAtStartOfSwing()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean finishSwingWhenTrajectoryDone()
-   {
-      return false;
    }
 
    @Override
@@ -356,12 +338,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean getCoMHeightDriftCompensation()
    {
       return true;
-   }
-
-   @Override
-   public double getDefaultDesiredPelvisPitch()
-   {
-      return 0.0;
    }
 
    @Override
