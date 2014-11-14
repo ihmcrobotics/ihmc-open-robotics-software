@@ -10,6 +10,11 @@ import us.ihmc.utilities.robotSide.RobotSide;
 public class AtlasFootstepParameters extends FootstepParameters{
 	private static final double goalRadius = 0.25;
 	private final double baseOffset = 0.3;
+	public double maxStepUp = 0.20;
+	public double minStepDown = -0.17;
+	public double maxStepDistance = 0.6;
+	
+	private double yawCostGain = 1;
 	
 	public AtlasFootstepParameters(){
 		initialize();
@@ -55,10 +60,17 @@ public class AtlasFootstepParameters extends FootstepParameters{
 			sign = 1;
 		}
 
-		generated.x += (offset.dx) * Math.cos(generated.theta) - (sign * offset.dy) * Math.sin(generated.theta);
+		double xForward = (offset.dx) * Math.cos(generated.theta) - (sign * offset.dy) * Math.sin(generated.theta);
+		generated.x += xForward;
 		generated.y += (sign * offset.dy) * Math.cos(generated.theta) + (offset.dx) * Math.sin(generated.theta);
 		generated.theta += sign * offset.dtheta;
 		generated.theta = ((generated.theta +Math.PI) % (2 * Math.PI)) - Math.PI; 
+		
+		generated.costToState = currentState.costToState + 1;
+		generated.costToState += Math.sqrt(Math.pow(offset.dx, 2)+ Math.pow(offset.dy,  2)) / maxStepDistance;
+		generated.costToState -= xForward / maxStepDistance;
+		generated.costToState += yawCostGain * offset.dtheta;
+		
 		return generated;
 	}
 
@@ -67,11 +79,14 @@ public class AtlasFootstepParameters extends FootstepParameters{
 		if (currentState.side == goalState.side){
 			return false;
 		}
-		double xdiff = goalState.x - currentState.x;
+		double xdiffworld = goalState.x - currentState.x;
+		double ydiffworld = goalState.y - currentState.y;
+		double theta = currentState.theta;
+		double xdiff = xdiffworld * Math.cos(theta) + ydiffworld * Math.sin(theta);
+		double ydiff = ydiffworld * Math.cos(theta) - xdiffworld * Math.sin(theta);
 		if (xdiff >.3 || xdiff < -.3){
 			return false;
 		}
-		double ydiff = goalState.y - currentState.y;
 		if (currentState.side == RobotSide.LEFT){
 			ydiff *= -1;
 		}
@@ -84,4 +99,13 @@ public class AtlasFootstepParameters extends FootstepParameters{
 		}
 		return true;
 	}
+	
+	public double getMaxStepUp(){
+		return this.maxStepUp;
+	}
+	public double getMinStepDown(){
+		return minStepDown;
+	}
+	public double getMaxStepDistance() {
+		return maxStepDistance;	}
 }
