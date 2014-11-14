@@ -18,9 +18,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.IndexChangedListener;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.IndexChangedListener;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedListener
 {

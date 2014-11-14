@@ -37,8 +37,8 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 import com.jme3.math.Transform;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class BonoRobotModel implements DRCRobotModel
 {

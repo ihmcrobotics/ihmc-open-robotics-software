@@ -8,9 +8,9 @@ import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class StepprAirwalkSliderboard extends SCSVisualizer
 {

@@ -12,7 +12,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 
 /**
  * Created by dstephen on 2/14/14.

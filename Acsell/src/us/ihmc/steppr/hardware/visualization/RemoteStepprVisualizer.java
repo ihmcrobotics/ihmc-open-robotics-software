@@ -7,7 +7,7 @@ import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
-import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class RemoteStepprVisualizer extends SCSVisualizer
 {
