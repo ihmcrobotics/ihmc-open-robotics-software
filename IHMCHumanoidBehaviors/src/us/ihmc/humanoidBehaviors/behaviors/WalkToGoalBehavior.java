@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -10,6 +11,7 @@ import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.communication.packets.walking.PlannedPathPacket;
+import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -39,9 +41,11 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
 	private final BooleanYoVariable hasSearchRequestBeenSent = new BooleanYoVariable("hasSearchRequestBeenSent", registry);
 	private final BooleanYoVariable hasNewFootsteps = new BooleanYoVariable("hasNewFootsteps", registry);;
+	private final BooleanYoVariable executePlan = new BooleanYoVariable("executePlan", registry);
 	
 	private ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
 	private FootstepListBehavior footstepListBehavior;
+
 	
 	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
 	{
@@ -78,8 +82,16 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 				footsepDataList.footstepDataList = footsteps;
 				footstepListBehavior.set(footsepDataList);
 				hasNewFootsteps.set(false);
+				
+				//send visualizaion
+				int size = footsteps.size();
+				byte[] flags = new byte[size];
+				Arrays.fill(flags, (byte) 2);
+				SnapFootstepPacket footstepPlanPacket = new SnapFootstepPacket(footsteps, new int[size], flags);
+				outgoingCommunicationBridge.sendPacketToNetworkProcessor(footstepPlanPacket);
+				executePlan.set(false);
 			}
-			else
+			else if (executePlan.getBooleanValue())
 			{
 				footstepListBehavior.doControl();
 			}
@@ -88,9 +100,14 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 
 	private void requestFootstepPlan()
 	{
-		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startState.x, startState.y, startState.theta, startState.side, goalState.x, goalState.y, goalState.theta, goalState.side);
+		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startState.x, startState.y, startState.z, startState.theta, startState.side, goalState.x, goalState.y, goalState.theta, goalState.side);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(footstepPlanRequestPacket);
 		hasSearchRequestBeenSent.set(true);
+	}
+	
+	private void requestSearchStop(){
+		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,0,0,0,0,RobotSide.LEFT,0,0,0,RobotSide.RIGHT);
+		outgoingCommunicationBridge.sendPacketToNetworkProcessor(stopSearchRequestPacket);
 	}
 
 	private void checkForNewInputs()
@@ -98,8 +115,12 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		WalkToGoalBehaviorPacket newestPacket = inputListeningQueue.getNewestPacket();
 		if (newestPacket != null)
 		{
-			set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], newestPacket.getGoalSide());
-			hasSearchRequestBeenSent.set(false);
+			if (newestPacket.execute){
+				executePlan.set(true);
+			}else{
+				set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], newestPacket.getGoalSide());
+				hasSearchRequestBeenSent.set(false);
+			}
 		}
 	}
 	
@@ -123,7 +144,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		double thetaStart = RotationFunctions.getYaw(startRotation);
 		double xStart = startTranslation.x;
 		double yStart = startTranslation.y;
-		startState = new FootstepPlanState(xStart,yStart,thetaStart,startSide);
+		double zStart = startTranslation.z;
+		startState = new FootstepPlanState(xStart,yStart,zStart,thetaStart,startSide);
 		goalState = new FootstepPlanState(xGoal, yGoal, thetaGoal, goalSide);
 		hasInputBeenSet.set(true);
 	}
@@ -134,6 +156,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		hasInputBeenSet.set(false);
 		hasSearchRequestBeenSent.set(false);
 		hasNewFootsteps.set(false);
+		executePlan.set(false);
 		footstepListBehavior.initialize();
 		startState = null;
 		goalState = null;
@@ -156,6 +179,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	@Override
 	public void stop()
 	{
+		requestSearchStop();
 		isStopped.set(true);
 	}
 	
@@ -196,7 +220,9 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		isStopped.set(false);
 		hasTargetBeenProvided.set(false);
 		hasNewFootsteps.set(false);
+		executePlan.set(false);
 		hasSearchRequestBeenSent.set(false);
+		requestSearchStop();
 		footstepListBehavior.finalize();
 	}
 	
