@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.kinematics;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
+public class YoValkyrieJointWriter implements ValkyrieJointInterface
 {
    private final String name;
    private double q;
@@ -17,7 +17,7 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    private final DoubleYoVariable qd_d;
    private final DoubleYoVariable f_d;
 
-   public YoDesiredValkyrieJoint(String name, YoVariableRegistry registry)
+   public YoValkyrieJointWriter(String name, YoVariableRegistry registry)
    {
       this.name = name;
 
