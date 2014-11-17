@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.kinematics;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-
 public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
 {
    private final String name;
@@ -17,15 +16,15 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    private final DoubleYoVariable q_d;
    private final DoubleYoVariable qd_d;
    private final DoubleYoVariable f_d;
-   
+
    public YoDesiredValkyrieJoint(String name, YoVariableRegistry registry)
    {
       this.name = name;
-      
+
       this.q_d = new DoubleYoVariable(name + "_q_d", registry);
       this.qd_d = new DoubleYoVariable(name + "_qd_d", registry);
       this.f_d = new DoubleYoVariable(name + "_tau_d", registry);
-      
+
    }
 
    @Override
@@ -63,7 +62,7 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    {
       return f;
    }
-   
+
    @Override
    public double getValidationVelocity()
    {
@@ -103,7 +102,7 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    @Override
    public void setValidationVelocity(double velocityFromJacobian)
    {
-	   this.qd_validation = velocityFromJacobian;
+      this.qd_validation = velocityFromJacobian;
    }
 
    @Override
@@ -141,7 +140,6 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    {
       this.commandedMotorCurrent = commandedMotorCurrent;
    }
-   
 
    public void set(ValkyrieJointInterface valkyrieJoint)
    {
