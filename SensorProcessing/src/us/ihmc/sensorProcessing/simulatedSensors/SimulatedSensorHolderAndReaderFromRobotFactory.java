@@ -15,6 +15,13 @@ import us.ihmc.sensorProcessing.signalCorruption.LatencyVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationLatencyCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.IMUMount;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -22,35 +29,26 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.IMUMount;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SensorReaderFactory");
    private final Robot robot;
    private final double estimateDT;
-   private final SensorNoiseParameters sensorNoiseParameters;
    
    private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
 
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
-   private final SensorFilterParameters sensorFilterParameters;
+   private final SensorProcessingConfiguration sensorProcessingConfiguration;
+   private final SensorNoiseParameters sensorNoiseParameters;
    
-   public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
-         SensorFilterParameters sensorFilterParameters)
+   public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorProcessingConfiguration sensorProcessingConfiguration)
    {
       this.robot = robot;
-      this.sensorNoiseParameters = sensorNoiseParameters;
-      this.sensorFilterParameters = sensorFilterParameters;
-      
-      this.estimateDT = sensorFilterParameters.getEstimatorDT();
+      this.sensorProcessingConfiguration = sensorProcessingConfiguration;
+      this.sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
+      this.estimateDT = sensorProcessingConfiguration.getEstimatorDT();
 
       robot.getIMUMounts(imuMounts);
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
@@ -76,7 +74,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, sensorNoiseParameters, robot.getYoTime(), registry);
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, sensorProcessingConfiguration, robot.getYoTime(), registry);
 
       createAndAddOrientationSensors(imuDefinitions, registry);
       createAndAddAngularVelocitySensors(imuDefinitions, registry);

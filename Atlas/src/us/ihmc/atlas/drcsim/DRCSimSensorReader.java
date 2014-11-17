@@ -17,13 +17,12 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -58,12 +57,12 @@ public class DRCSimSensorReader implements SensorReader
    private final DenseMatrix64F wrench = new DenseMatrix64F(6, 1);
 
    public DRCSimSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
-         SensorFilterParameters sensorFilterParameters, SensorNoiseParameters sensorNoiseParameters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+         StateEstimatorParameters stateEstimatorParameters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
    {
-      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
+      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
 
-      this.jointList = new ArrayList<>(stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions());
+      this.jointList = new ArrayList<>(stateEstimatorSensorDefinitions.getJointSensorDefinitions());
       Collections.sort(jointList, new Comparator<OneDoFJoint>()
       {
          @Override
@@ -72,7 +71,7 @@ public class DRCSimSensorReader implements SensorReader
             return o1.getName().compareTo(o2.getName());
          }
       });;
-      this.imu = stateEstimatorSensorDefinitions.getAngularVelocitySensorDefinitions().get(0);
+      this.imu = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(0);
       this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
 
       

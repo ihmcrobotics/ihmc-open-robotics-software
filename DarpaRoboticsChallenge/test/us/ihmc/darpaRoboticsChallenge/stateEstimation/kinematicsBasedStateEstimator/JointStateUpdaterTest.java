@@ -10,12 +10,11 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -138,20 +137,29 @@ public class JointStateUpdaterTest
          ArrayList<RevoluteJoint> jointsWithVelocitySensor)
    {
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = createSensorDefinitions(jointsWithPositionSensor, jointsWithVelocitySensor);
-      
-      SensorFilterParameters sensorFilterParameters = createParametersForNoFiltering();
-      
-      SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
-      
-      SensorProcessing sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
-      return sensorProcessing;
-   }
 
-   private static SensorFilterParameters createParametersForNoFiltering()
-   {
-      double updateDT = 1e-3;
-      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0, updateDT, false, false, false, Double.POSITIVE_INFINITY, null);
-      return sensorFilterParameters;
+      SensorProcessingConfiguration sensorProcessingConfiguration = new SensorProcessingConfiguration()
+      {
+         @Override
+         public SensorNoiseParameters getSensorNoiseParameters()
+         {
+            return null;
+         }
+         
+         @Override
+         public double getEstimatorDT()
+         {
+            return 1e-3;
+         }
+         
+         @Override
+         public void configureSensorProcessing(SensorProcessing sensorProcessing)
+         {
+         }
+      };
+      SensorProcessing sensorDataSource = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
+    
+      return sensorDataSource;
    }
 
    private static StateEstimatorSensorDefinitions createSensorDefinitions(ArrayList<RevoluteJoint> jointsWithPositionSensor,
@@ -159,9 +167,7 @@ public class JointStateUpdaterTest
    {
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
       for (OneDoFJoint joint : jointsWithPositionSensor)
-         stateEstimatorSensorDefinitions.addJointPositionSensorDefinition(joint);
-      for (OneDoFJoint joint : jointsWithVelocitySensor)
-         stateEstimatorSensorDefinitions.addJointVelocitySensorDefinition(joint);
+         stateEstimatorSensorDefinitions.addJointSensorDefinition(joint);
       return stateEstimatorSensorDefinitions;
    }
 

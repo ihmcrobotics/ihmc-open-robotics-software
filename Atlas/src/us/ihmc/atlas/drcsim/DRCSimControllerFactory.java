@@ -1,7 +1,6 @@
 package us.ihmc.atlas.drcsim;
 
 import java.io.IOException;
-import java.net.URI;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -19,18 +18,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
@@ -71,10 +67,8 @@ public class DRCSimControllerFactory
        * Create sensors
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
-      SensorNoiseParameters sensorNoiseParameters = stateEstimatorParameters.getSensorNoiseParameters();
-      SensorFilterParameters sensorFilterParameters = stateEstimatorParameters.getSensorFilterParameters();
 
-      DRCSimSensorReaderFactory sensorReaderFactory = new DRCSimSensorReaderFactory(sensorInformation, sensorFilterParameters, sensorNoiseParameters);
+      DRCSimSensorReaderFactory sensorReaderFactory = new DRCSimSensorReaderFactory(sensorInformation, stateEstimatorParameters);
 
       /*
        * Create output writer

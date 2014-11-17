@@ -42,7 +42,7 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
          StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
+      this.assumePerfectIMU = true; //stateEstimatorParameters.getAssumePerfectIMU();
       
       // Make the estimator here.
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,

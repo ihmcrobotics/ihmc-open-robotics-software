@@ -51,11 +51,12 @@ public class SensorAndEstimatorAssembler
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, YoVariableRegistry parentRegistry)
    {
-      this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
+      this.assumePerfectIMU = true; //stateEstimatorParameters.getAssumePerfectIMU();
       double estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
       SensorNoiseParameters sensorNoiseParametersForEstimator = stateEstimatorParameters.getSensorNoiseParameters();
-      PointMeasurementNoiseParameters pointMeasurementNoiseParameters = stateEstimatorParameters.getPointMeasurementNoiseParameters();
+      // broken
+      PointMeasurementNoiseParameters pointMeasurementNoiseParameters = null; //stateEstimatorParameters.getPointMeasurementNoiseParameters();
       
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);

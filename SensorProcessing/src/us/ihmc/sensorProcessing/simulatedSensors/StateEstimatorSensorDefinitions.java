@@ -4,19 +4,12 @@ import java.util.ArrayList;
 
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class StateEstimatorSensorDefinitions
 {
-   private final ArrayList<OneDoFJoint> oneDoFJointsForPositionSensors = new ArrayList<OneDoFJoint>();
-   private final ArrayList<OneDoFJoint> oneDoFJointsForVelocitySensors = new ArrayList<OneDoFJoint>();
-
-   private final ArrayList<IMUDefinition> imuDefinitionsForOrientationSensors = new ArrayList<IMUDefinition>();
-   private final ArrayList<IMUDefinition> imuDefinitionsForAngularVelocitySensors = new ArrayList<IMUDefinition>();
-   private final ArrayList<IMUDefinition> imuDefinitionsForLinearAccelerationSensors = new ArrayList<IMUDefinition>();
-
-   private final SideDependentList<ForceSensorDefinition> footForceSensors = new SideDependentList<ForceSensorDefinition>();
+   private final ArrayList<OneDoFJoint> oneDoFJointSensorDefinitions = new ArrayList<OneDoFJoint>();
+   private final ArrayList<IMUDefinition> imuSensorDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
 
    public ArrayList<ForceSensorDefinition> getForceSensorDefinitions()
@@ -28,58 +21,28 @@ public class StateEstimatorSensorDefinitions
    {
    }
 
-   public ArrayList<OneDoFJoint> getJointPositionSensorDefinitions()
+   public ArrayList<OneDoFJoint> getJointSensorDefinitions()
    {
-      return oneDoFJointsForPositionSensors;
+      return oneDoFJointSensorDefinitions;
    }
 
-   public ArrayList<OneDoFJoint> getJointVelocitySensorDefinitions()
+   public ArrayList<IMUDefinition> getIMUSensorDefinitions()
    {
-      return oneDoFJointsForVelocitySensors;
+      return imuSensorDefinitions;
    }
 
-   public ArrayList<IMUDefinition> getOrientationSensorDefinitions()
+   public void addJointSensorDefinition(OneDoFJoint oneDoFJoint)
    {
-      return imuDefinitionsForOrientationSensors;
+      oneDoFJointSensorDefinitions.add(oneDoFJoint);
    }
 
-   public ArrayList<IMUDefinition> getAngularVelocitySensorDefinitions()
+   public void addIMUSensorDefinition(IMUDefinition imuDefinition)
    {
-      return imuDefinitionsForAngularVelocitySensors;
+      imuSensorDefinitions.add(imuDefinition);
    }
 
-   public ArrayList<IMUDefinition> getLinearAccelerationSensorDefinitions()
-   {
-      return imuDefinitionsForLinearAccelerationSensors;
-   }
-
-   public void addJointPositionSensorDefinition(OneDoFJoint oneDoFJoint)
-   {
-      oneDoFJointsForPositionSensors.add(oneDoFJoint);
-   }
-
-   public void addJointVelocitySensorDefinition(OneDoFJoint oneDoFJoint)
-   {
-      oneDoFJointsForVelocitySensors.add(oneDoFJoint);
-   }
-
-   public void addOrientationSensorDefinition(IMUDefinition imuDefinition)
-   {
-      imuDefinitionsForOrientationSensors.add(imuDefinition);
-   }
-
-   public void addAngularVelocitySensorDefinition(IMUDefinition imuDefinition)
-   {
-      imuDefinitionsForAngularVelocitySensors.add(imuDefinition);
-   }
-
-   public void addLinearAccelerationSensorDefinition(IMUDefinition imuDefinition)
-   {
-      imuDefinitionsForLinearAccelerationSensors.add(imuDefinition);
-   }
    public void addForceSensorDefinition(ForceSensorDefinition forceSensorDefinition)
    {
       forceSensorDefinitions.add(forceSensorDefinition);
    }
-
 }

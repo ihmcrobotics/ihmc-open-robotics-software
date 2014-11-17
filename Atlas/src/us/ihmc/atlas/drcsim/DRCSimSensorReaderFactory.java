@@ -4,10 +4,9 @@ import java.util.HashMap;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -22,17 +21,13 @@ public class DRCSimSensorReaderFactory implements SensorReaderFactory
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private DRCRobotSensorInformation sensorInformation;
    private DRCSimSensorReader atlasSensorReader;
-   private final SensorFilterParameters sensorFilterParameters;
-   private final SensorNoiseParameters sensorNoiseParameters;
+   private final StateEstimatorParameters stateEstimatorParameters;
 
    public DRCSimSensorReaderFactory(DRCRobotSensorInformation sensorInformation,
-         SensorFilterParameters sensorFilterParameters, SensorNoiseParameters sensorNoiseParameters)
+         StateEstimatorParameters stateEstimatorParameters)
    {
       this.sensorInformation = sensorInformation;     
-      
-      this.sensorFilterParameters = sensorFilterParameters;
-      this.sensorNoiseParameters = sensorNoiseParameters;
-      
+      this.stateEstimatorParameters = stateEstimatorParameters;
    }
 
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
@@ -46,17 +41,14 @@ public class DRCSimSensorReaderFactory implements SensorReaderFactory
          if (joint instanceof OneDoFJoint)
          {
             OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-            stateEstimatorSensorDefinitions.addJointPositionSensorDefinition(oneDoFJoint);
-            stateEstimatorSensorDefinitions.addJointVelocitySensorDefinition(oneDoFJoint);
+            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
             allJoints.put(oneDoFJoint.getName(), oneDoFJoint);
          }
       }
 
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
-         stateEstimatorSensorDefinitions.addOrientationSensorDefinition(imuDefinition);
-         stateEstimatorSensorDefinitions.addAngularVelocitySensorDefinition(imuDefinition);
-         stateEstimatorSensorDefinitions.addLinearAccelerationSensorDefinition(imuDefinition);
+         stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
       }
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
@@ -64,7 +56,7 @@ public class DRCSimSensorReaderFactory implements SensorReaderFactory
          stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
       }
 
-      atlasSensorReader = new DRCSimSensorReader(stateEstimatorSensorDefinitions, sensorInformation, sensorFilterParameters, sensorNoiseParameters,
+      atlasSensorReader = new DRCSimSensorReader(stateEstimatorSensorDefinitions, sensorInformation, stateEstimatorParameters,
             forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, registry);
    }
 

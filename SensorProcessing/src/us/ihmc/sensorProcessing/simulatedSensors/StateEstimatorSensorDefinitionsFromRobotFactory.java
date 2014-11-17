@@ -34,10 +34,8 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
       createAndAddForceSensorDefinitions(forceSensorDefinitions);
-      createAndAddOneDoFPositionAndVelocitySensors();
-      createAndAddOrientationSensors(imuDefinitions);
-      createAndAddAngularVelocitySensors(imuDefinitions);
-      createAndAddLinearAccelerationSensors(imuDefinitions);
+      createAndAddOneDoFSensors();
+      createAndAddIMUSensors(imuDefinitions);
    }
    
    private void createAndAddForceSensorDefinitions(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions)
@@ -88,7 +86,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       return imuDefinitions;
    }
 
-   public void createAndAddOneDoFPositionAndVelocitySensors()
+   public void createAndAddOneDoFSensors()
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
 
@@ -96,45 +94,21 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       {
          OneDoFJoint oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
 
-         stateEstimatorSensorDefinitions.addJointPositionSensorDefinition(oneDoFJoint);
-         stateEstimatorSensorDefinitions.addJointVelocitySensorDefinition(oneDoFJoint);
+         stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
       }
    }
 
-   public void createAndAddOrientationSensors(LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions)
+   public void createAndAddIMUSensors(LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions)
    {
       Set<IMUMount> imuMounts = imuDefinitions.keySet();
 
       for (IMUMount imuMount : imuMounts)
       {
          IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
-         stateEstimatorSensorDefinitions.addOrientationSensorDefinition(imuDefinition);
+         stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
       }
    }
 
-   public void createAndAddAngularVelocitySensors(LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions)
-   {
-      Set<IMUMount> imuMounts = imuDefinitions.keySet();
-
-      for (IMUMount imuMount : imuMounts)
-      {
-         IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
-         stateEstimatorSensorDefinitions.addAngularVelocitySensorDefinition(imuDefinition);
-      }
-   }
-
-
-   public void createAndAddLinearAccelerationSensors(LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions)
-   {
-      Set<IMUMount> imuMounts = imuDefinitions.keySet();
-
-      for (IMUMount imuMount : imuMounts)
-      {
-         IMUDefinition imuDefinition = imuDefinitions.get(imuMount);
-
-         stateEstimatorSensorDefinitions.addLinearAccelerationSensorDefinition(imuDefinition);
-      }
-   }
 
    public Map<WrenchCalculatorInterface, ForceSensorDefinition> getForceSensorDefinitions()
    {
