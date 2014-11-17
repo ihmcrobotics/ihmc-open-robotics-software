@@ -165,6 +165,16 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
    {
    }
 
+   public void setMaximumAcceleration(double maxAcceleration)
+   {
+      this.maximumAcceleration.set(maxAcceleration);
+   }
+
+   public void setMaximumJerk(double maxJerk)
+   {
+      this.maximumJerk.set(maxJerk);
+   }
+
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       this.maximumAcceleration.set(maxAcceleration);
