@@ -140,12 +140,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       imuUSBSerialIds.put("v1Pelvis_LeftIMU", 622730566);
       imuUSBSerialIds.put("v1Pelvis_RightIMU", 622730571);
+      imuUSBSerialIds.put("v1Trunk_LeftIMU", 622730569);
+      imuUSBSerialIds.put("v1Trunk_RightIMU", 622709817);
    }
    
    // Use this until sim can handle multiple IMUs
 //    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
-   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
+   public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
    
    public ValkyrieSensorInformation()
    {
