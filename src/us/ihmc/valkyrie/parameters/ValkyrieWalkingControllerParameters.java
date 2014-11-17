@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -343,19 +344,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
+      YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
 
-      double kp = runningOnRealRobot ? 120.0 : 100.0;
-      double zeta = runningOnRealRobot ? 0.7 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
+      double kpXY = runningOnRealRobot ? 120.0 : 100.0;
+      double kpZ = runningOnRealRobot ? 120.0 : 100.0;
+      double zetaXY = runningOnRealRobot ? 0.5 : 0.8;
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;
       double maxAccel = runningOnRealRobot ? 36.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 540.0 : 270.0;
 
-      gains.setProportionalGain(kp);
-      gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setProportionalGains(kpXY, kpZ);
+      gains.setDampingRatios(zetaXY, zetaZ);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
@@ -420,19 +419,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+      YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
-      double kp = runningOnRealRobot ? 40.0 : 100.0;
-      double zeta = runningOnRealRobot ? 0.7 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
+      double kpXY = runningOnRealRobot ? 40.0 : 100.0;
+      double kpZ = runningOnRealRobot ? 40.0 : 100.0;
+      double zetaXY = runningOnRealRobot ? 0.4 : 0.8; // 0.4
+      double zetaZ = runningOnRealRobot ? 0.4 : 0.8; // Higher = 8Hz shakies 
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
-      gains.setProportionalGain(kp);
-      gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setProportionalGains(kpXY, kpZ);
+      gains.setDampingRatios(zetaXY, zetaZ);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
@@ -446,11 +443,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
       double kpXY = 100.0;
-      double kpZ = runningOnRealRobot ? 200.0 : 200.0;
+      double kpZ = runningOnRealRobot ? 200.0 : 200.0; //50
       double zetaXYZ = runningOnRealRobot ? 0.7 : 0.7;
-      double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 160.0 : 200.0;
-      double zetaOrientationXY = runningOnRealRobot ? 0.4 : 0.4;
+      double kpXYOrientation = runningOnRealRobot ? 100.0 : 300.0; //100
+      double kpZOrientation = runningOnRealRobot ? 160.0 : 200.0; //150
+      double zetaOrientationXY = runningOnRealRobot ? 0.4 : 0.4; 
       double zetaOrientationZ = runningOnRealRobot ? 0.7 : 0.7;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
@@ -537,7 +534,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSwingSingularityEscapeMultiplier()
    {
-      return -(runningOnRealRobot ? 50.0 : 200.0); //negative as knee axis are -y direction
+      return -(runningOnRealRobot ? 30.0 : 200.0); //negative as knee axis are -y direction
    }
 
    @Override
