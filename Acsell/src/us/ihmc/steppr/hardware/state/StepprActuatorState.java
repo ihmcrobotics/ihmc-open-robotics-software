@@ -135,6 +135,23 @@ public class StepprActuatorState
       int length = buffer.get() & 0xFF;
 
       buffer.mark();
+      
+      int calculatedChecksum = 0;
+      for(int i = 0; i < 58; i++)
+      {
+         calculatedChecksum = (calculatedChecksum + (buffer.get() & 0xFF)) & 0xFF;         
+      }
+      int checksum = buffer.get() & 0xFF;
+      
+      @SuppressWarnings("unused")
+      int unused = buffer.get();
+      
+      if (calculatedChecksum != checksum)
+      {
+         checksumFailures.increment();
+         return;
+      }
+      buffer.reset();
 
       // Only one format is defined for now
       @SuppressWarnings("unused")
@@ -171,27 +188,11 @@ public class StepprActuatorState
          }
       }
 
-      int checksumOffset = buffer.position();
-      buffer.reset();
-      checksumOffset -= buffer.position();
 
-      int calculatedChecksum = 0;
-      for (int i = 0; i < checksumOffset; i++)
-      {
-         calculatedChecksum = (calculatedChecksum + (buffer.get() & 0xFF)) & 0xFF;
-      }
+      checksum = buffer.get() & 0xFF;
 
-      int checksum = buffer.get() & 0xFF;
+      unused = buffer.get();
 
-      @SuppressWarnings("unused")
-      int unused = buffer.get();
-
-      if (calculatedChecksum != checksum)
-      {
-         checksumFailures.increment();
-//         throw new RuntimeException(registry.getName() + ": Checksum failure. Frame size: " + checksumOffset + ". Expected: " + calculatedChecksum
-//               + ", received " + checksum);
-      }
 
    }
 

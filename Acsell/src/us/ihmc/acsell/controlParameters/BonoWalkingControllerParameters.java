@@ -384,12 +384,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
-      double kp = 100.0;
-      double zeta = 0.8;
+      double kp = runningOnRealRobot ? 40.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.7 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = Double.POSITIVE_INFINITY;
-      double maxJerk = Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
@@ -517,12 +517,14 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDefaultTransferTime()
    {
+      if(runningOnRealRobot) return 1.5;
       return 0.25; // 1.5; //
    }
 
    @Override
    public double getDefaultSwingTime()
    {
+      if(runningOnRealRobot) return 1.5;
       return 0.6; // 1.5; //
    }
 
@@ -622,7 +624,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getContactThresholdForce()
    {
-      return 5.0;
+      return 30.0;
    }
    
    @Override

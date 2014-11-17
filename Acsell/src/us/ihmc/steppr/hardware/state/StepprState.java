@@ -108,7 +108,7 @@ public class StepprState
       StepprActuatorState rightFootSensorState = actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT);
       double rightForce0 = ((PressureSensor) rightFootSensorState.getSlowSensor(11)).getValue();
       double rightForce1 = ((PressureSensor) rightFootSensorState.getSlowSensor(12)).getValue();
-      footWrenches.get(RobotSide.RIGHT).set(5, rightForce0 + rightForce1);
+      footWrenches.get(RobotSide.RIGHT).set(5, 2.0 * rightForce1);// rightForce0 + rightForce1);
       
       
       
