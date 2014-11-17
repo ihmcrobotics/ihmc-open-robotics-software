@@ -1,11 +1,13 @@
 package us.ihmc.acsell.controlParameters;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class BonoStateEstimatorParameters implements StateEstimatorParameters
 {
@@ -13,27 +15,9 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
 
    private final double estimatorDT;
 
-   private final boolean useKinematicsBasedStateEstimator = true;
-   private final boolean assumePerfectIMU = true;
-
    private final double jointVelocitySlopTimeForBacklashCompensation;
 
-   private final double jointPositionFilterFrequencyHz;
-   private final double jointVelocityFilterFrequencyHz;
-   private final double orientationFilterFrequencyHz;
-   private final double angularVelocityFilterFrequencyHz;
-   private final double linearAccelerationFilterFrequencyHz;
-
-   // State Estimator Filter Parameters
-   private final double pointVelocityXYMeasurementStandardDeviation;
-   private final double pointVelocityZMeasurementStandardDeviation;
-
-   private final double pointPositionXYMeasurementStandardDeviation;
-   private final double pointPositionZMeasurementStandardDeviation;
-
-   private final SensorFilterParameters sensorFilterParameters;
-
-   private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
+   private final double defaultFilterBreakFrequency;
 
    // private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
    // private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
@@ -49,67 +33,34 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
 
       this.estimatorDT = estimatorDT;
 
-      final double defaultFilterBreakFrequency;
-
-      if (!runningOnRealRobot)
-      {
-         defaultFilterBreakFrequency = Double.POSITIVE_INFINITY;
-      }
-      else
-      {
-         defaultFilterBreakFrequency = 16.0; //50.0;
-      }
-
-      jointPositionFilterFrequencyHz = defaultFilterBreakFrequency;
-      jointVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
-      orientationFilterFrequencyHz = defaultFilterBreakFrequency;
-      angularVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
-      linearAccelerationFilterFrequencyHz = defaultFilterBreakFrequency;
-
+      defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
       jointVelocitySlopTimeForBacklashCompensation = 0.06;
-
-      pointVelocityXYMeasurementStandardDeviation = 2.0;
-      pointVelocityZMeasurementStandardDeviation = 2.0;
-
-      pointPositionXYMeasurementStandardDeviation = 0.1;
-      pointPositionZMeasurementStandardDeviation = 0.1;
-
-      boolean useTwoPolesForIMUFiltering = false;
-      boolean doFiniteDifferenceForJointVelocities = true;
-
+      
       doElasticityCompensation = false;
       defaultJointStiffness = Double.POSITIVE_INFINITY;
-
-      sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
-            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, doElasticityCompensation, defaultJointStiffness, jointSpecificStiffness);
-
-      pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
-            pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
    }
 
    @Override
-   public SensorFilterParameters getSensorFilterParameters()
+   public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      return sensorFilterParameters;
-   }
+      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", defaultFilterBreakFrequency);
+      Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
 
-   @Override
-   public boolean getAssumePerfectIMU()
-   {
-      return assumePerfectIMU;
-   }
+      DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
 
-   @Override
-   public boolean useKinematicsBasedStateEstimator()
-   {
-      return useKinematicsBasedStateEstimator;
-   }
+      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
+      if (doElasticityCompensation)
+         sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
 
-   @Override
-   public PointMeasurementNoiseParameters getPointMeasurementNoiseParameters()
-   {
-      return pointMeasurementNoiseParameters;
+      sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, false);
+      sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+
+      sensorProcessing.addOrientationAlphaFilter(orientationAlphaFilter, false);
+      sensorProcessing.addAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
+      sensorProcessing.addLinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
    }
 
    @Override
@@ -176,6 +127,12 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public double getPelvisLinearVelocityFusingFrequency()
    {
       return 0.4261; // alpha = 0.992 with dt = 0.003
+   }
+
+   @Override
+   public double getPelvisVelocityBacklashSlopTime()
+   {
+      return jointVelocitySlopTimeForBacklashCompensation;
    }
 
    @Override
