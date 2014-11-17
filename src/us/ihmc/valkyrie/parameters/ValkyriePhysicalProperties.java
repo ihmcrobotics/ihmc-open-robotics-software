@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.paramaters;
+package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
