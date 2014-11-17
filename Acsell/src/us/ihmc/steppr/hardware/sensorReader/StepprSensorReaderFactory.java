@@ -1,13 +1,10 @@
 package us.ihmc.steppr.hardware.sensorReader;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -27,15 +24,12 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
    private StepprSensorReader sensorReader;
 
    private final DRCRobotSensorInformation sensorInformation;
-   private final SensorFilterParameters sensorFilterParameters;
-   private final SensorNoiseParameters sensorNoiseParameters;
-
+   private final StateEstimatorParameters stateEstimatorParameters;
+   
    public StepprSensorReaderFactory(DRCRobotModel robotModel)
    {
       sensorInformation = robotModel.getSensorInformation();
-      StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
-      sensorNoiseParameters = stateEstimatorParameters.getSensorNoiseParameters();
-      sensorFilterParameters = stateEstimatorParameters.getSensorFilterParameters();
+      stateEstimatorParameters = robotModel.getStateEstimatorParameters();
    }
 
    @Override
@@ -44,23 +38,18 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
    {
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      HashMap<String, OneDoFJoint> allJoints = new HashMap<String, OneDoFJoint>();
       for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
       {
          if (joint instanceof OneDoFJoint)
          {
             OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-            stateEstimatorSensorDefinitions.addJointPositionSensorDefinition(oneDoFJoint);
-            stateEstimatorSensorDefinitions.addJointVelocitySensorDefinition(oneDoFJoint);
-            allJoints.put(oneDoFJoint.getName(), oneDoFJoint);
+            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
          }
       }
 
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
-         stateEstimatorSensorDefinitions.addOrientationSensorDefinition(imuDefinition);
-         stateEstimatorSensorDefinitions.addAngularVelocitySensorDefinition(imuDefinition);
-         stateEstimatorSensorDefinitions.addLinearAccelerationSensorDefinition(imuDefinition);
+         stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
       }
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
@@ -69,7 +58,7 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
       }
 
       sensorReader = new StepprSensorReader(stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, sensorInformation,
-            sensorFilterParameters, sensorNoiseParameters, parentRegistry);
+            stateEstimatorParameters, parentRegistry);
 
    }
 
