@@ -9,7 +9,7 @@ fi
 LOGDIR=$1
 LOGVIZDIR=$HOME/bin/logviz
 CLASSES=$LOGVIZDIR/classes:`echo $LOGVIZDIR/LogVisualizer_lib/*jar|tr ' ' ':'`
-WS=$HOME/workspace/
+WS=/home/unknownid/Workspaces/ValkyrieComputer/
 
 echo "****************************************************************************************************"
 if [[ $LOGDIR == *Valkyrie* ]];then
