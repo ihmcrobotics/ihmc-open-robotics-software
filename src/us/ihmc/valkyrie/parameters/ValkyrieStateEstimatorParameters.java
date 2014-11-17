@@ -1,11 +1,14 @@
 package us.ihmc.valkyrie.parameters;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ValkyrieStateEstimatorParameters implements StateEstimatorParameters
 {
@@ -13,12 +16,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
    private final double estimatorDT;
 
-   private final boolean useKinematicsBasedStateEstimator = true;
-   private final boolean assumePerfectIMU = true;
-
    private final double kinematicsPelvisLinearVelocityFilterFreqInHertz;
    private final double kinematicsPelvisPositionFilterFreqInHertz;
-   
+
    private final double jointVelocitySlopTimeForBacklashCompensation;
 
    private final double jointPositionFilterFrequencyHz;
@@ -26,20 +26,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double orientationFilterFrequencyHz;
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
-
-   // State Estimator Filter Parameters
-   private final double pointVelocityXYMeasurementStandardDeviation;
-   private final double pointVelocityZMeasurementStandardDeviation;
-
-   private final double pointPositionXYMeasurementStandardDeviation;
-   private final double pointPositionZMeasurementStandardDeviation;
-
-   private final boolean useTwoPolesForIMUFiltering;
-   private final boolean doFiniteDifferenceForJointVelocities;
-
-   private final SensorFilterParameters sensorFilterParameters;
-
-   private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
 //   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
 //   private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
@@ -56,59 +42,46 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       this.estimatorDT = estimatorDT;
 
       jointPositionFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
-      jointVelocityFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
 
       orientationFilterFrequencyHz        = 50.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       angularVelocityFilterFrequencyHz    = 50.0; //30.0; //30.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       linearAccelerationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      jointVelocitySlopTimeForBacklashCompensation = 0.06; //0.03;
-
-      pointVelocityXYMeasurementStandardDeviation = 2.0;
-      pointVelocityZMeasurementStandardDeviation  = 2.0;
-
-      pointPositionXYMeasurementStandardDeviation = 0.1;
-      pointPositionZMeasurementStandardDeviation  = 0.1;
-
-      useTwoPolesForIMUFiltering = false; //true; //runningOnRealRobot;
-      doFiniteDifferenceForJointVelocities = false;
+      jointVelocitySlopTimeForBacklashCompensation = 0.07;
 
       doElasticityCompensation = runningOnRealRobot;
-      defaultJointStiffness = 10000; //40000.0; //Double.POSITIVE_INFINITY; 
+      defaultJointStiffness = 10000; //40000.0; //Double.POSITIVE_INFINITY;
 
-      sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
-            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, doElasticityCompensation, defaultJointStiffness, jointSpecificStiffness);
-
-      pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
-            pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
-      
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
       kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0; //16.0;
    }
 
    @Override
-   public SensorFilterParameters getSensorFilterParameters()
+   public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      return sensorFilterParameters;
-   }
+      YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-   @Override
-   public boolean getAssumePerfectIMU()
-   {
-      return assumePerfectIMU;
-   }
+      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", jointPositionFilterFrequencyHz);
+      Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
+      DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
+      jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
-   @Override
-   public boolean useKinematicsBasedStateEstimator()
-   {
-      return useKinematicsBasedStateEstimator;
-   }
+      DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
+      DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
+      DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
 
-   @Override
-   public PointMeasurementNoiseParameters getPointMeasurementNoiseParameters()
-   {
-      return pointMeasurementNoiseParameters;
+      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
+      if (doElasticityCompensation)
+         sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
+
+      sensorProcessing.computeJointVelocityWithBacklashCompensator(jointVelocityAlphaFilter, jointVelocitySlopTime, false);
+      sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+
+      sensorProcessing.addOrientationAlphaFilter(orientationAlphaFilter, false);
+      sensorProcessing.addAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
+      sensorProcessing.addLinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
    }
 
    @Override
@@ -134,7 +107,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    {
       return kinematicsPelvisPositionFilterFreqInHertz;
    }
-   
+
    @Override
    public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
    {
@@ -175,6 +148,12 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getPelvisLinearVelocityFusingFrequency()
    {
       return 0.4261; // alpha = 0.992 with dt = 0.003
+   }
+
+   @Override
+   public double getPelvisVelocityBacklashSlopTime()
+   {
+      return jointVelocitySlopTimeForBacklashCompensation;
    }
 
    @Override

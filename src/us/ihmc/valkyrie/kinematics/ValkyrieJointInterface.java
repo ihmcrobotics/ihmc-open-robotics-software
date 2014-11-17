@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.kinematics;
 
 public interface ValkyrieJointInterface
 {
-
    public abstract void setPosition(double q);
 
    public abstract void setVelocity(double qd);
@@ -40,5 +39,4 @@ public interface ValkyrieJointInterface
    public abstract void setValidationVelocity(double velocityFromJacobian);
    
    public abstract double getValidationVelocity();
-
 }
