@@ -1,22 +1,10 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
-public interface StateEstimatorParameters
+public interface StateEstimatorParameters extends SensorProcessingConfiguration
 {
    public abstract boolean isRunningOnRealRobot();
    
-   public abstract SensorFilterParameters getSensorFilterParameters();
-
-   public abstract boolean getAssumePerfectIMU();
-
-   public abstract boolean useKinematicsBasedStateEstimator();
-
-   public abstract PointMeasurementNoiseParameters getPointMeasurementNoiseParameters();
-   
-   public abstract SensorNoiseParameters getSensorNoiseParameters();
-
    public abstract double getEstimatorDT();
    
    public abstract boolean trustCoPAsNonSlippingContactPoint();
@@ -35,6 +23,7 @@ public interface StateEstimatorParameters
 
    public abstract double getPelvisPositionFusingFrequency();
    public abstract double getPelvisLinearVelocityFusingFrequency();
+   public abstract double getPelvisVelocityBacklashSlopTime();
    
    public abstract double getDelayTimeForTrustingFoot();
    

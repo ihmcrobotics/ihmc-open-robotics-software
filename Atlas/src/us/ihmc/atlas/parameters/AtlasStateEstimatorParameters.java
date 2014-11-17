@@ -1,14 +1,17 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 {
@@ -16,30 +19,9 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
    private final double estimatorDT;
 
-   private final boolean useKinematicsBasedStateEstimator = true;
-   private final boolean assumePerfectIMU = true;
-
    private final double jointVelocitySlopTimeForBacklashCompensation;
 
-   private final double jointPositionFilterFrequencyHz;
-   private final double jointVelocityFilterFrequencyHz;
-   private final double orientationFilterFrequencyHz;
-   private final double angularVelocityFilterFrequencyHz;
-   private final double linearAccelerationFilterFrequencyHz;
-
-   // State Estimator Filter Parameters
-   private final double pointVelocityXYMeasurementStandardDeviation;
-   private final double pointVelocityZMeasurementStandardDeviation;
-
-   private final double pointPositionXYMeasurementStandardDeviation;
-   private final double pointPositionZMeasurementStandardDeviation;
-
-   private final boolean useTwoPolesForIMUFiltering;
-   private final boolean doFiniteDifferenceForJointVelocities;
-
-   private final SensorFilterParameters sensorFilterParameters;
-
-   private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
+   private final double defaultFilterBreakFrequency;
 
    // private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
    // private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
@@ -55,33 +37,9 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
       this.estimatorDT = estimatorDT;
 
-      final double defaultFilterBreakFrequency;
-
-      if (!runningOnRealRobot)
-      {
-         defaultFilterBreakFrequency = Double.POSITIVE_INFINITY;
-      }
-      else
-      {
-         defaultFilterBreakFrequency = 16.0;
-      }
-
-      jointPositionFilterFrequencyHz = defaultFilterBreakFrequency;
-      jointVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
-      orientationFilterFrequencyHz = defaultFilterBreakFrequency;
-      angularVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
-      linearAccelerationFilterFrequencyHz = defaultFilterBreakFrequency;
+      defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
 
       jointVelocitySlopTimeForBacklashCompensation = 0.03;
-
-      pointVelocityXYMeasurementStandardDeviation = 2.0;
-      pointVelocityZMeasurementStandardDeviation = 2.0;
-
-      pointPositionXYMeasurementStandardDeviation = 0.1;
-      pointPositionZMeasurementStandardDeviation = 0.1;
-
-      useTwoPolesForIMUFiltering = false;
-      doFiniteDifferenceForJointVelocities = false;
 
       doElasticityCompensation = runningOnRealRobot;
       defaultJointStiffness = 10000.0;
@@ -89,43 +47,39 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       {
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);
       }
-
-      sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
-            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, doElasticityCompensation, defaultJointStiffness, jointSpecificStiffness);
-
-      pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
-            pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
    }
 
    @Override
-   public boolean getAssumePerfectIMU()
+   public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      return assumePerfectIMU;
-   }
+      YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-   @Override
-   public boolean useKinematicsBasedStateEstimator()
-   {
-      return useKinematicsBasedStateEstimator;
-   }
+      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", defaultFilterBreakFrequency);
+      Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
+      jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
-   @Override
-   public PointMeasurementNoiseParameters getPointMeasurementNoiseParameters()
-   {
-      return pointMeasurementNoiseParameters;
+      DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
+
+      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
+      if (doElasticityCompensation)
+         sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
+
+      sensorProcessing.computeJointVelocityWithBacklashCompensator(jointVelocityAlphaFilter, jointVelocitySlopTime, false);
+      sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+
+      sensorProcessing.addOrientationAlphaFilter(orientationAlphaFilter, false);
+      sensorProcessing.addAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
+      sensorProcessing.addLinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
    }
 
    @Override
    public SensorNoiseParameters getSensorNoiseParameters()
    {
       return sensorNoiseParameters;
-   }
-
-   @Override
-   public SensorFilterParameters getSensorFilterParameters()
-   {
-      return sensorFilterParameters;
    }
 
    @Override
@@ -186,6 +140,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    public double getPelvisLinearVelocityFusingFrequency()
    {
       return 0.4261; // alpha = 0.992 with dt = 0.003
+   }
+
+   @Override
+   public double getPelvisVelocityBacklashSlopTime()
+   {
+      return jointVelocitySlopTimeForBacklashCompensation;
    }
 
    @Override

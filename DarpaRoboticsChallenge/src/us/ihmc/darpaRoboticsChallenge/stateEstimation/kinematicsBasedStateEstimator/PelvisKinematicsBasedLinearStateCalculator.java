@@ -180,10 +180,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
       alphaRootJointLinearVelocityNewTwist.set(alpha);
    }
    
-   public void setPelvisLinearVelocityBacklashParameters(double alphaFilter, double sloptime)
+   public void setPelvisLinearVelocityBacklashParameters(double alphaFilter, double slopTime)
    {
       alphaRootJointLinearVelocityBacklashKinematics.set(alphaFilter);
-      slopTimeRootJointLinearVelocityBacklashKinematics.set(sloptime);
+      slopTimeRootJointLinearVelocityBacklashKinematics.set(slopTime);
    }
 
    public void setAlphaCenterOfPressure(double alphaFilter)

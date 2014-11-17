@@ -3,9 +3,10 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.ProcessingYoVariable;
 
 
-public class ElasticityCompensatorYoVariable extends DoubleYoVariable
+public class ElasticityCompensatorYoVariable extends DoubleYoVariable implements ProcessingYoVariable
 {
    private final DoubleYoVariable stiffness;
    private final DoubleYoVariable rawJointPosition;
