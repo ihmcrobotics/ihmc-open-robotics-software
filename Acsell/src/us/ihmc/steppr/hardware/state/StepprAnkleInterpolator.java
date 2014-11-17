@@ -1,6 +1,5 @@
 package us.ihmc.steppr.hardware.state;
 
-
 public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 {
    //      private static final double px[] = { 0.000000000009934, -1.269023940640927, 1.269023940648429, -0.020516021439826, 0.020516020934548, 0.000000000508670,
@@ -27,21 +26,31 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    private static final double pJitY[] = { 0.465442714987602, -0.079404498198185, 0.091522714637596, -0.239129834635615, 0.040327656123728, 0.141924052147264,
          -0.130148712431276, 0.342409832258836, -0.315199115178924, 0.111764662233772 };
 
-   private static final int N = 6; // Cable reduction of pulleys
+   private static final double pM1[] = { 0.001637333497514, 2.363024415727514, 6.448426531047804, 0.209647991746190, -0.132578850323121, -0.102263276506052,
+         -0.223803048871049, 0.764689039287297, 0.459191580065332, 0.349362854084994 };
+   
+   private static final double pM2[] = { 0.001637333371246, -2.363024413970044, 6.448426532362931, 0.209647993650533, -0.132578850320880, 0.102263276373644,
+         0.223803036060187, 0.764689036580238, -0.459191581057666, 0.349362851648649 };
 
+   private static final int N = 6; // Cable reduction of pulleys
    // this returns the value a 2D cubic polynomial with given parameters p
    // the m1,m2 inputs are the motor1 and 2 pulley angles
-   private static double CubicApprox(double p[], double m1, double m2)
+   private static double ScaledCubicApprox(double p[], double m1, double m2)
    {
 
       m1 /= N; //parameters were given for pulley angle not motor angle, corrected here
       m2 /= N; //parameters were given for pulley angle not motor angle, corrected here
 
+      return CubicApprox(p, m1, m2);
+
+   }
+
+   private static double CubicApprox(double[] p, double m1, double m2)
+   {
       double val = p[0] + p[1] * m1 + p[2] * m2 + p[3] * m1 * m1 + p[4] * m2 * m2 + p[5] * m1 * m2 + p[6] * m1 * m1 * m1 + p[7] * m1 * m1 * m2 + p[8] * m1 * m2
             * m2 + p[9] * m2 * m2 * m2;
 
       return val;
-
    }
 
    //This should return a 1D array version of the Jacobian inverse transpose matrix for the linkage
@@ -50,10 +59,10 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    private static void JacobianInverseTranspose(double[] Jit, double m1, double m2)
    {
 
-      Jit[0] = CubicApprox(pJitX, m1, m2); //Jit11
-      Jit[1] = CubicApprox(pJitY, m1, m2); //Jit12
-      Jit[2] = -CubicApprox(pJitX, m2, m1); //Jit21
-      Jit[3] = CubicApprox(pJitY, m2, m1); //Jit22
+      Jit[0] = ScaledCubicApprox(pJitX, m1, m2); //Jit11
+      Jit[1] = ScaledCubicApprox(pJitY, m1, m2); //Jit12
+      Jit[2] = -ScaledCubicApprox(pJitX, m2, m1); //Jit21
+      Jit[3] = ScaledCubicApprox(pJitY, m2, m1); //Jit22
 
    }
 
@@ -70,14 +79,14 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    private final double[] Jit = new double[4];
    private double qAnkleX, qAnkleY;
    private double qdAnkleX, qdAnkleY;
-   
+
    private double tauRightActuator, tauLeftActuator;
 
    @Override
    public void updateAnkleState(double motorAngleRight, double motorAngleLeft, double motorVelocityRight, double motorVelocityLeft)
    {
-      qAnkleX = CubicApprox(px, motorAngleRight, motorAngleLeft);
-      qAnkleY = CubicApprox(py, motorAngleRight, motorAngleLeft);
+      qAnkleX = ScaledCubicApprox(px, motorAngleRight, motorAngleLeft);
+      qAnkleY = ScaledCubicApprox(py, motorAngleRight, motorAngleLeft);
 
       JacobianInverseTranspose(Jit, motorAngleRight, motorAngleLeft);
 
@@ -117,7 +126,18 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       tauRightActuator = (Jit[0] * tauDesiredAnkleX + Jit[1] * tauDesiredAnkleY) / N; //this is desired torque at motor 1
       tauLeftActuator = (Jit[2] * tauDesiredAnkleX + Jit[3] * tauDesiredAnkleY) / N; //this is desired torque at motor 2
 
-      
+   }
+   
+   @Override
+   public double calculateMotor1Angle(double ankleX, double ankleY)
+   {
+      return CubicApprox(pM1, ankleX, ankleY);
+   }
+
+   @Override
+   public double calculateMotor2Angle(double ankleX, double ankleY)
+   {
+      return CubicApprox(pM2, ankleX, ankleY);
    }
 
    @Override

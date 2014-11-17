@@ -20,4 +20,8 @@ public interface StepprAnkleAngleCalculator
    
    public double getRatio();
 
+   double calculateMotor1Angle(double ankleX, double ankleY);
+
+   double calculateMotor2Angle(double ankleX, double ankleY);
+
 }

@@ -51,6 +51,8 @@ public class StepprActuatorState
    private final int[] slowSensorSlotIDs = new int[7];
    
    private final LongYoVariable checksumFailures;
+   
+   private final DoubleYoVariable motorAngleOffset;
 
    public StepprActuatorState(String name, double motorKt, YoVariableRegistry parentRegistry)
    {
@@ -70,6 +72,8 @@ public class StepprActuatorState
 
       this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
 
+      this.motorAngleOffset = new DoubleYoVariable(name + "MotorAngleOffset", registry);
+      
       this.checksumFailures = new LongYoVariable("checksumFailures", registry);
       
       createSlowSensors(name);
@@ -166,7 +170,7 @@ public class StepprActuatorState
       inphaseCompositeStatorCurrent.set(buffer.getFloat());
       quadratureCompositeStatorCurrent.set(buffer.getFloat());
       controlTarget.set(buffer.getFloat());
-      motorEncoderPosition.set(buffer.getFloat());
+      motorEncoderPosition.set(buffer.getFloat() + motorAngleOffset.getDoubleValue());
       motorVelocityEstimate.set(buffer.getFloat());
 
       jointEncoderPosition.set(buffer.getFloat());
@@ -196,6 +200,15 @@ public class StepprActuatorState
 
    }
 
+   public void updateCanonicalAngle(double angle, double clocking)
+   {
+      double delta = angle - (motorEncoderPosition.getDoubleValue() - motorAngleOffset.getDoubleValue());
+      
+      double offset = Math.round(delta / clocking) * clocking;
+      motorAngleOffset.set(offset);
+      
+   }
+   
    public double getMotorPosition()
    {
       return motorEncoderPosition.getDoubleValue();
