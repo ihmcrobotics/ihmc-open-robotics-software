@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.paramaters;
+package us.ihmc.valkyrie.parameters;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

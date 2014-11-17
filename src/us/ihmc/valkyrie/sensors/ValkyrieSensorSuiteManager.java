@@ -23,7 +23,7 @@ import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {

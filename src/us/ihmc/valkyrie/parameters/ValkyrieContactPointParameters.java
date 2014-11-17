@@ -1,9 +1,9 @@
-package us.ihmc.valkyrie.paramaters;
+package us.ihmc.valkyrie.parameters;
 
-import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footChamferX;
-import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footChamferY;
-import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footLength;
-import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footWidth;
+import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footChamferX;
+import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footChamferY;
+import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footLength;
+import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footWidth;
 
 import java.util.ArrayList;
 import java.util.List;
