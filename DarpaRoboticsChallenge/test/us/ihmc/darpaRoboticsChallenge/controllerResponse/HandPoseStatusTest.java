@@ -161,9 +161,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       RobotSide robotSide = RandomTools.generateRandomRobotSide(new Random());
 
-      HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(robotSide);
-
-      HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(robotSide);
+      final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(robotSide);
+      final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(robotSide);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
       hasSimulationBeenInitialized = true;
@@ -221,8 +220,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
          }
       });
 
-      HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(RobotSide.LEFT);
-      HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(RobotSide.RIGHT);
+      final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(RobotSide.LEFT);
+      final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(RobotSide.RIGHT);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
       hasSimulationBeenInitialized = true;
