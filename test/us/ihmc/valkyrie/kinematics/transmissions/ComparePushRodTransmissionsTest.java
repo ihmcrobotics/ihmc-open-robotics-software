@@ -11,7 +11,7 @@ import org.junit.Test;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
-import us.ihmc.valkyrie.kinematics.YoDesiredValkyrieJoint;
+import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -193,8 +193,8 @@ public class ComparePushRodTransmissionsTest
       actuatorData[1] = new DummyTurboDriver();
 
       ValkyrieJointInterface[] jointData = new ValkyrieJointInterface[2];
-      jointData[0] = new YoDesiredValkyrieJoint("joint0", registry);
-      jointData[1] = new YoDesiredValkyrieJoint("joint1", registry);
+      jointData[0] = new YoValkyrieJointWriter("joint0", registry);
+      jointData[1] = new YoValkyrieJointWriter("joint1", registry);
 
       double increment = 0.05;
 
@@ -351,8 +351,8 @@ public class ComparePushRodTransmissionsTest
       actuatorData[1] = new DummyTurboDriver();
 
       ValkyrieJointInterface[] jointData = new ValkyrieJointInterface[2];
-      jointData[0] = new YoDesiredValkyrieJoint("joint0", registry);
-      jointData[1] = new YoDesiredValkyrieJoint("joint1", registry);
+      jointData[0] = new YoValkyrieJointWriter("joint0", registry);
+      jointData[1] = new YoValkyrieJointWriter("joint1", registry);
 
       double topJoint = 0.5;
       double bottomJoint = -0.25;
