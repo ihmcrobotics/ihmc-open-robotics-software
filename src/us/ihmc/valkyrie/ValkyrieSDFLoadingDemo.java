@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
@@ -8,20 +9,22 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Created by dstephen on 2/7/14.
  */
 public class ValkyrieSDFLoadingDemo
 {
-   private static final boolean SHOW_ELLIPSOIDS = true;
+   private static final boolean SHOW_ELLIPSOIDS = false;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
 
    private SimulationConstructionSet scs;
 
@@ -36,8 +39,12 @@ public class ValkyrieSDFLoadingDemo
       {
          addIntertialEllipsoidsToVisualizer(valkyrieRobot);
       }
+      
+      if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
+         addJointAxis(valkyrieRobot);
 
       SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
+      
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
@@ -79,6 +86,20 @@ public class ValkyrieSDFLoadingDemo
       }
 
       return links;
+   }
+
+   public void addJointAxis(SDFRobot valkyrieRobot)
+   {
+
+      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDoFJoints()));
+      
+      for (OneDegreeOfFreedomJoint joint : joints)
+      {
+         Graphics3DObject linkGraphics = new Graphics3DObject();
+         linkGraphics.addCoordinateSystem(0.5);
+         linkGraphics.combine(joint.getLink().getLinkGraphics());
+         joint.getLink().setLinkGraphics(linkGraphics);
+      }
    }
 
    public static void main(String[] args)
