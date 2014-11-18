@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 public class SimulatedIMURawSensorReaderTest
 {
    private final RawSensors rawSensors = new RawSensors();
-   private final FullRobotModel fullRobotModel = new FullRobotModel();
+   private final TestingRobotModel fullRobotModel = new TestingRobotModel();
    private final RigidBody rigidBody = fullRobotModel.getBodyLink();
    private final ReferenceFrame bodyFrame = fullRobotModel.getBodyFrame();
    
@@ -291,7 +291,7 @@ public class SimulatedIMURawSensorReaderTest
       }
    }
 
-   private static class FullRobotModel
+   private static class TestingRobotModel
    {
       private final RigidBody elevator;
       private final RigidBody body;
@@ -308,7 +308,7 @@ public class SimulatedIMURawSensorReaderTest
       private final ReferenceFrame elevatorFrame;
       private final ReferenceFrame bodyFrame;
 
-      public FullRobotModel()
+      public TestingRobotModel()
       {
          worldFrame = ReferenceFrame.getWorldFrame();
          elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
