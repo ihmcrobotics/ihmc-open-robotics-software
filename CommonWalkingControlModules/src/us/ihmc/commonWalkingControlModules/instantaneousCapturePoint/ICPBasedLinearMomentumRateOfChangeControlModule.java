@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -33,7 +32,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort("capturePointInputPort");
    private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -60,25 +58,25 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
+      icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
       this.centerOfMassFrame = centerOfMassFrame;
       this.soleFrames = soleFrames;
-      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
+      visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.totalMass = totalMass;
-      this.centerOfMass = new FramePoint(centerOfMassFrame);
+      centerOfMass = new FramePoint(centerOfMassFrame);
       this.gravityZ = gravityZ;
-      this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       parentRegistry.addChild(registry);
-      momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
 
       // hide CoP since we won't be calculating it explicitly in this class
       visualizer.setDesiredCoP(new FramePoint2d(controlledCMP.getReferenceFrame(), Double.NaN, Double.NaN));
-      
+
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
 
    }
 
-      
+
+   @Override
    public void startComputation()
    {
       RobotSide supportSide = supportLegInputPort.getData();
@@ -102,10 +100,10 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
                                    desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
                                    capturePointData.getOmega0(), keepCmpInsideSupportPolygon, supportPolygon, swingSoleFrame);
-      
 
-      desiredCMP.changeFrame(this.controlledCMP.getReferenceFrame());
-      this.controlledCMP.set(desiredCMP);
+
+      desiredCMP.changeFrame(controlledCMP.getReferenceFrame());
+      controlledCMP.set(desiredCMP);
 
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCMP(desiredCMP);
@@ -119,25 +117,25 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       FrameVector linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
       linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
       linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
-      
+
       if (linearMomentumRateOfChange.containsNaN())
          throw new RuntimeException("linearMomentumRateOfChange = " + linearMomentumRateOfChange);
 
-      this.controlledCoMAcceleration.set(linearMomentumRateOfChange);
-      this.controlledCoMAcceleration.scale(1.0/totalMass);
+      controlledCoMAcceleration.set(linearMomentumRateOfChange);
+      controlledCoMAcceleration.scale(1.0/totalMass);
       momentumRateOfChangeData.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
    }
 
    private final FramePoint cmp3d = new FramePoint();
    private final FrameVector groundReactionForce = new FrameVector();
-   
+
    private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
-      
+
       visualizer.setPseudoCMP(cmp3d);
-      
+
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computeForce(groundReactionForce, centerOfMass, cmp3d, fZ);
       groundReactionForce.changeFrame(centerOfMassFrame);
@@ -148,49 +146,58 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double captureKiBleedoff,
          double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
-      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz, rateLimitCMP, accelerationLimitCMP);
+      icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz, rateLimitCMP, accelerationLimitCMP);
    }
 
+   @Override
    public void waitUntilComputationIsDone()
    {
       // empty
    }
-   
+
+   @Override
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
       controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
-   public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
+   @Override
+   public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
-      return momentumRateOfChangeOutputPort;
+      momentumRateOfChangeDataToPack.set(this.momentumRateOfChangeData);
    }
 
+   @Override
    public ControlFlowInputPort<BipedSupportPolygons> getBipedSupportPolygonsInputPort()
    {
       return bipedSupportPolygonsInputPort;
    }
 
+   @Override
    public ControlFlowInputPort<RobotSide> getSupportLegInputPort()
    {
       return supportLegInputPort;
    }
 
+   @Override
    public ControlFlowInputPort<CapturePointData> getCapturePointInputPort()
    {
       return capturePointInputPort;
    }
 
+   @Override
    public ControlFlowInputPort<CapturePointTrajectoryData> getDesiredCapturePointTrajectoryInputPort()
    {
       return desiredCapturePointTrajectoryInputPort;
    }
 
+   @Override
    public ControlFlowInputPort<Double> getDesiredCenterOfMassHeightAccelerationInputPort()
    {
       return desiredCenterOfMassHeightAccelerationInputPort;
    }
 
+   @Override
    public void initialize()
    {
 //    empty

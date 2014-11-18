@@ -1,37 +1,38 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.controlFlow.AbstractControlFlowElement;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 
-public class NullMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements MomentumRateOfChangeControlModule
+public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChangeControlModule
 {
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
+   private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    public NullMomentumRateOfChangeControlModule()
    {
-      MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(null);
+      momentumRateOfChangeData = new MomentumRateOfChangeData(null);
       momentumRateOfChangeData.setEmpty();
-      momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
    }
 
+   @Override
    public void startComputation()
    {
       // empty
    }
 
+   @Override
    public void waitUntilComputationIsDone()
    {
       // empty
    }
 
-   public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
+   @Override
+   public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
-      return momentumRateOfChangeOutputPort;
+      momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
    }
 
+   @Override
    public void initialize()
    {
-//    empty
+      // empty
    }
 }

@@ -50,6 +50,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final SideDependentList<MutableBoolean> initializeHandsInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
    private final SideDependentList<MutableBoolean> initializeFeetInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
 
+   private final MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(momentumBasedController.getCenterOfMassFrame());
+   
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -127,7 +129,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
       momentumRateOfChangeControlModule.startComputation();
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
-      MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
+      momentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 

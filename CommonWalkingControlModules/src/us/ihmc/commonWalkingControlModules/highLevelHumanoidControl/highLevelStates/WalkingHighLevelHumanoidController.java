@@ -211,6 +211,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final FootExplorationControlModule footExplorationControlModule;
 
+   private final MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(momentumBasedController.getCenterOfMassFrame());
+
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
@@ -1442,7 +1444,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       icpBasedMomentumRateOfChangeControlModule.startComputation();
       icpBasedMomentumRateOfChangeControlModule.waitUntilComputationIsDone();
-      MomentumRateOfChangeData momentumRateOfChangeData = icpBasedMomentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
+      icpBasedMomentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
 

@@ -47,7 +47,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = createInputPort("desiredPelvisOrientationInputPort");
    private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -96,7 +95,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       parentRegistry.addChild(registry);
-      momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
    }
 
    public void startComputation()
@@ -301,9 +299,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       return desiredPelvisOrientationInputPort;
    }
 
-   public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
+   public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
-      return momentumRateOfChangeOutputPort;
+      momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
    }
 
    public void initialize()
