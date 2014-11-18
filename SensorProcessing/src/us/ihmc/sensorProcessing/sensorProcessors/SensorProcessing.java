@@ -137,6 +137,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public void startComputation(long timestamp, long visionSensorTimestamp)
    {
       this.timestamp.set(timestamp);
+      this.visionSensorTimestamp.set(visionSensorTimestamp);
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
