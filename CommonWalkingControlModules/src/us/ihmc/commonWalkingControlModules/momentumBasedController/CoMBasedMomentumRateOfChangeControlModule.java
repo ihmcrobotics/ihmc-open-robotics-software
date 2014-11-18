@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -16,7 +15,6 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ControlFlowInputPort<FramePoint> desiredCenterOfMassInputPort = createInputPort("desiredCenterOfMassInputPort");
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort("momentumRateOfChangeOutputPort");
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -25,12 +23,11 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
    public CoMBasedMomentumRateOfChangeControlModule(double dt, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
            YoVariableRegistry parentRegistry)
    {
-      this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
       this.centerOfMassJacobian = centerOfMassJacobian;
       boolean visualizeCom=false;
-      this.comPositionController = new EuclideanPositionController("com", centerOfMassFrame, dt, visualizeCom, registry);
-      momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
+      comPositionController = new EuclideanPositionController("com", centerOfMassFrame, dt, visualizeCom, registry);
       parentRegistry.addChild(registry);
    }
 
@@ -38,7 +35,8 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
    {
       comPositionController.reset();
    }
-   
+
+   @Override
    public void startComputation()
    {
       FramePoint desiredCoM = desiredCenterOfMassInputPort.getData();
@@ -55,14 +53,16 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
       momentumRateOfChangeData.setLinearMomentumRateOfChange(output);
    }
 
+   @Override
    public void waitUntilComputationIsDone()
    {
 //    empty
    }
 
-   public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
+   @Override
+   public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
-      return momentumRateOfChangeOutputPort;
+      momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -80,6 +80,7 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
       return desiredCenterOfMassInputPort;
    }
 
+   @Override
    public void initialize()
    {
 //    empty
