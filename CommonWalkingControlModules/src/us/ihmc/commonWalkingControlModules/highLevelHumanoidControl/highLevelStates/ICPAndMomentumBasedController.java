@@ -36,7 +36,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-
 public class ICPAndMomentumBasedController
 {
    private static final boolean USE_CONSTANT_OMEGA0 = true;
@@ -61,7 +60,7 @@ public class ICPAndMomentumBasedController
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
-   
+
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
          CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, YoVariableRegistry parentRegistry)
@@ -96,7 +95,7 @@ public class ICPAndMomentumBasedController
       supportLeg = EnumYoVariable.create("supportLeg", "", RobotSide.class, registry, true);
 
       // TODO: Have local updatables, instead of adding them to the momentum based controller.
-      
+
       this.updatables.add(new Omega0Updater());
       this.updatables.add(new BipedSupportPolygonsUpdater());
       this.updatables.add(new CapturePointUpdater());
@@ -107,22 +106,21 @@ public class ICPAndMomentumBasedController
       {
          ArrayList<PlaneContactState> feetContactStates = new ArrayList<PlaneContactState>();
          momentumBasedController.getFeetContactStates(feetContactStates);
-//         Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
+         //         Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
          FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, yoGraphicsListRegistry, registry);
          momentumBasedController.addUpdatable(footPolygonVisualizer);
-         
-         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(),
-                                                     GraphicType.ROTATED_CROSS);
+
+         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
          yoGraphicsListRegistry.registerYoGraphic("Capture Point", capturePointViz);
          yoGraphicsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
       }
-      
+
       capturePointOffsetY.set(0.0);
    }
-   
+
    public void updateUpdatables(double time)
    {
-      for (int i=0; i<updatables.size(); i++)
+      for (int i = 0; i < updatables.size(); i++)
       {
          updatables.get(i).update(time);
       }
@@ -143,53 +141,52 @@ public class ICPAndMomentumBasedController
    private final FramePoint2d capturePoint2d = new FramePoint2d(worldFrame);
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d(worldFrame);
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d(worldFrame);
-   
+
    //
    private final DoubleYoVariable capturePointOffsetY = new DoubleYoVariable("capturePointOffsetY", registry);
    private final FrameVector2d capturePointOffsetHack2d = new FrameVector2d();
-   
+
    public void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(momentumBasedController.getCenterOfMassFrame());
       momentumBasedController.getCenterOfMassJacobian().packCenterOfMassVelocity(centerOfMassVelocity);
-      
+
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
 
       centerOfMassPosition2d.set(centerOfMassPosition.getX(), centerOfMassPosition.getY());
       centerOfMassVelocity2d.set(centerOfMassVelocity.getX(), centerOfMassVelocity.getY());
-      
+
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, getOmega0());
-      
+
       ReferenceFrame midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
       capturePointOffsetHack2d.setIncludingFrame(midFeetZUpFrame, 0.0, capturePointOffsetY.getDoubleValue());
       capturePointOffsetHack2d.changeFrame(capturePoint2d.getReferenceFrame());
       capturePoint2d.add(capturePointOffsetHack2d);
-      
+
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
    }
 
-
-//   private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>(new ArrayList<FramePoint>(), new ArrayList<FramePoint>());
+   //   private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>(new ArrayList<FramePoint>(), new ArrayList<FramePoint>());
    private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<PlaneContactState>();
-   
+
    protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-//         momentumBasedController.getContactPoints(bipedFeet.get(robotSide), footContactPoints.get(robotSide));
+         //         momentumBasedController.getContactPoints(bipedFeet.get(robotSide), footContactPoints.get(robotSide));
          footContactStates.put(robotSide, momentumBasedController.getContactState(bipedFeet.get(robotSide)));
       }
 
-//      bipedSupportPolygons.update(footContactPoints, true);
+      //      bipedSupportPolygons.update(footContactPoints, true);
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
 
       if (capturabilityBasedStatusProducer != null)
       {
          desiredICP.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInWorld();
-         
+
          // Checking if we are in double support or transfer state
          boolean inDoubleSupport = true;
 
@@ -221,13 +218,13 @@ public class ICPAndMomentumBasedController
          ReferenceFrame centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
          SpatialForceVector admissibleGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
 
-//       FrameVector force = admissibleDesiredGroundReactionForce.getFrameVectorCopy();
+         //       FrameVector force = admissibleDesiredGroundReactionForce.getFrameVectorCopy();
          FrameVector force = momentumBasedController.getAdmissibleDesiredGroundReactionForceCopy();
 
          force.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
          admissibleGroundReactionWrench.setLinearPart(force.getVector());
 
-//       FrameVector torque = admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
+         //       FrameVector torque = admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
          FrameVector torque = momentumBasedController.getAdmissibleDesiredGroundReactionTorqueCopy();
 
          torque.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
@@ -235,12 +232,11 @@ public class ICPAndMomentumBasedController
 
          SpatialForceVector gravitationalWrench = momentumBasedController.getGravitationalWrench();
          if (admissibleGroundReactionWrench.getLinearPartCopy().getZ() == 0.0)
-            admissibleGroundReactionWrench.set(gravitationalWrench);    // FIXME: hack to resolve circularity
+            admissibleGroundReactionWrench.set(gravitationalWrench); // FIXME: hack to resolve circularity
 
          omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
       }
    }
-
 
    private final class BipedSupportPolygonsUpdater implements Updatable
    {
@@ -250,7 +246,6 @@ public class ICPAndMomentumBasedController
       }
    }
 
-
    private class CapturePointUpdater implements Updatable
    {
       public void update(double time)
@@ -258,7 +253,6 @@ public class ICPAndMomentumBasedController
          computeCapturePoint();
       }
    }
-
 
    // TODO: Following has been added for big refactor. Need to be checked.
 
@@ -286,7 +280,7 @@ public class ICPAndMomentumBasedController
    {
       return desiredICP;
    }
-   
+
    public void getDesiredICP(FramePoint2d pointToPack)
    {
       this.desiredICP.getFrameTuple2d(pointToPack);
