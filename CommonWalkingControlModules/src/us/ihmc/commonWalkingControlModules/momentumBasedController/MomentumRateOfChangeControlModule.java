@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.controlFlow.ControlFlowElement;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 
-public interface MomentumRateOfChangeControlModule extends ControlFlowElement
+public interface MomentumRateOfChangeControlModule
 {
-   public abstract ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort();
+   public abstract void initialize();
+   public abstract void startComputation();
+   public abstract void waitUntilComputationIsDone();
+   public abstract void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack);
 }

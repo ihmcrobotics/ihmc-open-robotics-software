@@ -86,6 +86,7 @@ public class SimpleStanceController implements RobotController
    private final OneDoFJoint[] oneDoFJoints;
    private final SixDoFJoint rootJoint;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    public SimpleStanceController(SDFRobot robot, SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, double controlDT,
                                  InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
@@ -144,6 +145,9 @@ public class SimpleStanceController implements RobotController
       desiredPelvisForce = new YoFrameVector("desiredPelvisForce", rootJoint.getSuccessor().getBodyFixedFrame(), registry);
 
       spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootJoint.getPredecessor(), twistCalculator, gravityZ, true);
+      
+      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData.setEmpty();
    }
 
    private static MomentumOptimizationSettings createOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, double momentumWeight, double lambda, double wRho, double rhoMin)
@@ -216,7 +220,7 @@ public class SimpleStanceController implements RobotController
    private void controlLinearMomentum()
    {
       momentumRateOfChangeControlModule.startComputation();
-      MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
+      momentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       
       DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
