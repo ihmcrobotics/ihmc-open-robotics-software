@@ -50,6 +50,7 @@ root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_kny*false*fal
 root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_kny*false*false
 root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle*false*false
 root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle*false*false
+root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator*false*false
 root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing*false*false
 root.remotemain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch*false*false
 root.remotemain.DRCEstimatorThread.r_footStateEstimatorWrenchBasedFootSwitch*false*false

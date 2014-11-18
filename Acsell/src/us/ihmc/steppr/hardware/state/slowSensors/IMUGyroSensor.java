@@ -15,7 +15,7 @@ public class IMUGyroSensor implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      imuGyro.set(value);
+      imuGyro.set(((short)value));
    }
 
 }

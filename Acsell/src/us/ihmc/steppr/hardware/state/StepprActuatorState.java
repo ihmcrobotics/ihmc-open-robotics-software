@@ -3,8 +3,12 @@ package us.ihmc.steppr.hardware.state;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.steppr.hardware.state.slowSensors.BusVoltage;
 import us.ihmc.steppr.hardware.state.slowSensors.ControlMode;
+import us.ihmc.steppr.hardware.state.slowSensors.ControllerTemperature1;
+import us.ihmc.steppr.hardware.state.slowSensors.ControllerTemperature2;
 import us.ihmc.steppr.hardware.state.slowSensors.IMUAccelSensor;
 import us.ihmc.steppr.hardware.state.slowSensors.IMUGyroSensor;
 import us.ihmc.steppr.hardware.state.slowSensors.IMUMagSensor;
@@ -19,8 +23,6 @@ import us.ihmc.steppr.hardware.state.slowSensors.SensorMCUTime;
 import us.ihmc.steppr.hardware.state.slowSensors.StatorHalSwitches;
 import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensor;
 import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.steppr.hardware.state.slowSensors.ControllerTemperature1;
-import us.ihmc.steppr.hardware.state.slowSensors.ControllerTemperature2;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -126,6 +128,25 @@ public class StepprActuatorState
       slowSensors[28] = new BusVoltage(name, slowSensorRegistry);
       slowSensors[29] = new MotorTemperature(name, slowSensorRegistry);
       this.registry.addChild(slowSensorRegistry);
+   }
+   
+   public void getIMUAccelerationVector(Vector3d vectorToPack)
+   {
+      double x = ((IMUAccelSensor) slowSensors[18]).getValue();
+      double y = ((IMUAccelSensor) slowSensors[19]).getValue();
+      double z = ((IMUAccelSensor) slowSensors[20]).getValue();
+      vectorToPack.set(x, y, z);
+      vectorToPack.normalize();
+   }
+   
+   public void getIMUMagnetoVector(Vector3d vectorToPack)
+   {
+      double x = ((IMUMagSensor) slowSensors[24]).getValue();
+      double y = ((IMUMagSensor) slowSensors[25]).getValue();
+      double z = ((IMUMagSensor) slowSensors[26]).getValue();
+      vectorToPack.set(x, y, z);
+      vectorToPack.normalize();
+      
    }
 
    public void update(ByteBuffer buffer) throws IOException

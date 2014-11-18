@@ -76,7 +76,7 @@ public class StepprSingleThreadedController extends RealtimeThread
    private StepprSingleThreadedController(PriorityParameters priorityParameters, RobotVisualizer visualizer, StepprController stepprController, YoVariableRegistry registry)
    {
       super(priorityParameters);
-      this.state = new StepprState(registry);
+      this.state = new StepprState(0.001, registry);
       this.reader = new UDPStepprStateReader(state);
       
       this.visualizer = visualizer;
