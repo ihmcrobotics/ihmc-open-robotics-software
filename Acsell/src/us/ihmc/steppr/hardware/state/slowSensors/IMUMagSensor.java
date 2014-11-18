@@ -15,7 +15,12 @@ public class IMUMagSensor implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      imuMag.set(value);
+      imuMag.set(((short)value));
+   }
+
+   public double getValue()
+   {
+      return imuMag.getDoubleValue();
    }
 
 }

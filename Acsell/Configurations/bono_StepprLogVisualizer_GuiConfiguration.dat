@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseACurrentADTicks,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseBCurrentADTicks,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseCCurrentADTicks</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseACurrentADTicks,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseBCurrentADTicks,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorRawPhaseCCurrentADTicks</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightKneeActuator.rightKneeActuatorTauDesired,root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightHipYActuator.rightHipYActuatorTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightKneeActuator.rightKneeActuatorTauDesired,root.loggedmain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightHipYActuator.rightHipYActuatorTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isLeftFootTrusted,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isRightFootTrusted</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isLeftFootTrusted,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isRightFootTrusted</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorQuadtratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorPressureSensor0,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorPressureSensor1</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.powerDistribution.ADC1</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,7 +145,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorPressureSensor0,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorPressureSensor1</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.SlowSensors.leftHipXActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -157,9 +157,69 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.SlowSensors.rightHipXActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce1</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.r_footStateEstimatorWrenchBasedFootSwitch.r_footStateEstimatorFootForceMag</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch.l_footStateEstimatorFootForceMag</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce0,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.checksumFailures</Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
+		<GraphConfiguration>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -176,117 +236,19 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>2</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>1910.0, 50.0</WindowLocation>
-<WindowSize>1880.0, 1115.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorStrainSensor1,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorStrainSensor1,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.SlowSensors.leftAnkleLeftActuatorStrainSensor1,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorStrainSensor1</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.xsens.accelX,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.xsens.accelY,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.xsens.accelZ</Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.SlowSensors.torsoZActuatorIMUAccelX,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.SlowSensors.torsoZActuatorIMUAccelY,root.loggedmain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.SlowSensors.torsoZActuatorIMUAccelZ</Variables>
-		<GraphConfiguration>
-			<Name>config17</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>0</ScreenID>
-<WindowLocation>2722.0, 373.0</WindowLocation>
-<WindowSize>804.0, 533.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch.l_footStateEstimatorForceX</Variables>
-		<GraphConfiguration>
-			<Name>config18</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config20</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config21</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window2>
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,Plotter Legend,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.683602811395187</Camera X>
- <Camera Y>-2.5275993682828943</Camera Y>
- <Camera Z>0.010020087624635354</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

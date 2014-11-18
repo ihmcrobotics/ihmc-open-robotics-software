@@ -56,7 +56,7 @@ public class StepprSensorReader implements SensorReader
          RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DRCRobotSensorInformation sensorInformation,
          StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
-      state = new StepprState(registry);
+      state = new StepprState(stateEstimatorParameters.getEstimatorDT(), registry);
       reader = new UDPStepprStateReader(state);
 
       sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);

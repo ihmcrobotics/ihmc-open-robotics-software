@@ -92,8 +92,8 @@ public class StepprAnkleJointState
       
       if(setOffset.getBooleanValue())
       {
-         rightActuator.updateCanonicalAngle(motorAngle[0], 2.0 * Math.PI / 6.0);
-         leftActuator.updateCanonicalAngle(motorAngle[1], 2.0 * Math.PI / 6.0);
+         rightActuator.updateCanonicalAngle(q_m_calc_rightActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);
+         leftActuator.updateCanonicalAngle(q_m_calc_leftActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);
          setOffset.set(false);
       }
    }

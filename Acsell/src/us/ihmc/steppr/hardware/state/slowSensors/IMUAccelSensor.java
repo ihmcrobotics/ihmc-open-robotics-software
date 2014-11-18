@@ -15,7 +15,12 @@ public class IMUAccelSensor implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      imuAccel.set(value);
+      imuAccel.set(((short)value));
+   }
+
+   public double getValue()
+   {
+      return imuAccel.getDoubleValue();
    }
 
 }
