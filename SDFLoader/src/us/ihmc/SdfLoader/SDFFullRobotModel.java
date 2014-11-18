@@ -6,12 +6,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -36,6 +32,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -59,8 +56,6 @@ public class SDFFullRobotModel implements FullRobotModel
    private final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
    private final SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists = SideDependentList.createListOfEnumMaps(LegJointName.class);
-   private final RigidBody[] upperBody;
-   private final RigidBody[] lowerBody;
 
    private final RigidBody pelvis;
    private RigidBody chest;
@@ -109,31 +104,6 @@ public class SDFFullRobotModel implements FullRobotModel
          addJointsRecursively(sdfJoint, pelvis);
       }
       
-      Set<InverseDynamicsJoint> excludeJointsForUpperBody = new LinkedHashSet<InverseDynamicsJoint>();
-      Set<InverseDynamicsJoint> excludeJointsForLowerBody = new LinkedHashSet<InverseDynamicsJoint>();
-
-      for (InverseDynamicsJoint joint : pelvis.getChildrenJoints())
-      {
-         String name = joint.getName();
-         JointRole role = sdfJointNameMap.getJointRole(name);
-         if(role == null)
-            continue;
-         switch (role)
-         {
-         case LEG:
-            excludeJointsForUpperBody.add(joint);
-            break;
-         case SPINE:
-            excludeJointsForLowerBody.add(joint);
-            break;
-         default:
-            throw new RuntimeException("Assuming that the leg or the spine are connected to the pelvis");
-         }
-      }
-
-      lowerBody = ScrewTools.computeSubtreeSuccessors(excludeJointsForLowerBody, elevator);
-      upperBody = ScrewTools.computeSubtreeSuccessors(excludeJointsForUpperBody, pelvis);
-
       for(RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
@@ -347,91 +317,127 @@ public class SDFFullRobotModel implements FullRobotModel
 
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RobotSpecificJointNames getRobotSpecificJointNames()
    {
       return sdfJointNameMap;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void updateFrames()
    {
       elevator.updateFramesRecursively();
    }
 
+   /** {@inheritDoc} */
+   @Override
    public ReferenceFrame getWorldFrame()
    {
       return worldFrame;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public ReferenceFrame getElevatorFrame()
    {
       return elevator.getBodyFixedFrame();
    }
 
+   /** {@inheritDoc} */
+   @Override
    public ReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return getLegJoint(robotSide, legJointName).getFrameAfterJoint();
    }
 
+   /** {@inheritDoc} */
+   @Override
    public SixDoFJoint getRootJoint()
    {
       return rootJoint;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getElevator()
    {
       return elevator;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public OneDoFJoint getLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return legJointLists.get(robotSide).get(legJointName);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
    {
       return armJointLists.get(robotSide).get(armJointName);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
    {
       return spineJoints.get(spineJointName);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
    {
       return neckJoints.get(neckJointName);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void getLidarJoints(ArrayList<OneDoFJoint> lidarJointsToPack)
    {
       lidarJointsToPack.addAll(lidarJoints);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getPelvis()
    {
       return pelvis;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getFoot(RobotSide robotSide)
    {
       return getEndEffector(robotSide, LimbName.LEG);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getHand(RobotSide robotSide)
    {
       return getEndEffector(robotSide, LimbName.ARM);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getChest()
    {
       return chest;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getHead()
    {
       return head;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
    {
       switch (limbName)
@@ -445,27 +451,23 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
+   /** {@inheritDoc} */
+   @Override
    public ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
    {
       return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
    }
 
+   /** {@inheritDoc} */
+   @Override
    public FramePoint getStaticWristToFingerOffset(RobotSide robotSide, FingerName fingerName)
    {
       // TODO Auto-generated method stub
       return null;
    }
 
-   public RigidBody[] getLowerBodyRigidBodiesInOrder()
-   {
-      return lowerBody;
-   }
-
-   public RigidBody[] getUpperBodyRigidBodiesInOrder()
-   {
-      return upperBody;
-   }
-
+   /** {@inheritDoc} */
+   @Override
    public OneDoFJoint[] getOneDoFJoints()
    {
       OneDoFJoint[] oneDoFJointsAsArray = new OneDoFJoint[oneDoFJoints.size()];
@@ -473,6 +475,8 @@ public class SDFFullRobotModel implements FullRobotModel
       return oneDoFJointsAsArray;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
    {
       Collection<OneDoFJoint> values = oneDoFJoints.values();
@@ -489,6 +493,8 @@ public class SDFFullRobotModel implements FullRobotModel
       return oneDoFJoints.get(name);
    }
 
+   /** {@inheritDoc} */
+   @Override
    public IMUDefinition[] getIMUDefinitions()
    {
       IMUDefinition[] imuDefinitions = new IMUDefinition[this.imuDefinitions.size()];
@@ -496,6 +502,8 @@ public class SDFFullRobotModel implements FullRobotModel
       return imuDefinitions;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public ForceSensorDefinition[] getForceSensorDefinitions()
    {
       return this.forceSensorDefinitions.toArray(new ForceSensorDefinition[this.forceSensorDefinitions.size()]);
@@ -525,12 +533,14 @@ public class SDFFullRobotModel implements FullRobotModel
       return lidarAxis.get(name);
    }
 
+   /** {@inheritDoc} */
    @Override
    public ReferenceFrame getSoleFrame(RobotSide robotSide)
    {
       return soleFrames.get(robotSide);
    }
 
+   /** {@inheritDoc} */
    @Override
    public ReferenceFrame getHandControlFrame(RobotSide robotSide)
    {
