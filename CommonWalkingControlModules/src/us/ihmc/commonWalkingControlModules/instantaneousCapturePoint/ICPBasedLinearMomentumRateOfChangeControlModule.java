@@ -21,7 +21,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBasedMomentumRateOfChangeControlModule
+public class ICPBasedLinearMomentumRateOfChangeControlModule
 {
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
@@ -80,7 +80,10 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
 
    }
 
-   @Override
+   public void initialize()
+   {
+   }
+
    public void compute()
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
@@ -145,31 +148,26 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
             rateLimitCMP, accelerationLimitCMP);
    }
 
-   @Override
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
       controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
-   @Override
    public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
       momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
    }
 
-   @Override
    public void setSupportLeg(RobotSide newSupportSide)
    {
       supportSide = newSupportSide;
    }
 
-   @Override
    public void setCapturePoint(FramePoint2d capturePoint)
    {
       this.capturePoint.setIncludingFrame(capturePoint);
    }
 
-   @Override
    public void setOmega0(double omega0)
    {
       if (Double.isNaN(omega0))
@@ -177,39 +175,28 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
       this.omega0 = omega0;
    }
 
-   @Override
    public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint)
    {
       this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
    }
 
-   @Override
    public void setDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocity)
    {
       this.desiredCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocity);
    }
 
-   @Override
    public void setFinalDesiredCapturePoint(FramePoint2d finalDesiredCapturePoint)
    {
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
    }
 
-   @Override
    public void keepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
    {
       this.keepCMPInsideSupportPolygon.set(keepCMPInsideSupportPolygon);
    }
 
-   @Override
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
    {
-      this.desiredCoMHeightAcceleration = desiredCenterOfMassHeightAcceleration;
-   }
-
-   @Override
-   public void initialize()
-   {
-      //    empty
+      desiredCoMHeightAcceleration = desiredCenterOfMassHeightAcceleration;
    }
 }

@@ -8,13 +8,11 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import org.antlr.runtime.tree.RewriteRuleTokenStream;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
@@ -129,7 +127,6 @@ public class FootExplorationControlModule
    private final BooleanYoVariable footHoldIsSafeEnough;
    private final DoubleYoVariable initialExplorationTime;
    private final MomentumBasedController momentumBasedController;
-   private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
    private final FootExplorationCoPPlanner footExplorationCoPPlanner;
    private final BooleanYoVariable isMasteringFullExploration;
    private final BooleanYoVariable swingIsFinished;
@@ -187,6 +184,7 @@ public class FootExplorationControlModule
    private ReferenceFrame CoPFrame;
    private RobotSide loadBearingSide;
    private final FramePoint2d tempFramePoint2d = new FramePoint2d();
+   private final FramePoint2d desiredCMP = new FramePoint2d();
    // to delete
    static
    {
@@ -201,7 +199,7 @@ public class FootExplorationControlModule
 
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SwingTimeCalculationProvider swingTimeCalculationProvider, 
-         FeetManager feetManager, ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule)
+         FeetManager feetManager)
    {
       performCoPExploration = new BooleanYoVariable("performCoPExploration", registry);
       footHoldIsSafeEnough = new BooleanYoVariable("footHoldIsSafe", registry);
@@ -253,7 +251,6 @@ public class FootExplorationControlModule
       this.momentumBasedController = momentumBasedController;
       this.centerOfMassHeightTrajectoryGenerator = (LookAheadCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
-      this.icpBasedMomentumRateOfChangeControlModule = icpBasedMomentumRateOfChangeControlModule;
       performCoPExploration.set(IS_ACTIVE);
       ICPTrajectory = new FrameLine2d(worldFrame, new Point2d(0.0, 0.0), new Point2d(1.0, 1.0));
       desiredICPLocal = new FramePoint2d(worldFrame);
@@ -282,11 +279,12 @@ public class FootExplorationControlModule
     * @param desiredICPVelocityToPack - desired ICP velocity to pack
     * @param currentCapturePoint - current ICP
     */
-   public void masterFullExploration(YoFramePoint2d desiredICPToPack, YoFrameVector2d desiredICPVelocityToPack, FramePoint2d currentCapturePoint)
+   public void masterFullExploration(YoFramePoint2d desiredICPToPack, YoFrameVector2d desiredICPVelocityToPack, FramePoint2d currentCapturePoint, FramePoint2d desiredCMP)
    {
       updateFootAngularRate();
       updateAnkleVelocity();
 
+      this.desiredCMP.setIncludingFrame(desiredCMP);
       desiredICPLocal.changeFrame(desiredICPToPack.getReferenceFrame());
       desiredICPVelocityLocal.changeFrame(desiredICPVelocityToPack.getReferenceFrame());
 
@@ -451,7 +449,6 @@ public class FootExplorationControlModule
       private FramePoint2d constantICP;
       private double timeInSwing;
       private double initialSwingTime;
-      private FramePoint2d desiredCMPToPack;
       private FrameVector cmpNormal; 
       private FramePoint cmpPointCopy;
       private FrameLine cmpLine;
@@ -464,7 +461,6 @@ public class FootExplorationControlModule
       {
          super(FeetExplorationState.SWING);
          
-         desiredCMPToPack =  new FramePoint2d();
          cmpNormal = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
          cmpPointCopy = new FramePoint(worldFrame);
          cmpLine = new FrameLine(cmpPointCopy, cmpNormal);
@@ -551,11 +547,9 @@ public class FootExplorationControlModule
        */
       private FramePoint getProjectedCMPOnFootSole()
       {
-        icpBasedMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMPToPack);
-        
-        ReferenceFrame cmpFrame = desiredCMPToPack.getReferenceFrame();
+        ReferenceFrame cmpFrame = desiredCMP.getReferenceFrame();
         cmpNormal.setIncludingFrame(cmpFrame, 0.0, 0.0, 1.0); 
-        cmpPointCopy.setIncludingFrame(cmpFrame, desiredCMPToPack.getX(), desiredCMPToPack.getY(), 0.0);
+        cmpPointCopy.setIncludingFrame(cmpFrame, desiredCMP.getX(), desiredCMP.getY(), 0.0);
         cmpLine.changeFrame(cmpFrame);
         cmpLine.setDirection(cmpNormal);
         cmpLine.setOrigin(cmpPointCopy);
