@@ -1419,12 +1419,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doProportionalControlOnCoP();
    }
 
+   private final CapturePointData capturePointData = new CapturePointData();
    // TODO: connect ports instead
    private void setICPBasedMomentumRateOfChangeControlModuleInputs()
    {
-      CapturePointData capturePointData = new CapturePointData();
       capturePointData.set(capturePoint.getFramePoint2dCopy(), icpAndMomentumBasedController.getOmega0());
-      icpBasedMomentumRateOfChangeControlModule.getCapturePointInputPort().setData(capturePointData);
+      icpBasedMomentumRateOfChangeControlModule.setCapturePointData(capturePointData);
 
       CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();
       capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
