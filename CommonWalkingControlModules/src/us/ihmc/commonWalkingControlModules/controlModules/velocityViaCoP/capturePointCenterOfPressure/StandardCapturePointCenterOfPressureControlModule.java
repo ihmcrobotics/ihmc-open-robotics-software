@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.captur
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -154,7 +154,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
 
    }
 
-   public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
+   public void controlDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
          FramePoint desiredCapturePoint)
    {
       FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
@@ -162,7 +162,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       controlDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint, null, null, null);
    }
 
-   public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
+   public void controlDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
          FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
       // Hide the guideline and parallel line since not used in double support:
@@ -307,7 +307,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
-         BipedSupportPolygons supportPolygons) // , double percentToFarEdgeOfFoot)
+         OldBipedSupportPolygons supportPolygons) // , double percentToFarEdgeOfFoot)
    {
       singleSupportWasPreviousTick.set(true);
 
@@ -478,7 +478,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
    }
 
-   public void controlSingleSupport(RobotSide supportLeg, BipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
+   public void controlSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
          FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d currentVelocity)
    {
       controlSingleSupport(currentCapturePoint, guideLine, desiredCapturePoint, supportLeg, supportPolygons);

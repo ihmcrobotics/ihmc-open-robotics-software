@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -17,9 +17,9 @@ public interface DesiredCapturePointToDesiredCoPControlModule
     * @param desiredCapturePoint
     * @param desiredCapturePointVelocity 
     */
-   public abstract FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+   public abstract FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
            FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity);
 
-   public abstract FramePoint2d computeDesiredCoPDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+   public abstract FramePoint2d computeDesiredCoPDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
            FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity);
 }

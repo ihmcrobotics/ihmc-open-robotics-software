@@ -81,7 +81,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
    {
       lastTickSingleSupport.set(true);
 
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
       FramePoint desiredFinalCapturePoint = new FramePoint();
       couplingRegistry.getDesiredFootstep().getPositionIncludingFrame(desiredFinalCapturePoint);
       FramePoint2d desiredFinalCapturePoint2d = desiredFinalCapturePoint.toFramePoint2d();
@@ -102,7 +102,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
          lastTickSingleSupport.set(false);
       }
 
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 
       boolean stayInDoubleSupport = loadingLeg == null;
       FramePoint2d desiredFinalCapturePoint;
@@ -110,7 +110,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
          desiredFinalCapturePoint = computeAverageOfSweetSpots();
       else
       {
-         desiredFinalCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(loadingLeg);
+         desiredFinalCapturePoint = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(loadingLeg);
       }
 
       double finalTime = doubleSupportFinalTime.getDoubleValue();
@@ -181,8 +181,8 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 
    private FramePoint2d computeAverageOfSweetSpots()
    {
-      FramePoint2d ret = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(RobotSide.LEFT);    // left sweet spot at this point
-      FramePoint2d rightSweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(RobotSide.RIGHT);
+      FramePoint2d ret = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(RobotSide.LEFT);    // left sweet spot at this point
+      FramePoint2d rightSweetSpot = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(RobotSide.RIGHT);
       rightSweetSpot.changeFrame(ret.getReferenceFrame());
       ret.add(rightSweetSpot);
       ret.scale(0.5);

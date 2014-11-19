@@ -95,7 +95,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 
       FramePoint captureRegionCentroid = couplingRegistry.getCaptureRegion().getCentroidCopy().toFramePoint();
       captureRegionCentroid.changeFrame(supportFootFrame);
-      FramePoint sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLegSide).toFramePoint();
+      FramePoint sweetSpot = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(supportLegSide).toFramePoint();
       sweetSpot.changeFrame(supportFootFrame);
 
       FrameVector offsetFromSweetSpot = new FrameVector(captureRegionCentroid);

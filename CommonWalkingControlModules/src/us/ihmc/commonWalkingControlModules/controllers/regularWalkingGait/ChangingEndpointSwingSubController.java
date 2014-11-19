@@ -404,7 +404,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       RobotSide oppositeSide = swingSide.getOppositeSide();
       ReferenceFrame stanceAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(oppositeSide);
       FramePoint comProjection = processedSensors.getCenterOfMassGroundProjectionInFrame(stanceAnkleZUpFrame);
-      FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(oppositeSide);
+      FramePoint2d sweetSpot = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(oppositeSide);
       sweetSpot.changeFrame(stanceAnkleZUpFrame);
       boolean inStateLongEnough = timeInState > 0.05;
       boolean isCoMPastSweetSpot = comProjection.getX() > sweetSpot.getX();
@@ -605,7 +605,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private boolean isCapturePointInsideFoot(RobotSide swingSide)
    {
-      FrameConvexPolygon2d footPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(swingSide);
+      FrameConvexPolygon2d footPolygon = couplingRegistry.getOldBipedSupportPolygons().getFootPolygonInAnkleZUp(swingSide);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(footPolygon.getReferenceFrame()).toFramePoint2d();
 
       boolean capturePointInsideFoot = footPolygon.isPointInside(capturePoint);

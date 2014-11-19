@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -99,7 +99,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    }
 
    // compute desired CoP in single support using desired capture point
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
            FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity)
    {
       desiredVelocityLength.set(desiredVelocity.length());
@@ -115,7 +115,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    }
 
    // compute desired CoP in single support using guide line
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
            FrameVector2d desiredVelocity, FrameLineSegment2d guideLine)
    {
       desiredVelocityLength.set(desiredVelocity.length());
@@ -151,7 +151,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    }
 
    // compute desired CoP in double support using desired capture point
-   public FramePoint2d computeDesiredCoPDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, FrameVector2d desiredVelocity,
+   public FramePoint2d computeDesiredCoPDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, FrameVector2d desiredVelocity,
            FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity)
    {
       desiredVelocityLength.set(desiredVelocity.length());

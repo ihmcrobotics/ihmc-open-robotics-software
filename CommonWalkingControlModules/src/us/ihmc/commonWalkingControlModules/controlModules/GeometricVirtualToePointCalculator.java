@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -165,7 +165,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       return ret;
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
          RobotSide upcomingSupportSide)
    {
       SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = bipedSupportPolygons.getFootPolygonsInMidFeetZUp();

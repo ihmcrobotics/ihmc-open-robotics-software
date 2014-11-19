@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.captur
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -80,7 +80,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       }
    }
 
-   public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
+   public void controlDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
                                     FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
@@ -89,7 +89,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       computeDesiredCoP(supportPolygon, currentCapturePoint.toFramePoint2d(), desiredCapturePoint.toFramePoint2d(), finalTime, comHeight, null);
    }
 
-   public void controlSingleSupport(RobotSide supportLeg, BipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
+   public void controlSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
                                     FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame,
                                     FrameVector2d currentVelocity)
    {

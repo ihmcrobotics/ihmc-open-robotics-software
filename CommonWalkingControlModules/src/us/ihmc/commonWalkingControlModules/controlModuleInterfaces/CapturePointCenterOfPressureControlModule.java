@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -18,7 +18,7 @@ public interface CapturePointCenterOfPressureControlModule
     * @param processedSensors ProcessedSensors
     * @todo add stepping if outside footbase
     */
-   public abstract void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint capturePoint, FramePoint desiredCapturePoint,
+   public abstract void controlDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint capturePoint, FramePoint desiredCapturePoint,
            FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
    /**
@@ -30,7 +30,7 @@ public interface CapturePointCenterOfPressureControlModule
     * @param captureTime double
     * @param desiredCenterOfPressure FramePoint
     */
-   public abstract void controlSingleSupport(RobotSide supportLeg, BipedSupportPolygons supportPolygons, FramePoint capturePoint,
+   public abstract void controlSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons supportPolygons, FramePoint capturePoint,
            FrameVector2d desiredVelocity, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame,
            FrameVector2d currentVelocity); // TODO: get rid of last 3 arguments
 

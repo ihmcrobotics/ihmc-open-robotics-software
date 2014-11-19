@@ -583,7 +583,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                initializedAtStart = true;
             }
 
-            icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons); // need to always update biped support polygons after a change to the contact states
+            icpAndMomentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
             icpTrajectoryHasBeenInitialized.set(true);
          }
          else
@@ -605,7 +605,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             if (feetManager.doToeOff())
             {
-               icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons); // need to always update biped support polygons after a change to the contact states
+               icpAndMomentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
                ecmpBasedToeOffHasBeenInitialized.set(true);
             }
          }
@@ -739,7 +739,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             //            instantaneousCapturePointPlanner.initializeForStoppingInDoubleSupport(yoTime.getDoubleValue());
          }
 
-         icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons); // need to always update biped support polygons after a change to the contact states
+         icpAndMomentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
          if (DESIREDICP_FROM_POLYGON_COORDINATE)
          {
@@ -1021,7 +1021,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
          momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);
          
-         icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
+         icpAndMomentumBasedController.updateBipedSupportPolygons();
 
          // Shouldn't have to do this init anymore since it's done above...
          // icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,

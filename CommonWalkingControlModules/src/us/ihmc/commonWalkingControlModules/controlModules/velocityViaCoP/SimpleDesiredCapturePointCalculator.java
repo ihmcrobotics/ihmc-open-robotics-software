@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -67,7 +67,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       icpMotionDistanceToOuterEdgeBackFootScaling.set(0.5);
    }
 
-   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
+   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
    { 
 //      return couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg);      
       double kxx, kxy;
@@ -85,7 +85,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       kxx = desiredCaptureKxx.getDoubleValue();
       kxy = supportLeg.negateIfLeftSide(desiredCaptureKxy.getDoubleValue());
 
-      FramePoint2d desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg);
+      FramePoint2d desiredCapturePoint = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(supportLeg);
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
       desiredCapturePoint.changeFrame(ankleZUpFrame);
       desiredVelocity.changeFrame(ankleZUpFrame);
@@ -116,7 +116,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    private FramePoint2d computeCapturePointMotion()
    {
       
-      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+      OldBipedSupportPolygons bipedSupportPolygons = couplingRegistry.getOldBipedSupportPolygons();
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       icpCurrentPositionOnMotionPolygon.add(icpMotionSpeed.getDoubleValue() * controlDT);
       
@@ -241,7 +241,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       throw new RuntimeException("Should not get here.");
    }
 
-   public FramePoint2d computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity)
+   public FramePoint2d computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, OldBipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity)
    {
       if (stayInDoubleSupport(loadingLeg))
       {

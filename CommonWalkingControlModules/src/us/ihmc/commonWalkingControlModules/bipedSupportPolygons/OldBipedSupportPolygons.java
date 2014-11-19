@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.awt.Color;
+import java.util.List;
 
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -19,7 +20,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 /**
- * <p>Title: BipedSupportPolygons </p>
+ * <p>Title: OldBipedSupportPolygons </p>
  *
  * <p>Description: Computes and holds on to information about the biped's support polygons that is a function of state only, and not of a particular controller.
  * </p>
@@ -33,9 +34,9 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
  */
 
 /*
- * FIXME: not rewindable!
+ * FIXME: not rewindable! Generate garbage. Use BipedSupportPolygons instead.
  */
-public class BipedSupportPolygons
+public class OldBipedSupportPolygons
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -72,7 +73,7 @@ public class BipedSupportPolygons
 
    private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
-   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
+   public OldBipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry, boolean useConnectingEdges)
    {
       this.ankleZUpFrames = ankleZUpFrames;
@@ -158,9 +159,7 @@ public class BipedSupportPolygons
       return sweetSpotsInAnkleZUp.get(robotSide);
    }
 
-   private final FramePoint tempFramePoint = new FramePoint();
-
-   public void updateUsingContactStates(SideDependentList<PlaneContactState> contactStates)
+   public void update(SideDependentList<List<FramePoint>> contactPoints)
    {
       timer.startTimer();
       boolean inDoubleSupport = true;
@@ -172,34 +171,18 @@ public class BipedSupportPolygons
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         PlaneContactState contactState = contactStates.get(robotSide);
-         if (contactState.inContact())
+         List<FramePoint> contactPointsForSide = contactPoints.get(robotSide);
+         boolean isSupportFoot = contactPointsForSide.size() > 0;
+         if (isSupportFoot)
          {
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
-            FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonsInAnkleZUp.get(robotSide);
-            FrameConvexPolygon2d footPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(robotSide);
+            footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ankleZUpFrames.get(robotSide), contactPointsForSide);
+            footPolygonsInMidFeetZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlaneAndUpdate(midFeetZUp, contactPointsForSide);
 
-            footPolygonInAnkleZUp.clear(ankleZUpFrames.get(robotSide));
-            footPolygonInMidFeetZUp.clear(midFeetZUp);
-
-            for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
-            {
-               ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
-               if (!contactPoint.isInContact())
-                  continue;
-
-               contactPoint.getPosition(tempFramePoint);
-               footPolygonInAnkleZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
-               footPolygonInMidFeetZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
-            }
-
-            footPolygonInAnkleZUp.update();
-            footPolygonInMidFeetZUp.update();
-
-            sweetSpotsInAnkleZUp.get(robotSide).setIncludingFrame(footPolygonInAnkleZUp.getCentroid()); // Sweet spots are the centroids of the foot polygons.
-            sweetSpotsInMidFeetZUp.get(robotSide).setIncludingFrame(footPolygonInMidFeetZUp.getCentroid()); // Sweet spots are the centroids of the foot polygons.
+            sweetSpotsInAnkleZUp.get(robotSide).setIncludingFrame(footPolygonsInAnkleZUp.get(robotSide).getCentroid()); // Sweet spots are the centroids of the foot polygons.
+            sweetSpotsInMidFeetZUp.get(robotSide).setIncludingFrame(footPolygonsInMidFeetZUp.get(robotSide).getCentroid()); // Sweet spots are the centroids of the foot polygons.
          }
          else
          {

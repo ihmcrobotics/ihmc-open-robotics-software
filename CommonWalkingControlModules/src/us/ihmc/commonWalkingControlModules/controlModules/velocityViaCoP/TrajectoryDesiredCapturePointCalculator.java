@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.plotting.Artifact;
@@ -66,7 +66,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
    }
   
    
-   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
+   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
    {
       hideCaptureLineAndSwitchLine();
       
@@ -79,7 +79,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       return getSweetSpot(supportLeg, bipedSupportPolygons);
    }
    
-   public FramePoint2d computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity)
+   public FramePoint2d computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, OldBipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity)
    {
       if (loadingLeg == null)
       {
@@ -92,7 +92,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       }
    }
 
-   private FramePoint2d getSweetSpot(RobotSide side, BipedSupportPolygons bipedSupportPolygons)
+   private FramePoint2d getSweetSpot(RobotSide side, OldBipedSupportPolygons bipedSupportPolygons)
    {
       FramePoint2d sweetSpot;
       if(side == null)
@@ -109,7 +109,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       return sweetSpot;
    }
    
-   private FramePoint2d getStartPoint(BipedSupportPolygons bipedSupportPolygons)
+   private FramePoint2d getStartPoint(OldBipedSupportPolygons bipedSupportPolygons)
    {
       FramePoint2d startPoint = null;
       switch (sweetSpotToUseForStartPoint.getEnumValue())
@@ -129,7 +129,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
    }
    
    
-   private FramePoint2d computeMorphToEndPoint(FramePoint2d startPoint, FramePoint2d endPoint, BipedSupportPolygons bipedSupportPolygons)
+   private FramePoint2d computeMorphToEndPoint(FramePoint2d startPoint, FramePoint2d endPoint, OldBipedSupportPolygons bipedSupportPolygons)
    {
       endPoint.changeFrame(startPoint.getReferenceFrame());
 
@@ -140,7 +140,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       return frame;
    }
 
-   private FramePoint2d computeTransferToDoubleSupport(BipedSupportPolygons bipedSupportPolygons)
+   private FramePoint2d computeTransferToDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons)
    {
       if (stateInLastTick.getEnumValue() != TransferState.DOUBLE_SUPPORT)
       {
@@ -179,7 +179,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       
    }
 
-   private FramePoint2d computeTransferToSingleSupport(RobotSide loadingLeg, BipedSupportPolygons bipedSupportPolygons)
+   private FramePoint2d computeTransferToSingleSupport(RobotSide loadingLeg, OldBipedSupportPolygons bipedSupportPolygons)
    {
       if (stateInLastTick.getEnumValue() != TransferState.TRANSFER_TO_SINGLE_SUPPORT)
       {
@@ -237,7 +237,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
      
    }
 
-   public boolean isPointPastSwitchLine(FramePoint2d framePoint2d, RobotSide loadingLeg, BipedSupportPolygons bipedSupportPolygons)
+   public boolean isPointPastSwitchLine(FramePoint2d framePoint2d, RobotSide loadingLeg, OldBipedSupportPolygons bipedSupportPolygons)
    {
       FramePoint2d startPoint = getStartPoint(bipedSupportPolygons);
       FramePoint2d endPoint = getSweetSpot(loadingLeg, bipedSupportPolygons);
