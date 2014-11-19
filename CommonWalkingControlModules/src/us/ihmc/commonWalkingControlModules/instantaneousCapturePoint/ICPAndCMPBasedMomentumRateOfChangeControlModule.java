@@ -40,7 +40,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 {
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = createInputPort("desiredPelvisOrientationInputPort");
-   private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
@@ -76,6 +75,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final FramePoint2d capturePoint = new FramePoint2d();
    private double omega0 = 0.0;
    
+   private final CapturePointTrajectoryData desiredCapturePointTrajectory = new CapturePointTrajectoryData();
+   
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -107,7 +108,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
          icpProportionalController.reset();
       }
 
-      CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
       boolean projectIntoSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
 
@@ -241,18 +241,23 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public void setCapturePointData(FramePoint2d capturePoint, double omega0)
+   public void setCapturePoint(FramePoint2d capturePoint)
+   {
+      this.capturePoint.setIncludingFrame(capturePoint);
+   }
+
+   @Override
+   public void setOmega0(double omega0)
    {
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
-      this.capturePoint.setIncludingFrame(capturePoint);
       this.omega0 = omega0;
    }
 
    @Override
-   public ControlFlowInputPort<CapturePointTrajectoryData> getDesiredCapturePointTrajectoryInputPort()
+   public void setDesiredCapturePointTrajectory(CapturePointTrajectoryData newCapturePointTrajectoryData)
    {
-      return desiredCapturePointTrajectoryInputPort;
+      desiredCapturePointTrajectory.set(newCapturePointTrajectoryData);
    }
 
    @Override

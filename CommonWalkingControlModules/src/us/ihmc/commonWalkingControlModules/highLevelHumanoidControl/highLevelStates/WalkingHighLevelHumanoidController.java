@@ -1421,7 +1421,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // TODO: connect ports instead
    private void setICPBasedMomentumRateOfChangeControlModuleInputs()
    {
-      icpBasedMomentumRateOfChangeControlModule.setCapturePointData(capturePoint.getFramePoint2dCopy(), icpAndMomentumBasedController.getOmega0());
+      icpBasedMomentumRateOfChangeControlModule.setCapturePoint(capturePoint.getFramePoint2dCopy());
+      icpBasedMomentumRateOfChangeControlModule.setOmega0(icpAndMomentumBasedController.getOmega0());
 
       CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();
       capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
@@ -1431,7 +1432,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          keepCMPInsideSupportPolygon = false;
 
       capturePointTrajectoryData.setProjectCMPIntoSupportPolygon(keepCMPInsideSupportPolygon);
-      icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
+      icpBasedMomentumRateOfChangeControlModule.setDesiredCapturePointTrajectory(capturePointTrajectoryData);
 
       icpBasedMomentumRateOfChangeControlModule.setSupportLeg(supportLeg.getEnumValue());
 
