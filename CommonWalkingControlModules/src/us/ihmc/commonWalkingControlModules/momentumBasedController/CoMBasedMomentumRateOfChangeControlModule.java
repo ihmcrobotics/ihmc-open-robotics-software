@@ -9,7 +9,6 @@ import us.ihmc.yoUtilities.controllers.EuclideanPositionController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-
 public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOfChangeControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -20,12 +19,12 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    private final FramePoint desiredCoM = new FramePoint();
 
    public CoMBasedMomentumRateOfChangeControlModule(double dt, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
-           YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
       this.centerOfMassJacobian = centerOfMassJacobian;
-      boolean visualizeCom=false;
+      boolean visualizeCom = false;
       comPositionController = new EuclideanPositionController("com", centerOfMassFrame, dt, visualizeCom, registry);
       parentRegistry.addChild(registry);
    }
@@ -53,13 +52,13 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    @Override
    public void waitUntilComputationIsDone()
    {
-//    empty
+      //    empty
    }
 
    @Override
    public void initialize()
    {
-//    empty
+      //    empty
    }
 
    public void setDesiredCoMPosition(YoFramePoint newDesiredCenterOfMass)
