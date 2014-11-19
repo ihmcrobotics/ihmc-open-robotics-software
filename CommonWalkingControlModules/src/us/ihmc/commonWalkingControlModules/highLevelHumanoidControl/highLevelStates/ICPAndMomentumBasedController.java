@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Vector3d;
 
@@ -61,8 +60,6 @@ public class ICPAndMomentumBasedController
 
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
 
-   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-
    private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
    private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
 
@@ -77,6 +74,8 @@ public class ICPAndMomentumBasedController
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
    private final SpatialForceVector gravitationalWrench;
+
+   private final SideDependentList<FramePoint2d> cops = new SideDependentList<>();
 
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -112,11 +111,14 @@ public class ICPAndMomentumBasedController
          footContactStates.put(robotSide, footContactState);
       }
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePoint2d cop = new FramePoint2d();
+         cop.setToZero(bipedFeet.get(robotSide).getSoleFrame());
+         cops.put(robotSide, cop);
+      }
+   
       // TODO: Have local updatables, instead of adding them to the momentum based controller.
-
-      this.updatables.add(new Omega0Updater());
-      this.updatables.add(new BipedSupportPolygonsUpdater());
-      this.updatables.add(new CapturePointUpdater());
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
@@ -134,14 +136,6 @@ public class ICPAndMomentumBasedController
       }
    }
 
-   public void updateUpdatables(double time)
-   {
-      for (int i = 0; i < updatables.size(); i++)
-      {
-         updatables.get(i).update(time);
-      }
-   }
-
    public void initialize()
    {
    }
@@ -151,7 +145,17 @@ public class ICPAndMomentumBasedController
       return omega0.getDoubleValue();
    }
 
-   public void computeCapturePoint()
+   /**
+    * Update the basics: capture point, omega0, and the support polygons.
+    */
+   public void update()
+   {
+      computeCapturePoint();
+      computeOmega0();
+      updateBipedSupportPolygons();
+   }
+
+   private void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
       momentumBasedController.getCenterOfMassVelocity(centerOfMassVelocity);
@@ -193,55 +197,22 @@ public class ICPAndMomentumBasedController
       }
    }
 
-   private final class Omega0Updater implements Updatable
+   private void computeOmega0()
    {
-      private final SideDependentList<FramePoint2d> cops = new SideDependentList<>();
-
-      public Omega0Updater()
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            FramePoint2d cop = new FramePoint2d();
-            cop.setToZero(bipedFeet.get(robotSide).getSoleFrame());
-            cops.put(robotSide, cop);
-         }
+         FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(bipedFeet.get(robotSide));
+         if (desiredCoP != null)
+            cops.get(robotSide).setIncludingFrame(desiredCoP);
       }
 
-      public void update(double time)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(bipedFeet.get(robotSide));
-            if (desiredCoP != null)
-               cops.get(robotSide).setIncludingFrame(desiredCoP);
-         }
+      momentumBasedController.getAdmissibleDesiredGroundReactionWrench(admissibleGroundReactionWrench);
 
-         momentumBasedController.getAdmissibleDesiredGroundReactionWrench(admissibleGroundReactionWrench);
+      if (admissibleGroundReactionWrench.getLinearPartZ() == 0.0)
+         admissibleGroundReactionWrench.set(gravitationalWrench); // FIXME: hack to resolve circularity
 
-         if (admissibleGroundReactionWrench.getLinearPartZ() == 0.0)
-            admissibleGroundReactionWrench.set(gravitationalWrench); // FIXME: hack to resolve circularity
-
-         omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
-      }
+      omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
    }
-
-   private final class BipedSupportPolygonsUpdater implements Updatable
-   {
-      public void update(double time)
-      {
-         updateBipedSupportPolygons();
-      }
-   }
-
-   private class CapturePointUpdater implements Updatable
-   {
-      public void update(double time)
-      {
-         computeCapturePoint();
-      }
-   }
-
-   // TODO: Following has been added for big refactor. Need to be checked.
 
    public EnumYoVariable<RobotSide> getYoSupportLeg()
    {
@@ -281,10 +252,5 @@ public class ICPAndMomentumBasedController
    public SideDependentList<? extends ContactablePlaneBody> getBipedFeet()
    {
       return bipedFeet;
-   }
-
-   public ArrayList<Updatable> getUpdatables()
-   {
-      return updatables;
    }
 }
