@@ -134,6 +134,7 @@ public class ManipulationControlModule
          handleDefaultState(robotSide);
 
          handleHandPoses(robotSide);
+         handleHandPauses(robotSide);
          handleHandsteps(robotSide);
          handleLoadBearing(robotSide);
       }
@@ -166,6 +167,15 @@ public class ManipulationControlModule
             handControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide),
                   handPoseProvider.getTrajectoryTime());
          }
+      }
+   }
+
+   private void handleHandPauses(RobotSide robotSide)
+   {
+      if (handPoseProvider.checkForNewPauseCommand(robotSide))
+      {
+         handPoseProvider.getPauseCommand(robotSide);
+         handControlModules.get(robotSide).holdPositionInJointSpace();
       }
    }
 
@@ -216,15 +226,20 @@ public class ManipulationControlModule
 
    public void prepareForLocomotion()
    {
-      for (HandControlModule individualHandControlModule : handControlModules)
+      for (HandControlModule handControlModule : handControlModules)
       {
-         if (individualHandControlModule.isControllingPoseInWorld())
-         {
-            if (HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION)
-               individualHandControlModule.holdPositionInJointSpace();
-            else
-               individualHandControlModule.holdPositionInBase();
-         }
+         freeze(handControlModule);
+      }
+   }
+
+   private void freeze(HandControlModule handControlModule)
+   {
+      if (handControlModule.isControllingPoseInWorld())
+      {
+         if (HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION)
+            handControlModule.holdPositionInJointSpace();
+         else
+            handControlModule.holdPositionInBase();
       }
    }
 
