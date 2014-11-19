@@ -21,7 +21,7 @@ public class SplashPanel extends JPanel
    {
       super();
 
-      URL imageURL = SplashPanel.class.getClassLoader().getResource("images/ihmc-scs-splash-551x283-v0.3candidate.png");
+      URL imageURL = SplashPanel.class.getClassLoader().getResource("images/ihmc-scs-splash-551x283-v0.4candidate.png");
 
       Toolkit toolkit = Toolkit.getDefaultToolkit();
       splashImage = toolkit.getImage(imageURL);
