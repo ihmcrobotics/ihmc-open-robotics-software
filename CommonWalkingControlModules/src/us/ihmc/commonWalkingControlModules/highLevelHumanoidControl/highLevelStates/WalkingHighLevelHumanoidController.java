@@ -298,8 +298,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
 
-      pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep,
-            icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
+      pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, stateMachine, registry,
+            swingTimeCalculationProvider, feet);
 
       footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime, centerOfMassHeightTrajectoryGenerator,
             swingTimeCalculationProvider, feetManager);
@@ -842,8 +842,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (pushRecoveryModule.isEnabled())
          {
-            boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, capturePoint2d, nextFootstep, omega0,
-                  footPolygon);
+            boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, nextFootstep, footPolygon);
 
             if (footstepHasBeenAdjusted)
             {
@@ -1389,9 +1388,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
+   private final FramePoint2d capturePoint2d = new FramePoint2d();
+
    // FIXME: don't override
    private void doMotionControlInternal()
    {
+      if (pushRecoveryModule != null)
+      {
+         capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
+         pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp(), icpAndMomentumBasedController.getOmega0());
+      }
+      
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 

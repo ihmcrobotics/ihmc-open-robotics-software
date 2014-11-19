@@ -7,7 +7,6 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.plotting.shapes.PointArtifact;
@@ -59,7 +58,6 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable usePushRecoveryICPPlanner;
    private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
    private final BooleanYoVariable enableProjectionInsidePushRecoveryICPPlanner;
-   private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final MomentumBasedController momentumBasedController;
    private final OrientationStateVisualizer orientationStateVisualizer;
    private final FootstepAdjustor footstepAdjustor;
@@ -93,14 +91,16 @@ public class PushRecoveryControlModule
    private Footstep recoverFromDoubleSupportFallFootStep;
    private RobotSide swingSideFromHighLevel;
    private Footstep nextFootstepFromHighLevel;
+   private double omega0;
+   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FrameConvexPolygon2d supportPolygonInMidFeetZUp = new FrameConvexPolygon2d();
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, StateMachine<?> stateMachine,
+         BooleanYoVariable readyToGrabNextFootstep, StateMachine<?> stateMachine,
          YoVariableRegistry parentRegistry, SwingTimeCalculationProvider swingTimeCalculationProvider, SideDependentList<? extends ContactablePlaneBody> feet)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
-      this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.referenceFrames = momentumBasedController.getReferenceFrames();
       this.stateMachine = stateMachine;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
@@ -146,7 +146,6 @@ public class PushRecoveryControlModule
 
    public class IsFallingFromDoubleSupportCondition implements StateTransitionCondition
    {
-      private final FramePoint2d capturePoint2d = new FramePoint2d();
       private RobotSide swingSide = null;
       private RobotSide transferToSide = null;
 
@@ -167,7 +166,7 @@ public class PushRecoveryControlModule
       public IsFallingFromDoubleSupportCondition(RobotSide robotSide)
       {
          this.transferToSide = robotSide;
-         this.reducedSupportPolygon = new FrameConvexPolygon2d(icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp());
+         this.reducedSupportPolygon = new FrameConvexPolygon2d(supportPolygonInMidFeetZUp);
          this.projectedCapturePoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
          this.projectedCapturePoint2d = new FramePoint2d(worldFrame, 0.0, 0.0);
          this.footPolygon = new FrameConvexPolygon2d(worldFrame);
@@ -194,13 +193,10 @@ public class PushRecoveryControlModule
          {
             if (isEnabledInDoubleSupport())
             {
-               FrameConvexPolygon2d supportPolygonInMidFeetZUp = icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
-
                // get current robot status
                reducedSupportPolygon.changeFrame(midFeetZUp);
                reducedSupportPolygon.setAndUpdate(supportPolygonInMidFeetZUp);
                reducedSupportPolygon.scale(DOUBLESUPPORT_SUPPORT_POLYGON_SCALE);
-               icpAndMomentumBasedController.getCapturePoint().getFrameTuple2dIncludingFrame(capturePoint2d);
 
                capturePoint2d.changeFrame(midFeetZUp);
 
@@ -350,6 +346,13 @@ public class PushRecoveryControlModule
       }
    }
 
+   public void updatePushRecoveryInputs(FramePoint2d capturePoint2d, FrameConvexPolygon2d supportPolygonInMidFeetZUp, double omega0)
+   {
+      this.capturePoint2d.setIncludingFrame(capturePoint2d);
+      this.supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
+      this.omega0 = omega0;
+   }
+
    /**
     * This method checks if the next footstep is inside of the capture region. If is outside it will be re-projected inside of the capture region.
     * The method can also handle the capture region calculation for "uncertain recover". In this case the capture region is calculated with the
@@ -357,14 +360,11 @@ public class PushRecoveryControlModule
     * 
     * @param swingSide
     * @param swingTimeRemaining
-    * @param capturePoint2d
     * @param nextFootstep
-    * @param omega0
     * @param footPolygon
     * @return
     */
-   public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, Footstep nextFootstep, double omega0,
-         FrameConvexPolygon2d footPolygon)
+   public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, Footstep nextFootstep, FrameConvexPolygon2d footPolygon)
    {
       this.swingTimeRemaining.set(swingTimeRemaining);
       this.swingSideFromHighLevel = swingSide;
@@ -487,10 +487,10 @@ public class PushRecoveryControlModule
             momentumBasedController.getReferenceFrames().getAnkleZUpFrame(swingSide.getOppositeSide()), tempContactPoints);
 
       captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY, capturePoint2d,
-            icpAndMomentumBasedController.getOmega0(), tempFootPolygon);
+            omega0, tempFootPolygon);
       captureRegionAreaWithDoubleSupportMinimumSwingTime.set(captureRegionCalculator.getCaptureRegionArea());
 
-      return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, icpAndMomentumBasedController.getOmega0(), tempFootPolygon);
+      return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, omega0, tempFootPolygon);
    }
 
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
