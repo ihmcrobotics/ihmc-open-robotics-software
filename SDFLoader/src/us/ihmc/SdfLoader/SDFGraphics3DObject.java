@@ -229,29 +229,47 @@ public class SDFGraphics3DObject extends Graphics3DObject
          meshPath = "file://media/materials/scripts/gazebo.material";
       }
 
+      if (meshPath.contains("models/silverspine_roll.obj"))
+         System.out.println();
+      
+      if (resourceDirectories.size() == 0)
+      {
+         String id = tryConversion(meshPath, "");
+         if (id != null) return id;
+      }
+      
       for (String resourceDirectory : resourceDirectories)
       {
-         try
-         {
-            URI meshURI = new URI(meshPath);
-
-            String id = resourceDirectory + meshURI.getAuthority() + meshURI.getPath();
-//            System.out.println("PATH: " + meshURI.getPath());
-//            System.out.println("AUTH: " + meshURI.getAuthority());
-//            System.out.println("ID: " + id);
-            URL resource = getClass().getClassLoader().getResource(id);
-            if (resource != null)
-            {
-               return id;
-            }
-         } catch (URISyntaxException e)
-         {
-            System.err.println("Malformed resource path in .SDF file for path: " + meshPath);
-         }
+         String id = tryConversion(meshPath, resourceDirectory);
+         if (id != null) return id;
       }
 
       System.out.println(meshPath);
       throw new RuntimeException("Resource not found");
    }
 
+   private String tryConversion(String meshPath, String resourceDirectory)
+   {
+      try
+      {
+         URI meshURI = new URI(meshPath);
+
+         String authority = meshURI.getAuthority() == null ? "" : meshURI.getAuthority();
+         String id = resourceDirectory + authority + meshURI.getPath();
+//            System.out.println("PATH: " + meshURI.getPath());
+//            System.out.println("AUTH: " + meshURI.getAuthority());
+//            System.out.println("ID: " + id);
+         URL resource = getClass().getClassLoader().getResource(id);
+         if (resource != null)
+         {
+            return id;
+         }
+      }
+      catch (URISyntaxException e)
+      {
+         System.err.println("Malformed resource path in .SDF file for path: " + meshPath);
+      }
+
+      return null;
+   }
 }
