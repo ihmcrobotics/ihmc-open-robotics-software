@@ -1422,8 +1422,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // TODO: connect ports instead
    private void setICPBasedMomentumRateOfChangeControlModuleInputs()
    {
-      icpBasedMomentumRateOfChangeControlModule.getBipedSupportPolygonsInputPort().setData(bipedSupportPolygons);
-
       CapturePointData capturePointData = new CapturePointData();
       capturePointData.set(capturePoint.getFramePoint2dCopy(), icpAndMomentumBasedController.getOmega0());
       icpBasedMomentumRateOfChangeControlModule.getCapturePointInputPort().setData(capturePointData);

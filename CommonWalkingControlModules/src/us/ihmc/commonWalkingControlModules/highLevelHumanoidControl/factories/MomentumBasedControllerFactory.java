@@ -128,16 +128,6 @@ public class MomentumBasedControllerFactory
       ContactablePlaneBody pelvisBackContactablePlaneBody = contactableBodiesFactory.createPelvisBackContactableBody(fullRobotModel.getPelvis());
       SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
 
-      /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
-      ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
-            referenceFrames.getCenterOfMassFrame(), referenceFrames.getSoleFrames(), controlDT, totalMass, gravityZ, registry, yoGraphicsListRegistry);
-
-      iCPBasedLinearMomentumRateOfChangeControlModule.setGains(walkingControllerParameters.getCaptureKpParallelToMotion(),
-            walkingControllerParameters.getCaptureKpOrthogonalToMotion(), walkingControllerParameters.getCaptureKi(),
-            walkingControllerParameters.getCaptureKiBleedoff(), walkingControllerParameters.getCaptureFilterBreakFrequencyInHz(),
-            walkingControllerParameters.getCMPRateLimit(), walkingControllerParameters.getCMPAccelerationLimit());
-
       // No longer need old one. Don't create it.
       // TODO: Remove OldMomentumControlModule completely once QP stuff is solidified.
       OldMomentumControlModule oldMomentumControlModule = null;
@@ -192,6 +182,16 @@ public class MomentumBasedControllerFactory
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, fullRobotModel, feet, bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
+      ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
+            referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, registry, yoGraphicsListRegistry);
+
+      iCPBasedLinearMomentumRateOfChangeControlModule.setGains(walkingControllerParameters.getCaptureKpParallelToMotion(),
+            walkingControllerParameters.getCaptureKpOrthogonalToMotion(), walkingControllerParameters.getCaptureKi(),
+            walkingControllerParameters.getCaptureKiBleedoff(), walkingControllerParameters.getCaptureFilterBreakFrequencyInHz(),
+            walkingControllerParameters.getCMPRateLimit(), walkingControllerParameters.getCMPAccelerationLimit());
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////

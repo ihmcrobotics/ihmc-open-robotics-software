@@ -13,6 +13,12 @@ public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChan
    }
 
    @Override
+   public void initialize()
+   {
+      // empty
+   }
+
+   @Override
    public void startComputation()
    {
       // empty
@@ -28,11 +34,5 @@ public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChan
    public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
       momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
-   }
-
-   @Override
-   public void initialize()
-   {
-      // empty
    }
 }
