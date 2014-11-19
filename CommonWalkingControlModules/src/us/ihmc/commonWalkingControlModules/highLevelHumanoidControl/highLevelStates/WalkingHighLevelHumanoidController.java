@@ -22,7 +22,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
@@ -160,7 +160,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
 
-   private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
+   private final ICPBasedLinearMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
 
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
 
@@ -214,7 +214,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
-         ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, InstantaneousCapturePointPlanner instantaneousCapturePointPlanner,
+         ICPBasedLinearMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, InstantaneousCapturePointPlanner instantaneousCapturePointPlanner,
          ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
@@ -302,7 +302,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
 
       footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime, centerOfMassHeightTrajectoryGenerator,
-            swingTimeCalculationProvider, feetManager, icpBasedMomentumRateOfChangeControlModule);
+            swingTimeCalculationProvider, feetManager);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -538,7 +538,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
          {
-            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d);
+            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d, desiredCMP);
          }
 
          if (VISUALIZE)
@@ -805,6 +805,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
       private final FramePoint2d ecmpLocal = new FramePoint2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
+      private final FramePoint2d desiredCMP = new FramePoint2d();
 
       private Footstep transferFromDesiredFootstep;
       private Footstep nextFootstep;
@@ -892,7 +893,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
          {
-            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d);
+            icpBasedMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMP);
+            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d, desiredCMP);
          }
 
          if (VISUALIZE)
