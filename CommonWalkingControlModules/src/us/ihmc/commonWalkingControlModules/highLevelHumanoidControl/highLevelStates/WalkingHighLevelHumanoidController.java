@@ -1436,7 +1436,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       capturePointTrajectoryData.setProjectCMPIntoSupportPolygon(keepCMPInsideSupportPolygon);
       icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
 
-      icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(supportLeg.getEnumValue());
+      icpBasedMomentumRateOfChangeControlModule.setSupportLeg(supportLeg.getEnumValue());
 
       icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(controlledCoMHeightAcceleration.getDoubleValue());
 
