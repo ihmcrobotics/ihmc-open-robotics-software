@@ -169,9 +169,11 @@ public class DRCSimulationFactory
       {
          multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, true);
       }
-      DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), drcRobotModel.getJointMap().getHeadName());
-      multiThreadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
-
+      if(drcRobotModel.getJointMap().getHeadName() != null)
+      {
+         DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), drcRobotModel.getJointMap().getHeadName());
+         multiThreadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
+      }
 
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
