@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
@@ -35,7 +35,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final VirtualToePointCalculator virtualToePointCalculator;
    private final LegStrengthCalculator legStrengthCalculator;
-   private final BipedSupportPolygons bipedSupportPolygons;
+   private final OldBipedSupportPolygons bipedSupportPolygons;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
    private final TranslationReferenceFrame centerOfPressurePlaneFrame;
    private final SideDependentList<Double> lambdas = new SideDependentList<Double>();
@@ -55,7 +55,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private final FramePoint2d centerOfPressure2d;
    private final FrameVector up;
 
-   public GeometricStairsGroundReactionWrenchDistributor(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+   public GeometricStairsGroundReactionWrenchDistributor(CommonHumanoidReferenceFrames referenceFrames, OldBipedSupportPolygons bipedSupportPolygons,
            SideDependentList<? extends ContactablePlaneBody> bipedFeet, double totalMass, YoGraphicsListRegistry yoGraphicsListRegistry,
            YoVariableRegistry parentRegistry)
    {

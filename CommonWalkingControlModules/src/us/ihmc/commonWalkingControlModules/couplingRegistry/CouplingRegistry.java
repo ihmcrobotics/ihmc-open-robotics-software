@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.couplingRegistry;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -36,7 +36,7 @@ public interface CouplingRegistry
    public abstract void setEstimatedSwingTimeRemaining(double estimatedSwingTimeRemaining);
    public abstract double getEstimatedSwingTimeRemaining();
 
-   public abstract BipedSupportPolygons getBipedSupportPolygons();
+   public abstract OldBipedSupportPolygons getOldBipedSupportPolygons();
 
    public abstract void setForceHindOnToes(boolean forceHindOnToes);
    public abstract boolean getForceHindOnToes();

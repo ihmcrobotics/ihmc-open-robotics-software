@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenterOfPressureFilter;
@@ -51,13 +51,13 @@ public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlMod
    {
       FramePoint2d desiredCoP;
       FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(referenceFrames.getMidFeetZUpFrame());
-      FrameConvexPolygon2d supportPolygonInMidFeetZUp = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2d supportPolygonInMidFeetZUp = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       if (lungeAxis == null)
       {
          // from CapturabilityBasedDesiredCoPControlModule
-         BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+         OldBipedSupportPolygons bipedSupportPolygons = couplingRegistry.getOldBipedSupportPolygons();
          FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame).toFramePoint2d();
 
          FramePoint2d desiredCapturePoint = desiredCapturePointCalculator.computeDesiredCapturePointDoubleSupport(loadingLeg, bipedSupportPolygons,

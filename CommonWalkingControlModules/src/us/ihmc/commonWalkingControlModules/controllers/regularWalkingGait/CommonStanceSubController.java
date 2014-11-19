@@ -350,12 +350,12 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneWithLoadingPreSwingA(RobotSide loadingLeg, double timeInState)
    {
-      FrameConvexPolygon2d loadingFootPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(loadingLeg);
+      FrameConvexPolygon2d loadingFootPolygon = couplingRegistry.getOldBipedSupportPolygons().getFootPolygonInAnkleZUp(loadingLeg);
       FramePoint2d desiredCoP = couplingRegistry.getDesiredCoP();
       desiredCoP.changeFrame(loadingFootPolygon.getReferenceFrame());      
       boolean copInsideLoadingFootPolygon = loadingFootPolygon.isPointInside(desiredCoP);
 
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
       boolean icpOutsideSupportPolygon = !supportPolygon.isPointInside(capturePoint);
 
@@ -368,8 +368,8 @@ public class CommonStanceSubController implements StanceSubController
       ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
 
-      FramePoint2d unLoadingSweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(loadingLeg.getOppositeSide());
-      FramePoint2d loadingSweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(loadingLeg);
+      FramePoint2d unLoadingSweetSpot = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(loadingLeg.getOppositeSide());
+      FramePoint2d loadingSweetSpot = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(loadingLeg);
 
       unLoadingSweetSpot.changeFrame(loadingLegZUpFrame);
       loadingSweetSpot.changeFrame(loadingLegZUpFrame);
@@ -390,7 +390,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
    {
-      FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportSide);
+      FramePoint2d sweetSpot = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(upcomingSupportSide);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(sweetSpot.getReferenceFrame()).toFramePoint2d();
 
       double doneLoadingForSingleLegBalanceSafetyFactor = 4.0;
@@ -404,7 +404,7 @@ public class CommonStanceSubController implements StanceSubController
    @SuppressWarnings("unused")
    private boolean isCapturePointOutsideBaseOfSupport()
    {
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
       boolean hasCapturePointLeftBaseOfSupport = !(supportPolygon.isPointInside(capturePoint));
 
@@ -499,7 +499,7 @@ public class CommonStanceSubController implements StanceSubController
       {
          double epsilon = 1e-2;
 
-         FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+         FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
          FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
          return supportPolygon.distance(capturePoint) > epsilon;  
       }

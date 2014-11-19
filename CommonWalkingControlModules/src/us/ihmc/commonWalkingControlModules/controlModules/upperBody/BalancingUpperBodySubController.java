@@ -488,7 +488,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	
 	private FramePoint2d getNominalCoP()
 	{
-		FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+		FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 		
 		FramePoint2d nominalCoP = supportPolygon.getCentroidCopy();
 		
@@ -510,7 +510,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	private FramePoint2d computeIntersectionWithSupportPolygon(FramePoint2d insidePolygonPoint, FramePoint2d outsidePolygonPoint)
 	{
-		FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+		FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 		FrameLineSegment2d lineSegment = new FrameLineSegment2d(insidePolygonPoint, outsidePolygonPoint);
 
 		FramePoint2d[] intersectionPoints = lineSegment.intersectionWith(supportPolygon);
@@ -778,7 +778,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	public boolean isCapturePointInsideSupportPolygon()
 	{
-		FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+		FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 		FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
 
 		return supportPolygon.isPointInside(capturePoint);

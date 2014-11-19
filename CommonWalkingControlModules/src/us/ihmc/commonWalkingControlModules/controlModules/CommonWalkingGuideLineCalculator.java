@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -50,7 +50,7 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
       throw new UnsupportedOperationException();
    }
 
-   public void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
+   public void update(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
                       FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocity)
    {
       if (finalDesiredSwingTarget == null)

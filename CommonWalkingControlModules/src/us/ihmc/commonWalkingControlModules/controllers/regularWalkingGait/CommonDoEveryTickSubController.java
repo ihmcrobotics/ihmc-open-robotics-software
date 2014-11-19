@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.DoubleAndSingleSupportDurationUpdater;
@@ -110,7 +110,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       boolean forceHindOnToes = couplingRegistry.getForceHindOnToes();
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, supportLeg, capturePointInMidfeetZUp, forceHindOnToes);
 
-      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+      OldBipedSupportPolygons bipedSupportPolygons = couplingRegistry.getOldBipedSupportPolygons();
 
       bipedSupportPolygons.update(new SideDependentList<List<FramePoint>>(leftFoot.computeFootPoints(), rightFoot.computeFootPoints()));
       doUpdatables(processedSensors.getTime());

@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenterOfPressureFilter;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -30,14 +30,14 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    private final DoubleYoVariable desiredCoPBreakFrequencyHertz = new DoubleYoVariable("desiredCoPBreakFrequencyHertz", registry);
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
-   private final BipedSupportPolygons bipedSupportPolygons;
+   private final OldBipedSupportPolygons bipedSupportPolygons;
    private final double controlDT;
    private final FramePoint2d returnedFilteredDesiredCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
    private final BooleanYoVariable resetCoPFiltersWhenGoingToDoubleSupport = new BooleanYoVariable("resetCoPFiltersWhenGoingToDoubleSupport", registry);
 
-   public SimpleDesiredCenterOfPressureFilter(BipedSupportPolygons bipedSupportPolygons, CommonHumanoidReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
+   public SimpleDesiredCenterOfPressureFilter(OldBipedSupportPolygons oldBipedSupportPolygons, CommonHumanoidReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.bipedSupportPolygons = oldBipedSupportPolygons;
       this.controlDT = controlDT;
       filteredDesiredCoPDoubleSupport = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("filteredDesCoPDoubleSupport", "", registry,
               alphaDesiredCoP, referenceFrames.getMidFeetZUpFrame());

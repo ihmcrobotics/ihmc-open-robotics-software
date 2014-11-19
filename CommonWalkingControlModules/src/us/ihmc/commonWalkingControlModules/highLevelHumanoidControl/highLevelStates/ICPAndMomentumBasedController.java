@@ -168,18 +168,15 @@ public class ICPAndMomentumBasedController
       yoCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
    }
 
-   //   private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>(new ArrayList<FramePoint>(), new ArrayList<FramePoint>());
    private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<PlaneContactState>();
 
-   protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
+   protected void updateBipedSupportPolygons()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         //         momentumBasedController.getContactPoints(bipedFeet.get(robotSide), footContactPoints.get(robotSide));
          footContactStates.put(robotSide, momentumBasedController.getContactState(bipedFeet.get(robotSide)));
       }
 
-      //      bipedSupportPolygons.update(footContactPoints, true);
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
 
       if (capturabilityBasedStatusProducer != null)
@@ -242,7 +239,7 @@ public class ICPAndMomentumBasedController
    {
       public void update(double time)
       {
-         updateBipedSupportPolygons(bipedSupportPolygons);
+         updateBipedSupportPolygons();
       }
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
@@ -21,11 +21,11 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
@@ -121,7 +121,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
 
       ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
 
-      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+      OldBipedSupportPolygons bipedSupportPolygons = couplingRegistry.getOldBipedSupportPolygons();
 
       FramePoint capturePointInAnkleZUp = couplingRegistry.getCapturePointInFrame(supportFootAnkleZUpFrame);
       FramePoint2d capturePoint2d = capturePointInAnkleZUp.toFramePoint2d();
@@ -144,7 +144,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       }
       else
       {
-         desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg).toFramePoint();
+         desiredCapturePoint = couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(supportLeg).toFramePoint();
          FramePoint temp = new FramePoint(desiredCapturePoint);
          temp.changeFrame(world);
          this.desiredCapturePointInWorld.set(temp);
@@ -176,7 +176,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          lastTickDoubleSupport.set(true);
       }
 
-      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+      OldBipedSupportPolygons bipedSupportPolygons = couplingRegistry.getOldBipedSupportPolygons();
 
       FramePoint desiredCapturePoint = computeDesiredCapturePointDoubleSupport(loadingLeg, desiredVelocity, bipedSupportPolygons);
 
@@ -207,7 +207,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       return desiredCoP2d;
    }
 
-   private FramePoint computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity, BipedSupportPolygons bipedSupportPolygons)
+   private FramePoint computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity, OldBipedSupportPolygons bipedSupportPolygons)
    {
       FramePoint desiredCapturePoint;
 

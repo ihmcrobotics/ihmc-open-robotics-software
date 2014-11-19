@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
@@ -43,20 +43,20 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
    }
    
    // using desired capture point
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
          FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity)
    {
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
       double finalTime = minimumEqConstTimespanSingleSupport.getDoubleValue();
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
       return computeDesiredCoP(supportPolygon, desiredCapturePoint, finalTime, comHeight);
    }
 
    // using desired capture point
-   public FramePoint2d computeDesiredCoPDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, FrameVector2d desiredVelocity,
+   public FramePoint2d computeDesiredCoPDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, FrameVector2d desiredVelocity,
          FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity)
    {
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 
       double estimatedDoubleSupportTimeRemaining = couplingRegistry.getEstimatedDoubleSupportTimeRemaining();
       double finalTime;
@@ -69,10 +69,10 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
    }
    
    // using guide line
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
          FrameVector2d desiredVelocity, FrameLineSegment2d guideLine)
    {
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getOldBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
       FramePoint2d desiredFinalCapturePoint = guideLine.pointBetweenEndPointsGivenParameter(guideLineParameter.getDoubleValue());
       double finalTime = Math.max(couplingRegistry.getEstimatedSwingTimeRemaining(), 50e-3);    // FIXME: hack
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);

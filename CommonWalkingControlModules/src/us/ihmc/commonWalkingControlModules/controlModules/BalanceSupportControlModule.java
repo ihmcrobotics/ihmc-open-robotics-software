@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.HipDamperControlModule;
@@ -24,9 +24,9 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 
@@ -41,7 +41,7 @@ public class BalanceSupportControlModule
    private final KneeDamperControlModule kneeDamperControlModule;
    private final HipDamperControlModule hipDamperControlModule;
    private final AnkleOverRotationControlModule ankleOverRotationControlModule;
-   private final BipedSupportPolygons bipedSupportPolygons;
+   private final OldBipedSupportPolygons bipedSupportPolygons;
 
    private final CouplingRegistry couplingRegistry;
 
@@ -55,7 +55,7 @@ public class BalanceSupportControlModule
                                       LegStrengthCalculator legStrengthCalculator, PelvisHeightControlModule pelvisHeightControlModule,
                                       PelvisOrientationControlModule pelvisOrientationControlModule,
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
-                                      HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
+                                      HipDamperControlModule hipDamperControlModule, OldBipedSupportPolygons bipedSupportPolygons,
                                       AnkleOverRotationControlModule ankleOverRotationControlModule, CouplingRegistry couplingRegistry,
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

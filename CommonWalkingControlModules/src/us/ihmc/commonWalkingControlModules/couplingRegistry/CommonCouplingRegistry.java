@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.couplingRegistry;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -46,7 +46,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private Footstep desiredFootstep;
 
-   private BipedSupportPolygons bipedSupportPolygons;
+   private OldBipedSupportPolygons bipedSupportPolygons;
 
    private CommonHumanoidReferenceFrames referenceFrames;
 
@@ -65,7 +65,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
   
    private EnumYoVariable<RobotSide> upcomingSupportLeg = new EnumYoVariable<RobotSide>("upcomingSupportLeg", registry, RobotSide.class);
 
-   public CommonCouplingRegistry(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonCouplingRegistry(CommonHumanoidReferenceFrames referenceFrames, OldBipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -210,7 +210,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
       return estimatedDoubleSupportTimeRemaining.getDoubleValue();
    }
 
-   public BipedSupportPolygons getBipedSupportPolygons()
+   public OldBipedSupportPolygons getOldBipedSupportPolygons()
    {
       return bipedSupportPolygons;
    }

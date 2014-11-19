@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -114,7 +114,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       parentRegistry.addChild(registry);
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
          RobotSide upcomingSupportLeg)
    {
       // Find trailing leg

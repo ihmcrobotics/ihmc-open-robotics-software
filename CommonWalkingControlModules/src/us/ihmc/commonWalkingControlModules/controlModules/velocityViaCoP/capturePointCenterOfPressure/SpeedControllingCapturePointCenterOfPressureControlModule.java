@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.captur
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
@@ -142,49 +142,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    }
    
    
-   private FrameLine2d createSpeedControlLineOLD(FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
-         ReferenceFrame currentFrame)
- {
-    //TODO: This seems to have problems when the desired velocity and the desired heading are not alligned.
-    // Otherwise it seems to be ok when they are aligned...
-    
-    desiredVelocity.changeFrame(desiredHeadingFrame);
-    ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
-    desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
-    
-    FrameVector2d currentVelocityInFrame = new FrameVector2d(currentVelocity);
-    currentVelocityInFrame.changeFrame(desiredVelocityFrame);
-    FramePoint centerOfMassPositionInFrame = new FramePoint(centerOfMassPosition);
-    centerOfMassPositionInFrame.changeFrame(desiredVelocityFrame);
-    FramePoint2d centerOfMassPosition2dInFrame = centerOfMassPositionInFrame.toFramePoint2d();
-
-    // Project CoM on control line
-    FrameVector2d velocityT = new FrameVector2d(desiredVelocity);
-    velocityT.setX(desiredVelocity.getY());
-    velocityT.setY(desiredVelocity.getX());
-
-
-    FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPosition2dInFrame);
-
-    // Speed controller: Only increase speed for now
-    speedControlPosition.setX(speedControlPosition.getX()
-                              + speedControlXKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getX() - desiredVelocity.getX()));
-    speedControlPosition.setY(speedControlPosition.getY()
-                              + speedControlYKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getY() - desiredVelocity.getY()));
-
-
-    if (velocityT.length() == 0.0)
-       throw new RuntimeException("Not sure what to do when velocity is zero");
-    
-    FrameLine2d massLine = new FrameLine2d(speedControlPosition, velocityT);
-    FrameLine2d massLineInWorld = new FrameLine2d(massLine);
-    massLineInWorld.changeFrame(world);
-   comSpeedControllingLine.setFrameLine2d(massLineInWorld);
-   massLine.changeFrame(currentFrame);
-    return massLine;
- }
-
-   public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
+   public void controlDoubleSupport(OldBipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
            FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
       guideLineWorld.setFrameLineSegment2d(null);
@@ -345,7 +303,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       return centerOfPressureDesired;
    }
 
-   public void controlSingleSupport(RobotSide supportLeg, BipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
+   public void controlSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
            FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d currentVelocity)
    {
       // Disable double support stuff

@@ -54,7 +54,7 @@ public class UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubut
       
       FramePoint swingToePoint = new FramePoint(toeMidPoints.get(upcomingSwingLeg));
       swingToePoint.changeFrame(midFeetZUpFrame);
-      FramePoint2d sweetPoint = new FramePoint2d(couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportLeg));
+      FramePoint2d sweetPoint = new FramePoint2d(couplingRegistry.getOldBipedSupportPolygons().getSweetSpotCopy(upcomingSupportLeg));
       sweetPoint.changeFrame(midFeetZUpFrame);
       
       FramePoint2d swingToePoint2d = swingToePoint.toFramePoint2d();
