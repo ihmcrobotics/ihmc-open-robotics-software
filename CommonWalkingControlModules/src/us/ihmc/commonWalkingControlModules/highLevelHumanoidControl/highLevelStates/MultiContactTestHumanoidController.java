@@ -125,7 +125,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    protected void doCoMControl()
    {
-      momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort().setData(desiredCoMPosition.getFramePointCopy());
+      momentumRateOfChangeControlModule.setDesiredCoMPosition(desiredCoMPosition);
 
       momentumRateOfChangeControlModule.startComputation();
       momentumRateOfChangeControlModule.waitUntilComputationIsDone();
