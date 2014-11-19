@@ -17,10 +17,14 @@ public interface HandPoseProvider
    public abstract double getTrajectoryTime();
 
    public abstract boolean checkForNewPose(RobotSide robotSide);
+   
+   public abstract boolean checkForNewPauseCommand(RobotSide robotSide);
 
    public abstract boolean checkForHomePosition(RobotSide robotSide);
 
    public abstract HandPosePacket.DataType checkPacketDataType(RobotSide robotSide);
 
    public abstract Map<OneDoFJoint, Double> getFinalDesiredJointAngleMaps(RobotSide robotSide);
+
+   public abstract void getPauseCommand(RobotSide robotSide);
 }

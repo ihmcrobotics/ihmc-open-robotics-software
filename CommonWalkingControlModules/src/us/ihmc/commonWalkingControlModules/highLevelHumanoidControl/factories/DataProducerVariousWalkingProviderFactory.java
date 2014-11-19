@@ -32,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
+import us.ihmc.communication.packets.manipulation.HandPausePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
@@ -49,6 +50,7 @@ import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -77,7 +79,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
                                                     walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
-      
+      ObjectConsumer<HandPausePacket> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
       HandPoseStatusProducer handPoseStatusProducer = new HandPoseStatusProducer(objectCommunicator);
       
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -117,6 +119,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
       objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider);
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
+      objectCommunicator.attachListener(HandPausePacket.class, handPauseCommandConsumer);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
     

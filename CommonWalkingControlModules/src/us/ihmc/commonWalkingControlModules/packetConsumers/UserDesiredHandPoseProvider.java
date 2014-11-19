@@ -144,4 +144,18 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return userHandPoseTrajectoryTime.getDoubleValue();
    }
 
+   @Override
+   public boolean checkForNewPauseCommand(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public void getPauseCommand(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }
