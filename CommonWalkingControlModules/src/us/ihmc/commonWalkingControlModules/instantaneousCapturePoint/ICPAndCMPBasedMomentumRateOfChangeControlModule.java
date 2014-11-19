@@ -6,12 +6,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionMomentControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
-import us.ihmc.controlFlow.AbstractControlFlowElement;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -35,11 +32,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
+public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBasedMomentumRateOfChangeControlModule
 {
-   private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = createInputPort("desiredPelvisOrientationInputPort");
-
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -74,10 +68,13 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
    private double omega0 = 0.0;
+   private double desiredCoMHeightAcceleration = 0.0;
    private final FramePoint2d capturePoint = new FramePoint2d();
    private final FramePoint2d desiredCapturePoint = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
+   
+   private final FrameOrientation desiredPelvisOrientation = new FrameOrientation();
 
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
@@ -123,7 +120,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 
       Momentum momentum = new Momentum(centerOfMassFrame);
       momentumCalculator.computeAndPack(momentum);
-      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationInputPort.getData().getOrientation();
       FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP(desiredPelvisOrientation, momentum);
       FramePoint2d desiredCoP = new FramePoint2d(desiredCMP);
       desiredCoP.sub(desiredDeltaCMP);
@@ -150,7 +146,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 
       supportLegPreviousTick.set(supportSide);
 
-      double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCenterOfMassHeightAccelerationInputPort.getData());
+      double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
 
       FrameVector normalMoment = groundReactionMomentControlModule.determineGroundReactionMoment(momentum, desiredPelvisOrientation.getYawPitchRoll()[0]);
 
@@ -278,14 +274,14 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public ControlFlowInputPort<Double> getDesiredCenterOfMassHeightAccelerationInputPort()
+   public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
    {
-      return desiredCenterOfMassHeightAccelerationInputPort;
+      this.desiredCoMHeightAcceleration = desiredCenterOfMassHeightAcceleration;
    }
 
-   public ControlFlowInputPort<OrientationTrajectoryData> getDesiredPelvisOrientationInputPort()
+   public void setDesiredPelvisOrientation(FrameOrientation desiredPelvisOrientation)
    {
-      return desiredPelvisOrientationInputPort;
+      this.desiredPelvisOrientation.setIncludingFrame(desiredPelvisOrientation);
    }
 
    @Override
