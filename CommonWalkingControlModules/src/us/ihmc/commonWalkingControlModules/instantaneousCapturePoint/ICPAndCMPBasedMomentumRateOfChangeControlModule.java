@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
@@ -73,8 +72,10 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final BipedSupportPolygons bipedSupportPolygons;
    private RobotSide supportSide;
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
-   private final CapturePointData capturePointData = new CapturePointData();
 
+   private final FramePoint2d capturePoint = new FramePoint2d();
+   private double omega0 = 0.0;
+   
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -114,9 +115,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       if (supportSide != null)
          swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
 
-      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(),
+      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
             desiredCapturePointTrajectory.getFinalDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePoint(),
-            desiredCapturePointTrajectory.getDesiredCapturePointVelocity(), capturePointData.getOmega0(), projectIntoSupportPolygon, supportPolygon,
+            desiredCapturePointTrajectory.getDesiredCapturePointVelocity(), omega0, projectIntoSupportPolygon, supportPolygon,
             swingSoleFrame);
 
       controlledCMP.set(desiredCMP);
@@ -164,7 +165,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private SpatialForceVector computeTotalGroundReactionWrench(FramePoint2d cop2d, FramePoint2d cmp2d, double fZ, FrameVector normalMoment)
    {
       FramePoint centerOfMass = new FramePoint(centerOfMassFrame);
-      FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, capturePointData.getOmega0());
+      FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, omega0);
       FrameVector force = WrenchDistributorTools.computeForce(centerOfMass, cmp3d, fZ);
       force.changeFrame(centerOfMassFrame);
 
@@ -240,9 +241,12 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public void setCapturePointData(CapturePointData newCapturePointData)
+   public void setCapturePointData(FramePoint2d capturePoint, double omega0)
    {
-      capturePointData.set(newCapturePointData);
+      if (Double.isNaN(omega0))
+         throw new RuntimeException("omega0 is NaN");
+      this.capturePoint.setIncludingFrame(capturePoint);
+      this.omega0 = omega0;
    }
 
    @Override
