@@ -5,6 +5,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.manipulation.HandPausePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
@@ -94,7 +95,7 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          outgoingHandPosePacket.setDestination(PacketDestination.UI);
 
-         sendThighStatePacketToController(outgoingHandPosePacket);
+         sendPacketToController(outgoingHandPosePacket);
          sendPacketToNetworkProcessor(outgoingHandPosePacket);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
@@ -138,6 +139,9 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
+      HandPausePacket pausePacket = new HandPausePacket(handPoseStatusSide, true);
+      pausePacket.setDestination(PacketDestination.CONTROLLER);
+      sendPacketToController(pausePacket);
       isPaused.set(true);
    }
 
@@ -145,6 +149,11 @@ public class HandPoseBehavior extends BehaviorInterface
    public void resume()
    {
       isPaused.set(false);
+      packetHasBeenSent.set(false);
+      if (hasInputBeenSet())
+      {
+         sendHandPoseToController();
+      }
    }
 
    @Override

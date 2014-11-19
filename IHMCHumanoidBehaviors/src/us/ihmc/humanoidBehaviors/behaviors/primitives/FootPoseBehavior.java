@@ -47,7 +47,7 @@ public class FootPoseBehavior extends BehaviorInterface
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
          outgoingFootPosePacket.setDestination(PacketDestination.UI);
-         sendThighStatePacketToController(outgoingFootPosePacket);
+         sendPacketToController(outgoingFootPosePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }

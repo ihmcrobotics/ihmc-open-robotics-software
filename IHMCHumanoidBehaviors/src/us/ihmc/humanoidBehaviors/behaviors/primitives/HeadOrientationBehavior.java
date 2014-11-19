@@ -48,7 +48,7 @@ public class HeadOrientationBehavior extends BehaviorInterface
       {
          outgoingHeadOrientationPacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingHeadOrientationPacket);
-         sendThighStatePacketToController(outgoingHeadOrientationPacket);
+         sendPacketToController(outgoingHeadOrientationPacket);
          
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();

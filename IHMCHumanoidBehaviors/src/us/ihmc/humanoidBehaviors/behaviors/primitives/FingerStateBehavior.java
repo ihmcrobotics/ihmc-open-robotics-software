@@ -45,7 +45,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendThighStatePacketToController(outgoingFingerStatePacket);
+         sendPacketToController(outgoingFingerStatePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }

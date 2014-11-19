@@ -62,7 +62,7 @@ public class ComHeightBehavior extends BehaviorInterface
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {      
          outgoingComHeightPacket.setDestination(PacketDestination.UI);  
-         sendThighStatePacketToController(outgoingComHeightPacket);
+         sendPacketToController(outgoingComHeightPacket);
          sendPacketToNetworkProcessor(outgoingComHeightPacket);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());

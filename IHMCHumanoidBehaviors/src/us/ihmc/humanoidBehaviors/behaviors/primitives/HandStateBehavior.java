@@ -45,7 +45,7 @@ public class HandStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendThighStatePacketToController(outgoingHandStatePacket);
+         sendPacketToController(outgoingHandStatePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }

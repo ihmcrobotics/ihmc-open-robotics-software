@@ -47,7 +47,7 @@ public class PelvisPoseBehavior extends BehaviorInterface
       {
          outgoingPelvisPosePacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingPelvisPosePacket);
-         sendThighStatePacketToController(outgoingPelvisPosePacket);
+         sendPacketToController(outgoingPelvisPosePacket);
          packetHasBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }

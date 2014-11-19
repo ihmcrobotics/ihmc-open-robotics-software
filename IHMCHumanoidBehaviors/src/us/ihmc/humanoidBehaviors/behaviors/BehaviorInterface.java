@@ -43,7 +43,7 @@ public abstract class BehaviorInterface implements RobotController
       networkProcessorObjectConsumer = new NetworkProcessorGlobalObjectConsumer(this);
    }
 
-   public void sendThighStatePacketToController(Object obj)
+   public void sendPacketToController(Object obj)
    {
       outgoingCommunicationBridge.sendPacketToController(obj);
    }
