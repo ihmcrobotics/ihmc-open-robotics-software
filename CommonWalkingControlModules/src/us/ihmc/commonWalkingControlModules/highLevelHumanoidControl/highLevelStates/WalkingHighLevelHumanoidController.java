@@ -1393,16 +1393,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // FIXME: don't override
    private void doMotionControlInternal()
    {
+      momentumBasedController.doPrioritaryControl();
+      super.callUpdatables();
+
+      icpAndMomentumBasedController.computeCapturePoint();
+      
       if (pushRecoveryModule != null)
       {
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
          pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp(), icpAndMomentumBasedController.getOmega0());
       }
       
-      momentumBasedController.doPrioritaryControl();
-      super.callUpdatables();
-
-      icpAndMomentumBasedController.computeCapturePoint();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
