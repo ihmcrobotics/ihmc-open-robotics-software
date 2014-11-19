@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
-import us.ihmc.controlFlow.ControlFlowInputPort;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -54,8 +54,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * @author twan
@@ -303,8 +301,7 @@ public class SimpleStanceController implements RobotController
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(fullRobotModel.getRootJoint().getSuccessor(), ReferenceFrame.getWorldFrame());
       centerOfMassCalculator.compute();
       FramePoint centerOfMass = centerOfMassCalculator.getCenterOfMass();
-      ControlFlowInputPort<FramePoint> desiredCoMPositionInputPort = momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort();
-      desiredCoMPositionInputPort.setData(centerOfMass);
+      momentumRateOfChangeControlModule.setDesiredCoMPosition(centerOfMass);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
