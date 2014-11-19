@@ -33,7 +33,7 @@ public class BumStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendThighStatePacketToController(outgoingBumStatePacket);
+         sendPacketToController(outgoingBumStatePacket);
          packetHasBeenSent.set(true);
       }
    }

@@ -33,7 +33,7 @@ public class FootStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendThighStatePacketToController(outgoingFootStatePacket);
+         sendPacketToController(outgoingFootStatePacket);
          packetHasBeenSent.set(true);
       }
    }

@@ -33,7 +33,7 @@ public class HandLoadBearingBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendThighStatePacketToController(outgoingHandLoadBearingPacket);
+         sendPacketToController(outgoingHandLoadBearingPacket);
          packetHasBeenSent.set(true);
       }
    }
