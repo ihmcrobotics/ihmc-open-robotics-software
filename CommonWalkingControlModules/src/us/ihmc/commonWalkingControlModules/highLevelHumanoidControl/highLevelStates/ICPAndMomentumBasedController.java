@@ -195,14 +195,25 @@ public class ICPAndMomentumBasedController
 
    private final class Omega0Updater implements Updatable
    {
+      private final SideDependentList<FramePoint2d> cops = new SideDependentList<>();
+
+      public Omega0Updater()
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePoint2d cop = new FramePoint2d();
+            cop.setToZero(bipedFeet.get(robotSide).getSoleFrame());
+            cops.put(robotSide, cop);
+         }
+      }
+
       public void update(double time)
       {
-         List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
-         for (ContactablePlaneBody foot : bipedFeet.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint2d coP = momentumBasedController.getCoP(foot);
-            if (coP != null)
-               cops.add(coP);
+            FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(bipedFeet.get(robotSide));
+            if (desiredCoP != null)
+               cops.get(robotSide).setIncludingFrame(desiredCoP);
          }
 
          momentumBasedController.getAdmissibleDesiredGroundReactionWrench(admissibleGroundReactionWrench);

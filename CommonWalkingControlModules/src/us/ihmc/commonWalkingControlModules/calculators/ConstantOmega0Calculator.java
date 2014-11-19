@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import java.util.List;
-
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -20,7 +19,7 @@ public class ConstantOmega0Calculator implements Omega0CalculatorInterface
       parentRegistry.addChild(registry);
    }
    
-   public double computeOmega0(List<FramePoint2d> cop2ds, SpatialForceVector totalGroundReactionWrench)
+   public double computeOmega0(SideDependentList<FramePoint2d> cop2ds, SpatialForceVector totalGroundReactionWrench)
    {
       return constantOmega0.getDoubleValue();
    }
