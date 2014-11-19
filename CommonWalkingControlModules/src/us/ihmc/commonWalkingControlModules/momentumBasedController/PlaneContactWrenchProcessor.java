@@ -20,7 +20,6 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
-
 /**
  * @author twan
  *         Date: 5/11/13
@@ -38,7 +37,8 @@ public class PlaneContactWrenchProcessor
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<ContactablePlaneBody, FramePoint2d>();
    private final YoVariableRegistry registry;
 
-   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
       this.contactablePlaneBodies = contactablePlaneBodies;
@@ -67,7 +67,7 @@ public class PlaneContactWrenchProcessor
             yoGraphicsListRegistry.registerArtifact(listName, copViz.createArtifact());
          }
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -100,7 +100,6 @@ public class PlaneContactWrenchProcessor
          {
             groundReactionForceMagnitudes.get(contactablePlaneBody).set(0.0);
 
-//          centersOfPressure2d.get(contactablePlaneBody).set(Double.NaN, Double.NaN);
             centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
@@ -113,7 +112,7 @@ public class PlaneContactWrenchProcessor
 
    public void initialize()
    {
-      for(int i = 0; i < contactablePlaneBodies.size(); i++)
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          FramePoint2d footCenter2d = new FramePoint2d(contactablePlaneBody.getSoleFrame());
