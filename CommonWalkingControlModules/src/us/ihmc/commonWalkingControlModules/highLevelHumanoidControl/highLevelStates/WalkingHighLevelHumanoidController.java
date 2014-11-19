@@ -1417,7 +1417,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doProportionalControlOnCoP();
    }
 
-   // TODO: connect ports instead
    private void setICPBasedMomentumRateOfChangeControlModuleInputs()
    {
       icpBasedMomentumRateOfChangeControlModule.setCapturePoint(capturePoint.getFramePoint2dCopy());
@@ -1434,7 +1433,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       icpBasedMomentumRateOfChangeControlModule.setSupportLeg(supportLeg.getEnumValue());
 
-      icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(controlledCoMHeightAcceleration.getDoubleValue());
+      icpBasedMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(controlledCoMHeightAcceleration.getDoubleValue());
 
       icpBasedMomentumRateOfChangeControlModule.startComputation();
       icpBasedMomentumRateOfChangeControlModule.waitUntilComputationIsDone();

@@ -4,8 +4,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
-import us.ihmc.controlFlow.AbstractControlFlowElement;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -23,10 +21,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
+public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBasedMomentumRateOfChangeControlModule
 {
-   private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
-
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -52,6 +48,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private RobotSide supportSide = null;
 
+   private double desiredCoMHeightAcceleration = 0.0;
    private double omega0 = 0.0;
    private final FramePoint2d capturePoint = new FramePoint2d();
    private final FramePoint2d desiredCapturePoint = new FramePoint2d();
@@ -111,7 +108,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
       supportLegPreviousTick.set(supportSide);
 
-      double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCenterOfMassHeightAccelerationInputPort.getData());
+      double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       FrameVector linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
       linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
       linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
@@ -211,9 +208,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public ControlFlowInputPort<Double> getDesiredCenterOfMassHeightAccelerationInputPort()
+   public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
    {
-      return desiredCenterOfMassHeightAccelerationInputPort;
+      this.desiredCoMHeightAcceleration = desiredCenterOfMassHeightAcceleration;
    }
 
    @Override
