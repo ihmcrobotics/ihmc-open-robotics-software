@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -20,8 +21,8 @@ public class SplashPanel extends JPanel
    public SplashPanel()
    {
       super();
-
-      URL imageURL = SplashPanel.class.getClassLoader().getResource("images/ihmc-scs-splash-551x283-v0.4candidate.png");
+      setBackground(new Color(0, 255, 0, 0));
+      URL imageURL = SplashPanel.class.getClassLoader().getResource("images/SplashScreen.png");
 
       Toolkit toolkit = Toolkit.getDefaultToolkit();
       splashImage = toolkit.getImage(imageURL);
@@ -87,9 +88,9 @@ public class SplashPanel extends JPanel
       }
 
       JWindow splashWindow = new JWindow();
+      splashWindow.setBackground(new Color(0, 255, 0, 0));
 
       Container splashContentPane = splashWindow.getContentPane();
-
       splashContentPane.add(this);
 
       Dimension imageSize = this.getImageSize();
