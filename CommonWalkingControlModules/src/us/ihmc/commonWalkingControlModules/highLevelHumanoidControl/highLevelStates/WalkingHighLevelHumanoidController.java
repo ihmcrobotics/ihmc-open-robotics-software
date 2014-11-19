@@ -219,8 +219,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
-      super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
-
       setupManagers(variousWalkingManagers);
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
@@ -443,7 +441,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
 
-      icpAndMomentumBasedController.computeCapturePoint();
+      icpAndMomentumBasedController.update();
       desiredICP.set(capturePoint.getFramePoint2dCopy());
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
@@ -1010,7 +1008,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          //Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
          //double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
          //double comHeight = centerOfMass.getZ() - footHeight;
-         icpAndMomentumBasedController.computeCapturePoint();
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
          transferToAndNextFootstepsData.setTransferFromDesiredFootstep(transferFromDesiredFootstep);
@@ -1396,7 +1393,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 
-      icpAndMomentumBasedController.computeCapturePoint();
+      icpAndMomentumBasedController.update();
       
       if (pushRecoveryModule != null)
       {
