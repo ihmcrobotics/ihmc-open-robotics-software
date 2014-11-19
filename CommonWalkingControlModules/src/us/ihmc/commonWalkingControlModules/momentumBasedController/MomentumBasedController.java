@@ -858,7 +858,7 @@ public class MomentumBasedController
       return getName();
    }
 
-   public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
+   public FramePoint2d getDesiredCoP(ContactablePlaneBody contactablePlaneBody)
    {
       return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
    }

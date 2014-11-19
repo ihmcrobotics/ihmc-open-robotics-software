@@ -767,7 +767,7 @@ public class FootExplorationControlModule
                   {
                      List<? extends ContactPointInterface> points = planeContactState.getContactPoints();
 
-                     FramePoint2d localCoP = momentumBasedController.getCoP(contactablePlaneBody);
+                     FramePoint2d localCoP = momentumBasedController.getDesiredCoP(contactablePlaneBody);
                      double minDistance = getClosestEdgeDistance(points, localCoP);
 
                      if (Math.abs(minDistance) < minCoPDistanceFromBorder)

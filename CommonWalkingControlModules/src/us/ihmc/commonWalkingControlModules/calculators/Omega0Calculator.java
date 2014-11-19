@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class Omega0Calculator implements Omega0CalculatorInterface
@@ -17,7 +16,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
    private final ReferenceFrame centerOfMassFrame;
    private final double totalMass;
-   private final List<FramePoint> cops = new ArrayList<FramePoint>(2); // Max of 2 CoPs assumed here
+   private final SideDependentList<FramePoint> cops = new SideDependentList<>(); // Max of 2 CoPs assumed here
    private final FramePoint2d pseudoCoP2d = new FramePoint2d();
    private final FramePoint pseudoCoP = new FramePoint();
    private final SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
@@ -26,31 +25,45 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.totalMass = totalMass;
-      
-      for (int i = 0; i < 2; i++) // Max of 2 CoPs assumed here
-         cops.add(new FramePoint());
+
+      for (RobotSide robotSide : RobotSide.values) // Max of 2 CoPs assumed here
+         cops.put(robotSide, new FramePoint());
    }
 
-   public double computeOmega0(List<FramePoint2d> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
+   private final FramePoint tempCoP3d = new FramePoint();
+
+   public double computeOmega0(SideDependentList<FramePoint2d> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
    {
       totalGroundReactionWrench.set(newTotalGroundReactionWrench);
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
       double fz = totalGroundReactionWrench.getLinearPartZ();
 
-      double deltaZ;
-      if (cop2ds.size() == 1)
+      int numberOfValidCoPs = 0;
+      for (RobotSide robotSide : RobotSide.values)
+         numberOfValidCoPs += cop2ds.get(robotSide).containsNaN() ? 0 : 1;
+
+      double deltaZ = Double.NaN;
+      if (numberOfValidCoPs == 1)
       {
-         FramePoint cop = cop2ds.get(0).toFramePoint();
-         cop.changeFrame(centerOfMassFrame);
-         deltaZ = -cop.getZ();
-      }
-      else    // assume 2 CoPs
-      {
-         for (int i = 0; i < 2; i++)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint2d cop2d = cop2ds.get(i);
-            cops.get(i).setIncludingFrame(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
-            cops.get(i).changeFrame(copToCoPFrame.getParent());
+            FramePoint2d cop2d = cop2ds.get(robotSide);
+            if (!cop2d.containsNaN())
+            {
+               tempCoP3d.setXYIncludingFrame(cop2d);
+               tempCoP3d.changeFrame(centerOfMassFrame);
+               deltaZ = -tempCoP3d.getZ();
+               break;
+            }
+         }
+      }
+      else // assume 2 CoPs
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePoint2d cop2d = cop2ds.get(robotSide);
+            cops.get(robotSide).setIncludingFrame(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
+            cops.get(robotSide).changeFrame(copToCoPFrame.getParent());
          }
 
          copToCoPFrame.setOriginAndPositionToPointAt(cops.get(0), cops.get(1));

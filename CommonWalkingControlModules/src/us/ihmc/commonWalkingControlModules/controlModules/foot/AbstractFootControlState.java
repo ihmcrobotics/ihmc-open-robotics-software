@@ -140,9 +140,9 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    protected void determineCoPOnEdge()
    {
-      FramePoint2d cop = momentumBasedController.getCoP(contactableBody);
+      FramePoint2d cop = momentumBasedController.getDesiredCoP(contactableBody);
 
-      if (cop == null)
+      if (cop == null || cop.containsNaN())
       {
          isCoPOnEdge = false;
       }
