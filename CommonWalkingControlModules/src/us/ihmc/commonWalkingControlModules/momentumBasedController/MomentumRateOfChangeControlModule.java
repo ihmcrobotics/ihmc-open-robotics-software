@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 public interface MomentumRateOfChangeControlModule
 {
    public abstract void initialize();
-   public abstract void startComputation();
-   public abstract void waitUntilComputationIsDone();
+   public abstract void compute();
    public abstract void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack);
 }

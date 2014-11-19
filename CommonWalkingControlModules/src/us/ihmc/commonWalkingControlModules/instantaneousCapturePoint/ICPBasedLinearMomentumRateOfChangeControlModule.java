@@ -81,7 +81,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
    }
 
    @Override
-   public void startComputation()
+   public void compute()
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
@@ -143,12 +143,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
    {
       icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz,
             rateLimitCMP, accelerationLimitCMP);
-   }
-
-   @Override
-   public void waitUntilComputationIsDone()
-   {
-      // empty
    }
 
    @Override

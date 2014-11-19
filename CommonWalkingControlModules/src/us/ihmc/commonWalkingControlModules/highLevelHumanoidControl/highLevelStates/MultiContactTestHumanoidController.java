@@ -127,8 +127,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    {
       momentumRateOfChangeControlModule.setDesiredCoMPosition(desiredCoMPosition);
 
-      momentumRateOfChangeControlModule.startComputation();
-      momentumRateOfChangeControlModule.waitUntilComputationIsDone();
+      momentumRateOfChangeControlModule.compute();
       momentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
