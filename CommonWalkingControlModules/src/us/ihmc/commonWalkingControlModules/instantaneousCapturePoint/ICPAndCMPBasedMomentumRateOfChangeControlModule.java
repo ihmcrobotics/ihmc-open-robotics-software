@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionMomentControlModule;
@@ -65,6 +64,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final double gravityZ;
    private final SpatialForceVector gravitationalWrench;
 
+   private final BooleanYoVariable keepCMPInsideSupportPolygon = new BooleanYoVariable("keepCMPInsideSupportPolygon", registry);
+
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
    private final MomentumCalculator momentumCalculator;
 
@@ -72,11 +73,12 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private RobotSide supportSide;
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
-   private final FramePoint2d capturePoint = new FramePoint2d();
    private double omega0 = 0.0;
-   
-   private final CapturePointTrajectoryData desiredCapturePointTrajectory = new CapturePointTrajectoryData();
-   
+   private final FramePoint2d capturePoint = new FramePoint2d();
+   private final FramePoint2d desiredCapturePoint = new FramePoint2d();
+   private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
+   private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
+
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -109,16 +111,13 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       }
 
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-      boolean projectIntoSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
 
       ReferenceFrame swingSoleFrame = null;
       if (supportSide != null)
          swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
 
-      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
-            desiredCapturePointTrajectory.getFinalDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePoint(),
-            desiredCapturePointTrajectory.getDesiredCapturePointVelocity(), omega0, projectIntoSupportPolygon, supportPolygon,
-            swingSoleFrame);
+      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, finalDesiredCapturePoint, desiredCapturePoint,
+            desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon, swingSoleFrame);
 
       controlledCMP.set(desiredCMP);
 
@@ -145,7 +144,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       desiredDeltaCMP.sub(desiredCMP, desiredCoP);
       controlledDeltaCMP.set(desiredDeltaCMP);
 
-      visualizer.setDesiredCapturePoint(desiredCapturePointTrajectory.getDesiredCapturePoint());
+      visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCoP(desiredCoP);
       visualizer.setDesiredCMP(desiredCMP);
 
@@ -255,9 +254,27 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public void setDesiredCapturePointTrajectory(CapturePointTrajectoryData newCapturePointTrajectoryData)
+   public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint)
    {
-      desiredCapturePointTrajectory.set(newCapturePointTrajectoryData);
+      this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
+   }
+
+   @Override
+   public void setDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocity)
+   {
+      this.desiredCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocity);
+   }
+
+   @Override
+   public void setFinalDesiredCapturePoint(FramePoint2d finalDesiredCapturePoint)
+   {
+      this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
+   }
+
+   @Override
+   public void keepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
+   {
+      this.keepCMPInsideSupportPolygon.set(keepCMPInsideSupportPolygon);
    }
 
    @Override

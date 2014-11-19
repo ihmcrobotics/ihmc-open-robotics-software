@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
@@ -1424,15 +1423,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       icpBasedMomentumRateOfChangeControlModule.setCapturePoint(capturePoint.getFramePoint2dCopy());
       icpBasedMomentumRateOfChangeControlModule.setOmega0(icpAndMomentumBasedController.getOmega0());
 
-      CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();
-      capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
-
       boolean keepCMPInsideSupportPolygon = true;
       if ((manipulationControlModule != null) && (manipulationControlModule.isAtLeastOneHandLoadBearing()))
          keepCMPInsideSupportPolygon = false;
 
-      capturePointTrajectoryData.setProjectCMPIntoSupportPolygon(keepCMPInsideSupportPolygon);
-      icpBasedMomentumRateOfChangeControlModule.setDesiredCapturePointTrajectory(capturePointTrajectoryData);
+      icpBasedMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredICP.getFramePoint2dCopy());
+      icpBasedMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredICPInWorld.getFramePoint2dCopy());
+      icpBasedMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredICPVelocity.getFrameVector2dCopy());
+      icpBasedMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
 
       icpBasedMomentumRateOfChangeControlModule.setSupportLeg(supportLeg.getEnumValue());
 
