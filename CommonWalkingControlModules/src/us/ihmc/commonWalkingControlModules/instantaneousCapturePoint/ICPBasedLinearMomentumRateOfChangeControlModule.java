@@ -27,7 +27,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
-   private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort("supportLegInputPort");
    private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort("capturePointInputPort");
    private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
@@ -54,18 +53,19 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private RobotSide supportSide = null;
 
-   public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, double controlDT, double totalMass, double gravityZ,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+         double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       soleFrames = referenceFrames.getSoleFrames();
-      
+
       this.bipedSupportPolygons = bipedSupportPolygons;
-      
+
       visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.totalMass = totalMass;
       centerOfMass = new FramePoint(centerOfMassFrame);
@@ -83,7 +83,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    @Override
    public void startComputation()
    {
-      RobotSide supportSide = supportLegInputPort.getData();
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
          icpProportionalController.reset();
@@ -173,9 +172,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public ControlFlowInputPort<RobotSide> getSupportLegInputPort()
+   public void setSupportLeg(RobotSide newSupportSide)
    {
-      return supportLegInputPort;
+      supportSide = newSupportSide;
    }
 
    @Override

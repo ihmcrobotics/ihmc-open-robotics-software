@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionMome
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -37,12 +37,9 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-
 public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
-   private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort("bipedSupportPolygonsInputPort");
-   private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort("supportLegInputPort");
    private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort("capturePointInputPort");
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = createInputPort("desiredPelvisOrientationInputPort");
    private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
@@ -74,32 +71,36 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
    private final MomentumCalculator momentumCalculator;
 
-   public ICPAndCMPBasedMomentumRateOfChangeControlModule(ReferenceFrame pelvisFrame, ReferenceFrame centerOfMassFrame, 
-         SideDependentList<ReferenceFrame> soleFrames,
-           TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ,
-           YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private RobotSide supportSide;
+   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+
+   public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+         TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
-
-      this.icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
-      this.groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
-      this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie TODO: move to setGains method
-
-      this.momentumCalculator = new MomentumCalculator(twistCalculator);
-      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
-      this.pelvisFrame = pelvisFrame;
-      this.centerOfMassFrame = centerOfMassFrame;
-      this.soleFrames = soleFrames;
+      this.pelvisFrame = referenceFrames.getPelvisFrame();
+      this.centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      this.soleFrames = referenceFrames.getSoleFrames();
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
-      this.gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
-      this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      this.bipedSupportPolygons = bipedSupportPolygons;
+
+      icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
+      groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
+      groundReactionMomentControlModule.setGains(10.0, 100.0); // kPelvisYaw was 0.0 for M3 movie TODO: move to setGains method
+
+      momentumCalculator = new MomentumCalculator(twistCalculator);
+      visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
+      gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
+      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void startComputation()
    {
-      RobotSide supportSide = supportLegInputPort.getData();
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
          icpProportionalController.reset();
@@ -107,17 +108,19 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 
       CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
-      FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
+      supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
       boolean projectIntoSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
 
       ReferenceFrame swingSoleFrame = null;
-      if (supportSide != null) swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
-      
-      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(), desiredCapturePointTrajectory.getFinalDesiredCapturePoint(),
-                                   desiredCapturePointTrajectory.getDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
-                                   capturePointData.getOmega0(), projectIntoSupportPolygon, supportPolygon, swingSoleFrame);
+      if (supportSide != null)
+         swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
 
-      this.controlledCMP.set(desiredCMP);
+      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(),
+            desiredCapturePointTrajectory.getFinalDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePoint(),
+            desiredCapturePointTrajectory.getDesiredCapturePointVelocity(), capturePointData.getOmega0(), projectIntoSupportPolygon, supportPolygon,
+            swingSoleFrame);
+
+      controlledCMP.set(desiredCMP);
 
       Momentum momentum = new Momentum(centerOfMassFrame);
       momentumCalculator.computeAndPack(momentum);
@@ -137,10 +140,10 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
          copProjected.set(true);
       }
 
-      desiredCoP.changeFrame(this.controlledCoP.getReferenceFrame());
-      this.controlledCoP.set(desiredCoP);
+      desiredCoP.changeFrame(controlledCoP.getReferenceFrame());
+      controlledCoP.set(desiredCoP);
       desiredDeltaCMP.sub(desiredCMP, desiredCoP);
-      this.controlledDeltaCMP.set(desiredDeltaCMP);
+      controlledDeltaCMP.set(desiredDeltaCMP);
 
       visualizer.setDesiredCapturePoint(desiredCapturePointTrajectory.getDesiredCapturePoint());
       visualizer.setDesiredCoP(desiredCoP);
@@ -155,7 +158,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       SpatialForceVector rateOfChangeOfMomentum = computeTotalGroundReactionWrench(desiredCoP, desiredCMP, fZ, normalMoment);
       rateOfChangeOfMomentum.changeFrame(gravitationalWrench.getExpressedInFrame());
       rateOfChangeOfMomentum.sub(gravitationalWrench);
-      
+
       momentumRateOfChangeData.set(rateOfChangeOfMomentum);
    }
 
@@ -179,12 +182,13 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       return ret;
    }
 
-   public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle, double captureKpParallelToMotion, double captureKpOrthogonalToMotion, 
+   public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle, double captureKpParallelToMotion, double captureKpOrthogonalToMotion,
          double captureKi, double captureKiBleedoff, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
    {
       this.kAngularMomentumXY.set(kAngularMomentumXY);
       this.kPelvisAxisAngle.set(kPelvisAxisAngle);
-      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz, rateLimitCMP, accelerationLimitCMP);
+      icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz,
+            rateLimitCMP, accelerationLimitCMP);
    }
 
    private FrameVector2d determineDesiredDeltaCMP(FrameOrientation desiredPelvisOrientation, Momentum momentum)
@@ -222,73 +226,33 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       }
 
       return desiredDeltaCMP.toFrameVector2d();
-
-//      ReferenceFrame frame = ReferenceFrame.getWorldFrame();
-//      
-//      desiredPelvisOrientation.changeFrame(frame);
-//      double[] yawPitchRoll = desiredPelvisOrientation.getYawPitchRoll();
-//      double desiredPelvisPitch = yawPitchRoll[1];
-//      double desiredPelvisRoll = yawPitchRoll[2];
-//
-//      FrameVector zUnitVector = new FrameVector(frame, 0.0, 0.0, 1.0);
-//      momentum.changeFrame(centerOfMassFrame);
-//      FrameVector angularMomentum = momentum.getAngularPartAsFrameVectorCopy();
-//      angularMomentum.changeFrame(worldFrame);
-//      FrameVector desiredDeltaCMP = new FrameVector(frame);
-//      desiredDeltaCMP.cross(angularMomentum, zUnitVector);
-//      desiredDeltaCMP.scale(-kAngularMomentumXY.getDoubleValue());
-//
-//      Transform3D pelvisToWorld = pelvisFrame.getTransformToDesiredFrame(frame);
-//      Matrix3d pelvisToDesiredPelvis = new Matrix3d();
-//      pelvisToWorld.get(pelvisToDesiredPelvis);
-//
-//      Matrix3d desiredPelvisToWorldRotation = new Matrix3d();
-//      RotationFunctions.setYawPitchRoll(desiredPelvisToWorldRotation, 0.0, desiredPelvisPitch, desiredPelvisRoll);
-//      pelvisToDesiredPelvis.mulTransposeLeft(desiredPelvisToWorldRotation, pelvisToDesiredPelvis);
-//
-//      AxisAngle4d pelvisToWorldAxisAngle = new AxisAngle4d();
-//      pelvisToWorldAxisAngle.set(pelvisToDesiredPelvis);
-//      FrameVector proportionalPart = new FrameVector(frame, pelvisToWorldAxisAngle.getX(), pelvisToWorldAxisAngle.getY(), 0.0);
-//      proportionalPart.scale(pelvisToWorldAxisAngle.getAngle());
-//      proportionalPart.cross(proportionalPart, zUnitVector);
-//      proportionalPart.scale(-kPelvisAxisAngle.getDoubleValue());
-//      desiredDeltaCMP.add(proportionalPart);
-//      
-//      double maxDeltaDesiredCMP = 0.02;
-//      if (desiredDeltaCMP.length() > maxDeltaDesiredCMP)
-//      {
-//         desiredDeltaCMP.normalize();
-//         desiredDeltaCMP.scale(maxDeltaDesiredCMP);
-//      }
-//
-//      return desiredDeltaCMP.toFrameVector2d();
    }
 
+   @Override
    public void waitUntilComputationIsDone()
    {
       // empty
    }
 
-   public ControlFlowInputPort<BipedSupportPolygons> getBipedSupportPolygonsInputPort()
+   @Override
+   public void setSupportLeg(RobotSide newSupportSide)
    {
-      return bipedSupportPolygonsInputPort;
+      supportSide = newSupportSide;
    }
 
-   public ControlFlowInputPort<RobotSide> getSupportLegInputPort()
-   {
-      return supportLegInputPort;
-   }
-
+   @Override
    public ControlFlowInputPort<CapturePointData> getCapturePointInputPort()
    {
       return capturePointInputPort;
    }
 
+   @Override
    public ControlFlowInputPort<CapturePointTrajectoryData> getDesiredCapturePointTrajectoryInputPort()
    {
       return desiredCapturePointTrajectoryInputPort;
    }
 
+   @Override
    public ControlFlowInputPort<Double> getDesiredCenterOfMassHeightAccelerationInputPort()
    {
       return desiredCenterOfMassHeightAccelerationInputPort;
@@ -299,16 +263,19 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       return desiredPelvisOrientationInputPort;
    }
 
+   @Override
    public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
    {
       momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
    }
 
+   @Override
    public void initialize()
    {
-//    empty
+      //    empty
    }
 
+   @Override
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
       controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
