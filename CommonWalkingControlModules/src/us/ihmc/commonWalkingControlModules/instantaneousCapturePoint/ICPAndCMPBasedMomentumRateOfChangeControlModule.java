@@ -40,7 +40,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
-   private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort("capturePointInputPort");
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = createInputPort("desiredPelvisOrientationInputPort");
    private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
@@ -74,6 +73,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private final BipedSupportPolygons bipedSupportPolygons;
    private RobotSide supportSide;
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private final CapturePointData capturePointData = new CapturePointData();
 
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
@@ -106,7 +106,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
          icpProportionalController.reset();
       }
 
-      CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
       boolean projectIntoSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
@@ -165,7 +164,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    private SpatialForceVector computeTotalGroundReactionWrench(FramePoint2d cop2d, FramePoint2d cmp2d, double fZ, FrameVector normalMoment)
    {
       FramePoint centerOfMass = new FramePoint(centerOfMassFrame);
-      FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
+      FramePoint cmp3d = WrenchDistributorTools.computePseudoCMP3d(centerOfMass, cmp2d, fZ, totalMass, capturePointData.getOmega0());
       FrameVector force = WrenchDistributorTools.computeForce(centerOfMass, cmp3d, fZ);
       force.changeFrame(centerOfMassFrame);
 
@@ -241,9 +240,9 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public ControlFlowInputPort<CapturePointData> getCapturePointInputPort()
+   public void setCapturePointData(CapturePointData newCapturePointData)
    {
-      return capturePointInputPort;
+      capturePointData.set(newCapturePointData);
    }
 
    @Override

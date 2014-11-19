@@ -27,7 +27,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
-   private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort("capturePointInputPort");
    private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort("desiredCapturePointTrajectoryInputPort");
 
    private final MomentumRateOfChangeData momentumRateOfChangeData;
@@ -55,6 +54,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private RobotSide supportSide = null;
 
+   private final CapturePointData capturePointData = new CapturePointData();
+   
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -88,7 +89,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
          icpProportionalController.reset();
       }
 
-      CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
       FramePoint2d finalDesiredCapturePoint = desiredCapturePointTrajectory.getFinalDesiredCapturePoint();
       FramePoint2d desiredCapturePoint = desiredCapturePointTrajectory.getDesiredCapturePoint();
@@ -135,7 +135,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
-      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, capturePointInputPort.getData().getOmega0());
+      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, capturePointData.getOmega0());
 
       visualizer.setPseudoCMP(cmp3d);
 
@@ -178,9 +178,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    }
 
    @Override
-   public ControlFlowInputPort<CapturePointData> getCapturePointInputPort()
+   public void setCapturePointData(CapturePointData newCapturePointData)
    {
-      return capturePointInputPort;
+      capturePointData.set(newCapturePointData);
    }
 
    @Override
