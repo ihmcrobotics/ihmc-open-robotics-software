@@ -100,7 +100,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBased
    }
 
    @Override
-   public void startComputation()
+   public void compute()
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
@@ -221,12 +221,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBased
       }
 
       return desiredDeltaCMP.toFrameVector2d();
-   }
-
-   @Override
-   public void waitUntilComputationIsDone()
-   {
-      // empty
    }
 
    @Override

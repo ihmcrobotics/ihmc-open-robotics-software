@@ -217,7 +217,7 @@ public class SimpleStanceController implements RobotController
 
    private void controlLinearMomentum()
    {
-      momentumRateOfChangeControlModule.startComputation();
+      momentumRateOfChangeControlModule.compute();
       momentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       
       DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);

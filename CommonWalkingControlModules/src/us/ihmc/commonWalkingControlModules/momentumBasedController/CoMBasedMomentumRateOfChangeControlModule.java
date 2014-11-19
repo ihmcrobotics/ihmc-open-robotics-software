@@ -35,7 +35,7 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    }
 
    @Override
-   public void startComputation()
+   public void compute()
    {
       FrameVector comd = new FrameVector(centerOfMassFrame);
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
@@ -47,12 +47,6 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
       comPositionController.compute(output, desiredCoM, desiredCoMd, comd, feedForward);
 
       momentumRateOfChangeData.setLinearMomentumRateOfChange(output);
-   }
-
-   @Override
-   public void waitUntilComputationIsDone()
-   {
-      //    empty
    }
 
    @Override

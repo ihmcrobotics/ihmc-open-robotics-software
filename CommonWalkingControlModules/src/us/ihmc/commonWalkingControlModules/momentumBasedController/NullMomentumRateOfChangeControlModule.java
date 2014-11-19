@@ -19,13 +19,7 @@ public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChan
    }
 
    @Override
-   public void startComputation()
-   {
-      // empty
-   }
-
-   @Override
-   public void waitUntilComputationIsDone()
+   public void compute()
    {
       // empty
    }

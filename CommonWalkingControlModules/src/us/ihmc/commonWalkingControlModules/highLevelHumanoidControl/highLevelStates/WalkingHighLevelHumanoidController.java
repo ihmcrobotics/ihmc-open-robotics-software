@@ -1435,8 +1435,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       icpBasedMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(controlledCoMHeightAcceleration.getDoubleValue());
 
-      icpBasedMomentumRateOfChangeControlModule.startComputation();
-      icpBasedMomentumRateOfChangeControlModule.waitUntilComputationIsDone();
+      icpBasedMomentumRateOfChangeControlModule.compute();
       icpBasedMomentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
    }
