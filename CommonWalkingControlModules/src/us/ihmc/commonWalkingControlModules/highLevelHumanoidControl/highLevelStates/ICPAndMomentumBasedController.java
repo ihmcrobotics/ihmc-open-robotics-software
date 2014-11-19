@@ -3,9 +3,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.ConstantOmega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface;
@@ -43,23 +46,37 @@ public class ICPAndMomentumBasedController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final ReferenceFrame centerOfMassFrame;
    private final MomentumBasedController momentumBasedController;
 
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final YoFramePoint2d desiredICP;
-   private final YoFrameVector2d desiredICPVelocity;
-   private final EnumYoVariable<RobotSide> supportLeg;
-   private final DoubleYoVariable controlledCoMHeightAcceleration;
-   private final YoFramePoint yoCapturePoint;
-   private final DoubleYoVariable omega0;
+   private final YoFramePoint2d desiredICP = new YoFramePoint2d("desiredICP", "", worldFrame, registry);
+   private final YoFrameVector2d desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", worldFrame, registry);
+   private final EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
+   private final DoubleYoVariable controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
+   private final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
+   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    private final Omega0CalculatorInterface omega0Calculator;
 
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
+   private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
+   private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
+
+   private final FramePoint2d capturePoint2d = new FramePoint2d(worldFrame);
+   private final FramePoint2d centerOfMassPosition2d = new FramePoint2d(worldFrame);
+   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d(worldFrame);
+
+   private final SpatialForceVector admissibleGroundReactionWrench = new SpatialForceVector();
+
+   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<PlaneContactState>();
+
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
+
+   private final SpatialForceVector gravitationalWrench;
 
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -72,6 +89,10 @@ public class ICPAndMomentumBasedController
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
+      double gravityZ = momentumBasedController.getGravityZ();
+      centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
+      gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
+
       if (USE_CONSTANT_OMEGA0)
       {
          double constantOmega0 = 3.4;
@@ -79,20 +100,17 @@ public class ICPAndMomentumBasedController
       }
       else
       {
-         ReferenceFrame centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
          this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
       }
 
-      omega0 = new DoubleYoVariable("omega0", registry);
-      yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
-      this.controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
       this.bipedFeet = bipedFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      desiredICP = new YoFramePoint2d("desiredICP", "", worldFrame, registry);
-      desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", worldFrame, registry);
-
-      supportLeg = EnumYoVariable.create("supportLeg", "", RobotSide.class, registry, true);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoPlaneContactState footContactState = momentumBasedController.getContactState(bipedFeet.get(robotSide));
+         footContactStates.put(robotSide, footContactState);
+      }
 
       // TODO: Have local updatables, instead of adding them to the momentum based controller.
 
@@ -114,8 +132,6 @@ public class ICPAndMomentumBasedController
          yoGraphicsListRegistry.registerYoGraphic("Capture Point", capturePointViz);
          yoGraphicsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
       }
-
-      capturePointOffsetY.set(0.0);
    }
 
    public void updateUpdatables(double time)
@@ -135,48 +151,25 @@ public class ICPAndMomentumBasedController
       return omega0.getDoubleValue();
    }
 
-   private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
-   private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
-
-   private final FramePoint2d capturePoint2d = new FramePoint2d(worldFrame);
-   private final FramePoint2d centerOfMassPosition2d = new FramePoint2d(worldFrame);
-   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d(worldFrame);
-
-   //
-   private final DoubleYoVariable capturePointOffsetY = new DoubleYoVariable("capturePointOffsetY", registry);
-   private final FrameVector2d capturePointOffsetHack2d = new FrameVector2d();
-
    public void computeCapturePoint()
    {
-      centerOfMassPosition.setToZero(momentumBasedController.getCenterOfMassFrame());
-      momentumBasedController.getCenterOfMassJacobian().packCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+      momentumBasedController.getCenterOfMassVelocity(centerOfMassVelocity);
 
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
 
-      centerOfMassPosition2d.set(centerOfMassPosition.getX(), centerOfMassPosition.getY());
-      centerOfMassVelocity2d.set(centerOfMassVelocity.getX(), centerOfMassVelocity.getY());
+      centerOfMassPosition2d.setByProjectionOntoXYPlane(centerOfMassPosition);
+      centerOfMassVelocity2d.setByProjectionOntoXYPlane(centerOfMassVelocity);
 
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, getOmega0());
 
-      ReferenceFrame midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
-      capturePointOffsetHack2d.setIncludingFrame(midFeetZUpFrame, 0.0, capturePointOffsetY.getDoubleValue());
-      capturePointOffsetHack2d.changeFrame(capturePoint2d.getReferenceFrame());
-      capturePoint2d.add(capturePointOffsetHack2d);
-
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
-      yoCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
+      yoCapturePoint.setXY(capturePoint2d);
    }
-
-   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<PlaneContactState>();
 
    protected void updateBipedSupportPolygons()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footContactStates.put(robotSide, momentumBasedController.getContactState(bipedFeet.get(robotSide)));
-      }
-
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
 
       if (capturabilityBasedStatusProducer != null)
@@ -212,23 +205,9 @@ public class ICPAndMomentumBasedController
                cops.add(coP);
          }
 
-         ReferenceFrame centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
-         SpatialForceVector admissibleGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
+         momentumBasedController.getAdmissibleDesiredGroundReactionWrench(admissibleGroundReactionWrench);
 
-         //       FrameVector force = admissibleDesiredGroundReactionForce.getFrameVectorCopy();
-         FrameVector force = momentumBasedController.getAdmissibleDesiredGroundReactionForceCopy();
-
-         force.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
-         admissibleGroundReactionWrench.setLinearPart(force.getVector());
-
-         //       FrameVector torque = admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
-         FrameVector torque = momentumBasedController.getAdmissibleDesiredGroundReactionTorqueCopy();
-
-         torque.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
-         admissibleGroundReactionWrench.setAngularPart(torque.getVector());
-
-         SpatialForceVector gravitationalWrench = momentumBasedController.getGravitationalWrench();
-         if (admissibleGroundReactionWrench.getLinearPartCopy().getZ() == 0.0)
+         if (admissibleGroundReactionWrench.getLinearPartZ() == 0.0)
             admissibleGroundReactionWrench.set(gravitationalWrench); // FIXME: hack to resolve circularity
 
          omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));

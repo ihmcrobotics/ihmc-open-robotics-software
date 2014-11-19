@@ -132,7 +132,7 @@ public class MomentumBasedController
 
    private final MomentumControlModuleBridge momentumControlModuleBridge;
 
-   private final SpatialForceVector gravitationalWrench;
+   @Deprecated
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true); // FIXME: not general enough; this should not be here
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
@@ -225,8 +225,6 @@ public class MomentumBasedController
       inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-
-      gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       this.finalDesiredPelvisLinearAcceleration = new YoFrameVector("finalDesiredPelvisLinearAcceleration", "", pelvisFrame, registry);
@@ -393,11 +391,6 @@ public class MomentumBasedController
       {
          feetContactStatesToPack.add(yoPlaneContactStates.get(feet.get(robotSide)));
       }
-   }
-
-   public SpatialForceVector getGravitationalWrench()
-   {
-      return gravitationalWrench;
    }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
@@ -1035,6 +1028,7 @@ public class MomentumBasedController
       return referenceFrames.getPelvisZUpFrame();
    }
 
+   @Deprecated
    public EnumYoVariable<RobotSide> getUpcomingSupportLeg()
    {
       return upcomingSupportLeg;
@@ -1080,14 +1074,15 @@ public class MomentumBasedController
       return centerOfMassJacobian;
    }
 
-   public FrameVector getAdmissibleDesiredGroundReactionForceCopy()
+   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
-      return admissibleDesiredGroundReactionForce.getFrameVectorCopy();
+      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocityToPack);
    }
 
-   public FrameVector getAdmissibleDesiredGroundReactionTorqueCopy()
+   public void getAdmissibleDesiredGroundReactionWrench(SpatialForceVector admissibleDesiredGroundReactionWrenchToPack)
    {
-      return admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
+      admissibleDesiredGroundReactionWrenchToPack.setToZero(centerOfMassFrame);
+      admissibleDesiredGroundReactionWrenchToPack.set(admissibleDesiredGroundReactionForce.getFrameTuple(), admissibleDesiredGroundReactionTorque.getFrameTuple());
    }
 
    public SideDependentList<ContactablePlaneBody> getContactableFeet()
