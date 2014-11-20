@@ -269,7 +269,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             scsJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
 
             WrenchCalculatorInterface wrenchCalculator;
-            if (joint.getName().contains("leg") || joint.getName().contains("Ankle"))
+            if (joint.getName().contains("leg") || joint.getName().contains("Ankle") || joint.getName().contains("ankle"))
             {
                System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
                wrenchCalculator = new GroundContactPointBasedWrenchCalculator(
