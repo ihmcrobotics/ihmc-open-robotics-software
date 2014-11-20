@@ -135,14 +135,18 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          for (SDFSensor sensor : child.getSensors())
          {
-            RigidBodyTransform pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
+            // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
+            RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
+            linkRotation.setTranslation(0.0, 0.0, 0.0);
+            RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
+            linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
             if ("imu".equals(sensor.getType()))
             {
                final IMU imu = sensor.getImu();
 
                if (imu != null)
                {
-                  IMUDefinition imuDefinition = new IMUDefinition(child.getName() + "_" + sensor.getName(), joint.getSuccessor(), pose);
+                  IMUDefinition imuDefinition = new IMUDefinition(child.getName() + "_" + sensor.getName(), joint.getSuccessor(), linkToSensorInZUp);
 
                   imuDefinitions.add(imuDefinition);
                }
@@ -156,7 +160,7 @@ public class SDFFullRobotModel implements FullRobotModel
                List<Camera> cameras = sensor.getCamera();
                if(cameras != null)
                {
-                  ReferenceFrame sensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName(), joint.getFrameAfterJoint(), pose);
+                  ReferenceFrame sensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName(), joint.getFrameAfterJoint(), linkToSensorInZUp);
                   for(Camera camera : cameras)
                   {
                      RigidBodyTransform cameraTransform = SDFConversionsHelper.poseToTransform(camera.getPose()); 
@@ -178,7 +182,7 @@ public class SDFFullRobotModel implements FullRobotModel
                {
                   ReferenceFrame lidarFrame = joint.getFrameBeforeJoint();
                   lidarBaseFrames.put(sensor.getName(), lidarFrame);
-                  lidarBaseToSensorTransform.put(sensor.getName(), pose);
+                  lidarBaseToSensorTransform.put(sensor.getName(), linkToSensorInZUp);
                   lidarAxis.put(sensor.getName(), ((RevoluteJoint) joint).getJointAxis());
                   lidarJoints.add((OneDoFJoint) joint);
                }
