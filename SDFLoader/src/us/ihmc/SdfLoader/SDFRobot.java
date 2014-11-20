@@ -57,7 +57,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 {
 
-   private static final boolean SHOW_CONTACT_POINTS = false;
+   private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
 
