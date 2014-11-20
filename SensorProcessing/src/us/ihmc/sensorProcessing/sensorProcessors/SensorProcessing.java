@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -229,10 +230,42 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     */
    public void computeJointVelocityFromFiniteDifference(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
+      computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly);
+   }
+
+   /**
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions. It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be processed.
+    */
+   public void computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly, invertJointSelection(jointsToBeProcessed));
+   }
+
+   /**
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions. It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String suffix = "_sp" + processors.size();
@@ -252,10 +285,42 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     */
    public void computeJointVelocityWithBacklashCompensator(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly)
    {
+      computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly);
+   }
+
+   /**
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be processed.
+    */
+   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly, invertJointSelection(jointsToBeProcessed));
+   }
+
+   /**
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
 
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
@@ -276,16 +341,48 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     */
    public void addJointVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
+      addJointVelocityAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly);
+   }
+
+   /**
+    * Add a low-pass filter stage on the joint velocities for a specific subset of joints.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    */
+   public void addJointVelocityAlphaFilterOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      addJointVelocityAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly, invertJointSelection(jointsToBeProcessed));
+   }
+
+   /**
+    * Add a low-pass filter stage on the joint velocities for a specific subset of joints.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void addJointVelocityAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
          DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String suffix = "_sp" + processors.size();
          AlphaFilteredYoVariable filteredJointVelocity = new AlphaFilteredYoVariable("filt_qd_" + jointName + suffix, registry, alphaFilter, intermediateJointVelocity);
          processors.add(filteredJointVelocity);
-         
+
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
       }
@@ -398,6 +495,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
       
       return stiffesses;
+   }
+
+   private String[] invertJointSelection(String... subSelection)
+   {
+      List<String> invertSelection = new ArrayList<>();
+      List<String> originalJointSensorSelectionList = new ArrayList<>();
+      if (subSelection != null && subSelection.length > 0)
+         originalJointSensorSelectionList.addAll(Arrays.asList(subSelection));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         String jointName = jointSensorDefinitions.get(i).getName();
+         if (!originalJointSensorSelectionList.contains(jointName))
+            invertSelection.add(jointName);
+      }
+      return (String[]) invertSelection.toArray();
    }
 
    @Override
