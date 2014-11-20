@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class AtlasHandPoseStatusTest extends HandPoseStatusTest
 {
-private AtlasRobotModel robotModel= new AtlasRobotModel(AtlasRobotVersion.ATLAS_ROBOTIQ_HOOK, AtlasRobotModel.AtlasTarget.SIM, false); 
+   private AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    
    @Override
    public DRCRobotModel getRobotModel()

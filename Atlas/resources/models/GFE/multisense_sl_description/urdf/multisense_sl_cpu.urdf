@@ -31,12 +31,9 @@
   </link>
   <link name="hokuyo_link">
     <inertial>
-      <origin xyz="0.012428 0.0004084 -0.0041835" rpy="0 0 0" />
+      <origin xyz="0.032428 0.0004084 -0.0041835" rpy="0 0 0" />
       <mass value="0.057654" />
-      <!--<inertia iyy="4.2412E-05" ixy="4.9927E-08" iyz="-9.8165E-09" ixx="3.7174E-05" ixz="1.1015E-05" izz="4.167E-05" />-->
-      <!-- distribute iyy and izz equally between head and hokuyo_link given it's constrainted anyways -->
-      <!-- tweak ixx of hokuyo so it's larger, 1/10th of head ixx. -->
-      <inertia iyy="0.002080106" ixy="4.9927E-08" iyz="-9.8165E-09" ixx="0.0004005974" ixz="1.1015E-05" izz="0.001782985" />
+      <inertia iyy="4.2412E-05" ixy="4.9927E-08" iyz="-9.8165E-09" ixx="3.7174E-05" ixz="1.1015E-05" izz="4.167E-05" />
     </inertial>
     <visual>
       <!--origin xyz="0.065774 -0.001163 -0.08809" rpy="0 0 0" /-->
@@ -62,6 +59,14 @@
     </geometry>
   </collision>
   </link>
+  <gazebo reference="head">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+  <gazebo reference="hokuyo_link">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
 
   <!-- Head Link Complex Collision Meshes
   <link name="head">
@@ -117,6 +122,9 @@
     <axis xyz="1 0 0" />
     <dynamics damping="0.01" friction="0"/>
   </joint>
+  <gazebo reference="hokuyo_joint">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
 
   <!-- Hokuyo Laser -->
   <joint name="head_hokuyo_joint" type="fixed">

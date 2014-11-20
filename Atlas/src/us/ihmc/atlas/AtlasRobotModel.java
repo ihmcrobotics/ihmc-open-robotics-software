@@ -40,20 +40,19 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
-import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 import com.jme3.math.Transform;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -216,12 +215,9 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public HandModel getHandModel()
    {
-      if (selectedVersion.hasIrobotHands())
-         return new iRobotHandModel();
-      else if (selectedVersion.hasRobotiqHands())
+      if (selectedVersion.hasRobotiqHands())
          return new RobotiqHandModel();
-      else
-         return null;
+      return null;
    }
 
    @Override

@@ -11,8 +11,10 @@
   <build_depend>multisense_sl_description</build_depend>
   <build_depend>sandia_hand_description</build_depend>
   <build_depend>irobot_hand_description</build_depend>
+  <build_depend>robotiq_hand_description</build_depend>
   <run_depend>multisense_sl_description</run_depend>
   <run_depend>sandia_hand_description</run_depend>
   <run_depend>irobot_hand_description</run_depend>
+  <run_depend>robotiq_hand_description</run_depend>
   <run_depend>xacro</run_depend>
 </package>

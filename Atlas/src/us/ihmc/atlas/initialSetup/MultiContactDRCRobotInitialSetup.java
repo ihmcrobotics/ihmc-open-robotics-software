@@ -5,7 +5,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_elx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_ely;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shy;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpx;
@@ -37,7 +37,7 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
-         robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_shy]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
+         robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_shz]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_shx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_ely]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_PITCH));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_elx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_ROLL));
