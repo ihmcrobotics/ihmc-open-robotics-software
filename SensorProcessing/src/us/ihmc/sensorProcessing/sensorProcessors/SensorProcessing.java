@@ -172,6 +172,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
+   /**
+    * Add a low-pass filter stage on the joint positions.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
    public void addJointPositionAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -189,6 +195,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
+   /**
+    * Apply an elasticity compensator to correct the joint positions according their torque and a given stiffness.
+    * Useful when the robot has a non negligible elasticity in the links or joints.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param stiffnesses estimated stiffness for each joint.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
    public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, boolean forVizOnly)
    {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -208,6 +221,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
+   /**
+    * Compute the joint velocities by calculating finite-difference on joint positions. It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
    public void computeJointVelocityFromFiniteDifference(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -225,6 +244,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
+   /**
+    * Compute the joint velocities by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
    public void computeJointVelocityWithBacklashCompensator(DoubleYoVariable alphaFilter, DoubleYoVariable slopTime, boolean forVizOnly)
    {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -243,6 +268,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
+   /**
+    * Add a low-pass filter stage on the joint velocities.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
    public void addJointVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -260,7 +291,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
-   public void addOrientationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   /**
+    * Add a low-pass filter stage on the orientations provided by the IMU sensors.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addIMUOrientationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
@@ -277,7 +314,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
-   public void addAngularVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   /**
+    * Add a low-pass filter stage on the angular velocities provided by the IMU sensors.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addIMUAngularVelocityAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
@@ -294,7 +337,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
-   public void addLinearAccelerationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   /**
+    * Add a low-pass filter stage on the linear accelerations provided by the IMU sensors.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addIMULinearAccelerationAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
    {
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
@@ -311,6 +360,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
+   /**
+    * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered in the {@code SensorProcessing}'s {@code YoVariableRegistry}.
+    * @param name name of the variable.
+    * @param breakFrequency break frequency in Hertz
+    * @return a {@code DoubleYoVariable} to be used when adding a low-pass filter stage using the methods in this class such as {@link SensorProcessing#addJointVelocityAlphaFilter(DoubleYoVariable, boolean)}.
+    */
    public DoubleYoVariable createAlphaFilter(String name, double breakFrequency)
    {
       DoubleYoVariable alphaFilter = new DoubleYoVariable(name, registry);
@@ -318,6 +373,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return alphaFilter;
    }
 
+   /**
+    * Helper to create easily a {@code Map<OneDoFJoint, DoubleYoVariable>} referring to the stiffness for each joint.
+    * @param nameSuffix suffix to be used in the variables' name.
+    * @param defaultStiffness default value of stiffness to use when not referred in the jointSpecificStiffness.
+    * @param jointSpecificStiffness {@code Map<String, Double>} referring the specific stiffness value to be used for each joint. Does not need to be exhaustive, can also be empty or null in which the defaultStiffness is used for every joint.
+    * @return {@code Map<OneDoFJoint, DoubleYoVariable>} to be used when calling {@link SensorProcessing#addJointPositionElasticyCompensator(Map, boolean)}.
+    */
    public Map<OneDoFJoint, DoubleYoVariable> createStiffness(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness)
    {
       LinkedHashMap<OneDoFJoint, DoubleYoVariable> stiffesses = new LinkedHashMap<>();
