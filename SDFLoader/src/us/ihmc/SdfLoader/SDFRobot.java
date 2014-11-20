@@ -60,7 +60,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
-   private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
+   private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = true;
 
    private final ArrayList<String> resourceDirectories;
 
@@ -474,10 +474,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          for (Camera camera : cameras)
          {
+            // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
+            RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
+            linkRotation.setTranslation(0.0, 0.0, 0.0);
             RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
             RigidBodyTransform sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
             RigidBodyTransform linkToCamera = new RigidBodyTransform();
-            linkToCamera.multiply(linkToSensor, sensorToCamera);
+            linkToCamera.multiply(linkRotation, linkToSensor);
+            linkToCamera.multiply(sensorToCamera);
             showCordinateSystem(scsJoint, linkToCamera);
 
             double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
@@ -504,9 +508,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
       if (imu != null)
       {
-         RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
-         showCordinateSystem(scsJoint, linkToSensor);
-         IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), linkToSensor, this);
+         // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
+         RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
+         linkRotation.setTranslation(0.0, 0.0, 0.0);
+         RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
+         linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
+
+         showCordinateSystem(scsJoint, linkToSensorInZUp);
+         IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), linkToSensorInZUp, this);
 
          IMUNoise noise = imu.getNoise();
          if (noise != null)
@@ -589,8 +598,12 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange,
                (float) sdfMaxRange, 0.0f);
 
-         RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
-         showCordinateSystem(scsJoint, linkToSensor);
+         // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
+         RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
+         linkRotation.setTranslation(0.0, 0.0, 0.0);
+         RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
+         linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
+         showCordinateSystem(scsJoint, linkToSensorInZUp);
 
          SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
          noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
@@ -605,7 +618,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          updateParameters.setAlwaysOn(sdfAlwaysOn);
          updateParameters.setUpdateRate(sdfUpdateRate);
 
-         LidarMount lidarMount = new LidarMount(linkToSensor, polarDefinition, sensor.getName());
+         LidarMount lidarMount = new LidarMount(linkToSensorInZUp, polarDefinition, sensor.getName());
          scsJoint.addSensor(lidarMount);
 
       }
