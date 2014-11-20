@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -19,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -31,7 +30,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristRollLimits = new ArrayList<Double>();
-   private static final ArrayList<Double> shoulderPitchLimits = new ArrayList<Double>();
+   private static final ArrayList<Double> shoulderYawLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowPitchLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristPitchLimits = new ArrayList<Double>();
    private final EnumMap<JointNames, OneDoFJoint> oneDoFJoints = new EnumMap<JointNames, OneDoFJoint>(JointNames.class);
@@ -56,7 +55,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private enum JointNames
    {
-      SHOULDER_PITCH, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL;
+      SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL;
    }
 
    ;;
@@ -247,13 +246,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private void populateEnumMaps()
    {
-      oneDoFJoints.put(JointNames.SHOULDER_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH));
+      oneDoFJoints.put(JointNames.SHOULDER_YAW, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW));
       oneDoFJoints.put(JointNames.SHOULDER_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL));
       oneDoFJoints.put(JointNames.ELBOW_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH));
       oneDoFJoints.put(JointNames.ELBOW_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL));
       oneDoFJoints.put(JointNames.WRIST_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_PITCH));
       oneDoFJoints.put(JointNames.WRIST_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL));
-      jointLimits.put(JointNames.SHOULDER_PITCH, shoulderPitchLimits);
+      jointLimits.put(JointNames.SHOULDER_YAW, shoulderYawLimits);
       jointLimits.put(JointNames.SHOULDER_ROLL, shoulderRollLimits);
       jointLimits.put(JointNames.ELBOW_PITCH, elbowPitchLimits);
       jointLimits.put(JointNames.ELBOW_ROLL, elbowRollLimits);
@@ -263,8 +262,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       // *_*_Limits(*_*_Max, *_*_Min);
       shoulderRollLimits.add(oneDoFJoints.get(JointNames.SHOULDER_ROLL).getJointLimitUpper());
       shoulderRollLimits.add(oneDoFJoints.get(JointNames.SHOULDER_ROLL).getJointLimitLower());
-      shoulderPitchLimits.add(oneDoFJoints.get(JointNames.SHOULDER_PITCH).getJointLimitUpper());
-      shoulderPitchLimits.add(oneDoFJoints.get(JointNames.SHOULDER_PITCH).getJointLimitLower());
+      shoulderYawLimits.add(oneDoFJoints.get(JointNames.SHOULDER_YAW).getJointLimitUpper());
+      shoulderYawLimits.add(oneDoFJoints.get(JointNames.SHOULDER_YAW).getJointLimitLower());
       elbowRollLimits.add(oneDoFJoints.get(JointNames.ELBOW_ROLL).getJointLimitUpper());
       elbowRollLimits.add(oneDoFJoints.get(JointNames.ELBOW_ROLL).getJointLimitLower());
       elbowPitchLimits.add(oneDoFJoints.get(JointNames.ELBOW_PITCH).getJointLimitUpper());
@@ -273,7 +272,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_ROLL).getJointLimitLower());
       wristPitchLimits.add(oneDoFJoints.get(JointNames.WRIST_PITCH).getJointLimitUpper());
       wristPitchLimits.add(oneDoFJoints.get(JointNames.WRIST_PITCH).getJointLimitLower());
-      jointAnglesInitial.put(JointNames.SHOULDER_PITCH, 0.346);
+      jointAnglesInitial.put(JointNames.SHOULDER_YAW, 0.346);
       jointAnglesInitial.put(JointNames.SHOULDER_ROLL, -1.3141);
       jointAnglesInitial.put(JointNames.ELBOW_PITCH, 1.9195);
       jointAnglesInitial.put(JointNames.ELBOW_ROLL, 1.1749);

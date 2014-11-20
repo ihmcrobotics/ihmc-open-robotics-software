@@ -29,6 +29,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
+   @Override
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       SideDependentList<EnumMap<ArmJointName, Double>> defaultArmPosition = getDefaultArmPositionForMultiContactSimulation();
@@ -37,7 +38,7 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
-         robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_shz]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
+         robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_shz]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_YAW));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_shx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_ely]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_PITCH));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_elx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_ROLL));
@@ -61,14 +62,14 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
    {
       SideDependentList<EnumMap<ArmJointName, Double>> defaultArmPosition = SideDependentList.createListOfEnumMaps(ArmJointName.class);
 
-      defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.SHOULDER_PITCH, -0.4);
+      defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.SHOULDER_YAW, -0.4);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.SHOULDER_ROLL, -0.7);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.ELBOW_PITCH, 1.8);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.ELBOW_ROLL, 1.4);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.WRIST_PITCH, 0.0);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.WRIST_ROLL, 0.5);
 
-      defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.SHOULDER_PITCH, 0.3);
+      defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.SHOULDER_YAW, 0.3);
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.SHOULDER_ROLL, 1.0);
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.ELBOW_PITCH, 1.0);
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.ELBOW_ROLL, -1.6);
@@ -78,10 +79,12 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
       return defaultArmPosition;
    }
    
+   @Override
    public void getOffset(Vector3d offsetToPack)
    {
    }
 
+   @Override
    public void setOffset(Vector3d offset)
    {
    }
