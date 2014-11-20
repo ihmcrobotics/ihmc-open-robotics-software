@@ -19,13 +19,13 @@ public interface AtlasState extends org.ros.internal.message.Message {
   static final int r_leg_kny = 13;
   static final int r_leg_aky = 14;
   static final int r_leg_akx = 15;
-  static final int l_arm_shy = 16;
+  static final int l_arm_shz = 16;
   static final int l_arm_shx = 17;
   static final int l_arm_ely = 18;
   static final int l_arm_elx = 19;
   static final int l_arm_wry = 20;
   static final int l_arm_wrx = 21;
-  static final int r_arm_shy = 22;
+  static final int r_arm_shz = 22;
   static final int r_arm_shx = 23;
   static final int r_arm_ely = 24;
   static final int r_arm_elx = 25;

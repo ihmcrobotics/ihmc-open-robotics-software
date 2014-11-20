@@ -41,7 +41,8 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
       SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();
-      stringBuffer.append("delayBeforePose poseDuration back_bkz back_bky back_bkx l_arm_shy l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx neck_ry hokuyo_joint r_arm_shy r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx\n");
+      stringBuffer
+            .append("delayBeforePose poseDuration back_bkz back_bky back_bkx l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx neck_ry hokuyo_joint r_arm_shz r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx\n");
       stringBuffer.append("0.300    1.000    0.130    -0.062   -0.363   -0.197   -0.091   1.906    0.510    0.190    -0.986   0.692    -2.269   -0.542   0.189    0.291    -1.044   1.148    0.101    0.728    0.430    -0.395   2.094    0.128    0.506    -0.903   0.239    0.300    1.454    0.677    0.091\n");    
       stringBuffer.append("0.300    1.000    -0.136   -0.164   0.278    -0.046   0.514    1.657    1.039    2.347    -0.957   -0.084   2.694    -1.251   0.225    0.867    -0.294   2.931    -0.528   1.132    -0.057   -0.082   2.050    -0.369   -0.790   -0.242   -0.177   0.464    2.139    -0.665   -0.531\n");   
       stringBuffer.append("0.300    1.000    -0.369   -0.552   -0.092   -0.592   -1.099   2.944    0.762    2.440    0.440    -0.063   0.947    -1.544   -1.404   0.670    -0.469   0.806    0.273    0.618    0.489    -1.159   0.287    0.071    -0.292   -0.080   -0.501   0.167    2.153    -0.324   0.340\n");    
