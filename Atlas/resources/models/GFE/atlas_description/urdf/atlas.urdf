@@ -1,3 +1,5 @@
+<!-- These are atlas torso and limb models, for full Atlas robot model, please see
+     xacro files containing fully assembed robots in atlas_description/robots/ -->
 <robot name="drc_skeleton">
     <link name="l_clav">
         <inertial>
@@ -402,7 +404,7 @@
         <inertial>
             <mass value="4.367" />
             <origin xyz="0.001 0 -0.187" rpy="0 -0 0" />
-            <inertia ixx="0.077" ixy="-0" ixz="0.003" iyy="0.076" iyz="-0" izz="0.01" />
+            <inertia ixx="0.077" ixy="-0" ixz="-0.003" iyy="0.076" iyz="-0" izz="0.01" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 -0 0" />
@@ -516,7 +518,10 @@
         <inertial>
             <mass value="18.484" />
             <origin xyz="0.02 -0.001 0.211" rpy="0 -0 0" />
+            <!-- original inertia violates triangle rule
             <inertia ixx="0.395" ixy="0" ixz="0.083" iyy="1.089" iyz="-0.003" izz="0.327" />
+            -->
+            <inertia ixx="0.395" ixy="0" ixz="0.083" iyy="1.089" iyz="-0.003" izz="0.827" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 -0 0" />

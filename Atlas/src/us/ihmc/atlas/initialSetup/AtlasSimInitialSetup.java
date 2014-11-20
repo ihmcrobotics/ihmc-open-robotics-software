@@ -1,20 +1,18 @@
 package us.ihmc.atlas.initialSetup;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
-
-import us.ihmc.simulationconstructionset.GroundContactPoint;
 
 public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
@@ -37,6 +35,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       this.initialYaw = initialYaw;
    }
 
+   @Override
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       if(!robotInitialized)
@@ -51,7 +50,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
             robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.276); //leg_aky
             robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(robotSide.negateIfRightSide(-0.062)); //leg_akx
             
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(0.300); //arm_shy
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0.0); //arm_shz
             robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(-1.30)); //arm_shx
             robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(2.00); //arm_ely
             robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(robotSide.negateIfRightSide(0.498)); //arm_elx
@@ -85,11 +84,13 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       }
    }
 
+   @Override
    public void getOffset(Vector3d offsetToPack)
    {
       offsetToPack.set(offset);
    }
 
+   @Override
    public void setOffset(Vector3d offset)
    {
       this.offset.set(offset);

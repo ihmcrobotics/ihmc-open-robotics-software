@@ -4,7 +4,7 @@
     <pose>0 0 0.93 0 0 0</pose>
   </gazebo>
   <gazebo>
-    <plugin name="atlas_plugin" filename="libAtlasPlugin.so"/>
+    <plugin name="atlas_plugin" filename="libAtlasV3Plugin.so"/>
     <plugin filename="libgazebo_ros_joint_pose_trajectory.so" name="joint_trajectory_plugin">
       <topicName>joint_trajectory</topicName>
       <updateRate>1000.0</updateRate>
@@ -373,7 +373,7 @@
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>r_situational_awareness_camera_optical_frame</frameName>
-        <hackBaseline>0.07</hackBaseline>
+        <hackBaseline>0.0</hackBaseline>
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>
         <distortionK3>0.0</distortionK3>
@@ -420,7 +420,59 @@
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>l_situational_awareness_camera_optical_frame</frameName>
-        <hackBaseline>0.07</hackBaseline>
+        <hackBaseline>0.0</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="rear_situational_awareness_camera_link">
+    <!-- Rear situational awareness camera is a D-Link DCS-2310L camera.
+         Specs taken from website:
+         http://www.dlink.com/us/en/home-solutions/view/network-cameras/dcs-2310l-outdoor-hd-poe-day-night-cloud-camera
+         FOV: (H)57.8 deg, (V)37.8 deg, (D)66.0 deg
+         Avalilable Resolutions:
+           16:9 - 1280 x 800, 1280 x 720, 800 x 450, 640 x 360, 480 x 270, 320 x 176, 176 x 144 up to 30 fps recording1
+           4:3 - 1024 x 768, 800 x 600, 640 x 480, 480 x 360, 320 x 240, 176 x 144 up to 30 fps recording1 
+        -->
+    <sensor type="camera" name="rear_situational_awareness_camera_sensor">
+      <update_rate>30.0</update_rate>
+      <camera name="rear_situational_awareness_camera">
+        <pose>0 0 0 0 0 0</pose>
+        <horizontal_fov>1.0</horizontal_fov>
+        <image>
+          <width>1280</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.  
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1].
+               The stddev value of 0.007 is based on experimental data 
+               from a camera in a Sandia hand pointed at a static scene
+               in a couple of different lighting conditions.  -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="rear_situational_awareness_camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rear_situational_awareness_camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>rear_situational_awareness_camera_optical_frame</frameName>
+        <hackBaseline>0.0</hackBaseline>
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>
         <distortionK3>0.0</distortionK3>

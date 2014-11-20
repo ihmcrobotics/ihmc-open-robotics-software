@@ -24,13 +24,13 @@ public class ROSAtlasJointMapCorrelation extends AtlasOrderedJointMap
       oppositeSideIndex[r_leg_kny] = l_leg_kny;
       oppositeSideIndex[r_leg_aky] = l_leg_aky;
       oppositeSideIndex[r_leg_akx] = l_leg_akx;
-      oppositeSideIndex[l_arm_shy] = r_arm_shy;
+      oppositeSideIndex[l_arm_shz] = r_arm_shz;
       oppositeSideIndex[l_arm_shx] = r_arm_shx;
       oppositeSideIndex[l_arm_ely] = r_arm_ely;
       oppositeSideIndex[l_arm_elx] = r_arm_elx;
       oppositeSideIndex[l_arm_wry] = r_arm_wry;
       oppositeSideIndex[l_arm_wrx] = r_arm_wrx;
-      oppositeSideIndex[r_arm_shy] = l_arm_shy;
+      oppositeSideIndex[r_arm_shz] = l_arm_shz;
       oppositeSideIndex[r_arm_shx] = l_arm_shx;
       oppositeSideIndex[r_arm_ely] = l_arm_ely;
       oppositeSideIndex[r_arm_elx] = l_arm_elx;
@@ -53,7 +53,7 @@ public class ROSAtlasJointMapCorrelation extends AtlasOrderedJointMap
       symmetricSignChange[l_leg_kny] = symmetricSignChange[r_leg_kny] = false;
       symmetricSignChange[l_leg_aky] = symmetricSignChange[r_leg_aky] = false;
       symmetricSignChange[l_leg_akx] = symmetricSignChange[r_leg_akx] = true;
-      symmetricSignChange[l_arm_shy] = symmetricSignChange[r_arm_shy] = false;
+      symmetricSignChange[l_arm_shz] = symmetricSignChange[r_arm_shz] = false;
       symmetricSignChange[l_arm_shx] = symmetricSignChange[r_arm_shx] = true;
       symmetricSignChange[l_arm_ely] = symmetricSignChange[r_arm_ely] = false;
       symmetricSignChange[l_arm_elx] = symmetricSignChange[r_arm_elx] = true;

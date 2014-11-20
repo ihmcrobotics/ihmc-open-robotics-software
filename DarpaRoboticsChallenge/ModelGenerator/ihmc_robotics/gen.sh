@@ -38,8 +38,10 @@ do
 done
 
 
-echo cp sdf/*sdf ../../src/us/ihmc/darpaRoboticsChallenge/models/GFE/
+#echo cp sdf/*sdf ../../src/us/ihmc/darpaRoboticsChallenge/models/GFE/
+echo cp sdf/*sdf ../../../Atlas/resources/models/GFE/
 
+Atlas/resources/models/GFE/drc_no_hands.sdf
 
 #roslauch ./show_in_rviz.launch &
 #rosparam set /robot_description -t sdf/atlas_v3_hook.urdf

@@ -8,7 +8,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_elx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_ely;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shy;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_akx;
@@ -20,8 +20,8 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
 import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.ELBOW_PITCH;
 import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.ELBOW_ROLL;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.SHOULDER_PITCH;
 import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.SHOULDER_ROLL;
+import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.SHOULDER_YAW;
 import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.WRIST_PITCH;
 import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.WRIST_ROLL;
 import static us.ihmc.utilities.humanoidRobot.partNames.LegJointName.ANKLE_PITCH;
@@ -76,7 +76,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String headName = "head";
 
    private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL };
-   private final ArmJointName[] armJoints = { SHOULDER_PITCH, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL };
+   private final ArmJointName[] armJoints = { SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL };
    private final SpineJointName[] spineJoints = { SPINE_PITCH, SPINE_ROLL, SPINE_YAW };
    private final NeckJointName[] neckJoints = { LOWER_NECK_PITCH };
 
@@ -113,7 +113,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[l_leg_aky], new Pair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_akx], new Pair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
 
-         armJointNames.put(forcedSideJointNames[l_arm_shy], new Pair<RobotSide, ArmJointName>(robotSide, SHOULDER_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_shz], new Pair<RobotSide, ArmJointName>(robotSide, SHOULDER_YAW));
          armJointNames.put(forcedSideJointNames[l_arm_shx], new Pair<RobotSide, ArmJointName>(robotSide, SHOULDER_ROLL));
          armJointNames.put(forcedSideJointNames[l_arm_ely], new Pair<RobotSide, ArmJointName>(robotSide, ELBOW_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_elx], new Pair<RobotSide, ArmJointName>(robotSide, ELBOW_ROLL));
@@ -257,6 +257,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       return armJoints;
    }
 
+   @Override
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;

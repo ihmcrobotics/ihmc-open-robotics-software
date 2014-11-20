@@ -7,7 +7,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_elx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_ely;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shy;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_akx;
@@ -19,7 +19,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_elx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_ely;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_shy;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_shz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_wrx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_wry;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_akx;
@@ -52,14 +52,14 @@ public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitial
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       // Avoid singularities at startup
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shy]).setQ(-0.8528);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shz]).setQ(-0.8528);
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shx]).setQ(0.1144);
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_ely]).setQ(0.9796);
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_elx]).setQ(1.6769);
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wry]).setQ(-1.13);
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wrx]).setQ(0.6748);
       
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shy]).setQ(-0.1573);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shz]).setQ(-0.1573);
       robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shx]).setQ(0.9835);
       robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_ely]).setQ(1.5037);
       robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_elx]).setQ(-1.3852);
