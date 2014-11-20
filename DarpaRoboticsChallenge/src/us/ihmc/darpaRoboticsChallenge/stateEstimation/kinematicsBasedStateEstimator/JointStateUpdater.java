@@ -3,6 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 import java.util.LinkedHashMap;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -33,13 +35,16 @@ public class JointStateUpdater
    private final YoVariableRegistry registry;
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> estimatedJointPositions;
 
-   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, YoVariableRegistry parentRegistry)
+   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       rootBody = twistCalculator.getRootBody();
       
       this.sensorMap = sensorOutputMapReadOnly;
+  
+      // TODO Enable that guy when ready
+//      setupSpineJointVelocitiesSmooothener(sensorOutputMapReadOnly, stateEstimatorParameters);
       
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
@@ -63,6 +68,27 @@ public class JointStateUpdater
          estimatedJointPositions = null;
          registry = null;
       }
+   }
+
+   public void setupSpineJointVelocitiesSmooothener(SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters)
+   {
+      if (stateEstimatorParameters == null)
+         return;
+
+      IMUSensorReadOnly pelvisIMU = null;
+      IMUSensorReadOnly chestIMU = null;
+      
+      for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
+      {
+         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
+         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().first()))
+            pelvisIMU = sensorReadOnly;
+         
+         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().second()))
+            chestIMU = sensorReadOnly;
+      }
+      
+      // TODO create the module with the two IMUs to compute and smoothen the spine joint velocities here.
    }
 
    public void initialize()
