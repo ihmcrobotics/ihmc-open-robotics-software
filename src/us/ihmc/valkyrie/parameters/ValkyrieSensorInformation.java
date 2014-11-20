@@ -133,7 +133,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String leftTrunkIMUSensor = "v1Trunk_LeftIMU";
    private static final String leftPelvisIMUSensor = "v1Pelvis_LeftIMU";
    private static final String rightPelvisIMUSensor = "v1Pelvis_RightIMU";
-   private static final String fakePelvisIMUSensor = "v1Pelvis_SimulatedIMU";
    
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
@@ -283,9 +282,30 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       return false;
    }
-   
+
    @Override
-   public ReferenceFrame getHeadIMUFrameWhenLevel(){
-	   return null;
+   public ReferenceFrame getHeadIMUFrameWhenLevel()
+   {
+      return null;
+   }
+
+   public String getRightTrunkIMUSensor()
+   {
+      return rightTrunkIMUSensor;
+   }
+
+   public String getLeftTrunkIMUSensor()
+   {
+      return leftTrunkIMUSensor;
+   }
+
+   public String getLeftPelvisIMUSensor()
+   {
+      return leftPelvisIMUSensor;
+   }
+
+   public String getRightPelvisIMUSensor()
+   {
+      return rightPelvisIMUSensor;
    }
 }
