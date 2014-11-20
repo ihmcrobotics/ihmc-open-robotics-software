@@ -180,9 +180,6 @@ public class MomentumBasedControllerFactory
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
             registry, yoGraphicsListRegistry, false);
 
-      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
-      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, fullRobotModel, feet, bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
-
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
       ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
@@ -193,12 +190,16 @@ public class MomentumBasedControllerFactory
             walkingControllerParameters.getCaptureKiBleedoff(), walkingControllerParameters.getCaptureFilterBreakFrequencyInHz(),
             walkingControllerParameters.getCMPRateLimit(), walkingControllerParameters.getCMPAccelerationLimit());
 
+      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
+      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, iCPBasedLinearMomentumRateOfChangeControlModule,
+            bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
+
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
       WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
             centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters,
-            iCPBasedLinearMomentumRateOfChangeControlModule, instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
+            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
