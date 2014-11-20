@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import us.ihmc.utilities.Pair;
+
 
 public interface StateEstimatorParameters extends SensorProcessingConfiguration
 {
@@ -8,6 +10,8 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract double getEstimatorDT();
    
    public abstract boolean trustCoPAsNonSlippingContactPoint();
+   
+   public abstract Pair<String, String> getIMUsForSpineJointVelocityEstimation();
    
    // Parameters related to the kinematics based state estimator
    public abstract double getKinematicsPelvisPositionFilterFreqInHertz();

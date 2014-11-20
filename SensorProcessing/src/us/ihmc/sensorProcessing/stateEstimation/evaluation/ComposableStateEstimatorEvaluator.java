@@ -19,6 +19,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -255,6 +256,13 @@ public class ComposableStateEstimatorEvaluator
          {
             // TODO Auto-generated method stub
             return 0;
+         }
+
+         @Override
+         public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
+         {
+            // TODO For Valkyrie. Probably have to make more generic.
+            return null;
          }
       };
 
