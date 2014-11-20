@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -26,6 +27,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double orientationFilterFrequencyHz;
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
+   
+   private final ValkyrieSensorInformation sensorInformation;
 
 //   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
 //   private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
@@ -35,11 +38,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
 
-   public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
+   public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation)
    {
       this.runningOnRealRobot = runningOnRealRobot;
 
       this.estimatorDT = estimatorDT;
+      
+      this.sensorInformation = sensorInformation;
 
       jointPositionFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
@@ -232,5 +237,15 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getFootSwitchCoPThresholdFraction()
    {
       return 0.02;
+   }
+
+   /**
+    * IMUs to use to compute the spine joint velocities.
+    * @return {@code Pair<String, String>} the first element is the name of one pelvis IMU, the second is the name of one IMU of the trunk. 
+    */
+   @Override
+   public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
+   {
+      return new Pair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getRightTrunkIMUSensor());
    }
 }
