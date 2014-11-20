@@ -7,6 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -224,5 +225,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    public double getFootSwitchCoPThresholdFraction()
    {
       return 0.02;
+   }
+
+   @Override
+   public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
+   {
+      // TODO For Valkyrie. Probably have to make more generic.
+      return null;
    }
 }
