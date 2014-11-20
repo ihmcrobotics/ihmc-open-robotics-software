@@ -23,16 +23,6 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.InertiaTools;
-import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
-
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -54,13 +44,22 @@ import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLi
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.InertiaTools;
+import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 {
 
-   private static final boolean SHOW_CONTACT_POINTS = true;
+   private static final boolean SHOW_CONTACT_POINTS = false;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
-   private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = true;
+   private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
 
    private final ArrayList<String> resourceDirectories;
 
@@ -231,6 +230,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       rootJoint.setVelocity(velocity);
    }
 
+   @Override
    public OneDegreeOfFreedomJoint getOneDegreeOfFreedomJoint(String name)
    {
       return oneDoFJoints.get(name);
@@ -273,7 +273,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             {
                System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
                wrenchCalculator = new GroundContactPointBasedWrenchCalculator(
-                     forceSensor.getName(), groundContactPoints, (OneDegreeOfFreedomJoint) scsJoint, forceSensor.getTransform());
+                     forceSensor.getName(), groundContactPoints, scsJoint, forceSensor.getTransform());
             }
             else
             {
