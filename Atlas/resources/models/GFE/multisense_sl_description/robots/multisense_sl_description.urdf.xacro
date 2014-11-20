@@ -1,3 +1,0 @@
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="multisense_sl" >
-  <xacro:include filename="$(find multisense_sl_description)/urdf/multisense_sl.urdf" />
-</robot>
