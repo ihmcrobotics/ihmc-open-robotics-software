@@ -50,7 +50,7 @@ public class JointStateUpdaterTest
       
       try
       {
-         new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
+         new JointStateUpdater(inverseDynamicsStructure, sensorMap, null, registry);
       }
       catch (Exception e)
       {
@@ -75,7 +75,7 @@ public class JointStateUpdaterTest
       ArrayList<RevoluteJoint> jointsWithVelocitySensor = new ArrayList<RevoluteJoint>(joints);
       SensorProcessing sensorMap = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
       
-      JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
+      JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, null, registry);
       
       fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, sensorMap);
       
