@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -211,5 +212,12 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public double getFootSwitchCoPThresholdFraction()
    {
       return Double.NaN;
+   }
+
+   @Override
+   public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
+   {
+      // TODO For Valkyrie. Probably have to make more generic.
+      return null;
    }
 }
