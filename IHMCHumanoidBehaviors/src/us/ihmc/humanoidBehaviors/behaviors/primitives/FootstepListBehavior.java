@@ -199,5 +199,10 @@ public class FootstepListBehavior extends BehaviorInterface
 	   else
 		   return false;
    }
+
+   public boolean isWalking()
+   {
+      return hasInputBeenSet() && !isDone();
+   }
    
 }
