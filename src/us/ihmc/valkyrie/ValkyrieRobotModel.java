@@ -28,6 +28,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -45,8 +47,6 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -61,7 +61,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final StateEstimatorParameters stateEstimatorParamaters;
    private final DRCRobotPhysicalProperties physicalProperties;
    private final ValkyrieSensorInformation sensorInformation;
-   private final DRCRobotJointMap jointMap;
+   private final ValkyrieJointMap jointMap;
    private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
@@ -115,7 +115,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
-      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation);
+      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
       networkParameters = new RobotNetworkParameters(runningOnRealRobot ? VALKYRIE_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
    }
    

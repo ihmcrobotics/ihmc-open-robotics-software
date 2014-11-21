@@ -22,13 +22,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
    private final double jointVelocitySlopTimeForBacklashCompensation;
 
-   private final double jointPositionFilterFrequencyHz;
    private final double jointVelocityFilterFrequencyHz;
    private final double orientationFilterFrequencyHz;
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
    
    private final ValkyrieSensorInformation sensorInformation;
+   private final ValkyrieJointMap jointMap;
 
 //   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
 //   private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
@@ -38,22 +38,22 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
 
-   public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation)
+   public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation, ValkyrieJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
 
       this.estimatorDT = estimatorDT;
       
       this.sensorInformation = sensorInformation;
+      this.jointMap = jointMap;
 
-      jointPositionFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
 
       orientationFilterFrequencyHz        = 50.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       angularVelocityFilterFrequencyHz    = 50.0; //30.0; //30.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       linearAccelerationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      jointVelocitySlopTimeForBacklashCompensation = 0.07;
+      jointVelocitySlopTimeForBacklashCompensation = 0.03; //0.07; => Add a shit load of delay!!
 
       doElasticityCompensation = runningOnRealRobot;
       defaultJointStiffness = 10000; //40000.0; //Double.POSITIVE_INFINITY;
@@ -65,25 +65,32 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
+      String[] namesOfJointsUsingOutputEncoder = jointMap.getNamesOfJointsUsingOutputEncoder();
+      
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", jointPositionFilterFrequencyHz);
       Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
-      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
-      DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
-      jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
       DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
       DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
 
-      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
       if (doElasticityCompensation)
          sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
 
-      sensorProcessing.computeJointVelocityWithBacklashCompensator(jointVelocityAlphaFilter, jointVelocitySlopTime, false);
-      sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+      //velocity from filtered positions
+      // For joints using output encoder
+      DoubleYoVariable jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
+      DoubleYoVariable jointOutputEncoderVelocitySlopTime = new DoubleYoVariable("jointOutputEncoderBacklashSlopTime", registry);
+      jointOutputEncoderVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
+      sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, jointOutputEncoderVelocitySlopTime, false, namesOfJointsUsingOutputEncoder); 
+      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, false, namesOfJointsUsingOutputEncoder);
 
+      // For joints using input encoder: only one pass since one is done onboard at 20Hz
+      DoubleYoVariable jointInputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointInputEncoderVelocityAlphaFilter", jointVelocityFilterFrequencyHz);
+      sensorProcessing.addJointVelocityAlphaFilterWithJointsToIgnore(jointInputEncoderVelocityAlphaFilter, false, namesOfJointsUsingOutputEncoder);
+
+      //imu
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
       sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
       sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
