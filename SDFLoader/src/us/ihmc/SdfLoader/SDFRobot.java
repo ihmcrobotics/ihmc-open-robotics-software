@@ -186,7 +186,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addForceSensorsIncludingDescendants(child);
+         addForceSensorsIncludingDescendants(child, sdfJointNameMap);
       }
 
       Point3d centerOfMass = new Point3d();
@@ -246,18 +246,21 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       return oneDoFJoints.values().toArray(new OneDegreeOfFreedomJoint[oneDoFJoints.size()]);
    }
 
-   private void addForceSensorsIncludingDescendants(SDFJointHolder joint)
+   private void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
    {
-      addForceSensor(joint);
+      addForceSensor(joint, jointNameMap);
 
       for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
       {
-         addForceSensorsIncludingDescendants(child);
+         addForceSensorsIncludingDescendants(child, jointNameMap);
       }
    }
 
-   private void addForceSensor(SDFJointHolder joint)
+   private void addForceSensor(SDFJointHolder joint, SDFJointNameMap jointNameMap)
    {
+      String jointBeforeLeftFootName = jointNameMap.getJointBeforeFootName(RobotSide.LEFT);
+      String jointBeforeRightFootName = jointNameMap.getJointBeforeFootName(RobotSide.RIGHT);
+      
       if (joint.getForceSensors().size() > 0)
       {
          String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
@@ -269,15 +272,18 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             scsJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
 
             WrenchCalculatorInterface wrenchCalculator;
-            if (joint.getName().contains("leg") || joint.getName().contains("Ankle") || joint.getName().contains("ankle"))
+            
+            boolean jointIsParentOfFoot = joint.getName().equals(jointBeforeLeftFootName) || joint.getName().equals(jointBeforeRightFootName);
+
+            if ( jointIsParentOfFoot )
             {
-               System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
+//               System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
                wrenchCalculator = new GroundContactPointBasedWrenchCalculator(
                      forceSensor.getName(), groundContactPoints, scsJoint, forceSensor.getTransform());
             }
             else
             {
-               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
+//               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
                
                Vector3d offsetToPack = new Vector3d();
                forceSensor.getTransform().get(offsetToPack);
