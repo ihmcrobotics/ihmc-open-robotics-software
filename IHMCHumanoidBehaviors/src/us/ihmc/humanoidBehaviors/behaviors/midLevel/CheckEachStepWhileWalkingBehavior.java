@@ -150,12 +150,11 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    {
       switch (snapFootstepPacket.getFlag()[0])
       {
-         case SnapFootstepPacket.UNKOWN:
-            stretchToLook(snapFootstepPacket.getFootstepData());
-         case SnapFootstepPacket.VALID_UNCHANGED_STEP:
-         case SnapFootstepPacket.VALID_SNAPPED_STEP:
+      case 0://retchToLook(snapFootstepPacket.getFootstepData());
+      case 1://SnapFootstepPacket.VALID_UNCHANGED_STEP:
+      case 2://SnapFootstepPacket.VALID_SNAPPED_STEP:
             footStepToTake.addAll(snapFootstepPacket.getFootstepData());
-         case SnapFootstepPacket.BAD_STEP:
+      case 3://SnapFootstepPacket.BAD_STEP:
             System.out.println("need to replan!");
       }
    }
