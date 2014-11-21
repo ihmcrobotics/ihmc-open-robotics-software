@@ -13,8 +13,8 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
@@ -32,45 +32,56 @@ public class JointStateUpdater
    private final SensorOutputMapReadOnly sensorMap;
    private IMUBasedPelvisToTorsoEncodersVelocityFilter iMUBasedPelvisToTorsoEncodersVelocityFilter;
 
-   private boolean USE_SPINE_JOINT_SMOOTHENER = true;
+   private BooleanYoVariable enableIMUBasedPelvisToTorsoEncodersVelocityFilter;
+   private double qd_filtered;
 
-   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       rootBody = twistCalculator.getRootBody();
-      
+
       this.sensorMap = sensorOutputMapReadOnly;
-  
+
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      if (USE_SPINE_JOINT_SMOOTHENER ){
-         setupSpineJointVelocitiesSmooothener(sensorOutputMapReadOnly, stateEstimatorParameters, parentRegistry);
-      }
+      setupSpineJointVelocitiesSmoothener(sensorOutputMapReadOnly, stateEstimatorParameters, parentRegistry);
+      enableIMUBasedPelvisToTorsoEncodersVelocityFilter = new BooleanYoVariable("enable_IMUBasedVelFilter", parentRegistry);
+      enableIMUBasedPelvisToTorsoEncodersVelocityFilter.set(false);
    }
 
-   public void setupSpineJointVelocitiesSmooothener(SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+   public void setupSpineJointVelocitiesSmoothener(SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters,
+         YoVariableRegistry parentRegistry)
    {
       if (stateEstimatorParameters == null || stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation() == null)
          return;
 
       IMUSensorReadOnly pelvisIMU = null;
       IMUSensorReadOnly chestIMU = null;
-      
+
       for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
       {
          IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
          if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().first()))
             pelvisIMU = sensorReadOnly;
-         
+
          if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().second()))
             chestIMU = sensorReadOnly;
       }
-      
+
       // TODO create the module with the two IMUs to compute and smoothen the spine joint velocities here.
-      iMUBasedPelvisToTorsoEncodersVelocityFilter = new IMUBasedPelvisToTorsoEncodersVelocityFilter(parentRegistry, pelvisIMU, chestIMU, sensorOutputMapReadOnly);
-      iMUBasedPelvisToTorsoEncodersVelocityFilter.compute();
+      if (pelvisIMU != null && chestIMU != null)
+      {
+         iMUBasedPelvisToTorsoEncodersVelocityFilter = new IMUBasedPelvisToTorsoEncodersVelocityFilter(parentRegistry, pelvisIMU, chestIMU,
+               sensorOutputMapReadOnly);
+         iMUBasedPelvisToTorsoEncodersVelocityFilter.compute();
+      }
+      else
+      {
+         throw new RuntimeException("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMU + ", chestIMU = " + chestIMU);
+      }
    }
 
    public void initialize()
@@ -80,26 +91,35 @@ public class JointStateUpdater
 
    public void updateJointState()
    {
+
+      if (iMUBasedPelvisToTorsoEncodersVelocityFilter != null)
+      {
+         iMUBasedPelvisToTorsoEncodersVelocityFilter.compute();
+      }
+
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
-         
+
          double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
-
          oneDoFJoint.setQ(positionSensorData);
-         oneDoFJoint.setQd(velocitySensorData);
+
+         if (enableIMUBasedPelvisToTorsoEncodersVelocityFilter.getBooleanValue()
+               && iMUBasedPelvisToTorsoEncodersVelocityFilter.getJointVelocities().get(oneDoFJoint) != null)
+         {
+            qd_filtered = iMUBasedPelvisToTorsoEncodersVelocityFilter.getJointVelocities().get(oneDoFJoint).getDoubleValue();
+            oneDoFJoint.setQd(qd_filtered);
+         }
+         else
+         {
+            oneDoFJoint.setQd(velocitySensorData);
+         }
       }
 
       rootBody.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
-
-      if (USE_SPINE_JOINT_SMOOTHENER)
-      {
-         if (iMUBasedPelvisToTorsoEncodersVelocityFilter != null)
-         iMUBasedPelvisToTorsoEncodersVelocityFilter.compute();
-      }
 
    }
 }

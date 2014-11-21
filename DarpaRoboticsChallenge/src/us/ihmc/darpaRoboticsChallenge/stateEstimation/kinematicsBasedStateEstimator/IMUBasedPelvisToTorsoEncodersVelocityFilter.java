@@ -174,5 +174,9 @@ public class IMUBasedPelvisToTorsoEncodersVelocityFilter
          i++;
       }
    }
+   
+   public Map<OneDoFJoint, DoubleYoVariable> getJointVelocities(){
+      return jointVelocities;
+   }
 
 }
