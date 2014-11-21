@@ -220,7 +220,7 @@ public class ComposableStateEstimatorEvaluator
 
          public boolean useTwistForPelvisLinearStateEstimation()
          {
-            return false;
+            return true;
          }
 
          public double getPelvisLinearVelocityAlphaNewTwist()
