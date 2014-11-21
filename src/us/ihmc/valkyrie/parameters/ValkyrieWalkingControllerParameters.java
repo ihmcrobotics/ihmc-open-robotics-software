@@ -348,8 +348,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
       double kpXY = runningOnRealRobot ? 120.0 : 100.0;
       double kpZ = runningOnRealRobot ? 120.0 : 100.0;
-      double zetaXY = runningOnRealRobot ? 0.5 : 0.8;
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.8;
+      double zetaZ = runningOnRealRobot ? 0.7 : 0.8;
       double maxAccel = runningOnRealRobot ? 36.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 540.0 : 270.0;
 
@@ -421,8 +421,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
-      double kpXY = runningOnRealRobot ? 40.0 : 100.0;
-      double kpZ = runningOnRealRobot ? 40.0 : 100.0;
+      double kpXY = runningOnRealRobot ? 60.0 : 100.0;
+      double kpZ = runningOnRealRobot ? 60.0 : 100.0;
       double zetaXY = runningOnRealRobot ? 0.4 : 0.8; // 0.4
       double zetaZ = runningOnRealRobot ? 0.4 : 0.8; // Higher = 8Hz shakies 
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
@@ -445,9 +445,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double kpXY = 100.0;
       double kpZ = runningOnRealRobot ? 200.0 : 200.0; //50
       double zetaXYZ = runningOnRealRobot ? 0.7 : 0.7;
-      double kpXYOrientation = runningOnRealRobot ? 100.0 : 300.0; //100
+      double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0; //100
       double kpZOrientation = runningOnRealRobot ? 160.0 : 200.0; //150
-      double zetaOrientationXY = runningOnRealRobot ? 0.4 : 0.4; 
+      double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.4; 
       double zetaOrientationZ = runningOnRealRobot ? 0.7 : 0.7;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
