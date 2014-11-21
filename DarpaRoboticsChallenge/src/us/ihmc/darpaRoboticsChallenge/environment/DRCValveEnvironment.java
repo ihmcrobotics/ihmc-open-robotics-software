@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 import com.yobotics.simulationconstructionset.util.environments.ContactableValveRobot;
+import com.yobotics.simulationconstructionset.util.environments.ValveType;
 
 public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -51,7 +52,7 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(0), Math.toRadians(0), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
-      ContactableValveRobot valve = new ContactableValveRobot("valveRobot", 0.13, 0.18, 0.025, 4, 0.025, valvePose, 3.5, 2.0, 1.0, 1.0, 1.0);
+      ContactableValveRobot valve = new ContactableValveRobot("valveRobot",ValveType.BIG_VALVE,3.5,valvePose);
 
       return valve;
 
