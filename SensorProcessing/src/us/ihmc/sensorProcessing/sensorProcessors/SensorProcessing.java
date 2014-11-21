@@ -510,7 +510,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          if (!originalJointSensorSelectionList.contains(jointName))
             invertSelection.add(jointName);
       }
-      return (String[]) invertSelection.toArray();
+      return invertSelection.toArray(new String[0]);
    }
 
    @Override
