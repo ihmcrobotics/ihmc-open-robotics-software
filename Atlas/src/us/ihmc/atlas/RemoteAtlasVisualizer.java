@@ -47,7 +47,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       switch (defaultSliderBoardType)
       {
          case WALK_CONTROLLER :
-            new WalkControllerSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), drcRobotModel.getGeneralizedRobotModel());
+            new WalkControllerSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry());
 
             break;
 
