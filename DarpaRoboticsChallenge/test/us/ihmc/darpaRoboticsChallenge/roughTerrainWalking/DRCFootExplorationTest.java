@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.roughTerrainWalking;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -45,7 +46,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 {
    private static final boolean ALWAYS_SHOW_GUI = true;
-   private static final boolean KEEP_SCS_UP = true;
+   private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -262,6 +263,8 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       scs.setGroundVisible(false);
       setupCameraForUnitTest(scs);
+      
+      new WalkControllerSliderBoard(scs, scs.getRootRegistry());
 
       return drcFlatGroundWalkingTrack;
    }
