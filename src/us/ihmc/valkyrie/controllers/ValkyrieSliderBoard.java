@@ -64,7 +64,7 @@ public class ValkyrieSliderBoard
             break;
 
          case WALKING :
-            new WalkControllerSliderBoard(scs, registry, drcRobotModel.getGeneralizedRobotModel());
+            new WalkControllerSliderBoard(scs, registry);
 
             break;
 
