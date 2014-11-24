@@ -90,12 +90,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
    private DoubleYoVariable interpolatedCorrectionFrame_yaw;
    private DoubleYoVariable interpolatedCorrectionFrame_pitch;
    private DoubleYoVariable interpolatedCorrectionFrame_roll;
-   private DoubleYoVariable interpolationStartFrame_x;
-   private DoubleYoVariable interpolationStartFrame_y;
-   private DoubleYoVariable interpolationStartFrame_z;
-   private DoubleYoVariable interpolationStartFrame_yaw;
-   private DoubleYoVariable interpolationStartFrame_pitch;
-   private DoubleYoVariable interpolationStartFrame_roll;
+   private DoubleYoVariable interpolationRotationStartFrame_x;
+   private DoubleYoVariable interpolationRotationStartFrame_y;
+   private DoubleYoVariable interpolationRotationStartFrame_z;
+   private DoubleYoVariable interpolationRotationStartFrame_yaw;
+   private DoubleYoVariable interpolationRotationStartFrame_pitch;
+   private DoubleYoVariable interpolationRotationStartFrame_roll;
 
    private BlockingSimulationRunner bsr;
    private SixDoFJoint sixDofPelvisJoint;
@@ -113,7 +113,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
    public static void main(String[] args)
    {
       String[] vars = new String[] { "nonCorrectedPelvis", "correctedPelvis", "seBackInTimeFrame", "localizationBackInTimeFrame", "totalErrorFrame",
-            "interpolatedCorrectionFrame", "interpolationStartFrame" };
+            "interpolatedCorrectionFrame", "interpolationRotationStartFrame" };
       String[] postFix = new String[] { "_x", "_y", "_z", "_yaw", "_pitch", "_roll" };
 
       for (int i = 0; i < vars.length; i++)
@@ -178,12 +178,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       interpolatedCorrectionFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_yaw");
       interpolatedCorrectionFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_pitch");
       interpolatedCorrectionFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedCorrectionFrame_roll");
-      interpolationStartFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_x");
-      interpolationStartFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_y");
-      interpolationStartFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_z");
-      interpolationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_yaw");
-      interpolationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_pitch");
-      interpolationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationStartFrame_roll");
+      interpolationRotationStartFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_x");
+      interpolationRotationStartFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_y");
+      interpolationRotationStartFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_z");
+      interpolationRotationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_yaw");
+      interpolationRotationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_pitch");
+      interpolationRotationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_roll");
 
    }
 
