@@ -228,6 +228,20 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
+   public boolean useIMUsForSpineJointVelocityEstimation()
+   {
+      // TODO For Valkyrie. Probably have to make more generic.
+      return false;
+   }
+
+   @Override
+   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   {
+      // TODO For Valkyrie. Probably have to make more generic.
+      return 0;
+   }
+
+   @Override
    public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
       // TODO For Valkyrie. Probably have to make more generic.

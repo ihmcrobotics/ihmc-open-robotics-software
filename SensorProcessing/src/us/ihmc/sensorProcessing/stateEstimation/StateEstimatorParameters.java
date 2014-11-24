@@ -10,7 +10,9 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract double getEstimatorDT();
    
    public abstract boolean trustCoPAsNonSlippingContactPoint();
-   
+
+   public boolean useIMUsForSpineJointVelocityEstimation();
+   public double getAlphaIMUsForSpineJointVelocityEstimation();
    public abstract Pair<String, String> getIMUsForSpineJointVelocityEstimation();
    
    // Parameters related to the kinematics based state estimator

@@ -264,6 +264,20 @@ public class ComposableStateEstimatorEvaluator
             // TODO For Valkyrie. Probably have to make more generic.
             return null;
          }
+
+         @Override
+         public boolean useIMUsForSpineJointVelocityEstimation()
+         {
+            // TODO Auto-generated method stub
+            return false;
+         }
+
+         @Override
+         public double getAlphaIMUsForSpineJointVelocityEstimation()
+         {
+            // TODO Auto-generated method stub
+            return 0;
+         }
       };
 
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
