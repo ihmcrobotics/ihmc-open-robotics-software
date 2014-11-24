@@ -94,6 +94,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
       sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
       sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+      
+      
+      // Raw finite difference on all joint positions
+      DoubleYoVariable dummyAlphaFilter = new DoubleYoVariable("dummyAlphaFilter", registry);
+      sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlphaFilter, true);
    }
 
    @Override
@@ -246,6 +251,18 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       return 0.02;
    }
 
+   @Override
+   public boolean useIMUsForSpineJointVelocityEstimation()
+   {
+      return true;
+   }
+
+   @Override
+   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   {
+      return 0.8;
+   }
+
    /**
     * IMUs to use to compute the spine joint velocities.
     * @return {@code Pair<String, String>} the first element is the name of one pelvis IMU, the second is the name of one IMU of the trunk. 
@@ -253,6 +270,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
-      return new Pair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getRightTrunkIMUSensor());
+      return new Pair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
    }
 }
