@@ -72,7 +72,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = true;//KEEP_SCS_UP || createMovie;
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private KryoLocalObjectCommunicator kryoLocalObjectCommunicator = new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList());
    private final Random random = new Random();
@@ -815,10 +815,10 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            OneDegreeOfFreedomJoint shoulderPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH));
-            shoulderPitch.setKp(200.0);
-            shoulderPitch.setKd(20.0);
-            shoulderPitch.setqDesired(qDesireds.get(shoulderPitch));
+            OneDegreeOfFreedomJoint shoulderYaw = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW));
+            shoulderYaw.setKp(200.0);
+            shoulderYaw.setKd(20.0);
+            shoulderYaw.setqDesired(qDesireds.get(shoulderYaw));
             OneDegreeOfFreedomJoint shoulderRoll = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL));
             shoulderRoll.setKp(200.0);
             shoulderRoll.setKd(20.0);
