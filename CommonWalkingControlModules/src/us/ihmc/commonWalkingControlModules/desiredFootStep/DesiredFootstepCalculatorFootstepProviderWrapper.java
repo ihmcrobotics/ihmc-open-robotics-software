@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -26,6 +27,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
       this.nextSwingLeg.set(nextSwingLeg);
    }
 
+   @Override
    public Footstep poll()
    {
       Footstep ret = null;
@@ -42,26 +44,31 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
       return ret;
    }
 
+   @Override
    public Footstep peek()
    {
       return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
    }
 
+   @Override
    public Footstep peekPeek()
    {
       Footstep nextOne = desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
       return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue().getOppositeSide(), nextOne);
    }
 
+   @Override
    public boolean isEmpty()
    {
       return !walk.getBooleanValue() || desiredFootstepCalculator.isDone();
    }
 
-   public void notifyComplete()
+   @Override
+   public void notifyComplete(FramePose actualFootPoseInWorld)
    {
    }
 
+   @Override
    public void notifyWalkingComplete()
    {
    }
@@ -71,6 +78,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
       this.walk.set(walk);
    }
 
+   @Override
    public int getNumberOfFootstepsToProvide()
    {
       if (walk.getBooleanValue())
@@ -83,6 +91,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
       }
    }
 
+   @Override
    public boolean isBlindWalking()
    {
       return true;

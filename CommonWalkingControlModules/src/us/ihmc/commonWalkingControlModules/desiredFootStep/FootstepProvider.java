@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 public interface FootstepProvider
@@ -12,7 +13,7 @@ public interface FootstepProvider
 
    public abstract boolean isEmpty();
 
-   public abstract void notifyComplete();
+   public abstract void notifyComplete(FramePose footPoseInWorld);
 
    public abstract void notifyWalkingComplete();
    

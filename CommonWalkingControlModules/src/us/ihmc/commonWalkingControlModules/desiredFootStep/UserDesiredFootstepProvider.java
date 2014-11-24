@@ -210,7 +210,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    }
 
    @Override
-   public void notifyComplete()
+   public void notifyComplete(FramePose actualFootPoseInWorld)
    {
       userStepsNotifyCompleteCount.increment();
    }

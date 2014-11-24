@@ -139,14 +139,14 @@ public class UpcomingFootstepList
       return nextNextNextFootstep;
    }
 
-   public void notifyComplete()
+   public void notifyComplete(FramePose acutalFootPoseInWorld)
    {
       if (footstepProvider == null)
          return;
 
-      footstepProvider.notifyComplete();
+      footstepProvider.notifyComplete(acutalFootPoseInWorld);
    }
-
+   
    public void notifyWalkingComplete()
    {
       if (footstepProvider == null)

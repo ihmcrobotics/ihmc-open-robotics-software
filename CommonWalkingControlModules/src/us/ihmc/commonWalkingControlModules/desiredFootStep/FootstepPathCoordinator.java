@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
@@ -12,13 +15,13 @@ import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-
 
 public class FootstepPathCoordinator implements FootstepProvider
 {
@@ -40,6 +43,9 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final ConstantSwingTimeCalculator constantSwingTimeCalculator;
    private final ConstantTransferTimeCalculator constantTransferTimeCalculator;
 
+   private final Point3d actualFootPositionInWorld;
+   private final Quat4d actualFootOrientationInWorld;
+
    public FootstepPathCoordinator(FootstepTimingParameters footstepTimingParameters, GlobalDataProducer objectCommunicator,
          BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
          ConstantSwingTimeCalculator constantSwingTimeCalculator, ConstantTransferTimeCalculator constantTransferTimeCalculator,
@@ -59,6 +65,9 @@ public class FootstepPathCoordinator implements FootstepProvider
             blindWalkingToDestinationDesiredFootstepCalculator, registry);
       desiredFootstepCalculatorFootstepProviderWrapper.setWalk(true);
       currentFootstepIndex.set(-1);
+
+      actualFootPositionInWorld = new Point3d();
+      actualFootOrientationInWorld = new Quat4d();
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -91,7 +100,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             System.out.println("stepInProgress= " + stepInProgress);
          }
 
-         notifyConsumersOfStatus(FootstepStatus.Status.STARTED);
+         notifyConsumersOfStatus(FootstepStatus.Status.STARTED, null);
       }
 
       return stepInProgress;
@@ -206,11 +215,23 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
    }
 
-   private void notifyConsumersOfStatus(FootstepStatus.Status status)
+   private void notifyConsumersOfStatus(FootstepStatus.Status status, FramePose actualFootPoseInWorld)
    {
       if (footstepStatusDataProducer != null)
       {
-         FootstepStatus footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue());
+         FootstepStatus footstepStatus;
+         
+         if (actualFootPoseInWorld != null)
+         {
+            actualFootPoseInWorld.getPosition(actualFootPositionInWorld);
+            actualFootPoseInWorld.getOrientation(actualFootOrientationInWorld);
+            footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue(), actualFootPositionInWorld, actualFootOrientationInWorld);
+         }
+         else
+         {
+            footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue());
+         }
+
          footstepStatusDataProducer.queueDataToSend(footstepStatus);
       }
    }
@@ -243,11 +264,11 @@ public class FootstepPathCoordinator implements FootstepProvider
    }
 
    @Override
-   public void notifyComplete()
+   public void notifyComplete(FramePose actualFootPoseInWorld)
    {
       if (stepInProgress != null)
       {
-         notifyConsumersOfStatus(FootstepStatus.Status.COMPLETED);
+         notifyConsumersOfStatus(FootstepStatus.Status.COMPLETED, actualFootPoseInWorld);
          currentFootstepIndex.increment();
       }
    }
@@ -460,4 +481,5 @@ public class FootstepPathCoordinator implements FootstepProvider
          return true;
       return false;
    }
+
 }

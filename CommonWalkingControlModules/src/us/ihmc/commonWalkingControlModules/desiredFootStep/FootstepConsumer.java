@@ -26,11 +26,13 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       this.rigidBodyList = bipedFeet;
    }
 
+   @Override
    public boolean canHandle(Object object)
    {
       return object instanceof FootstepData;
    }
 
+   @Override
    public void consume(long dataIdentifier, Object object)
    {
       if (dataIdentifier != this.dataIdentifier)
@@ -52,16 +54,19 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       currentIndex++;
    }
 
+   @Override
    public Footstep poll()
    {
       return footstepQueue.poll();
    }
 
+   @Override
    public Footstep peek()
    {
       return footstepQueue.peek();
    }
 
+   @Override
    public Footstep peekPeek()
    {
       Iterator<Footstep> iterator = footstepQueue.iterator();
@@ -84,36 +89,43 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       }
    }
 
+   @Override
    public boolean isEmpty()
    {
       return footstepQueue.isEmpty();
    }
 
-   public void notifyComplete()
+   @Override
+   public void notifyComplete(FramePose actualFootPoseInWorld)
    {
       System.out.println("FootstepConsumer: notifyComplete not implemented in FootstepConsumer");
    }
 
+   @Override
    public void notifyWalkingComplete()
    {
       System.out.println("FootstepConsumer: notifyWalkingComplete not implemented in FootstepConsumer");
    }
 
+   @Override
    public long getDataIdentifier()
    {
       return dataIdentifier;
    }
 
+   @Override
    public int getNumberOfFootstepsToProvide()
    {
       return footstepQueue.size();
    }
 
+   @Override
    public boolean isBlindWalking()
    {
       return false;
    }
 
+   @Override
    public void consumeObject(FootstepData object)
    {
       // TODO Auto-generated method stub
