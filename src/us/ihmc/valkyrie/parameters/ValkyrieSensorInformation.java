@@ -137,10 +137,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
    {
-      imuUSBSerialIds.put("v1Pelvis_LeftIMU", 622730566);
-      imuUSBSerialIds.put("v1Pelvis_RightIMU", 622730571);
-      imuUSBSerialIds.put("v1Trunk_LeftIMU", 622730569);
-      imuUSBSerialIds.put("v1Trunk_RightIMU", 622709817);
+      imuUSBSerialIds.put(leftPelvisIMUSensor, 622730571);
+      imuUSBSerialIds.put(rightPelvisIMUSensor, 622730566);
+      imuUSBSerialIds.put(leftTrunkIMUSensor, 622730569);
+      imuUSBSerialIds.put(rightTrunkIMUSensor, 622709817);
    }
    
    // Use this until sim can handle multiple IMUs
