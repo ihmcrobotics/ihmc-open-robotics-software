@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
@@ -39,45 +40,52 @@ public class SwitchableFootstepProvider implements FootstepProvider
       return footstepProvider;
    }
 
+   @Override
    public Footstep poll()
    {
       return getFootstepProviderInUse().poll();
    }
 
+   @Override
    public Footstep peek()
    {
       return getFootstepProviderInUse().peek();
    }
 
+   @Override
    public Footstep peekPeek()
    {
       return getFootstepProviderInUse().peekPeek();
    }
 
+   @Override
    public boolean isEmpty()
    {
       return getFootstepProviderInUse().isEmpty();
    }
 
-   public void notifyComplete()
+   @Override
+   public void notifyComplete(FramePose actualFootPoseInWorld)
    {
-      getFootstepProviderInUse().notifyComplete();
+      getFootstepProviderInUse().notifyComplete(actualFootPoseInWorld);
    }
 
+   @Override
    public void notifyWalkingComplete()
    {
       getFootstepProviderInUse().notifyWalkingComplete();
    }
 
+   @Override
    public int getNumberOfFootstepsToProvide()
    {
       return getFootstepProviderInUse().getNumberOfFootstepsToProvide();
    }
 
+   @Override
    public boolean isBlindWalking()
    {
       FootstepProvider footstepProviderInUse = getFootstepProviderInUse();
       return footstepProviderInUse.isBlindWalking();
    }
-
 }

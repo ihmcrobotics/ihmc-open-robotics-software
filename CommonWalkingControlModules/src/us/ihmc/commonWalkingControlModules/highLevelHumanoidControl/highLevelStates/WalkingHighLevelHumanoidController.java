@@ -43,6 +43,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -805,10 +806,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private Footstep nextFootstep;
       private double captureTime;
 
+      private final FramePose actualFootPoseInWorld;
+
       public SingleSupportState(RobotSide supportSide)
       {
          super(WalkingState.getSingleSupportState(supportSide));
          this.swingSide = supportSide.getOppositeSide();
+         actualFootPoseInWorld = new FramePose(worldFrame);
       }
 
       @Override
@@ -916,7 +920,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             readyToGrabNextFootstep.set(true);
             upcomingFootstepList.checkForFootsteps(readyToGrabNextFootstep, upcomingSupportLeg, feet);
-            upcomingFootstepList.notifyComplete();
+            upcomingFootstepList.notifyComplete(null);
             numberOfUpcomingFootsteps--;
          }
 
@@ -1035,7 +1039,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
 
          if (!isInFlamingoStance.getBooleanValue())
-            upcomingFootstepList.notifyComplete();
+         {
+            actualFootPoseInWorld.setToZero(fullRobotModel.getEndEffectorFrame(swingSide, LimbName.LEG)); // changed Here Nicolas
+            actualFootPoseInWorld.changeFrame(worldFrame);
+            upcomingFootstepList.notifyComplete(actualFootPoseInWorld);
+         }
          isInFlamingoStance.set(false);
 
          if (pushRecoveryModule.isEnabled())

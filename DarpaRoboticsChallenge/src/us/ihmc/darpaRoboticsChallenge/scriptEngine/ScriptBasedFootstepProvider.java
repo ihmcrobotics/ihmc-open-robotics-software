@@ -215,7 +215,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    }
 
    @Override
-   public void notifyComplete()
+   public void notifyComplete(FramePose actualFootPoseInWorld)
    {
       completedFootstepCount++;      
    }
