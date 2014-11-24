@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
-import java.util.LinkedHashMap;
-
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -14,7 +12,6 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
@@ -49,7 +46,7 @@ public class JointStateUpdater
 
       setupSpineJointVelocitiesSmoothener(sensorOutputMapReadOnly, stateEstimatorParameters, parentRegistry);
       enableIMUBasedPelvisToTorsoEncodersVelocityFilter = new BooleanYoVariable("enable_IMUBasedVelFilter", parentRegistry);
-      enableIMUBasedPelvisToTorsoEncodersVelocityFilter.set(false);
+      enableIMUBasedPelvisToTorsoEncodersVelocityFilter.set(stateEstimatorParameters.useIMUsForSpineJointVelocityEstimation());
    }
 
    public void setupSpineJointVelocitiesSmoothener(SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters,
@@ -77,6 +74,7 @@ public class JointStateUpdater
          iMUBasedPelvisToTorsoEncodersVelocityFilter = new IMUBasedPelvisToTorsoEncodersVelocityFilter(parentRegistry, pelvisIMU, chestIMU,
                sensorOutputMapReadOnly);
          iMUBasedPelvisToTorsoEncodersVelocityFilter.compute();
+         iMUBasedPelvisToTorsoEncodersVelocityFilter.setAlphaFuse(stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation());
       }
       else
       {
