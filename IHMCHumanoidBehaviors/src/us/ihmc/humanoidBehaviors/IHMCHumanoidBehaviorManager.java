@@ -46,7 +46,7 @@ public class IHMCHumanoidBehaviorManager
 
    private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
-   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator)
+   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator, double ankleHeight)
    {
       System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
 
@@ -87,7 +87,7 @@ public class IHMCHumanoidBehaviorManager
       DoubleYoVariable wristForceMagnitudeFiltered = wristSensorUpdatable.getWristForceBandPassFiltered();
       
       createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime,
-            communicationBridge, yoGraphicsListRegistry, tippingDetected);
+            communicationBridge, yoGraphicsListRegistry, tippingDetected, ankleHeight);
       
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
@@ -112,9 +112,10 @@ public class IHMCHumanoidBehaviorManager
     * @param yoTime Holds the controller time. It is updated in the dispatcher and can be shared with the behaviors.
     * @param outgoingCommunicationBridge used to send packets to the controller.
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
+ * @param ankleHeight 
     */
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, DoubleYoVariable wristForceFiltered, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, BooleanYoVariable tippingDetectedBoolean)
+         DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, BooleanYoVariable tippingDetectedBoolean, double ankleHeight)
    {
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
@@ -130,7 +131,7 @@ public class IHMCHumanoidBehaviorManager
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
       
-      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, ankleHeight);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
       
    }
