@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DWorld implements Graphics3DFrameListener
 {
@@ -121,14 +122,7 @@ public class Graphics3DWorld implements Graphics3DFrameListener
    
    public void keepAlive(double time)
    {
-      try
-      {
-         Thread.sleep((long) (time * 1000));
-      }
-      catch (InterruptedException e)
-      {
-         e.printStackTrace();
-      }
+      ThreadTools.sleepSeconds(time);
    }
 
    public void stop()
