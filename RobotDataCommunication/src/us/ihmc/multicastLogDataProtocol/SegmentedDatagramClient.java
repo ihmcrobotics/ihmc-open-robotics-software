@@ -114,8 +114,10 @@ public class SegmentedDatagramClient extends Thread
             receiveChannel.receive(receiveBuffer);
             receiveBuffer.flip();
 
-            header.read(receiveBuffer);
-            updateBuffer(header, receiveBuffer);
+            if(header.read(receiveBuffer))
+            {
+               updateBuffer(header, receiveBuffer);               
+            }
          }
          catch (IOException e)
          {
