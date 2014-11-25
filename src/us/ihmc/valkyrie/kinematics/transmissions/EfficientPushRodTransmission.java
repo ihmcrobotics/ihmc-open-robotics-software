@@ -23,6 +23,9 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
    private DoubleYoVariable pitchAngleOffset;
 
+   //TODO: YoVariablize this boolean
+   private final boolean RUNNING_ON_REAL_ROBOT = false;
+
    public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect, boolean futekBoolean)
    {
       if (Math.abs(Math.abs(reflect) - 1.0) > 1e-7)
@@ -72,7 +75,6 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
          inverseToPack[0][1] = (1.0 / det) * (-matrix[0][1]);
          inverseToPack[1][0] = (1.0 / det) * (-matrix[1][0]);
          inverseToPack[1][1] = (1.0 / det) * matrix[0][0];
-
          return true;
       }
       else
@@ -137,13 +139,23 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
          if (pushRodTransmissionJoint == PushRodTransmissionJoint.WAIST)
          {
-            jnt_data[0].setVelocity(-pitchVelocity);
-            jnt_data[1].setVelocity(reflect * -rollVelocity);
+            if (RUNNING_ON_REAL_ROBOT)
+            {
+               jnt_data[0].setVelocity(-pitchVelocity);
+               jnt_data[1].setVelocity(reflect * -rollVelocity);
+            }
+            jnt_data[0].setValidationVelocity(-pitchVelocity);
+            jnt_data[1].setValidationVelocity(reflect * -rollVelocity);
          }
          else
          {
-            jnt_data[0].setVelocity(pitchVelocity);
-            jnt_data[1].setVelocity(reflect * rollVelocity);
+            if (RUNNING_ON_REAL_ROBOT)
+            {
+               jnt_data[0].setVelocity(pitchVelocity);
+               jnt_data[1].setVelocity(reflect * rollVelocity);
+            }
+            jnt_data[0].setValidationVelocity(pitchVelocity);
+            jnt_data[1].setValidationVelocity(reflect * rollVelocity);
          }
       }
    }
