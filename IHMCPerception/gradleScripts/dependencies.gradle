@@ -7,4 +7,5 @@ dependencies {
 	compile project(':IHMCCommunication')
     compile project(':Planning')
     compile project(':IHMCROSTools')
+    compile project(':ROSJavaMessages')
 }
