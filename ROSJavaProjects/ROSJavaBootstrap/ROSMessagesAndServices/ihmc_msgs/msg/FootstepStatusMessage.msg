@@ -9,4 +9,6 @@ uint8 status
 # FootstepDataList and is then reset to 0 after all footsteps in the list are
 # completed.
 int32 footstepIndex
+geometry_msgs/Vector3 actualFootPositionInWorld
+geometry_msgs/Quaternion actualFootOrientationInWorld
 
