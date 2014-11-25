@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class SegmentedPacketSimulation
 {
-   private static final String host = "192.168.29.243";
+   private static final String host = "10.6.100.96";
 
    private final long sessionId = new Random().nextLong();
    

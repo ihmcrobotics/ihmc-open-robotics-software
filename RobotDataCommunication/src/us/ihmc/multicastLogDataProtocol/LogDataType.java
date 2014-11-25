@@ -2,8 +2,33 @@ package us.ihmc.multicastLogDataProtocol;
 
 public enum LogDataType
 {
-   DATA,
-   HANDSHAKE;
+   DATA(0x41),
+   HANDSHAKE(0x12);
    
    
+   private byte header;
+   private LogDataType(int header)
+   {
+      this.header = (byte) header;
+   }
+   
+   public byte getHeader()
+   {
+      return header;
+   }
+   
+   public static LogDataType[] values = values();
+   
+   public static LogDataType fromHeader(byte header)
+   {
+      for(LogDataType type : values)
+      {
+         if(type.getHeader() == header)
+         {
+            return type;
+         }
+      }
+      
+      return null;
+   }
 }

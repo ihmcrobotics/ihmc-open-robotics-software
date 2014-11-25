@@ -22,7 +22,7 @@ public class SegmentHeader
 
    public void write(ByteBuffer destination)
    {
-      destination.put((byte) type.ordinal());
+      destination.put((byte) type.getHeader());
 
       destination.putLong(sessionID);
       destination.putLong(packageID);
@@ -91,14 +91,25 @@ public class SegmentHeader
       this.sessionID = sessionID;
    }
 
-   public void read(ByteBuffer receiveBuffer)
+   public boolean read(ByteBuffer receiveBuffer)
    {
-      setType(LogDataType.values()[receiveBuffer.get()]);
+      if(receiveBuffer.remaining() < HEADER_SIZE)
+      {
+         return false;
+      }
+      
+      setType(LogDataType.fromHeader(receiveBuffer.get()));
+      if(getType() == null)
+      {
+         return false;
+      }
       sessionID = receiveBuffer.getLong();
       packageID = receiveBuffer.getLong();
       segmentCount = receiveBuffer.getShort();
       segmentID = receiveBuffer.getShort();
       timestamp = receiveBuffer.getLong();
+      
+      return true;
    }
 
 }
