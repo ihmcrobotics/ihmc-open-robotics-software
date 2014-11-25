@@ -51,6 +51,9 @@ public class JointStateUpdater
    public void setupSpineJointVelocitiesSmoothener(SensorOutputMapReadOnly sensorOutputMapReadOnly, StateEstimatorParameters stateEstimatorParameters,
          YoVariableRegistry parentRegistry)
    {
+      if (stateEstimatorParameters == null || stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation() == null)
+         return;
+
       enableIMUBasedPelvisToTorsoEncodersVelocityFilter.set(stateEstimatorParameters.useIMUsForSpineJointVelocityEstimation());
 
       IMUSensorReadOnly pelvisIMU = null;
