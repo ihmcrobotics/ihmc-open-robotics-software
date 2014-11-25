@@ -8,8 +8,6 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-import us.ihmc.utilities.ThreadTools;
-
 public class SegmentedPacketSimulation
 {
    private static final String host = "192.168.29.243";
