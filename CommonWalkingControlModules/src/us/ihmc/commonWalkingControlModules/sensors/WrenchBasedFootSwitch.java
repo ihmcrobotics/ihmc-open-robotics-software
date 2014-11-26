@@ -340,4 +340,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       return isForceMagnitudePastThreshold.getBooleanValue();
    }
+
+   public ContactablePlaneBody getContactablePlaneBody()
+   {
+      return contactablePlaneBody;
+   }
 }
