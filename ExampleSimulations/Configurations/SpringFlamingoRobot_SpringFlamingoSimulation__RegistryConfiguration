@@ -1,0 +1,5 @@
+root*false*false
+root.SpringFlamingoRobot*false*false
+root.SpringFlamingoRobot.SpringFlamingoController*false*false
+root.SpringFlamingoRobot.LinearGroundContactModel*false*false
+root.SpringFlamingoRobot.RobotFreezeFramer*false*false
