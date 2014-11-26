@@ -24,7 +24,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    private DoubleYoVariable pitchAngleOffset;
 
    //TODO: YoVariablize this boolean
-   private final boolean RUNNING_ON_REAL_ROBOT = false;
+   private final boolean USING_A2J_VEL_FOR_ROBOT_CONTROL = false;
 
    public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect, boolean futekBoolean)
    {
@@ -139,7 +139,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
          if (pushRodTransmissionJoint == PushRodTransmissionJoint.WAIST)
          {
-            if (RUNNING_ON_REAL_ROBOT)
+            if (USING_A2J_VEL_FOR_ROBOT_CONTROL)
             {
                jnt_data[0].setVelocity(-pitchVelocity);
                jnt_data[1].setVelocity(reflect * -rollVelocity);
@@ -149,7 +149,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
          }
          else
          {
-            if (RUNNING_ON_REAL_ROBOT)
+            if (USING_A2J_VEL_FOR_ROBOT_CONTROL)
             {
                jnt_data[0].setVelocity(pitchVelocity);
                jnt_data[1].setVelocity(reflect * rollVelocity);
