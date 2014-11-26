@@ -6,6 +6,7 @@ import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class EfficientPushRodTransmission implements PushRodTransmissionInterface
@@ -18,13 +19,15 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    private final double[][] jacobianInverse = new double[2][2];
    private final double[][] jacobianInvertedTranspose = new double[2][2];
    private final ClosedFormJacobian efficientPushrodTransmissionJacobian;
+   private final ClosedFormJacobian efficientPushrodTransmissionForQdValidation;
    private final double reflect;
    private final PushRodTransmissionJoint pushRodTransmissionJoint;
 
    private DoubleYoVariable pitchAngleOffset;
 
+   private boolean USING_A2J_VEL_FOR_ROBOT_CONTROL;
+
    //TODO: YoVariablize this boolean
-   private final boolean USING_A2J_VEL_FOR_ROBOT_CONTROL = false;
 
    public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect, boolean futekBoolean)
    {
@@ -36,6 +39,8 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       this.reflect = reflect;
       efficientPushrodTransmissionJacobian = new ClosedFormJacobian(pushRodTransmissionJoint);
       efficientPushrodTransmissionJacobian.useFuteks(futekBoolean);
+      efficientPushrodTransmissionForQdValidation = new ClosedFormJacobian(pushRodTransmissionJoint);
+      efficientPushrodTransmissionForQdValidation.useFuteks(false);
       this.pushRodTransmissionJoint = pushRodTransmissionJoint;
    }
 
@@ -114,13 +119,16 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       jointData[1].setEffort(reflect * rollTorque);
    }
 
+   
+   public void useQdValidationForControl(boolean bool){
+      USING_A2J_VEL_FOR_ROBOT_CONTROL = bool;
+   }
+   
    @Override
    public void actuatorToJointVelocity(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
    {
-      if (!efficientPushrodTransmissionJacobian.isUsingFuteks())
-      {
-
-         // Validation Velocity is used to validate the correct order and sign of the jacobian matrix elements.
+         // Validation Velocity was used to validate the correct order and sign of the jacobian matrix elements.
+         //UPDATE: Qd_validation is now used for control as well
          assertTrue((numActuators() == act_data.length) && (numJoints() == jnt_data.length));
 
          double actuatorVelocity0 = act_data[0].getVelocity();
@@ -130,7 +138,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
             pitchAngle += pitchAngleOffset.getDoubleValue();
          double rollAngle = reflect * jnt_data[1].getPosition();
 
-         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
+         jacobian = efficientPushrodTransmissionForQdValidation.getUpdatedTransform(rollAngle, pitchAngle);
          invertMatrix(jacobian, jacobianInverse);
 
          // theta_dot = J^-1 * x_dot
@@ -157,7 +165,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
             jnt_data[0].setValidationVelocity(pitchVelocity);
             jnt_data[1].setValidationVelocity(reflect * rollVelocity);
          }
-      }
+      
    }
 
    @Override
@@ -266,4 +274,5 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
       }
    }
+
 }
