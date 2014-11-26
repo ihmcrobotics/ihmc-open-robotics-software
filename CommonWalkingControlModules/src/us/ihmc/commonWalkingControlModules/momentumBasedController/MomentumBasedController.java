@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
+import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
@@ -77,6 +78,7 @@ public class MomentumBasedController
 {
    public static final boolean DO_NECK_PD_CONTROL = true;
    private static final boolean DO_PASSIVE_KNEE_CONTROL = true;
+   private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
    
    public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
 
@@ -182,6 +184,8 @@ public class MomentumBasedController
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
    private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies = new SideDependentList<>();
    
+   private final AntiGravityJointTorquesVisualizer antiGravityJointTorquesVisualizer;
+
    private final double totalMass;
    
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
@@ -223,6 +227,16 @@ public class MomentumBasedController
       RigidBody elevator = fullRobotModel.getElevator();
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+
+      if (VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES)
+      {
+         SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches = new SideDependentList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            wrenchBasedFootSwitches.put(robotSide, (WrenchBasedFootSwitch) footSwitches.get(robotSide));
+         antiGravityJointTorquesVisualizer = new AntiGravityJointTorquesVisualizer(fullRobotModel, twistCalculator, wrenchBasedFootSwitches, registry, gravityZ);
+      }
+      else
+         antiGravityJointTorquesVisualizer = null;
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
@@ -423,6 +437,9 @@ public class MomentumBasedController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
+      if (antiGravityJointTorquesVisualizer != null)
+         antiGravityJointTorquesVisualizer.computeAntiGravityJointTorques();
+
       if (contactPointVisualizer != null)
          contactPointVisualizer.update();
 
