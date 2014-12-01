@@ -9,15 +9,14 @@ import javax.vecmath.Quat4d;
 import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-
-import com.yobotics.simulationconstructionset.util.environments.ContactableValveRobot;
-import com.yobotics.simulationconstructionset.util.environments.ValveType;
 
 public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
 {

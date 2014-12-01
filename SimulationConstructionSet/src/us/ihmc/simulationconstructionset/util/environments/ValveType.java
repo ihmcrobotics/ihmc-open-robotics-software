@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.util.environments;
+package us.ihmc.simulationconstructionset.util.environments;
 
 public enum ValveType
 {
