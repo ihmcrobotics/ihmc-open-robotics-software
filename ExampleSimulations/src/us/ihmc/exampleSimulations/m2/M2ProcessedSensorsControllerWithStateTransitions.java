@@ -284,7 +284,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
       hip_b.set(22.8431);
       hipSwingGain.set(23.7176);
       hipSwingDamp.set(2.37255);
-      max_hip_torque.set(10);
+      max_hip_torque.set(20);
       swing_damp_knee1.set(0.25);
       ankle_gain.set(4);
       ankle_d.set(0);
