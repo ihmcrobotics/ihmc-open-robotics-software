@@ -327,16 +327,16 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       switch (atlasVersion)
       {
-         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-            createHandKnobContactPoints();
-            break;
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+         createHandKnobContactPoints();
+         break;
 
-         case ATLAS_DUAL_ROBOTIQ:
-            for (RobotSide robotSide : RobotSide.values)
-               createRobotiqHandContactPoints(robotSide);
-            break;
-         default:
-            break;
+      case ATLAS_DUAL_ROBOTIQ:
+         for (RobotSide robotSide : RobotSide.values)
+            createRobotiqHandContactPoints(robotSide);
+         break;
+      default:
+         break;
       }
    }
 
@@ -356,30 +356,43 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       String thumb_joint_2 = RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2.getJointName(robotSide);
       String thumb_joint_3 = RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3.getJointName(robotSide);
 
-      Vector3d palmContactPoint1 = new Vector3d(0.035, robotSide.negateIfRightSide(0.218), robotSide.negateIfRightSide(0.01));
-      Vector3d palmContactPoint2 = new Vector3d(-palmContactPoint1.x, palmContactPoint1.y, palmContactPoint1.z);
+      Vector3d palmContactPoint1 = new Vector3d(0.0, robotSide.negateIfRightSide(0.218), 0.01);
+      Vector3d palmContactPoint2 = new Vector3d(0.0, palmContactPoint1.y, -0.025);
+      Vector3d palmContactPoint3 = new Vector3d(-0.035, palmContactPoint1.y, palmContactPoint1.z);
+      Vector3d palmContactPoint4 = new Vector3d(-palmContactPoint3.x, palmContactPoint1.y, palmContactPoint1.z);
+      Vector3d palmContactPoint5 = new Vector3d(-0.035, palmContactPoint1.y, 0.04);
+      Vector3d palmContactPoint6 = new Vector3d(-palmContactPoint5.x, palmContactPoint1.y, 0.04);
 
       Vector3d fingersJoint1ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.032), -0.011);
-      Vector3d fingersJoint2ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.021), -0.0045);
-      Vector3d fingersJoint3ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.03), 0.006);
+      Vector3d fingersJoint2ContactPoint1 = new Vector3d(0.0, robotSide.negateIfRightSide(0.005), 0.005);
+      Vector3d fingersJoint2ContactPoint2 = new Vector3d(0.0, robotSide.negateIfRightSide(0.027),-0.007);
+      Vector3d fingersJoint3ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.025), 0.006);
 
       Vector3d thumbJoint1ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.033), 0.0105);
-      Vector3d thumbJoint2ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.021), 0.004);
-      Vector3d thumbJoint3ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.03), -0.006);
+      Vector3d thumbJoint2ContactPoint1 = new Vector3d(0.0, robotSide.negateIfRightSide(0.005), -0.005);
+      Vector3d thumbJoint2ContactPoint2 = new Vector3d(0.0, robotSide.negateIfRightSide(0.027), 0.007);
+      Vector3d thumbJoint3ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.025), -0.006);
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint1));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint2));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint3));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint4));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint6));
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_1, fingersJoint1ContactPoint));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_2, fingersJoint2ContactPoint));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_2, fingersJoint2ContactPoint1));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_2, fingersJoint2ContactPoint2));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_3, fingersJoint3ContactPoint));
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_2_joint_1, fingersJoint1ContactPoint));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_2_joint_2, fingersJoint2ContactPoint));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_2_joint_2, fingersJoint2ContactPoint1));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_2_joint_2, fingersJoint2ContactPoint2));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_2_joint_3, fingersJoint3ContactPoint));
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_1, thumbJoint1ContactPoint));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint1));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint2));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_3, thumbJoint3ContactPoint));
    }
 
