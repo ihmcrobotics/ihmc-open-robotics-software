@@ -19,19 +19,19 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-public class DRCSimOutputWriter implements DRCOutputWriter
+public class DRCSimGazeboOutputWriter implements DRCOutputWriter
 {
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1235);
 
    private SocketChannel channel;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(DRCSimSensorReaderFactory.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(DRCSimGazeboSensorReaderFactory.class.getSimpleName());
 
    private final int estimatorTicksPerControlTick;
    private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    private ByteBuffer jointCommand;
 
-   public DRCSimOutputWriter(AtlasRobotModel robotModel)
+   public DRCSimGazeboOutputWriter(AtlasRobotModel robotModel)
    {
       estimatorTicksPerControlTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 

@@ -31,7 +31,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-public class DRCSimSensorReader implements SensorReader
+public class DRCSimGazeboSensorReader implements SensorReader
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCSimSensorReader");
 
@@ -56,7 +56,7 @@ public class DRCSimSensorReader implements SensorReader
    private final Vector3d angularVelocity = new Vector3d();
    private final DenseMatrix64F wrench = new DenseMatrix64F(6, 1);
 
-   public DRCSimSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
+   public DRCSimGazeboSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
          StateEstimatorParameters stateEstimatorParameters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
    {
