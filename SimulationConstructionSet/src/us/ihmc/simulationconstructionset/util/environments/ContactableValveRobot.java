@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.util.environments;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
@@ -14,9 +14,6 @@ import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.util.environments.ContactablePinJointRobot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObject;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.FrameCylinder3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
