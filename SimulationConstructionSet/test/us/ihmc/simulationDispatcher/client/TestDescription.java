@@ -1,4 +1,4 @@
-package simulationdispatchertestclient;
+package us.ihmc.simulationDispatcher.client;
 
 import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationDescription;
 

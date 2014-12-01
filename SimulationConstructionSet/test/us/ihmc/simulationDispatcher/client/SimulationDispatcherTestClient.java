@@ -1,12 +1,11 @@
-package simulationdispatchertestclient;
+package us.ihmc.simulationDispatcher.client;
 
-import us.ihmc.simulationconstructionset.*;
-
-import us.ihmc.simulationDispatcher.interfaces.*;
-
-import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+
+import org.junit.Test;
+
+import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 public class SimulationDispatcherTestClient
 {
@@ -21,10 +20,7 @@ public class SimulationDispatcherTestClient
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-   public SimulationDispatcherTestClient()
-   {
-   }
-
+   @Test
    public void test()
    {
 //    YoVariable foo = new YoVariable("foo", null);
@@ -123,13 +119,4 @@ public class SimulationDispatcherTestClient
 
       return cause;
    }
-
-   public static void main(String[] args)
-   {
-      SimulationDispatcherTestClient test = new SimulationDispatcherTestClient();
-
-      test.test();
-
-   }
-
 }
