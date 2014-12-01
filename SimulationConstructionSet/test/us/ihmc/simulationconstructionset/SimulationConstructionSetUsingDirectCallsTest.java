@@ -361,38 +361,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       
-      scs.setFrameSize(dimension);
-      ThreadTools.sleep(THREAD_SLEEP_TIME);
-      Dimension dimensionFromSCS = scs.getJFrame().getBounds().getSize();
-      assertEquals(dimension.height, dimensionFromSCS.height, epsilon);
-      assertEquals(dimension.width, dimensionFromSCS.width, epsilon);
-
-      scs.setFrameLocation(location.x, location.y);
-      ThreadTools.sleep(THREAD_SLEEP_TIME);
-      Point locationFromSCS = scs.getJFrame().getLocation();
-      assertEquals(location.x, locationFromSCS.x, epsilon);
-      assertEquals(location.y, locationFromSCS.y, epsilon);
-
-      scs.setFrameMaximized();
-      ThreadTools.sleep(THREAD_SLEEP_TIME);
-      int frameStateFromSCS = getExtendedStateFromSCS(scs);
-      assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS, epsilon);
-
-      scs.setFrameAlwaysOnTop(true);
-      ThreadTools.sleep(THREAD_SLEEP_TIME);
-      boolean alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
-      assertEquals(true, alwaysOnTopFromSCS);
-
-      scs.setFrameAlwaysOnTop(false);
-      ThreadTools.sleep(THREAD_SLEEP_TIME);
-      alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
-      assertEquals(false, alwaysOnTopFromSCS);
-
-      scs.maximizeMainWindow();
-      ThreadTools.sleep(THREAD_SLEEP_TIME);
-      int frameStateFromSCS2 = getExtendedStateFromSCS(scs);
-      assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
-
       scs.createNewGraphWindow();
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       GraphArrayWindow graphArrayWindowFromSCS = scs.getGraphArrayWindow("Unnamed");
