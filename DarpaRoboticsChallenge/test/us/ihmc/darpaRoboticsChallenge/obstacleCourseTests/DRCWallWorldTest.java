@@ -72,8 +72,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      double wallMaxY = 2.5;
-      DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-0.5, wallMaxY);
+      double wallMaxY = 3.5;
+      DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-1.0, wallMaxY);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, getRobotModel());
 
@@ -127,14 +127,14 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       drcSimulationTestHelper.sendHandPosePacketToListeners(releaseRightHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      for (int i=0; i<2; i++)
+      for (int i=0; i<3; i++)
       {
          bodyY = bodyY + 0.3;
 
          FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
          drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
-         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
       
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -142,8 +142,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 
       assertTrue(success);
       
-      Point3d center = new Point3d(0.022237149581994832, 2.6888378632721963, 0.7893353089719684);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3d center = new Point3d(0.022237149581994832, 3.6888378632721963, 0.7893353089719684);
+      Vector3d plusMinusVector = new Vector3d(0.4, 0.3, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
