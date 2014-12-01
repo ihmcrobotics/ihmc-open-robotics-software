@@ -28,6 +28,7 @@ import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -39,19 +40,6 @@ import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
-
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
@@ -69,6 +57,18 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
+import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SimulationConstructionSetUsingDirectCallsTest
 {
@@ -356,6 +356,44 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(simulateDurationInSeconds, simulateDurationInSecondsFromSCS, epsilon);
    }
 
+   @Ignore // Only run this one locally since it doesn't work on Bamboo on Linux necessarily.
+   @Test
+   public void testFrameMethodsThatOnlyWorkOnSomeOperatingSystems()
+   {
+      scs.setFrameSize(dimension);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      Dimension dimensionFromSCS = scs.getJFrame().getBounds().getSize();
+      assertEquals(dimension.height, dimensionFromSCS.height, epsilon);
+      assertEquals(dimension.width, dimensionFromSCS.width, epsilon);
+
+      scs.setFrameLocation(location.x, location.y);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      Point locationFromSCS = scs.getJFrame().getLocation();
+      assertEquals(location.x, locationFromSCS.x, epsilon);
+      assertEquals(location.y, locationFromSCS.y, epsilon);
+
+      scs.setFrameMaximized();
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      int frameStateFromSCS = getExtendedStateFromSCS(scs);
+      assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS, epsilon);
+
+      scs.setFrameAlwaysOnTop(true);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      boolean alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
+      assertEquals(true, alwaysOnTopFromSCS);
+
+      scs.setFrameAlwaysOnTop(false);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
+      assertEquals(false, alwaysOnTopFromSCS);
+
+      scs.maximizeMainWindow();
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      int frameStateFromSCS2 = getExtendedStateFromSCS(scs);
+      assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
+   }
+   
+   
    @Test
    public void testFrameMethods()
    {
