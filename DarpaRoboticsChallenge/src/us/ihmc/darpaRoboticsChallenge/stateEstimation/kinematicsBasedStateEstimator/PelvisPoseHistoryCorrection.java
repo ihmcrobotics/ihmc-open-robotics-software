@@ -89,6 +89,11 @@ public class PelvisPoseHistoryCorrection
    private final Quat4d totalRotationError = new Quat4d();
    private final Vector3d totalTranslationError = new Vector3d();
 
+   private final Vector3d localizationTranslationInPast = new Vector3d();
+   private final Vector3d seTranslationInPast = new Vector3d();
+   private final Quat4d seRotationInPast = new Quat4d();
+   private final Quat4d localizationRotationInPast = new Quat4d();
+
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
    {
@@ -317,24 +322,20 @@ public class PelvisPoseHistoryCorrection
       long timeStamp = timestampedlocalizationPose.getTimeStamp();
       RigidBodyTransform localizationPose = timestampedlocalizationPose.getTransform3D();
 
-      Vector3d localizationTranslation = new Vector3d();
-      localizationPose.getTranslation(localizationTranslation);
-      newLocalizationTranslationFrame.setAndUpdate(localizationTranslation);
+      localizationPose.getTranslation(localizationTranslationInPast);
+      newLocalizationTranslationFrame.setAndUpdate(localizationTranslationInPast);
 
-      Quat4d localizationRotation = new Quat4d();
-      localizationPose.getRotation(localizationRotation);
-      newLocalizationRotationFrame.setAndUpdate(localizationRotation);
+      localizationPose.getRotation(localizationRotationInPast);
+      newLocalizationRotationFrame.setAndUpdate(localizationRotationInPast);
 
       stateEstimatorPelvisPoseBuffer.findPose(timeStamp, seTimeStampedPose);
       RigidBodyTransform sePose = seTimeStampedPose.getTransform3D();
 
-      Vector3d seTranslation = new Vector3d();
-      sePose.getTranslation(seTranslation);
-      pelvisStateAtLocalizationTimeTranslationFrame.setAndUpdate(seTranslation);
+      sePose.getTranslation(seTranslationInPast);
+      pelvisStateAtLocalizationTimeTranslationFrame.setAndUpdate(seTranslationInPast);
 
-      Quat4d seRotation = new Quat4d();
-      sePose.getRotation(seRotation);
-      pelvisStateAtLocalizationTimeRotationFrame.setAndUpdate(seRotation);
+      sePose.getRotation(seRotationInPast);
+      pelvisStateAtLocalizationTimeRotationFrame.setAndUpdate(seRotationInPast);
 
       newLocalizationTranslationFrame.getTransformToDesiredFrame(translationErrorInPastTransform, pelvisStateAtLocalizationTimeTranslationFrame);
       newLocalizationRotationFrame.getTransformToDesiredFrame(rotationErrorInPastTransform, pelvisStateAtLocalizationTimeRotationFrame);
