@@ -1,4 +1,4 @@
-package us.ihmc.atlas.drcsim;
+package us.ihmc.atlas.drcsimGazebo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
