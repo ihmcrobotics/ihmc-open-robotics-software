@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -29,6 +31,7 @@ public class AntiGravityJointTorquesVisualizer
    private final InverseDynamicsJoint[] allJoints;
    private final OneDoFJoint[] allOneDoFJoints;
    private final Wrench tempWrench = new Wrench();
+   private final LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper> helpers = new LinkedHashMap<OneDoFJoint, DiagnosticsWhenHangingHelper>();
 
    public AntiGravityJointTorquesVisualizer(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches, YoVariableRegistry parentRegistry, double gravity)
    {
@@ -46,8 +49,21 @@ public class AntiGravityJointTorquesVisualizer
          DoubleYoVariable antiGravityJointTorque = new DoubleYoVariable("antiGravity_tau_" + oneDoFJoint.getName(), registry);
          antiGravityJointTorques.put(oneDoFJoint, antiGravityJointTorque);
       }
-      
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         makeArmJointHelper(fullRobotModel, robotSide, true, ArmJointName.SHOULDER_PITCH); 
+         makeArmJointHelper(fullRobotModel, robotSide, false, ArmJointName.SHOULDER_ROLL);
+         makeArmJointHelper(fullRobotModel, robotSide, true, ArmJointName.SHOULDER_YAW); 
+         makeArmJointHelper(fullRobotModel, robotSide, true, ArmJointName.ELBOW_PITCH);
+      }
       parentRegistry.addChild(registry);
+   }
+
+   private void makeArmJointHelper(FullRobotModel fullRobotModel, RobotSide robotSide, boolean preserveY, ArmJointName armJointName)
+   {
+      OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+      helpers.put(armJoint, new DiagnosticsWhenHangingHelper(armJoint, preserveY, registry));
    }
 
    public void computeAntiGravityJointTorques()
@@ -61,6 +77,10 @@ public class AntiGravityJointTorquesVisualizer
          OneDoFJoint oneDoFJoint = allOneDoFJoints[i];
          antiGravityJointTorques.get(oneDoFJoint).set(oneDoFJoint.getTau());
          oneDoFJoint.setTau(0.0);
+         
+         DiagnosticsWhenHangingHelper helper = helpers.get(oneDoFJoint);
+         if (helper != null)
+            helper.update();
       }
       reset();
    }
@@ -80,11 +100,6 @@ public class AntiGravityJointTorquesVisualizer
 
    private void reset()
    {
-//      for (int i = 0; i < allJoints.length; i++)
-//      {
-//         allJoints[i].setDesiredAccelerationToZero();
-//      }
       inverseDynamicsCalculator.reset();
-      
    }
 }
