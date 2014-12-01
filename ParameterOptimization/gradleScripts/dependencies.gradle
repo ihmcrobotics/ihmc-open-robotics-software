@@ -4,6 +4,6 @@ dependencies {
 			
 	compile project(':IHMCUtilities')
 	//testCompile project(':IHMCUtilities').sourceSets.test.output
-    compile project(':SimulationConstructionSet')
+	compile project(':IHMCYoUtilities')
 	compile project(':Graphics3DAdapter')
 }

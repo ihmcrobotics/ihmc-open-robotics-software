@@ -41,4 +41,5 @@ dependencies {
 	compile project(':3DModelLoaders')
 	compile project(':Graphics3DAdapter')
 	compile project(':JMEGraphics3DAdapter')
+	compile project(':ParameterOptimization')
 }

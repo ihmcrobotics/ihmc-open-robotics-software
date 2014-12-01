@@ -1,7 +1,9 @@
-package us.ihmc.utilities.parameterOptimization;
+package us.ihmc.simulationconstructionset.optimization;
 
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
 public class SimpleSimulationIndividualToEvaluate extends IndividualToEvaluate
 {

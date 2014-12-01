@@ -1,10 +1,15 @@
-package us.ihmc.utilities.parameterOptimization;
+package us.ihmc.simulationconstructionset.optimization;
 
 import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.Test;
+
+import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
+import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
+import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParameterOptimizer;
 
 public class SimpleSimulationTest
 {
