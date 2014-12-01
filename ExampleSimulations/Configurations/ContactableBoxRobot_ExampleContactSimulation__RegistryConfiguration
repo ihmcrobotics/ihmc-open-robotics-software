@@ -1,0 +1,5 @@
+root*false*false
+root.ContactableBoxRobot*false*false
+root.PointMassRobot*false*false
+root.PointMassRobot.ContactController*false*false
+root.PointMassRobot.ContactController.simpleContactSimpleStickSlipContactModel*false*false
