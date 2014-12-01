@@ -17,6 +17,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'kryonet', version: '2.21'
 	compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
 	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.+'
+	compile group: 'org.apache.sshd', name: 'sshd-core', version: '0.12.+'
 	
 	
 	compile project(':BambooTools')
