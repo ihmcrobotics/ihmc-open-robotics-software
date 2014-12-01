@@ -31,7 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
 
-public class DRCSimControllerFactory
+public class DRCSimGazeboControllerFactory
 {
    private static final boolean USE_GUI = true;
 
@@ -39,7 +39,7 @@ public class DRCSimControllerFactory
 
    private static final double gravity = -9.81;
 
-   public DRCSimControllerFactory()
+   public DRCSimGazeboControllerFactory()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
       /*
@@ -68,13 +68,13 @@ public class DRCSimControllerFactory
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      DRCSimSensorReaderFactory sensorReaderFactory = new DRCSimSensorReaderFactory(sensorInformation, stateEstimatorParameters);
+      DRCSimGazeboSensorReaderFactory sensorReaderFactory = new DRCSimGazeboSensorReaderFactory(sensorInformation, stateEstimatorParameters);
 
       /*
        * Create output writer
        */
 
-      DRCSimOutputWriter outputWriter = new DRCSimOutputWriter(robotModel);
+      DRCSimGazeboOutputWriter outputWriter = new DRCSimGazeboOutputWriter(robotModel);
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer.getObjectCommunicator());
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
@@ -93,7 +93,7 @@ public class DRCSimControllerFactory
        * Setup threads
        */
 
-      DRCSimThreadedRobotController robotController = new DRCSimThreadedRobotController();
+      DRCSimGazeboThreadedRobotController robotController = new DRCSimGazeboThreadedRobotController();
       int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getEstimatorDT());
       int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 
@@ -161,6 +161,6 @@ public class DRCSimControllerFactory
 
    public static void main(String[] args)
    {
-      new DRCSimControllerFactory();
+      new DRCSimGazeboControllerFactory();
    }
 }

@@ -16,14 +16,14 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-public class DRCSimSensorReaderFactory implements SensorReaderFactory
+public class DRCSimGazeboSensorReaderFactory implements SensorReaderFactory
 {
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private DRCRobotSensorInformation sensorInformation;
-   private DRCSimSensorReader atlasSensorReader;
+   private DRCSimGazeboSensorReader atlasSensorReader;
    private final StateEstimatorParameters stateEstimatorParameters;
 
-   public DRCSimSensorReaderFactory(DRCRobotSensorInformation sensorInformation,
+   public DRCSimGazeboSensorReaderFactory(DRCRobotSensorInformation sensorInformation,
          StateEstimatorParameters stateEstimatorParameters)
    {
       this.sensorInformation = sensorInformation;     
@@ -56,11 +56,11 @@ public class DRCSimSensorReaderFactory implements SensorReaderFactory
          stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
       }
 
-      atlasSensorReader = new DRCSimSensorReader(stateEstimatorSensorDefinitions, sensorInformation, stateEstimatorParameters,
+      atlasSensorReader = new DRCSimGazeboSensorReader(stateEstimatorSensorDefinitions, sensorInformation, stateEstimatorParameters,
             forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, registry);
    }
 
-   public DRCSimSensorReader getSensorReader()
+   public DRCSimGazeboSensorReader getSensorReader()
    {
       return atlasSensorReader;
    }
