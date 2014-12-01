@@ -65,13 +65,13 @@ public class YoVariableServer implements RobotVisualizer
       }
       
       handshakeServer = new YoVariableHandshakeServer(handshakePort, mainBodies, dt);
-      List<JointHolder> jointHolders = handshakeServer.getJointHolders();
+      List<JointHolder> jointHolders = handshakeServer.getHandshakeBuilder().getJointHolders();
       
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
-      int mainOffset = handshakeServer.addRegistry(mainRegistry, variables);
+      int mainOffset = handshakeServer.getHandshakeBuilder().addRegistry(mainRegistry, variables);
       if(mainDynamicGraphicObjectsListRegistry != null)
       {
-         handshakeServer.addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
+         handshakeServer.getHandshakeBuilder().addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
       }
       FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
       mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -82,9 +82,9 @@ public class YoVariableServer implements RobotVisualizer
          addVariableBuffer(data);
       }
             
-      producer = new YoVariableProducer(producerPort, handshakeServer.getNumberOfVariables(), FullStateBuffer.getNumberOfJointStates(jointHolders), mainBuffer,
+      producer = new YoVariableProducer(producerPort, handshakeServer.getHandshakeBuilder().getNumberOfVariables(), FullStateBuffer.getNumberOfJointStates(jointHolders), mainBuffer,
             buffers.values());
-      consumer = new YoVariableChangedConsumer(consumerPort, handshakeServer.getVariablesAndRootRegistries(), variableChangeData);
+      consumer = new YoVariableChangedConsumer(consumerPort, handshakeServer.getHandshakeBuilder().getVariablesAndRootRegistries(), variableChangeData);
       
       
       handshakeServer.start();
@@ -144,10 +144,10 @@ public class YoVariableServer implements RobotVisualizer
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
       YoVariableRegistry registry = data.first();
       YoGraphicsListRegistry yoGraphicsListRegistry = data.second();
-      int variableOffset = handshakeServer.addRegistry(registry, variables);
+      int variableOffset = handshakeServer.getHandshakeBuilder().addRegistry(registry, variables);
       if(yoGraphicsListRegistry != null)
       {
-         handshakeServer.addDynamicGraphicObjects(yoGraphicsListRegistry);
+         handshakeServer.getHandshakeBuilder().addDynamicGraphicObjects(yoGraphicsListRegistry);
       }
       RegistryBuffer.Builder builder = new RegistryBuffer.Builder(variableOffset, variables);
       ConcurrentRingBuffer<RegistryBuffer> buffer = new ConcurrentRingBuffer<>(builder, VARIABLE_BUFFER_CAPACITY);
