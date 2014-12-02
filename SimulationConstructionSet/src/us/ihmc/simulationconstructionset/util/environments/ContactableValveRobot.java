@@ -23,7 +23,9 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class ContactableValveRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
@@ -43,9 +45,10 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
    private double valveNumberOfPossibleTurns;
 
+   private final DoubleYoVariable valveClosePercentage;
+   
    private double valveMass;
    private Matrix3d inertiaMatrix;
-   //   private double valveIxx, valveIyy, valveIzz;
 
    private FrameTorus3d valveTorus;
    private ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
@@ -69,6 +72,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       setMass(valveMass);
       valveDamping = new DoubleYoVariable(getName() + "ValveDamping", yoVariableRegistry);
       valveDamping.set(DEFAULT_DAMPING);
+      valveClosePercentage = new DoubleYoVariable("valveClosePercentage", yoVariableRegistry);
+      valveClosePercentage.set(0.0);
    }
 
    public ContactableValveRobot(String name, double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
@@ -174,6 +179,16 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       valveLink.setLinkGraphics(valveLinkGraphics);
 
       yoGraphicsListRegistries.add(graphListRegistry);
+      
+      valvePinJoint.getQ().addVariableChangedListener(new VariableChangedListener()
+      {
+         
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            valveClosePercentage.set(valvePinJoint.getQ().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
+         }
+      });
    }
 
    @Override
@@ -260,6 +275,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       return valvePinJoint;
    }
 
+   public double getClosePercentage()
+   {
+      return valveClosePercentage.getDoubleValue();
+   }
+   
    @Override
    public void setMass(double mass)
    {
@@ -293,5 +313,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    public void setDamping(double dampingValue)
    {
       valveDamping.set(dampingValue);
+   }
+
+   public void setClosePercentage(double percentage)
+   {
+      valveClosePercentage.set(percentage);
+      valvePinJoint.setQ(valveNumberOfPossibleTurns* 2 * Math.PI * percentage/100 );
    }
 }
