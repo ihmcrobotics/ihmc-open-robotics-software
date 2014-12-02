@@ -57,7 +57,6 @@ dependencies {
 	compile project(':IHMCSystemIdentification')
 	compile project(':IHMCUtilities')
 	compile project(':ImageProcessing')
-	compile project(':JMEGraphics3DAdapter')
     compile project(':Plotting')
 	compile project(':RobotDataCommunication')
 	compile project(':ROSJava')
