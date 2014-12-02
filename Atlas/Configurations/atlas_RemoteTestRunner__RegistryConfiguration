@@ -23,14 +23,8 @@ root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.l_leg_akxForceSe
 root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.r_leg_akxForceSensorToJointTorqueProjector*false*false
 root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCPoseCommunicator*false*false
 root.atlas.DRCSimulation.DRCControllerThread*false*false
-<<<<<<< .mine
-root.atlas.DRCSimulation.DRCControllerThread.FullRobotModelCorruptor*false*false
 root.atlas.DRCSimulation.DRCControllerThread.ForceSensorDataVisualizer*false*false
 root.atlas.DRCSimulation.DRCControllerThread.ForceSensorDataVisualizer.WrenchVisualizer*false*false
-=======
-root.atlas.DRCSimulation.DRCControllerThread.ForceSensorDataVisualizer*false*false
-root.atlas.DRCSimulation.DRCControllerThread.ForceSensorDataVisualizer.WrenchVisualizer*false*false
->>>>>>> .r24631
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.ModularSensorProcessor*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.ModularSensorProcessor.ReferenceFrameUpdater*false*false
@@ -72,13 +66,9 @@ root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLeve
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footFootswitchCOPBalls*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footFootswitchCOPBalls*false*false
-<<<<<<< .mine
-root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.UserDesiredHeadOrientationProvider*false*false
-=======
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.BlindWalkingToDestinationDesiredFootstepCalculator*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FootstepPathCoordinator*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FootstepPathCoordinator.DesiredFootstepCalculatorFootstepProviderWrapper*false*false
->>>>>>> .r24631
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.LookAheadCoMHeightTrajectoryGenerator*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.LookAheadCoMHeightTrajectoryGenerator.FourPointSpline1D*false*false
 root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.LookAheadCoMHeightTrajectoryGenerator.offsetHeightAboveGroundTrajectoryCubicPolynomialTrajectoryGenerator*false*false
@@ -243,11 +233,4 @@ root.atlas.DRCSimulation.DRCControllerThread.DRCSimulationOutputWriter*false*fal
 root.atlas.PIDLidarTorqueController*false*false
 root.atlas.SimulatedDRCRobotTimeProvider*false*false
 root.atlas.LinearGroundContactModel*false*false
-<<<<<<< .mine
 root.atlas.DRCSimulatedSpindleCommunicator*false*false
-root.atlas.SlipRandomOnNextStepPerturber*false*false
-root.atlas.SlipRandomOnNextStepPerturber.leftGroundContactPointsSlipper*false*false
-root.atlas.SlipRandomOnNextStepPerturber.rightGroundContactPointsSlipper*false*false
-=======
-root.atlas.DRCSimulatedSpindleCommunicator*false*false
->>>>>>> .r24631

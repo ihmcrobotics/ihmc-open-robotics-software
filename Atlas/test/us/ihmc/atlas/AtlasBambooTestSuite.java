@@ -14,7 +14,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 {
-   AtlasFootstepGeneratorTest.class,
+   AtlasFootstepGeneratorTest.class, 
    AtlasOptimizationMomentumControlModuleTest.class,
    AtlasNetworkingCommandReaderTest.class,
    AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class,

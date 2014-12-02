@@ -26,7 +26,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
    private static final Class<DRCObstacleCourseTrialsTerrainTest> thisClass = DRCObstacleCourseTrialsTerrainTest.class;
-   private static final boolean alwaysShowGUI = true;
+   private static final boolean alwaysShowGUI = false;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
@@ -126,7 +126,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       assertTrue(success);
       
-      // TODO Fix bounding box @dcalvert
       Point3d center = new Point3d(3.853111159859177, 4.117657981767957, 0.7897555650626801); //Atlas
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
