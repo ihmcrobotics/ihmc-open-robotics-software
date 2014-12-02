@@ -29,7 +29,6 @@ dependencies {
 	compile project(':IHMCROSTools')
 	compile project(':IHMCUtilities')
 	compile project(':ThirdParty')
-	compile project(':JMEGraphics3DAdapter')
 	compile project(':RobotDataCommunication')
 	compile project(':ROSJavaMessages')
 	compile project(':SDFLoader')
