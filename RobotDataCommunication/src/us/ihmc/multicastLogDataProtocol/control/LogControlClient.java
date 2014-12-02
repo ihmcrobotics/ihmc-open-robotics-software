@@ -3,14 +3,19 @@ package us.ihmc.multicastLogDataProtocol.control;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
-import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
+import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.utilities.net.KryoObjectClient;
+import us.ihmc.utilities.net.NetStateListener;
+import us.ihmc.utilities.net.ObjectConsumer;
 
-public class LogControlClient
+public class LogControlClient implements NetStateListener 
 {
    private final KryoObjectClient client;
-   public LogControlClient(byte[] host, int port)
+   private final YoVariableHandshakeParser handshakeParser;
+   
+   
+   public LogControlClient(byte[] host, int port, YoVariablesUpdatedListener listener, String registryPrefix, boolean registerYoVariables)
    {
       try
       {
@@ -20,11 +25,37 @@ public class LogControlClient
       {
          throw new RuntimeException(e);
       }
+      handshakeParser = new YoVariableHandshakeParser(listener, registryPrefix, registerYoVariables);      
+      client.attachStateListener(this);
+      client.attachListener(LogHandshake.class, new LogHandShakeConsumer());
    }
    
-   public LogModelLoader getModelLoader()
+   @Override
+   public void connected()
    {
-      return null;
+      client.consumeObject(new HandshakeRequest());
+   }
+
+   @Override
+   public void disconnected()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+   
+   private class LogHandShakeConsumer implements ObjectConsumer<LogHandshake>
+   {
+      private boolean receivedHandshake;
+      
+      @Override
+      public synchronized void consumeObject(LogHandshake object)
+      {
+         if(!receivedHandshake)
+         {
+            handshakeParser.parseFrom(object.protoShake);
+         }
+      }
+      
    }
    
 }
