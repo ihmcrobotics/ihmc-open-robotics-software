@@ -336,15 +336,15 @@ public class AtlasRobotModel implements DRCRobotModel
       switch (getHandType())
       {
          case ROBOTIQ:
-            return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
+        	 return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
          default:
-            return null;
+        	 return null;
       }
    }
-
-@Override
-public FootstepParameters getFootstepParameters() {
-	// TODO Auto-generated method stub
-	return new AtlasFootstepParameters();
-}
+   
+   @Override
+   public FootstepParameters getFootstepParameters() {
+	   // TODO Auto-generated method stub
+	   return new AtlasFootstepParameters();
+   }
 }
