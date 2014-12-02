@@ -162,11 +162,13 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		if (newestPacket != null){
 			//TODO: update current location and predicted location from the feedback
 			if (newestPacket.status == Status.STARTED){
+				System.out.println("Number of requested steps: " + stepsRequested.size());
+				System.out.println("footstep index: " + newestPacket.footstepIndex);
 				predictedLocation = stepsRequested.get(newestPacket.footstepIndex);
 				sendUpdateStart(predictedLocation);
 				stepCompleted.set(false);
 			}else if (newestPacket.status == Status.COMPLETED){
-				currentLocation = stepsRequested.get(newestPacket.footstepIndex);
+				currentLocation = predictedLocation;
 				stepCompleted.set(true);
 				if (newestPacket.footstepIndex == stepsRequested.size()-1){
 					allStepsCompleted.set(true);
@@ -196,7 +198,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		currentPlan.pathPlan.remove(0);
 		currentPlan.footstepUnknown.remove(0);
 		//element 1 is now element 0
-		if (currentPlan.footstepUnknown.get(0)) return;
+		if (currentPlan.footstepUnknown.get(0) && !executeUnknown.getBooleanValue()) return;
 		
 		sendStepsToController();
 		stepCompleted.set(false);
@@ -325,7 +327,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		waitingForValidPlan.set(false);
 		hasInputBeenSet.set(false);
 		executePlan.set(false);
-		executeUnknown.set(false);
+		executeUnknown.set(true);
 		allStepsCompleted.set(true);
 	}
 
