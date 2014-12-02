@@ -49,7 +49,6 @@ dependencies {
 	
 	compile project(':IHMCRealtime')
 	compile project(':IHMCROSTools')
-	compile project(':3DModelLoaders')
 	compile project(':BambooTools')
 	compile project(':CommonWalkingControlModules')
 	compile project(':Graphics3DAdapter')

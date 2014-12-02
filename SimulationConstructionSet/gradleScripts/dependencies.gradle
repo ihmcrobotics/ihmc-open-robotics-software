@@ -38,7 +38,6 @@ dependencies {
 	compile project(':IHMCYoUtilities')
 	testCompile project(':IHMCUtilities').sourceSets.test.output
     compile project(':Plotting')
-	compile project(':3DModelLoaders')
 	compile project(':Graphics3DAdapter')
 	compile project(':ParameterOptimization')
 }

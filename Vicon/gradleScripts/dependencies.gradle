@@ -7,6 +7,5 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':IHMCUtilities')
 	compile project(':Plotting')
-	compile project(':3DModelLoaders')
 	compile project(':Graphics3DAdapter')
 }
