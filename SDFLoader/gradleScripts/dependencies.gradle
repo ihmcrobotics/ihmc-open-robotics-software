@@ -7,6 +7,5 @@ dependencies {
        
     compile project(':SimulationConstructionSet')
     compile project(':Graphics3DAdapter')
-    compile project(':JMEGraphics3DAdapter')
     compile project(':IHMCUtilities')
 }

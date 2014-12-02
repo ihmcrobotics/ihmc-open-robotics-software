@@ -3,6 +3,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
 	
 	compile project(':IHMCUtilities')
-	compile project(':JMEGraphics3DAdapter')
+	compile project(':Graphics3DAdapter')
 	compile project(':UserInterface')
 }
