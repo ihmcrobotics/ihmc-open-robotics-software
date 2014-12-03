@@ -35,4 +35,5 @@ dependencies {
 	compile project(':IHMCUtilities')
 	compile project(':Plotting')
 	compile project(':IHMCCommunication')
+    compile project(':ThirdParty')
 }
