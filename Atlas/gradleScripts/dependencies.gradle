@@ -56,4 +56,5 @@ dependencies {
     compile project(':ROSJNIWrapper')
     compile project(':Planning')
     compile project(':IHMCPerception')
+    compile project(':ThirdParty')
   }
