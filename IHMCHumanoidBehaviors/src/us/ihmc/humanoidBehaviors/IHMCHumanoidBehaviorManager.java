@@ -81,14 +81,13 @@ public class IHMCHumanoidBehaviorManager
 //      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
 //      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
       
-      WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(fullRobotModel, RobotSide.RIGHT, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, registry);
-      dispatcher.addUpdatable(wristSensorUpdatable); 
+      WristForceSensorFilteredUpdatable rightWristSensorUpdatable = new WristForceSensorFilteredUpdatable(RobotSide.RIGHT, fullRobotModel, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
+      dispatcher.addUpdatable(rightWristSensorUpdatable); 
       
-      DoubleYoVariable wristForceMagnitudeFiltered = wristSensorUpdatable.getWristForceBandPassFiltered();
+      DoubleYoVariable wristForceMagnitudeFiltered = rightWristSensorUpdatable.getWristForceBandPassFiltered();
       
       createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime,
             communicationBridge, yoGraphicsListRegistry, tippingDetected, ankleHeight);
-      
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
