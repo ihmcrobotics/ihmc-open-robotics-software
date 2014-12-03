@@ -56,7 +56,10 @@ public class SDFFullRobotModel implements FullRobotModel
    private final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
    private final SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists = SideDependentList.createListOfEnumMaps(LegJointName.class);
-
+   
+   public final SideDependentList< ArrayList<OneDoFJoint>> armJointIDsList =  SideDependentList.createListOfArrayLists();
+   public final SideDependentList< ArrayList<OneDoFJoint>> legJointIDsList =  SideDependentList.createListOfArrayLists();
+   
    private final RigidBody pelvis;
    private RigidBody chest;
    private RigidBody head;
@@ -168,7 +171,6 @@ public class SDFFullRobotModel implements FullRobotModel
                      ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName() + "_" + camera.getName(), sensorFrame, cameraTransform);
                      cameraFrames.put(cameraFrame.getName(), cameraFrame);
                   }
-
                }
                else
                {
@@ -205,8 +207,6 @@ public class SDFFullRobotModel implements FullRobotModel
       RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
 
-
-
       OneDoFJoint inverseDynamicsJoint;
 
       //      ReferenceFrame parentFrame;
@@ -231,7 +231,6 @@ public class SDFFullRobotModel implements FullRobotModel
       default:
          throw new RuntimeException("Joint type not implemented: " + joint.getType());
       }
-
 
       inverseDynamicsJoint.setEffortLimit(joint.getEffortLimit());
       inverseDynamicsJoint.setJointLimitLower(joint.getLowerLimit());
@@ -289,10 +288,12 @@ public class SDFFullRobotModel implements FullRobotModel
          case ARM:
             Pair<RobotSide, ArmJointName> armJointName = sdfJointNameMap.getArmJointName(joint.getName());
             armJointLists.get(armJointName.first()).put(armJointName.second(), inverseDynamicsJoint);
+            armJointIDsList.get(armJointName.first()).add( inverseDynamicsJoint );
             break;
          case LEG:
             Pair<RobotSide, LegJointName> legJointName = sdfJointNameMap.getLegJointName(joint.getName());
             legJointLists.get(legJointName.first()).put(legJointName.second(), inverseDynamicsJoint);
+            legJointIDsList.get(legJointName.first()).add( inverseDynamicsJoint );
             break;
          case NECK:
             NeckJointName neckJointName = sdfJointNameMap.getNeckJointName(joint.getName());
@@ -318,8 +319,26 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          addJointsRecursively(sdfJoint, rigidBody);
       }
-
    }
+   
+   public void setJointAngles(RobotSide side, LimbName limb, double[] q) 
+   {
+	   int i = 0;
+		if( limb == LimbName.ARM){
+			for ( OneDoFJoint jnt : armJointIDsList.get( side ) )
+			{
+				jnt.setQ( q[i] );
+				i++;
+			}
+		}
+		else if( limb == LimbName.LEG){
+			for ( OneDoFJoint jnt : legJointIDsList.get( side ) )
+			{
+				jnt.setQ( q[i] );
+				i++;
+			}
+		}
+	}
 
    /** {@inheritDoc} */
    @Override
@@ -582,4 +601,5 @@ public class SDFFullRobotModel implements FullRobotModel
       }
       return sensorFrames.get(linkName);
    }
+   
 }
