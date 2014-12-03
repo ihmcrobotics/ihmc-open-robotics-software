@@ -26,6 +26,7 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface, NetStateListener
 {
+   private static final int MINIMUM_SCANS_TO_RECIEVE = 90;
    private static final float SCAN_TOLERANCE = 0.001f;
    private static final double WALL_DISTANCE = 1.0;
    private static final boolean ALLOW_PERCENTAGE_OUT_OF_RANGE = true;
@@ -64,7 +65,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       assertTrue(success);
       
       System.out.println("Scans consumed: " + numberOfLidarScansConsumed);
-      assertTrue("Lidar scans are not being received; numberOfLidarScansConsumed = " + numberOfLidarPointsConsumed, numberOfLidarScansConsumed > 100);
+      assertTrue("Lidar scans are not being received; numberOfLidarScansConsumed = " + numberOfLidarScansConsumed, numberOfLidarScansConsumed > MINIMUM_SCANS_TO_RECIEVE);
       
       System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: "
             + ((double) errorQueue.size() / numberOfLidarPointsConsumed) + " less than .05");
