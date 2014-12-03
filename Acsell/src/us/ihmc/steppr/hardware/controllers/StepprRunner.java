@@ -2,10 +2,10 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.io.IOException;
 
-import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
+import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 
 public class StepprRunner extends RealtimeThread
 {

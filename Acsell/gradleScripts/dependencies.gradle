@@ -25,4 +25,5 @@ dependencies {
 	compile project(':IHMCRealtime')
 	compile project(':IHMCHumanoidBehaviors')
     compile project(':IHMCPerception')
+    compile project(':IHMCWholeBodyController')
 }
