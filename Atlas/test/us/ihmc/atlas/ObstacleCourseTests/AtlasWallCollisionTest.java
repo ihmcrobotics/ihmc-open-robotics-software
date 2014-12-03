@@ -6,7 +6,6 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCWallCollisionTest;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCWallWorldTest;
 
 public class AtlasWallCollisionTest extends DRCWallCollisionTest
 {
@@ -18,6 +17,7 @@ public class AtlasWallCollisionTest extends DRCWallCollisionTest
       
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();
+
    }
    
    @Override
