@@ -16,7 +16,6 @@ import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -39,6 +38,8 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
    private final long initialTimestamp;
    private final long finalTimestamp = 0;
    
+   private int readEveryNTicks = 1;
+    
    public YoVariableLogPlaybackRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap,
          List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, FileChannel logChannel, SimulationConstructionSet scs)
    {
@@ -115,8 +116,33 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       }
    }
    
+   public void setReadEveryNTicks(int readEveryNTicks)
+   {
+      if (readEveryNTicks < 1) readEveryNTicks = 1;
+      this.readEveryNTicks = readEveryNTicks;
+   }
+   
+
+   public int getReadEveryNTicks()
+   {
+      return readEveryNTicks;
+   }
+   
+   // By overriding this method, we make the simulate button be the read data in button.
    @Override
    public void doDynamicsAndIntegrate(double DT)
+   {
+      for (int i=0; i<readEveryNTicks; i++)
+      {
+         boolean done = readAndProcessALogLineReturnTrueIfDone(DT);
+         if (done) return;
+      }
+      
+      update();
+      currentRecordTick.increment();
+   }
+   
+   private boolean readAndProcessALogLineReturnTrueIfDone(double DT)
    {
       logLine.clear();
       logLongArray.clear();
@@ -127,7 +153,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          {
             System.out.println("Reached end of file, stopping simulation thread");
             scs.stop();
-            return;
+            return true;
          }
 
          if (bytesRead != logLine.capacity())
@@ -160,12 +186,9 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       }
 
       t.add(DT);
-      update();
-
-      currentRecordTick.increment();
-
+      return false;
    }
-   
+
    public void addCurrentRecordTickListener(VariableChangedListener listener)
    {
       currentRecordTick.addVariableChangedListener(listener);
@@ -183,4 +206,5 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          throw new RuntimeException("Cannot skip to position " + position);
       }
    }
+
 }

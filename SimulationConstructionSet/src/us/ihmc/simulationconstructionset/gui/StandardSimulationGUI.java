@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Color3f;
@@ -70,7 +71,6 @@ import us.ihmc.yoUtilities.graphics.GraphicsUpdatable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
@@ -823,6 +823,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    public void addJLabel(JLabel label)
    {
       buttonPanel.add(label);
+      buttonPanel.updateUI();
+   }
+   
+   public void addTextField(JTextField textField)
+   {
+      buttonPanel.add(textField);
       buttonPanel.updateUI();
    }
 
@@ -2980,4 +2986,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    {
       return graphics3dAdapter;
    }
+
+
 }
