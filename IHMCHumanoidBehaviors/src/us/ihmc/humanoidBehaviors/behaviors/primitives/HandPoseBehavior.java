@@ -5,11 +5,11 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.manipulation.HandPausePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
+import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -110,6 +110,7 @@ public class HandPoseBehavior extends BehaviorInterface
       trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
       hasStatusBeenSent.set(false);
+      isPaused.set(false);
    }
 
    @Override
@@ -139,7 +140,7 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
-      HandPausePacket pausePacket = new HandPausePacket(handPoseStatusSide, true);
+      StopArmMotionPacket pausePacket = new StopArmMotionPacket(handPoseStatusSide);
       pausePacket.setDestination(PacketDestination.CONTROLLER);
       sendPacketToController(pausePacket);
       isPaused.set(true);

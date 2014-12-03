@@ -6,6 +6,7 @@ import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,6 +18,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
+import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -34,7 +36,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    private KryoLocalObjectCommunicator networkObjectCommunicator = new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList());
    private DRCDemo01NavigationEnvironment demo01NavEnvironmant = new DRCDemo01NavigationEnvironment();
 
-   private boolean showGUI = false;
+   private boolean showGUI = true;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -76,6 +78,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    private void sendHandPosePacket(HandPosePacket handPosePacket)
    {
       networkObjectCommunicator.consumeObject(handPosePacket);
+   }
+
+   private void sendHandPausePacket(RobotSide side)
+   {
+
+      networkObjectCommunicator.consumeObject(new StopArmMotionPacket(side));
    }
 
    private HandPosePacket createRandomHandPosePacket()
@@ -133,6 +141,55 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       assertTrue((statusStartedCounter == 1) && (statusCompletedCounter == 1));
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test
+   public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      statusStartedCounter = 0;
+      statusCompletedCounter = 0;
+
+      hasSimulationBeenInitialized = false;
+
+      networkObjectCommunicator.attachListener(HandPoseStatus.class, new ObjectConsumer<HandPoseStatus>()
+      {
+         @Override
+         public void consumeObject(HandPoseStatus object)
+         {
+            if (object.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
+               statusStartedCounter++;
+
+            if (object.getStatus() == HandPoseStatus.Status.COMPLETED && hasSimulationBeenInitialized)
+               statusCompletedCounter++;
+         }
+      });
+
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
+      hasSimulationBeenInitialized = true;
+
+      HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket();
+      outgoingHandPosePacket.position.x = 0.3;
+      outgoingHandPosePacket.position.y = 0.3;
+      outgoingHandPosePacket.position.z = 0.8;
+      outgoingHandPosePacket.trajectoryTime = 3;
+      outgoingHandPosePacket.robotSide = RobotSide.LEFT;
+      sendHandPosePacket(outgoingHandPosePacket);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      sendHandPausePacket(RobotSide.LEFT);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+
+      Vector3d translation = new Vector3d();
+      drcSimulationTestHelper.getRobot().getJoint("l_arm_wrx").getTranslationToWorld(translation);
+
+      assertTrue((statusStartedCounter == 2) && (statusCompletedCounter == 1));
+      assertTrue(Math.abs(translation.getX() - 0.2891406582001399) < 0.005);
+      assertTrue(Math.abs(translation.getY() - 0.34701296179764957) < 0.005);
+      assertTrue(Math.abs(translation.getZ() - 0.7988289858957343) < 0.005);
+
       BambooTools.reportTestFinishedMessage();
    }
 

@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.packets.manipulation.HandPausePacket;
+import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -20,7 +20,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, HandPoseProvider
 {
    private final SideDependentList<AtomicReference<HandPosePacket>> packets = new SideDependentList<AtomicReference<HandPosePacket>>();
-   private final SideDependentList<AtomicReference<HandPausePacket>> pausePackets = new SideDependentList<AtomicReference<HandPausePacket>>();
+   private final SideDependentList<AtomicReference<StopArmMotionPacket>> pausePackets = new SideDependentList<AtomicReference<StopArmMotionPacket>>();
 
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
@@ -31,7 +31,7 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
    private final FullRobotModel fullRobotModel;
-   private final ObjectConsumer<HandPausePacket> handPauseCommandConsumer;
+   private final ObjectConsumer<StopArmMotionPacket> handPauseCommandConsumer;
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame)
    {
@@ -42,7 +42,7 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
       for (RobotSide robotSide : RobotSide.values)
       {
          packets.put(robotSide, new AtomicReference<HandPosePacket>());
-         pausePackets.put(robotSide, new AtomicReference<HandPausePacket>());
+         pausePackets.put(robotSide, new AtomicReference<StopArmMotionPacket>());
 
          homePositions.put(robotSide, new FramePose(chestFrame, desiredHandPosesWithRespectToChestFrame.get(robotSide)));
 
@@ -51,9 +51,9 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
          finalDesiredJointAngleMaps.put(robotSide, new LinkedHashMap<OneDoFJoint, Double>());
       }
 
-      handPauseCommandConsumer = new ObjectConsumer<HandPausePacket>()
+      handPauseCommandConsumer = new ObjectConsumer<StopArmMotionPacket>()
       {
-         public void consumeObject(HandPausePacket object)
+         public void consumeObject(StopArmMotionPacket object)
          {
             pausePackets.get(object.getRobotSide()).set(object);
          }
@@ -185,7 +185,7 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
       return ret;
    }
 
-   public ObjectConsumer<HandPausePacket> getHandPauseCommandConsumer()
+   public ObjectConsumer<StopArmMotionPacket> getHandPauseCommandConsumer()
    {
       return handPauseCommandConsumer;
    }
