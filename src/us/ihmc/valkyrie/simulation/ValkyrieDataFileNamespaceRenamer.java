@@ -8,7 +8,6 @@ import javax.swing.JButton;
 
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -20,8 +19,11 @@ public class ValkyrieDataFileNamespaceRenamer
       
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
       
-      ChangeNamespacesToMatchSimButton button = new ChangeNamespacesToMatchSimButton(rootRegistry);
-      scs.addButton(button);
+      ChangeNamespacesToMatchSimButton changeNamespacesToMatchSimButton = new ChangeNamespacesToMatchSimButton(rootRegistry);
+      scs.addButton(changeNamespacesToMatchSimButton);
+      
+      ThinBufferButton thinBufferButton = new ThinBufferButton(scs);
+      scs.addButton(thinBufferButton);
       
       scs.startOnAThread();
    }
@@ -65,6 +67,27 @@ public class ValkyrieDataFileNamespaceRenamer
       {
          recursivelyPrintNamespaces(yoVariableRegistry);
       }
+   }
+   
+   private class ThinBufferButton extends JButton implements ActionListener
+   {
+      private static final long serialVersionUID = 4260526727108638954L;
+      private final SimulationConstructionSet simulationConstructionSet;
+      
+      public ThinBufferButton(SimulationConstructionSet simulationConstructionSet)
+      {
+         super("Thin Buffer");
+         
+         this.simulationConstructionSet = simulationConstructionSet;
+         this.addActionListener(this);
+      }
+
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+         simulationConstructionSet.thinBuffer(2);
+      }
+
    }
    
    public static void main(String[] args)
