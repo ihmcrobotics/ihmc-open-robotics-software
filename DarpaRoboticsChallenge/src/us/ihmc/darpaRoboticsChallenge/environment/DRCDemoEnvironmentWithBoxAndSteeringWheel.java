@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.darpaRoboticsChallenge.DRCVehicleModelObjects;
 import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -13,9 +12,9 @@ import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContro
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObject;

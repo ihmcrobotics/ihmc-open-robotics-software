@@ -1,11 +1,9 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.simulationconstructionset.robotController;
 
 import java.util.List;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.SimpleStickSlipContactModel;
 
