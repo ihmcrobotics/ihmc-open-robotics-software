@@ -8,10 +8,12 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RemoveSingleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -30,9 +32,11 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
    private double currentDistanceToObject;
    private final FramePoint currentObjectPosition = new FramePoint();
+   
+   private final SideDependentList<WristForceSensorFilteredUpdatable> wristSensors;
 
    public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrame,
-         DoubleYoVariable yoTime)
+         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime);
@@ -42,6 +46,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
       this.fullRobotModel = fullRobotModel;
       this.attachNetworkProcessorListeningQueue(inputListeningQueue, HumanoidBehaviorDebrisPacket.class);
 
+      this.wristSensors = wristSensors;
    }
 
    @Override
