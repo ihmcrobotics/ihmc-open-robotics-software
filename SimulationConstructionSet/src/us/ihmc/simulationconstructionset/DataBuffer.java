@@ -594,6 +594,8 @@ public class DataBuffer extends YoVariableHolderImplementation
       this.inPoint = 0;
       this.index = 0;
       
+      if (bufferSize <= 2 * keepEveryNthPoint) return;
+      
       // Step through the entries cutting and resizing the data set for each
       for (int i = 0; i < entries.size(); i++)
       {
