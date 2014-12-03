@@ -6,9 +6,9 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
@@ -51,8 +51,8 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(0), Math.toRadians(0), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
-      ContactableValveRobot valve = new ContactableValveRobot("valveRobot",ValveType.BIG_VALVE,3.5,valvePose);
-
+      ContactableValveRobot valve = new ContactableValveRobot("valveRobot",ValveType.BIG_VALVE,0.5,valvePose);
+      
       return valve;
 
    }
