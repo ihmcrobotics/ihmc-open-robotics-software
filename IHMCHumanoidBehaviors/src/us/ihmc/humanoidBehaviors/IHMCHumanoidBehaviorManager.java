@@ -30,6 +30,7 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -81,12 +82,15 @@ public class IHMCHumanoidBehaviorManager
 //      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
 //      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
       
-      WristForceSensorFilteredUpdatable rightWristSensorUpdatable = new WristForceSensorFilteredUpdatable(RobotSide.RIGHT, fullRobotModel, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
-      dispatcher.addUpdatable(rightWristSensorUpdatable); 
-      
-      DoubleYoVariable wristForceMagnitudeFiltered = rightWristSensorUpdatable.getWristForceBandPassFiltered();
-      
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristForceMagnitudeFiltered, referenceFrames, yoTime,
+      SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = new SideDependentList<WristForceSensorFilteredUpdatable>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
+         wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
+         dispatcher.addUpdatable(wristSensorUpdatable);
+      }
+              
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime,
             communicationBridge, yoGraphicsListRegistry, tippingDetected, ankleHeight);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
@@ -113,7 +117,7 @@ public class IHMCHumanoidBehaviorManager
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
  * @param ankleHeight 
     */
-   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, DoubleYoVariable wristForceFiltered, ReferenceFrames referenceFrames,
+   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, ReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, BooleanYoVariable tippingDetectedBoolean, double ankleHeight)
    {
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
@@ -127,7 +131,7 @@ public class IHMCHumanoidBehaviorManager
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, tippingDetectedBoolean);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
       
-      RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
+      RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, wristSensors, yoTime);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
       
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, ankleHeight);
