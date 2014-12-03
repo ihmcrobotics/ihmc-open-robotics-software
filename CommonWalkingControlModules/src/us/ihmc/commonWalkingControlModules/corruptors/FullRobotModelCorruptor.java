@@ -56,27 +56,40 @@ public class FullRobotModelCorruptor
          final RigidBody foot = fullRobotModel.getFoot(robotSide);
          createMassAndCoMOffsetCorruptors(footName, foot);
      }
-      
+
+      RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
+      LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
+      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
+      ArmJointName[] armJointNames = robotSpecificJointNames.getArmJointNames();
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-
-         String upperArmName = sidePrefix + "UpperArm";
-         OneDoFJoint elbowPitchJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
-         if (elbowPitchJoint != null)
+         for (ArmJointName jointName : armJointNames)
          {
-            RigidBody upperArm = elbowPitchJoint.getPredecessor();
-            createMassAndCoMOffsetCorruptors(upperArmName, upperArm);
+            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, jointName);
+            if (armJoint == null)
+               continue;
 
-            String lowerArmName = sidePrefix + "LowerArm";
-            final RigidBody lowerArm = elbowPitchJoint.getSuccessor();
-            createMassAndCoMOffsetCorruptors(lowerArmName, lowerArm);
+            RigidBody successor = armJoint.getSuccessor();
+            createMassAndCoMOffsetCorruptors(successor.getName(), successor);
          }
 
-         String handName = sidePrefix + "Hand";
-         final RigidBody hand = fullRobotModel.getHand(robotSide);
-         if (hand != null) createMassAndCoMOffsetCorruptors(handName, hand);
+//         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+//         String upperArmName = sidePrefix + "UpperArm";
+//         OneDoFJoint elbowPitchJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
+//         if (elbowPitchJoint != null)
+//         {
+//            RigidBody upperArm = elbowPitchJoint.getPredecessor();
+//            createMassAndCoMOffsetCorruptors(upperArmName, upperArm);
+//
+//            String lowerArmName = sidePrefix + "LowerArm";
+//            final RigidBody lowerArm = elbowPitchJoint.getSuccessor();
+//            createMassAndCoMOffsetCorruptors(lowerArmName, lowerArm);
+//         }
+//
+//         String handName = sidePrefix + "Hand";
+//         final RigidBody hand = fullRobotModel.getHand(robotSide);
+//         if (hand != null) createMassAndCoMOffsetCorruptors(handName, hand);
      }
 
 
@@ -104,10 +117,6 @@ public class FullRobotModelCorruptor
 
 
       // Joint Calibration offset errors:
-      RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
-      LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
-      ArmJointName[] armJointNames = robotSpecificJointNames.getArmJointNames();
-      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
       
       for (RobotSide robotSide : RobotSide.values)
       {
