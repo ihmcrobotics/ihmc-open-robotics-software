@@ -19,7 +19,6 @@ dependencies {
     compile group: 'colt', name: 'colt', version: '1.2.0'
     
     compile project(':IHMCUtilities')
-    compile project(':CapturePointCalculator')
     compile project(':Plotting')
     compile project(':KalmanProject')
     compile project(':SensorProcessing')
