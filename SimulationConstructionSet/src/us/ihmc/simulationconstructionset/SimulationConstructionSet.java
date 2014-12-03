@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -1228,6 +1229,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.addJLabel(label);
+      }
+   }
+   
+   public void addTextField(JTextField textField)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addTextField(textField);
       }
    }
 
@@ -4234,5 +4243,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       return mySimulation.getForceSensors();
    }
+
+
 
 }

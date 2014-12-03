@@ -1,11 +1,16 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
@@ -14,10 +19,9 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class YoVariableLogVisualizer
 {
@@ -116,6 +120,38 @@ public class YoVariableLogVisualizer
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, players, robot, yoVariableLogCropper, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
+      
+      
+      setupReadEveryNTicksTextField();
+   }
+
+   private void setupReadEveryNTicksTextField()
+   {
+      JLabel label = new JLabel("ReadEveryNTicks");
+      scs.addJLable(label);
+      
+      String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
+      final JTextField textField = new JTextField(everyNTicksString, 3);
+      textField.addActionListener(new ActionListener(){
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            try
+            {
+               int readEveryNTicks = Integer.parseInt(textField.getText());
+               robot.setReadEveryNTicks(readEveryNTicks);
+            }
+            catch (NumberFormatException exception)
+            {
+            }
+            
+            String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
+            textField.setText(everyNTicksString);
+            textField.getParent().requestFocus();
+         }});
+      
+      scs.addTextField(textField);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
