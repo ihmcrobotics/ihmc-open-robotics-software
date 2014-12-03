@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
+package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.ArrayList;
 
