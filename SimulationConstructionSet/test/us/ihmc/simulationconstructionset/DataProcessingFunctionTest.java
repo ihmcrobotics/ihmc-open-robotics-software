@@ -16,13 +16,13 @@ public class DataProcessingFunctionTest
    @Test
    public void testSimpleDataProcessingFunction() throws SimulationExceededMaximumTimeException
    {
-      Robot robot = new Robot("DataProcessingFunctionTestRobot");
+      final Robot robot = new Robot("DataProcessingFunctionTestRobot");
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registry);
-      DoubleYoVariable variableTwo = new DoubleYoVariable("variableTwo", registry);
-      DoubleYoVariable variableThree = new DoubleYoVariable("variableThree", registry);
+      final DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registry);
+      final DoubleYoVariable variableTwo = new DoubleYoVariable("variableTwo", registry);
+      final DoubleYoVariable variableThree = new DoubleYoVariable("variableThree", registry);
 
       robot.addYoVariableRegistry(registry);
 
