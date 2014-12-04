@@ -136,10 +136,10 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       {
          boolean done = readAndProcessALogLineReturnTrueIfDone(DT);
          if (done) return;
+         currentRecordTick.increment();
       }
       
       update();
-      currentRecordTick.increment();
    }
    
    private boolean readAndProcessALogLineReturnTrueIfDone(double DT)
