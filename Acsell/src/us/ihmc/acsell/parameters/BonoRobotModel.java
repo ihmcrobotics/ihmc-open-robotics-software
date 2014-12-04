@@ -19,7 +19,6 @@ import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -35,8 +34,10 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 
 import com.jme3.math.Transform;
+
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
