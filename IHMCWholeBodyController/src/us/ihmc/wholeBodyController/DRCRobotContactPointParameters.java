@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 import java.util.List;

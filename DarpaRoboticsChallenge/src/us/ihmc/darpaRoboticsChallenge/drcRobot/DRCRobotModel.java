@@ -5,8 +5,6 @@ import java.net.URI;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
@@ -19,35 +17,26 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.robotSide.RobotSide;
-
-import com.jme3.math.Transform;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.wholeBodyController.WholeBodyControlParameters;
 
-public interface DRCRobotModel
+import com.jme3.math.Transform;
+
+public interface DRCRobotModel extends WholeBodyControlParameters
 {
    //TODO: RobotBoundingBoxes.java
 
 //   public abstract boolean isRunningOnRealRobot();
    
-   public abstract CapturePointPlannerParameters getCapturePointPlannerParameters();
-
-   public abstract ArmControllerParameters getArmControllerParameters();
-
-   public abstract WalkingControllerParameters getWalkingControllerParameters();
-   
    public abstract FootstepParameters getFootstepParameters();
-
-   public abstract WalkingControllerParameters getMultiContactControllerParameters();
 
    public abstract WalkingControllerParameters getDrivingControllerParameters();
 
    public abstract StateEstimatorParameters getStateEstimatorParameters();
-
-   public abstract DRCRobotContactPointParameters getContactPointParameters();
 
    public abstract DRCRobotPhysicalProperties getPhysicalProperties();
 
@@ -72,8 +61,6 @@ public interface DRCRobotModel
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
-
-   public abstract double getControllerDT();
 
    public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 

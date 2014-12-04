@@ -7,6 +7,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 
 public interface DRCRobotJointMap extends SDFJointNameMap
 {
