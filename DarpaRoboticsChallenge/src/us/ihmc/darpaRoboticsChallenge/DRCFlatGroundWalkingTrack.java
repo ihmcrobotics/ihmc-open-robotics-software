@@ -10,12 +10,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.utilities.robotSide.SideDependentList;
-
+import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCFlatGroundWalkingTrack
