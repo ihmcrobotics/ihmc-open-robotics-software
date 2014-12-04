@@ -105,17 +105,20 @@ public class DataBuffer extends YoVariableHolderImplementation
       entries.add(entry);
    }
 
-   public void addVariable(YoVariable<?> newVariable, int nPoints) throws RepeatDataBufferEntryException
+   public DataBufferEntry addVariable(YoVariable<?> newVariable, int nPoints) throws RepeatDataBufferEntryException
    {
       addVariableToHolder(newVariable);
       yoVariableSet.add(newVariable);
 
-      this.addEntry(new DataBufferEntry(newVariable, nPoints));
+      DataBufferEntry entry = new DataBufferEntry(newVariable, nPoints);
+      this.addEntry(entry);
 
       if (newVariable.getName().equals("t"))
       {
          t = (DoubleYoVariable) newVariable;
       }
+      
+      return entry;
    }
 
    public void addVariable(YoVariable<?> newVariable) throws RepeatDataBufferEntryException
@@ -195,7 +198,7 @@ public class DataBuffer extends YoVariableHolderImplementation
    }
 
    public DataBufferEntry getEntry(String name)
-   {
+   {      
       for (int i = 0; i < entries.size(); i++)
       {
          DataBufferEntry entry = entries.get(i);
@@ -716,13 +719,7 @@ public class DataBuffer extends YoVariableHolderImplementation
             this.index = bufferSize - 1;    // )0;
          }
 
-         // else if (this.index < 0) this.index = this.getMaxIndex(); //)0;
-         for (int j = 0; j < entries.size(); j++)
-         {
-            DataBufferEntry entry = entries.get(j);
-
-            entry.updateValue(this.index);
-         }
+         setYoVariableValuesToDataAtIndex();
 
          notifyIndexChangedListeners();
 
@@ -812,25 +809,38 @@ public class DataBuffer extends YoVariableHolderImplementation
    }
 
 
-   public boolean updateAndTick(int n)
+   public boolean updateAndTick()
+   {
+      setDataAtIndexToYoVariableValues();
+      boolean ret = tick(1);
+      setYoVariableValuesToDataAtIndex();
+      return ret;
+   }
+   
+   public boolean updateAndTickBackwards()
+   {
+      setDataAtIndexToYoVariableValues();
+      boolean ret = tick(-1);
+      setYoVariableValuesToDataAtIndex();
+      return ret;
+   }
+
+   private void setYoVariableValuesToDataAtIndex()
    {
       for (int j = 0; j < entries.size(); j++)
       {
          DataBufferEntry entry = entries.get(j);
-
-         entry.tickAndUpdate(this.index);
+         entry.setYoVariableValueToDataAtIndex(this.index);
       }
+   }
 
-      boolean ret = tick(n);
-
+   public void setDataAtIndexToYoVariableValues()
+   {
       for (int j = 0; j < entries.size(); j++)
       {
          DataBufferEntry entry = entries.get(j);
-
-         entry.updateValue(this.index);
+         entry.setDataAtIndexToYoVariableValue(this.index);
       }
-
-      return ret;
    }
 
    public void tickAndUpdate()
@@ -880,12 +890,7 @@ public class DataBuffer extends YoVariableHolderImplementation
          // ... jjc
          keyPoints.removeKeyPoint(index);
 
-         for (int j = 0; j < entries.size(); j++)
-         {
-            DataBufferEntry entry = entries.get(j);
-
-            entry.tickAndUpdate(this.index);
-         }
+         setDataAtIndexToYoVariableValues();
 
          notifyIndexChangedListeners();
       }
@@ -958,11 +963,11 @@ public class DataBuffer extends YoVariableHolderImplementation
       while (!atOutPoint())
       {
          dataProcessingFunction.processData();
-         updateAndTick(1);
+         updateAndTick();
       }
 
       dataProcessingFunction.processData();
-      updateAndTick(1);
+      updateAndTick();
    }
    
    public void applyDataProcessingFunctionBackward(DataProcessingFunction dataProcessingFunction)
@@ -973,11 +978,11 @@ public class DataBuffer extends YoVariableHolderImplementation
       while (!atInPoint())
       {
          dataProcessingFunction.processData();
-         updateAndTick(-1);
+         updateAndTickBackwards();
       }
 
       dataProcessingFunction.processData();
-      updateAndTick(-1);
+      updateAndTickBackwards();
       
    }
 

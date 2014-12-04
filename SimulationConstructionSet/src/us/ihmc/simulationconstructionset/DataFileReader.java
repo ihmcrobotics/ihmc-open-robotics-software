@@ -394,7 +394,7 @@ public class DataFileReader
          newVars.addVariable(newVariable);
       }
 
-      DataBufferEntry newEntry = dataBuffer.getEntry(varName);
+      DataBufferEntry newEntry = dataBuffer.getEntry(newVariable);
 
       if (newEntry == null)
       {
@@ -402,14 +402,14 @@ public class DataFileReader
          {
             if (nPoints != -1)
             {
-               dataBuffer.addVariable(newVariable, nPoints);
+               newEntry = dataBuffer.addVariable(newVariable, nPoints);
             }
             else
             {
-               dataBuffer.addVariable(newVariable, dataBuffer.getBufferSize());
+               newEntry = dataBuffer.addVariable(newVariable, dataBuffer.getBufferSize());
             }
 
-            newEntry = dataBuffer.getEntry(varName);
+//            newEntry = dataBuffer.getEntry(varName);
          }
          catch (RepeatDataBufferEntryException ex)
          {

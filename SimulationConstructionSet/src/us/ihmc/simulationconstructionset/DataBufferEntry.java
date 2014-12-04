@@ -269,13 +269,9 @@ public class DataBufferEntry implements DataEntry
       return variable.getValueAsDouble();
    }
 
-   public synchronized void tickAndUpdate(int index)
-
-   // protected void tickAndUpdate(int index)
+   public synchronized void setDataAtIndexToYoVariableValue(int index)
    {
-      // Doesn't really "tick" since entries don't contain an index...
       double newVal = variable.getValueAsDouble();
-
       double oldVal = data[index];
 
       data[index] = newVal;
@@ -292,14 +288,6 @@ public class DataBufferEntry implements DataEntry
          setMinMaxChanged();
       }
 
-      //    if (index < data.length-1)
-      //    {
-      //      double nextVal = data[index + 1];
-      //      if (nextVal == oldVal) return;
-      //    }
-      //
-      //    if (oldVal == newVal) return;
-
       if (oldVal >= this.max)
       {
          setMinMaxChanged();
@@ -313,7 +301,7 @@ public class DataBufferEntry implements DataEntry
       } // reCalcMinMax();
    }
 
-   protected void updateValue(int index)
+   protected void setYoVariableValueToDataAtIndex(int index)
    {
       double doubleValue = data[index];
       variable.setValueFromDouble(doubleValue);
