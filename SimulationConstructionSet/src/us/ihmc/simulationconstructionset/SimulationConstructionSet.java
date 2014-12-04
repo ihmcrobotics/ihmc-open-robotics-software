@@ -1332,7 +1332,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public boolean updateAndTick()
    {
-      boolean ret = myDataBuffer.updateAndTick(1);
+      boolean ret = myDataBuffer.updateAndTick();
       if (myGUI != null)
       {
          myGUI.updateGraphs();

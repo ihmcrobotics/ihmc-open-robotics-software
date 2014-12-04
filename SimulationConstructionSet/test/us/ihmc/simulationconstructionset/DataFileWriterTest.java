@@ -315,6 +315,63 @@ public class DataFileWriterTest
 
       fileOne.delete();
    }
+   
+   @Test(timeout = 5000)
+   public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException, RepeatDataBufferEntryException
+   {
+      File fileOne = new File("fileOne.data.gz");
+
+      if (fileOne.exists())
+         fileOne.delete();
+
+      long seed = 1776L;
+      int numberOfVariables = 2000;    // 12000 for when testing long files for efficiency;
+      Random random = new Random(seed);
+      ArrayList<YoVariable<?>> variables = createALargeNumberOfVariables(random, numberOfVariables);
+      YoVariableList originalVarList = new YoVariableList("originalVarList");
+      originalVarList.addVariables(variables);
+
+      int bufferSize = 50;
+      DataBuffer dataBuffer = new DataBuffer(bufferSize);
+      
+      dataBuffer.addVariables(variables);
+      
+      for (int i=0; i<bufferSize/2; i++)
+      {
+         dataBuffer.setDataAtIndexToYoVariableValues();
+         dataBuffer.tick(1);
+      }
+      
+      
+      dataBuffer.setInOutPointFullBuffer();
+      
+      Robot robot = new Robot("testWritingRobot");
+      writeALongDataFile(fileOne, dataBuffer, variables, robot);
+
+      System.out.println("Wrote File. Now reading it.");
+      
+      DataFileReader dataFileReader = new DataFileReader(fileOne);
+
+      YoVariableList newVarList = new YoVariableList("newVarList");
+      YoVariableRegistry registry = new YoVariableRegistry("rootRegistry");
+
+      DataBuffer newDataBuffer = new DataBuffer();
+      dataFileReader.readData(newVarList, registry, newDataBuffer);
+
+      assertEquals(originalVarList.size(), newVarList.size());
+
+      for (int i = 0; i < originalVarList.size(); i++)
+      {
+         YoVariable<?> originalVariable = originalVarList.getVariable(i);
+         YoVariable<?> newVariable = newVarList.getVariable(originalVariable.getName());
+
+         assertFalse(originalVariable == newVariable);
+         assertEquals(originalVariable.getValueAsDouble(), newVariable.getValueAsDouble(), 1e-7);
+
+      }
+
+      fileOne.delete();
+   }
 
    private void writeALongStateFile(File file, ArrayList<YoVariable<?>> variables)
    {
@@ -324,6 +381,16 @@ public class DataFileWriterTest
       double recordDT = 0.001;
       boolean binary = false;
       dataFileWriter.writeState("model", recordDT, variables, binary, compress);
+   }
+   
+   private void writeALongDataFile(File file, DataBuffer dataBuffer, ArrayList<YoVariable<?>> variables, Robot robot)
+   {
+      DataFileWriter dataFileWriter = new DataFileWriter(file);
+
+      boolean compress = true;
+      double recordDT = 0.001;
+      boolean binary = true;
+      dataFileWriter.writeData("model", recordDT, dataBuffer, variables, binary, compress, robot);
    }
 
 
