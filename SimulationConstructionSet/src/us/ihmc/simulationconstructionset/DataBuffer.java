@@ -21,8 +21,8 @@ import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 
 public class DataBuffer extends YoVariableHolderImplementation
         implements java.io.Serializable, DataBufferCommandsExecutor, ToggleKeyPointModeCommandExecutor, TimeDataHolder, DataEntryHolder
-{ 
-   private String timeVariableName = "t"; 
+{
+   private String timeVariableName = "t";
 
    public static final int MAX_LENGTH_SHORT_NAME = 20;
 
@@ -63,7 +63,6 @@ public class DataBuffer extends YoVariableHolderImplementation
       entries = null;
 
       index = -1;
-
    }
 
    public DataBuffer(int bufferSize)
@@ -117,7 +116,7 @@ public class DataBuffer extends YoVariableHolderImplementation
       {
          t = (DoubleYoVariable) newVariable;
       }
-      
+
       return entry;
    }
 
@@ -198,7 +197,7 @@ public class DataBuffer extends YoVariableHolderImplementation
    }
 
    public DataBufferEntry getEntry(String name)
-   {      
+   {
       for (int i = 0; i < entries.size(); i++)
       {
          DataBufferEntry entry = entries.get(i);
@@ -295,18 +294,9 @@ public class DataBuffer extends YoVariableHolderImplementation
       this.wrapBuffer = newWrapBuffer;
    }
 
-/*   private int maxIndex;
-   public void setMaxIndex(int mi) //+++JEP Is this necessary???
-   {
-     this.maxIndex = mi;
-   }
-*/
-
    public void resetDataBuffer()
    {
       clearAll(getBufferSize());
-
-//    int origSize = getBufferSize();
 
       if (!clearing)
       {
@@ -320,17 +310,8 @@ public class DataBuffer extends YoVariableHolderImplementation
          setInPoint(0);
          clearing = true;
       }
-
-
-
    }
 
-   /*
-    * public int getMaxIndex()
-    * {
-    * return this.maxIndex;
-    * }
-    */
    public void clearAll(int nPoints)
    {
       double[] blankData;
@@ -384,31 +365,6 @@ public class DataBuffer extends YoVariableHolderImplementation
       }
    }
 
-/*   public int cropData(int start, int end)
-   {
-     if ((start < 0) || (end > nPoints)) return -1; //SimulationConstructionSet.NUM_POINTS;
-
-     for(int i=0; i<entries.size(); i++)
-     {
-       DataBufferEntry entry = (DataBufferEntry) entries.get(i);
-       entry.cropData(start, end);
-     }
-
-     return nPoints;
-   }*/
-
-   /*
-    * protected void packData(int start)
-    * {
-    * if ((start <= 0) || (start >= nPoints)) return;
-    *
-    * for(int i=0; i<entries.size(); i++)
-    * {
-    *   DataBufferEntry entry = (DataBufferEntry) entries.get(i);
-    *   entry.packData(start);
-    * }
-    * }
-    */
    public int getBufferInOutLength()
    {
       int ret;
@@ -432,8 +388,9 @@ public class DataBuffer extends YoVariableHolderImplementation
 
    public void packData(int start)
    {
-      if (start == 0) return;
-      
+      if (start == 0)
+         return;
+
       // If the start point is outside of the buffer abort.
       if ((start <= 0) || (start >= bufferSize))
       {
@@ -480,7 +437,6 @@ public class DataBuffer extends YoVariableHolderImplementation
 
    public void cropData(int start, int end)
    {
-      // int numPoints = SimulationConstructionSet.NUM_POINTS;
       // Abort if the start or end point is unreasonable
       if ((start < 0) || (end > bufferSize))
       {
@@ -508,7 +464,6 @@ public class DataBuffer extends YoVariableHolderImplementation
       // Move the current index to its relative position after the resize
       this.index = ((this.index - start + bufferSize) % bufferSize);
 
-      // bufferSize = nPoints;
       // If the index is out of bounds move it to the beginning
       if (this.index < 0)
       {
@@ -521,17 +476,16 @@ public class DataBuffer extends YoVariableHolderImplementation
       }
 
       // Set the in point to the beginning and the out point to the end
-      this.inPoint = 0;    // this.inPoint - start;
-      this.outPoint = bufferSize - 1;    // this.outPoint - start;
+      this.inPoint = 0;
+      this.outPoint = bufferSize - 1;
 
-      // System.out.println("outPoint set to: " +this.outPoint);
       // Move to the first tick
       this.tick(0);
 
       // +++++this.updateUI();
    }
-   
-   
+
+
    public void cutData()
    {
       if (this.inPoint <= this.outPoint)
@@ -569,7 +523,6 @@ public class DataBuffer extends YoVariableHolderImplementation
       // Move the current index to its relative position after the resize
       this.index = ((this.index - start + bufferSize) % bufferSize);
 
-      // bufferSize = nPoints;
       // If the index is out of bounds move it to the beginning
       if (this.index < 0)
       {
@@ -583,22 +536,22 @@ public class DataBuffer extends YoVariableHolderImplementation
 
       // Set the in point to the beginning and the out point to the end
       this.inPoint = 0;
-      this.outPoint = start-1;
+      this.outPoint = start - 1;
 
-      // System.out.println("outPoint set to: " +this.outPoint);
       // Move to the first tick
       this.gotoOutPoint();
    }
-   
+
    public void thinData(int keepEveryNthPoint)
    {
       packData();
 
       this.inPoint = 0;
       this.index = 0;
-      
-      if (bufferSize <= 2 * keepEveryNthPoint) return;
-      
+
+      if (bufferSize <= 2 * keepEveryNthPoint)
+         return;
+
       // Step through the entries cutting and resizing the data set for each
       for (int i = 0; i < entries.size(); i++)
       {
@@ -649,14 +602,13 @@ public class DataBuffer extends YoVariableHolderImplementation
       this.outPoint = out;
       keyPoints.trim(inPoint, outPoint);
    }
-   
+
    public void setInOutPointFullBuffer()
    {
       this.inPoint = 0;
-      this.outPoint = entries.get(0).getDataLength()-1;
+      this.outPoint = entries.get(0).getDataLength() - 1;
    }
 
-   // public ArrayList<Double> getKeyPoints(){return keyPoints.getPoints();}
    public void gotoInPoint()
    {
       setIndex(this.inPoint);
@@ -684,7 +636,7 @@ public class DataBuffer extends YoVariableHolderImplementation
 
    /**
     * Gets the KeyPoints in the cropped data
-    * 
+    *
     * @return The current KeyPoints as an ArrayList of Integer
     */
    public ArrayList<Integer> getKeyPoints()
@@ -814,14 +766,16 @@ public class DataBuffer extends YoVariableHolderImplementation
       setDataAtIndexToYoVariableValues();
       boolean ret = tick(1);
       setYoVariableValuesToDataAtIndex();
+
       return ret;
    }
-   
+
    public boolean updateAndTickBackwards()
    {
       setDataAtIndexToYoVariableValues();
       boolean ret = tick(-1);
       setYoVariableValuesToDataAtIndex();
+
       return ret;
    }
 
@@ -873,7 +827,6 @@ public class DataBuffer extends YoVariableHolderImplementation
             this.index = 0;
          }
 
-         // setIndex(this.index);
          // Out point should always be the last recorded tick...
          this.outPoint = this.index;
 
@@ -883,15 +836,12 @@ public class DataBuffer extends YoVariableHolderImplementation
 
             if (this.inPoint >= bufferSize)
             {
-               this.inPoint = 0;    // this.getMaxIndex();
+               this.inPoint = 0;
             }
          }
 
-         // ... jjc
          keyPoints.removeKeyPoint(index);
-
          setDataAtIndexToYoVariableValues();
-
          notifyIndexChangedListeners();
       }
       else
@@ -969,7 +919,7 @@ public class DataBuffer extends YoVariableHolderImplementation
       dataProcessingFunction.processData();
       updateAndTick();
    }
-   
+
    public void applyDataProcessingFunctionBackward(DataProcessingFunction dataProcessingFunction)
    {
       dataProcessingFunction.initializeProcessing();
@@ -983,7 +933,6 @@ public class DataBuffer extends YoVariableHolderImplementation
 
       dataProcessingFunction.processData();
       updateAndTickBackwards();
-      
    }
 
    public boolean isKeyPointModeToggled()
@@ -1063,9 +1012,6 @@ public class DataBuffer extends YoVariableHolderImplementation
 
    public class RepeatDataBufferEntryException extends Exception
    {
-      /**
-       *
-       */
       private static final long serialVersionUID = -8151095313463159788L;
 
       RepeatDataBufferEntryException(String message)
@@ -1128,17 +1074,16 @@ public class DataBuffer extends YoVariableHolderImplementation
       }
 
       return true;
-
    }
 
    public String getTimeVariableName()
    {
       return timeVariableName;
    }
-   
+
    public void setTimeVariableName(String timeVariableName)
    {
-      if(getEntry(timeVariableName)==null)
+      if (getEntry(timeVariableName) == null)
       {
          System.err.println("The requested timeVariableName does not exist, change not successful");
       }
@@ -1147,10 +1092,10 @@ public class DataBuffer extends YoVariableHolderImplementation
          this.timeVariableName = timeVariableName;
       }
    }
-   
+
    public double[] getTimeData()
    {
-         return getEntry(timeVariableName).getData();
+      return getEntry(timeVariableName).getData();
    }
 
    public boolean isIndexBetweenInAndOutPoint(int indexToCheck)
@@ -1173,23 +1118,4 @@ public class DataBuffer extends YoVariableHolderImplementation
       return false;
    }
 
-  
-
-
-// public String matchedVariablesShortened(String name)
-// {
-//    int textLength = name.length();
-//    String ret;
-//
-//    if (textLength > MAX_LENGTH_SHORT_NAME)
-//    {
-//       ret = name.substring(0, MAX_LENGTH_SHORT_NAME / 2 - 2) + "..." + name.substring(textLength - MAX_LENGTH_SHORT_NAME / 2 + 1, textLength);
-//    }
-//    else
-//    {
-//       ret = name;
-//    }
-//
-//    return ret;
-// }
 }

@@ -10,16 +10,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.simulationconstructionset.gui.config.VarGroup;
+import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
-import us.ihmc.simulationconstructionset.gui.config.VarGroup;
-import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 
 public class DataBufferTest
 {
@@ -662,21 +661,16 @@ public class DataBufferTest
        
        ArrayList<YoVariable<?>> withVariables = dataBuffer.getVariables();
        
-       System.out.println(withVariables.size());
+//       System.out.println(withVariables.size());
        assertTrue(withVariables.size() > 0);
        
        dataBuffer.resetDataBuffer();
        
        ArrayList<YoVariable<?>> resetVariables = dataBuffer.getVariables();
        
-       System.out.println(resetVariables.size());
+//       System.out.println(resetVariables.size());
 //       assertTrue(resetVariables.size() == 0);
     }
-   
-   // @Test
-   // public void testCopyValuesThrough()
-   // {
-   //    
-   // }
+
 
 }
