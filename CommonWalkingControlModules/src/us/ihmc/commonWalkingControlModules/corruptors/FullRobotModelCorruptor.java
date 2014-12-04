@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -29,16 +30,26 @@ public class FullRobotModelCorruptor
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
-   
+
    public FullRobotModelCorruptor(final FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
+      this("", fullRobotModel, parentRegistry);
+   }
+
+   public FullRobotModelCorruptor(String namePrefix, final FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   {
+      RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
+      LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
+      ArmJointName[] armJointNames = robotSpecificJointNames.getArmJointNames();
+      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
+      
       String chestName = "chest";
       final RigidBody chest = fullRobotModel.getChest();
-      createMassAndCoMOffsetCorruptors(chestName, chest);
+      createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
       
       String pelvisName = "pelvis";
       final RigidBody pelvis = fullRobotModel.getPelvis();
-      createMassAndCoMOffsetCorruptors(pelvisName, pelvis);
+      createMassAndCoMOffsetCorruptors(namePrefix, pelvisName, pelvis);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -46,50 +57,29 @@ public class FullRobotModelCorruptor
          
          String thighName = sidePrefix + "Thigh";
          final RigidBody thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getPredecessor();
-         createMassAndCoMOffsetCorruptors(thighName, thigh);
+         createMassAndCoMOffsetCorruptors(namePrefix, thighName, thigh);
          
          String shinName = sidePrefix + "Shin";
          final RigidBody shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
-         createMassAndCoMOffsetCorruptors(shinName, shin);
+         createMassAndCoMOffsetCorruptors(namePrefix, shinName, shin);
          
          String footName = sidePrefix + "Foot";
          final RigidBody foot = fullRobotModel.getFoot(robotSide);
-         createMassAndCoMOffsetCorruptors(footName, foot);
+         createMassAndCoMOffsetCorruptors(namePrefix, footName, foot);
      }
-
-      RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
-      LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
-      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
-      ArmJointName[] armJointNames = robotSpecificJointNames.getArmJointNames();
+      
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (ArmJointName jointName : armJointNames)
+         for (ArmJointName armJointName : armJointNames)
          {
-            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, jointName);
+            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             if (armJoint == null)
                continue;
 
-            RigidBody successor = armJoint.getSuccessor();
-            createMassAndCoMOffsetCorruptors(successor.getName(), successor);
+            RigidBody rigidBody = armJoint.getSuccessor();
+            createMassAndCoMOffsetCorruptors(namePrefix, rigidBody.getName(), rigidBody);
          }
-
-//         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-//         String upperArmName = sidePrefix + "UpperArm";
-//         OneDoFJoint elbowPitchJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
-//         if (elbowPitchJoint != null)
-//         {
-//            RigidBody upperArm = elbowPitchJoint.getPredecessor();
-//            createMassAndCoMOffsetCorruptors(upperArmName, upperArm);
-//
-//            String lowerArmName = sidePrefix + "LowerArm";
-//            final RigidBody lowerArm = elbowPitchJoint.getSuccessor();
-//            createMassAndCoMOffsetCorruptors(lowerArmName, lowerArm);
-//         }
-//
-//         String handName = sidePrefix + "Hand";
-//         final RigidBody hand = fullRobotModel.getHand(robotSide);
-//         if (hand != null) createMassAndCoMOffsetCorruptors(handName, hand);
      }
 
 
@@ -117,46 +107,40 @@ public class FullRobotModelCorruptor
 
 
       // Joint Calibration offset errors:
-      
       for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : legJointNames)
          {
             RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getLegJoint(robotSide, legJointName);
-            String offsetName = robotSide + legJointName.getCamelCaseNameForMiddleOfExpression() + "Offset";
-
-            createJointAngleCorruptor(oneDoFJoint, offsetName);
+            createJointAngleCorruptor(namePrefix, oneDoFJoint.getName(), oneDoFJoint);
          }
          
          for (ArmJointName armJointName : armJointNames)
          {
             RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getArmJoint(robotSide, armJointName);
-            String offsetName = robotSide + armJointName.getCamelCaseNameForMiddleOfExpression() + "Offset";
-
-            createJointAngleCorruptor(oneDoFJoint, offsetName);
+            createJointAngleCorruptor(namePrefix, oneDoFJoint.getName(), oneDoFJoint);
          }
       }
 
       for (SpineJointName spineJointName : spineJointNames)
       {
          RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getSpineJoint(spineJointName);
-         String offsetName = spineJointName.getCamelCaseNameForStartOfExpression() + "Offset";
-
-         createJointAngleCorruptor(oneDoFJoint, offsetName);
+         createJointAngleCorruptor(namePrefix, oneDoFJoint.getName(), oneDoFJoint);
       }
 
       parentRegistry.addChild(registry);
    }
 
 
-   private void createJointAngleCorruptor(RevoluteJoint oneDoFJoint, String offsetName)
+   private void createJointAngleCorruptor(String namePrefix, String name, RevoluteJoint oneDoFJoint)
    {
+      name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
       final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
       final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
 
       final RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
 
-      final DoubleYoVariable offset = new DoubleYoVariable(offsetName, registry);
+      final DoubleYoVariable offset = new DoubleYoVariable(name + "Offset", registry);
 
       VariableChangedListener jointOffsetChangedListener = new VariableChangedListener()
       {
@@ -173,8 +157,9 @@ public class FullRobotModelCorruptor
    }
 
 
-   private void createMassAndCoMOffsetCorruptors(String name, final RigidBody rigidBody)
+   private void createMassAndCoMOffsetCorruptors(String namePrefix, String name, final RigidBody rigidBody)
    {
+      name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
       final DoubleYoVariable massVariable = new DoubleYoVariable(name + "Mass", registry);
       massVariable.set(rigidBody.getInertia().getMass());
       
