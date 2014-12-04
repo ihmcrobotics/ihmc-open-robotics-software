@@ -55,8 +55,11 @@ public abstract class DRCLogProcessor
    public final void setLogDataProcessor(LogDataProcessorFunction logDataProcessor)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = logDataProcessor.getYoGraphicsListRegistry();
-      yoGraphicsListRegistry.addArtifactListsToPlotter(plotter);
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      if (yoGraphicsListRegistry != null)
+      {
+         yoGraphicsListRegistry.addArtifactListsToPlotter(plotter);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      }
 
       logDataProcessorWrapper.addLogDataProcessor(logDataProcessor);
    }
