@@ -5,8 +5,10 @@ public enum HumanoidArmPose
    STAND_PREP, SMALL_CHICKEN_WINGS, LARGE_CHICKEN_WINGS, STRAIGHTEN_ELBOWS, SUPPINATE_ARMS_IN_A_LITTLE, ARMS_BACK, LARGER_CHICKEN_WINGS,
    ARMS_OUT_EXTENDED, SUPPINATE_ARMS_IN_MORE, SUPPINATE_ARMS_IN_A_LOT, SUPER_CHICKEN_WINGS, FLYING, FLYING_SUPPINATE_IN, FLYING_SUPPINATE_OUT,
    REACH_BACK, REACH_WAY_BACK, ARMS_03, REACH_FORWARD, REACH_WAY_FORWARD, ARM_STRAIGHT_DOWN, ARM_NINETY_ELBOW_DOWN, ARM_NINETY_ELBOW_FORWARD,
-   ARM_NINETY_ELBOW_UP, ARM_FORTFIVE_ELBOW_UP, ARM_FORTFIVE_ELBOW_DOWN, ARM_OUT_TRICEP_EXERCISE;
+   ARM_NINETY_ELBOW_UP, ARM_FORTFIVE_ELBOW_UP, ARM_FORTFIVE_ELBOW_DOWN, ARM_OUT_TRICEP_EXERCISE, ARM_NINETY_ELBOW_DOWN2, ARM_NINETY_ELBOW_FORWARD2, ARM_NINETY_ELBOW_UP2, ARM_FORTFIVE_ELBOW_UP2, ARM_FORTFIVE_ELBOW_UP3, ARM_FORTFIVE_ELBOW_DOWN2, ARM_FORTFIVE_ELBOW_DOWN3;
  
+   private static final double halfPi = Math.PI / 2.0;
+
    /**
     * Arm angles are as follows:
     * 
@@ -64,16 +66,31 @@ public enum HumanoidArmPose
             
          case ARM_STRAIGHT_DOWN:
             return new double[]{0.0, -0.5, 1.45, -0.53};
+
          case ARM_NINETY_ELBOW_DOWN:
-            return new double[]{0.0, -1.57, 1.57, -1.57};
+            return new double[]{0.0, -halfPi, halfPi, -halfPi};
+         case ARM_NINETY_ELBOW_DOWN2:
+            return new double[]{halfPi / 2.0, -halfPi, halfPi / 2.0, -halfPi};
          case ARM_NINETY_ELBOW_FORWARD:
-            return new double[]{0.0, -1.57, 0.1, -1.57};
+            return new double[]{0.0, -halfPi, 0.0, -halfPi};
+         case ARM_NINETY_ELBOW_FORWARD2:
+            return new double[]{halfPi / 2.0, -halfPi, -halfPi / 2.0, -halfPi};
          case ARM_NINETY_ELBOW_UP:
-            return new double[]{0.0, -1.57, -1.57, -1.57};
+            return new double[]{0.0, -halfPi, -halfPi, -halfPi};
+         case ARM_NINETY_ELBOW_UP2:
+            return new double[]{-halfPi / 2.0, -halfPi, -halfPi / 2.0, -halfPi};
          case ARM_FORTFIVE_ELBOW_UP:
-            return new double[]{0.0, -1.57, -0.6, -1.57};
+            return new double[]{0.0, -halfPi, -halfPi / 2.0, -halfPi};
+         case ARM_FORTFIVE_ELBOW_UP2:
+            return new double[]{-halfPi /2.0, -halfPi, 0.0, -halfPi};
+         case ARM_FORTFIVE_ELBOW_UP3:
+            return new double[]{halfPi /2.0, -halfPi, -halfPi, -halfPi};
          case ARM_FORTFIVE_ELBOW_DOWN:
-            return new double[]{0.0, -1.57, 0.6, -1.57};
+            return new double[]{0.0, -halfPi, 0.6, -halfPi};
+         case ARM_FORTFIVE_ELBOW_DOWN2:
+            return new double[]{halfPi/ 2.0, -halfPi, 0.0, -halfPi};
+         case ARM_FORTFIVE_ELBOW_DOWN3:
+            return new double[]{-halfPi/ 2.0, -halfPi, halfPi, -halfPi};
             
          case ARM_OUT_TRICEP_EXERCISE:
             return new double[]{0.0, -1.4, 1.4, 0.05};
