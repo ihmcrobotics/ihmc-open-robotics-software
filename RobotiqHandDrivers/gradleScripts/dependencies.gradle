@@ -8,4 +8,5 @@ dependencies {
 	compile project(':SDFLoader')
 	compile project(':IHMCYoUtilities')
 	compile project(':SimulationConstructionSet')
+	compile project(':IHMCWholeBodyController')
 }
