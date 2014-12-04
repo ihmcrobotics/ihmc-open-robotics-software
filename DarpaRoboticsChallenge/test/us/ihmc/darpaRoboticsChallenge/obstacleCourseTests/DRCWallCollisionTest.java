@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -22,6 +24,11 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
+import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -38,6 +45,7 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -64,6 +72,9 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
    private WristForceSensorFilteredUpdatable wristUpdatable;
    private UpdateForceSensorFromRobotController updateForceSensorController;
    private HandGCArrestor handGCArrestor;
+   
+   private YoVariableRegistry testRegistry;
+   private DoubleYoVariable yoTime;
 
    @Before
    public void setUp()
@@ -91,6 +102,9 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       handGCArrestor = setupHandGroundContactPointArrestor();
       robotToTest.setController(handGCArrestor);
 
+      testRegistry = new YoVariableRegistry("WallCollisionTest");
+      yoTime = new DoubleYoVariable("yoTime", testRegistry);
+      
       setupCameraForHandstepsOnWalls();
    }
 
@@ -155,11 +169,58 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       UpdateForceSensorFromRobotController ret = new UpdateForceSensorFromRobotController(robotToTest, robotDataReceiver, wristUpdatable, forceSensors);
 
       return ret;
-
    }
 
+//   @Test
+   public void testImpactDetectionUsingHandPoseBehavior() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      wristUpdatable.setStopMotionIfCollision(true);
+
+      Point3d position = new Point3d(0.9, 0.35, 1.0);
+      Quat4d orientation = new Quat4d(-1.0, 0.0, 0.0, 0.5 * Math.PI);
+      double swingTrajectoryTime = 2.0;
+
+      HandPosePacket handCollisionWithWallPosePacket = new HandPosePacket(robotSideToTest, Frame.CHEST, position, orientation, swingTrajectoryTime);
+      
+      BehaviorCommunicationBridge behaviorCommunicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, networkObjectCommunicator, testRegistry);
+
+      
+      HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
+      HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
+      
+      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
+            desiredBehaviorSubscriber, behaviorCommunicationBridge, null, testRegistry, new YoGraphicsListRegistry());
+      
+      
+      networkObjectCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
+      networkObjectCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
+      
+      Thread dispatcherThread = new Thread(dispatcher, "BehaviorDispatcher");
+      dispatcherThread.start();
+      
+      HandPoseBehavior handCollisionBehavior = new HandPoseBehavior(behaviorCommunicationBridge, yoTime);
+      
+      handCollisionBehavior.setInput(handCollisionWithWallPosePacket);
+      
+//      sendHandPosePacket(handCollisionWithWallPosePacket);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      assertTrue(success);
+      
+      double actualHandGcCollisionTime = handGCArrestor.getHandGcCollisionTime();
+      double wristForceSensorCollisionTime = wristUpdatable.getHandImpactTime();
+
+      assertEquals("Expected time of detected impact = " + actualHandGcCollisionTime + ".  Actual detected impact time = " + wristForceSensorCollisionTime,
+            actualHandGcCollisionTime, wristForceSensorCollisionTime, 0.1);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
    @Test
-   public void testImpactDetection() throws SimulationExceededMaximumTimeException
+   public void testImpactDetectionUsingHandPosePacket() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -271,14 +332,18 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       public void doControl()
       {
+         double time = robot.getTime();
+         
          robotDataReceiver.updateRobotModel();
-         wristUpdatable.update(robot.getTime());
+         wristUpdatable.update(time);
 
          double wristForceMassCompensated = wristUpdatable.getWristForceMassCompensated().length();
-         if (wristForceMassCompensated > maxWristForceMassCompensated.getDoubleValue() && robot.getTime() > 1.0)
+         if (wristForceMassCompensated > maxWristForceMassCompensated.getDoubleValue() && time > 1.0)
          {
             maxWristForceMassCompensated.set(wristForceMassCompensated);
          }
+         
+         yoTime.set(time);
       }
    }
 
