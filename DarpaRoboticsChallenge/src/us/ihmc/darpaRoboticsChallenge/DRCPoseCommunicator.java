@@ -1,7 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packets.sensing.AtlasWristFeetSensorPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -11,13 +14,14 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
-import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class DRCPoseCommunicator implements RawOutputWriter
@@ -36,6 +40,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ObjectCommunicator networkProcessorCommunicator;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+   private final SideDependentList<String> footForceSensorNames;
+   private final SideDependentList<String> wristForceSensorNames;
+
    private State currentState;
 
    private final ConcurrentRingBuffer<State> stateRingBuffer;
@@ -46,9 +53,12 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
-      stateRingBuffer = new ConcurrentRingBuffer<State>(new State.Builder(jointConfigurationGathererAndProducer.getNumberOfJoints(), jointConfigurationGathererAndProducer.getNumberOfForceSensors()), 16);
+      stateRingBuffer = new ConcurrentRingBuffer<State>(new State.Builder(jointConfigurationGathererAndProducer.getNumberOfJoints(),
+            jointConfigurationGathererAndProducer.getNumberOfForceSensors()), 16);
       setupSensorFrames(sensorInformation, estimatorModel);
       startWriterThread();
    }
@@ -149,12 +159,73 @@ public class DRCPoseCommunicator implements RawOutputWriter
             {
                while ((currentState = stateRingBuffer.read()) != null)
                {
-                  networkProcessorCommunicator.consumeObject(currentState.poseData);
-                  networkProcessorCommunicator.consumeObject(currentState.jointData);
+                  RobotPoseData robotPoseData = currentState.poseData;
+                  RobotConfigurationData robotConfigData = currentState.jointData;
+
+                  networkProcessorCommunicator.consumeObject(robotPoseData);
+                  networkProcessorCommunicator.consumeObject(robotConfigData);
+
+                  AtlasWristFeetSensorPacket wristFeetSensorPacket = new AtlasWristFeetSensorPacket();
+                  setSensorPacketFromRobotConfigData(wristFeetSensorPacket, robotConfigData);
+
+                  networkProcessorCommunicator.consumeObject(wristFeetSensorPacket);
                }
                stateRingBuffer.flush();
             }
          }
+
+         private void setSensorPacketFromRobotConfigData(AtlasWristFeetSensorPacket wristFeetSensorPacket, RobotConfigurationData robotConfigData)
+         {
+            String[] forceSensorNames = robotConfigData.getForceSensorNames();
+
+            if (forceSensorNames != null)
+            {
+               for (int forceSensorNumber = 0; forceSensorNumber < forceSensorNames.length; forceSensorNumber++)
+               {
+                  String sensorName = forceSensorNames[forceSensorNumber];
+                  DenseMatrix64F momentAndForceVector = robotConfigData.getMomentAndForceVectorForSensor(forceSensorNumber);
+
+                  if (sensorName == footForceSensorNames.get(RobotSide.LEFT))
+                  {
+                     wristFeetSensorPacket.setLeftFootMx(momentAndForceVector.get(0));
+                     wristFeetSensorPacket.setLeftFootMy(momentAndForceVector.get(1));
+
+                     wristFeetSensorPacket.setLeftFootFz(momentAndForceVector.get(5));
+                  }
+
+                  else if (sensorName == footForceSensorNames.get(RobotSide.RIGHT))
+                  {
+                     wristFeetSensorPacket.setRightFootMx(momentAndForceVector.get(0));
+                     wristFeetSensorPacket.setRightFootMy(momentAndForceVector.get(1));
+
+                     wristFeetSensorPacket.setRightFootFz(momentAndForceVector.get(5));
+                  }
+
+                  else if (sensorName == wristForceSensorNames.get(RobotSide.LEFT))
+                  {
+                     wristFeetSensorPacket.setLeftWristMx(momentAndForceVector.get(0));
+                     wristFeetSensorPacket.setLeftWristMy(momentAndForceVector.get(1));
+                     wristFeetSensorPacket.setLeftWristMz(momentAndForceVector.get(2));
+
+                     wristFeetSensorPacket.setLeftWristFx(momentAndForceVector.get(3));
+                     wristFeetSensorPacket.setLeftWristFy(momentAndForceVector.get(4));
+                     wristFeetSensorPacket.setLeftWristFz(momentAndForceVector.get(5));
+                  }
+
+                  else if (sensorName == wristForceSensorNames.get(RobotSide.RIGHT))
+                  {
+                     wristFeetSensorPacket.setRightWristMx(momentAndForceVector.get(0));
+                     wristFeetSensorPacket.setRightWristMy(momentAndForceVector.get(1));
+                     wristFeetSensorPacket.setRightWristMz(momentAndForceVector.get(2));
+
+                     wristFeetSensorPacket.setRightWristFx(momentAndForceVector.get(3));
+                     wristFeetSensorPacket.setRightWristFy(momentAndForceVector.get(4));
+                     wristFeetSensorPacket.setRightWristFz(momentAndForceVector.get(5));
+                  }
+               }
+            }
+         }
+
       }, WORKER_SLEEP_TIME_MILLIS, "DRC Pose Communicator");
    }
 

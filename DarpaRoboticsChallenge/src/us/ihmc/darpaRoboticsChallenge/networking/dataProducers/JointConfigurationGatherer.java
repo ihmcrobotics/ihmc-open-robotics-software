@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -23,8 +25,9 @@ public class JointConfigurationGatherer
    private final SixDoFJoint rootJoint;
    private final Vector3d rootTranslation = new Vector3d();
    private final Quat4d rootOrientation = new Quat4d();
-   
-   private final ArrayList<ForceSensorData> forceSensorData = new ArrayList<>();
+
+   private final ArrayList<String> forceSensorNameList = new ArrayList<String>();
+   private final ArrayList<ForceSensorData> forceSensorDataList = new ArrayList<>();
 
    /**
     * The estimated state of the whole robot is packed and sent to the GUI using the DRCJointConfigurationData packet.
@@ -50,21 +53,30 @@ public class JointConfigurationGatherer
             }
          }
       }
-      
-      for(ForceSensorDefinition definition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+
+      for (ForceSensorDefinition definition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
       {
-         forceSensorData.add(forceSensorDataHolderForEstimator.get(definition));
+         String sensorName = definition.getSensorName();
+         forceSensorNameList.add(sensorName);
+
+         ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(definition);
+         forceSensorDataList.add(forceSensorData);
       }
    }
-   
+
    public int getNumberOfJoints()
    {
       return joints.size();
    }
-   
+
    public int getNumberOfForceSensors()
    {
-      return forceSensorData.size();
+      return forceSensorDataList.size();
+   }
+
+   public String getForceSensorName(int sensorNumber)
+   {
+      return forceSensorNameList.get(sensorNumber);
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
@@ -74,7 +86,7 @@ public class JointConfigurationGatherer
       {
          return;
       }
-      
+
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
 
@@ -82,10 +94,14 @@ public class JointConfigurationGatherer
       jointConfigurationData.setRootOrientation(rootOrientation);
       jointConfigurationData.setJointAngles(joints);
       jointConfigurationData.setSimTime(timestamp);
-      
-      for(int i = 0; i < forceSensorData.size(); i++)
+
+      for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
-         forceSensorData.get(i).packWrench(jointConfigurationData.getForceSensorData(i));
+         String sensorName = forceSensorNameList.get(sensorNumber);
+         jointConfigurationData.getForceSensorNames()[sensorNumber] = sensorName;
+
+         DenseMatrix64F forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
+         forceSensorDataList.get(sensorNumber).packWrench(forceAndMomentVector);
       }
    }
 }
