@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -46,13 +47,13 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
    
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
-         YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.bipedFeet = bipedFeet;
       this.ankleZUpReferenceFrames = ankleZUpReferenceFrames;
 
-      userStepWidth.set(0.3);
+      userStepWidth.set((walkingControllerParameters.getMaxStepWidth()+walkingControllerParameters.getMinStepWidth())/2);
       userStepMinWidth.set(0.22);
       userStepFirstSide.set(RobotSide.LEFT);
       
