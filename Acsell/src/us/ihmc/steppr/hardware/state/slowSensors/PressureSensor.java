@@ -5,12 +5,17 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class PressureSensor implements StepprSlowSensor
 {
-   private static final double offset = 1.0;
-   private static final double scale = 13.0 * 9.81;
-   
+   private double offset = -11.5-58;//1.96;
+   private static final double scale = 0.0815;
+
    private final DoubleYoVariable pressureSensorRawVoltage;
    private final DoubleYoVariable force;
-   
+   public PressureSensor(String name, int sensor, YoVariableRegistry registry, double offset)
+   {
+      this(name, sensor, registry);
+      this.offset=offset;
+   }
+
    public PressureSensor(String name, int sensor, YoVariableRegistry registry)
    {
       pressureSensorRawVoltage = new DoubleYoVariable(name + "PressureSensorRawVoltage" + sensor, registry);
@@ -20,16 +25,19 @@ public class PressureSensor implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      pressureSensorRawVoltage.set(((double) value) * 5.0/4095.0);
-      
-      force.set(Math.max(0, pressureSensorRawVoltage.getDoubleValue() - offset) * scale);
-      
-      
+      pressureSensorRawVoltage.set(((double) value) * 5.0 / 4095.0);
+      force.set(((double) value) * scale + offset);
+
    }
 
    public double getValue()
    {
       return force.getDoubleValue();
    }
+
+  public void tare()
+  {
+     offset = -force.getValueAsDouble()+offset;
+  }
 
 }

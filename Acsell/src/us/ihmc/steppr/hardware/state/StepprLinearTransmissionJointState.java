@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.state;
 
+import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -9,6 +10,7 @@ public class StepprLinearTransmissionJointState implements StepprJointState
 
    private final StepprActuatorState actuator;
 
+   private final StrainSensor strainSensor;
    private final double ratio;
    private final boolean hasOutputEncoder;
 
@@ -16,18 +18,21 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    
    private final DoubleYoVariable q;
    private final DoubleYoVariable qd;
-   private final DoubleYoVariable tau;
+   private final DoubleYoVariable tau_strain;
+   private final DoubleYoVariable tau_current;
 
-   public StepprLinearTransmissionJointState(String name, double ratio, boolean hasOutputEncoder, StepprActuatorState actuator, YoVariableRegistry parentRegistry)
+   public StepprLinearTransmissionJointState(String name, double ratio, boolean hasOutputEncoder, StepprActuatorState actuator, StrainSensor strainSensor, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.ratio = ratio;
       this.actuator = actuator;
       this.hasOutputEncoder = hasOutputEncoder;
+      this.strainSensor = strainSensor;
 
       this.q = new DoubleYoVariable(name + "_q", registry);
       this.qd = new DoubleYoVariable(name + "_qd", registry);
-      this.tau = new DoubleYoVariable(name + "_tau", registry);
+      this.tau_current = new DoubleYoVariable(name + "_tauPredictedCurrent", registry);
+      this.tau_strain = new DoubleYoVariable(name + "_tauMeasuredStrain", registry);
       
       parentRegistry.addChild(registry);
    }
@@ -47,7 +52,7 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    @Override
    public double getTau()
    {
-      return tau.getDoubleValue();
+      return tau_current.getDoubleValue();
    }
 
    @Override
@@ -65,7 +70,9 @@ public class StepprLinearTransmissionJointState implements StepprJointState
          q.set(actuator.getMotorPosition() / ratio); 
          qd.set(actuator.getMotorVelocity() / ratio); 
       }
-      tau.set(actuator.getMotorTorque() * ratio);
+      tau_current.set(actuator.getMotorTorque() * ratio);
+      if(strainSensor!=null)
+         tau_strain.set(strainSensor.getCalibratedValue());
    }
 
    @Override
@@ -78,6 +85,11 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    public double getMotorAngle(int actuator)
    {
       return motorAngle;
+   }
+
+   @Override
+   public void updateOffsets()
+   {
    }
 
 }

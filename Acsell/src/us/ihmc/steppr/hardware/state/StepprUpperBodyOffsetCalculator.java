@@ -7,12 +7,17 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class StepprUpperBodyOffsetCalculator
 {
-   private static final RigidBodyTransform imuToZUpMatrix = new RigidBodyTransform(new Matrix3d(1, 0, 0, 0, 0, -1, 0, 1, 0), new Vector3d());
+   // Values from matlab/fitHardIron.m
+   private static final Vector3d magScale = new Vector3d(1.0 / 261.0, 1.0 / 243.0, 1.0 / 233.0);
+   private static final Vector3d magBias = new Vector3d(-64.1, 54.0, -269.0);
+
+   private static final RigidBodyTransform accelAndGyroToZUpMatrix = new RigidBodyTransform(new Matrix3d(1, 0, 0, 0, 0, -1, 0, 1, 0), new Vector3d());
+   private static final RigidBodyTransform magToAccellMatrix = new RigidBodyTransform(new Matrix3d(0, 1, 0, 1, 0, 0, 0, 0, -1), new Vector3d());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -23,22 +28,34 @@ public class StepprUpperBodyOffsetCalculator
 
    private final StepprXSensState xsens;
 
-   private BooleanYoVariable update;
-
    private final Quat4d xsensQuat = new Quat4d();
    private final Matrix3d xsensMatrix = new Matrix3d();
 
    private final Vector3d accel = new Vector3d();
    private final Vector3d mag = new Vector3d();
 
-   private final AlphaFilteredYoVariable q_calc_torso_x;
-   private final AlphaFilteredYoVariable q_calc_torso_y;
-   private final AlphaFilteredYoVariable q_calc_torso_z;
+   private final DoubleYoVariable q_calc_torso_x;
+   private final DoubleYoVariable q_calc_torso_y;
+   private final DoubleYoVariable q_calc_torso_z;
 
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d();
+   private final AlphaFilteredYoVariable torso_yaw;
+   private final AlphaFilteredYoVariable torso_pitch;
+   private final AlphaFilteredYoVariable torso_roll;
+   private final AlphaFilteredYoVariable xsens_yaw;
+   private final AlphaFilteredYoVariable xsens_pitch;
+   private final AlphaFilteredYoVariable xsens_roll;
 
-   private final Matrix3d rotationDifference = new Matrix3d();
+   private final DoubleYoVariable pYawMagnet;
+
+   private final DoubleYoVariable torsoMagX;
+   private final DoubleYoVariable torsoMagY;
+   private final DoubleYoVariable torsoMagZ;
+
+   private final DoubleYoVariable torsoAccelX;
+   private final DoubleYoVariable torsoAccelY;
+   private final DoubleYoVariable torsoAccelZ;
+
+   private double[] yawPitchRoll = new double[3];
 
    public StepprUpperBodyOffsetCalculator(StepprActuatorState imuState, StepprActuatorState backX, StepprActuatorState backY, StepprActuatorState backZ,
          StepprXSensState xsens, double dt, YoVariableRegistry parentRegistry)
@@ -49,50 +66,102 @@ public class StepprUpperBodyOffsetCalculator
       this.torsoZ = backZ;
       this.xsens = xsens;
 
-      update = new BooleanYoVariable("UpdateUpperBodyOffset", registry);
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, dt);
+      q_calc_torso_x = new DoubleYoVariable("q_calc_torso_x", registry);
+      q_calc_torso_y = new DoubleYoVariable("q_calc_torso_y", registry);
+      q_calc_torso_z = new DoubleYoVariable("q_calc_torso_z", registry);
 
-      q_calc_torso_x = new AlphaFilteredYoVariable("q_calc_torso_x", registry, alpha);
-      q_calc_torso_y = new AlphaFilteredYoVariable("q_calc_torso_y", registry, alpha);
-      q_calc_torso_z = new AlphaFilteredYoVariable("q_calc_torso_z", registry, alpha);
+      double alphaOrientation = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, dt);
+      torso_yaw = new AlphaFilteredYoVariable("torso_yaw", registry, alphaOrientation);
+      torso_pitch = new AlphaFilteredYoVariable("torso_pitch", registry, alphaOrientation);
+      torso_roll = new AlphaFilteredYoVariable("torso_roll", registry, alphaOrientation);
+
+      xsens_yaw = new AlphaFilteredYoVariable("xsens_yaw", registry, alphaOrientation);
+      xsens_pitch = new AlphaFilteredYoVariable("xsens_pitch", registry, alphaOrientation);
+      xsens_roll = new AlphaFilteredYoVariable("xsens_roll", registry, alphaOrientation);
+
+      pYawMagnet = new DoubleYoVariable("pYawMagnet", registry);
+
+      torsoMagX = new DoubleYoVariable("torsoMagX", registry);
+      torsoMagY = new DoubleYoVariable("torsoMagY", registry);
+      torsoMagZ = new DoubleYoVariable("torsoMagZ", registry);
+      torsoAccelX = new DoubleYoVariable("torsoAccelX", registry);
+      torsoAccelY = new DoubleYoVariable("torsoAccelY", registry);
+      torsoAccelZ = new DoubleYoVariable("torsoAccelZ", registry);
 
       parentRegistry.addChild(registry);
    }
 
-   private final Matrix3d imuOrientation = new Matrix3d();
+   public void accel2quaternions(Vector3d a, double heading)
+   {
+      double g = a.length();
+
+      double roll = -Math.atan2(a.getY(), -a.getZ());
+      if (!Double.isNaN(roll))
+      {
+         torso_roll.update(roll); // roll
+      }
+
+      double pitch = -Math.asin(a.getX() / -g);
+      if (!Double.isNaN(pitch))
+      {
+         torso_pitch.update(pitch); // pitch
+      }
+      if (!Double.isNaN(heading))
+      {
+         torso_yaw.update(heading); // yaw
+      }
+
+   }
 
    public void update()
    {
-      imuState.getIMUAccelerationVector(accel);
-      imuState.getIMUMagnetoVector(mag);
-
-      imuToZUpMatrix.transform(accel);
-      imuToZUpMatrix.transform(mag);
-
-      mag.normalize();
-      accel.normalize();
-      imuOrientation.setColumn(0, mag);
-      yAxis.cross(mag, accel);
-      yAxis.normalize();
-      imuOrientation.setColumn(1, yAxis);
-
-      zAxis.cross(mag, yAxis);
-      zAxis.normalize();
-      imuOrientation.setColumn(2, zAxis);
+      read();
+      accel2quaternions(accel, pYawMagnet.getDoubleValue());
 
       xsens.getQuaternion(xsensQuat);
       xsensMatrix.set(xsensQuat);
 
-      rotationDifference.mulTransposeLeft(imuOrientation, xsensMatrix);
+      RotationFunctions.setYawPitchRollBasedOnQuaternion(yawPitchRoll, xsensQuat);
+      xsens_yaw.update(yawPitchRoll[0]);
+      xsens_pitch.update(yawPitchRoll[1]);
+      xsens_roll.update(yawPitchRoll[2]);
+      q_calc_torso_x.set(torso_roll.getDoubleValue() - xsens_roll.getDoubleValue());
+      q_calc_torso_y.set(torso_pitch.getDoubleValue() - xsens_pitch.getDoubleValue());
+      q_calc_torso_z.set(0.0);
 
-      q_calc_torso_x.update(RotationFunctions.getRoll(rotationDifference));
-      q_calc_torso_y.update(RotationFunctions.getPitch(rotationDifference));
-      q_calc_torso_z.update(RotationFunctions.getYaw(rotationDifference));
+   }
 
-      if (update.getBooleanValue())
-      {
-         update.set(false);
-      }
+   public void updateOffsets()
+   {
+      torsoX.updateCanonicalAngle(q_calc_torso_x.getDoubleValue() * 120.0, 2.0 * Math.PI / 120.0);
+      torsoY.updateCanonicalAngle(q_calc_torso_y.getDoubleValue() * 120.0, 2.0 * Math.PI / 120.0);
+      torsoZ.updateCanonicalAngle(q_calc_torso_z.getDoubleValue() * 120.0, 2.0 * Math.PI / 120.0);
+   }
+
+   private void read()
+   {
+      imuState.getIMUAccelerationVector(accel);
+      imuState.getIMUMagnetoVector(mag);
+
+      mag.setX((mag.getX() - magBias.getX()) * magScale.getX());
+      mag.setY((mag.getY() - magBias.getY()) * magScale.getY());
+      mag.setZ((mag.getZ() - magBias.getZ()) * magScale.getZ());
+
+      accel.negate();
+      accelAndGyroToZUpMatrix.transform(accel);
+
+      magToAccellMatrix.transform(mag);
+      accelAndGyroToZUpMatrix.transform(mag);
+
+      torsoMagX.set(mag.getX());
+      torsoMagY.set(mag.getY());
+      torsoMagZ.set(mag.getZ());
+      torsoAccelX.set(accel.getX());
+      torsoAccelY.set(accel.getY());
+      torsoAccelZ.set(accel.getZ());
+
+      pYawMagnet.set(-Math.atan2(mag.getY(), mag.getX()));
+
    }
 
 }

@@ -36,7 +36,6 @@ public class StepprAnkleJointState
 
    private double motorAngle[] = new double[2];
    
-   private final BooleanYoVariable setOffset;
    
    public StepprAnkleJointState(RobotSide robotSide, StepprActuatorState rightActuator, StepprActuatorState leftActuator, YoVariableRegistry parentRegistry)
    {
@@ -63,7 +62,6 @@ public class StepprAnkleJointState
       this.q_m_calc_rightActuator = new DoubleYoVariable(name + "_q_m_calc_rightActuator", registry);
 
       
-      this.setOffset = new BooleanYoVariable(name + "SetOffset", registry);
       parentRegistry.addChild(registry);
    }
 
@@ -89,13 +87,13 @@ public class StepprAnkleJointState
       //TODO: Check right/left
       this.q_m_calc_rightActuator.set(interpolator.calculateMotor1Angle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
       this.q_m_calc_leftActuator.set(interpolator.calculateMotor2Angle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
-      
-      if(setOffset.getBooleanValue())
-      {
-         rightActuator.updateCanonicalAngle(q_m_calc_rightActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);
-         leftActuator.updateCanonicalAngle(q_m_calc_leftActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);
-         setOffset.set(false);
-      }
+
+   }
+   
+   public void updateOffsets()
+   {
+      rightActuator.updateCanonicalAngle(q_m_calc_rightActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);
+      leftActuator.updateCanonicalAngle(q_m_calc_leftActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);
    }
 
    public StepprJointState ankleY()
@@ -147,6 +145,12 @@ public class StepprAnkleJointState
          return motorAngle[actuator];
       }
 
+      @Override
+      public void updateOffsets()
+      {
+         StepprAnkleJointState.this.updateOffsets();
+      }
+
    }
 
    private class AnkleX implements StepprJointState
@@ -186,6 +190,12 @@ public class StepprAnkleJointState
       public double getMotorAngle(int actuator)
       {
          return motorAngle[actuator];
+      }
+
+      @Override
+      public void updateOffsets()
+      {
+         // Offset is already updated by ankle Y.
       }
 
    }

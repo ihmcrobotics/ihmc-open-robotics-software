@@ -10,9 +10,13 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.state.slowSensors.PressureSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensor;
+import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
+import us.ihmc.utilities.math.UnitConversions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class StepprState
@@ -34,11 +38,24 @@ public class StepprState
    private final SideDependentList<DenseMatrix64F> footWrenches = new SideDependentList<>();
 
    private final StepprUpperBodyOffsetCalculator stepprUpperBodyOffsetCalculator;
-
+   
+   
+   private final BooleanYoVariable updateOffsets = new BooleanYoVariable("updateOffsets", registry);
+   private final BooleanYoVariable tarePressureSensors = new BooleanYoVariable("tarePressureSensors", registry);
+   // X: footLength, Y: footWidth
+   private final double forceSensorXOffset = 4.2 * UnitConversions.INCH_TO_METER;
+   private final double forceSensorYOffset = 2.2 * UnitConversions.INCH_TO_METER;
+   private final double AnkleToCenterOfFoot = 3.0 * UnitConversions.INCH_TO_METER;
+   private final double forceSensorToeXOffset = forceSensorXOffset + AnkleToCenterOfFoot;
+   private final double forceSensorHeelXOffset = forceSensorXOffset - AnkleToCenterOfFoot;
+   
+   private final boolean useToeSensorsOnlyForZForce=true;
+   
    public StepprState(double dt, YoVariableRegistry parentRegistry)
    {
       createActuators();
       createJoints();
+      
 
       stepprUpperBodyOffsetCalculator = new StepprUpperBodyOffsetCalculator(actuatorStates.get(StepprActuator.TORSO_Z),
             actuatorStates.get(StepprActuator.TORSO_X), actuatorStates.get(StepprActuator.TORSO_Y), actuatorStates.get(StepprActuator.TORSO_Z), xsens, dt, registry);
@@ -50,6 +67,19 @@ public class StepprState
 
       parentRegistry.addChild(registry);
    }
+   
+   
+   private StrainSensor getCalibratedJoint(StepprJoint joint)
+   {
+      StrainSensor strainSensor=null;
+      if(joint.getStrainSensorBoard()!=null)
+      {
+         strainSensor = actuatorStates.get(joint.getStrainSensorBoard()).getStrainGuage(joint.getStrainSensorConnectorId());
+         strainSensor.setCalibration(joint.getStrainSensorGain(), joint.getStrainSensorOffset());
+      }
+      return strainSensor;
+   }
+
 
    private void createJoints()
    {
@@ -58,21 +88,23 @@ public class StepprState
          if (joint.isLinear())
          {
             StepprActuatorState actuator = actuatorStates.get(joint.getActuators()[0]);
-            jointStates.put(joint, new StepprLinearTransmissionJointState(joint.getSdfName(), joint.getRatio(), joint.hasOutputEncoder(), actuator, registry));
+            StrainSensor strainSensor = getCalibratedJoint(joint);
+            jointStates.put(joint, new StepprLinearTransmissionJointState(joint.getSdfName(), joint.getRatio(), joint.hasOutputEncoder(), actuator, strainSensor, registry));
          }
       }
 
       // Create knees
+     
+      
       StepprKneeJointState leftKnee = new StepprKneeJointState(StepprJoint.LEFT_KNEE_Y, actuatorStates.get(StepprActuator.LEFT_KNEE),
-            actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), registry);
+            actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), getCalibratedJoint(StepprJoint.LEFT_KNEE_Y),registry);
       StepprKneeJointState rightKnee = new StepprKneeJointState(StepprJoint.RIGHT_KNEE_Y, actuatorStates.get(StepprActuator.RIGHT_KNEE),
-            actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT), registry);
+            actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT), getCalibratedJoint(StepprJoint.RIGHT_KNEE_Y), registry);
 
       jointStates.put(StepprJoint.LEFT_KNEE_Y, leftKnee);
       jointStates.put(StepprJoint.RIGHT_KNEE_Y, rightKnee);
 
       // Create ankles
-
       StepprAnkleJointState leftAnkle = new StepprAnkleJointState(RobotSide.LEFT, actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT),
             actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), registry);
       jointStates.put(StepprJoint.LEFT_ANKLE_Y, leftAnkle.ankleY());
@@ -84,14 +116,21 @@ public class StepprState
       jointStates.put(StepprJoint.RIGHT_ANKLE_X, rightAnkle.ankleX());
 
    }
+   
+  
+
 
    private void createActuators()
    {
       for (StepprActuator actuatorName : StepprActuator.values)
       {
-         actuatorStates.put(actuatorName, new StepprActuatorState(actuatorName.getName(), actuatorName.getKt(), registry));
+         actuatorStates.put(actuatorName, new StepprActuatorState(actuatorName.getName(), actuatorName.getKt(), actuatorName.getKinematicDirection(), registry));
       }
    }
+   
+   
+
+
 
    public void update(ByteBuffer buffer, long timestamp) throws IOException
    {
@@ -106,16 +145,53 @@ public class StepprState
       }
       powerDistributionState.update(buffer);
       xsens.update(buffer);
+      
+      
 
       StepprActuatorState leftFootSensorState = actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT);
-      double leftForce0 = ((PressureSensor) leftFootSensorState.getSlowSensor(11)).getValue();
-      double leftForce1 = ((PressureSensor) leftFootSensorState.getSlowSensor(12)).getValue();
-      footWrenches.get(RobotSide.LEFT).set(5, leftForce0 + leftForce1);
+      double leftForceLeftHeel = ((PressureSensor) leftFootSensorState.getPressureSensor(0)).getValue();
+      double leftForceRightHeel = ((PressureSensor) leftFootSensorState.getPressureSensor(1)).getValue();
+      double leftForceLeftToe = ((PressureSensor) leftFootSensorState.getPressureSensor(2)).getValue();
+      double leftForceRightToe = ((PressureSensor) leftFootSensorState.getPressureSensor(3)).getValue();
+      
+      footWrenches.get(RobotSide.LEFT).set(0, 
+            -(leftForceLeftHeel+leftForceLeftToe)*forceSensorYOffset 
+            + (leftForceRightHeel+leftForceRightToe)*forceSensorYOffset);
+      footWrenches.get(RobotSide.LEFT).set(1, 
+            -(leftForceLeftHeel+leftForceRightHeel)*forceSensorHeelXOffset 
+            +(leftForceLeftToe+leftForceRightToe)*forceSensorToeXOffset);
+      footWrenches.get(RobotSide.LEFT).set(5, leftForceLeftHeel+leftForceRightHeel+leftForceLeftToe+leftForceRightToe);
 
       StepprActuatorState rightFootSensorState = actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT);
-      double rightForce0 = ((PressureSensor) rightFootSensorState.getSlowSensor(11)).getValue();
-      double rightForce1 = ((PressureSensor) rightFootSensorState.getSlowSensor(12)).getValue();
-      footWrenches.get(RobotSide.RIGHT).set(5, 2.0 * rightForce1);// rightForce0 + rightForce1);
+      double rightForceLeftHeel = ((PressureSensor) rightFootSensorState.getPressureSensor(0)).getValue();
+      double rightForceRightHeel = ((PressureSensor) rightFootSensorState.getPressureSensor(1)).getValue();
+      double rightForceLeftToe = ((PressureSensor) rightFootSensorState.getPressureSensor(2)).getValue();
+      double rightForceRightToe = ((PressureSensor) rightFootSensorState.getPressureSensor(3)).getValue();
+      
+      
+      
+      footWrenches.get(RobotSide.RIGHT).set(0, 
+            - (rightForceLeftHeel+rightForceLeftToe)*forceSensorYOffset 
+            + (rightForceRightHeel+rightForceRightToe)*forceSensorYOffset);
+      footWrenches.get(RobotSide.RIGHT).set(1, 
+            +(rightForceLeftHeel+rightForceRightHeel)*forceSensorHeelXOffset 
+            -(rightForceLeftToe+rightForceRightToe)*forceSensorToeXOffset);
+      footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel+rightForceRightHeel+rightForceLeftToe+rightForceRightToe);
+      
+      if(useToeSensorsOnlyForZForce)
+      {
+         footWrenches.get(RobotSide.LEFT).set(5, leftForceLeftHeel+leftForceRightHeel);
+//         footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel+rightForceRightHeel);         
+         footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel*2);         
+      }
+
+      
+      if(tarePressureSensors.getBooleanValue())
+      {
+         tarePressureSensors();
+         tarePressureSensors.set(false);        
+      }
+
 
       stepprUpperBodyOffsetCalculator.update();
       
@@ -124,6 +200,31 @@ public class StepprState
          jointStates.get(joint).update();
       }
 
+      if(updateOffsets.getBooleanValue())
+      {
+         stepprUpperBodyOffsetCalculator.updateOffsets();
+         for (StepprJoint joint : StepprJoint.values)
+         {
+            jointStates.get(joint).updateOffsets();
+         }
+         
+         updateOffsets.set(false);
+      }
+      
+   }
+
+   private void tarePressureSensors()
+   {
+      for(StepprActuatorState actuatorState:actuatorStates.values())
+      {
+         for(StepprSlowSensor sensor:actuatorState.getSlowSensors())
+         {
+            if(sensor instanceof PressureSensor)
+            {
+               ((PressureSensor)sensor).tare();
+            }
+         }
+      }
    }
 
    public StepprJointState getJointState(StepprJoint joint)

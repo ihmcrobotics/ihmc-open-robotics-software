@@ -1,6 +1,7 @@
 package us.ihmc.steppr.hardware.state;
 
 import us.ihmc.steppr.hardware.StepprJoint;
+import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -11,6 +12,8 @@ public class StepprKneeJointState implements StepprJointState
 
    private final StepprActuatorState actuator;
    private final StepprActuatorState ankle;
+   private final StrainSensor strainSensor;
+   
 
    private final double ratio;
 
@@ -18,19 +21,23 @@ public class StepprKneeJointState implements StepprJointState
    
    private final DoubleYoVariable q;
    private final DoubleYoVariable qd;
-   private final DoubleYoVariable tau;
+   private final DoubleYoVariable tau_current;
+   private final DoubleYoVariable tau_strain;
 
-   public StepprKneeJointState(StepprJoint joint, StepprActuatorState actuator, StepprActuatorState ankle, YoVariableRegistry parentRegistry)
+   public StepprKneeJointState(StepprJoint joint, StepprActuatorState actuator, StepprActuatorState ankle, StrainSensor strainSesnor, YoVariableRegistry parentRegistry)
    {
       String name = joint.getSdfName();
       this.registry = new YoVariableRegistry(name);
       this.ratio = joint.getRatio();
       this.actuator = actuator;
       this.ankle = ankle;
+      this.strainSensor = strainSesnor;
+      
       
       this.q = new DoubleYoVariable(name + "_q", registry);
       this.qd = new DoubleYoVariable(name + "_qd", registry);
-      this.tau = new DoubleYoVariable(name + "_tau", registry);
+      this.tau_current = new DoubleYoVariable(name + "_tauPredictedCurrent", registry);
+      this.tau_strain = new DoubleYoVariable(name + "_tauMeasuredStrain", registry);
       
       parentRegistry.addChild(registry);
    }
@@ -51,7 +58,7 @@ public class StepprKneeJointState implements StepprJointState
    @Override
    public double getTau()
    {
-      return tau.getDoubleValue();
+      return tau_current.getDoubleValue();
    }
 
    @Override
@@ -65,7 +72,8 @@ public class StepprKneeJointState implements StepprJointState
       
       q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition() + ankleAngle));
       qd.set(actuator.getJointVelocity() + ankleVelocity);
-      tau.set(actuator.getMotorTorque() * ratio);
+      tau_current.set(actuator.getMotorTorque() * ratio);
+      tau_strain.set(strainSensor.getCalibratedValue());
    }
 
    @Override
@@ -78,6 +86,12 @@ public class StepprKneeJointState implements StepprJointState
    public double getMotorAngle(int actuator)
    {
       return motorAngle;
+   }
+
+
+   @Override
+   public void updateOffsets()
+   {
    }
 
 }
