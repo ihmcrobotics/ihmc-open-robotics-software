@@ -11,6 +11,7 @@ public abstract class StepprActuatorCommand
    private final YoVariableRegistry registry;
    private final BooleanYoVariable enabled;
    private final DoubleYoVariable tauDesired;
+   private final DoubleYoVariable currentDesired;
    private final DoubleYoVariable damping;
    
    private final double kt;
@@ -22,6 +23,7 @@ public abstract class StepprActuatorCommand
       this.enabled = new BooleanYoVariable(name + "Enabled", registry);
       this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
       this.damping = new DoubleYoVariable(name + "Damping", registry);
+      this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
       this.kt = kt;
       
       parentRegistry.addChild(registry);
@@ -36,7 +38,7 @@ public abstract class StepprActuatorCommand
       if(enabled.getBooleanValue())
       {
          target.put((byte) 3);
-         target.putFloat((float) (tauDesired.getDoubleValue() / kt));
+         target.putFloat((float) (currentDesired.getDoubleValue()));
          target.putFloat((float) (damping.getDoubleValue() / kt));
          target.putFloat(0f);
          target.putInt(controlID);
@@ -64,6 +66,7 @@ public abstract class StepprActuatorCommand
    protected void setTauDesired(double tau)
    {
       tauDesired.set(tau);
+      this.currentDesired.set(tau/kt);
    }
    
    protected void setDamping(double damping)

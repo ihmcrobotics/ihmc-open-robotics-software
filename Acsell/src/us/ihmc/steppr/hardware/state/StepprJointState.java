@@ -10,4 +10,6 @@ public interface StepprJointState
    public double getMotorAngle(int actuator);
  
    public void update();
+   
+   public void updateOffsets();
 }

@@ -1,26 +1,26 @@
 package us.ihmc.steppr.hardware;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EnumMap;
 
 import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.UIManager;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class StepprDashboard extends JPanel implements PlaybackListener
 {
@@ -28,8 +28,10 @@ public class StepprDashboard extends JPanel implements PlaybackListener
 
    private JTable table;
 
-   private final EnumMap<StepprActuator, YoVariable> motorTemperatures = new EnumMap<>(StepprActuator.class);
-   private final EnumMap<StepprActuator, YoVariable> motorEncoders = new EnumMap<>(StepprActuator.class);
+   private final EnumMap<StepprActuator, YoVariable<?>> motorTemperatures = new EnumMap<>(StepprActuator.class);
+   private final EnumMap<StepprActuator, YoVariable<?>> mcbTemperatures1 = new EnumMap<>(StepprActuator.class);
+   private final EnumMap<StepprActuator, YoVariable<?>> mcbTemperatures2 = new EnumMap<>(StepprActuator.class);
+   private final EnumMap<StepprActuator, YoVariable<?>> motorEncoders = new EnumMap<>(StepprActuator.class);
 
    public static void createDashboard(final SimulationConstructionSet scs, YoVariableHolder registry)
    {
@@ -57,16 +59,36 @@ public class StepprDashboard extends JPanel implements PlaybackListener
 
       createLogicButtons(yoVariableHolder);
       createMotorButtons(yoVariableHolder);
+      createCalibrationButtons(yoVariableHolder);
 
       createTable(yoVariableHolder);
 
+   }
+
+   private void createCalibrationButtons(YoVariableHolder yoVariableHolder)
+   {
+      JPanel calibrationPanel = new JPanel();
+      calibrationPanel.setLayout(new BoxLayout(calibrationPanel, BoxLayout.X_AXIS));
+      final YoVariable<?> updateOffsets = yoVariableHolder.getVariable("Steppr", "updateOffsets");
+      JButton setOffsets = new JButton("Update offsets");
+      setOffsets.addActionListener(new ActionListener()
+      {
+
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            updateOffsets.setValueFromDouble(1.0);
+         }
+      });
+      calibrationPanel.add(setOffsets);
+      add(calibrationPanel);
    }
 
    private void createLogicButtons(YoVariableHolder yoVariableHolder)
    {
       JPanel logicPanel = new JPanel();
       logicPanel.setLayout(new BoxLayout(logicPanel, BoxLayout.X_AXIS));
-      final YoVariable logicPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "logicPowerStateRequest");
+      final YoVariable<?> logicPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "logicPowerStateRequest");
       JButton logicPowerOn = new JButton("Logic power on");
       logicPowerOn.addActionListener(new ActionListener()
       {
@@ -96,7 +118,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    {
       JPanel motorPanel = new JPanel();
       motorPanel.setLayout(new BoxLayout(motorPanel, BoxLayout.X_AXIS));
-      final YoVariable motorPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "motorPowerStateRequest");
+      final YoVariable<?> motorPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "motorPowerStateRequest");
       JButton motorPowerOn = new JButton("Motor power on");
       motorPowerOn.addActionListener(new ActionListener()
       {
@@ -124,13 +146,12 @@ public class StepprDashboard extends JPanel implements PlaybackListener
 
    private void createTable(YoVariableHolder yoVariableHolder)
    {
-      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "<", "q", ">" }, StepprActuator.values.length);
+      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "MCB Temperature 0", "MCB Temperture 1", "q" }, StepprActuator.values.length);
       table = new JTable(tableModel);
       table.setFillsViewportHeight(true);
-      table.getColumn("<").setCellRenderer(new NudgeRenderer(true));
-      table.getColumn("<").setCellEditor(new NudgeEditor(-1));
-      table.getColumn(">").setCellRenderer(new NudgeRenderer(false));
-      table.getColumn(">").setCellEditor(new NudgeEditor(1));
+      table.getColumn("Motor Temperature").setCellRenderer(new WarningRenderer());
+      table.getColumn("MCB Temperature 0").setCellRenderer(new WarningRenderer());
+      table.getColumn("MCB Temperture 1").setCellRenderer(new WarningRenderer());
 
       int row = 0, col = 0;
       for (StepprActuator actuator : StepprActuator.values)
@@ -138,26 +159,26 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          YoVariable<?> nudgeVariable = yoVariableHolder.getVariable("StepprSetup", actuator.getName() + "Nudge");
          motorEncoders.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorEncoderPosition"));
          motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MotorTemperature"));
+         mcbTemperatures1.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MCBTemperature1"));
+         mcbTemperatures2.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MCBTemperature2"));
 
          table.setValueAt(actuator.getName(), row, col);
 
          col++;
 
-         table.setValueAt(0, row, col);
+         table.setValueAt(Double.NaN , row, col);
 
          col++;
 
-         table.setValueAt("<", row, col);
-         ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, nudgeVariable);
+         table.setValueAt(Double.NaN, row, col);
 
          col++;
 
-         table.setValueAt(0, row, col);
+         table.setValueAt(Double.NaN, row, col);
 
          col++;
 
-         table.setValueAt(">", row, col);
-         ((NudgeEditor) table.getCellEditor(row, col)).setYoVariable(row, nudgeVariable);
+         table.setValueAt(Double.NaN, row, col);
 
          col = 0;
          row++;
@@ -174,7 +195,9 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       for (StepprActuator actuator : StepprActuator.values)
       {
          table.setValueAt(String.format("%.1f", motorTemperatures.get(actuator).getValueAsDouble()), row, 1);
-         table.setValueAt(String.format("%.3f", motorEncoders.get(actuator).getValueAsDouble()), row, 3);
+         table.setValueAt(String.format("%.1f", mcbTemperatures1.get(actuator).getValueAsDouble()), row, 2);
+         table.setValueAt(String.format("%.1f", mcbTemperatures2.get(actuator).getValueAsDouble()), row, 3);
+         table.setValueAt(String.format("%.3f", motorEncoders.get(actuator).getValueAsDouble()), row, 4);
          row++;
       }
 
@@ -194,105 +217,49 @@ public class StepprDashboard extends JPanel implements PlaybackListener
 
    }
 
-   private class NudgeRenderer extends JButton implements TableCellRenderer
+   private class WarningRenderer extends DefaultTableCellRenderer implements TableCellRenderer
    {
-      private final boolean decrease;
 
-      public NudgeRenderer(boolean decrease)
+      private static final long serialVersionUID = -8042596150349794691L;
+
+      public WarningRenderer()
       {
-         this.decrease = decrease;
-         setOpaque(true);
+         super();
+         setFont(new Font(getFont().getName(), Font.BOLD, getFont().getSize()));
+         setHorizontalAlignment(JLabel.CENTER);
       }
-
+      
       public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-      {
-         setForeground(table.getForeground());
-         setBackground(UIManager.getColor("Button.background"));
-         if (decrease)
+      {  
+         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+         if(!(value instanceof Double))
          {
-            setText("<");
-         }
-         else
-         {
-            setText(">");
-         }
-
-         return this;
-      }
-   }
-
-   private class NudgeEditor extends DefaultCellEditor
-   {
-      protected JButton button;
-
-      private final int direction;
-      private boolean isPushed;
-      private int rowClicked;
-
-      private YoVariable[] yoVariables = new YoVariable[StepprActuator.values.length];
-
-      public NudgeEditor(int direction)
-      {
-         super(new JCheckBox());
-         this.direction = direction;
-         button = new JButton();
-         button.setOpaque(true);
-         button.addActionListener(new ActionListener()
-         {
-            public void actionPerformed(ActionEvent e)
+            if(Double.valueOf((String)value) > 100.0)
             {
-               fireEditingStopped();
+               c.setBackground(Color.RED);            
             }
-         });
-      }
-
-      public void setYoVariable(int row, YoVariable variable)
-      {
-         yoVariables[row] = variable;
-      }
-
-      public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
-      {
-         if (isSelected)
-         {
-            button.setForeground(table.getSelectionForeground());
-            button.setBackground(table.getSelectionBackground());
+            else if (Double.valueOf((String) value) > 80.0)
+            {
+               c.setBackground(Color.ORANGE);
+            }
+            else if (Double.valueOf((String) value) > 60.0)
+            {
+               c.setBackground(Color.GREEN.darker());
+            }
+            else
+            {
+               c.setBackground(Color.GREEN);
+            }
+         
          }
          else
          {
-            button.setForeground(table.getForeground());
-            button.setBackground(table.getBackground());
+            c.setBackground(Color.GRAY);
          }
 
-         isPushed = true;
-
-         rowClicked = row;
-
-         return button;
-      }
-
-      public Object getCellEditorValue()
-      {
-         if (isPushed)
-         {
-            yoVariables[rowClicked].setValueFromDouble(direction);
-         }
-
-         isPushed = false;
-
-         return yoVariables[rowClicked];
-      }
-
-      public boolean stopCellEditing()
-      {
-         isPushed = false;
-
-         return super.stopCellEditing();
-      }
-
-      protected void fireEditingStopped()
-      {
-         super.fireEditingStopped();
+         setValue(value);
+         return c;
       }
    }
+   
 }

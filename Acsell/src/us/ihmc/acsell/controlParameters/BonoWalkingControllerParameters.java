@@ -408,9 +408,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
       double kpXY = 100.0;
-      double kpZ = 200.0;
+      double kpZ = 250.0; // 200.0 Trying to smash the ground there
       double zetaXYZ = 0.7;
-      double kpOrientation = 200.0;
+      double kpXYOrientation = 500.0; // 300 not working
+      double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
       double maxPositionAcceleration = Double.POSITIVE_INFINITY;
       double maxPositionJerk = Double.POSITIVE_INFINITY;
@@ -420,7 +421,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
-      gains.setOrientationProportionalGains(kpOrientation, kpOrientation);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
@@ -618,7 +619,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDesiredTouchdownVelocity()
    {
-      return -0.3;
+      return -0.5;
    }
 
    @Override
