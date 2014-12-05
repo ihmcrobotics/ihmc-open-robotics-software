@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -51,7 +53,8 @@ public class AtlasROSAPISimulator
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
       ObjectCommunicator sensorCommunicator = simulation.getLocalObjectCommunicator();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, robotModel, nameSpace);
+      AtlasPPSTimestampOffsetProvider ppsOffsetProvider = new AtlasPPSTimestampOffsetProvider((AtlasSensorInformation) robotModel.getSensorInformation());
+      new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
       if (startUI)
       {

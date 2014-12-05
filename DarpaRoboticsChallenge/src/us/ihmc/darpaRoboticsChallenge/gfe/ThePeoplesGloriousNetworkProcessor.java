@@ -52,14 +52,14 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge,
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge, PPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
       this.controllerCommunicationBridge = controllerCommunicationBridge;
       this.scsSensorCommunicationBridge = scsSensorCommunicationBridge;
-      this.ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
+      this.ppsTimestampOffsetProvider = ppsOffsetProvider;
       this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       this.subscribers = new ArrayList<AbstractRosTopicSubscriber<?>>();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
@@ -81,7 +81,7 @@ public class ThePeoplesGloriousNetworkProcessor
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
          IOException
    {
-      this(rosUri, controllerCommunicationBridge, null, robotModel, namespace);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace);
    }
 
    private void setupOutputs(String namespace)
