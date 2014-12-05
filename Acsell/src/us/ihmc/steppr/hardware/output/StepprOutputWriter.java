@@ -37,6 +37,7 @@ public class StepprOutputWriter implements DRCOutputWriter
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
    
    private final UDPStepprOutputWriter outputWriter;
+   private final EnumMap<StepprJoint,DoubleYoVariable> yoTauSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class); 
 
    
    public StepprOutputWriter(DRCRobotModel robotModel)
@@ -51,6 +52,11 @@ public class StepprOutputWriter implements DRCOutputWriter
       registry.addChild(standPrep.getYoVariableRegistry());
       
       outputWriter.connect();
+      
+
+     yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName()+"_tauSpringCorrection", registry));
+     yoTauSpring.put(StepprJoint.LEFT_HIP_Y, new DoubleYoVariable(StepprJoint.LEFT_HIP_Y.getSdfName()+"_tauSpringCorrection", registry));
+      
    }
 
    @Override
@@ -100,7 +106,15 @@ public class StepprOutputWriter implements DRCOutputWriter
                   * (1.0 - controlRatio.getDoubleValue());
             
             StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
-            jointCommand.setTauDesired(tau, rawSensorData);
+            
+            double tauSpring =0;
+            if (yoTauSpring.get(joint)!=null)
+            {
+               tauSpring = calcSpringTorque(joint, wholeBodyControlJoint.getQ());
+               yoTauSpring.get(joint).set(tauSpring);               
+            }
+            
+            jointCommand.setTauDesired(tau-tauSpring, rawSensorData);
             jointCommand.setDamping(kd);
 
          }
@@ -108,6 +122,19 @@ public class StepprOutputWriter implements DRCOutputWriter
       
       outputWriter.write();
 
+   }
+   
+   private double calcSpringTorque(StepprJoint joint, double q)
+   {
+      switch(joint)
+      {
+      case LEFT_HIP_X:
+         return 550*Math.max(-0.05-q, 0);
+      case RIGHT_HIP_X:
+         return -550*Math.max(q-0.05, 0);
+      default:
+         return 0;
+      }
    }
 
    @Override
