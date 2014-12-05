@@ -33,9 +33,9 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
-import us.ihmc.ihmcPerception.footstepPlanner.ADStarPathPlannerService;
-import us.ihmc.ihmcPerception.footstepPlanner.AStarPathPlannerService;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepPathPlannerService;
+import us.ihmc.ihmcPerception.footstepPlanner.aStar.AStarPathPlannerService;
+import us.ihmc.ihmcPerception.footstepPlanner.dStar.DStarPathPlannerService;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -106,7 +106,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          
          FootstepPathPlannerService footstepPathPlannerService;
          footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
-//         footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
+//         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
          fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
