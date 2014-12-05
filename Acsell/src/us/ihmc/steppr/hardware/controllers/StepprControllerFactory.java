@@ -23,7 +23,6 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
-import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -40,6 +39,7 @@ import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import com.martiansoftware.jsap.JSAPException;
 
