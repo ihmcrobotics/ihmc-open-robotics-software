@@ -9,21 +9,24 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ChestOrientationBehavior extends BehaviorInterface
 {
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private ChestOrientationPacket outgoingChestOrientationPacket;
 
+   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private final DoubleYoVariable yoTime;
-   private double startTime = Double.NaN;
-   private double currentTime = Double.NaN;
-
-   // TODO: This is just an estimate of the time out. This needs to be dealt with
-   private double behaviorTime = 4.0;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
+   private final BooleanYoVariable trajectoryTimeElapsed;
 
    public ChestOrientationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
+      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(ChestOrientationPacket chestOrientationPacket)
@@ -36,21 +39,20 @@ public class ChestOrientationBehavior extends BehaviorInterface
    {
       if (!packetHasBeenSent.getBooleanValue() && (outgoingChestOrientationPacket != null))
       {
-         sendHandPoseToController();
+         sendChestPoseToController();
       }
-
-      currentTime = yoTime.getDoubleValue();
    }
 
-   private void sendHandPoseToController()
+   private void sendChestPoseToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingChestOrientationPacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingChestOrientationPacket);
          sendPacketToController(outgoingChestOrientationPacket);
          packetHasBeenSent.set(true);
-         startTime = yoTime.getDoubleValue();
+         startTime.set(yoTime.getDoubleValue());
+         trajectoryTime.set(outgoingChestOrientationPacket.getTrajectoryTime());
       }
    }
 
@@ -90,9 +92,12 @@ public class ChestOrientationBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      boolean trajectoryTimeElapsed = currentTime - startTime > behaviorTime;
+      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+         trajectoryTimeElapsed.set(false);
+      else
+         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed &&!isPaused.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -109,12 +114,13 @@ public class ChestOrientationBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
-   
+
    @Override
-   public boolean hasInputBeenSet() {
-	   if (outgoingChestOrientationPacket != null)
-		   return true;
-	   else
-		   return false;
+   public boolean hasInputBeenSet()
+   {
+      if (outgoingChestOrientationPacket != null)
+         return true;
+      else
+         return false;
    }
 }
