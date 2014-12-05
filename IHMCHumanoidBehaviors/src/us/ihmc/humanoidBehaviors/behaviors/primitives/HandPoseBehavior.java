@@ -20,9 +20,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandPoseBehavior extends BehaviorInterface
 {
+   private static final boolean DEBUG = false;
+
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private Status status;
-   private RobotSide handPoseStatusSide;
 
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private HandPosePacket outgoingHandPosePacket;
@@ -35,7 +36,8 @@ public class HandPoseBehavior extends BehaviorInterface
    private final BooleanYoVariable trajectoryTimeElapsed;
 
    private final BooleanYoVariable hasStatusBeenSent;
-   private RobotSide robotSide;
+
+   private final BooleanYoVariable isDone;
 
    public HandPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -49,7 +51,7 @@ public class HandPoseBehavior extends BehaviorInterface
       hasInputBeenSet = new BooleanYoVariable(getName() + "HasInputBeenSet", registry);
       trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
       hasStatusBeenSent = new BooleanYoVariable(getName() + "HasStatusBeenSent", registry);
-
+      isDone = new BooleanYoVariable(getName() + "IsDone", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
    }
 
@@ -72,7 +74,6 @@ public class HandPoseBehavior extends BehaviorInterface
       pose.get(rotation);
       Point3d point = new Point3d(translation.getX(), translation.getY(), translation.getZ());
       setInput(new HandPosePacket(robotSide, frame, point, rotation, trajectoryTime));
-      this.robotSide = robotSide;
    }
 
    @Override
@@ -111,6 +112,7 @@ public class HandPoseBehavior extends BehaviorInterface
       hasInputBeenSet.set(false);
       hasStatusBeenSent.set(false);
       isPaused.set(false);
+      isDone.set(false);
    }
 
    @Override
@@ -129,6 +131,7 @@ public class HandPoseBehavior extends BehaviorInterface
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);
       status = null;
+      isDone.set(false);
    }
 
    @Override
@@ -140,7 +143,7 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
-      StopArmMotionPacket pausePacket = new StopArmMotionPacket(handPoseStatusSide);
+      StopArmMotionPacket pausePacket = new StopArmMotionPacket(outgoingHandPosePacket.getRobotSide());
       pausePacket.setDestination(PacketDestination.CONTROLLER);
       sendPacketToController(pausePacket);
       isPaused.set(true);
@@ -161,12 +164,16 @@ public class HandPoseBehavior extends BehaviorInterface
    public boolean isDone()
    {
       checkForHandPoseStatus();
-      if (status == Status.COMPLETED && handPoseStatusSide == robotSide && !hasStatusBeenSent.getBooleanValue())
+      if (status == Status.COMPLETED && !hasStatusBeenSent.getBooleanValue())
       {
          hasStatusBeenSent.set(true);
-         return true;
+         isDone.set(true);
       }
-      return false;
+      else
+      {
+         isDone.set(false);
+      }
+      return isDone.getBooleanValue();
       //      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
       //         trajectoryTimeElapsed.set(false);
       //      else
@@ -178,10 +185,11 @@ public class HandPoseBehavior extends BehaviorInterface
    private void checkForHandPoseStatus()
    {
       HandPoseStatus newestPacket = inputListeningQueue.getNewestPacket();
-      if (newestPacket != null)
+      if (newestPacket != null && newestPacket.getRobotSide() == outgoingHandPosePacket.getRobotSide())
       {
+         if (DEBUG)
+            System.out.println("Received a hand pose status: " + newestPacket.getStatus() + ", " + newestPacket.getRobotSide());
          status = newestPacket.getStatus();
-         handPoseStatusSide = newestPacket.getRobotSide();
       }
    }
 
