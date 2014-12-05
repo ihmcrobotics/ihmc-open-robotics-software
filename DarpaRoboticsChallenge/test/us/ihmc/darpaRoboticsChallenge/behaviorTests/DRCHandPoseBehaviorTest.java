@@ -109,7 +109,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
+      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
 
 
       fullRobotModel.updateFrames();
@@ -134,7 +134,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
-      double simulationRunTime = swingTrajectoryTime + 1.0;
+      final double simulationRunTime = swingTrajectoryTime + 1.0;
       
    
       Thread behaviorThread = new Thread()
