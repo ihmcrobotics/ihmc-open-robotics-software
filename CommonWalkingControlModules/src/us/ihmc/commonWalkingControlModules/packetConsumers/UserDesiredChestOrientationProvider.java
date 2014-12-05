@@ -5,6 +5,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
@@ -12,6 +13,7 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final DoubleYoVariable chestTrajectoryTime = new DoubleYoVariable("userDesiredChestTrajectoryTime", registry);
    private final BooleanYoVariable isNewChestOrientationInformationAvailable = new BooleanYoVariable("isNewChestOrientationInformationAvailable", registry);
    private final YoFrameOrientation userChest;
 
@@ -59,5 +61,11 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
    public ReferenceFrame getChestOrientationExpressedInFrame()
    {
       return chestOrientationFrame;
+   }
+
+   @Override
+   public double getTrajectoryTime()
+   {
+      return chestTrajectoryTime.getDoubleValue();
    }
 }

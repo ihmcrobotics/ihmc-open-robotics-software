@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -13,11 +15,13 @@ public class DesiredChestOrientationProvider implements ObjectConsumer<ChestOrie
 {
 
    private final AtomicReference<Quat4d> desiredOrientation = new AtomicReference<>();
+   private final AtomicDouble trajectoryTime = new AtomicDouble();
    private final ReferenceFrame chestOrientationFrame;
 
-   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame)
+   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime)
    {
       this.chestOrientationFrame = chestOrientationFrame;
+      trajectoryTime.set(defaultTrajectoryTime);
    }
 
    @Override
@@ -43,11 +47,18 @@ public class DesiredChestOrientationProvider implements ObjectConsumer<ChestOrie
    public void consumeObject(ChestOrientationPacket object)
    {
       desiredOrientation.set(object.getQuaternion());
+      trajectoryTime.set(object.getTrajectoryTime());
    }
 
    @Override
    public ReferenceFrame getChestOrientationExpressedInFrame()
    {
       return chestOrientationFrame;
+   }
+
+   @Override
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime.get();
    }
 }

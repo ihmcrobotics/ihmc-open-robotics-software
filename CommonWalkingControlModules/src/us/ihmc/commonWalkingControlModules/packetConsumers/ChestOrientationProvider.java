@@ -11,4 +11,5 @@ public interface ChestOrientationProvider
 
    public abstract FrameOrientation getDesiredChestOrientation();
 
+   public abstract double getTrajectoryTime();
 }
