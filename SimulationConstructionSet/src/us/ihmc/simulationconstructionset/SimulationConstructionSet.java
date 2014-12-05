@@ -4244,6 +4244,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return mySimulation.getForceSensors();
    }
 
+   public void repaintWindows()
+   {
+      if (myGUI != null)
+      {
+         myGUI.repaintWindows();
+      }
+      
+   }
+
 
 
 }
