@@ -4,7 +4,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.GenericCRC32;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
-
+import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+ 
 public class IntermediateControllerStateHolder
 {
    private final GenericCRC32 estimatorChecksumCalculator = new GenericCRC32();
@@ -17,10 +18,10 @@ public class IntermediateControllerStateHolder
    private final InverseDynamicsJointDesiredAccelerationChecksum controllerChecksum;
    private final InverseDynamicsJointDesiredAccelerationChecksum estimatorChecksum;
    
-   public IntermediateControllerStateHolder(SDFFullRobotModel fullRobotModel, SDFFullRobotModel estimatorModel,
+   public IntermediateControllerStateHolder(WholeBodyControlParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel,
          SDFFullRobotModel controllerModel)
    {
-      SDFFullRobotModel intermediateModel = fullRobotModel;
+      SDFFullRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
 
       controllerToIntermediateCopier = new InverseDynamicsJointDesiredAccelerationCopier(controllerModel.getElevator(), intermediateModel.getElevator());
       intermediateToEstimatorCopier = new InverseDynamicsJointDesiredAccelerationCopier(intermediateModel.getElevator(), estimatorModel.getElevator());
@@ -67,11 +68,11 @@ public class IntermediateControllerStateHolder
 
       private final SDFFullRobotModel estimatorModel;
       private final SDFFullRobotModel controllerModel;
-      private final SDFFullRobotModel fullRobotModel;
+      private final WholeBodyControlParameters wholeBodyControlParameters;
 
-      public Builder(SDFFullRobotModel fullRobotModel, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
+      public Builder(WholeBodyControlParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
       {
-         this.fullRobotModel = fullRobotModel;
+         this.wholeBodyControlParameters = wholeBodyControlParameters;
          this.estimatorModel = estimatorModel;
          this.controllerModel = controllerModel;
       }
@@ -79,7 +80,7 @@ public class IntermediateControllerStateHolder
       @Override
       public IntermediateControllerStateHolder newInstance()
       {
-         return new IntermediateControllerStateHolder(fullRobotModel, estimatorModel, controllerModel);
+         return new IntermediateControllerStateHolder(wholeBodyControlParameters, estimatorModel, controllerModel);
       }
 
    }

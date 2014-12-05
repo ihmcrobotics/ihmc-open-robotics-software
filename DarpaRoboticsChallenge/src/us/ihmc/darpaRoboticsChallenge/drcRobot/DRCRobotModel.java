@@ -23,7 +23,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControlParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-
+ 
 import com.jme3.math.Transform;
 
 public interface DRCRobotModel extends WholeBodyControlParameters
@@ -31,8 +31,6 @@ public interface DRCRobotModel extends WholeBodyControlParameters
    //TODO: RobotBoundingBoxes.java
 
 //   public abstract boolean isRunningOnRealRobot();
-	
-//   public abstract WholeBodyControlParameters getWholeBodyControlParameters();
    
    public abstract FootstepParameters getFootstepParameters();
 
@@ -59,10 +57,6 @@ public interface DRCRobotModel extends WholeBodyControlParameters
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
-   
-   public SDFFullRobotModel createFullRobotModel();
-
-   public SDFRobot createSdfRobot(boolean createCollisionMeshes);
 
    public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 

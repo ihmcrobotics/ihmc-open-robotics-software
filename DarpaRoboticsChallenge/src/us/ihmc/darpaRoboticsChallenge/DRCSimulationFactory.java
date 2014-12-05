@@ -123,9 +123,9 @@ public class DRCSimulationFactory
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, stateEstimatorParameters);
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
-      ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel.createFullRobotModel());
+      ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
-
+ 
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
       {
          DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, drcRobotModel.getControllerDT(), true);
