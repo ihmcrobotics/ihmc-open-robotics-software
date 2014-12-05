@@ -16,6 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -53,7 +54,7 @@ public class AtlasROSAPISimulator
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
       ObjectCommunicator sensorCommunicator = simulation.getLocalObjectCommunicator();
-      AtlasPPSTimestampOffsetProvider ppsOffsetProvider = new AtlasPPSTimestampOffsetProvider((AtlasSensorInformation) robotModel.getSensorInformation());
+      SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
       if (startUI)
