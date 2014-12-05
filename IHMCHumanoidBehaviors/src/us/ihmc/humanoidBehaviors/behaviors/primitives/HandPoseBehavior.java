@@ -35,7 +35,7 @@ public class HandPoseBehavior extends BehaviorInterface
    private final BooleanYoVariable hasInputBeenSet;
    private final BooleanYoVariable trajectoryTimeElapsed;
 
-   private final BooleanYoVariable hasStatusBeenSent;
+   private final BooleanYoVariable hasStatusBeenReceived;
 
    private final BooleanYoVariable isDone;
 
@@ -50,7 +50,7 @@ public class HandPoseBehavior extends BehaviorInterface
       trajectoryTime.set(Double.NaN);
       hasInputBeenSet = new BooleanYoVariable(getName() + "HasInputBeenSet", registry);
       trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
-      hasStatusBeenSent = new BooleanYoVariable(getName() + "HasStatusBeenSent", registry);
+      hasStatusBeenReceived = new BooleanYoVariable(getName() + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(getName() + "IsDone", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
    }
@@ -110,7 +110,7 @@ public class HandPoseBehavior extends BehaviorInterface
       status = null;
       trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
-      hasStatusBeenSent.set(false);
+      hasStatusBeenReceived.set(false);
       isPaused.set(false);
       isDone.set(false);
    }
@@ -126,7 +126,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
       trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
-      hasStatusBeenSent.set(false);
+      hasStatusBeenReceived.set(false);
 
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);
@@ -164,14 +164,9 @@ public class HandPoseBehavior extends BehaviorInterface
    public boolean isDone()
    {
       checkForHandPoseStatus();
-      if (status == Status.COMPLETED && !hasStatusBeenSent.getBooleanValue())
+      if (status == Status.COMPLETED)
       {
-         hasStatusBeenSent.set(true);
          isDone.set(true);
-      }
-      else
-      {
-         isDone.set(false);
       }
       return isDone.getBooleanValue();
       //      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
@@ -190,6 +185,7 @@ public class HandPoseBehavior extends BehaviorInterface
          if (DEBUG)
             System.out.println("Received a hand pose status: " + newestPacket.getStatus() + ", " + newestPacket.getRobotSide());
          status = newestPacket.getStatus();
+         hasStatusBeenReceived.set(true);
       }
    }
 
