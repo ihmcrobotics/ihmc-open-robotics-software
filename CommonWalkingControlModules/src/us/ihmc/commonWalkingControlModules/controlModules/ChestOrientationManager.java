@@ -134,6 +134,7 @@ public class ChestOrientationManager
          orientationTrajectoryGenerator.get(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          finalOrientationProvider.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
+         chestOrientationTrajectoryTime.set(chestOrientationProvider.getTrajectoryTime());
          receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
          orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
