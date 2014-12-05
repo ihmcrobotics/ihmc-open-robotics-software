@@ -10,7 +10,6 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 
 public class DRCRobotSDFLoader
 {
-     
    public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless)
    {
       ArrayList<String> resources = new ArrayList<String>();

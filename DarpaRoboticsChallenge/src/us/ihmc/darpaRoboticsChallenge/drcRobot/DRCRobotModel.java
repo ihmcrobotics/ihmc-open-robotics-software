@@ -31,6 +31,8 @@ public interface DRCRobotModel extends WholeBodyControlParameters
    //TODO: RobotBoundingBoxes.java
 
 //   public abstract boolean isRunningOnRealRobot();
+	
+//   public abstract WholeBodyControlParameters getWholeBodyControlParameters();
    
    public abstract FootstepParameters getFootstepParameters();
 
@@ -57,6 +59,10 @@ public interface DRCRobotModel extends WholeBodyControlParameters
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
+   
+   public SDFFullRobotModel createFullRobotModel();
+
+   public SDFRobot createSdfRobot(boolean createCollisionMeshes);
 
    public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 
