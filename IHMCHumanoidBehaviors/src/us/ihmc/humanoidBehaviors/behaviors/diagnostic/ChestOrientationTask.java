@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.taskExecutor.Task;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ChestOrientationTask implements Task
 {
@@ -13,9 +14,22 @@ public class ChestOrientationTask implements Task
    private final ChestOrientationPacket chestOrientationPacket;
    private final ChestOrientationBehavior chestOrientationBehavior;
 
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, ChestOrientationBehavior chestOrientationBehavior, double trajectoryTime)
+   private final DoubleYoVariable yoTime;
+   private double behaviorDoneTime = Double.NaN;
+   private final double sleepTime;
+
+   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior,
+         double trajectoryTime)
+   {
+      this(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime, 0.0);
+   }
+
+   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior,
+         double trajectoryTime, double sleepTime)
    {
       this.chestOrientationBehavior = chestOrientationBehavior;
+      this.yoTime = yoTime;
+      this.sleepTime = sleepTime;
       Quat4d chestOrientation = new Quat4d();
       desiredChestOrientation.getQuaternion(chestOrientation);
       chestOrientationPacket = new ChestOrientationPacket(chestOrientation, trajectoryTime);
@@ -24,6 +38,8 @@ public class ChestOrientationTask implements Task
    @Override
    public void doTransitionIntoAction()
    {
+      if (DEBUG)
+         System.out.println("Started chest orientation");
       chestOrientationBehavior.initialize();
       chestOrientationBehavior.setInput(chestOrientationPacket);
    }
@@ -32,6 +48,10 @@ public class ChestOrientationTask implements Task
    public void doAction()
    {
       chestOrientationBehavior.doControl();
+      if (Double.isNaN(behaviorDoneTime) &&chestOrientationBehavior.isDone())
+      {
+         behaviorDoneTime = yoTime.getDoubleValue();
+      }
    }
 
    @Override
@@ -45,6 +65,7 @@ public class ChestOrientationTask implements Task
    @Override
    public boolean isDone()
    {
-      return chestOrientationBehavior.isDone();
+      boolean sleepTimeAchieved = yoTime.getDoubleValue() > behaviorDoneTime + sleepTime;
+      return chestOrientationBehavior.isDone() && sleepTimeAchieved;
    }
 }
