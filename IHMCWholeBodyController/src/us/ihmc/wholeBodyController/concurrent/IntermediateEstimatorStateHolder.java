@@ -1,9 +1,8 @@
-package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
+package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
 import us.ihmc.utilities.GenericCRC32;
@@ -11,6 +10,7 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.wholeBodyController.WholeBodyControlParameters;
 
 public class IntermediateEstimatorStateHolder
 {
@@ -35,11 +35,11 @@ public class IntermediateEstimatorStateHolder
    private final RawJointSensorDataHolderMapCopier rawDataEstimatorToIntermadiateCopier;
    private final RawJointSensorDataHolderMapCopier rawDataIntermediateToControllerCopier;
 
-   public IntermediateEstimatorStateHolder(DRCRobotModel robotModel, RigidBody estimatorRootBody, RigidBody controllerRootBody,
+   public IntermediateEstimatorStateHolder(WholeBodyControlParameters wholeBodyControlParameters, RigidBody estimatorRootBody, RigidBody controllerRootBody,
          ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
          RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
    {
-      SDFFullRobotModel intermediateModel = robotModel.createFullRobotModel();
+      SDFFullRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
       RigidBody intermediateRootBody = intermediateModel.getElevator();
 
       estimatorChecksum = new InverseDynamicsJointStateChecksum(estimatorRootBody, estimatorChecksumCalculator);
@@ -118,7 +118,7 @@ public class IntermediateEstimatorStateHolder
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateEstimatorStateHolder>
    {
 
-      private final DRCRobotModel robotModel;
+      private final WholeBodyControlParameters robotModel;
       private final RigidBody estimatorRootJoint;
       private final RigidBody controllerRootJoint;
 
@@ -129,7 +129,7 @@ public class IntermediateEstimatorStateHolder
       private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
 
-      public Builder(DRCRobotModel robotModel, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
+      public Builder(WholeBodyControlParameters robotModel, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
             ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
             RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
       {

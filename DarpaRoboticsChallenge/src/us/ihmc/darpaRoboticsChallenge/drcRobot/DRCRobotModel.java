@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.util.RobotNetworkParameters;
-import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
@@ -23,6 +22,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import com.jme3.math.Transform;
 
@@ -53,11 +53,7 @@ public interface DRCRobotModel extends WholeBodyControlParameters
    public abstract HandModel getHandModel();
 
    public abstract Transform getOffsetHandFromWrist(RobotSide side);
-
-   public abstract SDFFullRobotModel createFullRobotModel();
-
-   public abstract SDFRobot createSdfRobot(boolean createCollisionMeshes);
-
+   
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();

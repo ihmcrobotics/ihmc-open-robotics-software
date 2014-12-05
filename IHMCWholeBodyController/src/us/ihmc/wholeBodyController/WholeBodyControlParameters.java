@@ -1,20 +1,26 @@
 package us.ihmc.wholeBodyController;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 
 public interface WholeBodyControlParameters
 {
-	public abstract CapturePointPlannerParameters getCapturePointPlannerParameters();
+	public CapturePointPlannerParameters getCapturePointPlannerParameters();
 
-	public abstract ArmControllerParameters getArmControllerParameters();
+	public ArmControllerParameters getArmControllerParameters();
 
-	public abstract WalkingControllerParameters getWalkingControllerParameters();
+	public WalkingControllerParameters getWalkingControllerParameters();
 	
-	public abstract WalkingControllerParameters getMultiContactControllerParameters();
+	public WalkingControllerParameters getMultiContactControllerParameters();
 	
-	public abstract DRCRobotContactPointParameters getContactPointParameters();
+	public DRCRobotContactPointParameters getContactPointParameters();
 	
-	public abstract double getControllerDT();
+	public double getControllerDT();
+	
+	public SDFFullRobotModel createFullRobotModel();
+
+	public SDFRobot createSdfRobot(boolean createCollisionMeshes);
 }
