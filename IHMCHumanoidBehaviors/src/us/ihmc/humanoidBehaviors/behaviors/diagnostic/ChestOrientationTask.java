@@ -48,7 +48,7 @@ public class ChestOrientationTask implements Task
    public void doAction()
    {
       chestOrientationBehavior.doControl();
-      if (Double.isNaN(behaviorDoneTime) &&chestOrientationBehavior.isDone())
+      if (Double.isNaN(behaviorDoneTime) && chestOrientationBehavior.isDone())
       {
          behaviorDoneTime = yoTime.getDoubleValue();
       }
