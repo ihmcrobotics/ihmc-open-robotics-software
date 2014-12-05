@@ -242,4 +242,11 @@ public class JMEDataTypeUtils
       return ret;
    }
 
+   public static void jmeTransformToTransform3D(Transform jmeTransform, RigidBodyTransform rigidBodyTransformToPack) {
+	   Quaternion jmeQuat = jmeTransform.getRotation();
+	   Vector3f jmeVect = jmeTransform.getTranslation();
+	   Quat4d quat = new Quat4d(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
+	   Vector3d vect = new Vector3d(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
+	   rigidBodyTransformToPack.set(quat, vect);
+   }
 }
