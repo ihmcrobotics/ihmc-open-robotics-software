@@ -6,7 +6,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-
+import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+ 
 public class ThreadDataSynchronizer
 {
    private final SDFFullRobotModel estimatorFullRobotModel;
@@ -23,17 +24,17 @@ public class ThreadDataSynchronizer
    private long estimatorClockStartTime;
    private long estimatorTick;
 
-   public ThreadDataSynchronizer(SDFFullRobotModel fullRobotModel)
+   public ThreadDataSynchronizer(WholeBodyControlParameters wholeBodyControlParameters)
    {
-      estimatorFullRobotModel = fullRobotModel;
+      estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
 
-      controllerFullRobotModel = fullRobotModel;
+      controllerFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
       controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
 
-      IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(fullRobotModel,
+      IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(wholeBodyControlParameters,
             estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder,
             estimatorRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
       estimatorStateCopier = new ConcurrentCopier<IntermediateEstimatorStateHolder>(stateCopierBuilder);
