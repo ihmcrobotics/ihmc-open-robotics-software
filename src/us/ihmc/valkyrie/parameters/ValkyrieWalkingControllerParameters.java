@@ -152,7 +152,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.595 + 0.23;
-   private double nominalHeightAboveGround = 0.675 + 0.23;
+   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01;
    private final double maximumHeightAboveGround = 0.735 + 0.23;
 
    // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
