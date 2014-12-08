@@ -8,12 +8,11 @@ import javax.swing.JButton;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizer;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 

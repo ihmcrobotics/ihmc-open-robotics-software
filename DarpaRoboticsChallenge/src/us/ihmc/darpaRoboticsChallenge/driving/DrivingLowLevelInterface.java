@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
+import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import georegression.struct.se.Se3_F64;
 
 /**

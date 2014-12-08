@@ -14,8 +14,8 @@ import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataServer;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
+import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class CameraDataReceiver

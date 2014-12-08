@@ -11,7 +11,6 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -20,6 +19,7 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;

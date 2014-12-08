@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.WholeBodyControlParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 

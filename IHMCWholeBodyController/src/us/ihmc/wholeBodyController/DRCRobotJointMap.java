@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.wholeBodyController;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -7,7 +7,6 @@ import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 
 public interface DRCRobotJointMap extends SDFJointNameMap
 {

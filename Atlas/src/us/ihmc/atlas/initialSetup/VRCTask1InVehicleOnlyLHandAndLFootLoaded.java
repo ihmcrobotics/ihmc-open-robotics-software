@@ -28,13 +28,13 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
-
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 
 public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitialSetup<SDFRobot>

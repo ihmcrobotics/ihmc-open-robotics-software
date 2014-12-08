@@ -6,10 +6,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.robotSide.RobotSide;
-
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;

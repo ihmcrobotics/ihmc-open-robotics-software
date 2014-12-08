@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor;
+package us.ihmc.wholeBodyController;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,8 +11,7 @@ import javax.imageio.ImageIO;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
+import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 

@@ -4,7 +4,6 @@ import java.util.EnumMap;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -13,6 +12,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
  * Created by Peter on 12/5/13.

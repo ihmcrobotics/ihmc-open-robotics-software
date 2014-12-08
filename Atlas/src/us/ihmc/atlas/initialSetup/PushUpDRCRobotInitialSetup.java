@@ -3,8 +3,8 @@ package us.ihmc.atlas.initialSetup;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {

@@ -3,9 +3,9 @@ package us.ihmc.atlas.initialSetup;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class SquaredUpVRCQual1SteppingStones extends SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
