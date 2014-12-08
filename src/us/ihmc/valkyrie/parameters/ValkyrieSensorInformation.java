@@ -5,11 +5,11 @@ import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
