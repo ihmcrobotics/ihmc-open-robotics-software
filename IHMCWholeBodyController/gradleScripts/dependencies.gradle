@@ -5,6 +5,7 @@ dependencies {
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
 	
 	compile project(':CommonWalkingControlModules')
+	compile project(':IHMCCommunication')
 	compile project(':IHMCRealtime')
 	compile project(':IHMCUtilities')
 	compile project(':IHMCYoUtilities')
