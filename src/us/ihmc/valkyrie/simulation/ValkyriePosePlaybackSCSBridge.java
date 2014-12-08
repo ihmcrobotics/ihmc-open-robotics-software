@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyriePosePlaybackSCSBridge
 {
