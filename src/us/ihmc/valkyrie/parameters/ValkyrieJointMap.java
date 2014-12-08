@@ -34,7 +34,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -42,6 +41,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
