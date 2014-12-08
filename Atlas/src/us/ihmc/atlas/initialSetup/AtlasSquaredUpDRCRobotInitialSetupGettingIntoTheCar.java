@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -21,6 +20,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 // TODO: Temporary initial setup for testing the grasping control
 public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCRobotInitialSetup<SDFRobot>
