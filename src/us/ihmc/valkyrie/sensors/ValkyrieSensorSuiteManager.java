@@ -6,7 +6,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
@@ -38,7 +37,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldCommunicator, RobotPoseBuffer robotPoseBuffer,
-                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotModel robotModel)
+                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
       new SCSCameraDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
 
