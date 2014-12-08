@@ -13,7 +13,6 @@ import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -109,15 +108,15 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
          networkingManager.getControllerCommandHandler().attachListener(TestbedClientPacket.class, testbed);
          new Thread(testbed).start();
       }
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri, robotModel);
+      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri);
       connect();
    }
 
-   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI, DRCRobotModel robotModel)
+   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI)
    {
       if (useSimulatedSensors)
       {
-         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI, robotModel);
+         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI);
       }
       else
       {

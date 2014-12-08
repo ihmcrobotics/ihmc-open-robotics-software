@@ -28,7 +28,6 @@ import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
@@ -139,7 +138,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
+   public AtlasPhysicalProperties getPhysicalProperties()
    {
       return new AtlasPhysicalProperties();
    }
@@ -287,7 +286,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
-      return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap());
+      return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(), getFootstepParameters());
    }
 
    @Override

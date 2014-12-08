@@ -36,5 +36,4 @@ public interface DRCRobotSensorInformation
    public boolean setupROSParameterSetters();
    
    public boolean isMultisenseHead();
-   
 }

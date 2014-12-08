@@ -30,6 +30,7 @@ public class DepthDataFilter
    public static final int OCTREE_MIN_BOXES = 20000;
    public static final int OCTREE_MAX_BOXES = 100000;
    public static final double QUAD_TREE_EXTENT = 200;
+   public static final double GRID_RESOLUTION = 0.025; // in meters
 
    private final GroundOnlyQuadTree quadTree;
    private final Octree octree;
@@ -38,11 +39,11 @@ public class DepthDataFilter
    private final RobotBoundingBoxes robotBoundingBoxes;
    private final SDFFullRobotModel fullRobotModel;
 
-   DepthDataFilterParameters parameters;
+   private DepthDataFilterParameters parameters;
 
    // Adjustment which is applied to LIDAR points.  Must be applied while points are still in LIDAR frame.  Allows users correct for errors
    // See DRCManualLidarTransform and DRCLidarVisualizationManager. This is a bit of a hack but less likely to have unintended consequences.
-   RigidBodyTransform worldToCorrected = new RigidBodyTransform();
+   private RigidBodyTransform worldToCorrected = new RigidBodyTransform();
 
    public DepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel)
    {
@@ -69,7 +70,7 @@ public class DepthDataFilter
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
       // DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION, DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS*3,
       // DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION);
-      return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, DRCConfigParameters.GRID_RESOLUTION,
+      return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, GRID_RESOLUTION,
             parameters.quadtreeHeightThreshold, 100000);
    }
 
