@@ -6,7 +6,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 //import us.ihmc.wholeBodyController.*;
-import wholeBodyInverseKinematicsController.WholeBodyIKSimController;
+import wholeBodyInverseKinematicsSimulationController.WholeBodyIKSimController;
 
 public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
 {
