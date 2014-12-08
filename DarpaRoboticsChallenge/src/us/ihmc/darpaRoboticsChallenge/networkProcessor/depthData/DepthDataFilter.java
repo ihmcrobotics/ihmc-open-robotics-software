@@ -2,8 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -13,7 +11,6 @@ import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
 import us.ihmc.userInterface.util.DecayingResolutionFilter;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
@@ -23,6 +20,7 @@ import us.ihmc.utilities.lidar.polarLidar.AbstractLidarScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class DepthDataFilter
@@ -30,7 +28,6 @@ public class DepthDataFilter
    public static final int OCTREE_MIN_BOXES = 20000;
    public static final int OCTREE_MAX_BOXES = 100000;
    public static final double QUAD_TREE_EXTENT = 200;
-   public static final double GRID_RESOLUTION = 0.025; // in meters
 
    private final GroundOnlyQuadTree quadTree;
    private final Octree octree;
@@ -70,7 +67,7 @@ public class DepthDataFilter
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
       // DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION, DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS*3,
       // DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION);
-      return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, GRID_RESOLUTION,
+      return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, DepthDataFilterParameters.GRID_RESOLUTION,
             parameters.quadtreeHeightThreshold, 100000);
    }
 
@@ -90,7 +87,7 @@ public class DepthDataFilter
 
       return new Octree(new OneDimensionalBounds[] { new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
             new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT), new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT) },
-            DRCConfigParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
+            DepthDataFilterParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
    }
 
    public SparseLidarScanPacket filterPolarLidarScan(LidarScan lidarScan)
@@ -118,7 +115,7 @@ public class DepthDataFilter
          Point3d point = lidarScan.getPoint(i);
 
          // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
-         if( DRCConfigParameters.LIDAR_ADJUSTMENT_ACTIVE )
+         if( DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE )
             worldToCorrected.transform(point);
 
          if (parameters.nearScan && isValidNearScan(point, lidarOrigin))
@@ -149,7 +146,7 @@ public class DepthDataFilter
       if (pointInRange(point,sensorOrigin))
       {
          // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
-         if( DRCConfigParameters.LIDAR_ADJUSTMENT_ACTIVE )
+         if( DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE )
             worldToCorrected.transform(point);
 
          if (parameters.nearScan && isValidNearScan(point, sensorOrigin))

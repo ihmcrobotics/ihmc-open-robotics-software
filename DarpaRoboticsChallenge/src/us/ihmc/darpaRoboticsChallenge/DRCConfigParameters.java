@@ -18,9 +18,6 @@ public class DRCConfigParameters
    public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
 
-   // LIDAR Processor
-   public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
-   public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
    public static boolean CALIBRATE_ARM_MODE = false;
 
