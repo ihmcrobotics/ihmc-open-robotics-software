@@ -6,10 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
@@ -20,6 +17,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.ibeo.IbeoPointCloudDataReceiver;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
+import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -49,7 +48,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotModel robotModel)
+                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
