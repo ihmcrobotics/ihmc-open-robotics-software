@@ -3,6 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
@@ -11,7 +12,6 @@ import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
@@ -27,6 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepPathPlannerService;
 import us.ihmc.ihmcPerception.footstepPlanner.aStar.AStarPathPlannerService;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
@@ -48,18 +49,24 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private DepthDataProcessor depthDataProcessor;
+   
+   private final AtlasPhysicalProperties physicalProperties;
+   private final FootstepParameters footstepParameters;
 
-   public AtlasSensorSuiteManager(URI rosCoreURI, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap )
+   public AtlasSensorSuiteManager(URI rosCoreURI, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
+		   AtlasPhysicalProperties physicalProperties, FootstepParameters footstepParameters)
    {
       this.rosCoreURI = rosCoreURI;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
+      this.physicalProperties = physicalProperties;
+      this.footstepParameters = footstepParameters;
    }
 
    @Override
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldObjectCommunicator, RobotPoseBuffer robotPoseBuffer,
-                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotModel robotModel)
+                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
 
@@ -98,13 +105,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, networkingManager, ppsTimestampOffsetProvider);
 
          
-         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, robotModel.getPhysicalProperties());
+         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
          networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
          networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
          
          FootstepPathPlannerService footstepPathPlannerService;
-         footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
+         footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
 //         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
          fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
          
