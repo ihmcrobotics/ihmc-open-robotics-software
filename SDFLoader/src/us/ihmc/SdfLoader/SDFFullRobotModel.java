@@ -340,6 +340,31 @@ public class SDFFullRobotModel implements FullRobotModel
 		}
 	}
 
+   public void copyJointAnglesAcrossSide(RobotSide sourceSide, LimbName limb)
+   {
+      SideDependentList<ArrayList<OneDoFJoint>> joints;
+      if (limb == LimbName.ARM)
+      {
+         joints = armJointIDsList;
+      }
+      else if (limb == LimbName.LEG)
+      {
+         joints = legJointIDsList;
+      }
+      else
+      {
+         return;
+      }
+      
+      ArrayList<OneDoFJoint> sourceJoints = joints.get(sourceSide);
+      ArrayList<OneDoFJoint> destJoints = joints.get(sourceSide.getOppositeSide());
+      
+      for(int i = 0; i < sourceJoints.size(); i++)
+      {
+         destJoints.get(i).setQ(sourceJoints.get(i).getQ());
+      }
+   }
+
    /** {@inheritDoc} */
    @Override
    public RobotSpecificJointNames getRobotSpecificJointNames()
