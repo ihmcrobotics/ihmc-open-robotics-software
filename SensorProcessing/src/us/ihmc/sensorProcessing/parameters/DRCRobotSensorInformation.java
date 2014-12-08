@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.sensorProcessing.parameters;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.SideDependentList;

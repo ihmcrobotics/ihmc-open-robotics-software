@@ -5,9 +5,9 @@ import java.awt.image.BufferedImage;
 import org.ros.message.Time;
 
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
+import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosMainNode;

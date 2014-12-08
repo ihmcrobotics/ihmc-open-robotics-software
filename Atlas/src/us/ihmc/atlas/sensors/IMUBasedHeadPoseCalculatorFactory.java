@@ -14,7 +14,7 @@ import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;

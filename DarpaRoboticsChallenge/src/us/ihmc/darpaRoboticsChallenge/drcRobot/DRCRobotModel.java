@@ -2,8 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.net.URI;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
@@ -15,15 +13,15 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControlParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
- 
+
 import com.jme3.math.Transform;
 
 public interface DRCRobotModel extends WholeBodyControlParameters
@@ -57,8 +55,6 @@ public interface DRCRobotModel extends WholeBodyControlParameters
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
-
-   public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 
    public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
