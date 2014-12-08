@@ -15,9 +15,7 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -25,6 +23,8 @@ import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
+import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;

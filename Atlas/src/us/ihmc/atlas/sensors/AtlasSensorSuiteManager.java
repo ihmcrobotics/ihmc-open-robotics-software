@@ -11,12 +11,8 @@ import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
@@ -35,9 +31,12 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepPathPlannerService;
 import us.ihmc.ihmcPerception.footstepPlanner.aStar.AStarPathPlannerService;
-import us.ihmc.ihmcPerception.footstepPlanner.dStar.DStarPathPlannerService;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
+import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -145,7 +144,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotModel robotModel)
+                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);

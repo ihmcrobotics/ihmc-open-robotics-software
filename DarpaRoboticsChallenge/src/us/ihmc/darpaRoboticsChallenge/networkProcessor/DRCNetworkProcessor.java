@@ -121,7 +121,7 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
       }
       else
       {
-         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI, robotModel);
+         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI);
       }
    }
    

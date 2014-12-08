@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.sensorProcessing.parameters;
 
 
 public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters

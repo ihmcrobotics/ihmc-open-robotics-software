@@ -6,13 +6,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -21,7 +20,8 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
-
+import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 
 public class DRCLidar
