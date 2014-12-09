@@ -10,11 +10,11 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.ibeo.IbeoPointCloudDataReceiver;
+import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
