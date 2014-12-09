@@ -16,4 +16,5 @@ dependencies {
 	compile project(':IHMCYoUtilities')
 	compile project(':RobotDataCommunication')
 	compile project(':Planning')
+	compile project(':SensorProcessing')
 }
