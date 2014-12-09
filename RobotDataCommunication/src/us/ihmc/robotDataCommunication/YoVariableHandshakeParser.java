@@ -48,16 +48,13 @@ public class YoVariableHandshakeParser
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
-
-   private final YoVariablesUpdatedListener listener;
    
    private int numberOfVariables;
    private int numberOfJointStateVariables;
    
-   public YoVariableHandshakeParser(YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix, boolean registerYoVariables)
+   public YoVariableHandshakeParser(String registryPrefix, boolean registerYoVariables)
    {
       this.registerYoVariables = registerYoVariables;
-      this.listener = yoVariablesUpdatedListener;
       this.registryPrefix = registryPrefix;
    }
 
@@ -94,11 +91,6 @@ public class YoVariableHandshakeParser
    public void parseFrom(byte[] handShake)
    {
       YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
-      
-      if(listener != null)
-      {
-         listener.receivedHandshake(yoProtoHandshake);
-      }
       
       this.dt = yoProtoHandshake.getDt();
       if(registerYoVariables)

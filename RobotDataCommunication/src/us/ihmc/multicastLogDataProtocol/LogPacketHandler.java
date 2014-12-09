@@ -15,4 +15,6 @@ public interface LogPacketHandler
     * @param buffer
     */
    public void newDataAvailable(SegmentedPacketBuffer buffer);
+   
+   public void timeout(long timeoutInMillis);
 }

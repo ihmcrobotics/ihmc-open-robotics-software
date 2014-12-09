@@ -1,7 +1,7 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Color3f;
 
@@ -15,7 +15,7 @@ public class SDFAppearance extends YoAppearanceTransparency
    private final ArrayList<String> resourceDirectories = new ArrayList<String>();
 
 
-   public SDFAppearance(ArrayList<String> urls, String name, ArrayList<String> resourceDirectories)
+   public SDFAppearance(ArrayList<String> urls, String name, List<String> resourceDirectories)
    {
       super();
       this.urls = urls;

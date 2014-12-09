@@ -61,7 +61,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
 
-   private final ArrayList<String> resourceDirectories;
+   private final List<String> resourceDirectories;
 
    private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
 
@@ -248,7 +248,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
    private void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
    {
-      addForceSensor(joint, jointNameMap);
+      if(jointNameMap != null)
+      {
+         addForceSensor(joint, jointNameMap);         
+      }
 
       for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
       {

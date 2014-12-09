@@ -29,7 +29,8 @@ public class SegmentedDatagramServer
    public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group) throws IOException
    {
       this.sessionID = sessionID;
-      maximumPacketSize = iface.getMTU() - 28; // IP header(20 bytes) + UDP Header (8 bytes)
+      System.out.println(iface);
+      maximumPacketSize = iface.getMTU() - 32; // IP header(20 bytes) + UDP Header (8 bytes) + wiggle room (4 bytes)
       payloadSize = maximumPacketSize - SegmentHeader.HEADER_SIZE;
       address = new InetSocketAddress(group, LogDataProtocolSettings.LOG_DATA_PORT);
 
@@ -64,6 +65,17 @@ public class SegmentedDatagramServer
          }
          sendBuffer.flip();
          channel.send(sendBuffer, address);
+      }
+   }
+
+   public void close()
+   {
+      try
+      {
+         channel.close();
+      }
+      catch (IOException e)
+      {
       }
    }
 }

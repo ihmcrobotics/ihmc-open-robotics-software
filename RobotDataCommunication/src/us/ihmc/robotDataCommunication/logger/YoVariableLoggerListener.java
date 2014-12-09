@@ -1,14 +1,19 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
+import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
@@ -17,7 +22,6 @@ import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.Joint;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
@@ -27,6 +31,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private static final long disconnectTimeout = 5000; 
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bin";
+   private static final String modelFilename = "model.sdf";
+   private static final String modelResourceBundle = "resources.zip";
    
    private final Object synchronizer = new Object();
    
@@ -41,13 +47,33 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private final LogPropertiesWriter logProperties;
    private ArrayList<VideoDataLogger> videoDataLoggers = new ArrayList<VideoDataLogger>();
    
-   public YoVariableLoggerListener(File directory, YoVariableLoggerOptions options)
+   private final ArrayList<VideoSettings> cameras = new ArrayList<>();
+   
+   public YoVariableLoggerListener(File directory, AnnounceRequest request, YoVariableLoggerOptions options)
    {
       this.directory = directory; 
       this.options = options;
       logProperties = new LogPropertiesWriter(new File(directory, propertyFile));
       logProperties.setHandshakeFile(handshakeFilename);
       logProperties.setVariableDataFile(dataFilename);
+      
+      try
+      {
+         FileInputStream configuration = new FileInputStream(options.getConfigurationFile());
+         List<VideoSettings> cameraSettings = VideoSettings.loadCameraSettings(configuration);
+         
+         System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
+         for(int camera : request.getCameras())
+         {
+            cameras.add(cameraSettings.get(camera));
+         }
+         
+         configuration.close();
+      }
+      catch(IOException e)
+      {
+         throw new RuntimeException("Cannot load " + options.getConfigurationFile(), e);
+      }
      
    }
 
@@ -56,29 +82,49 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       return false;
    }
 
-   public void setRegistry(YoVariableRegistry registry)
-   {
-      
-   }
-
-   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView)
-   {
-      
-   }
-
-   public void receivedHandshake(YoProtoHandshake handshake)
+   public void receivedHandshake(LogHandshake handshake)
    {
       File handshakeFile = new File(directory, handshakeFilename);
       try
       {
          FileOutputStream handshakeStream = new FileOutputStream(handshakeFile, false);
-         handshakeStream.write(handshake.toByteArray());
+         handshakeStream.write(handshake.protoShake);
          handshakeStream.close();
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
+      
+      
+      if(handshake.modelLoaderClass != null)
+      {
+         logProperties.setModelLoaderClass(handshake.modelLoaderClass);
+         logProperties.setModelName(handshake.modelName);
+         logProperties.setModelResourceDirectories(handshake.resourceDirectories);
+         logProperties.setModelPath(modelFilename);
+         logProperties.setModelResourceBundlePath(modelResourceBundle);
+         
+         File modelFile = new File(directory, modelFilename);
+         File resourceFile = new File(directory, modelResourceBundle);
+         try
+         {
+            FileOutputStream modelStream = new FileOutputStream(modelFile, false);
+            modelStream.write(handshake.model);
+            modelStream.close();
+            FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
+            resourceStream.write(handshake.resourceZip);
+            resourceStream.close();
+            
+            
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+         
+      }
+      
       
    }
 
@@ -105,38 +151,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                throw new RuntimeException(e);
             }
          }         
-      }
-   }
-
-   public void start()
-   {
-      File dataFile = new File(directory, dataFilename);
-      synchronized (synchronizer)
-      {
-         try
-         {
-            dataChannel = new FileOutputStream(dataFile, false).getChannel();
-         }
-         catch (FileNotFoundException e)
-         {
-            throw new RuntimeException(e);
-         }         
-      }
-      
-      if(!options.getDisableVideo())
-      {
-         try
-         {
-            for(VideoSettings camera : options.getCameras())
-            {
-               videoDataLoggers.add(new VideoDataLogger(directory, logProperties, camera, options));
-            }
-         }
-         catch (IOException e)
-         {
-            System.err.println("Cannot start video data logger");
-            e.printStackTrace();
-         }   
       }
    }
 
@@ -226,11 +240,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
-   public void setJointStates(List<JointState<? extends Joint>> jointStates)
-   {
-      
-   }
-
    public void setYoVariableClient(YoVariableClient client)
    {
       this.yoVariableClient = client;
@@ -267,5 +276,40 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    {
       return 1;
    }
+
+   @Override
+   public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list,
+         YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView)
+   {
+      File dataFile = new File(directory, dataFilename);
+      synchronized (synchronizer)
+      {
+         try
+         {
+            dataChannel = new FileOutputStream(dataFile, false).getChannel();
+         }
+         catch (FileNotFoundException e)
+         {
+            throw new RuntimeException(e);
+         }         
+      }
+      
+      if(!options.getDisableVideo())
+      {
+         try
+         {
+            for(VideoSettings camera : cameras)
+            {
+               videoDataLoggers.add(new VideoDataLogger(directory, logProperties, camera, options));
+            }
+         }
+         catch (IOException e)
+         {
+            System.err.println("Cannot start video data logger");
+            e.printStackTrace();
+         }
+      }
+   }
+
 
 }

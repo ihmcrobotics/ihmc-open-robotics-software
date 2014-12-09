@@ -2,130 +2,72 @@ package us.ihmc.robotDataCommunication.logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMQException;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
+import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogBroadcastListener;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcastClient;
 
-import us.ihmc.robotDataCommunication.generated.YoVariableLoggerRequestProto.YoVariableLoggerRequest;
-import us.ihmc.utilities.net.NetworkTools;
-
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.martiansoftware.jsap.JSAPException;
 
-public class YoVariableLoggerDispatcher
+public class YoVariableLoggerDispatcher implements LogBroadcastListener
 {
-   private static final int port = 5560;
+   private static final String host = "10.66.171.20";
 
-   private static byte STARTED = 0x12;
-   private static byte FAILED = 0x13;
+   private final YoVariableLoggerOptions options;
 
-
-   public YoVariableLoggerDispatcher(YoVariableLoggerOptions options)
+   public YoVariableLoggerDispatcher(YoVariableLoggerOptions options) throws IOException
    {
+      this.options = options;
       System.out.println("Starting YoVariableLoggerDispatcher");
-      System.out.println("Opening socket on port " + port);
-      ZMQ.Context context = ZMQ.context(1);
-      ZMQ.Socket socket = context.socket(ZMQ.REP);
-      socket.bind("tcp://*:" + port);
 
-      System.out.println("Socket opened, waiting for requests");
-      while (true)
+      InetAddress myIP = LogUtils.getMyIP(host);
+      NetworkInterface iface = NetworkInterface.getByInetAddress(myIP);
+
+      System.out.println("Listening on interface " + iface);
+      LogSessionBroadcastClient client = new LogSessionBroadcastClient(iface, this);
+      client.start();
+      System.out.println("Client started, waiting for announcements");
+      try
+      {
+         client.join();
+      }
+      catch (InterruptedException e)
+      {
+      }
+
+      System.err.println("Logger has shut down");
+   }
+
+   public static void main(String[] args) throws JSAPException, IOException
+   {
+      YoVariableLoggerOptions options = YoVariableLoggerOptions.parse(args);
+      new YoVariableLoggerDispatcher(options);
+   }
+
+   @Override
+   public synchronized void logSessionCameOnline(AnnounceRequest request)
+   {
+      System.out.println("New control session came online " + request);
+      if (request.isLog())
       {
          try
          {
-            System.out.println("Waiting for new request");
-            byte[] req = socket.recv();
-            System.out.println("Received request");
-            if (req == null)
-            {
-               break;
-            }
-            else
-            {
-               try
-               {
-                  YoVariableLoggerRequest request = YoVariableLoggerRequest.parseFrom(req);
-                  System.out.println("Request new logging session for " + request.getHost() + ":" + request.getLogName());
-                  try
-                  {
-                     YoVariableLogger logger = new YoVariableLogger(request.getLogName(), request.getHost(), YoVariableLogger.defaultPort, options);
-                     socket.send(new byte[] { STARTED });
-                     System.out.println("Logging session started");
-                     logger.waitFor();
-                     
-                  }
-                  catch (IOException e)
-                  {
-                     socket.send(new byte[] { FAILED });
-                     System.err.println("Failed to start logging session");
-                  }
-
-               }
-               catch (InvalidProtocolBufferException e)
-               {
-                  System.err.println("Invalid request " + e.getMessage());
-                  socket.send(new byte[0]);
-               }
-
-            }
+            new YoVariableLogger(request, options);
+            System.out.println("Logging session started");
          }
-         catch (ZMQException e)
+         catch (IOException e)
          {
-            if (e.getErrorCode() == ZMQ.Error.ETERM.getCode())
-            {
-               break;
-            }
-            else
-            {
-               throw e;
-            }
+            e.printStackTrace();
          }
-
-         System.err.println("Logger has shut down");
       }
    }
 
-   public static void requestLogSession(String host, String logName)
+   @Override
+   public void logSessionWentOffline(AnnounceRequest description)
    {
-      System.out.println("Requesting logging session from " + host);
-      InetAddress myIP;
-      try
-      {
-         myIP = NetworkTools.getMyIP(host, port);
-      }
-      catch (IOException e)
-      {
-         System.err.println("Cannot connect to logging computer " + host + ", continuing without logging");
-         return;
-      }
-      
-      ZMQ.Context context = ZMQ.context(1);
-      Socket socket = context.socket(ZMQ.REQ);
-      socket.connect("tcp://" + host + ":" + port);
-      
-      YoVariableLoggerRequest.Builder request = YoVariableLoggerRequest.newBuilder();
-      request.setHost(myIP.getHostAddress());
-      request.setLogName(logName);
-      socket.send(request.build().toByteArray());
-      
-      System.out.println("Waiting for logging session");
-      byte[] result = socket.recv();
-      
-      if(result[0] == STARTED)
-      {
-         System.out.println("Logging session started");
-      }
-      else
-      {
-         System.err.println("Cannot start logging session, continuing without.");
-      }
-   }
 
-   public static void main(String[] args) throws JSAPException
-   {
-      YoVariableLoggerOptions options = YoVariableLoggerOptions.parse(args);      
-      new YoVariableLoggerDispatcher(options);
    }
 
 }

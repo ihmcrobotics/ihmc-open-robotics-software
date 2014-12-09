@@ -8,6 +8,9 @@ import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -37,27 +40,27 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("setWristForceSensorsToZero", 1.0);
       
-      YoVariableClient client = new YoVariableClient(host, port, scsVisualizer, "remote", showOverheadView);
+      YoVariableClient client = new YoVariableClient(host, scsVisualizer, "remote", showOverheadView);
       client.start();
    }
 
    @Override
-   public void starting()
+   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
       switch (defaultSliderBoardType)
       {
          case WALK_CONTROLLER :
-            new WalkControllerSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry());
+            new WalkControllerSliderBoard(scs, registry);
 
             break;
 
          case GAIN_CONTROLLER :
-            new GainControllerSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), drcRobotModel.getGeneralizedRobotModel());
+            new GainControllerSliderBoard(scs, registry, drcRobotModel.getGeneralizedRobotModel());
 
             break;
 
          case JOINT_ANGLE_OFFSET :
-            new JointAngleOffsetSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), drcRobotModel.getGeneralizedRobotModel());
+            new JointAngleOffsetSliderBoard(scs, registry, drcRobotModel.getGeneralizedRobotModel());
 
             break;
       }

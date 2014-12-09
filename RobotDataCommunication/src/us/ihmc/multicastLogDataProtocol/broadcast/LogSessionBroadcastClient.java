@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.SocketAddress;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
@@ -24,7 +25,7 @@ public class LogSessionBroadcastClient extends Thread
    private static final long TIMEOUT = 5000;
 
    private final InetAddress announceGroup = InetAddress.getByAddress(LogSessionBroadcaster.announceGroupAddress);
-   private final InetSocketAddress address = new InetSocketAddress(LogDataProtocolSettings.LOG_DATA_PORT);
+   private final InetSocketAddress address = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_PORT);
 
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
 
@@ -34,6 +35,7 @@ public class LogSessionBroadcastClient extends Thread
 
    public LogSessionBroadcastClient(NetworkInterface iface, LogBroadcastListener listener) throws IOException
    {
+      super("LogSessionBroadcastClient");
       this.iface = iface;
       this.listener = listener;
    }
@@ -44,7 +46,6 @@ public class LogSessionBroadcastClient extends Thread
       try
       {
          DatagramChannel channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(address);
-         channel.socket().setReceiveBufferSize(65535);
          MembershipKey receiveKey = channel.join(announceGroup, iface);
          channel.configureBlocking(false);
          Selector selector = Selector.open();
@@ -60,13 +61,18 @@ public class LogSessionBroadcastClient extends Thread
                if (key.isReadable())
                {
                   receiveBuffer.clear();
-                  channel.receive(receiveBuffer);
+                  SocketAddress source = channel.receive(receiveBuffer);
                   receiveBuffer.flip();
-                  reply.readHeader(receiveBuffer);
-                  reply.readName(receiveBuffer);
-                  if (reply.getType() == AnnounceType.ANNOUNCE)
+                  if(reply.readHeader(receiveBuffer) && reply.readVariableLengthData(receiveBuffer))
                   {
-                     handleRequest(reply);
+                     if (reply.getType() == AnnounceType.ANNOUNCE)
+                     {
+                        handleRequest(reply);
+                     }
+                  }
+                  else
+                  {
+                     System.err.println("Received invalid packet from " + source);
                   }
                }
             }

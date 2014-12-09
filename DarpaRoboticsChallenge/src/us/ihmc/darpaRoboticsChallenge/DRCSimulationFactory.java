@@ -21,7 +21,10 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
+import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -57,6 +60,8 @@ public class DRCSimulationFactory
    private AbstractThreadedRobotController multiThreadedRobotController;
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
+   
+   private final YoVariableServer yoVariableServer;
 
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
@@ -64,6 +69,8 @@ public class DRCSimulationFactory
    {
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
+      
+      yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP("10.66.171.20"), drcRobotModel.getEstimatorDT());
 
       Robot[] allSimulatedRobots = setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
       scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
@@ -134,7 +141,7 @@ public class DRCSimulationFactory
       
       
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
-            null, gravity);
+            yoVariableServer, gravity);
       
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = null;
       
@@ -146,7 +153,7 @@ public class DRCSimulationFactory
       drcEstimatorThread.setExternelPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
-            globalDataProducer, null, gravity);
+            globalDataProducer, yoVariableServer, gravity);
       
 
       if (RUN_MULTI_THREADED)
@@ -241,6 +248,7 @@ public class DRCSimulationFactory
 
    public void start()
    {
+      yoVariableServer.start();
       Thread simThread = new Thread(scs, "SCS simulation thread");
       simThread.start();
    }

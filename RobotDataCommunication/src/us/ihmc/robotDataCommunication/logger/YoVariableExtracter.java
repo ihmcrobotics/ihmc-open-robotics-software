@@ -49,7 +49,7 @@ public class YoVariableExtracter
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser(null, "logged", true);
+      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
       YoVariableRegistry registry = parser.getYoVariableRegistry();

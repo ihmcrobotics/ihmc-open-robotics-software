@@ -372,7 +372,7 @@ public class Graphics3DObject
       return graphics3dAddModelFileInstruction;
    }
 
-   public Graphics3DAddModelFileInstruction addModelFile(String fileName, String submesh, boolean centerSubmesh, ArrayList<String> resourceDirectories,
+   public Graphics3DAddModelFileInstruction addModelFile(String fileName, String submesh, boolean centerSubmesh, List<String> resourceDirectories,
            AppearanceDefinition app)
    {
       Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, submesh, centerSubmesh, app,

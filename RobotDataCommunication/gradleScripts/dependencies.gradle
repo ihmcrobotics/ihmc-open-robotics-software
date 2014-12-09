@@ -7,7 +7,6 @@ dependencies {
 	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.5'
 	
-	compile group: 'us.ihmc.thirdparty', name: 'jeromq', version: '0.3.4'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'

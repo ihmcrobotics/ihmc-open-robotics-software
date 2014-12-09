@@ -9,6 +9,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 
 public class LogSessionBroadcaster extends Thread
 {
@@ -29,34 +31,54 @@ public class LogSessionBroadcaster extends Thread
 
    private final NetworkInterface iface;
    private final InetSocketAddress controlAddress;
-
+   private final LogSettings logSettings;
    
    private final long sessionID;
    private final String className;
 
    private final InetSocketAddress address = new InetSocketAddress(LogDataProtocolSettings.LOG_DATA_PORT);
-   private final InetAddress announceGroup = InetAddress.getByAddress(announceGroupAddress);
-   private final InetSocketAddress sendAddress = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_PORT);
+   private final InetAddress announceGroup;
+   private final InetSocketAddress sendAddress;
 
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
    private final ByteBuffer sendBuffer = ByteBuffer.allocate(65535);
 
    private final byte[] multicastGroupAddress = new byte[4];
 
-   
    private DatagramChannel channel;
    private MembershipKey receiveKey;
-   private final Selector selector = Selector.open();
+   private final Selector selector;
    private SelectionKey key;
 
-   public LogSessionBroadcaster(InetSocketAddress controlAddress, Class<?> clazz) throws IOException
+   public LogSessionBroadcaster(InetSocketAddress controlAddress, Class<?> clazz, LogSettings logSettings)
    {
-      this.iface = NetworkInterface.getByInetAddress(controlAddress.getAddress());
-      this.controlAddress = controlAddress;
-      this.className = clazz.getSimpleName();
-      long mac = new BigInteger(1, iface.getHardwareAddress()).longValue();
-      long uid = createTempSessionID() << 48l;
-      sessionID = mac | uid;
+      try
+      {
+         this.iface = NetworkInterface.getByInetAddress(controlAddress.getAddress());
+         System.out.println(iface);
+         this.controlAddress = controlAddress;
+         this.logSettings = logSettings;
+         this.className = clazz.getSimpleName();
+         long mac;
+         if (iface.isLoopback())
+         {
+            mac = 0xFFFFFFFFFFFFl;
+         }
+         else
+         {
+            mac = new BigInteger(1, iface.getHardwareAddress()).longValue();
+         }
+         long uid = createTempSessionID() << 48l;
+         sessionID = mac | uid;
+
+         this.announceGroup = InetAddress.getByAddress(announceGroupAddress);
+         this.sendAddress = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_PORT);
+         this.selector = Selector.open();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    public void start()
@@ -71,13 +93,15 @@ public class LogSessionBroadcaster extends Thread
       canIHazRequest.setSessionID(sessionID);
       canIHazRequest.setControlIP(controlAddress.getAddress().getAddress());
       canIHazRequest.setControlPort((short) controlAddress.getPort());
+      canIHazRequest.setCameras(logSettings.getCameras());
+      canIHazRequest.setLog(logSettings.isLog());
       canIHazRequest.setName(className);
 
       setRandomGroupId();
       try
       {
-         channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(address);
-         channel.socket().setReceiveBufferSize(65535);
+         channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
+               .setOption(StandardSocketOptions.IP_MULTICAST_IF, iface).bind(address);
          receiveKey = channel.join(announceGroup, iface);
          channel.configureBlocking(false);
          key = channel.register(selector, SelectionKey.OP_READ);
@@ -137,6 +161,8 @@ public class LogSessionBroadcaster extends Thread
       announcement.setGroup(multicastGroupAddress);
       announcement.setControlIP(controlAddress.getAddress().getAddress());
       announcement.setControlPort((short) controlAddress.getPort());
+      announcement.setCameras(logSettings.getCameras());
+      announcement.setLog(logSettings.isLog());
       announcement.setName(className);
       announcement.createRequest(sendBuffer);
 
@@ -175,7 +201,7 @@ public class LogSessionBroadcaster extends Thread
             e.printStackTrace();
          }
       }
-      
+
       key.cancel();
       receiveKey.drop();
       try
@@ -191,6 +217,18 @@ public class LogSessionBroadcaster extends Thread
    public long getSessionID()
    {
       return sessionID;
+   }
+
+   public InetAddress getGroup()
+   {
+      try
+      {
+         return InetAddress.getByAddress(multicastGroupAddress);
+      }
+      catch (UnknownHostException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    private static long createTempSessionID() throws IOException
@@ -226,9 +264,26 @@ public class LogSessionBroadcaster extends Thread
 
    public static void main(String[] args) throws SocketException, IOException, InterruptedException
    {
-      InetSocketAddress controlAddress = new InetSocketAddress("10.6.192.1", LogDataProtocolSettings.LOG_DATA_PORT);
-      LogSessionBroadcaster logSessionAnnounce = new LogSessionBroadcaster(controlAddress, LogSessionBroadcaster.class);
+      InetSocketAddress controlAddress = new InetSocketAddress("127.0.0.1", LogDataProtocolSettings.LOG_DATA_PORT);
+      LogSessionBroadcaster logSessionAnnounce = new LogSessionBroadcaster(controlAddress, LogSessionBroadcaster.class, LogSettings.SIMULATION);
       logSessionAnnounce.start();
       logSessionAnnounce.join();
+   }
+
+   public NetworkInterface getInterface()
+   {
+      return iface;
+   }
+
+   public void close()
+   {
+      interrupt();
+      try
+      {
+         join();
+      }
+      catch (InterruptedException e)
+      {
+      }
    }
 }

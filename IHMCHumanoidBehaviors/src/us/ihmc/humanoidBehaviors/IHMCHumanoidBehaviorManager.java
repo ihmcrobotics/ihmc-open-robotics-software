@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
-import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
@@ -23,7 +22,10 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscribe
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -39,6 +41,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class IHMCHumanoidBehaviorManager
 {
+   public static final String BEHAVIOR_YO_VARIABLE_SERVER_HOST = "10.66.171.25";
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -48,13 +51,13 @@ public class IHMCHumanoidBehaviorManager
 
    private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
-   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator, double ankleHeight)
+   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, LogModelProvider modelProvider, DRCRobotSensorInformation sensorInfo, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator, double ankleHeight)
    {
       System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
 
       if(ENABLE_BEHAVIOR_VISUALIZATION)
       {
-         yoVariableServer = new YoVariableServer(NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, BEHAVIOR_YO_VARIABLE_SERVER_DT);
+         yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, LogUtils.getMyIP(BEHAVIOR_YO_VARIABLE_SERVER_HOST), BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(networkProcessorCommunicator, controllerCommunicator, registry);

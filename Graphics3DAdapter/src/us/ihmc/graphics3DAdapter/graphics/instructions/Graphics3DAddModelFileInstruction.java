@@ -1,6 +1,7 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
@@ -16,12 +17,12 @@ public class Graphics3DAddModelFileInstruction extends Graphics3DInstruction
       this(fileName, null);
    }
 
-   public Graphics3DAddModelFileInstruction(String fileName, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
+   public Graphics3DAddModelFileInstruction(String fileName, AppearanceDefinition appearance, List<String> resourceDirectories)
    {
       this(fileName, null, false, appearance, resourceDirectories);
    }
 
-   public Graphics3DAddModelFileInstruction(String fileName, String submesh, boolean centerSubmesh, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
+   public Graphics3DAddModelFileInstruction(String fileName, String submesh, boolean centerSubmesh, AppearanceDefinition appearance, List<String> resourceDirectories)
    {
       this.fileName = fileName;
       this.submesh = submesh;

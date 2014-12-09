@@ -7,11 +7,15 @@ import java.net.NetworkInterface;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 
 public class SegmentedDatagramClient extends Thread
 {
+   private static final int timeout = 1000;
    private static final int PACKAGE_BUFFER = 10;
 
    private final long sessionId;
@@ -23,18 +27,24 @@ public class SegmentedDatagramClient extends Thread
 
    public SegmentedDatagramClient(long sessionId, NetworkInterface iface, InetAddress group, LogPacketHandler handler)
    {
+      super("SegmentedDataClient" + sessionId);
       this.sessionId = sessionId;
       this.iface = iface;
       this.group = group;
       this.handler = handler;
    }
 
-   private void checkComplete(int i)
+   private boolean checkComplete(int i)
    {
       if (ringBuffer[i].isComplete())
       {
          handler.newDataAvailable(ringBuffer[i]);
          ringBuffer[i] = null;
+         return true;
+      }
+      else
+      {
+         return false;
       }
    }
 
@@ -44,6 +54,8 @@ public class SegmentedDatagramClient extends Thread
 
       int oldest = -1;
       long oldestUid = Integer.MAX_VALUE;
+      
+      boolean newPacket = true;
 
       for (int i = PACKAGE_BUFFER - 1; i >= 0; --i)
       {
@@ -57,8 +69,7 @@ public class SegmentedDatagramClient extends Thread
             if (ringBuffer[i].getUid() == header.getPackageID())
             {
                ringBuffer[i].addSegment(header.getSegmentID(), buffer);
-               checkComplete(i);
-               return;
+               newPacket = false;
             }
             else
             {
@@ -71,34 +82,45 @@ public class SegmentedDatagramClient extends Thread
          }
       }
 
-      // First packet for this segmented package
-      if (nextFree == -1)
+      if(newPacket)
       {
-         nextFree = oldest;
+         // First packet for this segmented package
+         if (nextFree == -1)
+         {
+            nextFree = oldest;
+         }
+      
+         ringBuffer[nextFree] = new SegmentedPacketBuffer(header);
+         ringBuffer[nextFree].addSegment(header.getSegmentID(), buffer);
+         handler.timestampReceived(header.getTimestamp());
       }
-
-      ringBuffer[nextFree] = new SegmentedPacketBuffer(header);
-      ringBuffer[nextFree].addSegment(header.getSegmentID(), buffer);
-      handler.timestampReceived(header.getTimestamp());
-      checkComplete(nextFree);
+      
+      
+      while(oldest != -1 && ringBuffer[oldest] != null && checkComplete(oldest))
+      {
+         oldest = (oldest + 1) % PACKAGE_BUFFER;
+      }
    }
 
    @Override
    public void run()
    {
-      InetSocketAddress receiveAddress = new InetSocketAddress(LogDataProtocolSettings.LOG_DATA_PORT);
+      InetSocketAddress receiveAddress = new InetSocketAddress(group, LogDataProtocolSettings.LOG_DATA_PORT);
       SegmentHeader header = new SegmentHeader();
 
       ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
 
       DatagramChannel receiveChannel;
       MembershipKey receiveKey;
+      Selector selector;
+      SelectionKey key;
       try
       {
-         receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
-               .bind(receiveAddress);
-         receiveChannel.socket().setReceiveBufferSize(65535);
+         receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(receiveAddress);
+         receiveChannel.configureBlocking(false);
          receiveKey = receiveChannel.join(group, iface);
+         selector = Selector.open();
+         key = receiveChannel.register(selector, SelectionKey.OP_READ);
       }
       catch (IOException e)
       {
@@ -110,14 +132,32 @@ public class SegmentedDatagramClient extends Thread
 
          try
          {
-            receiveBuffer.clear();
-            receiveChannel.receive(receiveBuffer);
-            receiveBuffer.flip();
-
-            if(header.read(receiveBuffer))
+            if (selector.select(timeout) > 0)
             {
-               updateBuffer(header, receiveBuffer);               
+               selector.selectedKeys().remove(key);
+               if (key.isReadable())
+               {
+                  receiveBuffer.clear();
+                  receiveChannel.receive(receiveBuffer);
+                  receiveBuffer.flip();
+
+                  if (header.read(receiveBuffer))
+                  {
+                     if (header.getSessionID() == sessionId && header.getSegmentCount() > 0)
+                     {
+                        updateBuffer(header, receiveBuffer);
+                     }
+                  }
+               }
             }
+            else
+            {
+               handler.timeout(timeout);
+            }
+         }
+         catch (AsynchronousCloseException e)
+         {
+            
          }
          catch (IOException e)
          {
@@ -135,5 +175,22 @@ public class SegmentedDatagramClient extends Thread
       {
       }
 
+   }
+
+   public void close()
+   {
+      interrupt();
+
+      if (Thread.currentThread() != this)
+      {
+         try
+         {
+            join();
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+      }
    }
 }

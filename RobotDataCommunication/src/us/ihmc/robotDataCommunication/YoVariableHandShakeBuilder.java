@@ -111,6 +111,11 @@ public class YoVariableHandShakeBuilder
    {
       return Collections.unmodifiableList(jointHolders);
    }
+   
+   public int getNumberOfJointStates()
+   {
+      return FullStateBuffer.getNumberOfJointStates(jointHolders);
+   }
 
    private void createRootRegistry()
    {
