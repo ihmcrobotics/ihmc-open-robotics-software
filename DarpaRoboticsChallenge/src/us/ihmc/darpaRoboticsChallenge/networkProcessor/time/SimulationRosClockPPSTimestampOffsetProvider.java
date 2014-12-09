@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 
 import org.ros.message.Time;
 
+import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosClockPublisher;
 

@@ -32,7 +32,6 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
@@ -48,6 +47,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 

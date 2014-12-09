@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.ros;
+package us.ihmc.ihmcPerception;
 
 import org.ros.exception.RemoteException;
 import org.ros.node.service.ServiceResponseListener;

@@ -8,10 +8,10 @@ import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 /**
  * 
