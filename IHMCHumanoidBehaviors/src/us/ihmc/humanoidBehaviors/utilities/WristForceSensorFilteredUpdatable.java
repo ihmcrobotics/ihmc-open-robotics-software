@@ -5,6 +5,8 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
+import us.ihmc.communication.util.DRCSensorParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -67,12 +69,13 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final ObjectCommunicator controllerCommunicator;
 
-   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder, double DT,
+   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo, ForceSensorDataHolder forceSensorDataHolder, double DT,
          ObjectCommunicator controllerCommunicator, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
 
-      String forceSensorName = robotSide.getShortLowerCaseName() + "_arm_wrx"; //TODO: Fix this so that it works with robots other than Atlas, by using DRCRobotSensorInformation.getWristForceSensorNames()
+      String forceSensorName = sensorInfo.getWristForceSensorNames().get(robotSide);
+//      String forceSensorName = robotSide.getShortLowerCaseName() + "_arm_wrx"; //TODO: Fix this so that it works with robots other than Atlas, by using DRCRobotSensorInformation.getWristForceSensorNames()
 
       ForceSensorDefinition wristSensorDefinition = null;
       List<ForceSensorDefinition> forceSensorDefinitions = forceSensorDataHolder.getForceSensorDefinitions();
