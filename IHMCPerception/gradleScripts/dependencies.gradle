@@ -11,4 +11,5 @@ dependencies {
     compile project(':ROSJavaMessages')
     compile project(':SensorProcessing')
     compile project(':UserInterface')
+    compile project(':SDFLoader')
 }
