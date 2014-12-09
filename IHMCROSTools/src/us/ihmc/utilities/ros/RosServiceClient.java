@@ -7,9 +7,6 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 
-import us.ihmc.utilities.ThreadTools;
-
-
 public class RosServiceClient<T extends Message, S extends Message>
 {
    private final String requestType;

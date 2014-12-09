@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 
 import org.ros.time.WallTimeProvider;
 
+import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class DirtySimulationRosClockPPSTimestampOffsetProvider implements
