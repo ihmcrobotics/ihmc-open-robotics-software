@@ -26,4 +26,5 @@ dependencies {
 	compile project(':IHMCHumanoidBehaviors')
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
+    compile project(':IHMCROSTools')
 }
