@@ -2,9 +2,9 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCHandType;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;

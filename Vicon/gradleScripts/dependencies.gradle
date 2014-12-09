@@ -8,4 +8,5 @@ dependencies {
 	compile project(':IHMCUtilities')
 	compile project(':Plotting')
 	compile project(':Graphics3DAdapter')
+	compile project(':UserInterface')
 }

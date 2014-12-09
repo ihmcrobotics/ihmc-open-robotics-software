@@ -4,5 +4,4 @@ dependencies {
 	
 	compile project(':IHMCUtilities')
 	compile project(':Graphics3DAdapter')
-	compile project(':UserInterface')
 }
