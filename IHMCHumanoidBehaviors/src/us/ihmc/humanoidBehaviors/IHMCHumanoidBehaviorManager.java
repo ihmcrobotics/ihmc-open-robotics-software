@@ -24,6 +24,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -47,7 +48,7 @@ public class IHMCHumanoidBehaviorManager
 
    private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
-   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator, double ankleHeight)
+   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator, double ankleHeight)
    {
       System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
 
@@ -85,7 +86,7 @@ public class IHMCHumanoidBehaviorManager
       SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = new SideDependentList<WristForceSensorFilteredUpdatable>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
+         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
          wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
          dispatcher.addUpdatable(wristSensorUpdatable);
       }

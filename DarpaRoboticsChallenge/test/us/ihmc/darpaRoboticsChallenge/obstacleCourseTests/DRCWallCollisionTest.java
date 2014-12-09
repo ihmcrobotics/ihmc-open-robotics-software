@@ -30,6 +30,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -151,9 +152,10 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       YoVariableRegistry robotYoVariableRegistry = robotToTest.getRobotsYoVariableRegistry();
 
       FullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
+      DRCRobotSensorInformation sensorInfo = getRobotModel().getSensorInformation();
 
       double DT = drcSimulationTestHelper.getSimulationConstructionSet().getDT();
-      WristForceSensorFilteredUpdatable ret = new WristForceSensorFilteredUpdatable(robotSideToTest, fullRobotModel, forceSensorDataHolder, DT,
+      WristForceSensorFilteredUpdatable ret = new WristForceSensorFilteredUpdatable(robotSideToTest, fullRobotModel, sensorInfo, forceSensorDataHolder, DT,
             networkObjectCommunicator, robotYoVariableRegistry);
 
       return ret;
