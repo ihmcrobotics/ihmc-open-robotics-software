@@ -38,13 +38,13 @@ public class ComHeightBehavior extends BehaviorInterface
 
    public void kneelDown()
    {
-      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.15);
+      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.15, 1.0);
       setInput(packet);
    }
 
    public void goToHomeHeight()
    {
-      ComHeightPacket packet = new ComHeightPacket(0.0);
+      ComHeightPacket packet = new ComHeightPacket(0.0, 1.0);
       setInput(packet);
    }
 

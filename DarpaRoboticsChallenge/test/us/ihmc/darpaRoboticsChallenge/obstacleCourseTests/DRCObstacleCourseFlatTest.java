@@ -23,15 +23,14 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
@@ -209,7 +208,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       setupCameraForWalkingUpToRamp();
       
       int ticksPerPerturbation = 10;
-      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.06, 0.011});
       
@@ -254,7 +253,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       setupCameraForWalkingUpToRamp();
       
       int ticksPerPerturbation = 10;
-      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.012, 0.011});
       
@@ -530,7 +529,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-      drcSimulationTestHelper.sendComHeightPacketToListeners(new ComHeightPacket(0.08));
+      drcSimulationTestHelper.sendComHeightPacketToListeners(new ComHeightPacket(0.08, 1.0));
 
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);

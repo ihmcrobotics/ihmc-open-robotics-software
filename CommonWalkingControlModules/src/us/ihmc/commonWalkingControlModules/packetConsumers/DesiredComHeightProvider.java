@@ -14,6 +14,7 @@ public class DesiredComHeightProvider
    // Do not do it like this, preferably use one atomic
    private final AtomicBoolean newDataAvailable = new AtomicBoolean(false);
    private final AtomicDouble comHeightOffset = new AtomicDouble(0.0);
+   private final AtomicDouble trajectoryTime = new AtomicDouble(0.0);
 
    public DesiredComHeightProvider()
    {
@@ -32,10 +33,12 @@ public class DesiredComHeightProvider
       {
       }
 
+      @Override
       public void consumeObject(ComHeightPacket packet)
       {
          newDataAvailable.set(true);
          comHeightOffset.set(packet.getHeightOffset());
+         trajectoryTime.set(packet.getTrajectoryTime());
       }
    }
 
@@ -46,6 +49,10 @@ public class DesiredComHeightProvider
    }
 
 
+   public double getComHeightTrajectoryTime()
+   {
+      return trajectoryTime.get();
+   }
 
    public double getComHeightOffset()
    {
