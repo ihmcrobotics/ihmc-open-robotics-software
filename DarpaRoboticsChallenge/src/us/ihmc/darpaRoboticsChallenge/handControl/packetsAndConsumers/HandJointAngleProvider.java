@@ -7,12 +7,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.graphics3DAdapter.GraphicsUpdatable;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.graphics.GraphicsUpdatable;
-
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
 public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>

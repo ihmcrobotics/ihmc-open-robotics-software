@@ -3,9 +3,12 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
     compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
 	
-	compile project(':IHMCUtilities')
 	compile project(':IHMCCommunication')
-    compile project(':Planning')
     compile project(':IHMCROSTools')
+	compile project(':IHMCUtilities')
+	compile project(':IHMCWholeBodyController')
+    compile project(':Planning')
     compile project(':ROSJavaMessages')
+    compile project(':SensorProcessing')
+    compile project(':UserInterface')
 }

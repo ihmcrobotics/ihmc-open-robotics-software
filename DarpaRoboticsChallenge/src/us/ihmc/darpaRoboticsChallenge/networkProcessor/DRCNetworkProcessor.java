@@ -13,11 +13,11 @@ import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
+import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.utilities.net.KryoLocalObjectCommunicator;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -89,7 +89,7 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
       drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
-      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel, fullRobotModel);
+      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel.getDRCHandType(), fullRobotModel);
       lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
       
       this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
