@@ -21,6 +21,8 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -68,9 +70,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final RobotNetworkParameters networkParameters;
 
    private final String[] resourceDirectories = {
-         "",
-         "models/",
-         "models/GFE/",
          "models/gazebo/",
          "models/V1/",
          "models/V1/sdf/",
@@ -78,12 +77,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
          "models/V1/meshes/2013_05_16/"};
 
    private final JaxbSDFLoader loader;
-   private final boolean runningOnRealRobot;
 
    public ValkyrieRobotModel(boolean runningOnRealRobot, boolean headless)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
-
       jointMap = new ValkyrieJointMap();
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation();
@@ -339,9 +335,16 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return null;
    }
 
-@Override
-public FootstepParameters getFootstepParameters() {
-	// TODO Auto-generated method stub
-	return null;
-}
+   @Override
+   public FootstepParameters getFootstepParameters()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public LogModelProvider getLogModelProvider()
+   {
+      return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
+   }
 }

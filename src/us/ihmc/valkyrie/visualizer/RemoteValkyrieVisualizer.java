@@ -8,10 +8,13 @@ import javax.swing.JButton;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.ValkyrieSliderBoardType;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -22,7 +25,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
    public static final int BUFFER_SIZE = 16384;
    public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
-   public static final int defaultPort = ValkyrieNetworkParameters.VARIABLE_SERVER_PORT;
+   public static final int defaultPort = Integer.MAX_VALUE;
    
    private ValkyrieSliderBoardType valkyrieSliderBoardType;
    
@@ -43,10 +46,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       scsVisualizer = new SCSVisualizer(valkyrieRobotModel.createSdfRobot(false), BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
 
-      int numberOfTicksBeforeUpdatingGraphs = 30;
-      scsVisualizer.updateGraphsLessFrequently(true, numberOfTicksBeforeUpdatingGraphs);
-
-      YoVariableClient client = new YoVariableClient(host, port, scsVisualizer, "remote", false);
+      YoVariableClient client = new YoVariableClient(host, scsVisualizer, "remote", false);
       client.start();
    }
    
@@ -85,15 +85,15 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    }
 
    @Override
-   public void starting()
+   public void starting(final SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
-      RobonetRegisterPanel registerPanel = new RobonetRegisterPanel(scsVisualizer.getRegistry());
-      scsVisualizer.getSCS().addExtraJpanel(registerPanel, "Registers");
-      scsVisualizer.getSCS().attachPlaybackListener(registerPanel);
+      RobonetRegisterPanel registerPanel = new RobonetRegisterPanel(registry);
+      scs.addExtraJpanel(registerPanel, "Registers");
+      scs.attachPlaybackListener(registerPanel);
 
-      RobonetRegisterModifierPanel modifierPanel = new RobonetRegisterModifierPanel(scsVisualizer.getRegistry());
-      scsVisualizer.getSCS().addExtraJpanel(modifierPanel, "Change Control Modes");
-      scsVisualizer.getSCS().attachPlaybackListener(modifierPanel);
+      RobonetRegisterModifierPanel modifierPanel = new RobonetRegisterModifierPanel(registry);
+      scs.addExtraJpanel(modifierPanel, "Change Control Modes");
+      scs.attachPlaybackListener(modifierPanel);
 
       JButton showRegisterViewer = new JButton("Show registers");
       showRegisterViewer.addActionListener(new ActionListener()
@@ -102,7 +102,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            scsVisualizer.getSCS().getStandardSimulationGUI().selectPanel("Registers");
+            scs.getStandardSimulationGUI().selectPanel("Registers");
          }
       });
 
@@ -113,14 +113,14 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            scsVisualizer.getSCS().getStandardSimulationGUI().selectPanel("Change Control Modes");
+            scs.getStandardSimulationGUI().selectPanel("Change Control Modes");
          }
       });
 
-      scsVisualizer.getSCS().addButton(showRegisterViewer);
-      scsVisualizer.getSCS().addButton(showControlModePanel);
+      scs.addButton(showRegisterViewer);
+      scs.addButton(showControlModePanel);
       
-      new ValkyrieSliderBoard(scsVisualizer.getSCS(), scsVisualizer.getRegistry(), valkyrieRobotModel, valkyrieSliderBoardType);
+      new ValkyrieSliderBoard(scs, registry, valkyrieRobotModel, valkyrieSliderBoardType);
    }
    
    public static void main(String[] args)
