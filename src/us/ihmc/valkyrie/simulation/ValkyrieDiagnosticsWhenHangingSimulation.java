@@ -29,7 +29,10 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotModel, robotInitialSetup);
       humanoidDiagnosticsWhenHangingSimulation.rememberCorruptorVariableValues();
       
-      //loadDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
+      //loadArmDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
+//      loadLegDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
+//      
+//      humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages();
    }
    
    private void loadDataAndDoSomeOptimizationTests(HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation)
@@ -39,9 +42,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
       humanoidDiagnosticsWhenHangingSimulation.restoreCorruptorVariableValues();
 
-      //      setInitialCorruptorMassValues(simulationConstructionSet);
-      //      setInitialCorruptorCoMOffsetValues(simulationConstructionSet);
-      setInitialCorruptorTorqueOffsetValues(simulationConstructionSet);
+      //      setInitialCorruptorArmMassValues(simulationConstructionSet);
+      //      setInitialCorruptorArmCoMOffsetValues(simulationConstructionSet);
+      setInitialCorruptorArmTorqueOffsetValues(simulationConstructionSet);
 
       //      humanoidDiagnosticsWhenHangingSimulation.setCorruptorVariableValuesToOptimizeToZero();
 
@@ -51,14 +54,38 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       // Forearm only:
       String[] containsToOptimizeCoM = new String[]{side + "ForearmCoM"};
       String[] containsToOptimizeTorqueOffset = new String[]{side + "Elbow"};
+      String[] containsToOptimizeTorqueScore = new String[]{""};
 
       //    String[] containsToOptimizeCoM = new String[]{side + "ShoulderRotatorCoM", side + "ShoulderAdductorCoM", side + "ForearmCoM"};
       //    String[] containsToOptimizeTorqueOffset = new String[]{side + "Shoulder", side + "Elbow"};
-      humanoidDiagnosticsWhenHangingSimulation.setVariablesToOptimize(containsToOptimizeCoM, containsToOptimizeTorqueOffset);
+      humanoidDiagnosticsWhenHangingSimulation.setVariablesToOptimize(containsToOptimizeCoM, containsToOptimizeTorqueOffset, containsToOptimizeTorqueScore);
+
+   }
+   
+   private void loadLegDataAndDoSomeOptimizationTests(HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation)
+   {
+      SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();
+      simulationConstructionSet.readData("D:/20141205_115537_Valkyrie_VerySlowLegMotions_Processed.data.gz");
+
+      humanoidDiagnosticsWhenHangingSimulation.restoreCorruptorVariableValues();
+      
+//      setInitialCorruptorLegCoMOffsetValues(simulationConstructionSet);
+      
+      String side = "left";
+
+      String[] containsToOptimizeCoM = new String[]{side + "ThighCoM", side + "ShinCoM"};
+//      String[] containsToOptimizeCoM = new String[]{side + "ThighCoM", side + "ShinCoMOffsetY"};
+      String[] containsToOptimizeTorqueOffset = new String[]{side + "Hip", side + "Knee", side + "Ankle"};
+      
+      String scoreSide = "score_Left";
+//      String[] containsToOptimizeTorqueScore = new String[]{scoreSide + "KneeExtensor"};
+      String[] containsToOptimizeTorqueScore = new String[]{scoreSide + "KneeExtensor", scoreSide + "HipExtensor", scoreSide + "HipAdductor", scoreSide + "HipRotator"};
+      
+      humanoidDiagnosticsWhenHangingSimulation.setVariablesToOptimize(containsToOptimizeCoM, containsToOptimizeTorqueOffset, containsToOptimizeTorqueScore);
 
    }
 
-   private void setInitialCorruptorMassValues(SimulationConstructionSet simulationConstructionSet)
+   private void setInitialCorruptorArmMassValues(SimulationConstructionSet simulationConstructionSet)
    {
       ((DoubleYoVariable) simulationConstructionSet.getVariable("v1RightShoulderExtensorMass")).set(2.65);
       ((DoubleYoVariable) simulationConstructionSet.getVariable("v1RightShoulderAdductorMass")).set(2.87);
@@ -77,7 +104,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       ((DoubleYoVariable) simulationConstructionSet.getVariable("v1LeftPalmMass")).set(0.928);
    }
    
-   private void setInitialCorruptorCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
+   private void setInitialCorruptorArmCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Start from Sylvain's Numbers:
       
@@ -102,7 +129,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightElbowExtensor")).set(-0.1);
    }
    
-   private void setInitialCorruptorTorqueOffsetValues(SimulationConstructionSet simulationConstructionSet)
+   private void setInitialCorruptorArmTorqueOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Start from Sylvain's Numbers:
       
@@ -110,6 +137,30 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderAdductor")).set(0.7);
       ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightShoulderSupinator")).set(0.3);
       ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_RightElbowExtensor")).set(-0.1);
+   }
+   
+   private void setInitialCorruptorLegCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
+   {
+      // Tuned by Jerry on December 8, 2014.
+      
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftThighCoMOffsetX")).set(-0.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftThighCoMOffsetY")).set(0.05);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftThighCoMOffsetZ")).set(-0.220);
+      
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShinCoMOffsetX")).set(0.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShinCoMOffsetY")).set(0.045);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShinCoMOffsetZ")).set(-0.185);
+      
+      
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightThighCoMOffsetX")).set(0.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightThighCoMOffsetY")).set(-0.05);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightThighCoMOffsetZ")).set(-0.220);
+      
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShinCoMOffsetX")).set(0.0);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShinCoMOffsetY")).set(-0.045);
+      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShinCoMOffsetZ")).set(-0.185);
+      
+
    }
 
    public static void main(String[] args)
