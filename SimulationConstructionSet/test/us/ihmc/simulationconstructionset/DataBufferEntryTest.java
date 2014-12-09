@@ -6,10 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DataBufferEntryTest
@@ -52,6 +51,30 @@ public class DataBufferEntryTest
       {
          assertEquals(tempData[i], data[i], epsilon);
       }
+   }
+   
+   @Test public void testComputeAverage()
+   {
+      int nPoints = 100;
+      
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      double total = 0.0;
+      for (int i = 0; i < nPoints; i++)
+      {
+         double data = MathTools.generateRandomDoubleInRange(random, -100.0, 100.0);
+         doubleYoVariable.set(data);
+         total = total + data;
+         dataBufferEntry.setDataAtIndexToYoVariableValue(i);
+      }
+
+      double average = total / ((double) nPoints);
+      double computedAverage = dataBufferEntry.computeAverage();
+
+      assertEquals(average, computedAverage, 1e-7);
    }
 
    @Test

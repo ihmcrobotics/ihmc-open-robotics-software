@@ -26,14 +26,8 @@ public class DataBufferEntry implements DataEntry
       this.min = 0.0;
       this.max = 0.0;
 
-      double[] sineWave = new double[nPoints];
-
-      /*
-       * for(int i=0; i<SimulationConstructionSet.NUM_POINTS; i++) { sineWave[i]
-       * = (float) Math.sin(2.0 * Math.PI * 0.005 * i); }
-       */
-
-      this.setData(sineWave, nPoints);
+      double[] emptyData = new double[nPoints];
+      this.setData(emptyData, nPoints);
       reCalcMinMax();
    }
 
@@ -406,6 +400,19 @@ public class DataBufferEntry implements DataEntry
          min = data;
          setMinMaxChanged();
       }
+   }
+   
+   public double computeAverage()
+   {
+      double total = 0.0;
+
+      int length = data.length;
+      for (int i=0; i<length; i++)
+      {
+         total = total + data[i];
+      }
+
+      return total / ((double) length);
    }
 
    protected double[] getWindowedData(int in, /* int out, */int bufferLength)

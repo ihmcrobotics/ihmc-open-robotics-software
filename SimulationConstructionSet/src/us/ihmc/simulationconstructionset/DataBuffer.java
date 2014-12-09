@@ -570,7 +570,12 @@ public class DataBuffer extends YoVariableHolderImplementation
       this.gotoInPoint();
    }
 
-
+   public double computeAverage(YoVariable<?> variable)
+   {
+      DataBufferEntry entry = this.getEntry(variable);
+      return entry.computeAverage();
+   }
+   
    public int getInPoint()
    {
       return this.inPoint;
@@ -1117,5 +1122,7 @@ public class DataBuffer extends YoVariableHolderImplementation
 
       return false;
    }
+
+
 
 }
