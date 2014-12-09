@@ -26,8 +26,12 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -37,9 +41,6 @@ import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import com.jme3.math.Transform;
-
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class BonoRobotModel implements DRCRobotModel
 {
@@ -276,5 +277,11 @@ public class BonoRobotModel implements DRCRobotModel
    public FootstepParameters getFootstepParameters() {
       // TODO Auto-generated method stub
       return null;
+   }
+   
+   @Override
+   public LogModelProvider getLogModelProvider()
+   {
+      return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
    }
 }

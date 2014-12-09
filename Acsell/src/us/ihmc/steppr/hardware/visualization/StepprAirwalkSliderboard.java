@@ -4,13 +4,13 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class StepprAirwalkSliderboard extends SCSVisualizer
 {
@@ -20,7 +20,8 @@ public class StepprAirwalkSliderboard extends SCSVisualizer
    }
 
    @Override
-   public void start()
+   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
+
    {
       StepprDashboard.createDashboard(scs, registry);
       MidiSliderBoard sliderBoard = new MidiSliderBoard(scs);
@@ -39,7 +40,6 @@ public class StepprAirwalkSliderboard extends SCSVisualizer
       sliderBoard.setSlider(5, ankleAmplitude, 0, 1);
       sliderBoard.setSlider(6, ankleFrequency, 0, 1);
       
-      super.start();
    }
    
    public static void main(String[] args)
@@ -52,8 +52,8 @@ public class StepprAirwalkSliderboard extends SCSVisualizer
 
     
       
-      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, StepprNetworkParameters.VARIABLE_SERVER_PORT,
-            scsYoVariablesUpdatedListener, "remote", false);
+      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener,
+            "remote", false);
       client.start();
 
    }

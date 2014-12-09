@@ -4,10 +4,11 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
-
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class RemoteStepprVisualizer extends SCSVisualizer
 {
@@ -17,11 +18,9 @@ public class RemoteStepprVisualizer extends SCSVisualizer
    }
 
    @Override
-   public void start()
+   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
       StepprDashboard.createDashboard(scs, registry);
-      
-      super.start();
    }
    
    public static void main(String[] args)
@@ -34,8 +33,8 @@ public class RemoteStepprVisualizer extends SCSVisualizer
 
     
       
-      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, StepprNetworkParameters.VARIABLE_SERVER_PORT,
-            scsYoVariablesUpdatedListener, "remote", false);
+      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener,
+            "remote", false);
       client.start();
 
    }

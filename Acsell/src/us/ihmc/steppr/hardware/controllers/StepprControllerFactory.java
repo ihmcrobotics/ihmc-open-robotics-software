@@ -18,21 +18,20 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Yo
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
+import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesVisualizer;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.steppr.hardware.StepprAffinity;
 import us.ihmc.steppr.hardware.StepprSetup;
-import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.utilities.LogTools;
@@ -66,7 +65,7 @@ public class StepprControllerFactory
        * Create network servers/clients
        */
       KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT, new IHMCCommunicationKryoNetClassList());
-      YoVariableServer yoVariableServer = new YoVariableServer(SCSYoVariablesVisualizer.defaultPort, robotModel.getEstimatorDT());
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC, LogUtils.getMyIP(robotModel.getNetworkParameters().getLoggingHostIP()), robotModel.getEstimatorDT());
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       /*
@@ -129,10 +128,6 @@ public class StepprControllerFactory
       StepprSetup stepprSetup = new StepprSetup(yoVariableServer);
       
       yoVariableServer.start();
-      if(StepprNetworkParameters.LOGGER_HOST != null)
-      {
-         YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, this.getClass().getSimpleName());         
-      }
       
       StepprSetup.startStreamingData();
       stepprSetup.start();

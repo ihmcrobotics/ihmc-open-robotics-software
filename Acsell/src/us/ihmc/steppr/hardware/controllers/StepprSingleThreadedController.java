@@ -7,10 +7,11 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -35,23 +36,20 @@ public class StepprSingleThreadedController extends RealtimeThread
    public static void startController(StepprController stepprController)
    {
       StepprSetup.startStreamingData();
-      
+
       YoVariableRegistry registry = new YoVariableRegistry("steppr");
-      
-      YoVariableServer variableServer = new YoVariableServer(5555, 0.01);
+      BonoRobotModel robotModel = new BonoRobotModel(true, true);
+      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC, LogUtils.getMyIP(StepprNetworkParameters.LOGGER_HOST), 0.01);
 
       StepprSetup stepprSetup = new StepprSetup(variableServer);
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
-      StepprSingleThreadedController communicator = new StepprSingleThreadedController(priority, variableServer, stepprController, registry);
+      StepprSingleThreadedController communicator = new StepprSingleThreadedController(robotModel, priority, variableServer, stepprController, registry);
 
-      
       variableServer.start();
-      YoVariableLoggerDispatcher.requestLogSession(StepprNetworkParameters.LOGGER_HOST, stepprController.getClass().getSimpleName());
-      
+
       stepprSetup.start();
       communicator.start();
-      
-      
+
       ThreadTools.sleepForever();
    }
 
@@ -59,9 +57,9 @@ public class StepprSingleThreadedController extends RealtimeThread
    private final StepprState state;
    private final StepprController controller;
    private final StepprCommand command;
-   
+
    private final UDPStepprOutputWriter outputWriter;
-   
+
    private final SixDoFJoint rootJoint;
    private final Quat4d rotation = new Quat4d();
    private final EnumMap<StepprJoint, OneDoFJoint> jointMap = new EnumMap<>(StepprJoint.class);
@@ -69,23 +67,23 @@ public class StepprSingleThreadedController extends RealtimeThread
 
    private boolean initialized = false;
    private final UDPStepprStateReader reader;
-   
+
    private volatile boolean requestStop = false;
 
-   
-   private StepprSingleThreadedController(PriorityParameters priorityParameters, RobotVisualizer visualizer, StepprController stepprController, YoVariableRegistry registry)
+   private StepprSingleThreadedController(BonoRobotModel robotModel, PriorityParameters priorityParameters, RobotVisualizer visualizer, StepprController stepprController,
+         YoVariableRegistry registry)
    {
       super(priorityParameters);
       this.state = new StepprState(0.001, registry);
       this.reader = new UDPStepprStateReader(state);
-      
+
       this.visualizer = visualizer;
-      
+
       this.command = new StepprCommand(registry);
       this.controller = stepprController;
-      this.outputWriter =  new UDPStepprOutputWriter(command);
+      this.outputWriter = new UDPStepprOutputWriter(command);
 
-      BonoRobotModel robotModel = new BonoRobotModel(true, true);
+      
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       rootJoint = fullRobotModel.getRootJoint();
 
@@ -101,21 +99,21 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       this.rawSensors = new RawJointSensorDataHolderMap(fullRobotModel);
       this.controller.setFullRobotModel(fullRobotModel);
-      
-      if(controller.getYoVariableRegistry() != null)
+
+      if (controller.getYoVariableRegistry() != null)
       {
          registry.addChild(controller.getYoVariableRegistry());
       }
-      
+
       if (visualizer != null)
       {
          visualizer.setMainRegistry(registry, fullRobotModel, null);
       }
-      
+
       outputWriter.connect();
 
    }
-   
+
    @Override
    public void run()
    {
@@ -132,14 +130,14 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       System.gc();
       System.gc();
-      
+
       try
       {
 
          while (!requestStop)
          {
             long receiveTime = reader.receive();
-            if(receiveTime != -1)
+            if (receiveTime != -1)
             {
                process(receiveTime);
             }
@@ -166,43 +164,42 @@ public class StepprSingleThreadedController extends RealtimeThread
          oneDoFJoint.setQ(jointState.getQ());
          oneDoFJoint.setQd(jointState.getQd());
          state.updateRawSensorData(joint, rawSensor);
-         
+
       }
 
       StepprXSensState xSensState = state.getXSensState();
       xSensState.getQuaternion(rotation);
-//      rootJoint.setRotation(rotation);
+      //      rootJoint.setRotation(rotation);
       rootJoint.updateFramesRecursively();
-      if(!initialized)
+      if (!initialized)
       {
          controller.initialize(timestamp);
          initialized = true;
       }
-      
+
       controller.doControl(timestamp);
-      
-      if(controller.turnOutputOn())
+
+      if (controller.turnOutputOn())
       {
          command.enableActuators();
       }
-      
+
       for (StepprJoint joint : StepprJoint.values)
       {
          OneDoFJoint oneDoFJoint = jointMap.get(joint);
          RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
-         
+
          StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
          jointCommand.setTauDesired(oneDoFJoint.getTau(), rawSensor);
          jointCommand.setDamping(oneDoFJoint.getKd());
       }
 
       outputWriter.write();
-      
+
       if (visualizer != null)
       {
          visualizer.update(timestamp);
       }
    }
-
 
 }
