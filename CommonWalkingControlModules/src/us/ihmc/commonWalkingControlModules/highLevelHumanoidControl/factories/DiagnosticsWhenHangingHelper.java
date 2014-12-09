@@ -138,6 +138,16 @@ public class DiagnosticsWhenHangingHelper
       return appliedTorque.getDoubleValue();
    }
    
+   public DoubleYoVariable getEstimatedTorqueYoVariable()
+   {
+      return estimatedTorque;
+   }
+   
+   public DoubleYoVariable getAppliedTorqueYoVariable()
+   {
+      return appliedTorque;
+   }
+   
    public void update()
    {
       centerOfMassCalculator.getDesiredFrame().update();
