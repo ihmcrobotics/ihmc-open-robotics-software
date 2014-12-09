@@ -6,6 +6,11 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
+import us.ihmc.simulationconstructionset.IndexChangedListener;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
@@ -16,10 +21,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
-import us.ihmc.simulationconstructionset.IndexChangedListener;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexChangedListener
 {
@@ -45,7 +46,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    }
 
    @Override
-   public void start()
+   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
@@ -62,7 +63,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          StandPrepVariables variables = new StandPrepVariables(setpoint, registry);
 
          StepprJoint aJoint = setpoint.getJoints()[0];
-         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(aJoint.getSdfName());
+         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFRobot)robot).getOneDegreeOfFreedomJoint(aJoint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJointPair, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.kp, 0, 100 * aJoint.getRatio() * aJoint.getRatio());
@@ -94,7 +95,6 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       selectedJointPair.set(StepprStandPrepSetpoints.HIP_Y);
 
       StepprDashboard.createDashboard(scs, registry);
-      super.start();
       scs.getDataBuffer().attachIndexChangedListener(this);
 
    }
@@ -145,8 +145,8 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
       SCSVisualizer scsYoVariablesUpdatedListener = new StepprStandPrepSliderboard(robot, 64000);
 
-      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, StepprNetworkParameters.VARIABLE_SERVER_PORT,
-            scsYoVariablesUpdatedListener, "remote", false);
+      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener,
+            "remote", false);
       client.start();
 
    }
