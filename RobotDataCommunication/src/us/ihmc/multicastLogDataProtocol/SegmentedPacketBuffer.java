@@ -24,6 +24,7 @@ public class SegmentedPacketBuffer
    {
       dataBuffer[segmentID] = ByteBuffer.allocate(data.remaining());
       dataBuffer[segmentID].put(data);
+      dataBuffer[segmentID].flip();
       
       boolean complete = true;
       for(int i = 0; i < dataBuffer.length; i++)
@@ -34,6 +35,24 @@ public class SegmentedPacketBuffer
          }
       }
       this.complete = complete;
+   }
+   
+   public ByteBuffer getBuffer()
+   {
+      int size = 0;
+      for(int i = 0; i < dataBuffer.length; i++)
+      {
+         size += dataBuffer[i].remaining();
+      }
+      
+      ByteBuffer buf = ByteBuffer.allocate(size);
+      
+      for(int i = 0; i < dataBuffer.length; i++)
+      {
+         buf.put(dataBuffer[i]);
+      }
+      buf.flip();
+      return buf;
    }
    
    public boolean isComplete()

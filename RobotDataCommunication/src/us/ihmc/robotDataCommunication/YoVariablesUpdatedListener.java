@@ -3,12 +3,12 @@ package us.ihmc.robotDataCommunication;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
+import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
-import us.ihmc.simulationconstructionset.Joint;
 
 public interface YoVariablesUpdatedListener
 {
@@ -16,19 +16,13 @@ public interface YoVariablesUpdatedListener
 
    public boolean changesVariables();
 
-   public void setRegistry(YoVariableRegistry registry);
-
-   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView);
-
-   public void receivedHandshake(YoProtoHandshake handshake);
+   public void receivedHandshake(LogHandshake handshake);
 
    public void receivedUpdate(long timestamp, ByteBuffer buf);
 
-   public void start();
+   public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView);
 
    public void disconnected();
-
-   public void setJointStates(List<JointState<? extends Joint>> jointStates);
 
    public void setYoVariableClient(YoVariableClient client);
 

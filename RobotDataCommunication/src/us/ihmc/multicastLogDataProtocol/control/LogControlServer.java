@@ -20,8 +20,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class LogControlServer
 {
+   protected static int RESOURCE_FOLDER_SIZE = 72000000;
+
    private int port = LogDataProtocolSettings.LOG_DATA_PORT;
    private KryoObjectServer server;
+
+   private final LogModelProvider logModelProvider;
 
    private final YoVariableHandShakeBuilder handshakeBuilder;
    private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData;
@@ -31,6 +35,7 @@ public class LogControlServer
    public LogControlServer(LogModelProvider modelProvider, List<RigidBody> rootBodies,
          LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData, double dt)
    {
+      this.logModelProvider = modelProvider;
       handshakeBuilder = new YoVariableHandShakeBuilder(rootBodies, dt);
       this.variableChangeData = variableChangeData;
    }
@@ -47,7 +52,7 @@ public class LogControlServer
          boolean connected = false;
          do
          {
-            server = new KryoObjectServer(port, new LogControlClassList());
+            server = new KryoObjectServer(port, new LogControlClassList(), RESOURCE_FOLDER_SIZE, RESOURCE_FOLDER_SIZE);
             try
             {
                server.connect();
@@ -68,6 +73,14 @@ public class LogControlServer
 
       handshake.protoShake = handshakeBuilder.toByteArray();
 
+      if (logModelProvider != null)
+      {
+         handshake.modelLoaderClass = logModelProvider.getLoader().getCanonicalName();
+         handshake.modelName = logModelProvider.getModelName();
+         handshake.model = logModelProvider.getModel();
+         handshake.resourceDirectories = logModelProvider.getResourceDirectories();
+         handshake.resourceZip = logModelProvider.getResourceZip();
+      }
       server.attachListener(HandshakeRequest.class, new HandshakeRequestListener());
       server.attachListener(VariableChangeRequest.class, new VariableChangeRequestListener());
    }
@@ -89,21 +102,31 @@ public class LogControlServer
       {
          VariableChangedMessage message;
          Pair<YoVariable<?>, YoVariableRegistry> variableAndRootRegistry = handshakeBuilder.getVariablesAndRootRegistries().get(object.variableID);
-         
+
          ConcurrentRingBuffer<VariableChangedMessage> buffer = variableChangeData.get(variableAndRootRegistry.second());
-         while((message = buffer.next()) == null)
+         while ((message = buffer.next()) == null)
          {
             ThreadTools.sleep(1);
          }
-         
-         if(message != null)
+
+         if (message != null)
          {
             message.setVariable(variableAndRootRegistry.first());
             message.setVal(object.requestedValue);
-            buffer.commit();                  
+            buffer.commit();
          }
       }
 
+   }
+
+   public int getPort()
+   {
+      return port;
+   }
+
+   public void close()
+   {
+      server.close();
    }
 
 }

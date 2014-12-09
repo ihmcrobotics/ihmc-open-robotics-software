@@ -86,7 +86,6 @@ public class DRCSimGazeboSensorReader implements SensorReader
       {
          channel = SocketChannel.open();
          channel.configureBlocking(true);
-         channel.socket().setReceiveBufferSize(jointDataLength + imuDataLength + forceSensorDataLength);
          channel.socket().setKeepAlive(true);
          channel.socket().setReuseAddress(true);
          channel.socket().setSoLinger(false, 0);

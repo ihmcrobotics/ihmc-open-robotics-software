@@ -14,13 +14,9 @@ public class DRCRobotSDFLoader
    public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless)
    {
       ArrayList<String> resources = new ArrayList<String>();
-      Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
 
       if (!headless)
       {
-         resources.add("models");
-         resources.add("models/GFE/");
-         resources.add("models/gazebo/");
         for(String resource : resourceDirectories)
         {
            resources.add(resource);

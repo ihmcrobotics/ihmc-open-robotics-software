@@ -1,11 +1,17 @@
 package us.ihmc.robotDataCommunication;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
+import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -21,6 +27,10 @@ public class YoVariableServer implements RobotVisualizer
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    
    private final double dt;
+   private final Class<?> mainClazz;
+   private final InetAddress address;   
+   private final LogModelProvider logModelProvider;
+   private final LogSettings logSettings;
    
    // Data to send
    private List<RigidBody> mainBodies = new ArrayList<>();
@@ -38,23 +48,21 @@ public class YoVariableServer implements RobotVisualizer
    // State
    private boolean started = false;
 
-   // ZMQ
-   private final int handshakePort;
-   private final int producerPort;
-   private final int consumerPort;
+   
    
    // Servers
-   private YoVariableHandshakeServer handshakeServer;
+   private LogSessionBroadcaster sessionBroadcaster;
+   private LogControlServer controlServer;
    private YoVariableProducer producer;
-   private YoVariableChangedConsumer consumer;
    
-   public YoVariableServer(int port, double dt)
+   
+   public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, LogSettings logSettings, InetAddress address, double dt)
    {
-      this.handshakePort = port;
-      this.producerPort = port + 1;
-      this.consumerPort = port + 2;
-      
       this.dt = dt;
+      this.mainClazz = mainClazz;
+      this.address = address;
+      this.logModelProvider = logModelProvider;
+      this.logSettings = logSettings;
    }
 
    public synchronized void start()
@@ -64,14 +72,30 @@ public class YoVariableServer implements RobotVisualizer
          throw new RuntimeException("Server already started");
       }
       
-      handshakeServer = new YoVariableHandshakeServer(handshakePort, mainBodies, dt);
-      List<JointHolder> jointHolders = handshakeServer.getHandshakeBuilder().getJointHolders();
+      
+      startControlServer();
+      
+      InetSocketAddress controlAddress = new InetSocketAddress(address, controlServer.getPort());
+      sessionBroadcaster = new LogSessionBroadcaster(controlAddress, mainClazz, logSettings);
+      producer = new YoVariableProducer(sessionBroadcaster, controlServer, mainBuffer,
+            buffers.values());
+            
+      sessionBroadcaster.start();
+      producer.start();
+      
+      started = true;
+   }
+
+   private List<JointHolder> startControlServer()
+   {
+      controlServer = new LogControlServer(logModelProvider, mainBodies, variableChangeData, dt);
+      List<JointHolder> jointHolders = controlServer.getHandshakeBuilder().getJointHolders();
       
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
-      int mainOffset = handshakeServer.getHandshakeBuilder().addRegistry(mainRegistry, variables);
+      int mainOffset = controlServer.getHandshakeBuilder().addRegistry(mainRegistry, variables);
       if(mainDynamicGraphicObjectsListRegistry != null)
       {
-         handshakeServer.getHandshakeBuilder().addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
+         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
       }
       FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
       mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -81,26 +105,18 @@ public class YoVariableServer implements RobotVisualizer
       {
          addVariableBuffer(data);
       }
-            
-      producer = new YoVariableProducer(producerPort, handshakeServer.getHandshakeBuilder().getNumberOfVariables(), FullStateBuffer.getNumberOfJointStates(jointHolders), mainBuffer,
-            buffers.values());
-      consumer = new YoVariableChangedConsumer(consumerPort, handshakeServer.getHandshakeBuilder().getVariablesAndRootRegistries(), variableChangeData);
-      
-      
-      handshakeServer.start();
-      producer.start();
-      consumer.start();
-      
-      started = true;
+
+      controlServer.start();
+      return jointHolders;
    }
 
    public synchronized void close()
    {
       if(started)
       {
-         handshakeServer.close();
+         sessionBroadcaster.close();
          producer.close();
-         consumer.close();         
+         controlServer.close();         
       }
    }
 
@@ -144,10 +160,10 @@ public class YoVariableServer implements RobotVisualizer
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
       YoVariableRegistry registry = data.first();
       YoGraphicsListRegistry yoGraphicsListRegistry = data.second();
-      int variableOffset = handshakeServer.getHandshakeBuilder().addRegistry(registry, variables);
+      int variableOffset = controlServer.getHandshakeBuilder().addRegistry(registry, variables);
       if(yoGraphicsListRegistry != null)
       {
-         handshakeServer.getHandshakeBuilder().addDynamicGraphicObjects(yoGraphicsListRegistry);
+         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(yoGraphicsListRegistry);
       }
       RegistryBuffer.Builder builder = new RegistryBuffer.Builder(variableOffset, variables);
       ConcurrentRingBuffer<RegistryBuffer> buffer = new ConcurrentRingBuffer<>(builder, VARIABLE_BUFFER_CAPACITY);

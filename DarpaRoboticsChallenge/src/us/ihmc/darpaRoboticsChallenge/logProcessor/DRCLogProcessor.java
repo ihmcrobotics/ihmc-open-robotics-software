@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizer;
+import us.ihmc.robotDataCommunication.logger.LogVisualizer;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public abstract class DRCLogProcessor
 {
-   private final YoVariableLogVisualizer logVisualizer;
+   private final LogVisualizer logVisualizer;
    private final SimulationConstructionSet scs;
    private final Plotter plotter;
 
@@ -34,7 +34,7 @@ public abstract class DRCLogProcessor
       drcRobotModel = createDRCRobotModel();
       GeneralizedSDFRobotModel generalizedRobotModel = drcRobotModel.getGeneralizedRobotModel();
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
-      logVisualizer = new YoVariableLogVisualizer(generalizedRobotModel, jointMap, timeVariableName);
+      logVisualizer = new LogVisualizer(generalizedRobotModel, jointMap);
 
       scs = logVisualizer.getSimulationConstructionSet();
       plotter = logVisualizer.getPlotter();

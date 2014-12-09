@@ -1,39 +1,68 @@
 package us.ihmc.robotDataCommunication;
 
+import java.io.IOException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
-
+import us.ihmc.multicastLogDataProtocol.LogUtils;
+import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
+import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
 
 public class YoVariableClient
 {
+   private enum ClientState
+   {
+      WAITING,
+      RUNNING,
+      STOPPED
+   }
+   
    private final YoVariablesUpdatedListener listener;
 
-   private final YoVariableHandshakeClient yoVariableHandshakeClient;
-   private final YoVariableChangedProducer yoVariableChangedProducer;
+   private final LogControlClient logControlClient;
    private final YoVariableConsumer yoVariableConsumer;
    private final boolean showOverheadView;
-   private boolean started = false;
+   private ClientState state = ClientState.WAITING;
 
-
-   public YoVariableClient(String host, int port, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   private static AnnounceRequest getRequest(String host)
    {
-      int handshakePort = port;
-      int consumerPort = port + 1;
-      int producerPort = port + 2;
+      try
+      {
+         NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(host));
+         System.out.println("Listening to broadcasts on " + iface);
+         AnnounceRequest request = LogSessionDisplay.selectLogSession(iface);
+         return request;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
-      this.yoVariableHandshakeClient = new YoVariableHandshakeClient(host, handshakePort, listener, registryPrefix, listener.populateRegistry());
-      this.yoVariableConsumer = new YoVariableConsumer(host, consumerPort, yoVariableHandshakeClient.getYoVariablesList(),
-            yoVariableHandshakeClient.getJointStates(), listener);
-      if(listener.changesVariables())
+   public YoVariableClient(String host, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   {
+      this(getRequest(host), listener, registryPrefix, showOverheadView);
+   }
+
+   public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   {
+      NetworkInterface iface;
+      try
       {
-         this.yoVariableChangedProducer = new YoVariableChangedProducer(host, producerPort, yoVariableHandshakeClient.getYoVariablesList());
+         iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(request.getControlIP()));
       }
-      else
+      catch (SocketException e)
       {
-         this.yoVariableChangedProducer = null;
+         throw new RuntimeException(e);
       }
+     
+      System.out.println("Starting YoVariableClient on " + iface);
+      this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener, registryPrefix, listener.populateRegistry());
+      this.yoVariableConsumer = new YoVariableConsumer(request.getSessionID(), iface, request.getGroup(), logControlClient.getYoVariablesList(),
+            logControlClient.getJointStates(), listener);
       this.listener = listener;
-      
       this.showOverheadView = showOverheadView;
 
       listener.setYoVariableClient(this);
@@ -53,45 +82,36 @@ public class YoVariableClient
 
    public synchronized void start(long timeout) throws SocketTimeoutException
    {
-      if (started)
+      if (state != ClientState.WAITING)
       {
          throw new RuntimeException("Client already started");
       }
-
-      yoVariableHandshakeClient.connect(timeout);
-      listener.setRegistry(yoVariableHandshakeClient.getRootRegistry());
-      listener.setJointStates(yoVariableHandshakeClient.getJointStates());
-      listener.registerDynamicGraphicObjectListsRegistry(yoVariableHandshakeClient.getDynamicGraphicObjectsListRegistry(), showOverheadView);
-
-      if(yoVariableChangedProducer != null)
+      
+      logControlClient.connect();
+      logControlClient.waitForHandshake();
+      listener.start(logControlClient.getModelLoader(), logControlClient.getRootRegistry(), logControlClient.getJointStates(), logControlClient.getDynamicGraphicObjectsListRegistry(), showOverheadView);
+      
+      if (listener.changesVariables())
       {
-         yoVariableChangedProducer.start();
+         logControlClient.startVariableChangedProducers();
       }
-      yoVariableConsumer.start(yoVariableHandshakeClient.getNumberOfVariables(), yoVariableHandshakeClient.getNumberOfJointStateVariables());
-      listener.start();
+      yoVariableConsumer.start(logControlClient.getNumberOfVariables(), logControlClient.getNumberOfJointStateVariables());
 
-      started = true;
-   }
-   
-   public void waitFor()
-   {
-      try
-      {
-         yoVariableConsumer.join();
-      }
-      catch (InterruptedException e)
-      {
-         e.printStackTrace();
-      }
+      state = ClientState.RUNNING;
    }
 
-   public void close()
+
+   public synchronized void close()
    {
-      if(yoVariableChangedProducer != null)
-      {
-         yoVariableChangedProducer.close();
-      }
       yoVariableConsumer.close();
+      logControlClient.close();
       listener.disconnected();
+      
+      state = ClientState.STOPPED;
+   }
+
+   public synchronized boolean isRunning()
+   {
+      return state == ClientState.RUNNING;
    }
 }

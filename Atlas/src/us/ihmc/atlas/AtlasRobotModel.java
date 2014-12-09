@@ -36,6 +36,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPP
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
@@ -345,5 +347,11 @@ public class AtlasRobotModel implements DRCRobotModel
    public FootstepParameters getFootstepParameters() {
 	   // TODO Auto-generated method stub
 	   return new AtlasFootstepParameters();
+   }
+
+   @Override
+   public LogModelProvider getLogModelProvider()
+   {
+      return new SDFLogModelProvider(jointMap.getModelName(), selectedVersion.getSdfFileAsStream(), selectedVersion.getResourceDirectories());
    }
 }

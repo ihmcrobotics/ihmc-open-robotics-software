@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
@@ -23,26 +24,29 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class YoVariableLogVisualizer
+public class LogVisualizer
 {
    private final SDFJointNameMap jointNameMap;
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
-   private final String timeVariableName;
    protected final SimulationConstructionSet scs;
    private YoVariableLogPlaybackRobot robot;
    private SimulationOverheadPlotter plotter;
 
-   public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName) throws IOException
+   public LogVisualizer() throws IOException
    {
-      this(generalizedSDFRobotModel, jointNameMap, timeVariableName, 32768, false, null);
+      this(null, null);
+   }
+   
+   public LogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap) throws IOException
+   {
+      this(generalizedSDFRobotModel, jointNameMap, 32768, false, null);
    }
 
-   public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName, int bufferSize,
-         boolean showOverheadView, File logFile) throws IOException
+   public LogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, int bufferSize, boolean showOverheadView,
+         File logFile) throws IOException
    {
       this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.jointNameMap = jointNameMap;
-      this.timeVariableName = timeVariableName;
 
       if (logFile == null)
       {
@@ -76,8 +80,36 @@ public class YoVariableLogVisualizer
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser(null, "logged", true);
+      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
+
+      GeneralizedSDFRobotModel generalizedSDFRobotModel;
+      if (logProperties.getModelLoaderClass() != null)
+      {
+         SDFModelLoader loader = new SDFModelLoader();
+         String modelName = logProperties.getModelName();
+         String[] resourceDirectories = logProperties.getModelResourceDirectories();
+
+         File model = new File(selectedFile, logProperties.getModelPath());
+         DataInputStream modelStream = new DataInputStream(new FileInputStream(model));
+         byte[] modelData = new byte[(int) model.length()];
+         modelStream.readFully(modelData);
+         modelStream.close();
+
+         File resourceBundle = new File(selectedFile, logProperties.getModelResourceBundlePath());
+         DataInputStream resourceStream = new DataInputStream(new FileInputStream(resourceBundle));
+         byte[] resourceData = new byte[(int) resourceBundle.length()];
+         resourceStream.readFully(resourceData);
+         resourceStream.close();
+
+         loader.load(modelName, modelData, resourceDirectories, resourceData);
+
+         generalizedSDFRobotModel = loader.createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
+      }
+      else
+      {
+         generalizedSDFRobotModel = this.generalizedSDFRobotModel;
+      }
 
       File logdata = new File(selectedFile, logProperties.getVariableDataFile());
       if (!logdata.exists())
@@ -86,8 +118,8 @@ public class YoVariableLogVisualizer
       }
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();
 
-      scs.setTimeVariableName(timeVariableName);
       robot = new YoVariableLogPlaybackRobot(generalizedSDFRobotModel, jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
+      scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();
       System.out.println(getClass().getSimpleName() + ": dt set to " + dt);
@@ -120,8 +152,7 @@ public class YoVariableLogVisualizer
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, players, robot, yoVariableLogCropper, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
-      
-      
+
       setupReadEveryNTicksTextField();
    }
 
@@ -129,10 +160,11 @@ public class YoVariableLogVisualizer
    {
       JLabel label = new JLabel("ReadEveryNTicks");
       scs.addJLable(label);
-      
+
       String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
       final JTextField textField = new JTextField(everyNTicksString, 3);
-      textField.addActionListener(new ActionListener(){
+      textField.addActionListener(new ActionListener()
+      {
 
          @Override
          public void actionPerformed(ActionEvent e)
@@ -145,12 +177,13 @@ public class YoVariableLogVisualizer
             catch (NumberFormatException exception)
             {
             }
-            
+
             String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
             textField.setText(everyNTicksString);
             textField.getParent().requestFocus();
-         }});
-      
+         }
+      });
+
       scs.addTextField(textField);
    }
 
@@ -172,5 +205,11 @@ public class YoVariableLogVisualizer
    public void run()
    {
       new Thread(scs).start();
+   }
+   
+   public static void main(String[] args) throws IOException
+   {
+      LogVisualizer visualizer = new LogVisualizer();
+      visualizer.run();
    }
 }

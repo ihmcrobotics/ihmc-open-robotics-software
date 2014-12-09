@@ -1,9 +1,7 @@
 package us.ihmc.humanoidBehaviors;
 
-import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
-
 import us.ihmc.simulationconstructionset.Robot;
 
 public abstract class BehaviorVisualizer extends SCSVisualizer
@@ -14,7 +12,7 @@ public abstract class BehaviorVisualizer extends SCSVisualizer
    {
       super(robot, bufferSize, true, false);
       
-      YoVariableClient client = new YoVariableClient(host, NetworkConfigParameters.BEHAVIOR_YO_VARIABLE_SERVER_PORT, this, "behavior", showOverheadView);
+      YoVariableClient client = new YoVariableClient(host, this, "behavior", showOverheadView);
       client.start();
    }
 }

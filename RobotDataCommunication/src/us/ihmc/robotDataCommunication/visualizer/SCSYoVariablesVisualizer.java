@@ -19,7 +19,7 @@ public class SCSYoVariablesVisualizer
       SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize);
 
       boolean showOverheadView = false;
-      YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", showOverheadView);
+      YoVariableClient client = new YoVariableClient(host, scsYoVariablesUpdatedListener, "remote", showOverheadView);
       client.start();
    }
 

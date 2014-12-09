@@ -6,18 +6,15 @@ import java.nio.LongBuffer;
 import java.util.Collection;
 import java.util.zip.CRC32;
 
-import org.zeromq.ZMQ;
-
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.multicastLogDataProtocol.LogDataType;
+import us.ihmc.multicastLogDataProtocol.SegmentedDatagramServer;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
+import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer extends Thread
 {
-   private static final int NUMBER_OF_WRITE_BUFFERS = 128;
-
-   private final zmq.Ctx ctx = zmq.ZMQ.zmq_init(1);
-
-   private final int port;
    private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
    private final ConcurrentRingBuffer<RegistryBuffer>[] buffers;
 
@@ -27,18 +24,18 @@ public class YoVariableProducer extends Thread
    private final ByteBuffer compressedBuffer;
 
    private final int jointStateOffset;
-
-   private zmq.SocketBase variablePublisher;
-
-   public YoVariableProducer(int port, int numberOfVariables, int numberOfJointStates, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
+   
+   private final LogSessionBroadcaster session;
+   
+   public YoVariableProducer(LogSessionBroadcaster session, LogControlServer controlServer, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
          Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
    {
-      super("YoVariableProducer_" + port);
-      this.port = port;
+      super("YoVariableProducer");
       this.mainBuffer = mainBuffer;
       this.buffers = buffers.toArray(new ConcurrentRingBuffer[buffers.size()]);
 
-      this.jointStateOffset = numberOfVariables;
+      this.jointStateOffset = controlServer.getHandshakeBuilder().getNumberOfVariables();
+      int numberOfJointStates = controlServer.getHandshakeBuilder().getNumberOfJointStates();
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
 
       byteWriteBuffer = ByteBuffer.allocate(bufferSize);
@@ -46,6 +43,8 @@ public class YoVariableProducer extends Thread
 
       compressedBackingArray = new byte[SnappyUtils.maxCompressedLength(bufferSize) + 4];
       compressedBuffer = ByteBuffer.wrap(compressedBackingArray);
+
+      this.session = session;
    }
 
    private void updateBuffers(long timestamp)
@@ -68,23 +67,17 @@ public class YoVariableProducer extends Thread
 
    public void run()
    {
-      variablePublisher = ctx.create_socket(ZMQ.PUB);
-      RemoteVisualizationUtils.mayRaise(variablePublisher);
-
-      if (!variablePublisher.bind("tcp://*:" + port))
+      
+      SegmentedDatagramServer server;
+      try
       {
-         RemoteVisualizationUtils.mayRaise(variablePublisher);
+         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup());
       }
-
-      int bufferIndex = 0;
-      byte[][] messageBuffers = new byte[NUMBER_OF_WRITE_BUFFERS][];
-      zmq.Msg messages[] = new zmq.Msg[NUMBER_OF_WRITE_BUFFERS];
-      for (int i = 0; i < NUMBER_OF_WRITE_BUFFERS; i++)
+      catch (IOException e)
       {
-         messageBuffers[i] = new byte[compressedBackingArray.length];
-         messages[i] = new zmq.Msg(messageBuffers[i]);
+         throw new RuntimeException(e);
       }
-
+      
       CRC32 crc32 = new CRC32();
 
       while (true)
@@ -95,14 +88,11 @@ public class YoVariableProducer extends Thread
 
             while ((fullStateBuffer = mainBuffer.read()) != null)
             {
-
+               
                writeBuffer.put(0, fullStateBuffer.getTimestamp());
                fullStateBuffer.getIntoBuffer(writeBuffer, 1);
                fullStateBuffer.getJointStatesInBuffer(writeBuffer, jointStateOffset + 1);
                updateBuffers(fullStateBuffer.getTimestamp());
-
-               byte[] messageBuffer = messageBuffers[bufferIndex % NUMBER_OF_WRITE_BUFFERS];
-               zmq.Msg msg = messages[bufferIndex % NUMBER_OF_WRITE_BUFFERS];
 
                byteWriteBuffer.clear();
                compressedBuffer.clear();
@@ -111,7 +101,6 @@ public class YoVariableProducer extends Thread
                {
                   SnappyUtils.compress(byteWriteBuffer, compressedBuffer);
                   compressedBuffer.flip();
-                  compressedBuffer.position(4);
                }
                catch (IllegalArgumentException | IOException e)
                {
@@ -120,19 +109,17 @@ public class YoVariableProducer extends Thread
                }
 
                crc32.reset();
-               crc32.update(compressedBackingArray, compressedBuffer.position(), compressedBuffer.remaining());
+               crc32.update(compressedBackingArray, 4, compressedBuffer.remaining() - 4);
                compressedBuffer.putInt(0, (int) crc32.getValue());
                
-               msg.setSize(compressedBuffer.limit());
-               System.arraycopy(compressedBackingArray, 0, messageBuffer, 0, compressedBuffer.limit());
-               
-               
-               if(!variablePublisher.send(msg, 0))
+               try
                {
-                  System.err.println("Cannot send messages " + variablePublisher.errno());
+                  server.send(LogDataType.DATA, fullStateBuffer.getTimestamp(), compressedBuffer);
                }
-
-               bufferIndex++;
+               catch (IOException e)
+               {
+                  e.printStackTrace();
+               }
             }
             mainBuffer.flush();
          }
@@ -147,17 +134,11 @@ public class YoVariableProducer extends Thread
          }
       }
 
-      if (variablePublisher.check_tag())
-         variablePublisher.close(); // don't close if already closed
+      server.close();
    }
 
    public void close()
    {
-      if (variablePublisher != null)
-      {
-         variablePublisher.close();
-      }
-      ctx.terminate();
       interrupt();
       try
       {
@@ -166,6 +147,5 @@ public class YoVariableProducer extends Thread
       catch (InterruptedException e)
       {
       }
-      ctx.terminate();
    }
 }

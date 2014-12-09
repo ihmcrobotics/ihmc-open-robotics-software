@@ -1,5 +1,7 @@
 package us.ihmc.robotDataCommunication.logger.util;
 
+import us.ihmc.robotDataCommunication.logger.VideoIn;
+
 public class BMDCapture implements ExternalProgram
 {
    private static final String bmdCapture = ExternalProgramHelpers.extractExternalProgram(BMDCapture.class.getResource(
@@ -17,23 +19,6 @@ public class BMDCapture implements ExternalProgram
       
       int command;
       private AudioIn(int command)
-      {
-         this.command = command;
-      }
-   }
-   
-   public enum VideoIn
-   {
-      COMPOSITE(1),
-      COMPONENT(2),
-      HDMI(3),
-      SDI(4),
-      OPTICAL_SDI(5),
-      S_VIDEO(6);
-      
-      
-      int command;
-      private VideoIn(int command)
       {
          this.command = command;
       }

@@ -14,15 +14,18 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.math.TimeTools;
 
 public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener
 {
    private final SimulationConstructionSet scs;
    private final LongYoVariable timestamp;
+   private final DoubleYoVariable robotTime;
    private final FileChannel logChannel;
    private final List<YoVariable<?>> variables;
 
@@ -45,6 +48,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
    {
       super(generalizedSDFRobotModel, sdfJointNameMap, false);
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
+      this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
       this.jointStates = jointStates;
       this.variables = variables;
       this.logChannel = logChannel;
@@ -163,6 +167,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          }
 
          timestamp.set(logLongArray.get());
+         robotTime.set(TimeTools.nanoSecondstoSeconds(timestamp.getLongValue()));
                
          for (int i = 0; i < variables.size(); i++)
          {

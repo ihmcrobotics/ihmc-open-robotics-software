@@ -5,5 +5,11 @@ package us.ihmc.multicastLogDataProtocol.control;
 public class LogHandshake
 {
    public byte[] protoShake;
+
+   public String modelLoaderClass = null;
+   public String modelName;
    public byte[] model;
+   public String[] resourceDirectories;
+   public byte[] resourceZip;
+
 }

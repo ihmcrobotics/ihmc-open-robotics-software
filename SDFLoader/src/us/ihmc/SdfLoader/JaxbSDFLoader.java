@@ -31,7 +31,7 @@ public class JaxbSDFLoader
       this(new FileInputStream(file), FileTools.createArrayListOfOneURL(resourceDirectory));
    }
    
-   public JaxbSDFLoader(InputStream inputStream, ArrayList<String> resourceDirectories) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories) throws JAXBException, FileNotFoundException
    {
       JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
       Unmarshaller um = context.createUnmarshaller();

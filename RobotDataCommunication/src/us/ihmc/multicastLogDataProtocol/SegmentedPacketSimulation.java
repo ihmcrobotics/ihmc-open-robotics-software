@@ -8,9 +8,11 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import us.ihmc.utilities.ThreadTools;
+
 public class SegmentedPacketSimulation
 {
-   private static final String host = "10.6.100.96";
+   private static final String host = "127.0.0.1";
 
    private final long sessionId = new Random().nextLong();
    
@@ -24,7 +26,7 @@ public class SegmentedPacketSimulation
    private ByteBuffer fillBuffer(int size)
    {
       ByteBuffer buffer = ByteBuffer.allocateDirect(size);
-      Random random = new Random();
+      Random random = new Random(1232);
       while(buffer.remaining() > 0)
       {
          buffer.put((byte) random.nextInt(255));
@@ -41,11 +43,12 @@ public class SegmentedPacketSimulation
       SegmentedDatagramServer server = new SegmentedDatagramServer(sessionId, iface, group);
       
       long timestamp = 10;
-      ByteBuffer buffer = fillBuffer(15000);
+      ByteBuffer buffer = fillBuffer(150000);
       while(true)
       {
          server.send(LogDataType.DATA, timestamp, buffer);
          timestamp++;
+         ThreadTools.sleep(10);
       }
 
    }
@@ -77,7 +80,26 @@ public class SegmentedPacketSimulation
             System.err.println("MISSED PACKET");
          }
          lastUid = buffer.getUid();
+         
+         ByteBuffer res = buffer.getBuffer();
+         Random random = new Random(1232);
+         while(res.remaining() > 0)
+         {
+            if(res.get() != random.nextInt(255))
+            {
+               System.out.println("CORRUPTION");
+               continue;
+            }
+         }
+         
          System.out.println("HEY DATA " + buffer.getUid());
+      }
+
+      @Override
+      public void timeout(long timeoutInMillis)
+      {
+         // TODO Auto-generated method stub
+         
       }
       
    }
@@ -85,7 +107,6 @@ public class SegmentedPacketSimulation
    public static void main(String[] args) throws IOException
    {
       NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(host));
-      System.out.println("MTU: " + iface.getMTU());
       
       new SegmentedPacketSimulation();
    }

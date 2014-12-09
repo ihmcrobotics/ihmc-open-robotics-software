@@ -61,7 +61,7 @@ public enum AtlasRobotVersion
 
       if (resourceDirectories == null)
       {
-         resourceDirectories = new String[] { "models/GFE/gazebo_models/", "models/GFE/gazebo_models/atlas_description/",
+         resourceDirectories = new String[] { "models/GFE/", 
                "models/GFE/gazebo_models/multisense_sl_description/", "models/GFE/gazebo_models/irobot_hand_description/", "models/GFE/gazebo_models/robotiq/" };
       }
       return resourceDirectories;

@@ -18,6 +18,8 @@ public class YoVariableLoggerOptions
    public final static String defaultVideoCodec = "mjpeg";
    public final static int defaultVideoQuality = 5;
 
+   public final static String defaultConfigurationFile = "cameras.yaml";
+
    private String logDirectory = defaultLogDirectory;
    private String videoCodec = defaultVideoCodec;
    private int videoQuality = defaultVideoQuality;
@@ -26,8 +28,8 @@ public class YoVariableLoggerOptions
    private String cookieJarUser = "";
    private String cookieJarHost = "";
    private String cookieJarRemoteDirectory = "";
-   private final ArrayList<VideoSettings> cameras = new ArrayList<>();
    private boolean disableVideo = false;
+   private String configurationFile = "";
 
    public static YoVariableLoggerOptions parse(String[] args) throws JSAPException
    {
@@ -37,15 +39,16 @@ public class YoVariableLoggerOptions
                   "Directory where to save log files"),
             new FlaggedOption("videoCodec", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultVideoCodec, JSAP.NOT_REQUIRED, 'c', "codec",
                   "Video codec to use"),
+            new FlaggedOption("configurationFile", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultConfigurationFile, JSAP.NOT_REQUIRED, 'f', "config",
+                  "Camera configuration file"),
             new FlaggedOption("videoQuality", JSAP.INTEGER_PARSER, String.valueOf(YoVariableLoggerOptions.defaultVideoQuality), JSAP.NOT_REQUIRED, 'q',
-                  "quality", "Video quality") ,
-            new UnflaggedOption("cameras", JSAP.STRING_PARSER, null, true, true, "Select capture camera(s) " + Arrays.toString(VideoSettings.values())) });
+                  "quality", "Video quality") });
       JSAPResult config = jsap.parse(args);
       if (jsap.messagePrinted())
       {
          System.out.println(jsap.getUsage());
          System.out.println(jsap.getHelp());
-         System.exit(-1);         
+         System.exit(-1);
       }
 
       YoVariableLoggerOptions options = new YoVariableLoggerOptions();
@@ -53,27 +56,9 @@ public class YoVariableLoggerOptions
       options.setVideoCodec(config.getString("videoCodec"));
       options.setVideoQuality(config.getInt("videoQuality"));
       options.setDisableVideo(config.getBoolean("disableVideo"));
-      
-      String[] cameras = config.getStringArray("cameras");
-      for(String camera : cameras)
-      {
-         try
-         {
-            options.addCamera(VideoSettings.valueOf(camera));
-         }
-         catch(Exception e)
-         {
-            System.err.println("Unknown camera " + camera);
-            System.exit(-1);
-         }
-      }
+      options.setConfigurationFile(config.getString("configurationFile"));
 
       return options;
-   }
-
-   private void addCamera(VideoSettings camera)
-   {
-      cameras.add(camera);
    }
 
    public String getLogDirectory()
@@ -155,10 +140,14 @@ public class YoVariableLoggerOptions
    {
       return cookieJarRemoteDirectory;
    }
-   
-   public ArrayList<VideoSettings> getCameras()
+
+   public String getConfigurationFile()
    {
-      return cameras;
+      return configurationFile;
    }
 
+   public void setConfigurationFile(String configurationFile)
+   {
+      this.configurationFile = configurationFile;
+   }
 }

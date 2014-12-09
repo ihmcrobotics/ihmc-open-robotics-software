@@ -39,12 +39,12 @@ public class SDFGraphics3DObject extends Graphics3DObject
       YoAppearance.makeTransparent(DEFAULT_APPEARANCE, 0.4);
    }
    
-   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories)
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories)
    {
       this(sdfVisuals, resourceDirectories, new RigidBodyTransform());
    }
    
-   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, ArrayList<String> resourceDirectories, RigidBodyTransform graphicsTransform)
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories, RigidBodyTransform graphicsTransform)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
@@ -210,7 +210,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
    }
    
-   private void addMesh(String mesh, String submesh, boolean centerSubmesh, RigidBodyTransform visualPose, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
+   private void addMesh(String mesh, String submesh, boolean centerSubmesh, RigidBodyTransform visualPose, AppearanceDefinition appearance, List<String> resourceDirectories)
    {
 
       // STL files do not have appearances
@@ -222,7 +222,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       addModelFile(mesh, submesh, centerSubmesh, resourceDirectories, appearance);
    }
 
-   private String convertToResourceIdentifier(ArrayList<String> resourceDirectories, String meshPath)
+   private String convertToResourceIdentifier(List<String> resourceDirectories, String meshPath)
    {
       if(meshPath.equals("__default__"))
       {

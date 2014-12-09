@@ -1,14 +1,14 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
-
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import java.util.List;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFModelVisual extends Graphics3DObject
 {
-   private final ArrayList<String> resourceDirectories;
+   private final List<String> resourceDirectories;
    
    public SDFModelVisual(GeneralizedSDFRobotModel generalizedSDFRobotModel)
    {

@@ -93,7 +93,6 @@ public class DRCSimGazeboOutputWriter implements DRCOutputWriter
       {
          channel = SocketChannel.open();
          channel.configureBlocking(true);
-         channel.socket().setReceiveBufferSize(jointCommand.capacity());
          channel.socket().setKeepAlive(true);
          channel.socket().setReuseAddress(true);
          channel.socket().setSoLinger(false, 0);

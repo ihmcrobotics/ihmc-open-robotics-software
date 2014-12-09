@@ -19,14 +19,14 @@ import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
    private final String name;
-   private final ArrayList<String> resourceDirectories;
+   private final List<String> resourceDirectories;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final RigidBodyTransform transformToRoot;
    private final LinkedHashMap<String, SDFJointHolder> joints = new LinkedHashMap<String, SDFJointHolder>();
    private final LinkedHashMap<String, SDFLinkHolder> links = new LinkedHashMap<String, SDFLinkHolder>();
    
    
-   public GeneralizedSDFRobotModel(String name, SDFModel model, ArrayList<String> resourceDirectories)
+   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories)
    {
       this.name = name;
       this.resourceDirectories = resourceDirectories;
@@ -107,7 +107,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       return joints.get(name);
    }
    
-   public ArrayList<String> getResourceDirectories()
+   public List<String> getResourceDirectories()
    {
       return resourceDirectories;
    }
