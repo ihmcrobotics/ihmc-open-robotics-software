@@ -113,6 +113,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          FootstepPathPlannerService footstepPathPlannerService;
          footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
 //         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
+//         footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
          fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);

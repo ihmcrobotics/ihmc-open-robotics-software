@@ -228,7 +228,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 
 	private void requestFootstepPlan()
 	{
-		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startFootstep,startYaw,goalFootsteps);
+		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startFootstep,startYaw,goalFootsteps, 10);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(footstepPlanRequestPacket);
 		waitingForValidPlan.set(true);
 	}
@@ -241,7 +241,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private void sendUpdateStart(FootstepData updatedLocation){
 		if (updatedLocation.orientation.epsilonEquals(new Quat4d(), .003)) return;
-		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationFunctions.getYawFromQuaternion(updatedLocation.orientation), null);
+		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationFunctions.getYawFromQuaternion(updatedLocation.orientation), null, 10);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(updateStartPacket);
 	}
 	
