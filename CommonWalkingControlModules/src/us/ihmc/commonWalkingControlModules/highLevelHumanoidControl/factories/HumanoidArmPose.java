@@ -69,7 +69,7 @@ public enum HumanoidArmPose
             
             
          case ARM_STRAIGHT_DOWN:
-            return new double[]{0.0, -0.5, 1.45, -0.53};
+            return new double[]{0.0, -0.5, 0.0, 0.0};
 
          case ARM_NINETY_ELBOW_DOWN:
             return new double[]{0.0, -halfPi, halfPi, -halfPi};
