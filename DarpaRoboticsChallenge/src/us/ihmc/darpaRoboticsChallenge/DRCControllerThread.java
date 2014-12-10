@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisu
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.darpaRoboticsChallenge.calib.CenterOfMassCalibrationTool;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -29,6 +28,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
+import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
