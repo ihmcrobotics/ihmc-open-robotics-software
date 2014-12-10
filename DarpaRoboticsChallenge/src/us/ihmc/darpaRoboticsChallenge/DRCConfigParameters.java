@@ -22,7 +22,6 @@ public class DRCConfigParameters
    public static boolean CALIBRATE_ARM_MODE = false;
 
    
-   public static final boolean ALLOW_MODEL_CORRUPTION = false;
    public static final boolean SEND_ROBOT_DATA_TO_ROS = false;
    
    // Do not add anything here. I'll shout at you. Jesper
