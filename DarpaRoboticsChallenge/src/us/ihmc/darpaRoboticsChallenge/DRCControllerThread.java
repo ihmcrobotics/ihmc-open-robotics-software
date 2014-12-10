@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
-import us.ihmc.darpaRoboticsChallenge.calib.CenterOfMassCalibrationTool;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -27,6 +26,7 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.wholeBodyController.CenterOfMassCalibrationTool;
 import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -54,6 +54,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
  
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
+   private static final boolean ALLOW_MODEL_CORRUPTION = false;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
    private final RobotVisualizer robotVisualizer;
@@ -113,7 +114,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       
-      if (DRCConfigParameters.ALLOW_MODEL_CORRUPTION)
+      if (ALLOW_MODEL_CORRUPTION)
       {
          fullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
       }
