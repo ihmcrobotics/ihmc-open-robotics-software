@@ -3,18 +3,24 @@ package us.ihmc.atlas;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest;
+import us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({
-   us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
-   us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryStandingTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
-   us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class
+@Suite.SuiteClasses
+({
+   AtlasBambooTestSuite.class,
+   
+   AtlasFlatGroundRewindabilityTest.class,
+   AtlasBumpyAndShallowRampsWalkingTest.class,
+   AtlasPushRecoveryTest.class,
+   AtlasPushRecoveryStandingTest.class,
+   AtlasPushRecoveryMultiStepTest.class,
+   AtlasPelvisPoseHistoryCorrectorTest.class,
+   AtlasHandPoseStatusTest.class
 //   AtlasPlaybackPoseInterpolatorTest.class
 })
+
 public class AtlasBambooTestSuiteNightly
 {
 }
