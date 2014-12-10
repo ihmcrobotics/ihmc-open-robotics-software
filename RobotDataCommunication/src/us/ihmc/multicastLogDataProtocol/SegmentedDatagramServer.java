@@ -26,17 +26,16 @@ public class SegmentedDatagramServer
     * Constructor for multicast server
     * @throws IOException 
     */
-   public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group) throws IOException
+   public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group, int port) throws IOException
    {
       this.sessionID = sessionID;
       System.out.println(iface);
       maximumPacketSize = iface.getMTU() - 32; // IP header(20 bytes) + UDP Header (8 bytes) + wiggle room (4 bytes)
       payloadSize = maximumPacketSize - SegmentHeader.HEADER_SIZE;
-      address = new InetSocketAddress(group, LogDataProtocolSettings.LOG_DATA_PORT);
+      address = new InetSocketAddress(group, port);
 
       channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
             .setOption(StandardSocketOptions.IP_MULTICAST_IF, iface);
-//      channel.join(group, iface);
 
       sendBuffer = ByteBuffer.allocate(maximumPacketSize);
    }

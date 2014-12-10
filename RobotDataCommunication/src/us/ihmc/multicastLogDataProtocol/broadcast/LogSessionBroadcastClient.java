@@ -17,6 +17,8 @@ import java.nio.channels.MembershipKey;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
+import org.apache.commons.lang.SystemUtils;
+
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest.AnnounceType;
 
@@ -25,7 +27,7 @@ public class LogSessionBroadcastClient extends Thread
    private static final long TIMEOUT = 5000;
 
    private final InetAddress announceGroup = InetAddress.getByAddress(LogSessionBroadcaster.announceGroupAddress);
-   private final InetSocketAddress address = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_PORT);
+   private final InetSocketAddress address;
 
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
 
@@ -38,6 +40,16 @@ public class LogSessionBroadcastClient extends Thread
       super("LogSessionBroadcastClient");
       this.iface = iface;
       this.listener = listener;
+      
+      if(SystemUtils.IS_OS_WINDOWS)
+      {
+         // Windows cannot bind to multicast group IPs
+         address = new InetSocketAddress(LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);
+      }
+      else
+      {
+         address = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);         
+      }
    }
 
    @Override

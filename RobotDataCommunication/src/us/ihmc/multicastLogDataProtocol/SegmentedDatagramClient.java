@@ -13,6 +13,8 @@ import java.nio.channels.MembershipKey;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
+import org.apache.commons.lang.SystemUtils;
+
 public class SegmentedDatagramClient extends Thread
 {
    private static final int timeout = 1000;
@@ -22,16 +24,18 @@ public class SegmentedDatagramClient extends Thread
    private final NetworkInterface iface;
    private final InetAddress group;
    private final LogPacketHandler handler;
+   private final int port;
 
    private final SegmentedPacketBuffer[] ringBuffer = new SegmentedPacketBuffer[PACKAGE_BUFFER];
 
-   public SegmentedDatagramClient(long sessionId, NetworkInterface iface, InetAddress group, LogPacketHandler handler)
+   public SegmentedDatagramClient(long sessionId, NetworkInterface iface, InetAddress group, int port, LogPacketHandler handler)
    {
       super("SegmentedDataClient" + sessionId);
       this.sessionId = sessionId;
       this.iface = iface;
       this.group = group;
       this.handler = handler;
+      this.port = port;
    }
 
    private boolean checkComplete(int i)
@@ -105,7 +109,17 @@ public class SegmentedDatagramClient extends Thread
    @Override
    public void run()
    {
-      InetSocketAddress receiveAddress = new InetSocketAddress(group, LogDataProtocolSettings.LOG_DATA_PORT);
+      InetSocketAddress receiveAddress;
+      if(SystemUtils.IS_OS_WINDOWS)
+      {
+         // Windows doesn't allow binding to group IPs
+         receiveAddress = new InetSocketAddress(port);
+      }
+      else
+      {
+         receiveAddress = new InetSocketAddress(group, port);
+      }
+      
       SegmentHeader header = new SegmentHeader();
 
       ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);

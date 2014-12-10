@@ -25,7 +25,8 @@ public class YoVariableConsumer implements LogPacketHandler
    private final long sessionId;
    private final NetworkInterface iface;
    private final InetAddress group;
-
+   private final int port;
+   
    private final List<YoVariable<?>> variables;
    private final List<JointState<?>> jointStates;
    private final YoVariablesUpdatedListener listener;
@@ -38,11 +39,12 @@ public class YoVariableConsumer implements LogPacketHandler
    private SegmentedDatagramClient client;
    private ThreadedLogPacketHandler updateHandler;
 
-   public YoVariableConsumer(long sessionId, NetworkInterface iface, byte[] group, List<YoVariable<?>> variables, List<JointState<?>> jointStates,
+   public YoVariableConsumer(long sessionId, NetworkInterface iface, byte[] group, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates,
          YoVariablesUpdatedListener listener)
    {
       this.sessionId = sessionId;
       this.iface = iface;
+      this.port = port;
       try
       {
          this.group = InetAddress.getByAddress(group);
@@ -65,7 +67,7 @@ public class YoVariableConsumer implements LogPacketHandler
       updateHandler = new ThreadedLogPacketHandler(this, 128);
       updateHandler.start();
 
-      client = new SegmentedDatagramClient(sessionId, iface, group, updateHandler);
+      client = new SegmentedDatagramClient(sessionId, iface, group, port, updateHandler);
       client.start();
       
    }

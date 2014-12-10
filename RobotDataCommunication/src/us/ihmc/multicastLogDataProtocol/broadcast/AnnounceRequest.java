@@ -40,6 +40,7 @@ public class AnnounceRequest
    public AnnounceRequest.AnnounceType type;
    public long sessionID;
    public byte[] group = new byte[4];
+   public short dataPort;
    public byte[] controlIP = new byte[4];
    public short controlPort;
    public byte[] cameras;
@@ -58,6 +59,7 @@ public class AnnounceRequest
       this.type = original.type;
       this.sessionID = original.sessionID;
       System.arraycopy(original.group, 0, group, 0, group.length);
+      this.dataPort = original.dataPort;
       System.arraycopy(original.controlIP, 0, controlIP, 0, controlIP.length);
       this.controlPort = original.controlPort;
       this.name = new String(original.name);
@@ -70,11 +72,12 @@ public class AnnounceRequest
 
    public boolean readHeader(ByteBuffer buffer)
    {
-      if (buffer.remaining() >= 17)
+      if (buffer.remaining() >= 19)
       {
          type = AnnounceType.fromHeader(buffer.get());
          sessionID = buffer.getLong();
          buffer.get(group);
+         dataPort = buffer.getShort();
          buffer.get(controlIP);
          controlPort = buffer.getShort();
          return true;
@@ -125,7 +128,7 @@ public class AnnounceRequest
       {
          return false;
       }
-      
+
       return true;
    }
 
@@ -137,6 +140,7 @@ public class AnnounceRequest
       buffer.put((byte) type.getHeader());
       buffer.putLong(sessionID);
       buffer.put(group);
+      buffer.putShort(dataPort);
       buffer.put(controlIP);
       buffer.putShort(controlPort);
       if (cameras != null)
@@ -218,6 +222,16 @@ public class AnnounceRequest
    public void setControlPort(int controlPort)
    {
       this.controlPort = (short) controlPort;
+   }
+
+   public int getDataPort()
+   {
+      return dataPort & 0xFFFF;
+   }
+
+   public void setDataPort(int dataPort)
+   {
+      this.dataPort = (short) dataPort;
    }
 
    public boolean isLog()
