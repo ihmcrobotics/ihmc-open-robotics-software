@@ -8,7 +8,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 {
-	   us.ihmc.robotDataCommunication.YoVariableConnectionBurstTest.class
+//	   us.ihmc.robotDataCommunication.YoVariableConnectionBurstTest.class
 })
 
 
