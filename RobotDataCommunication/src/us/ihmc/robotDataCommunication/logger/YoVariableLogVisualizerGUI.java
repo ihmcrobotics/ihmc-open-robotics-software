@@ -15,16 +15,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.movies.MovieFileFilter;
+import us.ihmc.utilities.SwingUtils;
 
 public class YoVariableLogVisualizerGUI extends JPanel
 {
@@ -230,7 +231,16 @@ public class YoVariableLogVisualizerGUI extends JPanel
          @Override
          public void stateChanged(ChangeEvent e)
          {
-            currentTime.setText(slider.getValue() + "");
+            final String val = String.valueOf(slider.getValue());
+            SwingUtilities.invokeLater(new Runnable()
+            {
+               
+               @Override
+               public void run()
+               {
+                  currentTime.setText(val);
+               }
+            });
             seek(slider.getValue());
          }
       });
