@@ -185,7 +185,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    @Override
    public final void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> jointStates,
-         YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView)
+         YoGraphicsListRegistry yoGraphicsListRegistry, int bufferSize, boolean showOverheadView)
    {
 
       if (logModelLoader == null)
@@ -204,6 +204,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
+      scs.setFastSimulate(true, 50);
 
       scs.addButton(disconnectButton);
       disconnectButton.addActionListener(new ActionListener()
@@ -255,5 +256,12 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       YoVariableClient client = new YoVariableClient("127.0.0.1", new SCSVisualizer(32169, true), "remote", false);
       client.start();
+   }
+
+   @Override
+   public void timestampReceived(long timestamp)
+   {
+      // TODO Auto-generated method stub
+      
    }
 }

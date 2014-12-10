@@ -9,11 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -37,12 +33,6 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogCropper;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
-import us.ihmc.utilities.SwingUtils;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.Joint;
@@ -50,6 +40,14 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.utilities.SwingUtils;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener
 {
@@ -354,16 +352,8 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
-      File logdata = new File(selectedFile, logProperties.getVariableDataFile());
-      if (!logdata.exists())
-      {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
-      }
-      @SuppressWarnings("resource")
-      final FileChannel logChannel = new FileInputStream(logdata).getChannel();
-
-      robot = new YoVariableLogPlaybackRobot(robotModel.getGeneralizedRobotModel(), robotModel.getJointMap(), parser.getJointStates(),
-            parser.getYoVariablesList(), logChannel, scs);
+      robot = new YoVariableLogPlaybackRobot(selectedFile, robotModel.getGeneralizedRobotModel(), robotModel.getJointMap(), parser.getJointStates(),
+            parser.getYoVariablesList(), logProperties, scs);
 
       double dt = parser.getDt();
       System.out.println(getClass().getSimpleName() + ": dt set to " + dt);

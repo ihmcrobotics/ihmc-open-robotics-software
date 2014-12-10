@@ -7,7 +7,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -57,6 +56,7 @@ public class LogVisualizer
       {
          System.out.println("loading log from folder:" + logFile);
          scs = new SimulationConstructionSet(true, bufferSize);
+         scs.setFastSimulate(true, 50);
          readLogFile(logFile, showOverheadView);
       }
       else
@@ -111,14 +111,8 @@ public class LogVisualizer
          generalizedSDFRobotModel = this.generalizedSDFRobotModel;
       }
 
-      File logdata = new File(selectedFile, logProperties.getVariableDataFile());
-      if (!logdata.exists())
-      {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
-      }
-      final FileChannel logChannel = new FileInputStream(logdata).getChannel();
 
-      robot = new YoVariableLogPlaybackRobot(generalizedSDFRobotModel, jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
+      robot = new YoVariableLogPlaybackRobot(selectedFile, generalizedSDFRobotModel, jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,scs);
       scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();

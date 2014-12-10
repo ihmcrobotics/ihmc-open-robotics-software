@@ -19,13 +19,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.movies.MovieFileFilter;
-import us.ihmc.utilities.SwingUtils;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableLogVisualizerGUI extends JPanel
 {
@@ -252,7 +251,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          {
             if (scs.isSimulating())
             {
-               slider.setValue((int) ((LongYoVariable) v).getLongValue());
+               slider.setValue((int) ((IntegerYoVariable) v).getIntegerValue());
             }
          }
       });

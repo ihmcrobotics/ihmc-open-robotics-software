@@ -32,7 +32,6 @@ public class YoVariableConsumer implements LogPacketHandler
 
    private long packetNumber = 0;
 
-   private int bufferSize;
    private ByteBuffer decompressed;
 
    private CRC32 crc32 = new CRC32();
@@ -59,9 +58,8 @@ public class YoVariableConsumer implements LogPacketHandler
 
    }
 
-   public void start(int numberOfVariables, int numberOfJointStateVariables)
+   public void start(int bufferSize)
    {
-      bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
       decompressed = ByteBuffer.allocate(bufferSize);
 
       updateHandler = new ThreadedLogPacketHandler(this, 128);
@@ -160,8 +158,7 @@ public class YoVariableConsumer implements LogPacketHandler
    @Override
    public void timestampReceived(long timestamp)
    {
-      // TODO Auto-generated method stub
-
+         listener.timestampReceived(timestamp);
    }
 
    @Override

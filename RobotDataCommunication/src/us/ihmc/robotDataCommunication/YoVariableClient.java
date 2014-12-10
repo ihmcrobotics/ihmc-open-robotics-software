@@ -89,13 +89,18 @@ public class YoVariableClient
       
       logControlClient.connect();
       logControlClient.waitForHandshake();
-      listener.start(logControlClient.getModelLoader(), logControlClient.getRootRegistry(), logControlClient.getJointStates(), logControlClient.getDynamicGraphicObjectsListRegistry(), showOverheadView);
+
+      int numberOfVariables = logControlClient.getNumberOfVariables();
+      int numberOfJointStateVariables = logControlClient.getNumberOfJointStateVariables();
+      int bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
+      
+      listener.start(logControlClient.getModelLoader(), logControlClient.getRootRegistry(), logControlClient.getJointStates(), logControlClient.getDynamicGraphicObjectsListRegistry(), bufferSize, showOverheadView);
       
       if (listener.changesVariables())
       {
          logControlClient.startVariableChangedProducers();
       }
-      yoVariableConsumer.start(logControlClient.getNumberOfVariables(), logControlClient.getNumberOfJointStateVariables());
+      yoVariableConsumer.start(bufferSize);
 
       state = ClientState.RUNNING;
    }

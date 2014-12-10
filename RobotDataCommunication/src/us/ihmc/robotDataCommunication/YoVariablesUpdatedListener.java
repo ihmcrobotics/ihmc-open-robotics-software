@@ -20,7 +20,7 @@ public interface YoVariablesUpdatedListener
 
    public void receivedUpdate(long timestamp, ByteBuffer buf);
 
-   public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView);
+   public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, int bufferSize, boolean showOverheadView);
 
    public void disconnected();
 
@@ -29,5 +29,7 @@ public interface YoVariablesUpdatedListener
    public void receiveTimedOut(long timeoutInMillis);
 
    public long getDisplayOneInNPackets();
+
+   public void timestampReceived(long timestamp);
 
 }
