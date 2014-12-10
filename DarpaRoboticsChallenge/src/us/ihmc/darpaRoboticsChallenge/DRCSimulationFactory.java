@@ -70,7 +70,14 @@ public class DRCSimulationFactory
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
       
-      yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP("10.66.171.20"), drcRobotModel.getEstimatorDT());
+      if(LogSettings.SIMULATION.isLog())
+      {
+         yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP("10.66.171.20"), drcRobotModel.getEstimatorDT());
+      }
+      else
+      {
+         yoVariableServer = null;
+      }
 
       Robot[] allSimulatedRobots = setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
       scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
