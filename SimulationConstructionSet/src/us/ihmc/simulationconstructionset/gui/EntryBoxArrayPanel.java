@@ -24,9 +24,7 @@ public class EntryBoxArrayPanel extends JPanel
 
    public static final int MAX_ENTRY_BOXES = 100; // 40;
 
-   private JButton plusButton;
-   private JButton minusButton;
-
+  
    private ArrayList<YoEntryBox> entryBoxesOnThisPanel;
    private SelectedVariableHolder selectedVariableHolder;
    private final FlowLayout layout;
@@ -35,15 +33,12 @@ public class EntryBoxArrayPanel extends JPanel
    private TimerTask alertChangeListenersTask;
    private final long OBSERVER_NOTIFICATION_PERIOD = 250;
 
-   public EntryBoxArrayPanel(Container frame, SelectedVariableHolder holder, DoubleYoVariable[] varsToEnter, JButton plusButton, JButton minusButton)
+   public EntryBoxArrayPanel(Container frame, SelectedVariableHolder holder, DoubleYoVariable[] varsToEnter)
    {
       this.setName("EntryBoxArrayPanel");
 
-      this.plusButton = plusButton;
-      this.minusButton = minusButton;
 
-      this.add(plusButton);
-      this.add(minusButton);
+     
 
       layout = new FlowLayout(FlowLayout.LEFT, 0, 0);
       this.setLayout(layout);
@@ -70,6 +65,39 @@ public class EntryBoxArrayPanel extends JPanel
 
       this.validate();
    }
+   
+   
+   public EntryBoxArrayPanel(Container frame, SelectedVariableHolder holder, ArrayList<YoVariable<?>> varsToEnter)
+   {
+      this.setName("EntryBoxArrayPanel");
+
+
+     
+
+      layout = new FlowLayout(FlowLayout.LEFT, 0, 0);
+      this.setLayout(layout);
+
+      this.selectedVariableHolder = holder;
+      this.setBackground(Color.lightGray);
+
+      this.setOpaque(true);
+      this.entryBoxesOnThisPanel = new ArrayList<YoEntryBox>();
+
+      this.addEntryBox(new YoEntryBox(this, selectedVariableHolder));
+
+      for (int i = 0; i < varsToEnter.size(); i++)
+      {
+         if (varsToEnter.get(i) != null)
+         {
+            addEntryBox(varsToEnter.get(i));
+         }
+      }
+
+      createAndStartPeriodicUIUpdateThread();
+
+      this.validate();
+   }
+   
 
    private void createAndStartPeriodicUIUpdateThread()
    {
@@ -102,8 +130,7 @@ public class EntryBoxArrayPanel extends JPanel
    {
       this.removeAll();
 
-      plusButton = null;
-      minusButton = null;
+  
 
       if (entryBoxesOnThisPanel != null)
       {
@@ -201,9 +228,7 @@ public class EntryBoxArrayPanel extends JPanel
       this.entryBoxesOnThisPanel.clear();
       this.removeAll();
 
-      this.add(plusButton);
-      this.add(minusButton);
-
+    
       updateRowsColumns();
 
    }
@@ -262,8 +287,7 @@ public class EntryBoxArrayPanel extends JPanel
    {
       int numRows = 1;
       int accumulatedWidth = 0;
-      accumulatedWidth += this.plusButton.getPreferredSize().width;
-      accumulatedWidth += this.minusButton.getPreferredSize().width;
+    
       int panelWidth = this.getWidth();
       if (panelWidth == 0)
       {
