@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.outputs;
+package us.ihmc.wholeBodyController;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
