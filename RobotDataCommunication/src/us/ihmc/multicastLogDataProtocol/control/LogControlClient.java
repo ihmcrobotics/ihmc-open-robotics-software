@@ -153,7 +153,7 @@ public class LogControlClient implements NetStateListener
       {         
          VariableChangeRequest request = new VariableChangeRequest();
          request.variableID = id;
-         request.requestedValue = v.getValueAsLongBits();
+         request.requestedValue = v.getValueAsDouble();
          client.consumeObject(request);
       }
    }
