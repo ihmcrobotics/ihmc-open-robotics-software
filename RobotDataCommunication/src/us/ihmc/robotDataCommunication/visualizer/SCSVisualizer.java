@@ -197,7 +197,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          this.robot = logModelLoader.createRobot();
       }
 
-      this.scs = new SimulationConstructionSet(robot, showGUI, bufferSize);
+      this.scs = new SimulationConstructionSet(robot, showGUI, this.bufferSize);
       if (hideViewport)
          scs.hideViewport();
       this.registry = scs.getRootRegistry();
