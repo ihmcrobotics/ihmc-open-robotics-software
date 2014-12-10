@@ -22,7 +22,7 @@ public class LogControlServer
 {
    protected static int RESOURCE_FOLDER_SIZE = 72000000;
 
-   private int port = LogDataProtocolSettings.LOG_DATA_PORT;
+   private int port = LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START;
    private KryoObjectServer server;
 
    private final LogModelProvider logModelProvider;

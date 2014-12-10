@@ -40,7 +40,7 @@ public class SegmentedPacketSimulation
       NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(host));
       InetAddress group = InetAddress.getByName("239.255.0.1");
       
-      SegmentedDatagramServer server = new SegmentedDatagramServer(sessionId, iface, group);
+      SegmentedDatagramServer server = new SegmentedDatagramServer(sessionId, iface, group, LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START);
       
       long timestamp = 10;
       ByteBuffer buffer = fillBuffer(150000);
@@ -58,7 +58,7 @@ public class SegmentedPacketSimulation
       NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(host));
       InetAddress group = InetAddress.getByName("239.255.0.1");
 
-      SegmentedDatagramClient client = new SegmentedDatagramClient(sessionId, iface, group, new Handler());
+      SegmentedDatagramClient client = new SegmentedDatagramClient(sessionId, iface, group, LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START, new Handler());
       client.start();
    }
    

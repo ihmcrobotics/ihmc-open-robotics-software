@@ -71,7 +71,7 @@ public class YoVariableProducer extends Thread
       SegmentedDatagramServer server;
       try
       {
-         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup());
+         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
       }
       catch (IOException e)
       {

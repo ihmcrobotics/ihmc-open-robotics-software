@@ -39,7 +39,7 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
       this.client = new LogSessionBroadcastClient(iface, this);
       JScrollPane scroller = new JScrollPane();
 
-      String[] columnNames = { "Controller", "Session ID", "IP", "Port", "Group" };
+      String[] columnNames = { "Controller", "Session ID", "IP", "Port", "Group", "Data port" };
       model = new DefaultTableModel(columnNames, 0)
       {
          private static final long serialVersionUID = 7807098301637938830L;
@@ -77,6 +77,7 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
       final String controlIp = ipToString(description.getControlIP());
       final int port = description.getControlPort();
       final String group = ipToString(description.getGroup());
+      final int dataPort = description.getDataPort();
       SwingUtilities.invokeLater(new Runnable()
       {
 
@@ -91,7 +92,7 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
                   return;
                }
             }
-            model.addRow(new Object[] { name, description, controlIp, port, group });
+            model.addRow(new Object[] { name, description, controlIp, port, group, dataPort });
 
          }
       });
@@ -205,6 +206,6 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
 
    public static void main(String[] args) throws IOException
    {
-      System.out.println(selectLogSession(NetworkInterface.getByName("eth1")));
+      System.out.println(selectLogSession(NetworkInterface.getByName("lo")));
    }
 }

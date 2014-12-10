@@ -60,7 +60,7 @@ public class YoVariableClient
      
       System.out.println("Starting YoVariableClient on " + iface);
       this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener, registryPrefix, listener.populateRegistry());
-      this.yoVariableConsumer = new YoVariableConsumer(request.getSessionID(), iface, request.getGroup(), logControlClient.getYoVariablesList(),
+      this.yoVariableConsumer = new YoVariableConsumer(request.getSessionID(), iface, request.getGroup(), request.getDataPort(), logControlClient.getYoVariablesList(),
             logControlClient.getJointStates(), listener);
       this.listener = listener;
       this.showOverheadView = showOverheadView;
