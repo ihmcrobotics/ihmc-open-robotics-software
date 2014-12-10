@@ -60,12 +60,13 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private FootstepPathPlanPacket currentPlan;
 	private List<FootstepData> stepsRequested;
 	private double ankleHeight = 0;
+	private int expectedIndex = 0;
 
 
 	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
 	{
 		super(outgoingCommunicationBridge);
-		DEBUG.set(true);
+		DEBUG.set(false);
 		this.yoTime = yoTime;
 		this.ankleHeight = ankleHeight;
 
@@ -88,6 +89,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 			return;
 		}
 		if (atGoal()){
+			debugPrintln("At goal, plan complete");
 			hasInputBeenSet.set(false);
 			return;
 		}
@@ -112,6 +114,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 			System.out.println("New plan received. Checking validity...");
 			if (planValid(newestPacket)){
 				currentPlan = newestPacket;
+				debugPrintln("Valid plan, new plan is:");
+				debugPrintln(currentPlan.pathPlan.toString());
 				hasNewPlan.set(true);
 				//stop current steps
 				visualizePlan(currentPlan);
@@ -152,6 +156,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 			plan.footstepUnknown.remove(0);
 		}
 		if (plan.pathPlan.size() < 2) return false;
+		if (approximatelyEqual(plan.pathPlan.get(1), currentLocation)) return false;
 		waitingForValidPlan.set(false);
 		return true;
 	}
@@ -161,16 +166,21 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		FootstepStatus newestPacket = footstepStatusQueue.getNewestPacket();
 		if (newestPacket != null){
 			//TODO: update current location and predicted location from the feedback
-			if (newestPacket.status == Status.STARTED){
-				System.out.println("Number of requested steps: " + stepsRequested.size());
-				System.out.println("footstep index: " + newestPacket.footstepIndex);
-				predictedLocation = stepsRequested.get(newestPacket.footstepIndex);
-				sendUpdateStart(predictedLocation);
+			if (newestPacket.status == Status.STARTED){ 
 				stepCompleted.set(false);
+				debugPrintln("Number of requested steps: " + stepsRequested.size());
+				debugPrintln("footstep index: " + newestPacket.footstepIndex);
+				debugPrintln("expected index: " + expectedIndex);
+				predictedLocation = stepsRequested.get(expectedIndex);
+				debugPrintln("Predicted now at " + predictedLocation.toString());
+				sendUpdateStart(predictedLocation);
+				expectedIndex++;
 			}else if (newestPacket.status == Status.COMPLETED){
-				currentLocation = predictedLocation;
 				stepCompleted.set(true);
+				currentLocation = predictedLocation;
+				debugPrintln("Step Completed, current location is: "+ currentLocation.toString());
 				if (newestPacket.footstepIndex == stepsRequested.size()-1){
+					debugPrintln("All steps complete");
 					allStepsCompleted.set(true);
 					executePlan.set(false);
 				}
@@ -182,6 +192,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private void processNextStep(){
 		if (!planValid(currentPlan)){
+			debugPrintln("current plan is invalid, waiting for new plan");
 			if (!waitingForValidPlan.getBooleanValue()){
 				sendUpdateStart(predictedLocation);
 				waitingForValidPlan.set(true);
@@ -193,7 +204,6 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	}
 
 	private void takeStep(){
-		System.out.println("Taking step.");
 		//remove current location from plan, element 1 is next step
 		currentPlan.pathPlan.remove(0);
 		currentPlan.footstepUnknown.remove(0);
@@ -256,10 +266,12 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 			}
 		}
 		stepsRequested = outgoingFootsteps.footstepDataList;
-		System.out.println(stepsRequested.size() + " steps sent to controller");
+		debugPrintln(stepsRequested.size() + " steps sent to controller");
+		debugPrintln(stepsRequested.toString());
 		outgoingFootsteps.setDestination(PacketDestination.CONTROLLER);
 		allStepsCompleted.set(false);
         sendPacketToController(outgoingFootsteps);
+        expectedIndex = 0;
     }
 	
 	private FootstepData adjustFootstepForAnkleHeight(FootstepData footstep){
@@ -278,11 +290,14 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		if (newestPacket != null)
 		{
 			if (newestPacket.execute){
+				debugPrintln("Executing path");
 				executePlan.set(true);
 			}else{
 				set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], newestPacket.getGoalSide());
 				requestFootstepPlan();
 				hasInputBeenSet.set(true);
+				executePlan.set(true); //for testing
+				debugPrintln("Requesting path");
 			}
 		}
 	}
@@ -327,7 +342,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		waitingForValidPlan.set(false);
 		hasInputBeenSet.set(false);
 		executePlan.set(false);
-		executeUnknown.set(true);
+		executeUnknown.set(false);
 		allStepsCompleted.set(true);
 	}
 
@@ -393,5 +408,9 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	public boolean hasInputBeenSet()
 	{
 		return hasInputBeenSet.getBooleanValue();
+	}
+	
+	public void debugPrintln(String string){
+		if (DEBUG.getBooleanValue()) System.out.println(string);
 	}
 }
