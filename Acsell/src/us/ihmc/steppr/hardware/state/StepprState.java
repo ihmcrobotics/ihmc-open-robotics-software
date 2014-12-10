@@ -6,6 +6,7 @@ import java.util.EnumMap;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.acsell.parameters.StrainGaugeInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -49,7 +50,7 @@ public class StepprState
    private final double forceSensorToeXOffset = forceSensorXOffset + AnkleToCenterOfFoot;
    private final double forceSensorHeelXOffset = forceSensorXOffset - AnkleToCenterOfFoot;
    
-   private final boolean useToeSensorsOnlyForZForce=true;
+   private final boolean useToeSensorsOnlyForZForce=false;
    
    public StepprState(double dt, YoVariableRegistry parentRegistry)
    {
@@ -69,15 +70,18 @@ public class StepprState
    }
    
    
-   private StrainSensor getCalibratedJoint(StepprJoint joint)
+   private StrainSensor getCalibratedJointStrainGauge(StrainGaugeInformation sensorInfo)
    {
-      StrainSensor strainSensor=null;
-      if(joint.getStrainSensorBoard()!=null)
+      if(sensorInfo!=null)
       {
-         strainSensor = actuatorStates.get(joint.getStrainSensorBoard()).getStrainGuage(joint.getStrainSensorConnectorId());
-         strainSensor.setCalibration(joint.getStrainSensorGain(), joint.getStrainSensorOffset());
+         StrainSensor strainSensor = actuatorStates.get(sensorInfo.getStrainSensorBoard()).getStrainGuage(sensorInfo.getStrainSensorConnectorId());
+         strainSensor.setCalibration(sensorInfo.getStrainSensorGain(), sensorInfo.getStrainSensorOffset());
+         return strainSensor;
       }
-      return strainSensor;
+      else
+      {
+         return null;
+      }
    }
 
 
@@ -88,7 +92,7 @@ public class StepprState
          if (joint.isLinear())
          {
             StepprActuatorState actuator = actuatorStates.get(joint.getActuators()[0]);
-            StrainSensor strainSensor = getCalibratedJoint(joint);
+            StrainSensor strainSensor = getCalibratedJointStrainGauge(joint.getStrainGaugeInformation());
             jointStates.put(joint, new StepprLinearTransmissionJointState(joint.getSdfName(), joint.getRatio(), joint.hasOutputEncoder(), actuator, strainSensor, registry));
          }
       }
@@ -97,9 +101,9 @@ public class StepprState
      
       
       StepprKneeJointState leftKnee = new StepprKneeJointState(StepprJoint.LEFT_KNEE_Y, actuatorStates.get(StepprActuator.LEFT_KNEE),
-            actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), getCalibratedJoint(StepprJoint.LEFT_KNEE_Y),registry);
+            actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), getCalibratedJointStrainGauge(StepprJoint.LEFT_KNEE_Y.getStrainGaugeInformation()),registry);
       StepprKneeJointState rightKnee = new StepprKneeJointState(StepprJoint.RIGHT_KNEE_Y, actuatorStates.get(StepprActuator.RIGHT_KNEE),
-            actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT), getCalibratedJoint(StepprJoint.RIGHT_KNEE_Y), registry);
+            actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT), getCalibratedJointStrainGauge(StepprJoint.RIGHT_KNEE_Y.getStrainGaugeInformation()), registry);
 
       jointStates.put(StepprJoint.LEFT_KNEE_Y, leftKnee);
       jointStates.put(StepprJoint.RIGHT_KNEE_Y, rightKnee);
@@ -178,11 +182,16 @@ public class StepprState
             -(rightForceLeftToe+rightForceRightToe)*forceSensorToeXOffset);
       footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel+rightForceRightHeel+rightForceLeftToe+rightForceRightToe);
       
+      double rightFootStrainSensorZ = -rightFootSensorState.getStrainGuage(1).getCalibratedValue();
+      double leftFootStrainSensorZ = -leftFootSensorState.getStrainGuage(1).getCalibratedValue();
+    
       if(useToeSensorsOnlyForZForce)
       {
          footWrenches.get(RobotSide.LEFT).set(5, leftForceLeftHeel+leftForceRightHeel);
-//         footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel+rightForceRightHeel);         
-         footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel*2);         
+         footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel+rightForceRightHeel);         
+//         footWrenches.get(RobotSide.RIGHT).set(5, rightForceLeftHeel*2);
+//         footWrenches.get(RobotSide.LEFT).set(5, leftFootStrainSensorZ);
+//         footWrenches.get(RobotSide.RIGHT).set(5, rightFootStrainSensorZ);
       }
 
       

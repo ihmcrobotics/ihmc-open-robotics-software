@@ -270,13 +270,6 @@ public class StepprActuatorState
    {
       return quadratureCompositeStatorCurrent.getDoubleValue() * motorKt * kinematicDirection;
    }
-
-   @Deprecated
-   public StepprSlowSensor getSlowSensor(int value)
-   {
-      return slowSensors[value];
-   }
-   
    
    public StepprSlowSensor[] getSlowSensors()
    {

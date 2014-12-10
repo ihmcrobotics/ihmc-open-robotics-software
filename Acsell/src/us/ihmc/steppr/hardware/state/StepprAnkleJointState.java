@@ -25,18 +25,17 @@ public class StepprAnkleJointState
 
    private final DoubleYoVariable q_x;
    private final DoubleYoVariable qd_x;
-   
+
    private final DoubleYoVariable q_calc_x;
    private final DoubleYoVariable qd_calc_x;
-   
+
    private final DoubleYoVariable q_m_calc_leftActuator;
    private final DoubleYoVariable q_m_calc_rightActuator;
-   
+
    private final DoubleYoVariable tau_x;
 
    private double motorAngle[] = new double[2];
-   
-   
+
    public StepprAnkleJointState(RobotSide robotSide, StepprActuatorState rightActuator, StepprActuatorState leftActuator, YoVariableRegistry parentRegistry)
    {
       this.leftActuator = leftActuator;
@@ -45,23 +44,22 @@ public class StepprAnkleJointState
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Ankle";
       this.registry = new YoVariableRegistry(name);
 
-      
       this.q_y = new DoubleYoVariable(name + "_q_y", registry);
       this.qd_y = new DoubleYoVariable(name + "_qd_y", registry);
       this.q_calc_y = new DoubleYoVariable(name + "_q_calc_y", registry);
       this.qd_calc_y = new DoubleYoVariable(name + "_qd_calc_y", registry);
-      this.tau_y = new DoubleYoVariable(name + "_tau_y", registry);
+      this.tau_y = new DoubleYoVariable(name + "_tau_yPredictedCurrent", registry);
 
       this.q_x = new DoubleYoVariable(name + "_q_x", registry);
       this.qd_x = new DoubleYoVariable(name + "_qd_x", registry);
       this.q_calc_x = new DoubleYoVariable(name + "_q_calc_x", registry);
       this.qd_calc_x = new DoubleYoVariable(name + "_qd_calc_x", registry);
-      this.tau_x = new DoubleYoVariable(name + "_tau_x", registry);
-      
+
+      this.tau_x = new DoubleYoVariable(name + "_tau_xPredictedCurrent", registry);
+
       this.q_m_calc_leftActuator = new DoubleYoVariable(name + "_q_m_calc_leftActuator", registry);
       this.q_m_calc_rightActuator = new DoubleYoVariable(name + "_q_m_calc_rightActuator", registry);
 
-      
       parentRegistry.addChild(registry);
    }
 
@@ -71,7 +69,7 @@ public class StepprAnkleJointState
       motorAngle[1] = leftActuator.getMotorPosition();
       
       interpolator.updateAnkleState(motorAngle[0], motorAngle[1], rightActuator.getMotorVelocity(),
-            leftActuator.getMotorVelocity());
+            leftActuator.getMotorVelocity(), rightActuator.getMotorTorque(), rightActuator.getMotorTorque());
 
       this.q_calc_x.set(interpolator.getQAnkleX());
       this.q_calc_y.set(interpolator.getQAnkleY());
@@ -88,8 +86,12 @@ public class StepprAnkleJointState
       this.q_m_calc_rightActuator.set(interpolator.calculateMotor1Angle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
       this.q_m_calc_leftActuator.set(interpolator.calculateMotor2Angle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
 
+      //update tau
+      this.tau_x.set(interpolator.getTauAnkleX());
+      this.tau_y.set(interpolator.getTauAnkleY());
+      
    }
-   
+
    public void updateOffsets()
    {
       rightActuator.updateCanonicalAngle(q_m_calc_rightActuator.getDoubleValue(), 2.0 * Math.PI / 6.0);

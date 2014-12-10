@@ -220,7 +220,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMinStepWidth()
    {
-      return 0.15;
+      return 0.2;
    }
 
    @Override

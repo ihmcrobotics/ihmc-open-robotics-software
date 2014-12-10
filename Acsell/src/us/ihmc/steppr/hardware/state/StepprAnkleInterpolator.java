@@ -65,7 +65,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       Jit[3] = ScaledCubicApprox(pJitY, m2, m1); //Jit22
 
    }
-
+   
    public static void twobytwoInverseTranspose(double JToPack[], double Jit[])
    {
 
@@ -75,15 +75,28 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       JToPack[2] = -Jit[1] / det;
       JToPack[3] = Jit[0] / det;
    }
+   
+   public static void twobytwoInverse(double JToPack[], double Jit[])
+   {
+
+      double det = Jit[0] * Jit[3] - Jit[1] * Jit[2];
+      JToPack[0] = Jit[3] / det;
+      JToPack[1] = -Jit[1] / det;
+      JToPack[2] = -Jit[2] / det;
+      JToPack[3] = Jit[0] / det;
+   }
 
    private final double[] Jit = new double[4];
+   private final double[] Jt = new double[4];
    private double qAnkleX, qAnkleY;
    private double qdAnkleX, qdAnkleY;
 
    private double tauRightActuator, tauLeftActuator;
+   private double tauAnkleX, tauAnkleY;
 
    @Override
-   public void updateAnkleState(double motorAngleRight, double motorAngleLeft, double motorVelocityRight, double motorVelocityLeft)
+   public void updateAnkleState(double motorAngleRight, double motorAngleLeft, double motorVelocityRight, double motorVelocityLeft,
+         double tauMeasureAnkleRight, double tauMeasureAnkleLeft)
    {
       qAnkleX = ScaledCubicApprox(px, motorAngleRight, motorAngleLeft);
       qAnkleY = ScaledCubicApprox(py, motorAngleRight, motorAngleLeft);
@@ -92,6 +105,10 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 
       qdAnkleX = (Jit[0] * motorVelocityRight + Jit[2] * motorVelocityLeft) / N;
       qdAnkleY = (Jit[1] * motorVelocityRight + Jit[3] * motorVelocityLeft) / N;
+
+      twobytwoInverse(Jt, Jit);
+      tauAnkleX = (Jit[0] * tauMeasureAnkleRight + Jit[1] * tauMeasureAnkleLeft) * N; //this is desired torque at motor 1
+      tauAnkleY = (Jit[2] * tauMeasureAnkleRight + Jit[3] * tauMeasureAnkleLeft) * N; //this is desired torque at motor 2
 
    }
 
@@ -125,8 +142,8 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       JacobianInverseTranspose(Jit, motorAngleRight, motorAngleLeft);
       tauRightActuator = (Jit[0] * tauDesiredAnkleX + Jit[1] * tauDesiredAnkleY) / N; //this is desired torque at motor 1
       tauLeftActuator = (Jit[2] * tauDesiredAnkleX + Jit[3] * tauDesiredAnkleY) / N; //this is desired torque at motor 2
-
    }
+
    
    @Override
    public double calculateMotor1Angle(double ankleX, double ankleY)
@@ -145,6 +162,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    {
       return tauRightActuator;
    }
+   
 
    @Override
    public double getTauLeftActuator()
@@ -153,9 +171,22 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
    }
 
    @Override
+   public double getTauAnkleX()
+   {
+      return tauAnkleX;
+   }
+   @Override
+   public double getTauAnkleY()
+   {
+      return tauAnkleY;
+   }
+   
+   @Override
    public double getRatio()
    {
       return N;
    }
+
+
 
 }
