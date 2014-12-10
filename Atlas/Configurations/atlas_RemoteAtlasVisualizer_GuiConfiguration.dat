@@ -84,6 +84,18 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftToolRigidBody.leftToolRigidBodyObjectMass</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes>enablePushRecovery</Entry Boxes>
 
@@ -102,9 +114,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>2.996421426565348</Camera X>
- <Camera Y>-1.9625006848582285</Camera Y>
- <Camera Z>0.8195074999861178</Camera Z>
+ <Camera X>-7.532432321889552</Camera X>
+ <Camera Y>5.878163199559785</Camera Y>
+ <Camera Z>5.66514732799767</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -128,8 +140,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-1.6827947851112863</Fix X>
-<Fix Y>0.6925169382805616</Fix Y>
-<Fix Z>-0.38568896277662845</Fix Z>
+<Fix X>-3.336852751197918</Fix X>
+<Fix Y>-0.5660418163746728</Fix Y>
+<Fix Z>0.8208107499769006</Fix Z>
 </Fix Position>
 </Canvas 1>
