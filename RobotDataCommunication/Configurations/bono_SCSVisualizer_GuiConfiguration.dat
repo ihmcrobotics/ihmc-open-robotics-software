@@ -1,7 +1,19 @@
 <GraphGroup>
 	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.icpAdjustmentX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.icpAdjustmentY</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-<Entry Boxes>walk</Entry Boxes>
+<Entry Boxes>walk,desiredCoMHeight,icpAdjustmentX,inputComHeight</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -13,14 +25,14 @@
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-10.265676320609412</Camera Y>
- <Camera Z>1.2843784213739606</Camera Z>
+ <Camera Y>-4.873730233721732</Camera Y>
+ <Camera Z>0.9249153489147821</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

@@ -1,5 +1,17 @@
 <GraphGroup>
 	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.bono.t</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes></Entry Boxes>
 
@@ -19,8 +31,8 @@
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-10.117932755430047</Camera Y>
- <Camera Z>1.2745288503620031</Camera Z>
+ <Camera Y>-9.98256828429112</Camera Y>
+ <Camera Z>1.2655045522860746</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

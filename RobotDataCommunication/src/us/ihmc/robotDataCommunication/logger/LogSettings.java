@@ -5,7 +5,7 @@ public enum LogSettings
    ATLAS_IAN(true, 4, 5),
    VALKYRIE_IHMC(true, 0, 1),
    STEPPR_IHMC(true, 2, 3),
-   SIMULATION(false),
+   SIMULATION(true),
    BEHAVIOR(true), 
    EXO_X1A(false),
    EXO_HOPPER(false);

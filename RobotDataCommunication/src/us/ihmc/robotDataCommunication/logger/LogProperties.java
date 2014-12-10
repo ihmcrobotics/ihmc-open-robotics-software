@@ -155,4 +155,24 @@ public abstract class LogProperties extends Properties
    {
       return getProperty("model.resourceDirectories").split(",");
    }
+   
+   public void setVariablesIndexFile(String indexFileName)
+   {
+      setProperty("variables.index", indexFileName);
+   }
+   
+   public String getVariablesIndexFile()
+   {
+      return getProperty("variables.index");
+   }
+   
+   public void setCompressed(boolean compressed)
+   {
+      setProperty("variables.compressed", String.valueOf(compressed));
+   }
+   
+   public boolean getCompressed()
+   {
+      return Boolean.valueOf(getProperty("variables.compressed"));
+   }
 }

@@ -20,6 +20,7 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -27,53 +28,59 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    public static final String propertyFile = "robotData.log";
    private static final long connectTimeout = 20000;
-   private static final long disconnectTimeout = 5000; 
+   private static final long disconnectTimeout = 5000;
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bin";
    private static final String modelFilename = "model.sdf";
    private static final String modelResourceBundle = "resources.zip";
-   
+   private static final String indexFilename = "robotData.dat";
+
    private final Object synchronizer = new Object();
-   
+
    private final File directory;
    private final YoVariableLoggerOptions options;
    private FileChannel dataChannel;
+   private FileChannel indexChannel;
+
+   private final ByteBuffer indexBuffer = ByteBuffer.allocate(8);
+   private ByteBuffer compressedBuffer;
    
    private YoVariableClient yoVariableClient;
    private volatile boolean connected = false;
    private long totalTimeout = 0;
-  
+
    private final LogPropertiesWriter logProperties;
    private ArrayList<VideoDataLogger> videoDataLoggers = new ArrayList<VideoDataLogger>();
-   
+
    private final ArrayList<VideoSettings> cameras = new ArrayList<>();
    
    public YoVariableLoggerListener(File directory, AnnounceRequest request, YoVariableLoggerOptions options)
    {
-      this.directory = directory; 
+      this.directory = directory;
       this.options = options;
       logProperties = new LogPropertiesWriter(new File(directory, propertyFile));
       logProperties.setHandshakeFile(handshakeFilename);
       logProperties.setVariableDataFile(dataFilename);
-      
+      logProperties.setCompressed(true);
+      logProperties.setVariablesIndexFile(indexFilename);
       try
       {
          FileInputStream configuration = new FileInputStream(options.getConfigurationFile());
          List<VideoSettings> cameraSettings = VideoSettings.loadCameraSettings(configuration);
-         
+
          System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
-         for(int camera : request.getCameras())
+         for (int camera : request.getCameras())
          {
             cameras.add(cameraSettings.get(camera));
          }
-         
+
          configuration.close();
       }
-      catch(IOException e)
+      catch (IOException e)
       {
          throw new RuntimeException("Cannot load " + options.getConfigurationFile(), e);
       }
-     
+
    }
 
    public boolean changesVariables()
@@ -94,16 +101,15 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          throw new RuntimeException(e);
       }
-      
-      
-      if(handshake.modelLoaderClass != null)
+
+      if (handshake.modelLoaderClass != null)
       {
          logProperties.setModelLoaderClass(handshake.modelLoaderClass);
          logProperties.setModelName(handshake.modelName);
          logProperties.setModelResourceDirectories(handshake.resourceDirectories);
          logProperties.setModelPath(modelFilename);
          logProperties.setModelResourceBundlePath(modelResourceBundle);
-         
+
          File modelFile = new File(directory, modelFilename);
          File resourceFile = new File(directory, modelResourceBundle);
          try
@@ -114,42 +120,47 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
             resourceStream.write(handshake.resourceZip);
             resourceStream.close();
-            
-            
+
          }
          catch (IOException e)
          {
             throw new RuntimeException(e);
          }
-         
+
       }
-      
-      
+
    }
 
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
    {
       connected = true;
       totalTimeout = 0;
-      for(VideoDataLogger videoDataLogger : videoDataLoggers)
-      {
-         videoDataLogger.timestampChanged(timestamp);
-      }
       
+
       synchronized (synchronizer)
       {
-         if(dataChannel != null)
+         if (dataChannel != null)
          {
             try
             {
                buffer.clear();
-               dataChannel.write(buffer);
+               compressedBuffer.clear();
+               SnappyUtils.compress(buffer, compressedBuffer);
+               compressedBuffer.flip();
+               
+               
+               indexBuffer.clear();
+               indexBuffer.putLong(dataChannel.position());
+               indexBuffer.flip();
+               
+               indexChannel.write(indexBuffer);
+               dataChannel.write(compressedBuffer);
             }
             catch (IOException e)
             {
                throw new RuntimeException(e);
             }
-         }         
+         }
       }
    }
 
@@ -158,17 +169,18 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       try
       {
          dataChannel.close();
+         indexChannel.close();
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
-      
-      for(VideoDataLogger videoDataLogger : videoDataLoggers)
+
+      for (VideoDataLogger videoDataLogger : videoDataLoggers)
       {
          videoDataLogger.close();
       }
-      
+
       try
       {
          logProperties.store();
@@ -177,58 +189,64 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          e.printStackTrace();
       }
-      
-      if(!connected)
+
+      if (!connected)
       {
          System.err.println("Never started logging, cleaning up");
-         for(VideoDataLogger videoDataLogger : videoDataLoggers)
+         for (VideoDataLogger videoDataLogger : videoDataLoggers)
          {
             videoDataLogger.removeLogFiles();
          }
-         
+
          File handshakeFile = new File(directory, handshakeFilename);
-         if(handshakeFile.exists())
+         if (handshakeFile.exists())
          {
             System.out.println("Deleting handshake file");
             handshakeFile.delete();
          }
-         
+
          File properties = new File(directory, propertyFile);
-         if(properties.exists())
+         if (properties.exists())
          {
             System.out.println("Deleting properties file");
             properties.delete();
          }
-         
+
          File model = new File(directory, modelFilename);
-         if(model.exists())
+         if (model.exists())
          {
             System.out.println("Deleting model file");
             model.delete();
          }
-         
-         File resources = new File(directory,modelResourceBundle);
+
+         File resources = new File(directory, modelResourceBundle);
          {
             System.out.println("Deleting resource bundle");
             resources.delete();
          }
-         
+
          File dataFile = new File(directory, dataFilename);
-         if(dataFile.exists())
+         if (dataFile.exists())
          {
             System.out.println("Deleting data file");
             dataFile.delete();
          }
-         
-         if(directory.exists())
+
+         File indexFile = new File(directory, indexFilename);
+         if (indexFile.exists())
+         {
+            System.out.println("Deleting index file");
+            indexFile.delete();
+         }
+
+         if (directory.exists())
          {
             System.out.println("Deleting log directory");
             directory.delete();
          }
-         
-         
+
       }
-      else if(options.isEnableCookieJar())
+      else if (options.isEnableCookieJar())
       {
          System.out.println("Creating cookiejar");
          File cookieJarDirectory = new File(directory, "cookieJar");
@@ -238,7 +256,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          cookieJar.setHost(options.getCookieJarHost());
          cookieJar.setUser(options.getCookieJarUser());
          cookieJar.setRemoteDirectory(options.getCookieJarRemoteDirectory());
-         
+
          PipedCommandExecutor executor = new PipedCommandExecutor(cookieJar);
          try
          {
@@ -248,7 +266,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             e.printStackTrace();
          }
-         
+
       }
    }
 
@@ -260,9 +278,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    public void receiveTimedOut(long timeoutInMillis)
    {
       totalTimeout += timeoutInMillis;
-      if(connected)
+      if (connected)
       {
-         if(totalTimeout > disconnectTimeout)
+         if (totalTimeout > disconnectTimeout)
          {
             System.out.println("Timeout reached: " + totalTimeout + ". Connection lost, closing client.");
             yoVariableClient.close();
@@ -270,7 +288,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
       else
       {
-         if(totalTimeout > connectTimeout)
+         if (totalTimeout > connectTimeout)
          {
             System.out.println("Cannot connect to client, closing");
             yoVariableClient.close();
@@ -291,26 +309,29 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    @Override
    public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list,
-         YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView)
+         YoGraphicsListRegistry yoGraphicsListRegistry, int bufferSize, boolean showOverheadView)
    {
+      this.compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       File dataFile = new File(directory, dataFilename);
+      File indexFile = new File(directory, indexFilename);
       synchronized (synchronizer)
       {
          try
          {
             dataChannel = new FileOutputStream(dataFile, false).getChannel();
+            indexChannel = new FileOutputStream(indexFile, false).getChannel();
          }
          catch (FileNotFoundException e)
          {
             throw new RuntimeException(e);
-         }         
+         }
       }
-      
-      if(!options.getDisableVideo())
+
+      if (!options.getDisableVideo())
       {
          try
          {
-            for(VideoSettings camera : cameras)
+            for (VideoSettings camera : cameras)
             {
                videoDataLoggers.add(new VideoDataLogger(directory, logProperties, camera, options));
             }
@@ -323,5 +344,13 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
+   @Override
+   public void timestampReceived(long timestamp)
+   {
+      for (VideoDataLogger videoDataLogger : videoDataLoggers)
+      {
+         videoDataLogger.timestampChanged(timestamp);
+      }
+   }
 
 }
