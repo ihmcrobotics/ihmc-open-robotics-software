@@ -72,7 +72,7 @@ public class DRCSimulationFactory
       
       if(LogSettings.SIMULATION.isLog())
       {
-         yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP("10.66.171.20"), drcRobotModel.getEstimatorDT());
+         yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP("127.0.0.1"), drcRobotModel.getEstimatorDT());
       }
       else
       {
