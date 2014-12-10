@@ -4,7 +4,6 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -15,6 +14,7 @@ import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
