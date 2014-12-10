@@ -1,4 +1,4 @@
-package us.ihmc.utilities.kinematics;
+package us.ihmc.darpaRoboticsChallenge;
 
 //~--- non-JDK imports --------------------------------------------------------
 
@@ -11,8 +11,11 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
+import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
+import us.ihmc.utilities.kinematics.KinematicSolver;
+import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
