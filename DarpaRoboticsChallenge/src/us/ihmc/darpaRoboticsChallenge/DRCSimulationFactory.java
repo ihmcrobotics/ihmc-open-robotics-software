@@ -255,7 +255,10 @@ public class DRCSimulationFactory
 
    public void start()
    {
-      yoVariableServer.start();
+      if(yoVariableServer != null)
+      {
+         yoVariableServer.start();         
+      }
       Thread simThread = new Thread(scs, "SCS simulation thread");
       simThread.start();
    }
