@@ -1,24 +1,36 @@
 package us.ihmc.valkyrie.simulation;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.valkyrie.DiagnosticsWhenHangingController;
 import us.ihmc.valkyrie.HumanoidDiagnosticsWhenHangingSimulation;
+import us.ihmc.valkyrie.HumanoidJointPoseList;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmission;
+import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {
+   private final DiagnosticsWhenHangingController diagnosticsWhenHangingController;
+   
    public ValkyrieDiagnosticsWhenHangingSimulation()
    {
       DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(false, false);
@@ -26,13 +38,107 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
-      HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotModel, robotInitialSetup);
+      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
+      boolean robotIsHanging = true;
+      HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotIsHanging, robotModel, robotInitialSetup);
       humanoidDiagnosticsWhenHangingSimulation.rememberCorruptorVariableValues();
+
+      
+      diagnosticsWhenHangingController = humanoidDiagnosticsWhenHangingSimulation.getDiagnosticsWhenHangingController();
+      SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();
       
       //loadArmDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
 //      loadLegDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
 //      
 //      humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages();
+      
+      PrintTorqueOffsetsButton printTorqueOffsetsButton = new PrintTorqueOffsetsButton();
+      simulationConstructionSet.addButton(printTorqueOffsetsButton);
+   }
+   
+   
+   private class PrintTorqueOffsetsButton extends JButton implements ActionListener
+   {
+      private static final long serialVersionUID = 262981153765265286L;
+      
+      public PrintTorqueOffsetsButton()
+      {
+         super("PrintTorqueOffsets");
+         
+         this.addActionListener(this);
+      }
+
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+         printOffsetsForCoeffsForValkyrie();
+      }
+
+   }
+   
+   
+   
+   // Don't Delete! Fix this for Valkyrie for printing out the coeffs when the torque offsets are changed. 
+   // Make it be more general, just looking at the tau_off variables...
+   public void printOffsetsForCoeffsForValkyrie()
+   {
+      java.text.NumberFormat doubleFormat = new java.text.DecimalFormat(" 0.00;-0.00");
+
+      System.out.println();
+
+      ArrayList<OneDoFJoint> oneDoFJoints = diagnosticsWhenHangingController.getOneDoFJoints();
+      
+      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      {
+         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = diagnosticsWhenHangingController.getDiagnosticsWhenHangingHelper(oneDoFJoint);
+
+         if (diagnosticsWhenHangingHelper != null)
+         {
+            double torqueOffset = diagnosticsWhenHangingHelper.getTorqueOffset();
+            double torqueOffsetSign = diagnosticsWhenHangingController.getTorqueOffsetSign(oneDoFJoint);
+
+            double signedTorqueOffset = torqueOffset * torqueOffsetSign;
+
+            String offsetString = doubleFormat.format(signedTorqueOffset);
+            System.out.println(oneDoFJoint.getName() + " torque offset = " + offsetString);
+         }
+      }
+
+      System.out.println();
+
+      double reflectTop = 1.0;
+      double reflectBottom = -1.0;
+      boolean topJointFirst = true;
+
+      InefficientPushRodTransmission leftAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
+                                                                topJointFirst, null, null);
+
+      reflectBottom = 1.0;
+      InefficientPushRodTransmission rightAnkleTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.ANKLE, reflectTop, reflectBottom,
+                                                                 topJointFirst, null, null);
+
+      double[] leftAnkleForceOffsets = leftAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.LEFT));
+      double[] rightAnkleForceOffsets = rightAnkleTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getAnkleTorqueOffsets(RobotSide.RIGHT));
+
+      System.out.println("\nLeft ankle J5 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[0]));
+      System.out.println("Left ankle J6 force offset = " + doubleFormat.format(-leftAnkleForceOffsets[1]));
+
+      System.out.println("\nRight ankle J5 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[0]));
+      System.out.println("Right ankle J6 force offset = " + doubleFormat.format(-rightAnkleForceOffsets[1]));
+
+      reflectTop = -1.0;
+      reflectBottom = 1.0;
+      topJointFirst = false;
+
+      InefficientPushRodTransmission waistTransmission = new InefficientPushRodTransmission(PushRodTransmissionJoint.WAIST, reflectTop, reflectBottom,
+                                                            topJointFirst, null, null);
+
+      double[] waistForceOffsets = waistTransmission.jointToActuatorEffortAtZero(diagnosticsWhenHangingController.getWaistTorqueOffsets());
+
+      // TODO: Need to figure out why this is not seeming to work correctly...
+      System.out.println("\nWaist J2 force offset = " + doubleFormat.format(waistForceOffsets[0]));
+      System.out.println("Waist J3 force offset = " + doubleFormat.format(-waistForceOffsets[1]));
+
    }
    
    private void loadDataAndDoSomeOptimizationTests(HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation)
