@@ -40,6 +40,7 @@ import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotCont
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.net.TimestampProvider;
+import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -159,8 +160,8 @@ public class DRCSimulationFactory
       }
       drcEstimatorThread.setExternelPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
 
-      drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
-            globalDataProducer, yoVariableServer, gravity);
+      drcControllerThread = new DRCControllerThread(drcRobotModel, drcRobotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter,
+            globalDataProducer, yoVariableServer, gravity, drcRobotModel.getEstimatorDT());
       
 
       if (RUN_MULTI_THREADED)
