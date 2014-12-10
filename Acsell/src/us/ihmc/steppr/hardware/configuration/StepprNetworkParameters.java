@@ -3,7 +3,7 @@ package us.ihmc.steppr.hardware.configuration;
 public class StepprNetworkParameters
 {
 
-   public static final String CONTROL_COMPUTER_HOST = "127.0.0.1";
+   public static final String CONTROL_COMPUTER_HOST = "10.66.171.22";
    public static final String LOGGER_HOST = "10.66.171.42";
 
    public static final int VARIABLE_SERVER_PORT = 5555;

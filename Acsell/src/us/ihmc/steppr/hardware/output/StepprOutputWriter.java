@@ -55,7 +55,7 @@ public class StepprOutputWriter implements DRCOutputWriter
       
 
      yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName()+"_tauSpringCorrection", registry));
-     yoTauSpring.put(StepprJoint.LEFT_HIP_Y, new DoubleYoVariable(StepprJoint.LEFT_HIP_Y.getSdfName()+"_tauSpringCorrection", registry));
+     yoTauSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName()+"_tauSpringCorrection", registry));
       
    }
 
@@ -114,7 +114,7 @@ public class StepprOutputWriter implements DRCOutputWriter
                yoTauSpring.get(joint).set(tauSpring);               
             }
             
-            jointCommand.setTauDesired(tau-tauSpring, rawSensorData);
+            jointCommand.setTauDesired(tau, rawSensorData);
             jointCommand.setDamping(kd);
 
          }

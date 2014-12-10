@@ -38,7 +38,7 @@ jar {
 
 task deploy(dependsOn: assemble) {
 
-	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.20/root/acsell")
+	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.22/root/acsell")
 	def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo() 
 	auth.userName = 'root'
 	auth.password = 'unknownpw'

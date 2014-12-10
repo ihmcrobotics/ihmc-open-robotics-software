@@ -6,6 +6,7 @@ import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footWidth;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.utilities.math.UnitConversions;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.Matrix3d;
@@ -106,6 +107,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
 
          thighContactPoints.put(robotSide, offsetsForSide);
       }
+      double heelContactPointShiftForward=1.0*UnitConversions.INCH_TO_METER;
       for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
@@ -115,8 +117,8 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
          footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
          footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0+heelContactPointShiftForward, -footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0+heelContactPointShiftForward, footWidth / 2.0)));
 
          for (Pair<String, Point2d> footGC : footGCs)
          {
