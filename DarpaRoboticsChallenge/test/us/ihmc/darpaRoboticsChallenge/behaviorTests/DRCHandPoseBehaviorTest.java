@@ -41,7 +41,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private ObjectCommunicator networkObjectCommunicator = new LocalObjectCommunicator();
+   private ObjectCommunicator controllerCommunicator = new LocalObjectCommunicator();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -62,7 +62,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
               DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie, true, getRobotModel());
 
       
@@ -74,12 +74,11 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
 
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-      networkObjectCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       ObjectCommunicator junkyObjectCommunicator = new LocalObjectCommunicator();
 
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, networkObjectCommunicator, robotToTest.getRobotsYoVariableRegistry());
-
+      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
 
       // setupCameraForHandstepsOnWalls();
    }
@@ -111,32 +110,28 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
 
-
+      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalObjectConsumer());
+      
       fullRobotModel.updateFrames();
       //ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSideToTest);
       
-      FramePose handPose = new FramePose();  
-      handPose.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+      FramePose handPoseStart = new FramePose();  
+      handPoseStart.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
       
-      handPose.changeFrame(ReferenceFrame.getWorldFrame());
-      handPose.setZ(handPose.getZ() + 0.2);
-
-//      Point3d position = new Point3d(0.5, 0.35, 1.0);
-//      Quat4d orientation = new Quat4d(-1.0, 0.0, 0.0, 0.5 * Math.PI);
-//      
-//
-//      Vector3d translation = new Vector3d(position.getX(), position.getY(), position.getZ());
+      handPoseStart.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      FramePose handPoseTarget = new FramePose(handPoseStart);  
+      handPoseTarget.setZ(handPoseTarget.getZ() + 0.2);
 
       RigidBodyTransform pose = new RigidBodyTransform(); //handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      handPose.getPose(pose);
+      handPoseTarget.getPose(pose);
       
       double swingTrajectoryTime = 2.0;
       
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime + 1.0;
-      
-   
+       
       Thread behaviorThread = new Thread()
       {
          public void run()
@@ -157,7 +152,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
                   double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
                   simStillRunning = timeSpentSimulating < simulationRunTime;
                   
-                  handPoseBehavior.doControl();        
+                  handPoseBehavior.doControl();    
                }             
             }
          }
@@ -166,18 +161,22 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       behaviorThread.start();
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-   
       
+      fullRobotModel.updateFrames();
+      FramePose handPoseEnd = new FramePose();  
+      handPoseEnd.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+      handPoseEnd.changeFrame(ReferenceFrame.getWorldFrame());
       
-      System.out.println("testSimpleHandPoseMove(): behaviorDone=" + handPoseBehavior.isDone());
+      //double positionDistance = handPoseEnd.getPosition(tupleToPack);
       
+      assertTrue(handPoseEnd.epsilonEquals(handPoseTarget, 1e-6));      
       assertTrue(success);
       assertTrue(handPoseBehavior.isDone());
 
-
-
       BambooTools.reportTestFinishedMessage();
    }
+   
+   
 
 
 }
