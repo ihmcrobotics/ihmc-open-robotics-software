@@ -6,7 +6,7 @@ public enum LogSettings
    VALKYRIE_IHMC(true, 0, 1),
    STEPPR_IHMC(true, 2, 3),
    SIMULATION(false),
-   BEHAVIOR(true), 
+   BEHAVIOR(false), 
    EXO_X1A(false),
    EXO_HOPPER(false);
 
