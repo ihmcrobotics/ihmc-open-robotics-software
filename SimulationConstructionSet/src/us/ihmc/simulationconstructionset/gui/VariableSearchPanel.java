@@ -60,7 +60,7 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
    private final SelectedVariableHolder holder;
    private JLabel label;
 
-   public VariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel, EntryBoxArrayPanel entryBoxArrayPanel,
+   public VariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel,
                               BookmarkedVariablesHolder bookmarkedVariablesHolder, CombinedVarPanel combinedVarPanel)
    {
       super(new BorderLayout());

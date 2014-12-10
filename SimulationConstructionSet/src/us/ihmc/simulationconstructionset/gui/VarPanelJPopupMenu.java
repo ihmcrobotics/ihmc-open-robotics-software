@@ -15,16 +15,15 @@ public class VarPanelJPopupMenu extends JPopupMenu
    private static final long serialVersionUID = -1080363015468056576L;
 
    private final GraphArrayPanel graphArrayPanel;
-   private final EntryBoxArrayPanel entryBoxArrayPanel;
+   private final EntryBoxArrayTabbedPanel entryBoxArrayPanel;
    private final SelectedVariableHolder selectedVariableHolder;
    private final CombinedVarPanel combinedVarPanel;
    private final BookmarkedVariablesHolder bookmarkedVariablesHolder;
 
    private JMenuItem bookmarkVariable;
-//   private JMenuItem showNameSpaces;
+   //   private JMenuItem showNameSpaces;
 
    private JMenuItem addToSliderBoard;
-
 
    public VarPanelJPopupMenu(SelectedVariableHolder selectedVariableHolder)
    {
@@ -37,8 +36,8 @@ public class VarPanelJPopupMenu extends JPopupMenu
       this.bookmarkedVariablesHolder = null;
    }
 
-   public VarPanelJPopupMenu(GraphArrayPanel graphArrayPanel, EntryBoxArrayPanel entryBoxArrayPanel, SelectedVariableHolder selectedVariableHolder,
-                             CombinedVarPanel combinedVarPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder)
+   public VarPanelJPopupMenu(GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel, SelectedVariableHolder selectedVariableHolder,
+         CombinedVarPanel combinedVarPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder)
    {
       super();
       this.graphArrayPanel = graphArrayPanel;
@@ -135,14 +134,13 @@ public class VarPanelJPopupMenu extends JPopupMenu
          {
             if (combinedVarPanel != null)
             {
-                
+
                combinedVarPanel.setVisibleVarPanel(selectedVariableHolder.getSelectedVariable().getYoVariableRegistry());
             }
 
             setVisible(false);
          }
       });
-
 
       this.add(showNameSpace);
 
@@ -159,7 +157,6 @@ public class VarPanelJPopupMenu extends JPopupMenu
             setVisible(false);
          }
       });
-
 
       this.add(displayNameSpaces);
 

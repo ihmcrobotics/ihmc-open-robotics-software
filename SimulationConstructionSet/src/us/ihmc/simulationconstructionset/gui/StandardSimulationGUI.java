@@ -154,7 +154,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    private JMenuBar menuBar;
    private CombinedVarPanel myCombinedVarPanel;
    private DataBuffer myDataBuffer;
-   protected EntryBoxArrayPanel myEntryBoxArrayPanel;
+   protected EntryBoxArrayTabbedPanel myEntryBoxArrayPanel;
    protected GraphArrayPanel myGraphArrayPanel;
    private JPanel numericContentPane;
 
@@ -327,7 +327,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return null;
    }
 
-   public GraphArrayWindow createNewGraphWindow(final String graphGroupName, final int screenID, final Point windowLocation, final Dimension windowSize, final boolean maximizeWindow)
+   public GraphArrayWindow createNewGraphWindow(final String graphGroupName, final int screenID, final Point windowLocation, final Dimension windowSize,
+         final boolean maximizeWindow)
    {
       if (graphArrayWindows == null)
       {
@@ -514,8 +515,10 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       if (robots != null)
       {
+         myEntryBoxArrayPanel = new EntryBoxArrayTabbedPanel(parentContainer, selectedVariableHolder);
+
          myCombinedVarPanel = new CombinedVarPanel(new YoVariableDoubleClickListener(myDataBuffer, jFrame), jFrame, bookmarkedVariablesHolder,
-               selectedVariableHolder, myEntryBoxArrayPanel, sim, rootRegistry);
+               selectedVariableHolder, null, sim, rootRegistry);
          VariableSearchPanel variableSearchPanel = new VariableSearchPanel(selectedVariableHolder, myDataBuffer, myGraphArrayPanel, myEntryBoxArrayPanel,
                bookmarkedVariablesHolder, myCombinedVarPanel);
          myCombinedVarPanel.addVariableSearchPanel(variableSearchPanel);
@@ -535,7 +538,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                }
                saveRegistryConfigurations();
 
-               
                if (sim.systemExitDisabled())
                   sim.closeAndDispose();
                else
@@ -590,10 +592,10 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                {
                   notifyExitActionListeners();
 
-//                  if (standardGUIActions != null)
-//                  {
-//                     saveDefaultGUIConfigurationFile();
-//                  }
+                  //                  if (standardGUIActions != null)
+                  //                  {
+                  //                     saveDefaultGUIConfigurationFile();
+                  //                  }
 
                }
             };
@@ -718,7 +720,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       // Numeric Entry Boxes on the Bottom:
       if (robots != null)
       {
-         DoubleYoVariable[] varsToEnter = new DoubleYoVariable[0];
          JButton plusButton = new JButton("+");
          JButton minusButton = new JButton("-");
 
@@ -726,21 +727,25 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          {
             public void actionPerformed(ActionEvent e)
             {
-               String nextName = entryBoxGroupList.getNextGroupName(selectedEntryBoxGroupName);
 
-               selectEntryBoxGroup(nextName);
+               myEntryBoxArrayPanel.addEmptyTab();
+
+               //
+               //               String nextName = entryBoxGroupList.getNextGroupName(selectedEntryBoxGroupName);
+               //
+               //               selectEntryBoxGroup(nextName);
             }
          });
          minusButton.addActionListener(new ActionListener()
          {
             public void actionPerformed(ActionEvent e)
             {
-               String nextName = entryBoxGroupList.getPreviousGroupName(selectedEntryBoxGroupName);
 
-               selectEntryBoxGroup(nextName);
+               myEntryBoxArrayPanel.getCurrentPanel().closeAndDispose();
+               myEntryBoxArrayPanel.remove(myEntryBoxArrayPanel.getCurrentPanel());
+
             }
          });
-         myEntryBoxArrayPanel = new EntryBoxArrayPanel(parentContainer, selectedVariableHolder, varsToEnter, plusButton, minusButton);
 
          /*
           * JPanel entryBoxArrayPanelHolder = new JPanel();
@@ -761,9 +766,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
          graphArrayAndButtonPanel.add("South", graphButtonPanel);
 
+         JPanel entryBoxPanel = new JPanel(new BorderLayout());
+         JPanel entryBoxControlPanel = new JPanel(new GridLayout(1, 2));
+         entryBoxControlPanel.add(plusButton);
+         entryBoxControlPanel.add(minusButton);
+
+         entryBoxPanel.add(entryBoxControlPanel, BorderLayout.WEST);
+         entryBoxPanel.add(myEntryBoxArrayPanel, BorderLayout.CENTER);
+
          JPanel graphArrayButtonAndEntryBoxPanel = new JPanel(new BorderLayout());
          graphArrayButtonAndEntryBoxPanel.add(graphArrayAndButtonPanel, BorderLayout.CENTER);
-         graphArrayButtonAndEntryBoxPanel.add(myEntryBoxArrayPanel, BorderLayout.SOUTH);
+         graphArrayButtonAndEntryBoxPanel.add(entryBoxPanel, BorderLayout.SOUTH);
 
          JSplitPane jSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, myCombinedVarPanel, graphArrayButtonAndEntryBoxPanel);
          jSplitPane.setDividerSize(3);
@@ -825,7 +838,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       buttonPanel.add(label);
       buttonPanel.updateUI();
    }
-   
+
    public void addTextField(JTextField textField)
    {
       buttonPanel.add(textField);
@@ -1188,7 +1201,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       repaintWindows();
    }
-   
+
    public void setInOutPointFullBuffer()
    {
       myDataBuffer.setInOutPointFullBuffer();
@@ -1200,7 +1213,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       repaintWindows();
    }
-
 
    /**
     * Gets the KeyPoints in the cropped data
@@ -1421,9 +1433,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    protected void frameResized()
    {
-      if (myEntryBoxArrayPanel != null)
+      if (myEntryBoxArrayPanel != null && myEntryBoxArrayPanel.getCurrentPanel() != null)
       {
-         myEntryBoxArrayPanel.updateRowsColumns();
+         myEntryBoxArrayPanel.getCurrentPanel().updateRowsColumns();
 
          // myEntryBoxArrayPanel.repaint();
          myEntryBoxArrayPanel.updateUI(); // +++ JEP: This works, but not sure if this is the way you're supposed to do this...
@@ -1645,7 +1657,32 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public EntryBoxArrayPanel getEntryBoxArrayPanel()
    {
-      return myEntryBoxArrayPanel;
+      return myEntryBoxArrayPanel.getCurrentPanel();
+   }
+
+   public void createNewEntryBoxTabFromEntryGoxGroup(String name)
+   {
+      if (myEntryBoxArrayPanel == null)
+      {
+         return;
+      }
+
+      EntryBoxGroup group = entryBoxGroupList.getEntryBoxGroup(name);
+
+      if (group == null)
+      {
+         return;
+      }
+
+      String[] entryBoxVars = group.getEntryBoxVars();
+      String[] entryBoxRegularExpressions = group.getEntryBoxRegularExpressions();
+      ArrayList<YoVariable<?>> matchingVariables = rootRegistry.getMatchingVariables(entryBoxVars, entryBoxRegularExpressions);
+
+      EntryBoxArrayPanel tmpEntryBoxArrayPanel = new EntryBoxArrayPanel(parentContainer, selectedVariableHolder, matchingVariables);
+      myEntryBoxArrayPanel.addEntryBoxArrayPanel(name, tmpEntryBoxArrayPanel);
+
+      this.myEntryBoxArrayPanel.getCurrentPanel().checkStatus();
+      numericContentPane.repaint(); // updateUI();
    }
 
    public void selectEntryBoxGroup(String name)
@@ -1664,7 +1701,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          return;
       }
 
-      myEntryBoxArrayPanel.removeAllEntryBoxes();
+      myEntryBoxArrayPanel.getCurrentPanel().removeAllEntryBoxes();
 
       String[] entryBoxVars = group.getEntryBoxVars();
       String[] entryBoxRegularExpressions = group.getEntryBoxRegularExpressions();
@@ -1681,7 +1718,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
        * i<entryBoxRegularExpressions.length; i++) {
        * this.setupEntryBoxRegularExpression(entryBoxRegularExpressions[i]); }
        */
-      this.myEntryBoxArrayPanel.checkStatus();
+      this.myEntryBoxArrayPanel.getCurrentPanel().checkStatus();
       numericContentPane.repaint(); // updateUI();
    }
 
@@ -1691,7 +1728,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       if (v != null)
       {
-         this.myEntryBoxArrayPanel.addEntryBox(v);
+         this.myEntryBoxArrayPanel.getCurrentPanel().addEntryBox(v);
       }
 
       // numericContentPane.updateUI();
@@ -1714,7 +1751,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
                if (v != null)
                {
-                  myEntryBoxArrayPanel.addEntryBox(v);
+                  myEntryBoxArrayPanel.getCurrentPanel().addEntryBox(v);
                }
             }
          }
@@ -1736,7 +1773,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
          if (v != null)
          {
-            this.myEntryBoxArrayPanel.addEntryBox(v);
+            this.myEntryBoxArrayPanel.getCurrentPanel().addEntryBox(v);
          }
       }
 
@@ -2247,13 +2284,13 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          {
             textToWrite += "<Graph Array Window" + window + ">\n";
             textToWrite += "<ScreenID>" + grapharray.getScreenID() + "</ScreenID>\n";
-            
+
             Point windowLocation = grapharray.getWindowLocationOnScreen();
             textToWrite += "<WindowLocation>" + windowLocation.getX() + ", " + windowLocation.getY() + "</WindowLocation>\n";
-            
+
             Dimension windowSize = grapharray.getWindowSize();
             textToWrite += "<WindowSize>" + windowSize.getWidth() + ", " + windowSize.getHeight() + "</WindowSize>\n";
-            
+
             textToWrite += graphArrayWindows.get(z).myGraphArrayPanel.getXMLRepresentationOfClass();
             textToWrite += "\n</Graph Array Window" + window + ">";
             window++;
@@ -2593,7 +2630,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
    }
 
-   public void addYoGraphicsLists(List<YoGraphicsList> yoGraphicObjectsLists, boolean updateFromSimulationThread, List<GraphicsUpdatable> graphicsUpdatablesToPack)
+   public void addYoGraphicsLists(List<YoGraphicsList> yoGraphicObjectsLists, boolean updateFromSimulationThread,
+         List<GraphicsUpdatable> graphicsUpdatablesToPack)
    {
       for (YoGraphicsList yoGraphicsList : yoGraphicObjectsLists)
       {
@@ -2987,5 +3025,11 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return graphics3dAdapter;
    }
 
+   public void clearAllEntryTabs()
+   {
+
+      myEntryBoxArrayPanel.closeAndDispose();
+
+   }
 
 }

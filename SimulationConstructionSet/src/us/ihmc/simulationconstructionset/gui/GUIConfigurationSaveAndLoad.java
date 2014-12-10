@@ -24,7 +24,7 @@ public class GUIConfigurationSaveAndLoad
    private JFileChooser dataFileChooser;
    private StandardSimulationGUI myGUI;
    private final GUIEnablerAndDisabler guiEnablerAndDisabler;
-   
+
    private boolean loadGraphGroups = true;
    private boolean loadEntryBoxes = true;
    private boolean loadViewPorts = false;
@@ -116,7 +116,7 @@ public class GUIConfigurationSaveAndLoad
       try
       {
          File guiConfig = new File(path + "/" + fileName + ".graphConf");
-         
+
          if (guiConfig.exists())
          {
             BufferedReader reader = new BufferedReader(new FileReader(guiConfig));
@@ -143,8 +143,9 @@ public class GUIConfigurationSaveAndLoad
 
    public void loadGUIConfiguration(String fileName)
    {
-      if (fileName == null) return;
-      
+      if (fileName == null)
+         return;
+
       try
       {
          File guiConfig = new File(fileName);
@@ -166,7 +167,7 @@ public class GUIConfigurationSaveAndLoad
                setupGraphGroups(myGUI, xmlRepresentation, name);
 
             if (loadEntryBoxes)
-               loadEntryBoxArrayPanel(xmlRepresentation);
+               loadEntryBoxArrayTabbedPanel(xmlRepresentation);
 
             if (loadViewPorts)
             {
@@ -200,7 +201,6 @@ public class GUIConfigurationSaveAndLoad
          e.printStackTrace();
       }
    }
-
 
    public void setupMultiViews(String xmlRepresentation)
    {
@@ -259,7 +259,6 @@ public class GUIConfigurationSaveAndLoad
       int numberOfViewports = Integer.parseInt(XMLReaderUtility.getMiddleString(0, xmlRepresentation, "<Number of ViewPorts>", "</Number of ViewPorts>"));
 
       ArrayList<ViewportWindow> windows = myGUI.getViewportWindows();
-
 
       for (int i = windows.size() - 1; i >= 0; i--)
       {
@@ -334,7 +333,7 @@ public class GUIConfigurationSaveAndLoad
 
             graphConfigurations[graphIndex] = tmpGraphConfiguration;
 
-            String[] graphConfigurationStringArray = {tmpGraphConfiguration.getName()};
+            String[] graphConfigurationStringArray = { tmpGraphConfiguration.getName() };
 
             var[graphIndex] = new String[2][numberOfTokens];
 
@@ -358,25 +357,27 @@ public class GUIConfigurationSaveAndLoad
    public void setupGraphWindows(String xmlRepresentation, String name)
    {
       removeOldWindows();
-      setupGraphWindows(myGUI, xmlRepresentation, name); 
+      setupGraphWindows(myGUI, xmlRepresentation, name);
    }
-   
+
    public static void setupGraphWindows(StandardSimulationGUI myGUI, String xmlRepresentation, String name)
    {
-      int graphArrayWindowSize = Integer.parseInt(XMLReaderUtility.getMiddleString(0, xmlRepresentation, "<Graph Array Window Size>", "</Graph Array Window Size>"));
+      int graphArrayWindowSize = Integer.parseInt(XMLReaderUtility.getMiddleString(0, xmlRepresentation, "<Graph Array Window Size>",
+            "</Graph Array Window Size>"));
       for (int windowNumber = 1; windowNumber <= graphArrayWindowSize; windowNumber++)
       {
          String first = "<Graph Array Window" + windowNumber + ">";
          String second = "</Graph Array Window" + windowNumber + ">";
          String graphWindowString = XMLReaderUtility.getMiddleString(0, xmlRepresentation, first, second);
-         
+
          first = "<ScreenID>";
          second = "</ScreenID>";
          String screenIDString = XMLReaderUtility.getMiddleString(0, graphWindowString, first, second);
 
          int screenID = 1;
-         if (screenIDString != null) screenID = Integer.parseInt(screenIDString);
-         
+         if (screenIDString != null)
+            screenID = Integer.parseInt(screenIDString);
+
          first = "<WindowLocation>";
          second = "</WindowLocation>";
          String windowLocationString = XMLReaderUtility.getMiddleString(0, graphWindowString, first, second);
@@ -389,8 +390,7 @@ public class GUIConfigurationSaveAndLoad
             double yPosition = Double.parseDouble(tokenizer.nextToken());
             windowLocation = new Point((int) xPosition, (int) yPosition);
          }
-         
-         
+
          first = "<WindowSize>";
          second = "</WindowSize>";
          String windowSizeString = XMLReaderUtility.getMiddleString(0, graphWindowString, first, second);
@@ -409,7 +409,7 @@ public class GUIConfigurationSaveAndLoad
       }
 
    }
-   
+
    private void removeOldWindows()
    {
       ArrayList<GraphArrayWindow> windows = myGUI.getGraphArrayWindows();
@@ -427,14 +427,35 @@ public class GUIConfigurationSaveAndLoad
       myGUI.selectGraphConfiguration(configurationName);
    }
 
-   public void loadEntryBoxArrayPanel(String XMLStyleRepresentation)
+   public void loadEntryBoxArrayTabbedPanel(String XMLStyleRepresentation)
    {
-      String XMLData = XMLReaderUtility.getMiddleString(0, XMLStyleRepresentation, "<Entry Boxes>", "</Entry Boxes>");
+      String XMLData = XMLReaderUtility.getMiddleString(0, XMLStyleRepresentation, "<Entry Boxes Tab Pane>", "</Entry Boxes Tab Pane>");
+      int index = 0;
+      while ((XMLReaderUtility.getEndIndexOfSubString(index, XMLData, "</EntryBoxTab>") <= XMLData.length())
+            && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, "</EntryBoxTab>") > 0))
+      {
+         int endIndex = XMLReaderUtility.getEndIndexOfSubString(index, XMLData, "</EntryBoxTab>");
+
+         String currentXMLEntryTab = XMLData.substring(index, endIndex - 1);
+
+         String name = XMLReaderUtility.getMiddleString(0, currentXMLEntryTab, "<Title>", "</Title>");
+
+         
+         String currentXMLEntry = XMLReaderUtility.getMiddleString(0, currentXMLEntryTab, "<Entry Boxes>", "</Entry Boxes>");
+
+         
+         loadEntryBoxArrayPanel(name, currentXMLEntry);
+         index = endIndex;
+      }
+
+   }
+   public void loadEntryBoxArrayPanel(String tabName, String XMLData)
+   {
       int index = 0;
       int currentNumberOfVariables = 0;
 
       while ((XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") <= XMLData.length())
-             && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") > 0))
+            && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") > 0))
       {
          currentNumberOfVariables++;
          index++;
@@ -448,7 +469,7 @@ public class GUIConfigurationSaveAndLoad
       index = 0;
 
       while ((XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") <= XMLData.length())
-             && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") > 0))
+            && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",") > 0))
       {
          int endIndex = XMLReaderUtility.getEndIndexOfSubString(index, XMLData, ",");
 
@@ -464,9 +485,9 @@ public class GUIConfigurationSaveAndLoad
          name[currentNumberOfVariables] = name[currentNumberOfVariables].trim();
       }
 
-      myGUI.setupEntryBoxGroup("Default", name);
+      myGUI.setupEntryBoxGroup(tabName, name);
       myGUI.updateGUI();
-      myGUI.selectEntryBoxGroup("Default");
+      myGUI.createNewEntryBoxTabFromEntryGoxGroup(tabName);
    }
 
    public void loadGraphConfigurationsInConfigurationMenu()
@@ -480,11 +501,11 @@ public class GUIConfigurationSaveAndLoad
 
          int index = child.indexOf(".");
          String name = child.substring(0, index);
-         
+
          defaultGraphConfigurationLoad(name);
-      }  
+      }
    }
-   
+
    public static String getConfigurationDirectoryPath()
    {
       File configurationDirectory = GUIConfigurationSaveAndLoad.makeOrFindConfigurationDirectory();
@@ -493,10 +514,10 @@ public class GUIConfigurationSaveAndLoad
       {
          return configurationDirectory.getPath();
       }
-      
+
       return null;
    }
-   
+
    public static String[] getPotentialConfigurationFilenames()
    {
       File configurationDirectory = makeOrFindConfigurationDirectory();
@@ -507,10 +528,10 @@ public class GUIConfigurationSaveAndLoad
       }
       else
       {
-         return new String[]{};
+         return new String[] {};
       }
    }
-   
+
    public static File makeOrFindConfigurationDirectory()
    {
       File configurationDirectory = new File("Configurations");
