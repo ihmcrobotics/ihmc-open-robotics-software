@@ -15,7 +15,6 @@ public class AcsellBambooWalkingTestSuite
 {
 	public static void main(String[] args)
 	{
-		String packageName = "us.ihmc.acsell";
-		System.out.println(JUnitTestSuiteConstructor.createTestSuite("AcsellBambooWalkingTestSuite", packageName));
+      JUnitTestSuiteConstructor.generateTestSuite(AcsellBambooWalkingTestSuite.class);
 	}
 }
