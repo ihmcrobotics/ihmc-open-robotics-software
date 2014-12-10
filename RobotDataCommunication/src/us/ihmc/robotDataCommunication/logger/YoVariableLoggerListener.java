@@ -16,13 +16,12 @@ import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
-import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.Joint;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
@@ -199,6 +198,19 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             System.out.println("Deleting properties file");
             properties.delete();
+         }
+         
+         File model = new File(directory, modelFilename);
+         if(model.exists())
+         {
+            System.out.println("Deleting model file");
+            model.delete();
+         }
+         
+         File resources = new File(directory,modelResourceBundle);
+         {
+            System.out.println("Deleting resource bundle");
+            resources.delete();
          }
          
          File dataFile = new File(directory, dataFilename);
