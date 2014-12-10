@@ -6,7 +6,7 @@ import org.apache.commons.lang.StringUtils;
 
 public abstract class LogProperties extends Properties
 {
-   protected static final String version = "1.1";
+   protected static final String version = "2.0";
 
    private static final long serialVersionUID = -2904334709894113620L;
 
