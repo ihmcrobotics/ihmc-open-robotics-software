@@ -28,7 +28,7 @@ import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepPathPlannerService;
 import us.ihmc.ihmcPerception.footstepPlanner.RosFootstepServiceClient;
-import us.ihmc.ihmcPerception.footstepPlanner.aStar.AStarPathPlannerService;
+import us.ihmc.ihmcPerception.footstepPlanner.aDStar.ADStarPathPlannerService;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -111,9 +111,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
          
          FootstepPathPlannerService footstepPathPlannerService;
-         footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-//         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
-//         footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, robotModel.getFootstepParameters(), robotModel.getPhysicalProperties().getAnkleHeight(), fieldObjectCommunicator);
+//         footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
+//         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
+         footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
          fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
