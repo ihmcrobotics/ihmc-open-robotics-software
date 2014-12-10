@@ -15,7 +15,6 @@ public class AtlasBambooWalkingTestSuite
 {
 	public static void main(String[] args)
 	{
-		String packageName = "us.ihmc.atlas";
-		System.out.println(JUnitTestSuiteConstructor.createTestSuite("AtlasBambooWalkingTestSuite", packageName));
+	   JUnitTestSuiteConstructor.generateTestSuite(AtlasBambooWalkingTestSuite.class);
 	}
 }
