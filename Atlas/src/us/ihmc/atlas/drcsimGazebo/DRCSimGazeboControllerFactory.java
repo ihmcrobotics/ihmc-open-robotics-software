@@ -21,7 +21,6 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.util.NetworkConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCControllerThread;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
@@ -30,6 +29,7 @@ import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 public class DRCSimGazeboControllerFactory
@@ -87,8 +87,8 @@ public class DRCSimGazeboControllerFactory
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel, sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer,
             gravity);
       estimatorThread.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, controllerFactory, threadDataSynchronizer, outputWriter, dataProducer,
-            yoVariableServer, gravity);
+      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, outputWriter, dataProducer,
+            yoVariableServer, gravity, robotModel.getEstimatorDT());
  
       /*
        * Setup threads

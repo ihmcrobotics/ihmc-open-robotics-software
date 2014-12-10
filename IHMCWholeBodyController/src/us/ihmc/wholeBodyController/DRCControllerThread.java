@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
@@ -12,10 +12,15 @@ import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import us.ihmc.simulationconstructionset.JointAxisVisualizer;
+import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -26,9 +31,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.wholeBodyController.CenterOfMassCalibrationTool;
-import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -37,12 +39,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.ExecutionTimer;
-import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
-import us.ihmc.simulationconstructionset.JointAxisVisualizer;
-import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
-import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
@@ -102,15 +98,15 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
-   public DRCControllerThread(DRCRobotModel robotModel, MomentumBasedControllerFactory controllerFactory,
+   public DRCControllerThread(WholeBodyControlParameters robotModel, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
-         double gravity)
+         double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
       this.robotVisualizer = robotVisualizer;
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getEstimatorDT());
+      this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(estimatorDT);
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       
@@ -130,7 +126,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
       
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       if(lidarParameters != null)
       {
