@@ -8,7 +8,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.codeGenerators.APIBuilderTest.class,
+//   us.ihmc.valkyrie.codeGenerators.APIBuilderTest.class,
    us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class,
    us.ihmc.valkyrie.kinematics.PushrodTransmissionTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
