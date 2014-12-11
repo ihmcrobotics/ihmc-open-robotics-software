@@ -21,7 +21,48 @@ public class InefficientPushrodTransmissionJacobianTest
    private final boolean visualizeAndKeepUp = false;
 
    @Test
-   public void testInefficientButReadablePushrodTransmissionForAnkles()
+   public void testInefficientPushrodTransmissionJacobianForAnklesAtZero()
+   {
+      Robot robot = new Robot("testPushrodTransmission");
+
+      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
+      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
+      InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry, null);
+      
+      double[][] jacobian = new double[2][2];
+
+      pitch.set(0.0);
+      roll.set(0.0);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, null);
+      assertJacobianEquals(jacobian, -0.0366712094326246, -0.0366712094326246, -0.034118686505983736, 0.034118686505983736);
+
+   }
+   
+   @Test
+   public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
+   {
+      Robot robot = new Robot("testPushrodTransmission");
+
+      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
+
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
+      InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry, null);
+      
+      double[][] jacobian = new double[2][2];
+
+      roll.set(0.0);
+      pitch.set(0.0);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, roll, pitch, jacobian, null);
+      assertJacobianEquals(jacobian, -0.04520035766057378, 0.04520035766057378, -0.06336787027660956, -0.06336787027660956); // Regression. Need to double check with Solid Works numbers.
+   }
+   
+   @Test
+   public void testInefficientPushrodTransmissionForAnkles()
    {
       Robot robot = new Robot("testPushrodTransmission");
 
@@ -43,7 +84,7 @@ public class InefficientPushrodTransmissionJacobianTest
       InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry,
             yoGraphicsListRegistry);
 
-      SimulationConstructionSet scs;
+      SimulationConstructionSet scs = null;
       if (visualizeAndKeepUp)
       {
          scs = new SimulationConstructionSet(robot);
@@ -53,15 +94,15 @@ public class InefficientPushrodTransmissionJacobianTest
 
          scs.startOnAThread();
       }
-      else
-      {
-         scs = null;
-      }
 
       double[][] jacobian = new double[2][2];
 
       if (visualizeAndKeepUp)
       {
+         pitch.set(0.0);
+         roll.set(0.0);
+         computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+
          double increment = 0.1;
          for (pitch.set(-Math.PI / 3.0); pitch.getDoubleValue() < Math.PI / 3.0; pitch.add(increment))
          {
@@ -119,15 +160,14 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
    
-   @Ignore
    @Test
-   public void testInefficientButReadablePushrodTransmissionForWaist()
+   public void testInefficientPushrodTransmissionForWaist()
    {
       Robot robot = new Robot("testPushrodTransmission");
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry;
       if (visualizeAndKeepUp)
@@ -162,50 +202,54 @@ public class InefficientPushrodTransmissionJacobianTest
 
       if (visualizeAndKeepUp)
       {
+         pitch.set(0.0);
+         roll.set(0.0);
+         computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+         
          double increment = 0.1;
          for (pitch.set(-Math.PI / 3.0); pitch.getDoubleValue() < Math.PI / 3.0; pitch.add(increment))
          {
             for (roll.set(-Math.PI / 3.0); roll.getDoubleValue() < Math.PI / 3.0; roll.add(increment))
             {
-               computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+               computeAndPrint(inefficientPushrodTransmissionJacobian, roll, pitch, jacobian, scs);
             }
          }
       }
 
-//      pitch.set(0.0);
-//      roll.set(0.0);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.0366712094326246, -0.0366712094326246, 0.034118686505983736, -0.034118686505983736);
-//
-//      pitch.set(0.2);
-//      roll.set(0.1);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.036202355875729446, -0.035509962933305175, 0.03640538461195576, -0.03181607828356141);
-//
-//      pitch.set(-0.2);
-//      roll.set(0.1);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.034740329545336665, -0.03695254741929382, 0.03440182578269918, -0.02988230913579041);
-//
-//      pitch.set(0.2);
-//      roll.set(-0.1);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.035509962933305175, -0.036202355875729446, 0.03181607828356141, -0.03640538461195576);
-//
-//      pitch.set(0.35);
-//      roll.set(0.0);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.03406729338743576, -0.03406729338743576, 0.03341354644555879, -0.03341354644555879);
-//
-//      pitch.set(-0.35);
-//      roll.set(0.0);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.03440991379530292, -0.03440991379530292, 0.030355910924449715, -0.030355910924449715);
-//
-//      pitch.set(0.0);
-//      roll.set(0.25);
-//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
-//      assertJacobianEquals(jacobian, -0.03539813540952868, -0.037679153131957736, 0.038150540900731125, -0.02679783281436968);
+      pitch.set(0.0);
+      roll.set(0.0);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.045200359335075935, 0.045200359335075935, -0.06336787278836283, -0.06336787278836283);
+
+      pitch.set(0.2);
+      roll.set(0.1);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.04230625056188121, 0.04324814514161008, -0.06204870021273448, -0.06848251178654614);
+
+      pitch.set(-0.2);
+      roll.set(0.1);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.04324814514161008, 0.04230625056188121, -0.06848251178654614, -0.06204870021273448);
+
+      pitch.set(0.2);
+      roll.set(-0.1);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.047953520032603066, 0.04505140974373653, -0.056019426591516215, -0.06263063790754238);
+
+      pitch.set(0.35);
+      roll.set(0.0);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.044046573174072956, 0.042535787548547144, -0.05437474030401962, -0.0662728724367141);
+
+      pitch.set(-0.35);
+      roll.set(0.0);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.042535787548547144, 0.044046573174072956, -0.0662728724367141, -0.05437474030401962);
+
+      pitch.set(0.0);
+      roll.set(0.25);
+      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+      assertJacobianEquals(jacobian, -0.04124545702816225, 0.04124545702816225, -0.07040587092825361, -0.07040587092825361);
 
       if (visualizeAndKeepUp)
       {
@@ -234,17 +278,20 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-   private void computeAndPrint(InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission, DoubleYoVariable pitch,
-                                DoubleYoVariable roll, double[][] jacobian, SimulationConstructionSet scs)
+   private void computeAndPrint(InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission, DoubleYoVariable topJointAngle,
+                                DoubleYoVariable bottomJointAngle, double[][] jacobian, SimulationConstructionSet scs)
    {
-      inefficientButReadablePushrodTransmission.computeJacobian(jacobian, pitch.getDoubleValue(), roll.getDoubleValue());
+      inefficientButReadablePushrodTransmission.computeJacobian(jacobian, topJointAngle.getDoubleValue(), bottomJointAngle.getDoubleValue());
 
       if (visualizeAndKeepUp)
       {
-         scs.tickAndUpdate();
+         if (scs != null) scs.tickAndUpdate();
 
-         System.out.println(pitch + ", " + roll + " f5=1 -> tauPitch = " + jacobian[0][0] + ", tauRoll = " + jacobian[1][0]);
-         System.out.println(pitch + ", " + roll + " f6=1 -> tauPitch = " + jacobian[0][1] + ", tauRoll = " + jacobian[1][1] + "\n");
+         System.out.println("topJoint " + topJointAngle.getName() + " = " + topJointAngle.getDoubleValue());
+         System.out.println("bottomJoint " + bottomJointAngle.getName() + " = " + bottomJointAngle.getDoubleValue());
+         
+         System.out.println("f5=1.0 -> tauTopJoint = " + jacobian[0][0] + ", tauBottomJoint = " + jacobian[1][0]);
+         System.out.println("f6=1.0 -> tauTopJoint = " + jacobian[0][1] + ", tauBottomJoint = " + jacobian[1][1] + "\n");
       }
    }
 }
