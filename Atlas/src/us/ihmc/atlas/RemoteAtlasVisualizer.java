@@ -35,7 +35,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       
       System.out.println("Connecting to host " + host);
 
-      scsVisualizer = new SCSVisualizer(drcRobotModel.createSdfRobot(false), bufferSize);
+      scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("setWristForceSensorsToZero", 1.0);
