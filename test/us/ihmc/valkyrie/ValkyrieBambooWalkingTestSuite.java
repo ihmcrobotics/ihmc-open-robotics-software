@@ -6,8 +6,8 @@ import org.junit.runners.Suite;
 import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses(
-{
+@Suite.SuiteClasses
+({
 	ValkyrieFlatGroundWalkingTest.class,
 })
 
@@ -15,7 +15,6 @@ public class ValkyrieBambooWalkingTestSuite
 {
 	public static void main(String[] args)
 	{
-		String packageName = "us.ihmc.valkyrie";
-		System.out.println(JUnitTestSuiteConstructor.createTestSuite("ValkyrieBambooWalkingTestSuite", packageName));
+		JUnitTestSuiteConstructor.generateTestSuite(ValkyrieBambooWalkingTestSuite.class);
 	}
 }
