@@ -4,7 +4,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.convexOptimization.QpOASESWrapper;
+import us.ihmc.convexOptimization.QpOASESCWrapper;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -36,7 +36,7 @@ public class OASESConstrainedQPSolver extends ConstrainedQPSolver {
     IntegerYoVariable      currentWorkingSetChange = new IntegerYoVariable("currentWorkingSetchange", registry);
 
     
-    QpOASESWrapper qpWrapper;
+    QpOASESCWrapper qpWrapper;
 
 
     public OASESConstrainedQPSolver(YoVariableRegistry parentRegistry) {
@@ -45,7 +45,7 @@ public class OASESConstrainedQPSolver extends ConstrainedQPSolver {
     public OASESConstrainedQPSolver(int nvar, int ncon, YoVariableRegistry parentRegistry) {
         maxCPUTime.set(Double.POSITIVE_INFINITY);
         maxWorkingSetChange.set(10000);
-        qpWrapper = new QpOASESWrapper(nvar, ncon);
+        qpWrapper = new QpOASESCWrapper();
 
         if (parentRegistry != null) {
             parentRegistry.addChild(this.registry);
