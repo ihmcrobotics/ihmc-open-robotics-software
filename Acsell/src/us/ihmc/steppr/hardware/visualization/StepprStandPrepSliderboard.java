@@ -24,7 +24,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexChangedListener
 {
-   private final SDFRobot robot;
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("StepprStandPrepSliderBoard");
    private final EnumYoVariable<StepprStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
          StepprStandPrepSetpoints.class);
@@ -37,17 +36,17 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
    private final EnumMap<StepprStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(StepprStandPrepSetpoints.class);
 
-   public StepprStandPrepSliderboard(SDFRobot robot, int bufferSize)
+   public StepprStandPrepSliderboard(int bufferSize)
    {
-      super(robot, bufferSize);
-      this.robot = robot;
-
-      registry.addChild(sliderBoardRegistry);
+      super(bufferSize);
    }
 
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
+
+
+      registry.addChild(sliderBoardRegistry);
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
       YoVariable<?> crouch = registry.getVariable("StepprStandPrep", "crouch");
@@ -140,10 +139,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    public static void main(String[] args)
    {
       System.out.println("Connecting to host " + StepprNetworkParameters.CONTROL_COMPUTER_HOST);
-      BonoRobotModel robotModel = new BonoRobotModel(true, false);
-      SDFRobot robot = robotModel.createSdfRobot(false);
-
-      SCSVisualizer scsYoVariablesUpdatedListener = new StepprStandPrepSliderboard(robot, 64000);
+      SCSVisualizer scsYoVariablesUpdatedListener = new StepprStandPrepSliderboard(64000);
 
       YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener,
             "remote", false);

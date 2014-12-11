@@ -12,8 +12,27 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.StepprOutputWriter.controlRatio</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-<Entry Boxes>walk</Entry Boxes>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes>enableOutput,startStandprep,requestedHighLevelState,controlRatio</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -31,8 +50,8 @@
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-11.834633923480945</Camera Y>
- <Camera Z>1.3889755948987297</Camera Z>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

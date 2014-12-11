@@ -26,7 +26,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedListener
 {
 
-   private final SDFRobot robot;
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("StepprPDSliderBoard");
    private final EnumYoVariable<StepprJoint> selectedJoint = new EnumYoVariable<>("selectedJoint", sliderBoardRegistry, StepprJoint.class);
 
@@ -47,18 +46,17 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
 
    private final EnumMap<StepprJoint, JointVariables> allJointVariables = new EnumMap<>(StepprJoint.class);
 
-   public StepprPDSliderboard(SDFRobot robot, int bufferSize)
+   public StepprPDSliderboard(int bufferSize)
    {
-      super(robot, bufferSize);
+      super(bufferSize);
 
-      this.robot = robot;
-      scs.getDataBuffer().attachIndexChangedListener(this);
-      registry.addChild(sliderBoardRegistry);
    }
 
    @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
+      scs.getDataBuffer().attachIndexChangedListener(this);
+      registry.addChild(sliderBoardRegistry);
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
       for (StepprJoint joint : StepprJoint.values)
@@ -160,7 +158,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
                      variable = actuator.getName() + "Enabled";
                      break;
                   }
-                  
+
                   BooleanYoVariable actEnabled = (BooleanYoVariable) variableHolder.getVariable(namespace, variable);
                   actEnabled.set(enabled.getBooleanValue());
                }
@@ -177,32 +175,32 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
             stateNameSpace = "Steppr.leftAnkle";
             qStateVariable = "leftAnkle_q_x";
             qdStateVariable = "leftAnkle_qd_x";
-            tauStateVariable = "leftAnkle_tau_x";
+            tauStateVariable = "leftAnkle_tau_xPredictedCurrent";
             break;
          case LEFT_ANKLE_Y:
             stateNameSpace = "Steppr.leftAnkle";
             qStateVariable = "leftAnkle_q_y";
             qdStateVariable = "leftAnkle_qd_y";
-            tauStateVariable = "leftAnkle_tau_y";
+            tauStateVariable = "leftAnkle_tau_yPredictedCurrent";
             break;
          case RIGHT_ANKLE_X:
             stateNameSpace = "Steppr.rightAnkle";
             qStateVariable = "rightAnkle_q_x";
             qdStateVariable = "rightAnkle_qd_x";
-            tauStateVariable = "rightAnkle_tau_x";
+            tauStateVariable = "rightAnkle_tau_xPredictedCurrent";
             break;
          case RIGHT_ANKLE_Y:
             stateNameSpace = "Steppr.rightAnkle";
             qStateVariable = "rightAnkle_q_y";
             qdStateVariable = "rightAnkle_qd_y";
-            tauStateVariable = "rightAnkle_tau_y";
+            tauStateVariable = "rightAnkle_tau_yPredictedCurrent";
             break;
 
          default:
             stateNameSpace = "Steppr." + prefix;
             qStateVariable = prefix + "_q";
             qdStateVariable = prefix + "_qd";
-            tauStateVariable = prefix + "_tau";
+            tauStateVariable = prefix + "_tauPredictedCurrent";
          }
          q = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qStateVariable);
          qd = (DoubleYoVariable) variableHolder.getVariable(stateNameSpace, qdStateVariable);
@@ -233,6 +231,15 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
          selectedJoint_tauFF.set(tauFF.getDoubleValue());
          selectedJoint_damping.set(damping.getDoubleValue());
       }
+
+      public void initialize()
+      {
+         if(!enabled.getBooleanValue())
+         {
+            q_d.set(q.getDoubleValue());
+            qd_d.set(0.0);
+         }
+      }
    }
 
    @Override
@@ -241,6 +248,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
       if (started)
       {
          StepprJoint joint = selectedJoint.getEnumValue();
+         allJointVariables.get(joint).initialize();
          allJointVariables.get(joint).update();
       }
    }
@@ -248,13 +256,10 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
    public static void main(String[] args)
    {
       System.out.println("Connecting to host " + StepprNetworkParameters.CONTROL_COMPUTER_HOST);
-      BonoRobotModel robotModel = new BonoRobotModel(true, false);
-      SDFRobot robot = robotModel.createSdfRobot(false);
 
-      SCSVisualizer scsYoVariablesUpdatedListener = new StepprPDSliderboard(robot, 16384);
+      SCSVisualizer scsYoVariablesUpdatedListener = new StepprPDSliderboard(16384);
 
-      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener,
-            "remote", false);
+      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
 
    }

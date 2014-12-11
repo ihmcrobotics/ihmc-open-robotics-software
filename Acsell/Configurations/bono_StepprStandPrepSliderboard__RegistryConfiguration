@@ -1,6 +1,5 @@
 root*false*false
 root.bono*false*false
-root.StepprStandPrepSliderBoard*false*false
 root.remotemain*false*false
 root.remotemain.DRCEstimatorThread*false*false
 root.remotemain.DRCEstimatorThread.StepprSensorReader*false*false
@@ -252,3 +251,4 @@ root.remotemain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightAnkleC
 root.remotemain.DRCControllerThread.StepprOutputWriter.StepprCommand.rightAnkleCommand.rightAnkleCommandLeftActuator*false*false
 root.remotemain.DRCControllerThread.StepprOutputWriter.StepprStandPrep*false*false
 root.remotemain.StepprSetup*false*false
+root.StepprStandPrepSliderBoard*false*false
