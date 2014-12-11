@@ -69,7 +69,6 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @Ignore
    @Test
    public void testCompareInefficientToEfficientWaist()
    {
