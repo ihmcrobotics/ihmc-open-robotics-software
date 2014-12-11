@@ -1,7 +1,5 @@
 package us.ihmc.steppr.hardware.visualization;
 
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
@@ -12,9 +10,9 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class RemoteStepprVisualizer extends SCSVisualizer
 {
-   public RemoteStepprVisualizer(Robot robot, int bufferSize)
+   public RemoteStepprVisualizer(int bufferSize)
    {
-      super(robot, bufferSize);
+      super( bufferSize);
    }
 
    @Override
@@ -26,10 +24,7 @@ public class RemoteStepprVisualizer extends SCSVisualizer
    public static void main(String[] args)
    {
       System.out.println("Connecting to host " + StepprNetworkParameters.CONTROL_COMPUTER_HOST);
-      BonoRobotModel robotModel = new BonoRobotModel(true, false);
-      SDFRobot robot = robotModel.createSdfRobot(false);
-
-      SCSVisualizer scsYoVariablesUpdatedListener = new RemoteStepprVisualizer(robot, 16384);
+      SCSVisualizer scsYoVariablesUpdatedListener = new RemoteStepprVisualizer(16384);
 
     
       

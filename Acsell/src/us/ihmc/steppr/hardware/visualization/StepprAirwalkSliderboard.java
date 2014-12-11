@@ -1,7 +1,5 @@
 package us.ihmc.steppr.hardware.visualization;
 
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
@@ -14,9 +12,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class StepprAirwalkSliderboard extends SCSVisualizer
 {
-   public StepprAirwalkSliderboard(Robot robot, int bufferSize)
+   public StepprAirwalkSliderboard(int bufferSize)
    {
-      super(robot, bufferSize);
+      super(bufferSize);
    }
 
    @Override
@@ -45,10 +43,7 @@ public class StepprAirwalkSliderboard extends SCSVisualizer
    public static void main(String[] args)
    {
       System.out.println("Connecting to host " + StepprNetworkParameters.CONTROL_COMPUTER_HOST);
-      BonoRobotModel robotModel = new BonoRobotModel(true, false);
-      SDFRobot robot = robotModel.createSdfRobot(false);
-
-      SCSVisualizer scsYoVariablesUpdatedListener = new StepprAirwalkSliderboard(robot, 16384);
+      SCSVisualizer scsYoVariablesUpdatedListener = new StepprAirwalkSliderboard(16384);
 
     
       

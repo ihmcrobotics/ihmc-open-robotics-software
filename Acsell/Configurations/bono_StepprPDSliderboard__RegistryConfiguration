@@ -1,6 +1,5 @@
 root*false*false
 root.bono*false*false
-root.StepprPDSliderBoard*false*false
 root.remotemain*false*false
 root.remotemain.steppr*false*false
 root.remotemain.steppr.Steppr*false*false
@@ -49,6 +48,7 @@ root.remotemain.steppr.Steppr.l_leg_kny*false*false
 root.remotemain.steppr.Steppr.r_leg_kny*false*false
 root.remotemain.steppr.Steppr.leftAnkle*false*false
 root.remotemain.steppr.Steppr.rightAnkle*false*false
+root.remotemain.steppr.Steppr.StepprUpperBodyOffsetCalculator*false*false
 root.remotemain.steppr.StepprCommand*false*false
 root.remotemain.steppr.StepprCommand.l_leg_mhx*false*false
 root.remotemain.steppr.StepprCommand.leftHipXActuator*false*false
@@ -84,3 +84,4 @@ root.remotemain.steppr.StepprCommand.rightAnkleCommand.rightAnkleCommandRightAct
 root.remotemain.steppr.StepprCommand.rightAnkleCommand.rightAnkleCommandLeftActuator*false*false
 root.remotemain.steppr.StepprPDJointController*false*false
 root.remotemain.StepprSetup*false*false
+root.StepprPDSliderBoard*false*false
