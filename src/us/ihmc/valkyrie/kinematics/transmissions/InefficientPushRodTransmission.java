@@ -9,6 +9,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class InefficientPushRodTransmission implements PushRodTransmissionInterface
 {
+   private static final boolean PRINT_OUT_TRANSMISSION_INFORMATION_ON_FIRST_CALL = false;
    private static final double INFINITY_THRESHOLD = 1e10;
    private static final boolean DEBUG = false;
 
@@ -50,11 +51,14 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    private final boolean topJointFirst;
    
    private DoubleYoVariable topJointAngleOffset;
+   private final PushRodTransmissionJoint pushRodTransmissionJoint;
    
    public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, 
          double reflectTop, double reflectBottom, boolean topJointFirst,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.pushRodTransmissionJoint = pushRodTransmissionJoint;
+      
       if (Math.abs(Math.abs(reflectBottom) - 1.0) > 1e-7) throw new RuntimeException("reflect must be 1.0 or -1.0");
       this.reflectBottom = reflectBottom;
       this.reflectTop = reflectTop;
@@ -103,6 +107,31 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       
    }
 
+   private void printOutTransmissionInformation(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
+   {
+      System.out.println("\nInefficientPushrodTransmission for " + pushRodTransmissionJoint);
+      System.out.println("reflectTop = " + reflectTop);
+      System.out.println("reflectBottom = " + reflectBottom);
+      System.out.println("topJointFirst = " + topJointFirst);
+      
+      if (topJointAngleOffset != null) System.out.println("topJointAngleOffset = " + topJointAngleOffset.getDoubleValue());
+      
+      System.out.println("TurboDrivers: ");
+
+      for (TurboDriver truboDriver : actuatorData)
+      {
+         System.out.println(truboDriver.getNodePath());
+      }
+      
+      System.out.println("ValkyrieJointInterfaces: ");
+
+      for (ValkyrieJointInterface valkyrieJointInterface : jointData)
+      {
+         System.out.println(valkyrieJointInterface.getName());
+      }
+   }
+   
+   
    // For ankles:
    // jointData[0] = ankleExtensor (Top Joint -- Pitch)
    // jointData[1] = Ankle  (Bottom Joint -- Roll)
@@ -111,9 +140,18 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    // LeftLeg has reflect = +1
    // RightLeg has reflect = -1
    
+   private boolean printOutAtuatorToJointEffort = PRINT_OUT_TRANSMISSION_INFORMATION_ON_FIRST_CALL;
+   
    @Override
    public void actuatorToJointEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
+      if(printOutAtuatorToJointEffort)
+      {
+         System.out.println("\nactuatorToJointEffort():");
+         printOutTransmissionInformation(actuatorData, jointData);
+         printOutAtuatorToJointEffort = false;
+      }
+      
       assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
       TurboDriver rightTurboDriver = actuatorData[0];
@@ -149,9 +187,18 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       bottomJointInterface.setEffort(reflectBottom * bottomJointTorque);
    }
 
+   private boolean printOutActuatorEffortHasBeenCalled = PRINT_OUT_TRANSMISSION_INFORMATION_ON_FIRST_CALL;
+   
    @Override
    public void jointToActuatorEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
+      if(printOutActuatorEffortHasBeenCalled)
+      {
+         System.out.println("\njointToActuatorEffort():");
+         printOutTransmissionInformation(actuatorData, jointData);
+         printOutActuatorEffortHasBeenCalled = false;
+      }
+      
       assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
       TurboDriver rightTurboDriver = actuatorData[0];
