@@ -32,7 +32,6 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    private SCSVisualizer scsVisualizer;
    private ValkyrieRobotModel valkyrieRobotModel;
    private String host;
-   private int port;
 
    public RemoteValkyrieVisualizer(String[] networkArguments, ValkyrieSliderBoardType valkyrieSliderBoardType)
    {
@@ -41,9 +40,8 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       parseNetworkArguments(networkArguments);
       
       System.out.println("Connecting to host " + host);
-      valkyrieRobotModel = new ValkyrieRobotModel(true, false);
 
-      scsVisualizer = new SCSVisualizer(valkyrieRobotModel.createSdfRobot(false), BUFFER_SIZE);
+      scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
 
       YoVariableClient client = new YoVariableClient(host, scsVisualizer, "remote", false);
@@ -81,7 +79,6 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       }
       
       host = config.getString("host");
-      port = config.getInt("port");
    }
 
    @Override
