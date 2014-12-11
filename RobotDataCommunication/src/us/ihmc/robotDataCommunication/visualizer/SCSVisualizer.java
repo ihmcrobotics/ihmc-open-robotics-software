@@ -58,25 +58,33 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    public SCSVisualizer(int bufferSize, boolean showGUI)
    {
-      this(new Robot("NullRobot"), bufferSize, showGUI);
+      this(bufferSize, showGUI, false);
    }
 
-   public SCSVisualizer(Robot robot, int bufferSize)
-   {
-      this(robot, bufferSize, true);
-   }
-
-   public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI)
-   {
-      this(robot, bufferSize, showGUI, false);
-   }
-
-   public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI, boolean hideViewport)
+   public SCSVisualizer(int bufferSize, boolean showGUI, boolean hideViewport)
    {
       this.bufferSize = bufferSize;
       this.showGUI = showGUI;
       this.hideViewport = hideViewport;
       addSCSVisualizerStateListener(this);
+   }
+
+   @Deprecated
+   public SCSVisualizer(Robot robot, int bufferSize)
+   {
+      this(bufferSize);
+   }
+
+   @Deprecated
+   public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI)
+   {
+      this(bufferSize, showGUI);
+   }
+
+   @Deprecated
+   public SCSVisualizer(Robot robot, int bufferSize, boolean showGUI, boolean hideViewport)
+   {
+      this(bufferSize, showGUI, hideViewport);
    }
 
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
