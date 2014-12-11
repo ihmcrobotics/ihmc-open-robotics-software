@@ -6,8 +6,8 @@ import org.junit.runners.Suite;
 import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses(
-{
+@Suite.SuiteClasses
+({
    us.ihmc.simulationconstructionset.util.globalParameters.AndBooleanGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.globalParameters.BooleanGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.globalParameters.DoubleGlobalParameterTest.class,
@@ -20,7 +20,6 @@ public class GlobalParameterTestSuite
 {
    public static void main(String[] args)
    {
-      String packageName = "us.ihmc.simulationconstructionset.util.globalParameters";
-      System.out.println(JUnitTestSuiteConstructor.createTestSuite("GlobalParameterTestSuite", packageName));
+      JUnitTestSuiteConstructor.generateTestSuite(GlobalParameterTestSuite.class);
    }
 }
