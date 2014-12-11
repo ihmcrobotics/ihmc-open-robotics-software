@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
  
 public class ThreadDataSynchronizer
 {
@@ -24,7 +24,7 @@ public class ThreadDataSynchronizer
    private long estimatorClockStartTime;
    private long estimatorTick;
 
-   public ThreadDataSynchronizer(WholeBodyControlParameters wholeBodyControlParameters)
+   public ThreadDataSynchronizer(WholeBodyControllerParameters wholeBodyControlParameters)
    {
       estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));

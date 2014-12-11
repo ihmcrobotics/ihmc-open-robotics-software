@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 
-public interface WholeBodyControlParameters
+public interface WholeBodyControllerParameters
 {
 	public CapturePointPlannerParameters getCapturePointPlannerParameters();
 

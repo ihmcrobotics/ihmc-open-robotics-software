@@ -98,7 +98,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
-   public DRCControllerThread(WholeBodyControlParameters robotModel, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
+   public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          double gravity, double estimatorDT)
    {

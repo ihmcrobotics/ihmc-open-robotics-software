@@ -10,7 +10,7 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
  
 public class IntermediateEstimatorStateHolder
 {
@@ -35,7 +35,7 @@ public class IntermediateEstimatorStateHolder
    private final RawJointSensorDataHolderMapCopier rawDataEstimatorToIntermadiateCopier;
    private final RawJointSensorDataHolderMapCopier rawDataIntermediateToControllerCopier;
 
-   public IntermediateEstimatorStateHolder(WholeBodyControlParameters wholeBodyControlParameters, RigidBody estimatorRootBody, RigidBody controllerRootBody,
+   public IntermediateEstimatorStateHolder(WholeBodyControllerParameters wholeBodyControlParameters, RigidBody estimatorRootBody, RigidBody controllerRootBody,
          ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
          RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
    {
@@ -118,7 +118,7 @@ public class IntermediateEstimatorStateHolder
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateEstimatorStateHolder>
    {
 
-      private final WholeBodyControlParameters robotModel;
+      private final WholeBodyControllerParameters robotModel;
       private final RigidBody estimatorRootJoint;
       private final RigidBody controllerRootJoint;
 
@@ -129,7 +129,7 @@ public class IntermediateEstimatorStateHolder
       private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
 
-      public Builder(WholeBodyControlParameters robotModel, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
+      public Builder(WholeBodyControllerParameters robotModel, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
             ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
             RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
       {

@@ -21,12 +21,12 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import com.jme3.math.Transform;
 
-public interface DRCRobotModel extends WholeBodyControlParameters
+public interface DRCRobotModel extends WholeBodyControllerParameters
 {
    //TODO: RobotBoundingBoxes.java
 

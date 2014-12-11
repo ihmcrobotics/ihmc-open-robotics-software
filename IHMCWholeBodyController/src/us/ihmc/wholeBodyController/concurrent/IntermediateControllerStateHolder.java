@@ -4,7 +4,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.GenericCRC32;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
-import us.ihmc.wholeBodyController.WholeBodyControlParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
  
 public class IntermediateControllerStateHolder
 {
@@ -18,7 +18,7 @@ public class IntermediateControllerStateHolder
    private final InverseDynamicsJointDesiredAccelerationChecksum controllerChecksum;
    private final InverseDynamicsJointDesiredAccelerationChecksum estimatorChecksum;
    
-   public IntermediateControllerStateHolder(WholeBodyControlParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel,
+   public IntermediateControllerStateHolder(WholeBodyControllerParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel,
          SDFFullRobotModel controllerModel)
    {
       SDFFullRobotModel intermediateModel = wholeBodyControlParameters.createFullRobotModel();
@@ -68,9 +68,9 @@ public class IntermediateControllerStateHolder
 
       private final SDFFullRobotModel estimatorModel;
       private final SDFFullRobotModel controllerModel;
-      private final WholeBodyControlParameters wholeBodyControlParameters;
+      private final WholeBodyControllerParameters wholeBodyControlParameters;
 
-      public Builder(WholeBodyControlParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
+      public Builder(WholeBodyControllerParameters wholeBodyControlParameters, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
       {
          this.wholeBodyControlParameters = wholeBodyControlParameters;
          this.estimatorModel = estimatorModel;
