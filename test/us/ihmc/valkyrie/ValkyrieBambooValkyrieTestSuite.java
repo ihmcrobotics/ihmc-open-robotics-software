@@ -18,10 +18,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 //   us.ihmc.valkyrie.networkProcessor.depthData.ValkyrieDepthDataProcessorTest.class, // Feature not yet implemented @dcalvert
 })
 
-public class ValkyrieBambooTestSuite
+public class ValkyrieBambooValkyrieTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(ValkyrieBambooTestSuite.class);
+      JUnitTestSuiteConstructor.generateTestSuite(ValkyrieBambooValkyrieTestSuite.class);
    }
 }
