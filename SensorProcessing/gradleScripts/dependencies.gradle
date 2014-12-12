@@ -36,6 +36,7 @@ dependencies {
     compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
       
     compile project(':IHMCControlFlow')
+    compile project(':IHMCCommunication')
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')
     compile project(':IHMCUtilities')

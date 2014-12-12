@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
+package us.ihmc.stateEstimation.kinematicsBasedStateEstimation;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
