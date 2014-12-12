@@ -54,7 +54,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    private final ArrayList<VideoSettings> cameras = new ArrayList<>();
    
-   public YoVariableLoggerListener(File directory, AnnounceRequest request, YoVariableLoggerOptions options)
+   public YoVariableLoggerListener(File directory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
       this.directory = directory;
       this.options = options;
@@ -63,6 +63,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       logProperties.setVariableDataFile(dataFilename);
       logProperties.setCompressed(true);
       logProperties.setVariablesIndexFile(indexFilename);
+      
+      logProperties.setLogName(request.getName());
+      logProperties.setTimestamp(timestamp);
       try
       {
          FileInputStream configuration = new FileInputStream(options.getConfigurationFile());

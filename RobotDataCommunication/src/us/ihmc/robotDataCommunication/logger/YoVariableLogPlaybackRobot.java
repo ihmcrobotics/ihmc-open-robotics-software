@@ -15,11 +15,13 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -27,6 +29,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener
 {
+   private final YoVariableRegistry logRegistry;
+   
    private final SimulationConstructionSet scs;
    private final LongYoVariable timestamp;
    private final DoubleYoVariable robotTime;
@@ -59,8 +63,35 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          throws IOException
    {
       super(generalizedSDFRobotModel, sdfJointNameMap, false);
+      this.logRegistry = new YoVariableRegistry(generalizedSDFRobotModel.getName());
+      
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
+      
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQx());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQy());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQz());
+      
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQdx());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQdy());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQdz());
+
+
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQs());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQx());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQy());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQz());
+      
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getAngularVelocityX());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getAngularVelocityY());
+      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getAngularVelocityZ());
+      
+      for(OneDegreeOfFreedomJoint joint : getOneDoFJoints())
+      {
+         getRobotsYoVariableRegistry().registerVariable(joint.getQ());
+         getRobotsYoVariableRegistry().registerVariable(joint.getQD());
+      }
+      
       this.jointStates = jointStates;
       this.variables = variables;
       this.scs = scs;
@@ -115,7 +146,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       logLine = ByteBuffer.allocate(bufferSize);
       logLongArray = logLine.asLongBuffer();
 
-      currentRecordTick = new IntegerYoVariable("currentRecordTick", yoVariableRegistry);
+      currentRecordTick = new IntegerYoVariable("currentRecordTick", getRobotsYoVariableRegistry());
 
       try
       {
@@ -204,7 +235,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          }
 
          timestamp.set(logLongArray.get());
-         robotTime.set(TimeTools.nanoSecondstoSeconds(timestamp.getLongValue()));
+         robotTime.set(TimeTools.nanoSecondstoSeconds(timestamp.getLongValue() - initialTimestamp));
 
          for (int i = 0; i < variables.size(); i++)
          {
@@ -310,4 +341,17 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       }
    }
 
+   @Override
+   public YoVariableRegistry getRobotsYoVariableRegistry()
+   {
+      if(this.logRegistry == null)
+      {
+         // Hack to avoid null registry errors on startup.
+         return super.getRobotsYoVariableRegistry();
+      }
+      else
+      {
+         return this.logRegistry;
+      }
+   }
 }

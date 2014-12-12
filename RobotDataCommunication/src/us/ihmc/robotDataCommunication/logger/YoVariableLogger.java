@@ -31,7 +31,7 @@ public class YoVariableLogger
          throw new IOException("Cannot create directory " + directory.getAbsolutePath());
       }
 
-      YoVariableLoggerListener logger = new YoVariableLoggerListener(directory, request, options);
+      YoVariableLoggerListener logger = new YoVariableLoggerListener(directory, timestamp, request, options);
       boolean showOverheadView = false;
       client = new YoVariableClient(request, logger, "", showOverheadView);
       try

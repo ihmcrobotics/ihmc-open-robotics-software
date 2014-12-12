@@ -252,7 +252,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       if (registry == null)
          throw new RuntimeException("Cannot add a null registry to " + this.name + "!!!!");
 
-      this.yoVariableRegistry.addChild(registry);
+      getRobotsYoVariableRegistry().addChild(registry);
    }
 
    public void addDynamicGraphicObjectsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -1831,12 +1831,12 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
 
    public ArrayList<YoVariableList> createAllVarLists()
    {
-      return yoVariableRegistry.createVarListsIncludingChildren();
+      return getRobotsYoVariableRegistry().createVarListsIncludingChildren();
    }
 
    public ArrayList<RewoundListener> getSimulationRewoundListeners()
    {
-      return yoVariableRegistry.getAllSimulationRewoundListeners();
+      return getRobotsYoVariableRegistry().getAllSimulationRewoundListeners();
    }
 
    public ArrayList<RobotControllerAndParameters> getControllers()
@@ -1852,47 +1852,47 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
 
    public YoVariable<?> getVariable(String variableName)
    {
-      return this.yoVariableRegistry.getVariable(variableName);
+      return getRobotsYoVariableRegistry().getVariable(variableName);
    }
 
    public boolean hasUniqueVariable(String variableName)
    {
-      return this.yoVariableRegistry.hasUniqueVariable(variableName);
+      return getRobotsYoVariableRegistry().hasUniqueVariable(variableName);
    }
 
    public ArrayList<YoVariable<?>> getAllVariables()
    {
-      return this.yoVariableRegistry.getAllVariablesIncludingDescendants();
+      return getRobotsYoVariableRegistry().getAllVariablesIncludingDescendants();
    }
 
    public YoVariable<?>[] getAllVariablesArray()
    {
-      return this.yoVariableRegistry.getAllVariablesArray();
+      return getRobotsYoVariableRegistry().getAllVariablesArray();
    }
 
    public YoVariable<?> getVariable(String nameSpaceEnding, String name)
    {
-      return this.yoVariableRegistry.getVariable(nameSpaceEnding, name);
+      return getRobotsYoVariableRegistry().getVariable(nameSpaceEnding, name);
    }
 
    public boolean hasUniqueVariable(String nameSpaceEnding, String name)
    {
-      return this.yoVariableRegistry.hasUniqueVariable(nameSpaceEnding, name);
+      return getRobotsYoVariableRegistry().hasUniqueVariable(nameSpaceEnding, name);
    }
 
    public ArrayList<YoVariable<?>> getVariables(String nameSpaceEnding, String name)
    {
-      return this.yoVariableRegistry.getVariables(nameSpaceEnding, name);
+      return getRobotsYoVariableRegistry().getVariables(nameSpaceEnding, name);
    }
 
    public ArrayList<YoVariable<?>> getVariables(String name)
    {
-      return this.yoVariableRegistry.getVariables(name);
+      return getRobotsYoVariableRegistry().getVariables(name);
    }
 
    public ArrayList<YoVariable<?>> getVariables(NameSpace nameSpace)
    {
-      return this.yoVariableRegistry.getVariables(nameSpace);
+      return getRobotsYoVariableRegistry().getVariables(nameSpace);
    }
    
    public ArrayList<Graphics3DObject> getStaticLinkGraphics()

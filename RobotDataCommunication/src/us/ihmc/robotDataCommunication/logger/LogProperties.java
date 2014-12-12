@@ -175,4 +175,24 @@ public abstract class LogProperties extends Properties
    {
       return Boolean.valueOf(getProperty("variables.compressed"));
    }
+   
+   public void setTimestamp(String timestamp)
+   {
+      setProperty("timestamp", timestamp);
+   }
+   
+   public String getTimestamp()
+   {
+      return getProperty("timestamp");
+   }
+   
+   public void setLogName(String logName)
+   {
+      setProperty("name", logName);
+   }
+   
+   public String getLogName()
+   {
+      return getProperty("name");
+   }
 }

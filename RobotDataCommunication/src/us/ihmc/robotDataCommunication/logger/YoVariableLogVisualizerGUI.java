@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -37,7 +38,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
    private final File directory;
 
-   public YoVariableLogVisualizerGUI(File directory, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper,
+   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper,
          SimulationConstructionSet scs)
    {
       super();
@@ -50,7 +51,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
       setLayout(new GridLayout(1, 2));
 
-      addGUIElements();
+      addGUIElements(directory, properties);
 
       setVisible(true);
    }
@@ -182,7 +183,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       }
    }
 
-   private void addGUIElements()
+   private void addGUIElements(File directory, LogProperties properties)
    {
       final JComboBox<String> videoFiles = new JComboBox<>();
       videoFiles.addItem("-- Disabled --");
@@ -280,8 +281,16 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
       timePanel.add(slider, BorderLayout.CENTER);
       timePanel.add(currentTime, BorderLayout.EAST);
-      setLayout(new BorderLayout());
-      add(timePanel, BorderLayout.NORTH);
+      
+      
+      JPanel dataPanel = new JPanel(new GridLayout(1, 3));
+      dataPanel.add(new JLabel("Main class name: " + properties.getLogName()));
+      dataPanel.add(new JLabel("Record time: " + properties.getTimestamp()));
+      dataPanel.add(new JLabel("Directory: " + directory));
+      add(dataPanel);
+      
+      setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+      add(timePanel);
       
       JPanel subPanel = new JPanel(new GridLayout(1, 3));
       subPanel.add(videoFiles);
