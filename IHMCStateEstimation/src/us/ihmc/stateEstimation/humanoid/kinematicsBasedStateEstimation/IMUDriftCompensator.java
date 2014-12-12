@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import javax.vecmath.AxisAngle4d;
 

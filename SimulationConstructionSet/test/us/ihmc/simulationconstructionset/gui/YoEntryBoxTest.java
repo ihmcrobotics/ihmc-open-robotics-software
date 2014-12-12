@@ -195,7 +195,8 @@ public class YoEntryBoxTest
       scs.startOnAThread();
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);
       StandardSimulationGUI scsGUI = scs.getStandardSimulationGUI();
-      scsGUI.getEntryBoxArrayPanel().removeAllEntryBoxes();
+      EntryBoxArrayPanel temp = scsGUI.getEntryBoxArrayPanel();
+      temp.removeAllEntryBoxes();
       scsGUI.getEntryBoxArrayPanel().updateUI();
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);
       return scs;
