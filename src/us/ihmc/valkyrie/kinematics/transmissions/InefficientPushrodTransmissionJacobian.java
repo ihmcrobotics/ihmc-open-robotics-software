@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 
-public class InefficientPushrodTransmissionJacobian
+public class InefficientPushrodTransmissionJacobian implements PushrodTransmissionJacobian
 {
    private final boolean DEBUG = false;
 
@@ -112,7 +112,7 @@ public class InefficientPushrodTransmissionJacobian
       }
       }
       
-      topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
+      topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the top joint frame.
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide5FrameToBoneFrame.rotY(-actuatorSlider5PitchRotation);
@@ -136,15 +136,15 @@ public class InefficientPushrodTransmissionJacobian
       {
          YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
 
-         double ballRadius = 0.005;
+         double ballRadius = 0.01;
 
          t5Viz = new YoGraphicPosition("t5Viz", "", registry, ballRadius, YoAppearance.Blue());
          t6Viz = new YoGraphicPosition("t6Viz", "", registry, ballRadius, YoAppearance.Green());
 
          b5Viz = new YoGraphicPosition("b5Viz", "", registry, ballRadius, YoAppearance.Red());
-         b6Viz = new YoGraphicPosition("b6Viz", "", registry, ballRadius, YoAppearance.Gold());
+         b6Viz = new YoGraphicPosition("b6Viz", "", registry, ballRadius, YoAppearance.Black());
 
-         double frameScale = 0.05;
+         double frameScale = 0.1;
 
          topFrameViz = new YoGraphicReferenceFrame(topFrame, registry, frameScale);
          afterTopJointFrameViz = new YoGraphicReferenceFrame(afterTopJointFrame, registry, frameScale * 0.8);

@@ -44,7 +44,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    private final double[][] jacobian = new double[2][2];
    private final double[][] jacobianInverse = new double[2][2];
 
-   private final InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian;
+   private final PushrodTransmissionJacobian pushrodTransmissionJacobian;
    
    private final double reflectBottom;
    private final double reflectTop;
@@ -64,7 +64,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       this.reflectTop = reflectTop;
       this.topJointFirst = topJointFirst;
       
-       inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, parentRegistry, yoGraphicsListRegistry);
+       pushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, parentRegistry, yoGraphicsListRegistry);
    }
    
    public void allowTopJointAngleOffset(String namePrefix, double offset, YoVariableRegistry registry)
@@ -75,7 +75,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
   
    public void setUseFuteks(boolean useFuteks)
    {
-      inefficientPushrodTransmissionJacobian.setUseFuteks(useFuteks);      
+      pushrodTransmissionJacobian.setUseFuteks(useFuteks);
    }
 
    private boolean invertMatrix(double[][] matrix, double[][] inverseTransposeToPack)
@@ -177,7 +177,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       if (topJointAngleOffset != null) topJointAngle += topJointAngleOffset.getDoubleValue();
       double bottomJointAngle = reflectBottom * bottomJointInterface.getPosition();
       
-      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
+      pushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
 
 //      System.out.println("m11: " + jacobian[0][0] + ", m12: " + jacobian[0][1] + ", m21: " + jacobian[1][0] + ", m22: " + jacobian[1][1]);
       double topJointTorque = jacobian[0][0] * leftActuatorForce + jacobian[0][1] * rightActuatorForce;
@@ -229,7 +229,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
          throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
       }
 
-      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
+      pushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
       invertMatrix(jacobian, jacobianInverse);
       double leftJointForce = jacobianInverse[0][0] * topJointTorque + jacobianInverse[0][1] * bottomJointTorque;
       double rightJointForce = jacobianInverse[1][0] * topJointTorque + jacobianInverse[1][1] * bottomJointTorque;
@@ -249,7 +249,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       double topJointTorque = reflectTop * jointTorques[0];
       double bottomJointTorque = reflectBottom * jointTorques[1];
 
-      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
+      pushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
       invertMatrix(jacobian, jacobianInverse);
       double leftJointForce = jacobianInverse[0][0] * topJointTorque + jacobianInverse[0][1] * bottomJointTorque;
       double rightJointForce = jacobianInverse[1][0] * topJointTorque + jacobianInverse[1][1] * bottomJointTorque;
