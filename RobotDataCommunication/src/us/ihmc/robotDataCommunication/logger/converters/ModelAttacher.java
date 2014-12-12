@@ -14,10 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.swing.JFileChooser;
 
-import org.apache.bcel.classfile.Field;
-
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogProperties;
 import us.ihmc.robotDataCommunication.logger.LogPropertiesReader;
 
