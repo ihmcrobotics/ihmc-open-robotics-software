@@ -7,4 +7,5 @@ dependencies {
  	compile project(':IHMCYoUtilities')
 	compile project(':SensorProcessing')
 	compile project(':Graphics3DAdapter')
+	compile project(':SimulationConstructionSet')
 }
