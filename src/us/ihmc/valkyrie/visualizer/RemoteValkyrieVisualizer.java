@@ -29,8 +29,8 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    
    private ValkyrieSliderBoardType valkyrieSliderBoardType;
    
-   private SCSVisualizer scsVisualizer;
-   private ValkyrieRobotModel valkyrieRobotModel;
+   private final SCSVisualizer scsVisualizer;
+   private final ValkyrieRobotModel valkyrieRobotModel;
    private String host;
 
    public RemoteValkyrieVisualizer(String[] networkArguments, ValkyrieSliderBoardType valkyrieSliderBoardType)
@@ -40,6 +40,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       parseNetworkArguments(networkArguments);
       
       System.out.println("Connecting to host " + host);
+      valkyrieRobotModel = new ValkyrieRobotModel(true, false);
 
       scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
