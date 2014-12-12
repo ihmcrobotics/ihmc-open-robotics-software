@@ -5,11 +5,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -163,7 +165,7 @@ public class InefficientPushrodTransmissionJacobianTest
    @Test
    public void testInefficientPushrodTransmissionForWaist()
    {
-      Robot robot = new Robot("testPushrodTransmission");
+      Robot robot = new ValkyrieWaistRobot();
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
@@ -207,10 +209,11 @@ public class InefficientPushrodTransmissionJacobianTest
          computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
          
          double increment = 0.1;
+         for (roll.set(-Math.PI / 3.0); roll.getDoubleValue() < Math.PI / 3.0; roll.add(increment))
+         {
          for (pitch.set(-Math.PI / 3.0); pitch.getDoubleValue() < Math.PI / 3.0; pitch.add(increment))
          {
-            for (roll.set(-Math.PI / 3.0); roll.getDoubleValue() < Math.PI / 3.0; roll.add(increment))
-            {
+            
                computeAndPrint(inefficientPushrodTransmissionJacobian, roll, pitch, jacobian, scs);
             }
          }
@@ -292,6 +295,32 @@ public class InefficientPushrodTransmissionJacobianTest
          
          System.out.println("f5=1.0 -> tauTopJoint = " + jacobian[0][0] + ", tauBottomJoint = " + jacobian[1][0]);
          System.out.println("f6=1.0 -> tauTopJoint = " + jacobian[0][1] + ", tauBottomJoint = " + jacobian[1][1] + "\n");
+      }
+   }
+   
+   private class ValkyrieWaistRobot extends Robot
+   {
+      public ValkyrieWaistRobot()
+      {
+         super("ValkyrieWaistRobot");
+         
+         Graphics3DObject linkGraphics = new Graphics3DObject();
+
+         double heightOfTopAxisAboveBottomAxis = 0.02032;
+
+         linkGraphics.translate(0.0, 0.0, 1.0 - heightOfTopAxisAboveBottomAxis);
+         linkGraphics.rotate(Math.PI/2.0, Axis.Z);
+         linkGraphics.rotate(Math.PI/2.0, Axis.X);
+         linkGraphics.translate(0.10705, 0.37547, -0.22417);
+
+         linkGraphics.addModelFile("models/waistPushrods/waist_assem.STL", YoAppearance.Gold());
+
+         this.addStaticLinkGraphics(linkGraphics);
+
+         linkGraphics = new Graphics3DObject();
+         linkGraphics.addCoordinateSystem(0.1);
+         this.addStaticLinkGraphics(linkGraphics);
+
       }
    }
 }
