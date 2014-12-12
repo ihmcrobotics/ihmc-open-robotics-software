@@ -57,7 +57,7 @@ public class YoVariableLoggerDispatcher implements LogBroadcastListener
             new YoVariableLogger(request, options);
             System.out.println("Logging session started");
          }
-         catch (IOException e)
+         catch (Exception e)
          {
             e.printStackTrace();
          }
