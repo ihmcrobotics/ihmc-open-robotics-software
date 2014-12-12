@@ -83,6 +83,7 @@ public class LogControlServer
       }
       server.attachListener(HandshakeRequest.class, new HandshakeRequestListener());
       server.attachListener(VariableChangeRequest.class, new VariableChangeRequestListener());
+      server.attachListener(ClearLogRequest.class, new ClearLogRequestListener());
    }
 
    public class HandshakeRequestListener implements ObjectConsumer<HandshakeRequest>
@@ -119,6 +120,19 @@ public class LogControlServer
 
    }
 
+   public class ClearLogRequestListener implements ObjectConsumer<ClearLogRequest>
+   {
+
+      @Override
+      public void consumeObject(ClearLogRequest object)
+      {
+         System.out.println("Broadcasting clear log");
+         server.consumeObject(object);
+      }
+      
+   }
+
+   
    public int getPort()
    {
       return port;

@@ -44,6 +44,7 @@ public class LogControlClient implements NetStateListener
       handshakeParser = new YoVariableHandshakeParser(registryPrefix, registerYoVariables);      
       client.attachStateListener(this);
       client.attachListener(LogHandshake.class, new LogHandShakeConsumer());
+      client.attachListener(ClearLogRequest.class, new ClearLogRequestListener());
    }
    
    @Override
@@ -156,6 +157,22 @@ public class LogControlClient implements NetStateListener
          request.requestedValue = v.getValueAsDouble();
          client.consumeObject(request);
       }
+   }
+   
+   public class ClearLogRequestListener implements ObjectConsumer<ClearLogRequest>
+   {
+
+      @Override
+      public void consumeObject(ClearLogRequest object)
+      {
+         listener.clearLog();
+      }
+      
+   }
+   
+   public void sendClearLogRequest()
+   {
+      client.consumeObject(new ClearLogRequest());
    }
 
    public int getNumberOfVariables()

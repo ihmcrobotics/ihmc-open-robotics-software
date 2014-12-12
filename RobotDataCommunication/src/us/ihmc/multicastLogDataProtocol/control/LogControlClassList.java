@@ -12,5 +12,7 @@ public class LogControlClassList extends NetClassList
       registerPacketClass(VariableChangeRequest.class);
       
       registerPacketField(String[].class);
+      
+      registerPacketClass(ClearLogRequest.class);
    }
 }
