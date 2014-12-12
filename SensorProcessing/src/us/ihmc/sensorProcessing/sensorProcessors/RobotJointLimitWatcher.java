@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.sensors;
+package us.ihmc.sensorProcessing.sensorProcessors;
 
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

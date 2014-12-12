@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
+package us.ihmc.stateEstimation.kinematicsBasedStateEstimation;
 
 import java.util.Random;
 

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation;
+package us.ihmc.stateEstimation;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
