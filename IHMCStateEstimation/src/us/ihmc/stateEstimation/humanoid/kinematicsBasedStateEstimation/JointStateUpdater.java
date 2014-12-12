@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;

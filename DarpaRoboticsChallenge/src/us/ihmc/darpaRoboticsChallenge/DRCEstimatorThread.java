@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.stateEstimation.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;

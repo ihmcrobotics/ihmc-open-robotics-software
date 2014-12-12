@@ -16,7 +16,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.stateEstimation.kinematicsBasedStateEstimation.JointStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;

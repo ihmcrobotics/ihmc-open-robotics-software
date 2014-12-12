@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 
 import static us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;

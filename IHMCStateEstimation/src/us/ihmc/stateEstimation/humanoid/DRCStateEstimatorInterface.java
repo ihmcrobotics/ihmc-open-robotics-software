@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation;
+package us.ihmc.stateEstimation.humanoid;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;

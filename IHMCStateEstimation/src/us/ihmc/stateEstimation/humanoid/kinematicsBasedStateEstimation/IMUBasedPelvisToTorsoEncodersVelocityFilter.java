@@ -1,7 +1,7 @@
 /**
  * Author: Will Rifenburgh 4:30:29 PM Nov 18, 2014
  */
-package us.ihmc.stateEstimation.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
