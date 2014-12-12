@@ -34,7 +34,7 @@ public class ImportDataDialogGenerator implements ImportDataDialogConstructor
       this.sim = sim;
       this.frame = frame;
 
-      try    // +++++++JEP: Applet Stuff
+      try
       {
          fileChooser = new JFileChooser();
 
@@ -89,54 +89,11 @@ public class ImportDataDialogGenerator implements ImportDataDialogConstructor
                  && (chosenFile.getName().endsWith(".data") || chosenFile.getName().endsWith(".data.gz") || chosenFile.getName().endsWith(".data.csv")))
          {
             sim.readData(chosenFile);
-
-            /*
-             * DataFileReader dataReader = new DataFileReader(chosenFile);
-             *
-             * int npoints = dataReader.readData(robVarPanel, myCombinedVarPanel);
-             *
-             * if (npoints > 0)
-             * {
-             * NUM_POINTS = npoints;
-             * //plotVariables = dataReader.getVariables();
-             * //robVarPanel.setVariables(plotVariables);
-             *
-             * myCombinedVarPanel.setInPoint(0);
-             * myCombinedVarPanel.setOutPoint(NUM_POINTS-1);
-             *
-             * myGraphArrayPanel.setLeftPlotIndex(0);
-             * myGraphArrayPanel.setRightPlotIndex(NUM_POINTS-1);
-             *
-             * recordDT = dataReader.getRecordDT();
-             * myGraphArrayPanel.setIndex(0);
-             *
-             * offsetTimeMillis = System.currentTimeMillis() - (long)(simTime*1000);
-             *
-             * numIndexSkip = (int) (0.03/recordDT);
-             * if (numIndexSkip < 1) numIndexSkip = 1;
-             * System.out.println("numIndexSkip: " + numIndexSkip);
-             * }
-             *
-             *
-             * else
-             * {
-             * JOptionPane.showMessageDialog(frame,"File not valid data file!");
-             * }
-             */
          }
 
          else if (chosenFile.canRead() && (chosenFile.getName().endsWith(".state") || chosenFile.getName().endsWith(".state.gz")))
          {
             sim.readState(chosenFile);
-
-            /*
-             * DataFileReader dataReader = new DataFileReader(chosenFile);
-             * dataReader.readState(myCombinedVarPanel);
-             * myCombinedVarPanel.tickAndUpdate();
-             * myCombinedVarPanel.setInPoint();
-             * myCombinedVarPanel.setOutPoint();
-             * myGraphArrayPanel.updateUI();
-             */
          }
 
          else
