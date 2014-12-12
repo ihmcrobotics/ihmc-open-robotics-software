@@ -8,4 +8,5 @@ dependencies {
 	compile project(':SensorProcessing')
 	compile project(':Graphics3DAdapter')
 	compile project(':SimulationConstructionSet')
+	compile project(':Plotting')
 }
