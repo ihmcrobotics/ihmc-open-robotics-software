@@ -27,6 +27,7 @@ public class FileSelectionDialog
       
       fileDialog.setVisible(true);         
       String filename = fileDialog.getDirectory();
+      fileDialog.dispose();
       if(filename != null)
       {
          return new File(filename);

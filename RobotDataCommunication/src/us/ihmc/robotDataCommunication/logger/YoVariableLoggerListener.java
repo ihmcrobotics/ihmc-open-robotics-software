@@ -30,7 +30,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private static final long connectTimeout = 20000;
    private static final long disconnectTimeout = 5000;
    private static final String handshakeFilename = "handshake.proto";
-   private static final String dataFilename = "robotData.bin";
+   private static final String dataFilename = "robotData.bsz";
    private static final String modelFilename = "model.sdf";
    private static final String modelResourceBundle = "resources.zip";
    private static final String indexFilename = "robotData.dat";
