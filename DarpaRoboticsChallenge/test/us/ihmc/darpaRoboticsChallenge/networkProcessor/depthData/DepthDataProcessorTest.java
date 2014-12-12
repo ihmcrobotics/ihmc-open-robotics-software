@@ -26,7 +26,7 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface, NetStateListener
 {
-   private static final int MINIMUM_SCANS_TO_RECIEVE = 60;
+   private static final int MINIMUM_SCANS_TO_RECIEVE = 60; // GPU Benchmark
    private static final float SCAN_TOLERANCE = 0.001f;
    private static final double WALL_DISTANCE = 1.0;
    private static final boolean ALLOW_PERCENTAGE_OUT_OF_RANGE = true;
