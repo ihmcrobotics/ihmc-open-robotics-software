@@ -1,6 +1,5 @@
 package us.ihmc.robotDataCommunication.logger.converters;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,7 +26,7 @@ public class LogCompressor
       {
          System.out.println("Compressing " + log);
 
-         YoVariableHandshakeParser handshake = getHandshake(new File(directory, properties.getHandshakeFile()));
+         YoVariableHandshakeParser handshake = ConverterUtil.getHandshake(new File(directory, properties.getHandshakeFile()));
          int bufferSize = (1 + handshake.getNumberOfVariables() + handshake.getNumberOfJointStateVariables()) * 8;
 
 
@@ -98,22 +97,5 @@ public class LogCompressor
       {
          System.err.println("Log file is already compressed");
       }
-   }
-
-   private static YoVariableHandshakeParser getHandshake(File handshake) throws IOException
-   {
-      if (!handshake.exists())
-      {
-         throw new RuntimeException("Cannot find " + handshake);
-      }
-
-      DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
-      byte[] handshakeData = new byte[(int) handshake.length()];
-      handshakeStream.readFully(handshakeData);
-      handshakeStream.close();
-
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged", true);
-      parser.parseFrom(handshakeData);
-      return parser;
    }
 }
