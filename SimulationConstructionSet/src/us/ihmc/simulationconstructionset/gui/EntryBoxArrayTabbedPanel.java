@@ -49,6 +49,8 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
    public EntryBoxArrayPanel getCurrentPanel()
    {
       // TODO Auto-generated method stub
+	  if(getSelectedComponent()==null)
+		  addEmptyTab();
       return (EntryBoxArrayPanel) getSelectedComponent();
    }
 
