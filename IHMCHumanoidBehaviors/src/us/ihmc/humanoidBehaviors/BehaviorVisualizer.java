@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 
-public abstract class BehaviorVisualizer extends SCSVisualizer
+public class BehaviorVisualizer extends SCSVisualizer
 {
    private final boolean showOverheadView = false;
    
