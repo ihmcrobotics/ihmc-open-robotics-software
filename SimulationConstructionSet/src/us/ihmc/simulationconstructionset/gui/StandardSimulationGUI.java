@@ -945,6 +945,14 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          standardGUIActions.notifySimulationStopped();
    }
 
+   public void addStaticLinkGraphics(ArrayList<Graphics3DObject> staticLinkGraphics)
+   {
+      for (Graphics3DObject graphics3dObject : staticLinkGraphics)
+      {
+         this.addStaticLinkGraphics(graphics3dObject);
+      }
+   }
+
    public Graphics3DNode addStaticLinkGraphics(Graphics3DObject staticLinkGraphics)
    {
       return addStaticLinkGraphics(staticLinkGraphics, Graphics3DNodeType.GROUND);
@@ -3031,5 +3039,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       myEntryBoxArrayPanel.closeAndDispose();
 
    }
+
+ 
 
 }

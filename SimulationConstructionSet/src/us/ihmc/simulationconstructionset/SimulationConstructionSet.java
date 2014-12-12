@@ -499,6 +499,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
       }
+      
+      if ((myGUI != null) && (robots != null))
+      {
+         for (Robot robot : robots)
+         {            
+            ArrayList<Graphics3DObject> staticLinkGraphics = robot.getStaticLinkGraphics();
+            myGUI.addStaticLinkGraphics(staticLinkGraphics);
+         }
+      }
 
       standardAllCommandsExecutor.setup(this, myGUI, myDataBuffer);
    }
@@ -3466,14 +3475,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          System.exit(-1);
       }
    }
-
-   // private void addVariablesToGUI(YoVariableRegistry rootRegistry)
-   // {
-   // if (myGUI != null)
-   // {
-   // myGUI.addVariablesFromRegistry(rootRegistry);
-   // }
-   // }
 
    private void addVariablesToGUI(YoVariableList varList)
    {
