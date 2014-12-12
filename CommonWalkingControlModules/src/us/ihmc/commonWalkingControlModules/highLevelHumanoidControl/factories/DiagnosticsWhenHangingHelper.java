@@ -206,5 +206,10 @@ public class DiagnosticsWhenHangingHelper
       this.torqueOffset.set(torqueOffset);
    }
 
+   public void setAppliedTorque(double appliedTorque)
+   {
+      this.appliedTorque.set(appliedTorque);
+   }
+
 
 }
