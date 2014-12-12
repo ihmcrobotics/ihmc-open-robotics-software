@@ -54,6 +54,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    private final ArrayList<VideoSettings> cameras = new ArrayList<>();
    
+   private boolean clearingLog = false;
+   
    public YoVariableLoggerListener(File directory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
       this.directory = directory;
@@ -142,7 +144,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       synchronized (synchronizer)
       {
-         if (dataChannel != null)
+         if (!clearingLog && dataChannel != null)
          {
             try
             {
@@ -353,6 +355,33 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       for (VideoDataLogger videoDataLogger : videoDataLoggers)
       {
          videoDataLogger.timestampChanged(timestamp);
+      }
+   }
+
+   @Override
+   public void clearLog()
+   {
+      synchronized (synchronizer)
+      {
+         clearingLog = true;
+      }
+      try
+      {
+         System.out.println("Clearing log.");
+         dataChannel.truncate(0);
+         indexChannel.truncate(0);
+         for (VideoDataLogger videoDataLogger : videoDataLoggers)
+         {
+            videoDataLogger.restart();
+         }
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      synchronized (synchronizer)
+      {
+         clearingLog = false;
       }
    }
 

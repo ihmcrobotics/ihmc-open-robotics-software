@@ -51,6 +51,13 @@ public class VideoDataLogger implements TimestampListener
       commandExecutor.execute();
 
    }
+   
+   public void restart() throws IOException
+   {
+      close();
+      removeLogFiles();
+      commandExecutor.execute();
+   }
 
    public void timestampChanged(long newTimestamp)
    {

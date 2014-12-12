@@ -119,4 +119,9 @@ public class YoVariableClient
    {
       return state == ClientState.RUNNING;
    }
+   
+   public void sendClearLogRequest()
+   {
+      logControlClient.sendClearLogRequest();
+   }
 }

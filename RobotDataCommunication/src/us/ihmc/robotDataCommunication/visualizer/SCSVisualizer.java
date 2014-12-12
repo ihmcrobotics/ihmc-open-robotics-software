@@ -45,6 +45,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
 
    private final JButton disconnectButton = new JButton("Disconnect");
+   private final JButton clearLogButton = new JButton("Clear log");
    private int totalTimeout = 0;
 
    private int bufferSize;
@@ -205,7 +206,20 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          }
 
       });
-
+      scs.addButton(clearLogButton);
+      clearLogButton.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            if(client != null)
+            {
+               client.sendClearLogRequest();
+            }
+         }
+      });
+      
       this.registry.addChild(yoVariableRegistry);
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
@@ -250,6 +264,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    @Override
    public void timestampReceived(long timestamp)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void clearLog()
    {
       // TODO Auto-generated method stub
       

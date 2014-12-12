@@ -32,4 +32,6 @@ public interface YoVariablesUpdatedListener
 
    public void timestampReceived(long timestamp);
 
+   public void clearLog();
+
 }
