@@ -16,19 +16,13 @@ dependencies {
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'com.jroller.santhosh', name: 'JResizable', version: '1.0'
-	//compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-calibration', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-sfm', version: '0.18'
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-calibration-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-geo-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-io-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-ip-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-visualize-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-sfm-0.19-SNAPSHOT.jar")
-	//compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
+	compile group: 'us.ihmc.thirdparty', name: 'boofcv-calibration', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-io', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-ip', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-visualize', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
+	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")
 	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.+'
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  

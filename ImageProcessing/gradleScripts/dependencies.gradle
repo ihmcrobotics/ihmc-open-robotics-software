@@ -3,22 +3,14 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
 	
 	
-	//compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-calibration', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-feature', version: '0.18'
-    //compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-sfm', version: '0.18'
-	//compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-xuggler', version: '0.18'
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-calibration-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-geo-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-io-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-ip-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-visualize-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-feature-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-sfm-0.19-SNAPSHOT.jar")
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-xuggler-0.19-SNAPSHOT.jar")
+	compile group: 'us.ihmc.thirdparty', name: 'boofcv-calibration', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-io', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-ip', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-visualize', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-feature', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
+	compile group: 'us.ihmc.thirdparty', name: 'boofcv-xuggler', version: '0.19-internal'
 	//compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.6.+'
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/DDogleg", include: "ddogleg-0.7-SNAPSHOT.jar")
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
