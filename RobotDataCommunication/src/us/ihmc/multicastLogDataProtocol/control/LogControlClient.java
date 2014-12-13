@@ -5,15 +5,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import us.ihmc.communication.net.KryoObjectClient;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;

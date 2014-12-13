@@ -4,10 +4,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;

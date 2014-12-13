@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.AtlasWristFeetSensorPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
@@ -18,7 +19,6 @@ import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

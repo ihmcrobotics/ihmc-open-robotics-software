@@ -17,12 +17,12 @@ import javax.vecmath.Vector3d;
 import org.ddogleg.struct.FastQueue;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.thoughtworks.xstream.XStream;
 

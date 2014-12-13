@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.communication;
 
+import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.utilities.net.GlobalObjectConsumer;
 
 public class ControllerGlobalObjectConsumer implements GlobalObjectConsumer
 {

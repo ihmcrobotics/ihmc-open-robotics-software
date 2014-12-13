@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.google.common.util.concurrent.AtomicDouble;
 

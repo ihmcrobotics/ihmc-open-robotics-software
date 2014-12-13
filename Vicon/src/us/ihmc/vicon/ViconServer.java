@@ -1,9 +1,9 @@
 package us.ihmc.vicon;
 
-import us.ihmc.utilities.remote.ReflectiveTCPServer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import us.ihmc.communication.remote.ReflectiveTCPServer;
 
 /**
  * ViconServer can be run anywhere the Vicon dll is located. The Vicon dll is only available for Windows 32-bit machines.

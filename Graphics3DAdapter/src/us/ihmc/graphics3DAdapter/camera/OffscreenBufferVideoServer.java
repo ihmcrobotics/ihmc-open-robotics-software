@@ -1,12 +1,14 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import us.ihmc.graphics3DAdapter.CameraAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.utilities.net.TimestampProvider;
+import java.awt.image.BufferedImage;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import java.awt.image.BufferedImage;
+
+import us.ihmc.graphics3DAdapter.CameraAdapter;
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.VideoDataServer;
 
 public class OffscreenBufferVideoServer
 {

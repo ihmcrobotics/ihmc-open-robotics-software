@@ -9,11 +9,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.imageio.ImageIO;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class ArmCalibrationHelper implements DRCStereoListener, ObjectConsumer<CalibrateArmPacket>
 {

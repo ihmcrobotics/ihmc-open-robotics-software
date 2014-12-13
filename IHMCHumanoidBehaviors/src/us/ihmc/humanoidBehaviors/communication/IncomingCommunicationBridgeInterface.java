@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.utilities.net.GlobalObjectConsumer;
+import us.ihmc.communication.net.GlobalObjectConsumer;
 
 public interface IncomingCommunicationBridgeInterface
 {

@@ -35,13 +35,13 @@ import javax.swing.text.PlainDocument;
 
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.tcpServer.DisconnectedException;
+import us.ihmc.communication.net.tcpServer.ReconnectingTCPClient;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.tcpServer.DisconnectedException;
-import us.ihmc.utilities.net.tcpServer.ReconnectingTCPClient;
 import us.ihmc.utilities.processManagement.ExitListener;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 

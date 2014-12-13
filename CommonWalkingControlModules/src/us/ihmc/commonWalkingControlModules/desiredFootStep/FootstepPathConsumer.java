@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -15,7 +16,6 @@ import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters
 import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;

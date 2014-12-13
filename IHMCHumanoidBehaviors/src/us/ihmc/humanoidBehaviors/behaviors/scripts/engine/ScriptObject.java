@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.util.ArrayList;
 
+import us.ihmc.utilities.TransformableDataObject;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.net.TransformableDataObject;
 
 /**
  * Created with IntelliJ IDEA.

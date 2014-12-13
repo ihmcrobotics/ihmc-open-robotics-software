@@ -16,8 +16,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Da
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.util.NetworkConfigParameters;
@@ -27,8 +29,6 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 

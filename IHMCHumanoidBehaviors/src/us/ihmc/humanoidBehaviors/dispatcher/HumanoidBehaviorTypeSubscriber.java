@@ -2,9 +2,9 @@ package us.ihmc.humanoidBehaviors.dispatcher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class HumanoidBehaviorTypeSubscriber implements ObjectConsumer<HumanoidBehaviorTypePacket>
 {

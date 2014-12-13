@@ -3,10 +3,11 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.driving.VehiclePosePacket;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
 {

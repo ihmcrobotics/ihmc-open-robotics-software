@@ -5,6 +5,8 @@ import java.net.BindException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import us.ihmc.communication.net.KryoObjectServer;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -12,8 +14,6 @@ import us.ihmc.robotDataCommunication.VariableChangedMessage;
 import us.ihmc.robotDataCommunication.YoVariableHandShakeBuilder;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.net.KryoObjectServer;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;

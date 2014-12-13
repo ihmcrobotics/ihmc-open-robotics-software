@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import us.ihmc.utilities.TransformableDataObject;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.net.TransformableDataObject;
 
 import com.thoughtworks.xstream.XStream;
 

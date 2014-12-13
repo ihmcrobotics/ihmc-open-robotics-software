@@ -2,13 +2,13 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
 import us.ihmc.communication.packets.driving.LowLevelDrivingCommand;
 import us.ihmc.communication.packets.driving.LowLevelDrivingStatus;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.DrivingInterface;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.DrivingInterface.GearName;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjects;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCommand>
 {

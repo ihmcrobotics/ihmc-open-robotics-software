@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 import java.io.IOException;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public abstract class HandCommandManager

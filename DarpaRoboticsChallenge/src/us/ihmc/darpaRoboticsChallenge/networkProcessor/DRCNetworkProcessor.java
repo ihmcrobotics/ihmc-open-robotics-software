@@ -6,6 +6,11 @@ import java.net.URI;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.AbstractNetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.KryoLocalObjectCommunicator;
+import us.ihmc.communication.net.KryoObjectClient;
+import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.sensing.TestbedClientPacket;
@@ -18,11 +23,6 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
-import us.ihmc.utilities.net.KryoLocalObjectCommunicator;
-import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DRCNetworkProcessor extends AbstractNetworkProcessor
 {

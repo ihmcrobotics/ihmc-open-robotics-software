@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -41,8 +43,6 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

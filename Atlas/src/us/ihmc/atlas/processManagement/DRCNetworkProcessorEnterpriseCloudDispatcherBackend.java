@@ -8,11 +8,11 @@ import java.net.Socket;
 
 import us.ihmc.atlas.AtlasNetworkProcessor;
 import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.communication.net.tcpServer.DisconnectedException;
+import us.ihmc.communication.net.tcpServer.ReconnectingTCPServer;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
-import us.ihmc.utilities.net.tcpServer.DisconnectedException;
-import us.ihmc.utilities.net.tcpServer.ReconnectingTCPServer;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import com.martiansoftware.jsap.FlaggedOption;

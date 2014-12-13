@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.util.DRCSensorParameters;
@@ -14,7 +15,6 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;

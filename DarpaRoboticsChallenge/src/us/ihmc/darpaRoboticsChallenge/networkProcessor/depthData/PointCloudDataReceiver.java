@@ -7,6 +7,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.NetworkProcessorControllerCommandHandler;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
@@ -19,8 +21,6 @@ import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.producers.RobotPoseBufferListener;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class PointCloudDataReceiver implements RobotPoseBufferListener, NetStateListener
 {

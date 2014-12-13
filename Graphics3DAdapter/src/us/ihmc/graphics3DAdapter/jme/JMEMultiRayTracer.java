@@ -5,8 +5,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.math.geometry.Ray3d;
-import us.ihmc.utilities.net.TimestampProvider;
 
 import com.jme3.app.Application;
 import com.jme3.scene.Node;

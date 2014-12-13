@@ -5,11 +5,10 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedRobotiqHandJointAngleProducer

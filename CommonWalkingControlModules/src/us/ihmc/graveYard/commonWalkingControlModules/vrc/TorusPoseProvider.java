@@ -2,10 +2,10 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 /**
  * @author twan

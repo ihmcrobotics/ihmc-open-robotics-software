@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.utilities.net.GlobalObjectConsumer;
-import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.communication.net.GlobalObjectConsumer;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 

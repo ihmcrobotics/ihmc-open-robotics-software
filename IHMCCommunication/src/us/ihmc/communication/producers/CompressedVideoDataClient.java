@@ -8,11 +8,11 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPicture;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.VideoPacket;
-import us.ihmc.graphics3DAdapter.camera.VideoStreamer;
-import us.ihmc.utilities.net.NetStateListener;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.VideoStreamer;
 
 public class CompressedVideoDataClient implements NetStateListener
 {

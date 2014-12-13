@@ -19,4 +19,5 @@ dependencies {
 	compile project(':SDFLoader')
 	compile project(':SimulationConstructionSet')
 	compile project(':UserInterface')
+	compile project(':IHMCCommunication')
 }

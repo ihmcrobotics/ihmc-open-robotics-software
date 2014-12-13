@@ -7,10 +7,10 @@ import java.util.Random;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.communication.remote.DataObjectServer;
+import us.ihmc.communication.remote.DataObjectTransponder;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.remote.DataObjectServer;
-import us.ihmc.utilities.remote.DataObjectTransponder;
 
 public class SpoofNetoworkSimulatedLidar
 {

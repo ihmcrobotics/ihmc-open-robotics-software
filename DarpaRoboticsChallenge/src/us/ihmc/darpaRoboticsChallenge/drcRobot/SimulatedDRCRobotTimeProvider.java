@@ -1,9 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
+import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvider implements RobotController
