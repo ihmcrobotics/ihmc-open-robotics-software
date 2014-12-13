@@ -1,11 +1,11 @@
 package us.ihmc.robotiq.control;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class RobotiqHandCommandManager extends HandCommandManager
 {

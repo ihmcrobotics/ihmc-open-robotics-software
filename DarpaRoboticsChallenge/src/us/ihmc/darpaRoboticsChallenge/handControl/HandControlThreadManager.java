@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.handControl;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.utilities.net.KryoObjectClient;
+import us.ihmc.communication.net.KryoObjectClient;
 
 public abstract class HandControlThreadManager
 {

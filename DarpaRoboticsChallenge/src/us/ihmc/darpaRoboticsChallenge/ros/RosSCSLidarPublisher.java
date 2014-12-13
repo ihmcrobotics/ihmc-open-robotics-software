@@ -5,14 +5,14 @@ import javax.vecmath.AxisAngle4d;
 import org.ros.message.Time;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.SpindleAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SpindleAngleReceiver;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosLidarPublisher;

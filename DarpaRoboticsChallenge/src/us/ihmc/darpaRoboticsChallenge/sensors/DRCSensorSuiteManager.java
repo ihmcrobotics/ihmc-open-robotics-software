@@ -4,10 +4,10 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
-import us.ihmc.utilities.net.LocalObjectCommunicator;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 public interface DRCSensorSuiteManager
 {

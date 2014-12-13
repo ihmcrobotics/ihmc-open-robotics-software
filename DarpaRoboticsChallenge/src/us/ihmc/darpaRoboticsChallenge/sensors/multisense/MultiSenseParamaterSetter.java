@@ -10,9 +10,9 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;

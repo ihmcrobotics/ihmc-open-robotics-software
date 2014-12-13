@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class HandPoseStatusProducer

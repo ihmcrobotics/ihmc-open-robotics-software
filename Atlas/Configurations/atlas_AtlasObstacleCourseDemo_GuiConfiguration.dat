@@ -1,31 +1,8 @@
 <GraphGroup>
 	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.atlas.t</Variables>
-		<GraphConfiguration>
-			<Name>config1</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedCenterOfMassPositionX</Variables>
-		<GraphConfiguration>
-			<Name>config2</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes Tab Pane>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

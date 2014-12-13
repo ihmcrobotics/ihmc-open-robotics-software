@@ -4,11 +4,11 @@ import java.awt.image.BufferedImage;
 
 import org.ros.message.Time;
 
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;

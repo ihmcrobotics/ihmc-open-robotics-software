@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.BumStatePacket;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredPelvisLoadBearingProvider implements ObjectConsumer<BumStatePacket>
 {

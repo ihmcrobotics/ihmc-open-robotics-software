@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.HashMap;
 
-import us.ihmc.utilities.net.GlobalObjectConsumer;
-import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.communication.net.GlobalObjectConsumer;
+import us.ihmc.communication.net.ObjectCommunicator;
 
 public class BehaviorPacketPassThroughManager implements GlobalObjectConsumer
 {

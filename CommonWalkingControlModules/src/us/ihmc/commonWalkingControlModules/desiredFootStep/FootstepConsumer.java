@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
+import us.ihmc.communication.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;

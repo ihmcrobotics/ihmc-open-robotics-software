@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetProducers;
 
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.robotSide.RobotSide;

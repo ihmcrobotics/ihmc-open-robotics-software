@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.communication.packets.walking.FootstepStatus;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

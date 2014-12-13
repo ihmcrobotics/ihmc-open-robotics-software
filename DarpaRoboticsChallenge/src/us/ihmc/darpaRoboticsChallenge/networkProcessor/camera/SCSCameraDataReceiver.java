@@ -4,13 +4,13 @@ import java.awt.image.BufferedImage;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 /**

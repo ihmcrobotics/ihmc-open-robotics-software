@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.graphics;
 
+import us.ihmc.utilities.GraphicsUpdatable;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.graphics3DAdapter.GraphicsUpdatable;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.yoUtilities.graphics.YoGraphic;

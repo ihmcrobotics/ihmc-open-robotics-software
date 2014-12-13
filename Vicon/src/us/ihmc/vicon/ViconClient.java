@@ -1,8 +1,5 @@
 package us.ihmc.vicon;
 
-import us.ihmc.utilities.remote.RemoteConnection;
-import us.ihmc.utilities.remote.RemoteRequest;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -13,6 +10,9 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
+
+import us.ihmc.communication.remote.RemoteConnection;
+import us.ihmc.communication.remote.RemoteRequest;
 
 public class ViconClient
 {

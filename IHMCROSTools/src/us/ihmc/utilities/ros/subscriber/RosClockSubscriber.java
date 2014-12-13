@@ -1,6 +1,6 @@
 package us.ihmc.utilities.ros.subscriber;
 
-import us.ihmc.utilities.net.TimestampProvider;
+import us.ihmc.utilities.TimestampProvider;
 
 public class RosClockSubscriber extends AbstractRosTopicSubscriber<rosgraph_msgs.Clock> implements TimestampProvider
 {

@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.KryoLocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -27,8 +29,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.net.KryoLocalObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class HandPoseStatusTest implements MultiRobotTestInterface

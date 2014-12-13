@@ -2,9 +2,9 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import us.ihmc.communication.net.GlobalObjectConsumer;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.net.GlobalObjectConsumer;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class NonBlockingGlobalObjectConsumerRelay implements GlobalObjectConsumer
 {

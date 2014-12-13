@@ -11,6 +11,8 @@ import multisense_ros.RawImuData;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
@@ -18,8 +20,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 

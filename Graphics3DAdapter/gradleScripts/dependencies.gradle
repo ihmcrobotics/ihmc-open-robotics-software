@@ -4,7 +4,6 @@ dependencies {
 	compile group: 'xerces', name: 'xercesImpl', version: '2.9.1'
 	
 	//compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/BoofCV", include: "BoofCV-geo-0.19-SNAPSHOT.jar")
 	compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5' //1.7.5
     ['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
@@ -25,6 +24,7 @@ dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 	
 	compile project(':IHMCUtilities')
+	compile project(':IHMCCommunication')
     compile project(':ThirdParty')
     
 	testCompile project(':IHMCUtilities').sourceSets.test.output

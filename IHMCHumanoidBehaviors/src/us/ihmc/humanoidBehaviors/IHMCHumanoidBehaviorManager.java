@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors;
 
 import java.util.Arrays;
 
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
@@ -31,7 +32,6 @@ import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

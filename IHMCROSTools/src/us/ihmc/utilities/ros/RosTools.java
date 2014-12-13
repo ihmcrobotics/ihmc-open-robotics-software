@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.utilities.net.NetworkTools;
+import us.ihmc.communication.net.NetworkTools;
 
 public class RosTools
 {

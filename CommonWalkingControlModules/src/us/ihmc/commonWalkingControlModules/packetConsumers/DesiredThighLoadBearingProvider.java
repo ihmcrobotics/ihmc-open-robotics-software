@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 

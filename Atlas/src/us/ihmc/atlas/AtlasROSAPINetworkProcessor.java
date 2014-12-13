@@ -4,12 +4,13 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.KryoObjectClient;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
-import us.ihmc.utilities.net.KryoObjectClient;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 import java.io.IOException;
 import java.net.URI;

@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 /**
  * User: Matt
