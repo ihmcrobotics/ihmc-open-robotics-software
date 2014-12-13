@@ -3,11 +3,8 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2'
 	compile group: 'xerces', name: 'xercesImpl', version: '2.9.1'
 	
-<<<<<<< .mine
 	compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal'
-=======
 	//compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.18'
->>>>>>> .r25034
 	compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5' //1.7.5
     ['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
