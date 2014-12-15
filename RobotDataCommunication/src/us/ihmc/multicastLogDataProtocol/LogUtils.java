@@ -13,6 +13,7 @@ public class LogUtils
 
    public static InetAddress getMyIP(String host)
    {
+      System.out.println("Getting ip for " + host);
       try
       {
          return getMyIP(InetAddress.getByName(host));
