@@ -349,4 +349,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       };
       return ret;
    }
+
+   @Override
+   public String getJointBeforeHandName(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }
