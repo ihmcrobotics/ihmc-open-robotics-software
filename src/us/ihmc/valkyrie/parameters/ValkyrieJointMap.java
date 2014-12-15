@@ -257,6 +257,12 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       return legJointStrings.get(robotSide).get(LegJointName.ANKLE_ROLL);
    }
+   
+   @Override
+   public String getJointBeforeHandName(RobotSide robotSide)
+   {
+      return nameOfJointsBeforeHands.get(robotSide);
+   }
 
    @Override
    public ValkyrieContactPointParameters getContactPointParameters()
@@ -348,12 +354,5 @@ public class ValkyrieJointMap implements DRCRobotJointMap
             getSpineJointName(SpineJointName.SPINE_ROLL),
       };
       return ret;
-   }
-
-   @Override
-   public String getJointBeforeHandName(RobotSide robotSide)
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 }
