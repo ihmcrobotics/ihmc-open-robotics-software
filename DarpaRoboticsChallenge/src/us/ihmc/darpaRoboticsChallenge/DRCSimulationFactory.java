@@ -148,8 +148,8 @@ public class DRCSimulationFactory
       }
       
       
-      drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
-            yoVariableServer, gravity);
+      drcEstimatorThread = new DRCEstimatorThread(drcRobotModel.getSensorInformation(), drcRobotModel.getContactPointParameters(), drcRobotModel.getStateEstimatorParameters(),
+    		  sensorReaderFactory, threadDataSynchronizer, globalDataProducer, yoVariableServer, gravity);
       
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = null;
       
