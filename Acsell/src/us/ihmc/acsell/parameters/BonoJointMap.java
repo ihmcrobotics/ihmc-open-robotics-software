@@ -267,6 +267,12 @@ public class BonoJointMap implements DRCRobotJointMap
    {
       return null;
    }
+   
+   @Override
+   public String getJointBeforeHandName(RobotSide robotSide)
+   {
+      return null;
+   }
 
    protected LinkedHashMap<String, Pair<RobotSide, LegJointName>> getLegJointNamesMap()
    {
@@ -295,12 +301,5 @@ public class BonoJointMap implements DRCRobotJointMap
    public String getSpineJointName(SpineJointName spineJointName)
    {
       return spineJointStrings.get(spineJointName);
-   }
-
-   @Override
-   public String getJointBeforeHandName(RobotSide robotSide)
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 }
