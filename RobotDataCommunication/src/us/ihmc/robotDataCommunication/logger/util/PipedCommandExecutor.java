@@ -94,7 +94,9 @@ public class PipedCommandExecutor
 		   }
 	   }
 	   try {
-		   return process.waitFor();
+	      int res = process.waitFor();
+	      process = null;
+		   return res;
 	   } catch (InterruptedException e) {
 		return 0;
 	   }
