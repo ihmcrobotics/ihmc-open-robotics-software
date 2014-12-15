@@ -95,8 +95,8 @@ public class StepprControllerFactory
        * Build controller
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
-      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel, sensorReaderFactory, threadDataSynchronizer, dataProducer,
-           yoVariableServer, gravity);
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(), robotModel.getStateEstimatorParameters(),
+    		  sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer, gravity);
       estimatorThread.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter, dataProducer,
             yoVariableServer, gravity, robotModel.getEstimatorDT());
