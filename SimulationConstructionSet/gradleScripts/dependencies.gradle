@@ -40,4 +40,5 @@ dependencies {
     compile project(':Plotting')
 	compile project(':Graphics3DAdapter')
 	compile project(':ParameterOptimization')
+	compile project(':IHMCCommunication')
 }
