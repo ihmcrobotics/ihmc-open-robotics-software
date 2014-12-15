@@ -6,13 +6,13 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
-import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -26,6 +26,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVectorInMultipleFrames;
 
@@ -37,11 +38,11 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final double forceSensorMaxPassThroughFreq_Hz = 50.0;
 
    private final ForceSensorData forceSensorData;
-   private final Wrench wristWrench;
+   private final Wrench wristSensorWrench;
 
-   private final DoubleYoVariable yoWristForceMagnitude;
-   private final FirstOrderFilteredYoVariable yoWristForceMagnitudeBias;
-   private final FirstOrderBandPassFilteredYoVariable yoWristForceMagnitudeBandPassFiltered;
+   private final DoubleYoVariable yoWristSensorForceMagnitude;
+   private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
+   private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
 
    private final BooleanYoVariable yoImpactDetected;
    private final DoubleYoVariable yoImpactTime;
@@ -51,31 +52,36 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame sensorFrame;
+   private final FramePose sensorPose;
+   private final YoFramePoint yoSensorPosition;
 
    private final DoubleYoVariable handMass;
 
    private final YoFrameVectorInMultipleFrames yoWristSensorForce;
    private final YoFrameVectorInMultipleFrames yoWristSensorTorque;
-   private final YoFrameVectorInMultipleFrames yoWristForceDueToHandMass;
+   private final YoFrameVectorInMultipleFrames yoWristSensorForceDueToHandMass;
    private final YoFrameVectorInMultipleFrames yoSensorToHandCoMvector;
-   private final YoFrameVectorInMultipleFrames yoWristTorqueDueToHandMass;
+   private final YoFrameVectorInMultipleFrames yoWristSensorTorqueDueToHandMass;
 
-   private final YoFrameVector yoWristForceHandMassCompensated;
-   private final YoFrameVector yoWristTorqueHandMassCompensated;
+   private final YoFrameVector yoWristSensorForceHandMassCompensated;
+   private final YoFrameVector yoWristSensorTorqueHandMassCompensated;
 
+   private final DoubleYoVariable yoImpactStiffnessThreshold_NperM;
    private final DoubleYoVariable yoImpactForceThreshold_N;
    private final BooleanYoVariable stopArmMotionIfImpactDetected;
    private final BooleanYoVariable addSimulatedSensorNoise;
 
+   private final TurboEncabulatorDingus stiffnessCalc;
+
    private final ObjectCommunicator controllerCommunicator;
 
-   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo, ForceSensorDataHolder forceSensorDataHolder, double DT,
-         ObjectCommunicator controllerCommunicator, YoVariableRegistry registry)
+   public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
+         ForceSensorDataHolder forceSensorDataHolder, double DT, ObjectCommunicator controllerCommunicator, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
 
+      String sidePrefix = robotSide.getLowerCaseName();
       String forceSensorName = sensorInfo.getWristForceSensorNames().get(robotSide);
-//      String forceSensorName = robotSide.getShortLowerCaseName() + "_arm_wrx"; //TODO: Fix this so that it works with robots other than Atlas, by using DRCRobotSensorInformation.getWristForceSensorNames()
 
       ForceSensorDefinition wristSensorDefinition = null;
       List<ForceSensorDefinition> forceSensorDefinitions = forceSensorDataHolder.getForceSensorDefinitions();
@@ -93,10 +99,12 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       this.forceSensorData = forceSensorDataHolder.getByName(forceSensorName);
 
       InverseDynamicsJoint wristJoint = forceSensorData.getMeasurementLink().getParentJoint();
-      wristWrench = new Wrench();
-      forceSensorData.packWrench(wristWrench);
+      wristSensorWrench = new Wrench();
+      forceSensorData.packWrench(wristSensorWrench);
 
       this.sensorFrame = wristSensorDefinition.getSensorFrame();
+      this.sensorPose = new FramePose(world);
+      this.yoSensorPosition = new YoFramePoint(sidePrefix + "WristSensorPosition", world, registry);
 
       handMass = new DoubleYoVariable(robotSide.getLowerCaseName() + "HandMass", registry);
       handMassCalc = new CenterOfMassCalculator(ScrewTools.computeRigidBodiesAfterThisJoint(wristJoint), sensorFrame);
@@ -104,37 +112,38 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
       ReferenceFrame[] worldAndSensorFrames = new ReferenceFrame[] { world, sensorFrame };
 
-      yoWristSensorForce = new YoFrameVectorInMultipleFrames(robotSide.getLowerCaseName() + "WristForce", registry, worldAndSensorFrames);
-      yoWristSensorTorque = new YoFrameVectorInMultipleFrames(robotSide.getLowerCaseName() + "WristTorque", registry, worldAndSensorFrames);
+      yoWristSensorForce = new YoFrameVectorInMultipleFrames(sidePrefix + "WristForce", registry, worldAndSensorFrames);
+      yoWristSensorTorque = new YoFrameVectorInMultipleFrames(sidePrefix + "WristTorque", registry, worldAndSensorFrames);
 
-      yoWristForceDueToHandMass = new YoFrameVectorInMultipleFrames(robotSide.getLowerCaseName() + "WristForceDueToHandMass", registry, worldAndSensorFrames);
-      yoSensorToHandCoMvector = new YoFrameVectorInMultipleFrames(robotSide.getLowerCaseName() + "SensorToHandCoM", registry, worldAndSensorFrames);
-      yoWristTorqueDueToHandMass = new YoFrameVectorInMultipleFrames(robotSide.getLowerCaseName() + "WristTorqueDueToHandMass", registry, worldAndSensorFrames);
+      yoWristSensorForceDueToHandMass = new YoFrameVectorInMultipleFrames(sidePrefix + "WristForceDueToHandMass", registry, worldAndSensorFrames);
+      yoSensorToHandCoMvector = new YoFrameVectorInMultipleFrames(sidePrefix + "SensorToHandCoM", registry, worldAndSensorFrames);
+      yoWristSensorTorqueDueToHandMass = new YoFrameVectorInMultipleFrames(sidePrefix + "WristTorqueDueToHandMass", registry, worldAndSensorFrames);
 
-      yoWristForceHandMassCompensated = new YoFrameVector(robotSide.getLowerCaseName() + "WristForceMassCompensated", sensorFrame, registry);
-      yoWristTorqueHandMassCompensated = new YoFrameVector(robotSide.getLowerCaseName() + "WristTorqueMassCompensated", sensorFrame, registry);
+      yoWristSensorForceHandMassCompensated = new YoFrameVector(sidePrefix + "WristForceMassCompensated", sensorFrame, registry);
+      yoWristSensorTorqueHandMassCompensated = new YoFrameVector(sidePrefix + "WristTorqueMassCompensated", sensorFrame, registry);
 
-      yoWristForceMagnitude = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "WristForceMag", registry);
-      yoWristForceMagnitudeBias = new FirstOrderFilteredYoVariable(robotSide.getShortLowerCaseName() + "WristForceBias", "", 0.0001, DT,
-            FirstOrderFilterType.LOW_PASS, registry);
-      yoWristForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(robotSide.getShortLowerCaseName() + "WristForceMagFiltered", "",
+      yoWristSensorForceMagnitude = new DoubleYoVariable(sidePrefix + "WristForceMag", registry);
+      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(sidePrefix + "WristForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS, registry);
+      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(sidePrefix + "WristForceMagFiltered", "",
             forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, DT, registry);
 
-      yoImpactForceThreshold_N = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "ImpactForceThreshold_N", registry);
-      yoImpactDetected = new BooleanYoVariable(robotSide.getShortLowerCaseName() + "WristImpactDetected", registry);
+      yoImpactStiffnessThreshold_NperM = new DoubleYoVariable(sidePrefix + "ImpactStiffnessThreshold_NperM", registry);
+      yoImpactForceThreshold_N = new DoubleYoVariable(sidePrefix + "ImpactForceThreshold_N", registry);
+      yoImpactDetected = new BooleanYoVariable(sidePrefix + "WristImpactDetected", registry);
       yoImpactDetected.set(false);
 
-      yoImpactTime = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "WristImpactTime", registry);
+      yoImpactTime = new DoubleYoVariable(sidePrefix + "WristImpactTime", registry);
 
-      //      YoGraphicVector wristForceViz = new YoGraphicVector(robotSide.getLowerCaseName() + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
+      //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
 
       addSimulatedSensorNoise = new BooleanYoVariable(robotSide.getShortLowerCaseName() + "AddSimulatedNoise", registry);
-
       stopArmMotionIfImpactDetected = new BooleanYoVariable(robotSide.getShortLowerCaseName() + "stopArmMotionIfImpactDetected", registry);
 
+      stiffnessCalc = new TurboEncabulatorDingus(sidePrefix, DT, registry);
+
       this.controllerCommunicator = controllerCommunicator;
-      
+
       initialize();
    }
 
@@ -142,10 +151,12 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    {
       addSimulatedSensorNoise.set(false);
       stopArmMotionIfImpactDetected.set(false);
-      
+
       handMassCalc.compute();
       handMass.set(handMassCalc.getTotalMass());
-      yoImpactForceThreshold_N.set(  20.0 );
+      
+      yoImpactForceThreshold_N.set(20.0);
+      yoImpactStiffnessThreshold_NperM.set(20000.0);
    }
 
    public void setStopMotionIfCollision(boolean stop)
@@ -160,17 +171,17 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    public FrameVector getWristForceMassCompensated()
    {
-      return yoWristForceHandMassCompensated.getFrameTuple();
+      return yoWristSensorForceHandMassCompensated.getFrameTuple();
    }
 
    public DoubleYoVariable getWristForceMagnitude()
    {
-      return yoWristForceMagnitude;
+      return yoWristSensorForceMagnitude;
    }
 
    public DoubleYoVariable getWristForceBandPassFiltered()
    {
-      return yoWristForceMagnitudeBandPassFiltered;
+      return yoWristSensorForceMagnitudeBandPassFiltered;
    }
 
    public Boolean getIsHandCurrentlyColliding()
@@ -185,23 +196,22 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    public void updateWristSensorValuesFromRobot()
    {
-      forceSensorData.packWrench(wristWrench);
+      forceSensorData.packWrench(wristSensorWrench);
 
-      ReferenceFrame wristWrenchFrame = wristWrench.getExpressedInFrame();
+      ReferenceFrame wristWrenchFrame = wristSensorWrench.getExpressedInFrame();
 
-      yoWristSensorForce.set(wristWrenchFrame, wristWrench.getLinearPartX(), wristWrench.getLinearPartY(), wristWrench.getLinearPartZ());
-      yoWristSensorTorque.set(wristWrenchFrame, wristWrench.getAngularPartX(), wristWrench.getAngularPartY(), wristWrench.getAngularPartZ());
+      yoWristSensorForce.set(wristWrenchFrame, wristSensorWrench.getLinearPartX(), wristSensorWrench.getLinearPartY(), wristSensorWrench.getLinearPartZ());
+      yoWristSensorTorque.set(wristWrenchFrame, wristSensorWrench.getAngularPartX(), wristSensorWrench.getAngularPartY(), wristSensorWrench.getAngularPartZ());
 
-      yoWristForceMagnitude.set(yoWristSensorForce.length());
+      yoWristSensorForceMagnitude.set(yoWristSensorForce.length());
 
       if (addSimulatedSensorNoise.getBooleanValue())
       {
-         yoWristForceMagnitude.add(0.1 * 2.0 * (Math.random() - 0.5) + 0.25);
+         yoWristSensorForceMagnitude.add(0.1 * 2.0 * (Math.random() - 0.5) + 0.25);
       }
-
    }
 
-   FramePoint temp = new FramePoint();
+   private final FramePoint temp = new FramePoint();
 
    public void update(double time)
    {
@@ -220,15 +230,18 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       computeSensorForceDueToWeightOfHand();
 
       computeSensorTorqueDueToWeightOfHand();
-
-      yoWristForceMagnitudeBias.update(yoWristForceMagnitude.getDoubleValue());
-      yoWristForceMagnitudeBandPassFiltered.update(yoWristForceMagnitude.getDoubleValue());
-
       
-      if (Math.abs(yoWristForceHandMassCompensated.length()) > yoImpactForceThreshold_N.getDoubleValue())
+      estimateStiffnessOfConstraintsActingUponWrist();
+
+      yoWristSensorForceMagnitudeBias.update(yoWristSensorForceMagnitude.getDoubleValue());
+      yoWristSensorForceMagnitudeBandPassFiltered.update(yoWristSensorForceMagnitude.getDoubleValue());
+
+//      if (Math.abs(yoWristForceHandMassCompensated.length()) > yoImpactForceThreshold_N.getDoubleValue())
+      if( stiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue() )
       {
          if (!yoImpactDetected.getBooleanValue() && time > 1.0)
          {
+            yoImpactDetected.set(true);
             yoImpactTime.set(time);
 
             if (stopArmMotionIfImpactDetected.getBooleanValue())
@@ -238,41 +251,49 @@ public class WristForceSensorFilteredUpdatable implements Updatable
                controllerCommunicator.consumeObject(pausePacket);
             }
          }
-         yoImpactDetected.set(true);
-
-      }
-      else
-      {
-         yoImpactDetected.set(false);
       }
    }
 
    private void computeSensorForceDueToWeightOfHand()
    {
-      yoWristForceDueToHandMass.changeFrame(world);
-      yoWristForceDueToHandMass.set(world, 0.0, 0.0, 9.81 * handMass.getDoubleValue()); // USE +9.81 since measured force is equal and opposite
+      yoWristSensorForceDueToHandMass.changeFrame(world);
+      yoWristSensorForceDueToHandMass.set(world, 0.0, 0.0, 9.81 * handMass.getDoubleValue()); // USE +9.81 since measured force is equal and opposite
 
       yoWristSensorForce.changeFrame(sensorFrame);
-      yoWristForceDueToHandMass.changeFrame(sensorFrame);
+      yoWristSensorForceDueToHandMass.changeFrame(sensorFrame);
 
-      yoWristForceHandMassCompensated.sub(yoWristSensorForce, yoWristForceDueToHandMass);
+      yoWristSensorForceHandMassCompensated.sub(yoWristSensorForce, yoWristSensorForceDueToHandMass);
    }
 
    private void computeSensorTorqueDueToWeightOfHand()
    {
       yoSensorToHandCoMvector.changeFrame(handWeightInWorld.getReferenceFrame());
-      yoWristTorqueDueToHandMass.changeFrame(handWeightInWorld.getReferenceFrame());
+      yoWristSensorTorqueDueToHandMass.changeFrame(handWeightInWorld.getReferenceFrame());
 
-      FrameVector wristTorqueDueToHandMass = yoWristTorqueDueToHandMass.getFrameTuple();
+      FrameVector wristTorqueDueToHandMass = yoWristSensorTorqueDueToHandMass.getFrameTuple();
       wristTorqueDueToHandMass.cross(yoSensorToHandCoMvector.getFrameTuple(), handWeightInWorld);
 
-      yoWristTorqueDueToHandMass.set(wristTorqueDueToHandMass.getReferenceFrame(), wristTorqueDueToHandMass.getX(), wristTorqueDueToHandMass.getY(),
+      yoWristSensorTorqueDueToHandMass.set(wristTorqueDueToHandMass.getReferenceFrame(), wristTorqueDueToHandMass.getX(), wristTorqueDueToHandMass.getY(),
             wristTorqueDueToHandMass.getZ());
 
       yoWristSensorTorque.changeFrame(sensorFrame);
-      yoWristTorqueDueToHandMass.changeFrame(sensorFrame);
+      yoWristSensorTorqueDueToHandMass.changeFrame(sensorFrame);
 
-      yoWristTorqueHandMassCompensated.sub(yoWristSensorTorque, yoWristTorqueDueToHandMass);
+      yoWristSensorTorqueHandMassCompensated.sub(yoWristSensorTorque, yoWristSensorTorqueDueToHandMass);
+   }
+   
+   private void estimateStiffnessOfConstraintsActingUponWrist()
+   {
+      sensorPose.setPose(sensorFrame.getTransformToDesiredFrame(world));
+
+      sensorPose.getPositionIncludingFrame(temp);
+      yoSensorPosition.set(temp.getReferenceFrame(), temp.getX(), temp.getY(), temp.getZ());
+
+      ReferenceFrame changeBackToThisFrame = yoWristSensorForce.getReferenceFrame();
+      yoWristSensorForce.changeFrame(world);
+
+      stiffnessCalc.update(yoSensorPosition.getFrameTuple(), yoWristSensorForce.getFrameTuple());
+      yoWristSensorForce.changeFrame(changeBackToThisFrame);
    }
 
 }

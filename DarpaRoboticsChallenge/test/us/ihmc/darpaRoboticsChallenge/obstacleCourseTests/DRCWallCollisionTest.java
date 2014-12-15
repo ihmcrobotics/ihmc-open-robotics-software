@@ -16,8 +16,6 @@ import org.junit.Test;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
-import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -28,9 +26,6 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
-import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
-import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -42,11 +37,12 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -63,18 +59,16 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   private Robot robotToTest;
    private RobotSide robotSideToTest = RobotSide.LEFT;
 
-   private String forceSensorNameSuffix = "wrx"; //TODO: Fix this so that it works with robots other than Atlas, by using DRCRobotSensorInformation.getWristForceSensorNames()
-   private GroundContactPoint wristGCPoint;
-
-   private ForceSensorDataHolder forceSensorDataHolder;
-   private RobotDataReceiver robotDataReceiver;
+   private FullRobotModel fullRobotModel;
+   private DRCRobotSensorInformation sensorInfo;
+   
    private WristForceSensorFilteredUpdatable wristUpdatable;
    private UpdateForceSensorFromRobotController updateForceSensorController;
    private HandGCArrestor handGCArrestor;
    
-   private YoVariableRegistry testRegistry;
    private DoubleYoVariable yoTime;
 
    @Before
@@ -85,27 +79,23 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie, true, getRobotModel());
 
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      FullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
+      robotToTest = drcSimulationTestHelper.getRobot();
+      fullRobotModel = getRobotModel().createFullRobotModel();
 
-      wristGCPoint = setupHandGCPoint();
-
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       networkObjectCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
       wristUpdatable = setupWristForceSensorUpdatable(forceSensorDataHolder);
 
       updateForceSensorController = setupUpdateForceSensorController(robotDataReceiver);
       robotToTest.setController(updateForceSensorController);
-
-      handGCArrestor = setupHandGroundContactPointArrestor();
+      
+      GroundContactPoint wristGCPoint = drcSimulationTestHelper.getRobot().getHandGroundContactPoints(robotSideToTest).get(0);
+      handGCArrestor = setupHandGroundContactPointArrestor(wristGCPoint);
       robotToTest.setController(handGCArrestor);
 
-      testRegistry = new YoVariableRegistry("WallCollisionTest");
-      yoTime = new DoubleYoVariable("yoTime", testRegistry);
-      
+      yoTime = robotToTest.getYoTime();
+
       setupCameraForHandstepsOnWalls();
    }
 
@@ -131,13 +121,13 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       networkObjectCommunicator.consumeObject(handPosePacket);
    }
 
-   private GroundContactPoint setupHandGCPoint()
-   {
+   private GroundContactPoint setupHandGCPoint(String handGcPointSuffix)
+   {     
       GroundContactPoint ret = null;
 
       for (GroundContactPoint gcPoint : drcSimulationTestHelper.getRobot().getAllGroundContactPoints())
       {
-         if (gcPoint.getName().contains(forceSensorNameSuffix) && gcPoint.getName().contains(robotSideToTest.getShortLowerCaseName()))
+         if (gcPoint.getName().contains(handGcPointSuffix) && gcPoint.getName().contains(robotSideToTest.getShortLowerCaseName()))
          {
             ret = gcPoint;
          }
@@ -168,13 +158,13 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       Robot robotToTest = drcSimulationTestHelper.getRobot();
       robotToTest.getForceSensors(forceSensors);
 
-      UpdateForceSensorFromRobotController ret = new UpdateForceSensorFromRobotController(robotToTest, robotDataReceiver, wristUpdatable, forceSensors);
+      UpdateForceSensorFromRobotController ret = new UpdateForceSensorFromRobotController(robotDataReceiver, wristUpdatable, forceSensors);
 
       return ret;
    }
 
-//   @Test
-   public void testImpactDetectionUsingHandPoseBehavior() throws SimulationExceededMaximumTimeException
+   @Test
+   public void testConstrainedHandPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -182,34 +172,52 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       wristUpdatable.setStopMotionIfCollision(true);
 
-      Point3d position = new Point3d(0.9, 0.35, 1.0);
-      Quat4d orientation = new Quat4d(-1.0, 0.0, 0.0, 0.5 * Math.PI);
-      double swingTrajectoryTime = 2.0;
+      BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(new LocalObjectCommunicator(), networkObjectCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
+      
+      FramePose handPose = new FramePose();  
+      handPose.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+      
+      handPose.changeFrame(ReferenceFrame.getWorldFrame());
+      handPose.setX(handPose.getX() + 0.4);
 
-      HandPosePacket handCollisionWithWallPosePacket = new HandPosePacket(robotSideToTest, Frame.CHEST, position, orientation, swingTrajectoryTime);
+      RigidBodyTransform handPoseTransform = new RigidBodyTransform();
+      handPose.getPose(handPoseTransform);
       
-      BehaviorCommunicationBridge behaviorCommunicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, networkObjectCommunicator, testRegistry);
-
+      double swingTrajectoryTime = 4.0 * Math.random() + 0.2;
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTransform, robotSideToTest, swingTrajectoryTime);      
       
-      HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
-      HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
+      final double simulationRunTime = swingTrajectoryTime + 1.0;
       
-      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
-            desiredBehaviorSubscriber, behaviorCommunicationBridge, null, testRegistry, new YoGraphicsListRegistry());
+      Thread handPoseBehaviorThread = new Thread()
+      {
+         public void run()
+         {
+            {
+               double startTime = Double.NaN;
+               boolean simStillRunning = true;
+               boolean initalized = false;
+               
+               while(simStillRunning)
+               {
+                  if (!initalized)
+                  {
+                     startTime = yoTime.getDoubleValue();
+                     initalized = true;
+                  }
+                  
+                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
+                  simStillRunning = timeSpentSimulating < simulationRunTime;
+                  
+                  handPoseBehavior.doControl();        
+               }             
+            }
+         }
+      };
       
+      handPoseBehaviorThread.start();
       
-      networkObjectCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
-      networkObjectCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
-      
-      Thread dispatcherThread = new Thread(dispatcher, "BehaviorDispatcher");
-      dispatcherThread.start();
-      
-      HandPoseBehavior handCollisionBehavior = new HandPoseBehavior(behaviorCommunicationBridge, yoTime);
-      
-      handCollisionBehavior.setInput(handCollisionWithWallPosePacket);
-      
-//      sendHandPosePacket(handCollisionWithWallPosePacket);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
       assertTrue(success);
       
       double actualHandGcCollisionTime = handGCArrestor.getHandGcCollisionTime();
@@ -221,32 +229,107 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
    
-   @Test
-   public void testImpactDetectionUsingHandPosePacket() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      wristUpdatable.setStopMotionIfCollision(true);
-
-      Point3d position = new Point3d(0.9, 0.35, 1.0);
-      Quat4d orientation = new Quat4d(-1.0, 0.0, 0.0, 0.5 * Math.PI);
-      double swingTrajectoryTime = 2.0;
-
-      HandPosePacket handCollisionWithWallPosePacket = new HandPosePacket(robotSideToTest, Frame.CHEST, position, orientation, swingTrajectoryTime);
-      sendHandPosePacket(handCollisionWithWallPosePacket);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      assertTrue(success);
-      
-      double actualHandGcCollisionTime = handGCArrestor.getHandGcCollisionTime();
-      double wristForceSensorCollisionTime = wristUpdatable.getHandImpactTime();
-
-      assertEquals("Expected time of detected impact = " + actualHandGcCollisionTime + ".  Actual detected impact time = " + wristForceSensorCollisionTime,
-            actualHandGcCollisionTime, wristForceSensorCollisionTime, 0.1);
-
-      BambooTools.reportTestFinishedMessage();
-   }
+   
+//   @Test
+//   public void testImpactDetectionUsingHandPoseBehavior() throws SimulationExceededMaximumTimeException
+//   {
+//      BambooTools.reportTestStartedMessage();
+//
+//      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//
+//      wristUpdatable.setStopMotionIfCollision(true);
+//
+//      BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(new LocalObjectCommunicator(), networkObjectCommunicator, robotToTest.getRobotsYoVariableRegistry());
+//      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
+//      
+//      FramePose handPose = new FramePose();  
+//      handPose.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+//      
+//      handPose.changeFrame(ReferenceFrame.getWorldFrame());
+//      handPose.setX(handPose.getX() + 0.4);
+//
+//      RigidBodyTransform handPoseTransform = new RigidBodyTransform();
+//      handPose.getPose(handPoseTransform);
+//      
+//      double swingTrajectoryTime = 2.0;
+//      handPoseBehavior.setInput(Frame.WORLD, handPoseTransform, robotSideToTest, swingTrajectoryTime);      
+//      
+//      final double simulationRunTime = swingTrajectoryTime + 1.0;
+//      
+//      Thread handPoseBehaviorThread = new Thread()
+//      {
+//         public void run()
+//         {
+//            {
+//               double startTime = Double.NaN;
+//               boolean simStillRunning = true;
+//               boolean initalized = false;
+//               
+//               while(simStillRunning)
+//               {
+//                  if (!initalized)
+//                  {
+//                     startTime = yoTime.getDoubleValue();
+//                     initalized = true;
+//                  }
+//                  
+//                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
+//                  simStillRunning = timeSpentSimulating < simulationRunTime;
+//                  
+//                  handPoseBehavior.doControl();        
+//               }             
+//            }
+//         }
+//      };
+//      
+//      handPoseBehaviorThread.start();
+//      
+//      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+//      assertTrue(success);
+//      
+//      double actualHandGcCollisionTime = handGCArrestor.getHandGcCollisionTime();
+//      double wristForceSensorCollisionTime = wristUpdatable.getHandImpactTime();
+//
+//      assertEquals("Expected time of detected impact = " + actualHandGcCollisionTime + ".  Actual detected impact time = " + wristForceSensorCollisionTime,
+//            actualHandGcCollisionTime, wristForceSensorCollisionTime, 0.1);
+//
+//      BambooTools.reportTestFinishedMessage();
+//   }
+   
+   
+//   @Test
+//   public void testImpactDetectionUsingHandPosePacket() throws SimulationExceededMaximumTimeException
+//   {
+//      BambooTools.reportTestStartedMessage();
+//
+//      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//
+//      wristUpdatable.setStopMotionIfCollision(true);
+//      
+//      FramePose handPose = new FramePose();  
+//      handPose.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+//      
+//      handPose.changeFrame(ReferenceFrame.getWorldFrame());
+//      handPose.setZ(handPose.getZ() + 0.2);
+//      
+//      Point3d position = new Point3d(0.9, 0.35, 1.0);
+//      Quat4d orientation = new Quat4d(-1.0, 0.0, 0.0, 0.5 * Math.PI);
+//      double swingTrajectoryTime = 2.0;
+//
+//      HandPosePacket handCollisionWithWallPosePacket = new HandPosePacket(robotSideToTest, Frame.CHEST, position, orientation, swingTrajectoryTime);
+//      sendHandPosePacket(handCollisionWithWallPosePacket);
+//
+//      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+//      assertTrue(success);
+//      
+//      double actualHandGcCollisionTime = handGCArrestor.getHandGcCollisionTime();
+//      double wristForceSensorCollisionTime = wristUpdatable.getHandImpactTime();
+//
+//      assertEquals("Expected time of detected impact = " + actualHandGcCollisionTime + ".  Actual detected impact time = " + wristForceSensorCollisionTime,
+//            actualHandGcCollisionTime, wristForceSensorCollisionTime, 0.1);
+//
+//      BambooTools.reportTestFinishedMessage();
+//   }
 
    //FIXME: Running more than one test causes the following error: java.lang.RuntimeException: java.net.BindException: Address already in use: bind
    //      @Test
@@ -279,11 +362,11 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   private HandGCArrestor setupHandGroundContactPointArrestor()
+   private HandGCArrestor setupHandGroundContactPointArrestor(GroundContactPoint wristGCPoint)
    {
       Robot robotToTest = drcSimulationTestHelper.getRobot();
 
-      double timeToArrest = 999.0;
+      double timeToArrest = 1.5;
       double arrestStiffness_NperM = 10000.0;
       HandGCArrestor ret = new HandGCArrestor(robotToTest, wristGCPoint, timeToArrest, arrestStiffness_NperM);
 
@@ -293,16 +376,14 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
    private class UpdateForceSensorFromRobotController implements RobotController
    {
       private final YoVariableRegistry registry;
-      private final Robot robot;
       private final RobotDataReceiver robotDataReceiver;
       private final WristForceSensorFilteredUpdatable wristUpdatable;
       private final DoubleYoVariable maxWristForceMassCompensated;
 
-      public UpdateForceSensorFromRobotController(Robot robot, RobotDataReceiver robotDataReceiver, WristForceSensorFilteredUpdatable wristUpdatable,
+      public UpdateForceSensorFromRobotController(RobotDataReceiver robotDataReceiver, WristForceSensorFilteredUpdatable wristUpdatable,
             ArrayList<WrenchCalculatorInterface> forceSensors)
       {
          registry = new YoVariableRegistry("ForceSensorController");
-         this.robot = robot;
          this.robotDataReceiver = robotDataReceiver;
          this.wristUpdatable = wristUpdatable;
          this.maxWristForceMassCompensated = new DoubleYoVariable("maxWristForceMassCompensated", registry);
@@ -333,19 +414,16 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       }
 
       public void doControl()
-      {
-         double time = robot.getTime();
-         
+      {        
          robotDataReceiver.updateRobotModel();
-         wristUpdatable.update(time);
+         wristUpdatable.update( yoTime.getDoubleValue() );
 
          double wristForceMassCompensated = wristUpdatable.getWristForceMassCompensated().length();
-         if (wristForceMassCompensated > maxWristForceMassCompensated.getDoubleValue() && time > 1.0)
+         if (wristForceMassCompensated > maxWristForceMassCompensated.getDoubleValue() && yoTime.getDoubleValue() > 1.0)
          {
             maxWristForceMassCompensated.set(wristForceMassCompensated);
          }
-         
-         yoTime.set(time);
+
       }
    }
 
@@ -360,11 +438,18 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       private final DoubleYoVariable handGCPointCollisionTime;
 
+      private final YoFrameVector allowableDirectionOfMotion;
+      
       private final YoFramePoint desiredPosition;
+      private final YoFramePoint initialPosition;
       private final YoFramePoint currentPosition;
+      
+      private final YoFrameVector currentPositionFromInitial;
+      private final YoFrameVector desiredPositionFromInitial;
+      
       private final YoFrameVector positionError;
       private final YoFrameVector force;
-
+      
       public HandGCArrestor(Robot robot, GroundContactPoint handGCPoint, double elapsedUnarrestedTime, double stiffness_NperM)
       {
          registry = new YoVariableRegistry(handGCPoint.getName() + "HandGCArrestor");
@@ -376,10 +461,19 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
          handGCPointCollisionTime = new DoubleYoVariable(handGCPoint.getName() + "CollisionTime", registry);
 
+         allowableDirectionOfMotion = new YoFrameVector(handGCPoint.getName() + "AllowableDirectionOfMotion", ReferenceFrame.getWorldFrame(), registry);
+         
          desiredPosition = new YoFramePoint(handGCPoint.getName() + "DesiredPosition", ReferenceFrame.getWorldFrame(), registry);
+         initialPosition = new YoFramePoint(handGCPoint.getName() + "InitialPosition", ReferenceFrame.getWorldFrame(), registry);
          currentPosition = new YoFramePoint(handGCPoint.getName() + "CurrentPosition", ReferenceFrame.getWorldFrame(), registry);
+         
+         currentPositionFromInitial = new YoFrameVector(handGCPoint.getName() + "CurrentPosFromInitial", ReferenceFrame.getWorldFrame(), registry);
+         desiredPositionFromInitial = new YoFrameVector(handGCPoint.getName() + "DesiredPosFromInitial", ReferenceFrame.getWorldFrame(), registry);
+         
          positionError = new YoFrameVector(handGCPoint.getName() + "PositionError", ReferenceFrame.getWorldFrame(), registry);
          force = new YoFrameVector(handGCPoint.getName() + "Force", ReferenceFrame.getWorldFrame(), registry);
+         
+         initialize();
       }
 
       public double getHandGcCollisionTime()
@@ -389,6 +483,8 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       public void initialize()
       {
+         allowableDirectionOfMotion.set(0, 0, 1.0);
+         allowableDirectionOfMotion.normalize();
       }
 
       public YoVariableRegistry getYoVariableRegistry()
@@ -407,8 +503,6 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       }
 
       boolean hasDoControlBeenCalled = false;
-      private final Point3d temp = new Point3d();
-
       boolean handGCHasCollided = false;
 
       public void doControl()
@@ -421,18 +515,28 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
          if (!hasDoControlBeenCalled)
          {
-            handGCPoint.getPosition(temp);
-            desiredPosition.set(temp);
+            desiredPosition.set(handGCPoint.getYoPosition());
 
             if (robot.getTime() > elapsedUnarrestedTime)
             {
+               initialPosition.set(handGCPoint.getYoPosition());
                hasDoControlBeenCalled = true;
             }
          }
          else
          {
-            handGCPoint.getPosition(temp);
-            currentPosition.set(temp);
+            currentPosition.set(handGCPoint.getYoPosition());
+            currentPositionFromInitial.sub(currentPosition, initialPosition);
+            
+            double currentPositionProjectedOntoAllowableDirection = currentPositionFromInitial.dot( allowableDirectionOfMotion.getFrameTuple() );
+            
+            desiredPositionFromInitial.set(allowableDirectionOfMotion.getFrameTuple());
+            desiredPositionFromInitial.normalize();
+            desiredPositionFromInitial.scale(currentPositionProjectedOntoAllowableDirection);
+            
+            desiredPosition.set(initialPosition);
+            desiredPosition.add(desiredPositionFromInitial);
+ 
             positionError.sub(desiredPosition, currentPosition);
 
             force.set(positionError);
