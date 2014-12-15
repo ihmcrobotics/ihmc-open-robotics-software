@@ -45,6 +45,8 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public String getJointBeforeFootName(RobotSide robotSide);
 
+   public String getJointBeforeHandName(RobotSide robotSide);
+
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
 
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);

@@ -69,6 +69,8 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
+   private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
+   
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
@@ -129,6 +131,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
+         handGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
       }
 
       LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
@@ -179,7 +182,13 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             for (RobotSide robotSide : RobotSide.values)
             {
                if (jointName.equals(sdfJointNameMap.getJointBeforeFootName(robotSide)))
+               {
                   footGroundContactPoints.get(robotSide).add(groundContactPoint);
+               }
+               else if(jointName.equals(sdfJointNameMap.getJointBeforeHandName(robotSide)))
+               {
+                  handGroundContactPoints.get(robotSide).add(groundContactPoint);
+               }
             }
          }
       }
@@ -709,6 +718,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       return footGroundContactPoints.get(robotSide);
    }
 
+   public List<GroundContactPoint> getHandGroundContactPoints(RobotSide robotSide)
+   {
+      return handGroundContactPoints.get(robotSide);
+   }
+   
    public Vector3d getPositionInWorld()
    {
       Vector3d position = new Vector3d();

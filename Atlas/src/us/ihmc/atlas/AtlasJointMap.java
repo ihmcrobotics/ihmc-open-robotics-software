@@ -274,7 +274,13 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return legJointStrings.get(robotSide).get(ANKLE_ROLL);
    }
-
+   
+   @Override
+   public String getJointBeforeHandName(RobotSide robotSide)
+   {
+      return nameOfJointsBeforeHands.get(robotSide);
+   }
+   
    @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
