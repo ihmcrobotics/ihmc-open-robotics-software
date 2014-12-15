@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
@@ -33,7 +32,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -67,20 +65,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    
-   private final DRCRobotSensorInformation sensorInformation;
-   
-   public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
-         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
+   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, StateEstimatorParameters stateEstimatorParameters,
+		   SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
       
-      sensorInformation = robotModel.getSensorInformation();
-      DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParameters();
-      StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
-
       sensorReaderFactory.build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
             forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
@@ -90,8 +82,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       if (sensorReaderFactory.useStateEstimator())
       {
-         drcStateEstimator = createStateEstimator(estimatorFullRobotModel, robotModel, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParamaters, forceSensorDataHolderForEstimator, yoGraphicsListRegistry, estimatorRegistry);
+         drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
+               contactPointParameters, forceSensorDataHolderForEstimator, yoGraphicsListRegistry, estimatorRegistry);
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
@@ -182,16 +174,15 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       estimatorTick.increment();
    }
 
-   public static DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
+   private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
-      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
 
       ReferenceFrames estimatorReferenceFrames = new ReferenceFrames(estimatorFullRobotModel);
-      ContactableBodiesFactory contactableBodiesFactory = jointMap.getContactPointParameters().getContactableBodiesFactory();
+      ContactableBodiesFactory contactableBodiesFactory = contactPointParamaters.getContactableBodiesFactory();
       SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, estimatorReferenceFrames);
 
       double gravityMagnitude = Math.abs(gravity);
@@ -200,7 +191,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       SideDependentList<WrenchBasedFootSwitch> footSwitchesForEstimator = new SideDependentList<WrenchBasedFootSwitch>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         String footForceSensorName = drcRobotModel.getSensorInformation().getFeetForceSensorNames().get(robotSide);
+         String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          ForceSensorData footForceSensorForEstimator = forceSensorDataHolderForEstimator.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
@@ -212,7 +203,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          footSwitchesForEstimator.put(robotSide, wrenchBasedFootSwitchForEstimator);
       }
       
-      String[] imuSensorsToUseInStateEstimator = drcRobotModel.getSensorInformation().getIMUSensorsToUseInStateEstimator();
+      String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
       
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
