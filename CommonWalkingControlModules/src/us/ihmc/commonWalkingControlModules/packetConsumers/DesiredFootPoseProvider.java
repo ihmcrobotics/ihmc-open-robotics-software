@@ -29,9 +29,11 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, 
    private final AtomicInteger footPoseSide = new AtomicInteger(-1);
    private final FramePose desiredFootPose = new FramePose();
    private double trajectoryTime = Double.NaN;
+   private final double defaultTrajectoryTime;
 
-   public DesiredFootPoseProvider()
+   public DesiredFootPoseProvider(double defaultTrajectoryTime)
    {
+      this.defaultTrajectoryTime = defaultTrajectoryTime;
    }
 
    @Override
@@ -73,6 +75,8 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, 
       RobotSide robotSide = object.getRobotSide();
       footPoseSide.set(robotSide == RobotSide.LEFT ? 0 : 1);
       trajectoryTime = object.getTrajectoryTime();
+      if (Double.isNaN(trajectoryTime) || trajectoryTime < 0.01) 
+         trajectoryTime = defaultTrajectoryTime;
       footPosePacket.set(object);
    }
 }

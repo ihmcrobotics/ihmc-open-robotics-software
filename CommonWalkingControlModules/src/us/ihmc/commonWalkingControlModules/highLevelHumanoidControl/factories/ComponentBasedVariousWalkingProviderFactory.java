@@ -80,7 +80,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       DesiredHandPoseProvider handPoseProvider = null;
       if ((fullRobotModel.getHand(RobotSide.LEFT) != null) && (fullRobotModel.getHand(RobotSide.RIGHT) != null))
          handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
-      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
+      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime());
      
 
       HandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();

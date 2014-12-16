@@ -73,7 +73,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider();
 
-      desiredFootPoseProvider = new DesiredFootPoseProvider();
+      desiredFootPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime());
    }
    
    private void loadScriptFileIfNecessary()
