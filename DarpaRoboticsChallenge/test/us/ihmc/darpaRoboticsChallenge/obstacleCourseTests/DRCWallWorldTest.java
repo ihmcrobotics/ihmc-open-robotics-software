@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
@@ -119,11 +120,11 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
       
-      HandPosePacket releaseLeftHandToHome = HandPosePacket.createGoToHomePacket(RobotSide.LEFT, 1.0);
+      HandPosePacket releaseLeftHandToHome = PacketControllerTools.createGoToHomePacket(RobotSide.LEFT, 1.0);
       drcSimulationTestHelper.sendHandPosePacketToListeners(releaseLeftHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      HandPosePacket releaseRightHandToHome = HandPosePacket.createGoToHomePacket(RobotSide.RIGHT, 1.0);
+      HandPosePacket releaseRightHandToHome = PacketControllerTools.createGoToHomePacket(RobotSide.RIGHT, 1.0);
       drcSimulationTestHelper.sendHandPosePacketToListeners(releaseRightHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
