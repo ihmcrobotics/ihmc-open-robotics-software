@@ -54,7 +54,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       this.ankleZUpReferenceFrames = ankleZUpReferenceFrames;
 
       userStepWidth.set((walkingControllerParameters.getMaxStepWidth()+walkingControllerParameters.getMinStepWidth())/2);
-      userStepMinWidth.set(0.22);
+      userStepMinWidth.set(walkingControllerParameters.getMinStepWidth());
       userStepFirstSide.set(RobotSide.LEFT);
       
       userStepHeelPercentage.set(1.0);
