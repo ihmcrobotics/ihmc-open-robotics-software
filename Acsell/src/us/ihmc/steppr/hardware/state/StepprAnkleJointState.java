@@ -1,8 +1,8 @@
 package us.ihmc.steppr.hardware.state;
 
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class StepprAnkleJointState
@@ -77,9 +77,9 @@ public class StepprAnkleJointState
       this.qd_calc_x.set(interpolator.getQdAnkleX());
       this.qd_calc_y.set(interpolator.getQdAnkleY());
       
-      this.q_x.set(rightActuator.getJointPosition());
+      this.q_x.set(AngleTools.trimAngleMinusPiToPi(rightActuator.getJointPosition()));
       this.qd_x.set(rightActuator.getJointVelocity());
-      this.q_y.set(leftActuator.getJointPosition());
+      this.q_y.set(AngleTools.trimAngleMinusPiToPi(leftActuator.getJointPosition()));
       this.qd_y.set(leftActuator.getJointVelocity());
       
       //TODO: Check right/left

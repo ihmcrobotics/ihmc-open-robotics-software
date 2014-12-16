@@ -70,10 +70,11 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       JPanel calibrationPanel = new JPanel();
       calibrationPanel.setLayout(new BoxLayout(calibrationPanel, BoxLayout.X_AXIS));
       final YoVariable<?> updateOffsets = yoVariableHolder.getVariable("Steppr", "updateOffsets");
+      final YoVariable<?> tareSensorsVar = yoVariableHolder.getVariable("Steppr", "tareSensors");
       JButton setOffsets = new JButton("Update offsets");
       setOffsets.addActionListener(new ActionListener()
       {
-
+         
          @Override
          public void actionPerformed(ActionEvent e)
          {
@@ -81,6 +82,17 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          }
       });
       calibrationPanel.add(setOffsets);
+      JButton tareSensors = new JButton("Tare sensors");
+      tareSensors.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            tareSensorsVar.setValueFromDouble(1.0);
+         }
+      });
+      calibrationPanel.add(tareSensors);
       add(calibrationPanel);
    }
 

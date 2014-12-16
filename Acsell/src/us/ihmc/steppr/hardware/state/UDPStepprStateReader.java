@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.SocketOption;
+import java.net.SocketTimeoutException;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
@@ -36,7 +38,14 @@ public class UDPStepprStateReader
    public long receive() throws IOException
    {
       receiveBuffer.clear();
-      receiveChannel.receive(receiveBuffer);
+      try
+      {
+         receiveChannel.receive(receiveBuffer);
+      }
+      catch(SocketTimeoutException e)
+      {
+         throw new RuntimeException(e);
+      }
       receiveBuffer.flip();
 
       if (receiveBuffer.remaining() != 1048)
@@ -59,7 +68,7 @@ public class UDPStepprStateReader
 
       receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(receiveAddress);
       receiveChannel.socket().setReceiveBufferSize(65535);
-
+      receiveChannel.socket().setSoTimeout(1000);
       InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
       receiveKey = receiveChannel.join(group, iface);
    }
