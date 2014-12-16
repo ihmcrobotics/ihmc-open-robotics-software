@@ -1,6 +1,7 @@
 package us.ihmc.steppr.hardware.state;
 
 import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -62,12 +63,12 @@ public class StepprLinearTransmissionJointState implements StepprJointState
       motorAngle = actuator.getMotorPosition();
       if(hasOutputEncoder)
       {
-         q.set(actuator.getJointPosition());
+         q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition()));
          qd.set(actuator.getJointVelocity());
       }
       else
       {
-         q.set(actuator.getMotorPosition() / ratio); 
+         q.set(AngleTools.trimAngleMinusPiToPi(actuator.getMotorPosition() / ratio)); 
          qd.set(actuator.getMotorVelocity() / ratio); 
       }
       tau_current.set(actuator.getMotorTorque() * ratio);

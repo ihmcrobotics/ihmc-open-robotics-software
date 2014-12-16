@@ -34,7 +34,7 @@ public class ControlMode implements StepprSlowSensor
       
       if(controlModeByte > 0 && controlModeByte < ControlModeEnum.values.length)
       {
-         controlMode.set(ControlModeEnum.values[value]);
+         controlMode.set(ControlModeEnum.values[controlModeByte]);
       }
       else
       {

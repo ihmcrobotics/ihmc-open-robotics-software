@@ -227,14 +227,15 @@ public class StepprActuatorState
 
 
    }
-   
+
    public StrainSensor getStrainGuage(int id)
    {
-      return (StrainSensor)(slowSensors[STRAIN_SENSOR_BASE_15+id]);
+      return (StrainSensor) (slowSensors[STRAIN_SENSOR_BASE_15 + id]);
    }
+
    public PressureSensor getPressureSensor(int id)
    {
-      return (PressureSensor) (slowSensors[PRESSURE_SENSOR_BASE_11+id]);
+      return (PressureSensor) (slowSensors[PRESSURE_SENSOR_BASE_11 + id]);
    }
 
    public void updateCanonicalAngle(double angle, double clocking)

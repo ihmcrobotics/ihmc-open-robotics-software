@@ -1,0 +1,21 @@
+package us.ihmc.steppr.hardware;
+
+import us.ihmc.acsell.parameters.StrainGaugeInformation;
+
+public enum StepprAnkle
+{
+   LEFT(new StrainGaugeInformation(StepprActuator.LEFT_ANKLE_LEFT, 1, -660.0, 3.9)),
+   RIGHT(new StrainGaugeInformation(StepprActuator.RIGHT_ANKLE_LEFT, 1, -660.0, 3.9));
+   
+   private final StrainGaugeInformation shankSensor;
+   
+   StepprAnkle(StrainGaugeInformation shankSensor)
+   {
+      this.shankSensor = shankSensor;
+   }
+   
+   public StrainGaugeInformation getShankSensor()
+   {
+      return shankSensor;
+   }
+}

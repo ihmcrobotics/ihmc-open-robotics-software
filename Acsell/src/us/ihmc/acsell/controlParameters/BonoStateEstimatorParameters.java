@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -37,8 +38,20 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
       jointVelocitySlopTimeForBacklashCompensation = 0.06;
       
-      doElasticityCompensation = false;
+      doElasticityCompensation = true;
       defaultJointStiffness = Double.POSITIVE_INFINITY;
+      
+      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
+      
+      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_X.getSdfName(), 6750.0);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_X.getSdfName(), 6750.0);
+      
+      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Y.getSdfName(), 8000.0);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Y.getSdfName(), 8000.0);
+
+      jointSpecificStiffness.put(StepprJoint.LEFT_KNEE_Y.getSdfName(), 75000.0);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_KNEE_Y.getSdfName(), 75000.0);
    }
 
    @Override
