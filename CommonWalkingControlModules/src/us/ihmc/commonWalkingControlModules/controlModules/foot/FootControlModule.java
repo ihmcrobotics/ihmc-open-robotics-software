@@ -174,9 +174,9 @@ public class FootControlModule
             swingFootControlGains, robotSide, registry, walkingControllerParameters);
       states.add(swingState);
 
-      moveStraightState = new MoveStraightState(swingTimeProvider, accelerationControlModule, momentumBasedController, contactableFoot, jacobianId,
-            nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains,
-            robotSide, registry);
+      moveStraightState = new MoveStraightState(accelerationControlModule, momentumBasedController, contactableFoot, jacobianId, nullspaceMultiplier,
+            jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, robotSide,
+            registry);
       states.add(moveStraightState);
 
       setupStateMachine(states);
@@ -376,9 +376,9 @@ public class FootControlModule
       swingState.setFootstep(footstep, trajectoryParameters, false);
    }
 
-   public void setFootPose(FramePose footPose)
+   public void setFootPose(FramePose footPose, double trajectoryTime)
    {
-      moveStraightState.setFootPose(footPose);
+      moveStraightState.setFootPose(footPose, trajectoryTime);
    }
 
    public double getHeelTouchdownInitialAngle()

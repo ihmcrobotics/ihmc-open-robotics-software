@@ -7,7 +7,6 @@ import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
-import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
@@ -18,7 +17,7 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
-
+import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class MoveStraightState extends AbstractUnconstrainedState
 {
@@ -26,12 +25,12 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
+   private final YoVariableDoubleProvider trajectoryTimeProvider;
 
-   public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains, RobotSide robotSide,
-         YoVariableRegistry registry)
+   public MoveStraightState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
+         ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+         BooleanYoVariable doSingularityEscape, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+         YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.MOVE_STRAIGHT, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, gains, robotSide, registry);
@@ -40,6 +39,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
       String namePrefix = rigidBody.getName();
 
       finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "MoveStraightFootFinal", worldFrame, registry);
+      trajectoryTimeProvider = new YoVariableDoubleProvider(namePrefix + "MoveStraightTrajectoryTime", registry);
 
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
 
@@ -47,16 +47,17 @@ public class MoveStraightState extends AbstractUnconstrainedState
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
       CurrentConfigurationProvider initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
-      positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, footTrajectoryTimeProvider,
+      positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, trajectoryTimeProvider,
             initialConfigurationProvider, finalConfigurationProvider, registry);
 
-      orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Orientation", worldFrame, footTrajectoryTimeProvider,
+      orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Orientation", worldFrame, trajectoryTimeProvider,
             initialConfigurationProvider, finalConfigurationProvider, registry);
    }
 
-   public void setFootPose(FramePose footPose)
+   public void setFootPose(FramePose footPose, double trajectoryTime)
    {
       finalConfigurationProvider.setPose(footPose);
+      trajectoryTimeProvider.set(trajectoryTime);
    }
 
    @Override

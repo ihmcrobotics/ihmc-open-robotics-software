@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -11,7 +12,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
 {
    private ChestOrientationPacket outgoingChestOrientationPacket;
 
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
+   private final BooleanYoVariable hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
@@ -22,11 +23,13 @@ public class ChestOrientationBehavior extends BehaviorInterface
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
-      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(ChestOrientationPacket chestOrientationPacket)
@@ -37,7 +40,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingChestOrientationPacket != null))
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingChestOrientationPacket != null))
       {
          sendChestPoseToController();
       }
@@ -50,7 +53,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
          outgoingChestOrientationPacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingChestOrientationPacket);
          sendPacketToController(outgoingChestOrientationPacket);
-         packetHasBeenSent.set(true);
+         hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingChestOrientationPacket.getTrajectoryTime());
       }
@@ -64,7 +67,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
-      packetHasBeenSent.set(false);
+      hasPacketBeenSent.set(false);
       outgoingChestOrientationPacket = null;
 
       isPaused.set(false);
@@ -118,9 +121,6 @@ public class ChestOrientationBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      if (outgoingChestOrientationPacket != null)
-         return true;
-      else
-         return false;
+      return outgoingChestOrientationPacket != null;
    }
 }

@@ -830,7 +830,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                yoTime.getDoubleValue() + icpProjectionTimeOffset.getDoubleValue());
 
          if (isInFlamingoStance.getBooleanValue() && footPoseProvider.checkForNewPose(swingSide))
-            feetManager.requestMoveStraight(swingSide, footPoseProvider.getDesiredFootPose(swingSide));
+            feetManager.requestMoveStraight(swingSide, footPoseProvider.getDesiredFootPose(swingSide), footPoseProvider.getTrajectoryTime());
 
          RobotSide supportSide = swingSide.getOppositeSide();
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
@@ -966,7 +966,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else if (footPoseProvider != null && footPoseProvider.checkForNewPose(swingSide))
          {
             FramePose nextFootPose = footPoseProvider.getDesiredFootPose(swingSide);
-            feetManager.requestMoveStraight(swingSide, nextFootPose);
+            feetManager.requestMoveStraight(swingSide, nextFootPose, footPoseProvider.getTrajectoryTime());
             icpStandOffsetX.set(0.0);
             icpStandOffsetY.set(0.0);
             isInFlamingoStance.set(true);

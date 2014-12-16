@@ -10,4 +10,6 @@ public interface FootPoseProvider
    public abstract RobotSide checkForNewPose();
 
    public abstract FramePose getDesiredFootPose(RobotSide robotSide);
+
+   public abstract double getTrajectoryTime();
 }

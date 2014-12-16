@@ -1,9 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -27,9 +23,9 @@ public class HandPoseBehavior extends BehaviorInterface
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private Status status;
 
-   private final BooleanYoVariable hasPacketBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private HandPosePacket outgoingHandPosePacket;
 
+   private final BooleanYoVariable hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
@@ -52,6 +48,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
       this.yoTime = yoTime;
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
@@ -71,7 +68,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
    public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
    {
-      setInput(PacketControllerTools.createHandPosePacket(frame,pose,robotSide,trajectoryTime));
+      setInput(PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime));
    }
 
    @Override

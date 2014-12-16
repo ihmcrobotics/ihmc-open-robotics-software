@@ -50,8 +50,10 @@ public class FootPosePacketTransformerTest
             robotSide = RobotSide.RIGHT;
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         
+         double trajectoryTime = RandomTools.generateRandomDouble(random, 0.6, 5.0);
 
-         FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat);
+         FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat, trajectoryTime);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
