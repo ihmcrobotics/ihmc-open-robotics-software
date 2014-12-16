@@ -3,6 +3,8 @@ package us.ihmc.robotDataCommunication.logger;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -159,7 +161,6 @@ public class LogVisualizer
       final JTextField textField = new JTextField(everyNTicksString, 3);
       textField.addActionListener(new ActionListener()
       {
-
          @Override
          public void actionPerformed(ActionEvent e)
          {
@@ -172,13 +173,33 @@ public class LogVisualizer
             {
             }
 
-            String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
-            textField.setText(everyNTicksString);
+            setReadEveryNTicksTextFieldToCurrentValue(textField);
             textField.getParent().requestFocus();
+         }
+      });
+      
+      textField.addFocusListener(new FocusListener()
+      {
+         @Override
+         public void focusLost(FocusEvent arg0)
+         {
+            setReadEveryNTicksTextFieldToCurrentValue(textField);
+         }
+
+         @Override
+         public void focusGained(FocusEvent arg0)
+         {
+            setReadEveryNTicksTextFieldToCurrentValue(textField);
          }
       });
 
       scs.addTextField(textField);
+   }
+   
+   private void setReadEveryNTicksTextFieldToCurrentValue(final JTextField textField)
+   {
+      String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
+      textField.setText(everyNTicksString);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
