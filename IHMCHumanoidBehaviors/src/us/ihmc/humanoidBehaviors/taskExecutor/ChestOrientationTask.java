@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
+package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import javax.vecmath.Quat4d;
 
