@@ -308,7 +308,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (isContactablePlaneBodyInContact(feet.get(robotSide)))
             feetManager.setFlatFootContactState(robotSide);
          else
-            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getFrameAfterParentJoint()));
+         {
+            double defaultSwingTime = this.walkingControllerParameters.getDefaultSwingTime();
+            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getFrameAfterParentJoint()), defaultSwingTime);
+         }
          requestedThighLoadBearing.get(robotSide).set(false); // Set to false there is no button in the GUI to change it anymore
          requestedThighLoadBearing.get(robotSide).notifyVariableChangedListeners();
       }
@@ -423,7 +426,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide))
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
-            feetManager.requestMoveStraight(robotSide, newFootPose);
+            double trajectoryTime = footPoseProvider.getTrajectoryTime();
+            feetManager.requestMoveStraight(robotSide, newFootPose, trajectoryTime);
          }
       }
 

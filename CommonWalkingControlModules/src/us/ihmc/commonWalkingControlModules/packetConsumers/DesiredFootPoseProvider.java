@@ -28,16 +28,19 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, 
     */
    private final AtomicInteger footPoseSide = new AtomicInteger(-1);
    private final FramePose desiredFootPose = new FramePose();
+   private double trajectoryTime = Double.NaN;
 
    public DesiredFootPoseProvider()
    {
    }
 
+   @Override
    public boolean checkForNewPose(RobotSide robotSide)
    {
       return checkForNewPose() == robotSide;
    }
 
+   @Override
    public RobotSide checkForNewPose()
    {
       if (footPoseSide.get() == -1)
@@ -46,6 +49,7 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, 
          return footPoseSide.get() == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
    }
 
+   @Override
    public FramePose getDesiredFootPose(RobotSide robotSide)
    {
       FootPosePacket object = footPosePacket.getAndSet(null);
@@ -57,11 +61,18 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, 
       return desiredFootPose;
    }
 
+   @Override
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
+   }
+
+   @Override
    public void consumeObject(FootPosePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       footPoseSide.set(robotSide == RobotSide.LEFT ? 0 : 1);
-
+      trajectoryTime = object.getTrajectoryTime();
       footPosePacket.set(object);
    }
 }

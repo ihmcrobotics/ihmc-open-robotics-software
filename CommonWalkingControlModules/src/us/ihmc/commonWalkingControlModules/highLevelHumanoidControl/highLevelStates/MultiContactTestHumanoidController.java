@@ -118,7 +118,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getFrameAfterParentJoint()));
+            double defaultSwingTime = this.walkingControllerParameters.getDefaultSwingTime();
+            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getFrameAfterParentJoint()), defaultSwingTime);
          }
       }
    }
@@ -142,7 +143,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredConfigurationProviders.get(foot).set(newFootPose);
-            feetManager.requestMoveStraight(robotSide, newFootPose);
+            double defaultSwingTime = this.walkingControllerParameters.getDefaultSwingTime();
+            feetManager.requestMoveStraight(robotSide, newFootPose, defaultSwingTime);
          }
       }
 

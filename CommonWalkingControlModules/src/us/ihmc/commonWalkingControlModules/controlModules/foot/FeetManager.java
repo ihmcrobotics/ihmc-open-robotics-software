@@ -115,10 +115,10 @@ public class FeetManager
       setContactStateForSwing(upcomingSwingSide);
    }
 
-   public void requestMoveStraight(RobotSide robotSide, FramePose footPose)
+   public void requestMoveStraight(RobotSide robotSide, FramePose footPose, double trajectoryTime)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
-      footControlModule.setFootPose(footPose);
+      footControlModule.setFootPose(footPose, trajectoryTime);
       if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_STRAIGHT)
          footControlModule.resetCurrentState();
       else

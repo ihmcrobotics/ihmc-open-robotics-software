@@ -64,7 +64,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       PelvisPoseProvider pelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
       ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
 
-      FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, registry);
+      FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, walkingControllerParameters.getDefaultSwingTime(), registry);
 
       HandLoadBearingProvider handLoadBearingProvider = new UserDesiredHandLoadBearingProvider(registry);
       DesiredFootStateProvider footLoadBearingProvider = null;

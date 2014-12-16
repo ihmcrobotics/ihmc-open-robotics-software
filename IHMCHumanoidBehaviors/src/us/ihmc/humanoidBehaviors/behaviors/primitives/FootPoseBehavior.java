@@ -4,26 +4,32 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class FootPoseBehavior extends BehaviorInterface
 {
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private FootPosePacket outgoingFootPosePacket;
 
+   private final BooleanYoVariable hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
-   private double startTime = Double.NaN;
-   private double currentTime = Double.NaN;
-
-   // TODO: This is just an estimate of the time out. This needs to be dealt with
-   private double behaviorTime = 4.0;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
+   private final BooleanYoVariable trajectoryTimeElapsed;
 
    public FootPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(FootPosePacket footPosePacket)
@@ -34,22 +40,21 @@ public class FootPoseBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingFootPosePacket != null))
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingFootPosePacket != null))
       {
          sendFootPosePacketToController();
       }
-
-      currentTime = yoTime.getDoubleValue();
    }
 
    private void sendFootPosePacketToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingFootPosePacket.setDestination(PacketDestination.UI);
          sendPacketToController(outgoingFootPosePacket);
-         packetHasBeenSent.set(true);
-         startTime = yoTime.getDoubleValue();
+         hasPacketBeenSent.set(true);
+         startTime.set(yoTime.getDoubleValue());
+         trajectoryTime.set(outgoingFootPosePacket.getTrajectoryTime());
       }
    }
 
@@ -61,7 +66,7 @@ public class FootPoseBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
-      packetHasBeenSent.set(false);
+      hasPacketBeenSent.set(false);
       outgoingFootPosePacket = null;
 
       isPaused.set(false);
@@ -89,9 +94,12 @@ public class FootPoseBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      boolean trajectoryTimeElapsed = currentTime - startTime > behaviorTime;
+      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+         trajectoryTimeElapsed.set(false);
+      else
+         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed &&!isPaused.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -108,12 +116,10 @@ public class FootPoseBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
-   
-   public boolean hasInputBeenSet() {
-	   if (outgoingFootPosePacket != null)
-		   return true;
-	   else
-		   return false;
-   }
 
+   @Override
+   public boolean hasInputBeenSet()
+   {
+      return outgoingFootPosePacket != null;
+   }
 }

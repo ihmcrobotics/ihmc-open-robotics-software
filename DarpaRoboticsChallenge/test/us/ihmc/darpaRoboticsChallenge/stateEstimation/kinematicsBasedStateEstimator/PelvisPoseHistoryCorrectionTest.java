@@ -391,7 +391,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    private boolean yawBigInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
-      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d());
+      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
       kryoLocalObjectCommunicator.consumeObject(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
@@ -405,7 +405,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    private boolean localizeOutsideOfFootInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
-      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d());
+      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
       kryoLocalObjectCommunicator.consumeObject(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());

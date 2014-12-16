@@ -17,6 +17,7 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
 
 
    private final BooleanYoVariable userFootPoseTakeEm = new BooleanYoVariable("userFootPoseTakeEm", registry);
+   private final DoubleYoVariable userFootPoseTrajectoryTime = new DoubleYoVariable("userDesiredPelvisTrajectoryTime", registry);
 
    private final EnumYoVariable<RobotSide> userFootPoseSide = new EnumYoVariable<RobotSide>("userFootPoseSide", registry, RobotSide.class);
 
@@ -31,14 +32,16 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    
    private final FullRobotModel fullRobotModel;
 
-   public UserDesiredFootPoseProvider(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public UserDesiredFootPoseProvider(FullRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
 
       parentRegistry.addChild(registry);
+      userFootPoseTrajectoryTime.set(defaultTrajectoryTime);
    }
 
 
+   @Override
    public boolean checkForNewPose(RobotSide robotSide)
    {
       if (userFootPoseSide.getEnumValue() != robotSide)
@@ -48,6 +51,7 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    }
 
 
+   @Override
    public RobotSide checkForNewPose()
    {
       if (userFootPoseTakeEm.getBooleanValue())
@@ -58,6 +62,7 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
       return null;
    }
 
+   @Override
    public FramePose getDesiredFootPose(RobotSide robotSide)
    {
       ReferenceFrame footFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
@@ -80,4 +85,9 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
       return framePose;
    }
 
+   @Override
+   public double getTrajectoryTime()
+   {
+      return userFootPoseTrajectoryTime.getDoubleValue();
+   }
 }

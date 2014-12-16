@@ -4,52 +4,58 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class PelvisPoseBehavior extends BehaviorInterface
 {
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private PelvisPosePacket outgoingPelvisPosePacket;
 
+   private final BooleanYoVariable hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
-   private double startTime = Double.NaN;
-   private double currentTime = Double.NaN;
-   private double behaviorTime = 1.0;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
+   private final BooleanYoVariable trajectoryTimeElapsed;
 
    public PelvisPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(PelvisPosePacket pelvisPosePacket)
    {
       this.outgoingPelvisPosePacket = pelvisPosePacket;
-      behaviorTime = pelvisPosePacket.getTrajectoryTime();
    }
 
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingPelvisPosePacket != null))
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingPelvisPosePacket != null))
       {
          sendPelvisPosePacketToController();
       }
-
-      currentTime = yoTime.getDoubleValue();
    }
 
    private void sendPelvisPosePacketToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingPelvisPosePacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingPelvisPosePacket);
          sendPacketToController(outgoingPelvisPosePacket);
-         packetHasBeenSent.set(true);
-         startTime = yoTime.getDoubleValue();
+         hasPacketBeenSent.set(true);
+         startTime.set(yoTime.getDoubleValue());
+         trajectoryTime.set(outgoingPelvisPosePacket.getTrajectoryTime());
       }
    }
 
@@ -61,7 +67,7 @@ public class PelvisPoseBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
-      packetHasBeenSent.set(false);
+      hasPacketBeenSent.set(false);
       outgoingPelvisPosePacket = null;
 
       isPaused.set(false);
@@ -89,9 +95,12 @@ public class PelvisPoseBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      boolean trajectoryTimeElapsed = currentTime - startTime > behaviorTime;
+      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+         trajectoryTimeElapsed.set(false);
+      else
+         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed &&!isPaused.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -108,11 +117,10 @@ public class PelvisPoseBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
-   
-   public boolean hasInputBeenSet() {
-	   if (outgoingPelvisPosePacket != null)
-		   return true;
-	   else
-		   return false;
+
+   @Override
+   public boolean hasInputBeenSet()
+   {
+      return outgoingPelvisPosePacket != null;
    }
 }
