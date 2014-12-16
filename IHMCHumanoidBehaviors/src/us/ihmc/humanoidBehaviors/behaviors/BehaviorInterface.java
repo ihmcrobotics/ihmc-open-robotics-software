@@ -12,6 +12,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.FormattingTools;
 
 /**
  * Any behavior needs to implement this abstract class.
@@ -26,20 +27,30 @@ public abstract class BehaviorInterface implements RobotController
    
    private final ControllerGlobalObjectConsumer controllerObjectConsumer;
    private final NetworkProcessorGlobalObjectConsumer networkProcessorObjectConsumer;
-   protected final String behaviorName = getClass().getSimpleName();
+   protected final String behaviorName;
    
    /**
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
     */
-   protected final YoVariableRegistry registry = new YoVariableRegistry(behaviorName);
-   protected final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
-   protected final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
+   protected final YoVariableRegistry registry;
+   protected final BooleanYoVariable isPaused;
+   protected final BooleanYoVariable isStopped;
 
    public BehaviorInterface(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   {
+      this(null, outgoingCommunicationBridge);
+   }
+
+   public BehaviorInterface(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this.outgoingCommunicationBridge = outgoingCommunicationBridge;
       controllerObjectConsumer = new ControllerGlobalObjectConsumer(this);
       networkProcessorObjectConsumer = new NetworkProcessorGlobalObjectConsumer(this);
+      
+      behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
+      registry = new YoVariableRegistry(behaviorName);
+      isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
+      isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
    }
 
    public void sendPacketToController(Object obj)
@@ -119,7 +130,7 @@ public abstract class BehaviorInterface implements RobotController
    @Override
    public String getName()
    {
-      return this.getClass().getSimpleName();
+      return behaviorName;
    }
 
    @Override
