@@ -7,4 +7,5 @@
 uint8 robotSide
 geometry_msgs/Vector3 position
 geometry_msgs/Quaternion orientation
+float64 trajectoryTime
 
