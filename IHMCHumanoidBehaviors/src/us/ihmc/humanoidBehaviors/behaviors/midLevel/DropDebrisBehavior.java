@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -151,7 +152,7 @@ public class DropDebrisBehavior extends BehaviorInterface
 
             if (behaviors.size() == 1)
             {
-               handPoseBehavior.goToHomePosition(robotSide);
+               handPoseBehavior.setInput(PacketControllerTools.createGoToHomePacket(robotSide, trajectoryTime));
             }
          }
          else
