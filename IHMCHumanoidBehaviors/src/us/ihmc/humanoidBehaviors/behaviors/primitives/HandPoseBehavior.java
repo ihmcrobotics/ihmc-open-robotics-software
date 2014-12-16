@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -41,17 +42,23 @@ public class HandPoseBehavior extends BehaviorInterface
 
    public HandPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
-      super(outgoingCommunicationBridge);
+      this(null, outgoingCommunicationBridge, yoTime);
+   }
+
+   public HandPoseBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   {
+      super(namePrefix, outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
-      startTime = new DoubleYoVariable(getName() + "StartTime", registry);
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
+      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      hasInputBeenSet = new BooleanYoVariable(getName() + "HasInputBeenSet", registry);
-      trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
-      hasStatusBeenReceived = new BooleanYoVariable(getName() + "HasStatusBeenReceived", registry);
-      isDone = new BooleanYoVariable(getName() + "IsDone", registry);
+      hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
+      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
+      isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
    }
 
