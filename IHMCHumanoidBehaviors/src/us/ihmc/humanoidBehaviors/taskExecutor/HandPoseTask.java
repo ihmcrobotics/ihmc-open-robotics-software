@@ -1,12 +1,15 @@
-package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
+package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class ArmPoseTask implements Task
+public class HandPoseTask implements Task
 {
    private static final boolean DEBUG = false;
    private final HandPosePacket handPosePacket;
@@ -16,12 +19,12 @@ public class ArmPoseTask implements Task
    private double behaviorDoneTime = Double.NaN;
    private final double sleepTime;
 
-   public ArmPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime)
+   public HandPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime)
    {
       this(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime, 0.0);
    }
 
-   public ArmPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime,
+   public HandPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime,
          double sleepTime)
    {
       this.handPoseBehavior = handPoseBehavior;
@@ -32,6 +35,23 @@ public class ArmPoseTask implements Task
 
    }
 
+   public HandPoseTask(RobotSide robotSide,DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame ,RigidBodyTransform pose, double trajectoryTime)
+   {
+      this.handPoseBehavior = handPoseBehavior;
+      this.yoTime = yoTime;
+      this.sleepTime = 0.0;
+      
+      handPosePacket = PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime);
+   }
+   
+   public HandPoseTask(HandPosePacket goToHomePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime)
+   {
+      this.handPoseBehavior = handPoseBehavior;
+      this.yoTime = yoTime;
+      this.sleepTime = 0.0;
+      this.handPosePacket = goToHomePacket;
+   }
+   
    @Override
    public void doTransitionIntoAction()
    {
