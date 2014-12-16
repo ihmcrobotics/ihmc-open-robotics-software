@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -26,7 +27,7 @@ public class HandPoseBehavior extends BehaviorInterface
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private Status status;
 
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
+   private final BooleanYoVariable hasPacketBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private HandPosePacket outgoingHandPosePacket;
 
    private final DoubleYoVariable yoTime;
@@ -68,25 +69,15 @@ public class HandPoseBehavior extends BehaviorInterface
       hasInputBeenSet.set(true);
    }
 
-   public void goToHomePosition(RobotSide side)
-   {
-      setInput(HandPosePacket.createGoToHomePacket(side, 3.0));
-   }
-
    public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
    {
-      Vector3d translation = new Vector3d();
-      Quat4d rotation = new Quat4d();
-      pose.get(translation);
-      pose.get(rotation);
-      Point3d point = new Point3d(translation.getX(), translation.getY(), translation.getZ());
-      setInput(new HandPosePacket(robotSide, frame, point, rotation, trajectoryTime));
+      setInput(PacketControllerTools.createHandPosePacket(frame,pose,robotSide,trajectoryTime));
    }
 
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && outgoingHandPosePacket != null)
+      if (!hasPacketBeenSent.getBooleanValue() && outgoingHandPosePacket != null)
       {
          sendHandPoseToController();
       }
@@ -105,7 +96,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
          sendPacketToController(outgoingHandPosePacket);
          sendPacketToNetworkProcessor(outgoingHandPosePacket);
-         packetHasBeenSent.set(true);
+         hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());
       }
@@ -125,7 +116,7 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
-      packetHasBeenSent.set(false);
+      hasPacketBeenSent.set(false);
       outgoingHandPosePacket = null;
 
       isPaused.set(false);
@@ -160,7 +151,7 @@ public class HandPoseBehavior extends BehaviorInterface
    public void resume()
    {
       isPaused.set(false);
-      packetHasBeenSent.set(false);
+      hasPacketBeenSent.set(false);
       if (hasInputBeenSet())
       {
          sendHandPoseToController();
