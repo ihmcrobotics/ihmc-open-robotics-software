@@ -1,0 +1,1117 @@
+<sdf version='1.4'>
+  <world name='default'>
+    <model name='drc_vehicle'>
+      <link name='polaris_ranger_ev::chassis'>
+        <inertial>
+          <mass>720.000000</mass>
+          <inertia>
+            <ixx>140.000000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>550.000000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>550.000000</izz>
+          </inertia>
+          <pose>0.100000 0.000000 0.400000 0.000000 0.000000 0.000000</pose>
+        </inertial>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 0.000000 0.000000 -1.570796</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Ranger</name>
+                <center>0</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <collision name='chassis_bottom'>
+          <pose>0.100000 0.000000 0.370000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>1.500000 1.340000 0.060000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='cargo_bottom'>
+          <pose>-0.900000 0.000000 0.900000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.900000 1.200000 0.010000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='cargo_front'>
+          <pose>-0.450000 0.000000 1.025000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.050000 1.200000 0.250000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='cargo_back'>
+          <pose>-1.350000 0.000000 1.025000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.050000 1.200000 0.250000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='cargo_left'>
+          <pose>-0.900000 0.600000 1.025000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.900000 0.050000 0.250000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='cargo_right'>
+          <pose>-0.900000 -0.600000 1.025000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.900000 0.050000 0.250000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='seat'>
+          <pose>-0.100000 0.000000 0.560000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.600000 1.220000 0.500000</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <min_depth>0.010000</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <collision name='mud_seat'>
+          <pose>-0.100000 0.000000 0.810000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.600000 1.150000 0.100000</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <collide_without_contact>1</collide_without_contact>
+            </contact>
+          </surface>
+        </collision>
+        <sensor name='seat_contact' type='contact'>
+          <always_on>1</always_on>
+          <update_rate>1000.000000</update_rate>
+          <contact>
+            <collision>mud_seat</collision>
+            <topic>__default_topic__</topic>
+          </contact>
+        </sensor>
+        <collision name='seat_back'>
+          <pose>-0.300000 0.000000 1.125000 0.000000 -0.200000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.060000 1.000000 0.400000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='engine'>
+          <pose>1.050000 0.000000 0.700000 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.580000 1.000000 0.800000</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name='handle_left_middle'>
+          <pose>-0.300000 0.610000 1.055000 0.000000 -0.200000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.020000</radius>
+              <length>0.170000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='handle_right_middle'>
+          <pose>-0.300000 -0.610000 1.055000 0.000000 -0.200000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.020000</radius>
+              <length>0.170000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_top_left'>
+          <pose>0.000000 0.610000 1.920000 -3.141592 1.531593 -3.141592</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.680000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_top_right'>
+          <pose>0.000000 -0.610000 1.920000 -3.141592 1.531593 -3.141592</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.680000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_top_front'>
+          <pose>0.325000 0.000000 1.890000 1.570796 0.000000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>1.220000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_top_back'>
+          <pose>-0.330000 0.000000 1.920000 1.570796 0.000000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>1.220000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_front_left'>
+          <pose>0.540000 0.610000 1.450000 0.000000 -0.440000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>1.040000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_front_right'>
+          <pose>0.540000 -0.610000 1.450000 0.000000 -0.440000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>1.040000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='fender_front_right'>
+          <pose>0.640000 -0.610000 0.700000 0.000000 0.350000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.720000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='fender_front_left'>
+          <pose>0.640000 0.610000 0.700000 0.000000 0.350000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.720000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_left'>
+          <pose>-0.370000 0.610000 1.250000 0.000000 -0.140000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.900000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_right'>
+          <pose>-0.370000 -0.610000 1.250000 0.000000 -0.140000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.900000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_midleft'>
+          <pose>-0.370000 0.155000 1.250000 0.000000 -0.140000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.023000</radius>
+              <length>0.900000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_midright'>
+          <pose>-0.370000 -0.155000 1.250000 0.000000 -0.140000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.023000</radius>
+              <length>0.900000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_upper_left'>
+          <pose>-0.380000 0.610000 1.820000 0.000000 0.400000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.290000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_upper_right'>
+          <pose>-0.380000 -0.610000 1.820000 0.000000 0.400000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.030000</radius>
+              <length>0.290000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_upper_midleft'>
+          <pose>-0.380000 0.155000 1.820000 0.000000 0.400000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.023000</radius>
+              <length>0.290000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name='rollcage_back_upper_midright'>
+          <pose>-0.380000 -0.155000 1.820000 0.000000 0.400000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.023000</radius>
+              <length>0.290000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+        <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+      </link>
+      <link name='polaris_ranger_ev::rear_right_wheel'>
+        <pose>-0.850000 -0.600000 0.320000 1.520000 0.000000 0.000000</pose>
+        <inertial>
+          <mass>12.000000</mass>
+          <inertia>
+            <ixx>0.500000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>0.500000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.320000</radius>
+              <length>0.230000</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>1</max_contacts>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.000000</mu>
+                <mu2>1.000000</mu2>
+                <fdir1>0.000000 0.000000 1.000000</fdir1>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <min_depth>0.005000</min_depth>
+                <kp>100000000.000000</kp>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 0.000000 -1.570796 0.000000</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Rear_Wheel_Right</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::rear_left_wheel'>
+        <pose>-0.850000 0.600000 0.320000 -1.520000 0.000000 0.000000</pose>
+        <inertial>
+          <mass>12.000000</mass>
+          <inertia>
+            <ixx>0.500000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>0.500000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.320000</radius>
+              <length>0.230000</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>1</max_contacts>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.000000</mu>
+                <mu2>1.000000</mu2>
+                <fdir1>0.000000 0.000000 1.000000</fdir1>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <min_depth>0.005000</min_depth>
+                <kp>100000000.000000</kp>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 0.000000 -1.570796 0.000000</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Rear_Wheel_Left</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::front_right_wheel'>
+        <pose>1.030000 -0.600000 0.320000 1.520000 0.000000 0.000000</pose>
+        <inertial>
+          <mass>12.000000</mass>
+          <inertia>
+            <ixx>0.500000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>0.500000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.320000</radius>
+              <length>0.230000</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>1</max_contacts>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.000000</mu>
+                <mu2>1.000000</mu2>
+                <fdir1>0.000000 0.000000 1.000000</fdir1>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <min_depth>0.005000</min_depth>
+                <kp>100000000.000000</kp>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 0.000000 -1.570796 0.000000</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Front_Wheel_Right</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::front_right_wheel_steering_block'>
+        <pose>1.030000 -0.500000 0.320000 1.570800 0.000000 0.000000</pose>
+        <inertial>
+          <mass>1.000000</mass>
+          <inertia>
+            <ixx>1.000000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>1.000000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.050000</radius>
+              <length>0.010000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::front_left_wheel'>
+        <pose>1.030000 0.600000 0.320000 -1.520000 0.000000 0.000000</pose>
+        <inertial>
+          <mass>12.000000</mass>
+          <inertia>
+            <ixx>0.500000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>0.500000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.320000</radius>
+              <length>0.230000</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>1</max_contacts>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.000000</mu>
+                <mu2>1.000000</mu2>
+                <fdir1>0.000000 0.000000 1.000000</fdir1>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <min_depth>0.005000</min_depth>
+                <kp>100000000.000000</kp>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 3.141590 1.570796 -0.000000</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Front_Wheel_Left</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::front_left_wheel_steering_block'>
+        <pose>1.030000 0.500000 0.320000 1.570800 0.000000 0.000000</pose>
+        <inertial>
+          <mass>1.000000</mass>
+          <inertia>
+            <ixx>1.000000</ixx>
+            <ixy>0.000000</ixy>
+            <iyy>1.000000</iyy>
+            <ixz>0.000000</ixz>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.050000</radius>
+              <length>0.010000</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::gas_pedal'>
+        <pose>0.630000 0.100000 0.580000 0.000000 0.000000 0.000000</pose>
+        <gravity>0</gravity>
+        <inertial>
+          <mass>0.100000</mass>
+          <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+          <inertia>
+            <ixx>0.010000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>0.010000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>0.010000</izz>
+          </inertia>
+        </inertial>
+        <collision name='gas_pedal_collision'>
+          <pose>-0.038500 0.000000 -0.086000 -3.141592 1.125593 -3.141592</pose>
+          <geometry>
+            <box>
+              <size>0.106900 0.077000 0.010000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 0.000000 0.000000 -1.570700</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Pedal_Gas</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::brake_pedal'>
+        <gravity>0</gravity>
+        <pose>0.640000 0.270000 0.580000 0.000000 0.000000 0.000000</pose>
+        <inertial>
+          <mass>0.100000</mass>
+          <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+          <inertia>
+            <ixx>0.010000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>0.010000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>0.010000</izz>
+          </inertia>
+        </inertial>
+        <collision name='brake_pedal_collision'>
+          <pose>-0.040000 0.000000 -0.086000 -3.141592 1.142593 -3.141592</pose>
+          <geometry>
+            <box>
+              <size>0.063000 0.080000 0.010000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 0.000000 0.000000 -1.570700</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Pedal_brake</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::steering_wheel'>
+        <pose>0.340000 0.300000 1.290000 0.000000 -0.870000 0.000000</pose>
+        <inertial>
+          <mass>1.000000</mass>
+          <pose>-0.002000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+          <inertia>
+            <ixx>0.012000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>0.012000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>0.024000</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <pose>0.000000 0.000000 0.000000 -0.690000 0.000000 -1.570796</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Steering_Wheel</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <min_depth>0.003000</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <pose>0.000000 0.000000 0.000000 -0.690000 0.000000 -1.570796</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>Steering_Wheel</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::hand_brake'>
+        <pose>0.530000 0.070000 1.050000 0.000000 0.000000 0.000000</pose>
+        <inertial>
+          <mass>0.500000</mass>
+          <inertia>
+            <ixx>0.100000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>0.100000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>0.050000</izz>
+          </inertia>
+        </inertial>
+        <collision name='hand_brake_collision'>
+          <pose>0.000000 0.000000 0.050000 -0.200000 -0.000000 -1.570796</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>E-Brake</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name='hand_brake_visual'>
+          <pose>0.000000 0.000000 0.050000 -0.200000 -0.000000 -1.570796</pose>
+          <geometry>
+            <mesh>
+              <uri>model://polaris_ranger_ev/meshes/polaris.dae</uri>
+              <submesh>
+                <name>E-Brake</name>
+                <center>1</center>
+              </submesh>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>Polaris/Diffuse</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <link name='polaris_ranger_ev::FNR_switch'>
+        <pose>0.560000 -0.020000 1.080000 0.000000 0.250000 0.000000</pose>
+        <inertial>
+          <mass>0.100000</mass>
+          <inertia>
+            <ixx>0.100000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>0.000060</iyy>
+            <iyz>0.000000</iyz>
+            <izz>0.100000</izz>
+          </inertia>
+        </inertial>
+        <collision name='polaris_ranger_ev::FNR_switch'>
+          <geometry>
+            <box>
+              <size>0.020000 0.040000 0.080000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name='FNR_switch_F'>
+          <transparency>0.000000</transparency>
+          <geometry>
+            <box>
+              <size>0.020000 0.040000 0.080000</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>FNR_switch_F</name>
+            </script>
+          </material>
+        </visual>
+        <visual name='FNR_switch_R'>
+          <transparency>1.000000</transparency>
+          <geometry>
+            <box>
+              <size>0.019900 0.039900 0.079900</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://polaris_ranger_ev/materials/scripts</uri>
+              <uri>model://polaris_ranger_ev/materials/textures</uri>
+              <name>FNR_switch_R</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+      </link>
+      <joint name='polaris_ranger_ev::front_left_steering_joint' type='revolute'>
+        <child>polaris_ranger_ev::front_left_wheel_steering_block</child>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <axis>
+          <xyz>0.000000 0.000000 1.000000</xyz>
+          <limit>
+            <lower>-0.872700</lower>
+            <upper>0.872700</upper>
+          </limit>
+          <dynamics>
+            <damping>50.000000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+            <limit>
+              <cfm>0.000000</cfm>
+              <erp>0.900000</erp>
+            </limit>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::front_left_wheel_joint' type='revolute'>
+        <child>polaris_ranger_ev::front_left_wheel</child>
+        <parent>polaris_ranger_ev::front_left_wheel_steering_block</parent>
+        <axis>
+          <xyz>0.000000 1.000000 0.050000</xyz>
+          <limit>
+            <lower>-10000000000000000.000000</lower>
+            <upper>10000000000000000.000000</upper>
+          </limit>
+        </axis>
+      </joint>
+      <joint name='polaris_ranger_ev::front_right_steering_joint' type='revolute'>
+        <child>polaris_ranger_ev::front_right_wheel_steering_block</child>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <axis>
+          <xyz>0.000000 0.000000 1.000000</xyz>
+          <limit>
+            <lower>-0.872700</lower>
+            <upper>0.872700</upper>
+          </limit>
+          <dynamics>
+            <damping>50.000000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+            <limit>
+              <cfm>0.000000</cfm>
+              <erp>0.900000</erp>
+            </limit>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::front_right_wheel_joint' type='revolute'>
+        <child>polaris_ranger_ev::front_right_wheel</child>
+        <parent>polaris_ranger_ev::front_right_wheel_steering_block</parent>
+        <axis>
+          <xyz>0.000000 1.000000 -0.050000</xyz>
+          <limit>
+            <lower>-10000000000000000.000000</lower>
+            <upper>10000000000000000.000000</upper>
+          </limit>
+        </axis>
+      </joint>
+      <joint name='polaris_ranger_ev::rear_left_wheel_joint' type='revolute'>
+        <child>polaris_ranger_ev::rear_left_wheel</child>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <axis>
+          <xyz>0.000000 1.000000 0.050000</xyz>
+          <limit>
+            <lower>-10000000000000000.000000</lower>
+            <upper>10000000000000000.000000</upper>
+          </limit>
+        </axis>
+      </joint>
+      <joint name='polaris_ranger_ev::rear_right_wheel_joint' type='revolute'>
+        <pose>0.000000 0.000000 -0.100000 0.000000 0.000000 0.000000</pose>
+        <child>polaris_ranger_ev::rear_right_wheel</child>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <axis>
+          <xyz>0.000000 1.000000 -0.050000</xyz>
+          <limit>
+            <lower>-10000000000000000.000000</lower>
+            <upper>10000000000000000.000000</upper>
+          </limit>
+        </axis>
+      </joint>
+      <joint name='polaris_ranger_ev::rear_differential_joint' type='revolute'>
+        <child>polaris_ranger_ev::rear_right_wheel</child>
+        <parent>polaris_ranger_ev::rear_left_wheel</parent>
+        <axis>
+          <xyz>0.000000 1.000000 0.000000</xyz>
+          <dynamics>
+            <damping>70.000000</damping>
+          </dynamics>
+          <limit>
+            <lower>-10000000000000000.000000</lower>
+            <upper>10000000000000000.000000</upper>
+          </limit>
+        </axis>
+        <physics>
+          <ode>
+            <erp>0.000000</erp>
+            <cfm>1000.000000</cfm>
+            <cfm_damping>1</cfm_damping>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::gas_joint' type='prismatic'>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <child>polaris_ranger_ev::gas_pedal</child>
+        <axis>
+          <xyz>1.000000 0.000000 -1.000000</xyz>
+          <limit>
+            <lower>0.000000</lower>
+            <upper>0.080000</upper>
+          </limit>
+          <dynamics>
+            <damping>3.000000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::brake_joint' type='prismatic'>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <child>polaris_ranger_ev::brake_pedal</child>
+        <axis>
+          <xyz>1.000000 0.000000 -0.600000</xyz>
+          <limit>
+            <lower>0.000000</lower>
+            <upper>0.080000</upper>
+          </limit>
+          <dynamics>
+            <damping>3.000000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::steering_joint' type='revolute'>
+        <pose>-0.002000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <child>polaris_ranger_ev::steering_wheel</child>
+        <axis>
+          <xyz>-1.000000 0.000000 0.843650</xyz>
+          <limit>
+            <lower>-3.140000</lower>
+            <upper>3.140000</upper>
+          </limit>
+          <dynamics>
+            <damping>1.000000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::hand_brake_joint' type='revolute'>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <child>polaris_ranger_ev::hand_brake</child>
+        <axis>
+          <xyz>0.000000 -1.000000 0.000000</xyz>
+          <limit>
+            <lower>0.000000</lower>
+            <upper>0.600000</upper>
+          </limit>
+          <dynamics>
+            <damping>1.000000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+          </ode>
+        </physics>
+      </joint>
+      <joint name='polaris_ranger_ev::FNR_switch_joint' type='revolute'>
+        <parent>polaris_ranger_ev::chassis</parent>
+        <child>polaris_ranger_ev::FNR_switch</child>
+        <axis>
+          <xyz>0.000000 -1.000000 0.000000</xyz>
+          <limit>
+            <lower>-0.300000</lower>
+            <upper>0.300000</upper>
+          </limit>
+          <dynamics>
+            <damping>0.010000</damping>
+          </dynamics>
+        </axis>
+        <physics>
+          <ode>
+            <cfm_damping>1</cfm_damping>
+          </ode>
+        </physics>
+      </joint>
+      <plugin name='vehicle' filename='libDRCVehicleROSPlugin.so'>
+        <front_left_wheel>polaris_ranger_ev::front_left_wheel_joint</front_left_wheel>
+        <front_right_wheel>polaris_ranger_ev::front_right_wheel_joint</front_right_wheel>
+        <front_left_wheel_steering>polaris_ranger_ev::front_left_steering_joint</front_left_wheel_steering>
+        <front_right_wheel_steering>polaris_ranger_ev::front_right_steering_joint</front_right_wheel_steering>
+        <back_left_wheel>polaris_ranger_ev::rear_left_wheel_joint</back_left_wheel>
+        <back_right_wheel>polaris_ranger_ev::rear_right_wheel_joint</back_right_wheel>
+        <gas_pedal>polaris_ranger_ev::gas_joint</gas_pedal>
+        <brake_pedal>polaris_ranger_ev::brake_joint</brake_pedal>
+        <steering_wheel>polaris_ranger_ev::steering_joint</steering_wheel>
+        <hand_brake>polaris_ranger_ev::hand_brake_joint</hand_brake>
+        <fnr_switch>polaris_ranger_ev::FNR_switch_joint</fnr_switch>
+        <fnr_switch_f>polaris_ranger_ev::FNR_switch::FNR_switch_F</fnr_switch_f>
+        <fnr_switch_r>polaris_ranger_ev::FNR_switch::FNR_switch_R</fnr_switch_r>
+        <front_torque>1000</front_torque>
+        <back_torque>1000</back_torque>
+        <front_brake_torque>2000</front_brake_torque>
+        <back_brake_torque>2000</back_brake_torque>
+        <tire_angle_range>0.5</tire_angle_range>
+        <max_speed>4.5</max_speed>
+        <max_steer>0.6458</max_steer>
+        <aero_load>0.1</aero_load>
+        <min_brake_percent>0.04</min_brake_percent>
+      </plugin>
+      <plugin name='seat_mud' filename='libMudPlugin.so'>
+        <contact_sensor_name>polaris_ranger_ev/chassis/seat_contact</contact_sensor_name>
+        <stiffness>0.0</stiffness>
+        <damping>100.0</damping>
+        <link_name>atlas::pelvis</link_name>
+        <link_name>atlas::r_uleg</link_name>
+        <link_name>atlas::l_uleg</link_name>
+      </plugin>
+      <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+    </model>
+    <physics type='ode'>
+      <max_step_size>0.001000</max_step_size>
+      <real_time_factor>1.000000</real_time_factor>
+      <real_time_update_rate>1000.000000</real_time_update_rate>
+      <gravity>0.000000 0.000000 -9.800000</gravity>
+    </physics>
+    <scene>
+      <ambient>0.200000 0.200000 0.200000 1.000000</ambient>
+      <background>0.700000 0.700000 0.700000 1.000000</background>
+      <shadows>1</shadows>
+    </scene>
+  </world>
+</sdf>
