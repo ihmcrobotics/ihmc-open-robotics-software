@@ -16,6 +16,8 @@ public class DesiredComHeightProvider
    private final AtomicDouble comHeightOffset = new AtomicDouble(0.0);
    private final AtomicDouble trajectoryTime = new AtomicDouble(0.0);
 
+   private final double defaultTrajectoryTime = 0.5; //Hackish default time for height trajectory. We need to just ensure that this is always set in the packet instead and then get rid of this.
+   
    public DesiredComHeightProvider()
    {
       comHeightPacketConsumer = new ComHeightPacketConsumer();
@@ -38,7 +40,13 @@ public class DesiredComHeightProvider
       {
          newDataAvailable.set(true);
          comHeightOffset.set(packet.getHeightOffset());
-         trajectoryTime.set(packet.getTrajectoryTime());
+         double packetTime = packet.getTrajectoryTime();
+         
+         if ((packetTime < 1e-7) || (Double.isNaN(packetTime)))
+         {
+            packetTime = defaultTrajectoryTime;
+         }
+         trajectoryTime.set(packetTime);
       }
    }
 
