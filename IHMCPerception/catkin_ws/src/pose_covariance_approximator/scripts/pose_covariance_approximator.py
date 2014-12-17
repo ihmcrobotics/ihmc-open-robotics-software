@@ -16,10 +16,10 @@ def callback(newPose):
     if initialized == False:
         initialize(newPose)
         
-    xFactor = 0.15 ** 2
-    yFactor = 0.15 ** 2
-    zFactor = 0.15 ** 2
-    yawFactor = 0.65 ** 2
+    xFactor = 0.05 ** 2
+    yFactor = 0.05 ** 2
+    zFactor = 0.05 ** 2
+    yawFactor = 0.25 ** 2
     
     positionDifference = geometry_msgs.msg.Vector3(0, 0, 0)
     positionDifference.x = newPose.pose.position.x - lastPoseWithCovariance.pose.position.x
