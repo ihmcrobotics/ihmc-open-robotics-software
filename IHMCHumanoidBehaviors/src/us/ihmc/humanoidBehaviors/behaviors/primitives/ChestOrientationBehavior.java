@@ -72,6 +72,9 @@ public class ChestOrientationBehavior extends BehaviorInterface
 
       isPaused.set(false);
       isStopped.set(false);
+
+      startTime.set(Double.NaN);
+      trajectoryTime.set(Double.NaN);
    }
 
    @Override
