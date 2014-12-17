@@ -2,6 +2,7 @@ package us.ihmc.atlas.parameters;
 
 
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
+import us.ihmc.ihmcPerception.footstepPlanner.FootstepPlanState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +29,15 @@ public class AtlasFootstepParameters extends FootstepParameters {
 		cropWidth = 0.085;
 		cropLength = 0.22;
 		maxSupportPolygonArea = cropWidth*cropLength;
-		minSupportPolygonArea = maxSupportPolygonArea/2;
+		//minSupportPolygonArea = maxSupportPolygonArea/2;
+      minSupportPolygonArea = maxSupportPolygonArea * 0.99;
 		
 	}
 	
 	private void setOffsets(){
-		List<FootstepOffset> offsets = new ArrayList<FootstepOffset>();
+      FootstepOffset sidestep = new FootstepOffset(0,.25,0);
+      List<FootstepOffset> offsets = new ArrayList<FootstepOffset>();
+      offsets.add(sidestep);
       double[] xs = new double[]{0.0 , 0.0 , 0.0 , 0.0, 0.6 , 0.4, -0.3, 0.4};
       double[] ys = new double[]{0.16 , 0.25 , 0.4, 0.6 , 0.25 , 0.25, 0.25, 0.4};
       double[] thetas = new double[]{0.0 , 0.0 , 0.0, 0.0 , 0.0 , 0.0, 0.0, 0.0};
@@ -54,6 +58,10 @@ public class AtlasFootstepParameters extends FootstepParameters {
       offsetList = offsets;
 	}
 
+   @Override
+   public FootstepOffset getSidestep(FootstepPlanState currentState) {
+      return offsetList.get(0);
+   }
 	public double getMaxStepUp(){
 		return this.maxStepUp;
 	}

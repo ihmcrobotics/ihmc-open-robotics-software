@@ -6,6 +6,7 @@
  */
 
 #include <lidar_to_point_cloud_transformer/RobotSelfFilter.hpp>
+#include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <vector>
 #include <exception>
@@ -105,8 +106,8 @@ void RobotSelfFilter::filterPointClould(
 	const double min_range_ = 0.0;
 
 	//convert XYZI to XYZ
-	pcl::PointCloud<pcl::PointXYZ> tmp;
-	pcl::copyPointCloud(source_cloud, tmp);
+	sensor_msgs::PointCloud2 tmp;
+	pcl::toROSMsg(source_cloud, tmp);
 
 	//obtain in/out mask
 	shape_mask_->maskContainment(tmp, dummy_sensor_origin, min_range_,
