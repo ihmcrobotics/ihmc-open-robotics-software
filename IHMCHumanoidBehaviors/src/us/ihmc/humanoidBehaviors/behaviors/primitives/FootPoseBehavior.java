@@ -17,12 +17,15 @@ public class FootPoseBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeElapsed;
+   private final BooleanYoVariable doubleSupport;
 
-   public FootPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public FootPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport)
    {
       super(outgoingCommunicationBridge);
 
       this.yoTime = yoTime;
+      this.doubleSupport = yoDoubleSupport;
+
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
       hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
@@ -44,6 +47,14 @@ public class FootPoseBehavior extends BehaviorInterface
       {
          sendFootPosePacketToController();
       }
+
+      if (hasPacketBeenSent.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      {
+         if (Double.isNaN(startTime.getDoubleValue()) && !doubleSupport.getBooleanValue())
+         {
+            startTime.set(yoTime.getDoubleValue());
+         }
+      }
    }
 
    private void sendFootPosePacketToController()
@@ -53,7 +64,6 @@ public class FootPoseBehavior extends BehaviorInterface
          outgoingFootPosePacket.setDestination(PacketDestination.UI);
          sendPacketToController(outgoingFootPosePacket);
          hasPacketBeenSent.set(true);
-         startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingFootPosePacket.getTrajectoryTime());
       }
    }
@@ -71,6 +81,9 @@ public class FootPoseBehavior extends BehaviorInterface
 
       isPaused.set(false);
       isStopped.set(false);
+
+      startTime.set(Double.NaN);
+      trajectoryTime.set(Double.NaN);
    }
 
    @Override

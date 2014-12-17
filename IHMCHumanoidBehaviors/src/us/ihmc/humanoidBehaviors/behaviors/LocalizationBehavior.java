@@ -8,6 +8,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class LocalizationBehavior extends BehaviorInterface {
@@ -23,12 +24,12 @@ public class LocalizationBehavior extends BehaviorInterface {
 	private ScriptBehaviorInputPacket receivedScriptBehavior;
 	private boolean firstRun = false;
 	
-	public LocalizationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+	public LocalizationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport)
 	   {
 	      super(outgoingCommunicationBridge);
 	      
 	      this.fullRobotModel = fullRobotModel;
-	      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+	      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
 	      registry.addChild(scriptBehavior.getYoVariableRegistry());
 	      scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
 	      super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);

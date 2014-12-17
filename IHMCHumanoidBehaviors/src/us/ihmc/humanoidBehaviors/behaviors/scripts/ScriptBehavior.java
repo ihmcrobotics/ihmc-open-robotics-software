@@ -93,7 +93,7 @@ public class ScriptBehavior extends BehaviorInterface
 	private final FingerStateBehavior fingerStateBehavior;
 	private ScriptBehaviorInputPacket receivedScriptBehavior;
 	
-	public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+	public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, BooleanYoVariable doubleSupport)
 	{
 		super(outgoingCommunicationBridge);
 		
@@ -107,7 +107,7 @@ public class ScriptBehavior extends BehaviorInterface
 		handStateBehavior = new HandStateBehavior(outgoingCommunicationBridge, yoTime);
 		headOrientationBehavior = new HeadOrientationBehavior(outgoingCommunicationBridge, yoTime);
 		comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
-		footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime);
+		footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, doubleSupport);
 		pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
 		chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
 		handLoadBearingBehavior = new HandLoadBearingBehavior(outgoingCommunicationBridge);

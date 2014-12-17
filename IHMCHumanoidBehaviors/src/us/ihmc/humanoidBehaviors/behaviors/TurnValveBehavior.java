@@ -56,13 +56,13 @@ public class TurnValveBehavior extends BehaviorInterface
    // private final ModifiableValveModel valveModel;
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable tippingDetectedBoolean)
+         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean)
    {
       super(outgoingCommunicationBridge);
       targetWalkLocation = new Point3d();
       valveOrientation = new YoFrameOrientation(behaviorName + "ValveOrientation", ReferenceFrame.getWorldFrame(), registry);
       targetWalkOrientation = new YoFrameOrientation(behaviorName + "WalkToOrientation", ReferenceFrame.getWorldFrame(), registry);
-      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
