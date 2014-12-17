@@ -15,7 +15,8 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double footForward = 0.202;
    public static final double footBack = 0.05;
    public static final double footLength = footForward + footBack;
-   public static final double footWidth = 0.152;
+   public static final double toeWidth = 0.152;
+   public static final double footWidth = toeWidth - 0.022;
    public static final double thighLength = 0.37694;
    public static final double shinLength = 0.42164;
    public static final double legLength = thighLength + shinLength;

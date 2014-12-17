@@ -16,9 +16,6 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-/**
- * Created by dstephen on 2/14/14.
- */
 public class BonoWalkingControllerParameters implements WalkingControllerParameters
 {
 
@@ -226,7 +223,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMaxStepWidth()
    {
-      return 0.6; //0.5; //0.4;
+      return 0.5; //0.5; //0.4;
    }
 
    @Override
@@ -413,10 +410,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double kpXYOrientation = 500.0; // 300 not working
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
-      double maxPositionAcceleration = Double.POSITIVE_INFINITY;
-      double maxPositionJerk = Double.POSITIVE_INFINITY;
-      double maxOrientationAcceleration = Double.POSITIVE_INFINITY;
-      double maxOrientationJerk = Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
@@ -575,7 +572,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getToeWidth()
    {
-      return BonoPhysicalProperties.footWidth;
+      return BonoPhysicalProperties.toeWidth;
    }
 
    @Override
