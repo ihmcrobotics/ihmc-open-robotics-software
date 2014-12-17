@@ -19,9 +19,9 @@ public class PelvisPoseTask implements Task
    private double behaviorDoneTime = Double.NaN;
    private final double sleepTime;
 
-   public PelvisPoseTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime)
+   public PelvisPoseTask(FrameOrientation desiredPelvisOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime)
    {
-      this(desiredChestOrientation, yoTime, pelvisPoseBehavior, trajectoryTime, 0.0);
+      this(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime, 0.0);
    }
 
    public PelvisPoseTask(FrameOrientation desiredPelvisOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime,
