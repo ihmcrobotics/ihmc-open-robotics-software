@@ -5,6 +5,8 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -19,18 +21,32 @@ public class FootPoseTask implements Task
    private double behaviorDoneTime = Double.NaN;
    private final double sleepTime;
 
-   public FootPoseTask(RobotSide robotSide, Point3d position, Quat4d orientation, DoubleYoVariable yoTime, FootPoseBehavior footPoseBehavior, double trajectoryTime)
+   public FootPoseTask(RobotSide robotSide, Point3d position, Quat4d orientation, DoubleYoVariable yoTime, FootPoseBehavior footPoseBehavior,
+         double trajectoryTime)
    {
       this(robotSide, position, orientation, yoTime, footPoseBehavior, trajectoryTime, 0.0);
    }
 
-   public FootPoseTask(RobotSide robotSide, Point3d position, Quat4d orientation, DoubleYoVariable yoTime, FootPoseBehavior footPoseBehavior, double trajectoryTime,
-         double sleepTime)
+   public FootPoseTask(RobotSide robotSide, Point3d position, Quat4d orientation, DoubleYoVariable yoTime, FootPoseBehavior footPoseBehavior,
+         double trajectoryTime, double sleepTime)
    {
       this.footPoseBehavior = footPoseBehavior;
       this.yoTime = yoTime;
       this.sleepTime = sleepTime;
 
+      footPosePacket = new FootPosePacket(robotSide, position, orientation, trajectoryTime);
+   }
+
+   public FootPoseTask(RobotSide robotSide, FramePose pose, DoubleYoVariable yoTime, FootPoseBehavior footPoseBehavior, double trajectoryTime, double sleepTime)
+   {
+      this.footPoseBehavior = footPoseBehavior;
+      this.yoTime = yoTime;
+      this.sleepTime = sleepTime;
+
+      pose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      Point3d position = new Point3d();
+      Quat4d orientation = new Quat4d();
+      pose.getPose(position, orientation);
       footPosePacket = new FootPosePacket(robotSide, position, orientation, trajectoryTime);
    }
 
