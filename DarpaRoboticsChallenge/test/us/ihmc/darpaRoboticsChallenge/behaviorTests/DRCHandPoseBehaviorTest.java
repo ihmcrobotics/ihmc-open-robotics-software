@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
@@ -13,6 +14,7 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -61,6 +63,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private FullRobotModel fullRobotModel;
 
+   private boolean returnValue = true;
 
    @Before
    public void setUp()
@@ -107,7 +110,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
 
 
-   @Test
+   // @Test
    public void testSimpleHandPoseMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -210,13 +213,15 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       RigidBodyTransform pose = new RigidBodyTransform();    // handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       handPoseTarget.getPose(pose);
 
-      double swingTrajectoryTime = 4.0;
+      final double swingTrajectoryTime = 4.0;
 
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
       final double secondsToPauseEarly = 2.0;
       final double simulationRunTime = swingTrajectoryTime - secondsToPauseEarly;
 
+      setReturnValue(true);
+      
       Thread behaviorThreadFirst = new Thread()
       {
          public void run()
@@ -237,6 +242,29 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
                simStillRunning = timeSpentSimulating < (simulationRunTime - 0.5);
 
                handPoseBehavior.doControl();
+
+               HandPoseStatus.Status status = handPoseBehavior.getStatus();
+
+               if ((status != null) && (timeSpentSimulating > 0.5))
+               {
+                  if ((timeSpentSimulating > 0.5) && (timeSpentSimulating < (swingTrajectoryTime - 0.5)))
+                  {
+                     if (status != HandPoseStatus.Status.STARTED)
+                     {
+                        System.out.println("behaviorThreadFirst: status should be STARTED, = " + status + ", timeSpentSimulating=" + timeSpentSimulating);
+                        setReturnValue(false);
+                     }
+                  }
+                  else if (timeSpentSimulating > (swingTrajectoryTime + 0.5))
+                  {
+                     if (status != HandPoseStatus.Status.COMPLETED)
+                     {
+                        System.out.println("behaviorThreadFirst: status should be STARTED, = " + status + ", timeSpentSimulating=" + timeSpentSimulating);
+                        setReturnValue(false);
+                     }
+
+                  }
+               }
             }
 
             handPoseBehavior.pause();
@@ -250,6 +278,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
+      assertTrue(returnValue);
+      
       fullRobotModel.updateFrames();
       FramePose handPoseAtPauseStart = new FramePose();
       handPoseAtPauseStart.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
@@ -270,8 +300,71 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       handPoseBehavior.resume();
 
+      setReturnValue(true);
 
+      Thread behaviorThreadSecond = new Thread()
+      {
+         public void run()
+         {
+            double startTime = Double.NaN;
+            boolean simStillRunning = true;
+            boolean initalized = false;
+            boolean ret = true;
+
+            while (simStillRunning)
+            {
+               if (!initalized)
+               {
+                  startTime = yoTime.getDoubleValue();
+                  initalized = true;
+               }
+
+               double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
+               simStillRunning = timeSpentSimulating < (swingTrajectoryTime + 1.0);
+
+               handPoseBehavior.doControl();
+
+               HandPoseStatus.Status status = handPoseBehavior.getStatus();
+
+               if ((status != null) && (timeSpentSimulating > 0.5))
+               {
+                  if ((timeSpentSimulating > 0.5) && (timeSpentSimulating < (swingTrajectoryTime - 0.5)))
+                  {
+                     if (status != HandPoseStatus.Status.STARTED)
+                     {
+                        System.out.println("behaviorThreadFirst: status should be STARTED, = " + status + ", timeSpentSimulating=" + timeSpentSimulating);
+                        setReturnValue(false);
+                     }
+                     
+                  }
+                  else if (timeSpentSimulating > (swingTrajectoryTime + 0.5))
+                  {
+                     if (status != HandPoseStatus.Status.COMPLETED)
+                     {
+                        System.out.println("behaviorThreadFirst: status should be STARTED, = " + status + ", timeSpentSimulating=" + timeSpentSimulating);
+                        setReturnValue(false);
+                     }
+                     
+                  }
+               }
+            }
+            
+            
+
+            if (DEBUG)
+               System.out.println("testHandPosePause: behaviorThreadSecond done");
+         }
+      };
+
+      behaviorThreadSecond.start();
+
+      assertTrue(returnValue);
+      
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+
+      handPoseBehavior.doControl();
+      HandPoseStatus.Status status = handPoseBehavior.getStatus();
+      assertTrue(status.equals(HandPoseStatus.Status.COMPLETED));
 
 
       fullRobotModel.updateFrames();
@@ -288,6 +381,11 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       assertTrue(handPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
+   }
+   
+   private void setReturnValue(boolean value)
+   {
+      returnValue = value;
    }
 
 

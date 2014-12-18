@@ -74,10 +74,13 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      checkForHandPoseStatus();
+      
       if (!hasPacketBeenSent.getBooleanValue() && outgoingHandPosePacket != null)
       {
          sendHandPoseToController();
       }
+      
    }
 
    public Status getStatus()
