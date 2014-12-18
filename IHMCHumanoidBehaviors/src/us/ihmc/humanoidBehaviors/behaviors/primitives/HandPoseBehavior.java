@@ -75,12 +75,12 @@ public class HandPoseBehavior extends BehaviorInterface
    public void doControl()
    {
       checkForHandPoseStatus();
-      
-      if (!hasPacketBeenSent.getBooleanValue() && outgoingHandPosePacket != null)
+
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandPosePacket != null))
       {
          sendHandPoseToController();
       }
-      
+
    }
 
    public Status getStatus()
@@ -90,7 +90,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
    private void sendHandPoseToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
          outgoingHandPosePacket.setDestination(PacketDestination.UI);
 
@@ -135,6 +135,9 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
+      StopArmMotionPacket pausePacket = new StopArmMotionPacket(outgoingHandPosePacket.getRobotSide());
+      pausePacket.setDestination(PacketDestination.CONTROLLER);
+      sendPacketToController(pausePacket);
       isStopped.set(true);
    }
 
@@ -152,6 +155,7 @@ public class HandPoseBehavior extends BehaviorInterface
    {
       isPaused.set(false);
       hasPacketBeenSent.set(false);
+
       if (hasInputBeenSet())
       {
          sendHandPoseToController();
@@ -162,23 +166,26 @@ public class HandPoseBehavior extends BehaviorInterface
    public boolean isDone()
    {
       checkForHandPoseStatus();
+
       if (status == Status.COMPLETED)
       {
          isDone.set(true);
       }
+
       return isDone.getBooleanValue();
-      //      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
-      //         trajectoryTimeElapsed.set(false);
-      //      else
-      //         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
+
+      // if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+      // trajectoryTimeElapsed.set(false);
+      // else
+      // trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
       //
-      //      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+      // return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    private void checkForHandPoseStatus()
    {
       HandPoseStatus newestPacket = inputListeningQueue.getNewestPacket();
-      if (newestPacket != null && newestPacket.getRobotSide() == outgoingHandPosePacket.getRobotSide())
+      if ((newestPacket != null) && (newestPacket.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
       {
          if (DEBUG)
             System.out.println("Received a hand pose status: " + newestPacket.getStatus() + ", " + newestPacket.getRobotSide());
