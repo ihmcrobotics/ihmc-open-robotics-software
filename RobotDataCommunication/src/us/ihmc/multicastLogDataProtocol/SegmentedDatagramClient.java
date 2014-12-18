@@ -28,6 +28,8 @@ public class SegmentedDatagramClient extends Thread
 
    private final SegmentedPacketBuffer[] ringBuffer = new SegmentedPacketBuffer[PACKAGE_BUFFER];
 
+   private volatile boolean running = true;
+   
    public SegmentedDatagramClient(long sessionId, NetworkInterface iface, InetAddress group, int port, LogPacketHandler handler)
    {
       super("SegmentedDataClient" + sessionId);
@@ -141,7 +143,7 @@ public class SegmentedDatagramClient extends Thread
          throw new RuntimeException(e);
       }
 
-      while (!isInterrupted())
+      while (running)
       {
 
          try
@@ -193,7 +195,7 @@ public class SegmentedDatagramClient extends Thread
 
    public void close()
    {
-      interrupt();
+      running = false;
 
       if (Thread.currentThread() != this)
       {

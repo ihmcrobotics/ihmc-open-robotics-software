@@ -108,11 +108,14 @@ public class YoVariableClient
 
    public synchronized void close()
    {
-      yoVariableConsumer.close();
-      logControlClient.close();
-      listener.disconnected();
-      
-      state = ClientState.STOPPED;
+      if(state == ClientState.RUNNING)
+      {
+         yoVariableConsumer.close();
+         logControlClient.close();
+         listener.disconnected();
+         
+         state = ClientState.STOPPED;
+      }
    }
 
    public synchronized boolean isRunning()
