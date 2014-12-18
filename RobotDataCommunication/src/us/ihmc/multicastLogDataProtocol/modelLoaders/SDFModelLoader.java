@@ -18,6 +18,7 @@ import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.utilities.ClassLoaderUtils;
 
 public class SDFModelLoader implements LogModelLoader
@@ -42,7 +43,7 @@ public class SDFModelLoader implements LogModelLoader
    @Override
    public SDFRobot createRobot()
    {
-      return createJaxbSDFLoader().createRobot(modelName, false);
+      return new VisualizerRobot(createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName), null);
    }
    
    public JaxbSDFLoader createJaxbSDFLoader()

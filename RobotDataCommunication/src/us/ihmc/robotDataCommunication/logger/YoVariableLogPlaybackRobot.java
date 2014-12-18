@@ -11,26 +11,23 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.LogIndex;
+import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener
+public class YoVariableLogPlaybackRobot extends VisualizerRobot implements RewoundListener
 {
-   private final YoVariableRegistry logRegistry;
    
    private final SimulationConstructionSet scs;
    private final LongYoVariable timestamp;
@@ -62,35 +59,12 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
          throws IOException
    {
-      super(generalizedSDFRobotModel, sdfJointNameMap, false);
-      this.logRegistry = new YoVariableRegistry(generalizedSDFRobotModel.getName());
+      super(generalizedSDFRobotModel, sdfJointNameMap);
       
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
       
-      logRegistry.registerVariable(getRootJoint().getQx());
-      logRegistry.registerVariable(getRootJoint().getQy());
-      logRegistry.registerVariable(getRootJoint().getQz());
 
-      logRegistry.registerVariable(getRootJoint().getQdx());
-      logRegistry.registerVariable(getRootJoint().getQdy());
-      logRegistry.registerVariable(getRootJoint().getQdz());
-
-
-      logRegistry.registerVariable(getRootJoint().getQuaternionQs());
-      logRegistry.registerVariable(getRootJoint().getQuaternionQx());
-      logRegistry.registerVariable(getRootJoint().getQuaternionQy());
-      logRegistry.registerVariable(getRootJoint().getQuaternionQz());
-
-      logRegistry.registerVariable(getRootJoint().getAngularVelocityX());
-      logRegistry.registerVariable(getRootJoint().getAngularVelocityY());
-      logRegistry.registerVariable(getRootJoint().getAngularVelocityZ());
-      
-      for(OneDegreeOfFreedomJoint joint : getOneDoFJoints())
-      {
-         logRegistry.registerVariable(joint.getQ());
-         logRegistry.registerVariable(joint.getQD());
-      }
       
       this.jointStates = jointStates;
       this.variables = variables;
@@ -131,7 +105,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       logLine = ByteBuffer.allocate(bufferSize);
       logLongArray = logLine.asLongBuffer();
 
-      currentRecordTick = new IntegerYoVariable("currentRecordTick", logRegistry);
+      currentRecordTick = new IntegerYoVariable("currentRecordTick", getRobotsYoVariableRegistry());
 
       try
       {
@@ -339,17 +313,5 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       }
    }
 
-   @Override
-   public YoVariableRegistry getRobotsYoVariableRegistry()
-   {
-      if(this.logRegistry == null)
-      {
-         // Hack to avoid null registry errors on startup.
-         return super.getRobotsYoVariableRegistry();
-      }
-      else
-      {
-         return this.logRegistry;
-      }
-   }
+   
 }
