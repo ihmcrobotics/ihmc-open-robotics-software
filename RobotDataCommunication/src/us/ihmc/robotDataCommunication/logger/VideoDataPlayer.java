@@ -47,7 +47,7 @@ public class VideoDataPlayer
    
    private final File videoFile;
    
-   public VideoDataPlayer(String name, File dataDirectory, LogProperties logProperties)
+   public VideoDataPlayer(String name, File dataDirectory, LogProperties logProperties) throws IOException
    {
       this.name = name;
       this.interlaced = logProperties.getInterlaced(name);
@@ -58,18 +58,16 @@ public class VideoDataPlayer
          System.err.println("Video data is using timestamps instead of frame numbers. Falling back to seeking based on timestamp.");
       }
       videoFile = new File(dataDirectory, logProperties.getVideoFile(name));
+      if(!videoFile.exists())
+      {
+         throw new IOException("Cannot find video: " + videoFile);
+      }
+      
       File timestampFile = new File(dataDirectory, logProperties.getTimestampFile(name));
 
       parseTimestampData(timestampFile);
       
-      try
-      {
-         demuxer = new MP4VideoDemuxer(videoFile);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      demuxer = new MP4VideoDemuxer(videoFile);
       
       viewer = new HideableMediaFrame(name, demuxer.getWidth(), demuxer.getHeight());
    }
