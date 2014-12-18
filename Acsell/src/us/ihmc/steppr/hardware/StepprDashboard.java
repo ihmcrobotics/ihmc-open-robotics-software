@@ -158,7 +158,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
 
    private void createTable(YoVariableHolder yoVariableHolder)
    {
-      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "MCB Temperature 0", "MCB Temperture 1", "q" }, StepprActuator.values.length);
+      DefaultTableModel tableModel = new DefaultTableModel(new String[] { "Actuator", "Motor Temperature", "MCB Temperature 0", "MCB Temperture 1", "Motor angle" }, StepprActuator.values.length);
       table = new JTable(tableModel);
       table.setFillsViewportHeight(true);
       table.getColumn("Motor Temperature").setCellRenderer(new WarningRenderer());
