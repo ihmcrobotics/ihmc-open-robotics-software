@@ -25,7 +25,6 @@ dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 	
 	compile project(':IHMCUtilities')
-	compile project(':IHMCCommunication')
     compile project(':ThirdParty')
     
 	testCompile project(':IHMCUtilities').sourceSets.test.output
