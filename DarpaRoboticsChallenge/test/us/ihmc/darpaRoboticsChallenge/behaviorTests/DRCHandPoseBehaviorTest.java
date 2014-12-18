@@ -39,8 +39,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    private static final boolean KEEP_SCS_UP = false;
    private static final boolean DEBUG = false;
 
-   private final double POSITION_THRESHOLD = 0.001;
-   private final double ORIENTATION_THRESHOLD = 0.005;
+   private final double POSITION_THRESHOLD = 0.007;
+   private final double ORIENTATION_THRESHOLD = 0.007;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
@@ -288,11 +288,16 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double timeToPause = 2.0;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToPause);
 
+      handPoseBehavior.doControl();
+      assertTrue(handPoseBehavior.isDone());
+      
       fullRobotModel.updateFrames();
       FramePose handPoseAtPauseEnd = new FramePose();
       handPoseAtPauseEnd.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
       handPoseAtPauseEnd.changeFrame(ReferenceFrame.getWorldFrame());
 
+      
+      
       if (DEBUG)
          System.out.println("testSimpleHandPoseMove: checking start and end of pause");
 
@@ -382,6 +387,127 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   
+   @Test
+   public void testHandPoseMoveStop() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
+
+      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalObjectConsumer());
+
+      fullRobotModel.updateFrames();
+
+      // ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSideToTest);
+
+      FramePose handPoseStart = new FramePose();
+      handPoseStart.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+
+      handPoseStart.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FramePose handPoseTarget = new FramePose(handPoseStart);
+      handPoseTarget.setZ(handPoseTarget.getZ() + 0.3);
+      handPoseTarget.setOrientation(new double[] {0.0, 0.0, 0.6});
+
+      RigidBodyTransform pose = new RigidBodyTransform();    // handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      handPoseTarget.getPose(pose);
+
+      double swingTrajectoryTime = 4.0;
+
+      handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
+
+      final double simulationRunTime = swingTrajectoryTime - 2.0;
+
+      Thread behaviorThreadFirst = new Thread()
+      {
+         public void run()
+         {
+            {
+               double startTime = Double.NaN;
+               boolean simStillRunning = true;
+               boolean initalized = false;
+
+               while (simStillRunning)
+               {
+                  if (!initalized)
+                  {
+                     startTime = yoTime.getDoubleValue();
+                     initalized = true;
+                  }
+
+                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
+                  simStillRunning = timeSpentSimulating < simulationRunTime;
+
+                  handPoseBehavior.doControl();
+               }
+            }
+         }
+      };
+
+      behaviorThreadFirst.start();
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+
+      handPoseBehavior.stop();
+      
+      fullRobotModel.updateFrames();
+      FramePose handPoseEnd = new FramePose();
+      handPoseEnd.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+      handPoseEnd.changeFrame(ReferenceFrame.getWorldFrame());
+
+      final double simulationRunTime2 = 2.0;
+      
+      Thread behaviorThreadSecond = new Thread()
+      {
+         public void run()
+         {
+            {
+               double startTime = Double.NaN;
+               boolean simStillRunning = true;
+               boolean initalized = false;
+
+               while (simStillRunning)
+               {
+                  if (!initalized)
+                  {
+                     startTime = yoTime.getDoubleValue();
+                     initalized = true;
+                  }
+
+                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
+                  simStillRunning = timeSpentSimulating < simulationRunTime2;
+
+                  handPoseBehavior.doControl();
+               }
+            }
+         }
+      };
+
+      behaviorThreadSecond.start();
+      
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime2);
+      
+      handPoseBehavior.doControl();
+      HandPoseStatus.Status status = handPoseBehavior.getStatus();
+      assertTrue(status.equals(HandPoseStatus.Status.COMPLETED));
+      
+      fullRobotModel.updateFrames();
+      FramePose handPoseAfterResting = new FramePose();
+      handPoseAfterResting.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+      handPoseAfterResting.changeFrame(ReferenceFrame.getWorldFrame());
+
+      assertPosesAreWithinThresholds(handPoseEnd, handPoseAfterResting);
+
+      assertTrue(success);
+      assertTrue(handPoseBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
    
    private void setReturnValue(boolean value)
    {
