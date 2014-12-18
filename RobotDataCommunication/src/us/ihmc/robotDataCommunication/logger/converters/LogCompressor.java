@@ -42,7 +42,7 @@ public class LogCompressor
          File compressedData = new File(directory, properties.getVariableDataFile());
          File indexData = new File(directory, properties.getVariablesIndexFile());
          
-         ByteBuffer indexBuffer = ByteBuffer.allocate(8);
+         ByteBuffer indexBuffer = ByteBuffer.allocate(16);
          ByteBuffer compressed = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
          ByteBuffer uncompressed = ByteBuffer.allocate(bufferSize);
          FileChannel logChannel = new FileInputStream(logdata).getChannel();
@@ -71,6 +71,7 @@ public class LogCompressor
             SnappyUtils.compress(uncompressed, compressed);
             compressed.flip();
 
+            indexBuffer.putLong(uncompressed.getLong(0));
             indexBuffer.putLong(compressedChannel.position());
             indexBuffer.flip();
             indexChannel.write(indexBuffer);

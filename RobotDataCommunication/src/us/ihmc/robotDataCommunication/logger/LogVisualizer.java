@@ -20,6 +20,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
+import us.ihmc.robotDataCommunication.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
@@ -51,7 +52,7 @@ public class LogVisualizer
 
       if (logFile == null)
       {
-         logFile = FileSelectionDialog.loadDirectoryWithFileNamed("robotData.log");
+         logFile = FileSelectionDialog.loadDirectoryWithFileNamed(YoVariableLoggerListener.propertyFile);
       }
 
       if (logFile != null)
@@ -71,11 +72,14 @@ public class LogVisualizer
    private void readLogFile(File selectedFile, boolean showOverheadView) throws IOException
    {
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(selectedFile, YoVariableLoggerListener.propertyFile));
+      LogFormatUpdater.updateLogs(selectedFile, logProperties);
+
       File handshake = new File(selectedFile, logProperties.getHandshakeFile());
       if (!handshake.exists())
       {
          throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
       }
+      
 
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
       byte[] handshakeData = new byte[(int) handshake.length()];
@@ -143,7 +147,15 @@ public class LogVisualizer
          e.printStackTrace();
       }
 
-      YoVariableLogCropper yoVariableLogCropper = new YoVariableLogCropper(players, selectedFile, logProperties);
+      YoVariableLogCropper yoVariableLogCropper;
+      if(logProperties.getCompressed())
+      {
+         yoVariableLogCropper = new YoVariableLogCropper(players, selectedFile, logProperties);         
+      }
+      else
+      {
+         yoVariableLogCropper = null;
+      }
 
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, robot, yoVariableLogCropper, scs);
