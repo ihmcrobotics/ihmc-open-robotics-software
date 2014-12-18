@@ -116,6 +116,7 @@ public class ValkyriePosePlaybackDemoTest
       BambooTools.reportTestFinishedMessage();
    }
 
+   // FlakyUnitTest: Hung on https://bamboo.ihmc.us/browse/RC-ALLGRADLE-VAL-952
    @Test
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
    {
