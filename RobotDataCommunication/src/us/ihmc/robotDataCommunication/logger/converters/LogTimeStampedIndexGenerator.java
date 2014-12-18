@@ -91,7 +91,6 @@ public class LogTimeStampedIndexGenerator
       
       logProperties.setTimestampedIndex(true);
       logProperties.setVariablesIndexFile(newIndexFile);
-      System.out.println("Done converting");
       
       FileWriter writer = new FileWriter(new File(logDirectory, YoVariableLoggerListener.propertyFile));
       logProperties.store(writer, "Timestamps added to index by LogTimestampedIndexGenerator");
