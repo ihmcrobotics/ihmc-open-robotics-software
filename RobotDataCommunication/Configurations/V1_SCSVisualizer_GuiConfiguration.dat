@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.V1.t</Variables>
+		<Variables>root.remotemain.IHMCHumanoidBehaviorManager.BehaviorDisptacher.ScriptForDiagnosticBehavior.desiredArmPose</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,20 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>walk</Entry Boxes>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes>requestedBehavior,desiredArmPose</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -30,9 +43,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>12.96286958752668</Camera X>
- <Camera Y>-5.315661911839554</Camera Y>
- <Camera Z>1.5683917505563387</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
