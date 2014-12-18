@@ -21,17 +21,25 @@ public class YoVariableLogger
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
-      File directory = new File(options.getLogDirectory(), timestamp + "_" + request.getName());
-      if (directory.exists())
+      
+      File tempDirectory = new File(options.getLogDirectory(), "." + timestamp + "_" + request.getName());
+      
+      File finalDirectory = new File(options.getLogDirectory(), timestamp + "_" + request.getName());
+      if (finalDirectory.exists())
       {
-         throw new IOException("Directory " + directory.getAbsolutePath() + " already exists");
+         throw new IOException("Directory " + finalDirectory.getAbsolutePath() + " already exists");
       }
-      if (!directory.mkdir())
+      
+      if (tempDirectory.exists())
       {
-         throw new IOException("Cannot create directory " + directory.getAbsolutePath());
+         throw new IOException("Temp directory " + finalDirectory.getAbsolutePath() + " already exists");
+      }
+      if (!tempDirectory.mkdir())
+      {
+         throw new IOException("Cannot create directory " + finalDirectory.getAbsolutePath());
       }
 
-      YoVariableLoggerListener logger = new YoVariableLoggerListener(directory, timestamp, request, options);
+      YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
       boolean showOverheadView = false;
       client = new YoVariableClient(request, logger, "", showOverheadView);
       try
@@ -40,7 +48,7 @@ public class YoVariableLogger
       }
       catch (SocketTimeoutException e)
       {
-         directory.delete();
+         finalDirectory.delete();
          throw e;
       }
    }
