@@ -1498,7 +1498,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // TODO: use current omega0 instead of previous
       comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
-      comXYAcceleration.setIncludingFrame(desiredICPVelocity);
+      if (desiredICPVelocity.containsNaN())
+      {
+         System.err.println("Desired ICP velocity contains NaN");
+         comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
+      }
+      else
+      {
+         comXYAcceleration.setIncludingFrame(desiredICPVelocity);
+      }
       comXYAcceleration.sub(comXYVelocity);
       comXYAcceleration.scale(icpAndMomentumBasedController.getOmega0()); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
