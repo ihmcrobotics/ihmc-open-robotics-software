@@ -430,6 +430,10 @@ public class GUIConfigurationSaveAndLoad
    public void loadEntryBoxArrayTabbedPanel(String XMLStyleRepresentation)
    {
       String XMLData = XMLReaderUtility.getMiddleString(0, XMLStyleRepresentation, "<Entry Boxes Tab Pane>", "</Entry Boxes Tab Pane>");
+
+      if(XMLData == null)
+    	  return;
+      
       int index = 0;
       while ((XMLReaderUtility.getEndIndexOfSubString(index, XMLData, "</EntryBoxTab>") <= XMLData.length())
             && (XMLReaderUtility.getEndIndexOfSubString(index, XMLData, "</EntryBoxTab>") > 0))
