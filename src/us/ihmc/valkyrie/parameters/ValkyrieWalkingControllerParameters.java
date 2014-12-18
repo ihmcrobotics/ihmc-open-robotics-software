@@ -347,11 +347,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
 
       double kpXY = runningOnRealRobot ? 160.0 : 100.0; // 120.0
-      double kpZ = runningOnRealRobot ? 160.0 : 100.0; // 120.0
+      double kpZ = runningOnRealRobot ? 120.0 : 100.0; // 120.0
       double zetaXY = runningOnRealRobot ? 0.5 : 0.8; // 0.7
       double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.7
-      double maxAccel = runningOnRealRobot ? 36.0 : 18.0;
-      double maxJerk = runningOnRealRobot ? 540.0 : 270.0;
+      double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
       gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaZ);
@@ -422,9 +422,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
       double kpXY = runningOnRealRobot ? 80.0 : 100.0; // 60.0
-      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // 60.0
-      double zetaXY = runningOnRealRobot ? 1.0 : 0.8; // 0.4
-      double zetaZ = runningOnRealRobot ? 1.0 : 0.8; // 0.4
+      double kpZ = runningOnRealRobot ? 40.0 : 100.0; // 60.0
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.8; // 0.4
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.4
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
@@ -444,11 +444,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
       double kpXY = 150.0; // 100.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
-      double zetaXYZ = runningOnRealRobot ? 0.7 : 0.7;
+      double zetaXYZ = runningOnRealRobot ? 0.5 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0; //160
+      double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; //160
       double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7; 
-      double zetaOrientationZ = runningOnRealRobot ? 0.7 : 0.7;
+      double zetaOrientationZ = runningOnRealRobot ? 0.5 : 0.7;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
