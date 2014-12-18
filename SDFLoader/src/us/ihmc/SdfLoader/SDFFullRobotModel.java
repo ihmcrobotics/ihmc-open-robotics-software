@@ -126,6 +126,23 @@ public class SDFFullRobotModel implements FullRobotModel
          }
       }
    }
+   
+   public void displayJointPositions()
+   {
+      for (Map.Entry<String, OneDoFJoint> entry : oneDoFJoints.entrySet()  )
+      {
+         System.out.println("\n" + entry.getKey());
+         OneDoFJoint joint = entry.getValue();
+         
+         RigidBodyTransform abs_pose = new RigidBodyTransform();
+         ReferenceFrame frame = joint.getFrameAfterJoint() ;
+         Vector3d pos = new Vector3d();
+         frame.update();
+         frame.getTransformToDesiredFrame(abs_pose, this.getSoleFrame(RobotSide.RIGHT));
+         abs_pose.getTranslation(pos);
+         System.out.println( pos );
+      }
+   }
 
    public String getModelName()
    {
