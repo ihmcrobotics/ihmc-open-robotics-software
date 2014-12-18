@@ -66,9 +66,16 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
 
-      jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(globalDataProducer, simulatedRobot);
-
+      if(globalDataProducer != null)
+      {
+         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(globalDataProducer, simulatedRobot);
+      }      
+      else
+      {
+         jointAngleProducer = null;
+      }
       fingerTrajectoryTime.set(0.5);
+      
 
       EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
       EnumMap<RobotiqHandJointNameMinimal, DoubleYoVariable> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
@@ -174,7 +181,10 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    {
       long timestamp = threadDataSynchronizer.getTimestamp();
       handControllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
-      jointAngleProducer.sendHandJointAnglesPacket();
+      if(jointAngleProducer != null)
+      {
+         jointAngleProducer.sendHandJointAnglesPacket();         
+      }
    }
 
    @Override
