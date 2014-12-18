@@ -6,15 +6,13 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.logger.LogVisualizer;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public abstract class DRCLogProcessor
 {
@@ -29,12 +27,8 @@ public abstract class DRCLogProcessor
 
    public DRCLogProcessor() throws IOException
    {
-      String timeVariableName = "estimatorTime";
-
       drcRobotModel = createDRCRobotModel();
-      GeneralizedSDFRobotModel generalizedRobotModel = drcRobotModel.getGeneralizedRobotModel();
-      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
-      logVisualizer = new LogVisualizer(generalizedRobotModel, jointMap);
+      logVisualizer = new LogVisualizer();
 
       scs = logVisualizer.getSimulationConstructionSet();
       plotter = logVisualizer.getPlotter();

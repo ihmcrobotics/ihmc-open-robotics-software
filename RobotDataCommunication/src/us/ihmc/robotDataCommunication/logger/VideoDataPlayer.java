@@ -152,23 +152,25 @@ public class VideoDataPlayer
          
                   
          String line;
-         
-         if((line = reader.readLine()) != null)
+         if(hasTimebase)
          {
-            bmdTimeBaseNum = Long.valueOf(line);
-         }
-         else
-         {
-            throw new RuntimeException("Cannot read numerator");
-         }
-         
-         if((line = reader.readLine()) != null)
-         {
-            bmdTimeBaseDen = Long.valueOf(line);
-         }
-         else
-         {
-            throw new RuntimeException("Cannot read denumerator");
+            if((line = reader.readLine()) != null)
+            {
+               bmdTimeBaseNum = Long.valueOf(line);
+            }
+            else
+            {
+               throw new RuntimeException("Cannot read numerator");
+            }
+            
+            if((line = reader.readLine()) != null)
+            {
+               bmdTimeBaseDen = Long.valueOf(line);
+            }
+            else
+            {
+               throw new RuntimeException("Cannot read denumerator");
+            }
          }
 
          TLongArrayList robotTimestamps = new TLongArrayList();

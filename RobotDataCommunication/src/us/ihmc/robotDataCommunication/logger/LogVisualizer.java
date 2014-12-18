@@ -14,7 +14,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
@@ -28,28 +27,18 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class LogVisualizer
 {
-   private final SDFJointNameMap jointNameMap;
-   private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
    protected final SimulationConstructionSet scs;
    private YoVariableLogPlaybackRobot robot;
    private SimulationOverheadPlotter plotter;
 
    public LogVisualizer() throws IOException
    {
-      this(null, null);
-   }
-   
-   public LogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap) throws IOException
-   {
-      this(generalizedSDFRobotModel, jointNameMap, 32768, false, null);
+      this(32768, false, null);
    }
 
-   public LogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, int bufferSize, boolean showOverheadView,
+   public LogVisualizer(int bufferSize, boolean showOverheadView,
          File logFile) throws IOException
    {
-      this.generalizedSDFRobotModel = generalizedSDFRobotModel;
-      this.jointNameMap = jointNameMap;
-
       if (logFile == null)
       {
          logFile = FileSelectionDialog.loadDirectoryWithFileNamed(YoVariableLoggerListener.propertyFile);
@@ -114,11 +103,11 @@ public class LogVisualizer
       }
       else
       {
-         generalizedSDFRobotModel = this.generalizedSDFRobotModel;
+         throw new RuntimeException("No model available for log");
       }
 
 
-      robot = new YoVariableLogPlaybackRobot(selectedFile, generalizedSDFRobotModel, jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,scs);
+      robot = new YoVariableLogPlaybackRobot(selectedFile, generalizedSDFRobotModel, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,scs);
       scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();

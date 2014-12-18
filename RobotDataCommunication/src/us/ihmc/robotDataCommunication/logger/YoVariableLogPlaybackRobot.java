@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotDataCommunication.LogIndex;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
@@ -55,11 +54,11 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
    private int readEveryNTicks = 1;
 
-   public YoVariableLogPlaybackRobot(File selectedFile, GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap,
+   public YoVariableLogPlaybackRobot(File selectedFile, GeneralizedSDFRobotModel generalizedSDFRobotModel,
          List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
          throws IOException
    {
-      super(generalizedSDFRobotModel, sdfJointNameMap);
+      super(generalizedSDFRobotModel, null);
       
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
@@ -109,8 +108,17 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
       try
       {
-         initialTimestamp = logIndex.getInitialTimestamp();
-         positionChannel(0);
+      	if(this.compressed)
+      	{
+         	initialTimestamp = logIndex.getInitialTimestamp();
+         	positionChannel(0);
+         }
+         else
+         {
+         	readLogLine();
+         	initialTimestamp = logLine.getLong(0);
+         	positionChannel(0);
+         }
       }
       catch (IOException e)
       {
@@ -234,7 +242,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       }
       else
       {
-         logChannel.position(position * logLine.capacity());
+         logChannel.position(((long)position) * ((long)logLine.capacity()));
       }
    }
    
