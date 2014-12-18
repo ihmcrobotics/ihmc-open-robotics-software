@@ -19,6 +19,7 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend.TextureDefinition;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
+import us.ihmc.utilities.ClassLoaderUtils;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
@@ -39,7 +40,7 @@ public class JMEAppearanceMaterial
    private static final String PHONG_ILLUMINATED_JME_MAT = "Common/MatDefs/Light/Lighting.j3md";
    private static AWTLoader awtLoader = new AWTLoader();
 
-   private static boolean GAZEBO_MATERIAL_CACHE_READY = false;
+   private static String GAZEBO_MATERIAL_CACHE = null;
 
    private static boolean isMaterialFile(File file)
    {
@@ -69,13 +70,11 @@ public class JMEAppearanceMaterial
 
       HeightMap heightMap = appearanceDefinition.getHeightMap();
       BoundingBox3d boundingBox = heightMap.getBoundingBox();
-      
+
       double xMin = boundingBox.getXMin();
       double xStep = (boundingBox.getXMax() - boundingBox.getXMin()) / ((double) alphaMapSize);
       double yMin = boundingBox.getYMin();
       double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / ((double) alphaMapSize);
-      
-      
 
       BufferedImage alphaMap = new BufferedImage(alphaMapSize, alphaMapSize, BufferedImage.TYPE_INT_ARGB);
       for (int x = 0; x < alphaMapSize; x++)
@@ -148,8 +147,8 @@ public class JMEAppearanceMaterial
          material.setFloat("DiffuseMap_" + i + "_scale", (float) scale);
 
       }
-      
-//      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+
+      //      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 
       return material;
    }
@@ -157,32 +156,35 @@ public class JMEAppearanceMaterial
    private static void updateOgreMaterials(File file, MaterialList materials, JMEAssetLocator contentMan)
    {
       String matPath = null;
-      try {
-          matPath = file.getCanonicalPath();
-      } catch (IOException e) {
-          e.printStackTrace();
-      }
-      if(isMaterialFile(file))
+      try
       {
-         if(OperatingSystemTools.isWindows())
+         matPath = file.getCanonicalPath();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      if (isMaterialFile(file))
+      {
+         if (OperatingSystemTools.isWindows())
          {
-             matPath = stripDiskRootFromPath(matPath);
+            matPath = stripDiskRootFromPath(matPath);
          }
          materials.putAll(contentMan.loadOgreAsset(matPath));
       }
       else
       {
-         for(File subFile : file.listFiles())
+         for (File subFile : file.listFiles())
          {
-            if(isMaterialFile(subFile))
+            if (isMaterialFile(subFile))
             {
-               if(OperatingSystemTools.isWindows())
+               if (OperatingSystemTools.isWindows())
                {
-                   matPath = stripDiskRootFromPath(matPath);
+                  matPath = stripDiskRootFromPath(matPath);
                }
                materials.putAll(contentMan.loadOgreAsset(subFile.getPath()));
             }
-            else if(subFile.isDirectory())
+            else if (subFile.isDirectory())
             {
                updateOgreMaterials(subFile, materials, contentMan);
             }
@@ -198,7 +200,7 @@ public class JMEAppearanceMaterial
 
       for (String path : appearanceDefinition.getUrls())
       {
-         if(path.contains("axl"))
+         if (path.contains("axl"))
          {
             //TODO Fix this, I'm just too tired to do it tonight.
             updateOgreMaterials(new File(JMEAppearanceMaterial.class.getClassLoader().getResource(path).getFile()), materials, contentMan);
@@ -216,17 +218,17 @@ public class JMEAppearanceMaterial
          System.err.println("Cannot load material " + appearanceDefinition.getName());
          mat = createMaterial(contentMan, YoAppearance.White());
       }
-//      mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-      
+      //      mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+
       return mat;
    }
 
    private static String stripDiskRootFromPath(String path)
    {
       File[] roots = File.listRoots();
-      for(File root : roots)
+      for (File root : roots)
       {
-         if(path.startsWith(root.getAbsolutePath()))
+         if (path.startsWith(root.getAbsolutePath()))
          {
             return path.replace(root.getAbsolutePath(), "");
          }
@@ -234,64 +236,36 @@ public class JMEAppearanceMaterial
       return path;
    }
 
-   private static String updateGazeboMaterialCache()
+   private synchronized static String updateGazeboMaterialCache()
    {
-      String ret = "";
 
-      File cacheDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "SCSCache" + File.separator + "ogre_materials");
-      if (!cacheDir.exists())
+      if (GAZEBO_MATERIAL_CACHE != null)
       {
-         cacheDir.mkdir();
+         return GAZEBO_MATERIAL_CACHE;
       }
-
-      try
+      else
       {
-         InputStream resourceAsStream = JMEAppearanceMaterial.class.getClassLoader().getResourceAsStream("models/gazebo/media.zip");
-         String hash = DigestUtils.md5Hex(resourceAsStream);
 
-         File outDir = new File(cacheDir.getPath() + File.separator + hash);
-         if(!outDir.exists())
+         File cacheDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "SCSCache" + File.separator + "ogre_materials");
+         if (!cacheDir.exists())
          {
-            outDir.mkdir();
-            System.out.println("Copying and decompressing Gazebo Ogre shaders to cache...");
-         }
-         else
-         {
-            GAZEBO_MATERIAL_CACHE_READY = true;
-            ret = outDir.getPath();
+            cacheDir.mkdir();
          }
 
-         if(!GAZEBO_MATERIAL_CACHE_READY)
+         try
          {
-            File tmpOutFile = new File(outDir.getPath() + File.separator + "media.zip");
-            FileOutputStream fileOutputStream = new FileOutputStream(tmpOutFile);
-            int read = 0;
-            byte[] buffer = new byte[1024];
-
-            resourceAsStream = JMEAppearanceMaterial.class.getClassLoader().getResourceAsStream("models/gazebo/media.zip");
-            while((read = resourceAsStream.read(buffer)) != -1)
-            {
-               fileOutputStream.write(buffer, 0, read);
-            }
-
-            resourceAsStream.close();
-            fileOutputStream.close();
-
-            ZipFile zipFile = new ZipFile(outDir.getPath() + File.separator + "media.zip");
-            zipFile.extractAll(cacheDir.getPath() + File.separator + hash);
-
-            GAZEBO_MATERIAL_CACHE_READY = true;
-            System.out.println("Gazebo Ogre shaders successfully cached!");
-            ret = outDir.getPath();
+            ClassLoaderUtils.copyToFileSystem(cacheDir.toPath(), "models/gazebo/media/materials");
+            GAZEBO_MATERIAL_CACHE = cacheDir.getAbsolutePath() + File.separator + "models" + File.separator + "gazebo" + File.separator + "media" + File.separator + "materials";
+            System.out.println(GAZEBO_MATERIAL_CACHE);
          }
-      } catch (IOException e)
-      {
-         e.printStackTrace();
-      } catch (ZipException e)
-      {
-         e.printStackTrace();
+         catch (IOException e)
+         {
+            e.printStackTrace();
+            GAZEBO_MATERIAL_CACHE = "";
+         }
+         return GAZEBO_MATERIAL_CACHE;
+
       }
-      return ret + File.separator + "media" + File.separator + "materials";
    }
 
    public static Material createMaterialFromBufferedImage(JMEAssetLocator contentMan, BufferedImage bufferedImage)
@@ -305,8 +279,8 @@ public class JMEAppearanceMaterial
          material.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
          material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
       }
-      
-//      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+
+      //      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
       return material;
    }
 
@@ -315,7 +289,7 @@ public class JMEAppearanceMaterial
       Material material = new Material(contentMan.getAssetManager(), PHONG_ILLUMINATED_JME_MAT);
       Texture texture = contentMan.loadTexture(path);
       material.setTexture("DiffuseMap", texture);
-//      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+      //      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
       return material;
    }
 
@@ -330,8 +304,8 @@ public class JMEAppearanceMaterial
       {
          material = createMaterialFromBufferedImage(contentMan, appearanceDefinition.getBufferedImage());
       }
-      
-//      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+
+      //      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
       return material;
 
    }
