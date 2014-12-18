@@ -37,6 +37,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
    private final File directory;
 
+   private final Object seekLock = new Object();
+   private boolean isSeeking = false;
+
    public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot,
          YoVariableLogCropper yoVariableLogCropper, SimulationConstructionSet scs)
    {
@@ -64,25 +67,29 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
    private void seek(int newValue)
    {
-      if (!scs.isSimulating())
+      synchronized (seekLock)
       {
-         robot.seek(newValue);
-
-         try
+         if (!isSeeking && !scs.isSimulating())
          {
-            scs.simulateOneRecordStepNow();
-            scs.setInPoint();
-         }
-         catch (UnreasonableAccelerationException e)
-         {
-            e.printStackTrace();
+            robot.seek(newValue);
+
+            try
+            {
+               scs.simulateOneRecordStepNow();
+               scs.setInPoint();
+            }
+            catch (UnreasonableAccelerationException e)
+            {
+               e.printStackTrace();
+            }
+
+            if (multiPlayer != null)
+               multiPlayer.indexChanged(0, 0);
+
          }
 
-         if (multiPlayer != null)
-            multiPlayer.indexChanged(0, 0);
       }
    }
-
 
    private void exportVideo(int start, int end)
    {
@@ -90,7 +97,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          return;
       }
-      
+
       if (multiPlayer != null)
       {
 
@@ -222,6 +229,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
                }
             });
             seek(slider.getValue());
+
          }
       });
 
@@ -230,9 +238,11 @@ public class YoVariableLogVisualizerGUI extends JPanel
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            if (scs.isSimulating())
+            synchronized (seekLock)
             {
+               isSeeking = true;
                slider.setValue((int) ((IntegerYoVariable) v).getIntegerValue());
+               isSeeking = false;
             }
          }
       });
@@ -310,7 +320,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       subPanel.setLayout(new BoxLayout(subPanel, BoxLayout.X_AXIS));
       subPanel.add(new JLabel("Show camera: "));
       subPanel.add(videoFiles);
-      
+
       subPanel.add(startMark);
       subPanel.add(endMark);
       subPanel.add(clearMark);
