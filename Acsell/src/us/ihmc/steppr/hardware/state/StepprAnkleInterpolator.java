@@ -107,8 +107,8 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       qdAnkleY = (Jit[1] * motorVelocityRight + Jit[3] * motorVelocityLeft) / N;
 
       twobytwoInverse(Jt, Jit);
-      tauAnkleX = (Jit[0] * tauMeasureAnkleRight + Jit[1] * tauMeasureAnkleLeft) * N; //this is desired torque at motor 1
-      tauAnkleY = (Jit[2] * tauMeasureAnkleRight + Jit[3] * tauMeasureAnkleLeft) * N; //this is desired torque at motor 2
+      tauAnkleX = (Jt[0] * tauMeasureAnkleRight + Jt[1] * tauMeasureAnkleLeft) * N; //this is desired torque at motor 1
+      tauAnkleY = (Jt[2] * tauMeasureAnkleRight + Jt[3] * tauMeasureAnkleLeft) * N; //this is desired torque at motor 2
 
    }
 
@@ -136,6 +136,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       return qdAnkleY;
    }
 
+   // motorTorque = Jit * ankleTorques
    @Override
    public void calculateDesiredTau(double motorAngleRight, double motorAngleLeft, double tauDesiredAnkleX, double tauDesiredAnkleY)
    {
