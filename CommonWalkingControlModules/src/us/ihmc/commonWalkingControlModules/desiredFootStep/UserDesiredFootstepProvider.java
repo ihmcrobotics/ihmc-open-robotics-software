@@ -66,6 +66,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    {
       if (userStepsTakeEm.getBooleanValue())
       {
+         footstepList.clear();
          userStepsTakeEm.set(false);
 
          RobotSide stepSide = userStepFirstSide.getEnumValue();
