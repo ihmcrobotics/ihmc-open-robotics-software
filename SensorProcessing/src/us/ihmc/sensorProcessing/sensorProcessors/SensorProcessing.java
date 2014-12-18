@@ -53,6 +53,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointTaus = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedOrientations = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedAngularVelocities = new LinkedHashMap<>();
@@ -99,6 +100,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          DoubleYoVariable rawJointTau = new DoubleYoVariable("raw_tau_" + jointName, registry);
          inputJointTaus.put(oneDoFJoint, rawJointTau);
          outputJointTaus.put(oneDoFJoint, rawJointTau);
+         processedJointTaus.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
       }
 
       SensorNoiseParameters sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
@@ -146,6 +148,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          
          updateProcessors(processedJointPositions.get(oneDoFJoint));
          updateProcessors(processedJointVelocities.get(oneDoFJoint));
+         updateProcessors(processedJointTaus.get(oneDoFJoint));
       }
       
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
@@ -454,6 +457,61 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          
          if (!forVizOnly)
             intermediateLinearAccelerations.put(imuDefinition, filteredLinearAcceleration);
+      }
+   }
+
+   /**
+    * Add a low-pass filter stage on the joint torques.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addJointTauAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   {
+      addJointTauAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly);
+   }
+
+   /**
+    * Add a low-pass filter stage on the joint torques for a specific subset of joints.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    */
+   public void addJointTauAlphaFilterOnlyForSpecifiedJoints(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      addJointTauAlphaFilterWithJointsToIgnore(alphaFilter, forVizOnly, invertJointSelection(jointsToBeProcessed));
+   }
+
+   /**
+    * Add a low-pass filter stage on the joint torques for a specific subset of joints.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void addJointTauAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         DoubleYoVariable intermediateJointTaus = outputJointTaus.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointTaus.get(oneDoFJoint);
+         String suffix = "_sp" + processors.size();
+         AlphaFilteredYoVariable filteredJointTaus = new AlphaFilteredYoVariable("filt_tau_" + jointName + suffix, registry, alphaFilter, intermediateJointTaus);
+         processors.add(filteredJointTaus);
+
+         if (!forVizOnly)
+            outputJointTaus.put(oneDoFJoint, filteredJointTaus);
       }
    }
 
