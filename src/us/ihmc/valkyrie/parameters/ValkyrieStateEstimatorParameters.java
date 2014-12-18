@@ -99,6 +99,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       // Raw finite difference on all joint positions
       DoubleYoVariable dummyAlphaFilter = new DoubleYoVariable("dummyAlphaFilter", registry);
       sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlphaFilter, true);
+      
+      DoubleYoVariable tauAlphaFilter = sensorProcessing.createAlphaFilter("tauAlphaFilter", 1.0);
+      sensorProcessing.addJointTauAlphaFilter(tauAlphaFilter, true);
    }
 
    @Override
