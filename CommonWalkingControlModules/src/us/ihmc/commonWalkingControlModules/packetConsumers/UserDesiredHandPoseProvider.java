@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -91,6 +91,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
 
    }
 
+   @Override
    public boolean checkForNewPose(RobotSide robotSide)
    {
       if (userHandPoseSide.getEnumValue() != robotSide)
@@ -99,11 +100,13 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return userHandPoseTakeEm.getBooleanValue();
    }
 
+   @Override
    public HandPosePacket.DataType checkPacketDataType(RobotSide robotSide)
    {
       return userHandPoseDataType.getEnumValue();
    }
 
+   @Override
    public boolean checkForHomePosition(RobotSide robotSide)
    {
       return false; 
@@ -119,6 +122,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
 //      return true;
    }
 
+   @Override
    public FramePose getDesiredHandPose(RobotSide robotSide)
    {
       updateFromNewestPacket(robotSide);
@@ -127,6 +131,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return desiredHandPoses.get(robotSide);
    }
 
+   @Override
    public Map<OneDoFJoint, Double> getFinalDesiredJointAngleMaps(RobotSide robotSide)
    {
       updateFromNewestPacket(robotSide);
@@ -134,11 +139,13 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return finalDesiredJointAngleMaps.get(robotSide);
    }
 
+   @Override
    public ReferenceFrame getDesiredReferenceFrame(RobotSide robotSide)
    {
       return packetReferenceFrames.get(robotSide);
    }
 
+   @Override
    public double getTrajectoryTime()
    {
       return userHandPoseTrajectoryTime.getDoubleValue();
@@ -158,4 +165,15 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       
    }
 
+   @Override
+   public boolean checkForNewPoseList(RobotSide robotSide)
+   {
+      return false;
+   }
+
+   @Override
+   public Map<OneDoFJoint, double[]> getDesiredJointAngleForWaypointTrajectory(RobotSide robotSide)
+   {
+      return null;
+   }
 }
