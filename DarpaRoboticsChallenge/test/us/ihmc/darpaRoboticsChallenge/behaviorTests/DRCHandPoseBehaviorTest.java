@@ -110,7 +110,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
 
 
-   // @Test
+   @Test
    public void testSimpleHandPoseMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

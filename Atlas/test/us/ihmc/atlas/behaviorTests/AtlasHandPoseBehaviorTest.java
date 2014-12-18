@@ -1,12 +1,7 @@
 package us.ihmc.atlas.behaviorTests;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHandPoseBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -17,7 +12,7 @@ public class AtlasHandPoseBehaviorTest extends DRCHandPoseBehaviorTest
    
    public AtlasHandPoseBehaviorTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false); 
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false); 
    }
    
    
