@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import us.ihmc.robotDataCommunication.logger.LogProperties;
+import us.ihmc.robotDataCommunication.logger.converters.ModelAttacher.LogModels;
 
 public class LogFormatUpdater
 {
@@ -11,6 +12,12 @@ public class LogFormatUpdater
    {
       try
       {
+         if(properties.getModelLoaderClass() == null)
+         {
+            LogModels model = ModelAttacher.chooseModel(directory);
+            ModelAttacher.addModel(directory, properties, model);
+         }
+         
          if (properties.getCompressed() && !properties.isTimestampedIndex())
          {
             LogTimeStampedIndexGenerator.convert(directory, properties);

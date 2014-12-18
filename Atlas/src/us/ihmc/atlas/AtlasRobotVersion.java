@@ -46,7 +46,7 @@ public enum AtlasRobotVersion
       {
          case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
          case DRC_NO_HANDS:
-            return "models/GFE/atlas_v4.sdf";
+            return "models/GFE/drc_no_hands.sdf";
          case ATLAS_DUAL_ROBOTIQ:
             return "models/GFE/atlas_v4_robotiq_hands.sdf";
          case GAZEBO_ATLAS_NO_HANDS:
@@ -61,8 +61,7 @@ public enum AtlasRobotVersion
 
       if (resourceDirectories == null)
       {
-         resourceDirectories = new String[] { "models/GFE/", 
-               "models/GFE/gazebo_models/multisense_sl_description/", "models/GFE/gazebo_models/irobot_hand_description/", "models/GFE/gazebo_models/robotiq/" };
+         resourceDirectories = new String[] { "models/GFE/" };
       }
       return resourceDirectories;
    }

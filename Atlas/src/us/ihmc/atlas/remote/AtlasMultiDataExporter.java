@@ -352,7 +352,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
-      robot = new YoVariableLogPlaybackRobot(selectedFile, robotModel.getGeneralizedRobotModel(), robotModel.getJointMap(), parser.getJointStates(),
+      robot = new YoVariableLogPlaybackRobot(selectedFile, robotModel.getGeneralizedRobotModel(), parser.getJointStates(),
             parser.getYoVariablesList(), logProperties, scs);
 
       double dt = parser.getDt();
