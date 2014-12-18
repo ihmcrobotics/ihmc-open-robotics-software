@@ -197,7 +197,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
          }
       });
-      if (multiPlayer != null && multiPlayer.getVideos().length > 0)
+      if (multiPlayer != null && multiPlayer.getVideos().size() > 0)
       {
          videoFiles.setSelectedIndex(1);
       }
