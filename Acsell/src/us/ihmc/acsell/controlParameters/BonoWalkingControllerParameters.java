@@ -110,7 +110,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    private final double minimumHeightAboveGround = 0.595 + 0.03;
    private double nominalHeightAboveGround = 0.675 + 0.03;
    private final double maximumHeightAboveGround = 0.735 + 0.03;
-   private final double additionalOffsetHeightBono = 0.05 + 0.12;
+   private final double additionalOffsetHeightBono = 0.05 + 0.7;
 
    @Override
    public double minimumHeightAboveAnkle()
