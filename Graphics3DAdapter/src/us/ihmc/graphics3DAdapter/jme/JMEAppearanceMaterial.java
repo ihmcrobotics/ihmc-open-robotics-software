@@ -1,5 +1,27 @@
 package us.ihmc.graphics3DAdapter.jme;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.vecmath.Color3f;
+
+import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
+import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend.TextureDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
+import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
+import us.ihmc.utilities.ClassLoaderUtils;
+import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
+
 import com.jme3.material.Material;
 import com.jme3.material.MaterialList;
 import com.jme3.material.RenderState.BlendMode;
@@ -9,29 +31,6 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
-
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-
-import org.apache.commons.codec.digest.DigestUtils;
-
-import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.graphics.appearances.*;
-import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend.TextureDefinition;
-import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.utilities.ClassLoaderUtils;
-import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
-
-import javax.vecmath.Color3f;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 
 public class JMEAppearanceMaterial
 {
@@ -256,7 +255,6 @@ public class JMEAppearanceMaterial
          {
             ClassLoaderUtils.copyToFileSystem(cacheDir.toPath(), "models/gazebo/media/materials");
             GAZEBO_MATERIAL_CACHE = cacheDir.getAbsolutePath() + File.separator + "models" + File.separator + "gazebo" + File.separator + "media" + File.separator + "materials";
-            System.out.println(GAZEBO_MATERIAL_CACHE);
          }
          catch (IOException e)
          {
