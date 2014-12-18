@@ -51,7 +51,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
       this.wholeBodyIKSolver = new WholeBodyIkSolver(robotModel, fullRobotModel, "models/atlas_v4_dual.urdf");
       wholeBodyIKSolver.enableHandRotAndTranslation(RobotSide.LEFT, false);
-      this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel, fullRobotModel);
+      this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel);
       while (true)
       {
          if (ingressEgressModeActivated())
