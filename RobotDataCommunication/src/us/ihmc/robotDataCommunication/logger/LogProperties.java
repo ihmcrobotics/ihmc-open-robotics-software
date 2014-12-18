@@ -195,4 +195,14 @@ public abstract class LogProperties extends Properties
    {
       return getProperty("name");
    }
+   
+   public boolean isTimestampedIndex()
+   {
+      return Boolean.valueOf(getProperty("variables.timestamped"));
+   }
+   
+   public void setTimestampedIndex(boolean timestamped)
+   {
+      setProperty("variables.timestamped", String.valueOf(timestamped));
+   }
 }

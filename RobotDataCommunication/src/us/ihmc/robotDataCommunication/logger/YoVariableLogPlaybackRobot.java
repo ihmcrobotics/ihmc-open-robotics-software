@@ -12,6 +12,7 @@ import java.util.List;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.robotDataCommunication.LogIndex;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
 import us.ihmc.simulationconstructionset.Joint;
@@ -39,8 +40,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
 
    // Compressed data helpers
    private final boolean compressed;
-   private final long[] dataOffsets;
-   private final int[] compressedSizes;
+   private final LogIndex logIndex;
    private final ByteBuffer compressedBuffer;
    private int index = 0;
 
@@ -68,28 +68,28 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
       
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQx());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQy());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQz());
-      
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQdx());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQdy());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQdz());
+      logRegistry.registerVariable(getRootJoint().getQx());
+      logRegistry.registerVariable(getRootJoint().getQy());
+      logRegistry.registerVariable(getRootJoint().getQz());
+
+      logRegistry.registerVariable(getRootJoint().getQdx());
+      logRegistry.registerVariable(getRootJoint().getQdy());
+      logRegistry.registerVariable(getRootJoint().getQdz());
 
 
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQs());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQx());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQy());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getQuaternionQz());
-      
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getAngularVelocityX());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getAngularVelocityY());
-      getRobotsYoVariableRegistry().registerVariable(getRootJoint().getAngularVelocityZ());
+      logRegistry.registerVariable(getRootJoint().getQuaternionQs());
+      logRegistry.registerVariable(getRootJoint().getQuaternionQx());
+      logRegistry.registerVariable(getRootJoint().getQuaternionQy());
+      logRegistry.registerVariable(getRootJoint().getQuaternionQz());
+
+      logRegistry.registerVariable(getRootJoint().getAngularVelocityX());
+      logRegistry.registerVariable(getRootJoint().getAngularVelocityY());
+      logRegistry.registerVariable(getRootJoint().getAngularVelocityZ());
       
       for(OneDegreeOfFreedomJoint joint : getOneDoFJoints())
       {
-         getRobotsYoVariableRegistry().registerVariable(joint.getQ());
-         getRobotsYoVariableRegistry().registerVariable(joint.getQD());
+         logRegistry.registerVariable(joint.getQ());
+         logRegistry.registerVariable(joint.getQD());
       }
       
       this.jointStates = jointStates;
@@ -115,29 +115,14 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
          {
             throw new RuntimeException("Cannot find " + logProperties.getVariablesIndexFile());
          }
-         @SuppressWarnings("resource")
-         FileChannel indexChannel = new FileInputStream(indexData).getChannel();
-         this.dataOffsets = new long[(int) (indexData.length() / 8)];
-         ByteBuffer dataOffsetWrap = ByteBuffer.allocateDirect(dataOffsets.length * 8);
-         indexChannel.read(dataOffsetWrap);
-         dataOffsetWrap.flip();
-         dataOffsetWrap.asLongBuffer().get(dataOffsets);
-         indexChannel.close();
-
-         compressedSizes = new int[dataOffsets.length];
-         for (int i = 0; i < dataOffsets.length - 1; i++)
-         {
-            compressedSizes[i] = (int) (dataOffsets[i + 1] - dataOffsets[i]);
-         }
-         compressedSizes[dataOffsets.length - 1] = (int) (logChannel.size() - dataOffsets[dataOffsets.length - 1]);
+         logIndex = new LogIndex(indexData, logChannel.size());
          compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
-         numberOfEntries = dataOffsets.length;
+         numberOfEntries = logIndex.getNumberOfEntries();
       }
       else
       {
          numberOfEntries = (int) (logChannel.size() / bufferSize) - 1;
-         dataOffsets = null;
-         compressedSizes = null;
+         logIndex = null;
          compressedBuffer = null;
       }
 
@@ -146,12 +131,11 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       logLine = ByteBuffer.allocate(bufferSize);
       logLongArray = logLine.asLongBuffer();
 
-      currentRecordTick = new IntegerYoVariable("currentRecordTick", getRobotsYoVariableRegistry());
+      currentRecordTick = new IntegerYoVariable("currentRecordTick", logRegistry);
 
       try
       {
-         readLogLine();
-         initialTimestamp = logLine.getLong(0);
+         initialTimestamp = logIndex.getInitialTimestamp();
          positionChannel(0);
       }
       catch (IOException e)
@@ -162,6 +146,8 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       scs.setRobot(this);
       scs.attachSimulationRewoundListener(this);
    }
+
+
 
    public long getInitialTimestamp()
    {
@@ -267,15 +253,25 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
       if (compressed)
       {
          index = position;
-         if(index < dataOffsets.length)
+         if(index < logIndex.dataOffsets.length)
          {
-            logChannel.position(dataOffsets[position]);            
+            logChannel.position(logIndex.dataOffsets[position]);            
          }
       }
       else
       {
          logChannel.position(position * logLine.capacity());
       }
+   }
+   
+   public long getTimestamp(int position)
+   {
+      if(!compressed)
+      {
+         throw new RuntimeException("Cannot get timestamp for non-compressed logs");
+      }
+      
+      return logIndex.timestamps[position];
    }
 
    private boolean readLogLine() throws IOException
@@ -285,15 +281,17 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
 
       if (compressed)
       {
-         if(index >= compressedSizes.length)
+         if(index >= logIndex.getNumberOfEntries())
          {
             return false;
          }
-         int size = compressedSizes[index];
+         int size = logIndex.compressedSizes[index];
          compressedBuffer.clear();
          compressedBuffer.limit(size);
 
-         int read = logChannel.read(compressedBuffer);if(read != size)
+         int read = logChannel.read(compressedBuffer);
+         
+         if(read != size)
          {
             throw new RuntimeException("Expected read of " + size + ", got " + read + ". TODO: Implement loop for reading the full log line.");
          }

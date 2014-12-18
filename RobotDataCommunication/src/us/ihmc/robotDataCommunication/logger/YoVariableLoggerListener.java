@@ -42,7 +42,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private FileChannel dataChannel;
    private FileChannel indexChannel;
 
-   private final ByteBuffer indexBuffer = ByteBuffer.allocate(8);
+   private final ByteBuffer indexBuffer = ByteBuffer.allocate(16);
    private ByteBuffer compressedBuffer;
    
    private YoVariableClient yoVariableClient;
@@ -64,6 +64,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       logProperties.setHandshakeFile(handshakeFilename);
       logProperties.setVariableDataFile(dataFilename);
       logProperties.setCompressed(true);
+      logProperties.setTimestampedIndex(true);
       logProperties.setVariablesIndexFile(indexFilename);
       
       logProperties.setLogName(request.getName());
@@ -155,6 +156,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                
                
                indexBuffer.clear();
+               indexBuffer.putLong(timestamp);
                indexBuffer.putLong(dataChannel.position());
                indexBuffer.flip();
                
