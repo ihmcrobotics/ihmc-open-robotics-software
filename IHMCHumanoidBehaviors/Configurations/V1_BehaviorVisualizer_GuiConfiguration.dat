@@ -1,5 +1,17 @@
 <GraphGroup>
 	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.behaviormain.IHMCHumanoidBehaviorManager.BehaviorDisptacher.DiagnosticBehavior.activeSideForFootControl</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 <EntryBoxTab>
@@ -16,33 +28,9 @@ Tab
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
-Tab
-</Title>
-<Entry Boxes></Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-Tab
-</Title>
-<Entry Boxes></Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-Tab
-</Title>
-<Entry Boxes></Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-Tab
-</Title>
-<Entry Boxes></Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
 Diagnostic
 </Title>
-<Entry Boxes>requestedBehavior,requestedDiagnostic,requestedSymmetricArmPose,requestedSingleArmPose,requestedScriptBehaviorState,activeSideForFootControl,activeSideForHandControl,diagnosticBehaviorTrajectoryTime,diagnosticBehaviorSleepTimeBetweenPoses</Entry Boxes>
+<Entry Boxes>requestedBehavior,requestedDiagnostic,diagnosticBehaviorTrajectoryTime,diagnosticBehaviorSleepTimeBetweenPoses,activeSideForFootControl,diagnosticBehaviorflyingTrajectoryTime</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -61,9 +49,9 @@ Diagnostic
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>8.822336700365604</Camera X>
- <Camera Y>-0.41812816323504814</Camera Y>
- <Camera Z>1.5233450484563669</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -87,8 +75,8 @@ Diagnostic
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.015198451260228575</Fix X>
-<Fix Y>7.203194261667008E-4</Fix Y>
-<Fix Z>0.7814530251457693</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>
