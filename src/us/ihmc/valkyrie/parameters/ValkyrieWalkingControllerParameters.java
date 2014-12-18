@@ -442,7 +442,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-      double kpXY = 150.0; // 100.0
+      double kpXY = 100.0; // 150.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
       double zetaXYZ = runningOnRealRobot ? 0.5 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
