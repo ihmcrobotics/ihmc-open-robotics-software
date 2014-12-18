@@ -125,9 +125,9 @@ public class StepprOutputWriter implements DRCOutputWriter
       switch (joint)
       {
       case LEFT_HIP_X:
-         return 550 * Math.max(-0.05 - q, 0);
+         return 400 * Math.max(-0.05 - q, 0);
       case RIGHT_HIP_X:
-         return -550 * Math.max(q - 0.05, 0);
+         return -400 * Math.max(q - 0.05, 0);
       default:
          return 0;
       }

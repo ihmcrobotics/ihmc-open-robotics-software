@@ -566,13 +566,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getFootWidth()
    {
-      return BonoPhysicalProperties.footWidth - 0.022;
+      return BonoPhysicalProperties.footWidth;
    }
 
    @Override
    public double getToeWidth()
    {
-      return BonoPhysicalProperties.footWidth;
+      return BonoPhysicalProperties.toeWidth;
    }
 
    @Override
