@@ -38,6 +38,7 @@ import us.ihmc.yoUtilities.math.trajectories.FinalApproachPoseTrajectoryGenerato
 import us.ihmc.yoUtilities.math.trajectories.InitialClearancePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.LeadInOutPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OneDoFJointWayPointTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
@@ -58,6 +59,7 @@ public class HandControlModule
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
+   private final Map<OneDoFJoint, OneDoFJointWayPointTrajectoryGenerator> waypointsPolynomialTrajectoryGenerators;
 
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
@@ -143,6 +145,14 @@ public class HandControlModule
          quinticPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
       }
 
+      waypointsPolynomialTrajectoryGenerators = new LinkedHashMap<>();
+
+      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      {
+         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, 30, registry);
+         waypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
+      }
+
       DoubleYoVariable simulationTime = momentumBasedController.getYoTime();
       stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, simulationTime, registry);
 
@@ -208,7 +218,6 @@ public class HandControlModule
       parentRegistry.addChild(registry);
    }
 
-   @SuppressWarnings("unchecked")
    private void setupStateMachine()
    {
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
@@ -411,6 +420,29 @@ public class HandControlModule
       
       if (handPoseStatusProducer != null)
          handPoseStatusProducer.sendStartedStatus(robotSide);
+   }
+
+   public void moveJointspaceWithWaypoints(Map<OneDoFJoint, double[]> desiredJointPositions, double time)
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         if (!desiredJointPositions.containsKey(oneDoFJoints[i]))
+            throw new RuntimeException("not all joint positions specified");
+      }
+
+      trajectoryTimeProvider.set(time);
+
+      for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
+      {
+         waypointsPolynomialTrajectoryGenerators.get(oneDoFJoint).setDesiredPositions(desiredJointPositions.get(oneDoFJoint));
+      }
+
+      jointSpaceHandControlState.setTrajectories(waypointsPolynomialTrajectoryGenerators);
+      requestedState.set(jointSpaceHandControlState.getStateEnum());
+      stateMachine.checkTransitionConditions();
+      
+//      if (handPoseStatusProducer != null)
+//         handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
    public boolean isLoadBearing()

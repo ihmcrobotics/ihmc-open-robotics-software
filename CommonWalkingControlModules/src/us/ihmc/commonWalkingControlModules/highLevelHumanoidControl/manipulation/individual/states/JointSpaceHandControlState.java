@@ -21,13 +21,13 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OneDoFJointTrajectoryGenerator;
 
 
 public class JointSpaceHandControlState extends AbstractJointSpaceHandControlState
 {
    private final OneDoFJoint[] oneDoFJoints;
-   private final LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectories;
+   private final LinkedHashMap<OneDoFJoint, OneDoFJointTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
 
    private final ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
@@ -55,7 +55,7 @@ public class JointSpaceHandControlState extends AbstractJointSpaceHandControlSta
 
       maxAcceleration = gains.getYoMaximumAcceleration();
 
-      trajectories = new LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
+      trajectories = new LinkedHashMap<OneDoFJoint, OneDoFJointTrajectoryGenerator>();
       pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
       rateLimitedAccelerations = new ObjectObjectMap<OneDoFJoint, RateLimitedYoVariable>();
       initialized = new BooleanYoVariable(name + "Initialized", registry);
@@ -129,7 +129,7 @@ public class JointSpaceHandControlState extends AbstractJointSpaceHandControlSta
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint joint = oneDoFJoints[i];
-            trajectories.get(joint).reinitialize(desiredPositions.get(joint).getDoubleValue(), desiredVelocities.get(joint).getDoubleValue());
+            trajectories.get(joint).initialize(desiredPositions.get(joint).getDoubleValue(), desiredVelocities.get(joint).getDoubleValue());
          }
       }
       else
@@ -161,7 +161,7 @@ public class JointSpaceHandControlState extends AbstractJointSpaceHandControlSta
       return true;
    }
 
-   public void setTrajectories(Map<OneDoFJoint, ? extends OneDoFJointQuinticTrajectoryGenerator> trajectories)
+   public void setTrajectories(Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectories)
    {
       this.trajectories.clear();
       this.trajectories.putAll(trajectories);

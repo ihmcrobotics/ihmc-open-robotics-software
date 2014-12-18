@@ -168,6 +168,10 @@ public class ManipulationControlModule
                   handPoseProvider.getTrajectoryTime());
          }
       }
+      else if (handPoseProvider.checkForNewPoseList(robotSide))
+      {
+         handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide), handPoseProvider.getTrajectoryTime());
+      }
    }
 
    private void handleHandPauses(RobotSide robotSide)
