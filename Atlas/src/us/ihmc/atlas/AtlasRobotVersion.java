@@ -46,7 +46,7 @@ public enum AtlasRobotVersion
       {
          case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
          case DRC_NO_HANDS:
-            return "models/GFE/drc_no_hands.sdf";
+            return "models/GFE/atlas_v4.sdf";
          case ATLAS_DUAL_ROBOTIQ:
             return "models/GFE/atlas_v4_robotiq_hands.sdf";
          case GAZEBO_ATLAS_NO_HANDS:
