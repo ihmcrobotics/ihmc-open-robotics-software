@@ -16,7 +16,7 @@ public class BonoModelBundleGenerator
 {
    public static void main(String[] args) throws IOException
    {
-      BonoRobotModel model = new BonoRobotModel(true, true);
+      BonoRobotModel model = new BonoRobotModel(true, false);
       LogModelProvider logModelProvider = model.getLogModelProvider();
       Properties properties = new Properties();
       properties.setProperty("modelName", logModelProvider.getModelName());
