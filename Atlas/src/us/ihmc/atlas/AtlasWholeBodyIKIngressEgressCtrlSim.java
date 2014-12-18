@@ -82,7 +82,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       //      desiredToWorldTransform.setTranslation(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
       //      desiredToWorldTransform.setTranslation(hik_arm_pos_x_d.getDoubleValue(), hik_arm_pos_y_d.getDoubleValue(), hik_arm_pos_z_d.getDoubleValue());
       //      System.out.println(hik_arm_pos_x_d.getDoubleValue() + ", " + hik_arm_pos_y_d.getDoubleValue() + ", " + hik_arm_pos_z_d.getDoubleValue());
-      wholeBodyIKSolver.setTarget(RobotSide.LEFT, desiredReferenceFrame);
+      wholeBodyIKSolver.setHandTarget(RobotSide.LEFT, desiredReferenceFrame);
       wholeBodyIKSolver.compute(fullRobotModel);
       wholeBodyIKPacketCreator.createPackets(fullRobotModel, 3.0, packetsToSend);
       for (int i = 0; i < packetsToSend.size(); i++)
