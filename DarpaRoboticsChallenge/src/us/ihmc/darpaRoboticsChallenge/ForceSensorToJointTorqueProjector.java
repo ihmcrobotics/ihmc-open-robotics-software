@@ -74,10 +74,13 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
       for(int i = 0; i < yoTorqueInJoints.size(); i++)
       {
          Pair<FrameVector, DoubleYoVariable> pair = yoTorqueInJoints.get(i);
-         tempWrench.changeFrame(pair.first().getReferenceFrame());
+         FrameVector jointAxis = pair.first();
+         DoubleYoVariable torqueAboutJointAxis = pair.second();
+
+         tempWrench.changeFrame(jointAxis.getReferenceFrame());
          tempFrameVector.setToZero(tempWrench.getExpressedInFrame());
          tempWrench.packAngularPart(tempFrameVector);
-         pair.second().set(-tempFrameVector.dot(pair.first()));
+         torqueAboutJointAxis.set(-tempFrameVector.dot(jointAxis));
       }
 
    }
