@@ -1,5 +1,8 @@
 package us.ihmc.atlas;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.userInterface.StatisticsDisplay;
 
@@ -42,5 +45,21 @@ public class AtlasStatisticsDisplay
          return;
       }
       new StatisticsDisplay(model.createFullRobotModel());
+      
+      try
+      {
+    	  Class<?> clazz = Class.forName("us.ihmc.darpaRoboticsChallenge.userInterface.StatisticsDisplay");
+    	  Constructor<?> constructor = clazz.getDeclaredConstructor(us.ihmc.SdfLoader.SDFFullRobotModel.class);
+    	  constructor.newInstance(model.createFullRobotModel());
+      }
+      catch (ClassNotFoundException e)
+      {	
+    	// TODO insert Dennis Nedry troll here
+    	  e.printStackTrace();
+      }
+      catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+      {
+    	  e.printStackTrace();
+      }
    }
 }
