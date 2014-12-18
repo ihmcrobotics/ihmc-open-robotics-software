@@ -26,7 +26,8 @@ public class ModelAttacher extends SimpleFileVisitor<Path>
    public enum LogModels
    {
       ATLAS("RobotModels/Atlas"),
-      STEPPR("RobotModels/Steppr");
+      STEPPR("RobotModels/Steppr"),
+      VALKYRIE("RobotModels/Valkyrie");
 
       private final boolean valid;
       private final String loader;
@@ -120,7 +121,7 @@ public class ModelAttacher extends SimpleFileVisitor<Path>
          model = chooseModel(mainDirectory);
          if (model != null)
          {
-            System.out.println("Attaching model");
+            System.out.println("Attaching model " + model);
             Files.walkFileTree(mainDirectory.toPath(), this);
          }
       }
