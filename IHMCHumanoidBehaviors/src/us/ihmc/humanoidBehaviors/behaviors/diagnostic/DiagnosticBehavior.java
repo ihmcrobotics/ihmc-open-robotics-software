@@ -49,7 +49,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final FootstepListBehavior footstepListBehavior;
 
    private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
    private final DoubleYoVariable sleepTimeBetweenPoses;
    private final int numberOfArmJoints;
    private final FullRobotModel fullRobotModel;
@@ -60,7 +60,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private enum DiagnosticTask
    {
-      CHEST_MOTIONS, PELVIS_MOTIONS, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, SALUTE, KARATE_KID
+      CHEST_MOTIONS, PELVIS_MOTIONS, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, SALUTE, KARATE_KID, WHOLE_SCHEBANG
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -90,7 +90,9 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
       trajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
+      flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
       sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
       sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 2.0);
 
@@ -343,8 +345,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceSalute()
    {
-      for (RobotSide robotSide : RobotSide.values)
-         salute(robotSide);
+//      for (RobotSide robotSide : RobotSide.values)
+         salute(RobotSide.LEFT);
    }
 
    private void salute(RobotSide robotSide)
@@ -497,7 +499,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (RobotSide tempSide : RobotSide.values)
       {
-         HandPoseListPacket handPoseListPacket = new HandPoseListPacket(tempSide, armFlyingSequence, trajectoryTime.getDoubleValue() * numberOfHandPoses);
+         HandPoseListPacket handPoseListPacket = new HandPoseListPacket(tempSide, armFlyingSequence, flyingTrajectoryTime.getDoubleValue() * numberOfHandPoses);
          pipeLine.submit(handPoseListBehaviors.get(tempSide), new HandPoseListTask(handPoseListPacket, handPoseListBehaviors.get(tempSide), yoTime,
                sleepTimeBetweenPoses.getDoubleValue()));
       }
@@ -758,20 +760,33 @@ public class DiagnosticBehavior extends BehaviorInterface
             break;
          case CHEST_MOTIONS:
             sequenceMovingChestOnly();
+            break;
          case PELVIS_MOTIONS:
             sequenceMovingPelvisOnly();
+            break;
          case COMBINED_CHEST_PELVIS:
             sequenceMovingChestAndPelvisOnly();
+            break;
          case UPPER_BODY:
             sequenceUpperBody();
+            break;
          case FOOT_POSES:
             sequenceFootPose();
+            break;
          case RUNNING_MAN:
             sequenceRunningMan();
+            break;
          case SALUTE:
             sequenceSalute();
+            break;
          case KARATE_KID:
             karateKid(activeSideForFootControl.getEnumValue());
+            break;
+         case WHOLE_SCHEBANG:
+            sequenceRunningMan();
+            karateKid(activeSideForFootControl.getEnumValue());
+            sequenceSalute();
+            break;
          default:
             break;
          }
