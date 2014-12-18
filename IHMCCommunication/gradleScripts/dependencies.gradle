@@ -10,7 +10,4 @@ dependencies {
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '1.0.5'
 	
 	compile project(':IHMCUtilities')
-	//`compile project(':IHMCYoUtilities')
-	//compile project(':Graphics3DAdapter')
-	
 }
