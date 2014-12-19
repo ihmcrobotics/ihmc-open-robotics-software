@@ -515,7 +515,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       // Supa powerful front kick!!!!!
       FramePose footPose = new FramePose();
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.85, robotSide.negateIfRightSide(0.25), 0.25);
+      footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
       footPose.setOrientation(0.0, -halfPi / 2.0, 0.0);
       footPose.changeFrame(worldFrame);
       pipeLine.submit(footPoseBehavior,
@@ -541,7 +541,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.8 * Math.PI / 2.0, -0.3, 0.0, -0.3 });
       submitHandPoses(desiredJointAngles);
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(-0.85, robotSide.negateIfRightSide(0.25), 0.35);
+      footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
       footPose.setOrientation(0.0, 0.8 * halfPi, 0.0);
       footPose.changeFrame(worldFrame);
       pipeLine.submit(footPoseBehavior,
