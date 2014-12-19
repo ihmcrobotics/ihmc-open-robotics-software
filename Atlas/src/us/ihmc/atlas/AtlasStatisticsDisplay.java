@@ -54,7 +54,7 @@ public class AtlasStatisticsDisplay
       }
       catch (ClassNotFoundException e)
       {	
-    	// TODO insert Dennis Nedry troll here
+        // TODO insert Dennis Nedry troll here
     	  e.printStackTrace();
       }
       catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
