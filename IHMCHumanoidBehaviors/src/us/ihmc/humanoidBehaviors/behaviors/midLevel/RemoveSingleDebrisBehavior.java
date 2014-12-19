@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -40,7 +41,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.85;
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrame, DoubleYoVariable yoTime)
+         ReferenceFrames referenceFrame, DoubleYoVariable yoTime,WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
 
@@ -48,7 +49,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
       graspPieceOfDebris = new GraspObjectBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
-      walkCloseToObject = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame);
+      walkCloseToObject = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, walkingControllerParameters);
 
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);

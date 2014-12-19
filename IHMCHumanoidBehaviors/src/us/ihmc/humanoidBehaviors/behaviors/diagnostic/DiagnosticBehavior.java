@@ -3,9 +3,11 @@ package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
@@ -19,12 +21,14 @@ import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -47,6 +51,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final ChestOrientationBehavior chestOrientationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
    private final FootstepListBehavior footstepListBehavior;
+   private final WalkToLocationBehavior walkToLocationBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
@@ -60,7 +65,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private enum DiagnosticTask
    {
-      CHEST_MOTIONS, PELVIS_MOTIONS, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, SALUTE, KARATE_KID, WHOLE_SCHEBANG
+      CHEST_MOTIONS, PELVIS_MOTIONS, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -73,9 +78,10 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final double maxPitch = Math.toRadians(-5.0);
    private final double minPitch = Math.toRadians(40.0);
    private final double minMaxRoll = Math.toRadians(15.0);
+   private final DoubleYoVariable footstepLength;
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
-         BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+         BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
 
@@ -96,6 +102,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
       sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 2.0);
 
+      footstepLength = new DoubleYoVariable(behaviorNameFirstLowerCase + "FootstepLength", registry);
+      footstepLength.set(0.3);
+      
+      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
+      
       chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(chestOrientationBehavior.getYoVariableRegistry());
 
@@ -338,18 +350,18 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
-      
+
       // Put the foot back on the ground
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
 
-   private void sequenceSalute()
+   private void sequenceBow()
    {
-//      for (RobotSide robotSide : RobotSide.values)
-         salute(RobotSide.LEFT);
+      //      for (RobotSide robotSide : RobotSide.values)
+      bow(RobotSide.LEFT);
    }
 
-   private void salute(RobotSide robotSide)
+   private void bow(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
 
@@ -367,15 +379,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitHandPoses(desiredJointAngles);
 
       pipeLine.requestNextStage();
-      
+
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
       submitHandPoses(desiredJointAngles);
 
       pipeLine.requestNextStage();
-      
-      
+
       //bend forward and arms
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -Math.PI / 2 });
@@ -387,7 +398,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredPelvisOrientation.changeFrame(worldFrame);
       pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
-      
+
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(35.0), 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
       pipeLine.submit(
@@ -395,9 +406,8 @@ public class DiagnosticBehavior extends BehaviorInterface
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
 
-
       pipeLine.requestNextStage();
-      
+
       //back to normal stance
       desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
@@ -413,7 +423,7 @@ public class DiagnosticBehavior extends BehaviorInterface
             sleepTimeBetweenPoses.getDoubleValue()));
 
       pipeLine.requestNextStage();
-      
+
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
@@ -425,7 +435,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredFootstepPosition.setPose(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPosition(robotSide, desiredFootstepPosition);
-      
+
       pipeLine.requestNextStage();
 
       // Put the foot back on the ground
@@ -435,15 +445,69 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredJointAngles.put(robotSide, new double[] { 0.0, -0.3, 0.0, -0.2 });
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.0, -0.3, 0.0, -0.2 });
       submitHandPoses(desiredJointAngles);
-      
+
       pipeLine.requestNextStage();
-      
+
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { 0.0, -0.3, 0.0, -Math.PI / 2 });
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.0, -0.3, 0.0, -Math.PI / 2 });
       submitHandPoses(desiredJointAngles);
+
+      pipeLine.requestNextStage();
+   }
+
+   private void sequenceSteps()
+   {
+      pipeLine.requestNextStage();
+      
+      // forward
+      FramePose2d targetPoseInWorld = new FramePose2d();
+      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, 0.0);
+      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue()));
       
       pipeLine.requestNextStage();
+      
+      //backward
+      targetPoseInWorld = new FramePose2d();
+      targetPoseInWorld.setPose(worldFrame, 0.0, 0.0, 0.0);
+      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI,footstepLength.getDoubleValue()));
+      
+      pipeLine.requestNextStage();
+      
+      //sideWalk
+      targetPoseInWorld = new FramePose2d();
+      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, -Math.PI/2.0);
+      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
+      
+      pipeLine.requestNextStage();
+      
+      targetPoseInWorld = new FramePose2d();
+      targetPoseInWorld.setPose(worldFrame, 0.0, 0.0,0.0);
+      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2.0,footstepLength.getDoubleValue()));
+
+      pipeLine.requestNextStage();
+//      
+//      targetPoseInWorld = new FramePose2d();
+//      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, 0.0);
+//      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0,footstepLength.getDoubleValue()));
+//      
+//      pipeLine.requestNextStage();
+      
+//      pipeLine.requestNextStage();
+//      
+//      targetPoseInWorld = new FramePose2d();
+//      targetPoseInWorld.setPose(worldFrame, 0.01, 0.0, Math.PI/4.0);
+//      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0,footstepLength.getDoubleValue()));
+//      //sideWalk 180degrees
+//      targetPoseInWorld = new FramePose2d();
+//      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, -Math.PI/2);
+//      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
+//      
+//      pipeLine.requestNextStage();
+//      
+//      targetPoseInWorld = new FramePose2d();
+//      targetPoseInWorld.setPose(worldFrame, 0.0, 0.0, -Math.PI/2);
+//      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2,footstepLength.getDoubleValue()));
    }
 
    private void karateKid(RobotSide robotSide)
@@ -471,26 +535,26 @@ public class DiagnosticBehavior extends BehaviorInterface
             double desiredJointAngle;
             switch (poseIndex % 6)
             {
-               case 0:
-                  desiredJointAngle = armDown1[jointIndex];
-                  break;
-               case 1:
-                  desiredJointAngle = armDown2[jointIndex];
-                  break;
-               case 2:
-                  desiredJointAngle = armIntermediateOnWayUp[jointIndex];
-                  break;
-               case 3:
-                  desiredJointAngle = armUp1[jointIndex];
-                  break;
-               case 4:
-                  desiredJointAngle = armUp2[jointIndex];
-                  break;
-               case 5:
-                  desiredJointAngle = armIntermediateOnWayDown[jointIndex];
-                  break;
-               default:
-                  throw new RuntimeException("Should not get there!");
+            case 0:
+               desiredJointAngle = armDown1[jointIndex];
+               break;
+            case 1:
+               desiredJointAngle = armDown2[jointIndex];
+               break;
+            case 2:
+               desiredJointAngle = armIntermediateOnWayUp[jointIndex];
+               break;
+            case 3:
+               desiredJointAngle = armUp1[jointIndex];
+               break;
+            case 4:
+               desiredJointAngle = armUp2[jointIndex];
+               break;
+            case 5:
+               desiredJointAngle = armIntermediateOnWayDown[jointIndex];
+               break;
+            default:
+               throw new RuntimeException("Should not get there!");
             }
 
             armFlyingSequence[jointIndex][poseIndex] = desiredJointAngle;
@@ -608,6 +672,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       // Put the foot back on the ground
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
+
    private ReferenceFrame findFixedFrameForPelvisOrientation()
    {
       if (supportLeg.getEnumValue() == null)
@@ -776,16 +841,20 @@ public class DiagnosticBehavior extends BehaviorInterface
          case RUNNING_MAN:
             sequenceRunningMan();
             break;
-         case SALUTE:
-            sequenceSalute();
+         case BOW:
+            sequenceBow();
             break;
          case KARATE_KID:
             karateKid(activeSideForFootControl.getEnumValue());
             break;
+         case STEPS:
+            sequenceSteps();
+            break;
          case WHOLE_SCHEBANG:
+            sequenceSteps();
             sequenceRunningMan();
             karateKid(activeSideForFootControl.getEnumValue());
-            sequenceSalute();
+            sequenceBow();
             break;
          default:
             break;
@@ -819,6 +888,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       {
          handPoseBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
+         walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
       }
    }
 
@@ -829,6 +899,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       {
          handPoseBehaviors.get(robotSide).consumeObjectFromController(object);
          footstepListBehavior.consumeObjectFromController(object);
+         walkToLocationBehavior.consumeObjectFromController(object);
       }
    }
 

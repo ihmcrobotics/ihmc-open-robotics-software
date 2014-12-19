@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -45,7 +46,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
 
-   SimplePathParameters pathType = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
+   private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
 
    private TurnStraightTurnFootstepGenerator footstepGenerator;
 
@@ -56,7 +57,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames)
+         ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
 
@@ -65,6 +66,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(), 0.0,
+            Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -75,10 +78,11 @@ public class WalkToLocationBehavior extends BehaviorInterface
    }
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, double walkingYawOrientationAngle)
+         ReferenceFrames referenceFrames, double walkingYawOrientationAngle, WalkingControllerParameters walkingControllerParameters)
    {
-      this(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
-      this.pathType = new SimplePathParameters(0.4, 0.30, walkingYawOrientationAngle, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
+      this(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(),
+            walkingYawOrientationAngle, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
    }
 
    public void setTarget(Point3d targetLocation, YoFrameOrientation targetOrientation)
@@ -87,12 +91,17 @@ public class WalkToLocationBehavior extends BehaviorInterface
       this.targetOrientation.set(targetOrientation);
       hasTargetBeenProvided.set(true);
    }
-   
+
    public void setTarget(FramePose2d targetPose2dInWorld)
    {
-      this.targetLocation.set(targetPose2dInWorld.getX(),targetPose2dInWorld.getY(), 0.0);
-      this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0,0.0);
+      this.targetLocation.set(targetPose2dInWorld.getX(), targetPose2dInWorld.getY(), 0.0);
+      this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0, 0.0);
       hasTargetBeenProvided.set(true);
+   }
+
+   public void setwalkingYawOrientationAngle(double walkingYawOrientationAngle)
+   {
+      pathType.setAngle(walkingYawOrientationAngle);
    }
 
    @Override
@@ -214,6 +223,11 @@ public class WalkToLocationBehavior extends BehaviorInterface
          return true;
       else
          return false;
+   }
+
+   public void setFootstepLength(double footstepLength)
+   {
+      pathType.setStepLength(footstepLength);
    }
 
 }
