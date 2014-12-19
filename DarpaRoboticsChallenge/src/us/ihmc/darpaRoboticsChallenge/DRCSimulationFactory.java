@@ -64,6 +64,8 @@ public class DRCSimulationFactory
    
    private final YoVariableServer yoVariableServer;
 
+   private ThreadDataSynchronizer threadDataSynchronizer;
+
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
@@ -138,7 +140,7 @@ public class DRCSimulationFactory
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, stateEstimatorParameters);
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
-      ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
+      threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
  
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
@@ -291,4 +293,10 @@ public class DRCSimulationFactory
    {
       drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externelPelvisCorrectorSubscriber);
    }
+   
+   public ThreadDataSynchronizer getThreadDataSynchronizer()
+   {
+      return threadDataSynchronizer;
+   }
+   
 }

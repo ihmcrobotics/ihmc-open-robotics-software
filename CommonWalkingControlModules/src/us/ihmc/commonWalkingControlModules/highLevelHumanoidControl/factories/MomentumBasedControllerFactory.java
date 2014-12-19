@@ -279,4 +279,9 @@ public class MomentumBasedControllerFactory
          highLevelHumanoidControllerManager.addHighLevelBehavior(highLevelBehavior, transitionToBehaviorRequested);
       }
    }
+   
+   public YoVariableRegistry getRegistry(){
+      return registry;
+   }
+   
 }
