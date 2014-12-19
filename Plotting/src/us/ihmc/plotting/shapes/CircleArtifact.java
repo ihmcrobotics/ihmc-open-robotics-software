@@ -10,9 +10,6 @@ import us.ihmc.plotting.Artifact;
 
 public class CircleArtifact extends Artifact
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = -8129731194060916363L;
    private double x;
    private double y;
