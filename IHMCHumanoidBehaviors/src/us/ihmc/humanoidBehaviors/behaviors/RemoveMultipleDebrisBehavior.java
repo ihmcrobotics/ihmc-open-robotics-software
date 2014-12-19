@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.DebrisData;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RemoveSingleDebrisBehavior;
@@ -36,10 +37,10 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    private final SideDependentList<WristForceSensorFilteredUpdatable> wristSensors;
 
    public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrame,
-         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime)
+         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
-      removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime);
+      removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime, walkingControllerParameters);
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
 

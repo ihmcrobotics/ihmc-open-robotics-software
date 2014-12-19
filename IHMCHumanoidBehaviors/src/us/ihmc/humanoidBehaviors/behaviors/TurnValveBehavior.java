@@ -10,6 +10,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -56,14 +57,15 @@ public class TurnValveBehavior extends BehaviorInterface
    // private final ModifiableValveModel valveModel;
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean)
+         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
+         WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
       targetWalkLocation = new Point3d();
       valveOrientation = new YoFrameOrientation(behaviorName + "ValveOrientation", ReferenceFrame.getWorldFrame(), registry);
       targetWalkOrientation = new YoFrameOrientation(behaviorName + "WalkToOrientation", ReferenceFrame.getWorldFrame(), registry);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
+      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
       this.tippingDetected = tippingDetectedBoolean;
@@ -73,10 +75,10 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-//      if (!currentBehavior.equals(walkToLocationBehavior))
-//      {
-         pauseBehaviorIfCapturePointErrorIsTooLarge();
-//      }
+      //      if (!currentBehavior.equals(walkToLocationBehavior))
+      //      {
+      pauseBehaviorIfCapturePointErrorIsTooLarge();
+      //      }
 
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
