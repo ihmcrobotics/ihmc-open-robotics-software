@@ -55,7 +55,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
-import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
+//import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
@@ -917,7 +917,16 @@ public class DRCDashboard
       {
          public void actionPerformed(ActionEvent e)
          {
-            uiSpawner.spawn(DRCOperatorInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+            try
+            {
+               Class<?> clazz = Class.forName("us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface");
+               uiSpawner.spawn(clazz, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+            }
+            catch (ClassNotFoundException e1)
+            {
+               // TODO Dennis Nedry
+               e1.printStackTrace();
+            }
          }
       });
    }
@@ -1201,7 +1210,16 @@ public class DRCDashboard
    {
       if (operatorUICheckBox.isSelected() &&!uiSpawner.hasRunningProcesses())
       {
-         uiSpawner.spawn(DRCOperatorInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+         try
+         {
+            Class<?> clazz = Class.forName("us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface");
+            uiSpawner.spawn(clazz, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+         }
+         catch (ClassNotFoundException e)
+         {
+            // TODO Dennis Nedry
+            e.printStackTrace();
+         }
       }
    }
 
