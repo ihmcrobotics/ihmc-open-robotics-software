@@ -23,6 +23,7 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 public class WalkToLocationBehavior extends BehaviorInterface
@@ -41,8 +42,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
    private final BooleanYoVariable hasFootstepsBeenGenerated = new BooleanYoVariable("hasFootstepsBeenGenerated", registry);
 
-   private final Point3d targetLocation = new Point3d();
-   private final YoFrameOrientation targetOrientation = new YoFrameOrientation("targetOrientation", worldFrame, registry);
+   private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
+   private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
 
    SimplePathParameters pathType = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
 
@@ -74,16 +75,23 @@ public class WalkToLocationBehavior extends BehaviorInterface
    }
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, double WalkingYawOrientationAngle)
+         ReferenceFrames referenceFrames, double walkingYawOrientationAngle)
    {
       this(outgoingCommunicationBridge, fullRobotModel, referenceFrames);
-      this.pathType = new SimplePathParameters(0.4, 0.30, WalkingYawOrientationAngle, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
+      this.pathType = new SimplePathParameters(0.4, 0.30, walkingYawOrientationAngle, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
    }
 
-   public void setTarget(Point3d targetLocation, YoFrameOrientation targetOrientation)//(Point3d targetLocation, YoFrameOrientation targetOrientation)   //(YoFramePoint targetLocation, YoFrameOrientation targetOrientation)
+   public void setTarget(Point3d targetLocation, YoFrameOrientation targetOrientation)
    {
       this.targetLocation.set(targetLocation);
       this.targetOrientation.set(targetOrientation);
+      hasTargetBeenProvided.set(true);
+   }
+   
+   public void setTarget(FramePose2d targetPose2dInWorld)
+   {
+      this.targetLocation.set(targetPose2dInWorld.getX(),targetPose2dInWorld.getY(), 0.0);
+      this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0,0.0);
       hasTargetBeenProvided.set(true);
    }
 
