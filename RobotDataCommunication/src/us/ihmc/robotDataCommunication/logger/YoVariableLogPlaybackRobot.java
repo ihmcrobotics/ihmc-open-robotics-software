@@ -208,7 +208,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          for (int i = 0; i < variables.size(); i++)
          {
             YoVariable<?> variable = variables.get(i);
-            variable.setValueFromLongBits(logLongArray.get());
+            variable.setValueFromLongBits(logLongArray.get(), false);
          }
 
          for (int i = 0; i < jointStates.size(); i++)
