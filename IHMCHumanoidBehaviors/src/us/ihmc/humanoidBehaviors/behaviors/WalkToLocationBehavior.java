@@ -61,8 +61,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       super(outgoingCommunicationBridge);
 
-      this.targetLocation.set(robotLocation);
-      this.targetOrientation.set(robotOrientation);
+//      this.targetLocation.set(robotLocation);
+//      this.targetOrientation.set(robotOrientation);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -94,6 +94,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    public void setTarget(FramePose2d targetPose2dInWorld)
    {
+      targetPose2dInWorld.checkReferenceFrameMatch(worldFrame);
       this.targetLocation.set(targetPose2dInWorld.getX(), targetPose2dInWorld.getY(), 0.0);
       this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0, 0.0);
       hasTargetBeenProvided.set(true);
@@ -118,6 +119,9 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       robotPose.getPosition(robotLocation);
       robotPose.getOrientation(robotOrientation);
+      
+    this.targetLocation.set(robotLocation);
+    this.targetOrientation.set(robotOrientation);
 
       //for testing purpose
       //this.setTarget(new Point3d(2.0, 2.0,0.0),new YoFrameOrientation( "blabla", ReferenceFrame.getWorldFrame(), registry));
