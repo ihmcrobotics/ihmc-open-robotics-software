@@ -39,16 +39,26 @@ public class StepprCommand
             jointCommands.get(StepprJoint.RIGHT_ANKLE_X), StepprActuator.RIGHT_ANKLE_RIGHT.getKt(), StepprActuator.RIGHT_ANKLE_LEFT.getKt(), registry);
       actuatorCommands.put(StepprActuator.RIGHT_ANKLE_LEFT, rightAnkle.leftActuatorCommand());
       actuatorCommands.put(StepprActuator.RIGHT_ANKLE_RIGHT, rightAnkle.rightActuatorCommand());
-      
+
       parentRegistry.addChild(registry);
    }
 
-   public void write(ByteBuffer target, int controlID)
+   public double getAcutatorTau(StepprActuator actuator)
+   {
+      return actuatorCommands.get(actuator).getTauDesired();
+   }
+
+   public void updateActuatorCommandsFromJointCommands()
    {
       for (StepprActuator actuator : StepprActuator.values)
       {
          actuatorCommands.get(actuator).update();
       }
+   }
+
+   public void write(ByteBuffer target, int controlID)
+   {
+      updateActuatorCommandsFromJointCommands();
       for (StepprActuator actuator : StepprActuator.values)
       {
          actuatorCommands.get(actuator).write(target, controlID);
@@ -60,7 +70,7 @@ public class StepprCommand
    {
       return jointCommands.get(joint);
    }
-   
+
    public void enableActuators()
    {
       for (StepprActuator actuator : StepprActuator.values)
@@ -68,13 +78,13 @@ public class StepprCommand
          actuatorCommands.get(actuator).enable();
       }
    }
-   
+
    public void disableActuators()
    {
       for (StepprActuator actuator : StepprActuator.values)
       {
          actuatorCommands.get(actuator).disable();
-      }      
+      }
    }
 
 }

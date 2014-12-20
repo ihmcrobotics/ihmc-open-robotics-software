@@ -17,5 +17,10 @@ public class InphaseControlEffort implements StepprSlowSensor
    {
       inphaseControlEffort.set(((double)((short) value)) / 100.0);
    }
+   
+   public double getValue()
+   {
+	   return inphaseControlEffort.getDoubleValue();
+   }
 
 }

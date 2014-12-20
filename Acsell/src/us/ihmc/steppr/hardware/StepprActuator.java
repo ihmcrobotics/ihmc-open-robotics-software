@@ -2,39 +2,41 @@ package us.ihmc.steppr.hardware;
 
 public enum StepprActuator
 {
-   LEFT_ANKLE_RIGHT("leftAnkleRightActuator", 1.152, 0, 1, 1),
-   LEFT_ANKLE_LEFT("leftAnkleLeftActuator", 1.152, 0, 2, 1),
-   LEFT_KNEE("leftKneeActuator", 2.286, 0, 3, -1),
-   LEFT_HIP_Y("leftHipYActuator", 0.893, 0, 4, 1),
-   LEFT_HIP_Z("leftHipZActuator", 0.702, 0, 5, 1),
-   LEFT_HIP_X("leftHipXActuator", 2.286, 0, 6, 1),
+   LEFT_ANKLE_RIGHT("leftAnkleRightActuator", 1.152, 0.587, 0, 1, -1), //measured current is -1*commanded current
+   LEFT_ANKLE_LEFT("leftAnkleLeftActuator", 1.152, 0.587, 0, 2, 1),
+   LEFT_KNEE("leftKneeActuator", 2.286, 0.749, 0, 3, -1),
+   LEFT_HIP_Y("leftHipYActuator", 0.893, 0.744, 0, 4, 1),
+   LEFT_HIP_Z("leftHipZActuator", 0.702, 0.299, 0, 5, 1),
+   LEFT_HIP_X("leftHipXActuator", 2.286, 0.749, 0, 6, 1),
    
-   RIGHT_ANKLE_RIGHT("rightAnkleRightActuator", 1.152, 1, 1, 1),
-   RIGHT_ANKLE_LEFT("rightAnkleLeftActuator", 1.152, 1, 2, 1),
-   RIGHT_KNEE("rightKneeActuator", 2.286, 1, 3, -1),
-   RIGHT_HIP_Y("rightHipYActuator", 0.893, 1, 4, 1),
-   RIGHT_HIP_Z("rightHipZActuator", 0.702, 1, 5, 1),
-   RIGHT_HIP_X("rightHipXActuator", 2.286, 1, 6, -1),
+   RIGHT_ANKLE_RIGHT("rightAnkleRightActuator", 1.152, .587, 1, 1, -1),
+   RIGHT_ANKLE_LEFT("rightAnkleLeftActuator", 1.152, .587, 1, 2, 1),
+   RIGHT_KNEE("rightKneeActuator", 2.286, .749, 1, 3, -1),
+   RIGHT_HIP_Y("rightHipYActuator", 0.893, .744, 1, 4, 1),
+   RIGHT_HIP_Z("rightHipZActuator", 0.702, .299, 1, 5, 1),
+   RIGHT_HIP_X("rightHipXActuator", 2.286, .749, 1, 6, -1),
    
-   TORSO_X("torsoXActuator", 0.398, 2, 1, 1),
-   TORSO_Y("torsoYActuator", 0.45, 2, 2, 1),
-   TORSO_Z("torsoZActuator", 0.316, 2, 3, 1)
+   TORSO_X("torsoXActuator", 0.398, .104, 2, 1, 1),
+   TORSO_Y("torsoYActuator", 0.45, .192, 2, 2, 1),
+   TORSO_Z("torsoZActuator", 0.316, .104, 2, 3, 1)
    ;
    public static final StepprActuator[] values = values();
    
    private final String name;
    private final double ktSinesoidal;
+   private final double Km;
    private final int bus;
    private final int index;
-   private final int kinematicDirection;
+   private final int SensedCurrentToTorqueDirection;
    
-   private StepprActuator(String name, double ktPeak, int bus, int index, int kinematicDirection)
+   private StepprActuator(String name, double ktPeak, double km, int bus, int index, int SensedCurrentToTorqueDirection)
    {
       this.name = name;
       this.ktSinesoidal = ktPeak * Math.sqrt(3.0) / 2.0;
+      this.Km = km;
       this.bus = bus;
       this.index = index;
-      this.kinematicDirection = kinematicDirection;
+      this.SensedCurrentToTorqueDirection = SensedCurrentToTorqueDirection;
    }
    
    public String getName()
@@ -45,6 +47,11 @@ public enum StepprActuator
    public double getKt()
    {
       return ktSinesoidal;
+   }
+   
+   public double getKm()
+   {
+	   return Km;
    }
 
    public int getBus()
@@ -57,9 +64,9 @@ public enum StepprActuator
       return index;
    }
    
-   public int getKinematicDirection()
+   public int getSensedCurrentToTorqueDirection()
    {
-      return kinematicDirection;
+      return SensedCurrentToTorqueDirection;
    }
    
    

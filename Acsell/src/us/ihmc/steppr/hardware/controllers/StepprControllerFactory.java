@@ -44,29 +44,31 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import com.martiansoftware.jsap.JSAPException;
 
 public class StepprControllerFactory
-{   
+{
    private static final double gravity = -9.80; // From xsens
 
    private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = true;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {
-      
+
       /*
        * Create registries
        */
       StepprAffinity stepprAffinity = new StepprAffinity();
       PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
       PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
-      
+
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      
+
       /*
        * Create network servers/clients
        */
-      KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT, new IHMCCommunicationKryoNetClassList());
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC, LogUtils.getMyIP(StepprNetworkParameters.CONTROL_COMPUTER_HOST), robotModel.getEstimatorDT());
+      KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+            new IHMCCommunicationKryoNetClassList());
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC,
+            LogUtils.getMyIP(StepprNetworkParameters.CONTROL_COMPUTER_HOST), robotModel.getEstimatorDT());
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       /*
@@ -74,8 +76,6 @@ public class StepprControllerFactory
        */
       MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, dataProducer, sensorInformation);
 
-      
-      
       /*
        * Create sensors
        */
@@ -87,7 +87,7 @@ public class StepprControllerFactory
        */
 
       DRCOutputWriter drcOutputWriter = new StepprOutputWriter(robotModel);
-      
+
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer.getObjectCommunicator());
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
 
@@ -95,25 +95,22 @@ public class StepprControllerFactory
        * Build controller
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
-      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(), robotModel.getStateEstimatorParameters(),
-    		  sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer, gravity);
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
+            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer, gravity);
       estimatorThread.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter, dataProducer,
-            yoVariableServer, gravity, robotModel.getEstimatorDT());
- 
-      
-      
+      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
+            drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
+
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
-      if(stepprAffinity.setAffinity())
+      if (stepprAffinity.setAffinity())
       {
-         robotController.addController(controllerThread, controllerPriority, stepprAffinity.getControlThreadProcessor());         
+         robotController.addController(controllerThread, controllerPriority, stepprAffinity.getControlThreadProcessor());
       }
       else
       {
-         robotController.addController(controllerThread, controllerPriority, null);                  
+         robotController.addController(controllerThread, controllerPriority, null);
       }
 
-      
       /*
        * Connect all servers
        */
@@ -125,25 +122,24 @@ public class StepprControllerFactory
       {
          e.printStackTrace();
       }
-      
+
       StepprSetup stepprSetup = new StepprSetup(yoVariableServer);
-      
+
       yoVariableServer.start();
-      
+
       StepprSetup.startStreamingData();
       stepprSetup.start();
 
-      
       robotController.start();
       StepprRunner runner = new StepprRunner(estimatorPriority, sensorReaderFactory, robotController);
       runner.start();
       runner.join();
-      
+
       System.exit(0);
    }
-   
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel,
-         GlobalDataProducer dataProducer, DRCRobotSensorInformation sensorInformation)
+
+   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, GlobalDataProducer dataProducer,
+         DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
