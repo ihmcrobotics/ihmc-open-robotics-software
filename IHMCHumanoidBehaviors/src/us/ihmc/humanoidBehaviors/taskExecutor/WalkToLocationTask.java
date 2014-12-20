@@ -14,7 +14,7 @@ public class WalkToLocationTask implements Task
    
    public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double walkingYawOrientationAngle, double footstepLength)
    {
-      this.targetPoseInWorld = targetPoseInWorld;
+      this.targetPoseInWorld = new FramePose2d(targetPoseInWorld);
       this.walkToLocationBehavior = walkToLocationBehavior;
       this.walkingYawOrientationAngle = walkingYawOrientationAngle;
       this.footstepLength = footstepLength;

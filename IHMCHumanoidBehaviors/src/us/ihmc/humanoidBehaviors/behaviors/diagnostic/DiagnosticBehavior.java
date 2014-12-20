@@ -462,27 +462,31 @@ public class DiagnosticBehavior extends BehaviorInterface
       
       // forward
       FramePose2d targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, 0.0);
+      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, 0.0);
+      targetPoseInWorld.changeFrame(worldFrame);
       pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue()));
       
       pipeLine.requestNextStage();
       
       //backward
       targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPose(worldFrame, 0.0, 0.0, 0.0);
+      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0, 0.0);
+      targetPoseInWorld.changeFrame(worldFrame);
       pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI,footstepLength.getDoubleValue()));
       
       pipeLine.requestNextStage();
       
       //sideWalk
       targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, -Math.PI/2.0);
+      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, -Math.PI/2.0);
+      targetPoseInWorld.changeFrame(worldFrame);
       pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
       
       pipeLine.requestNextStage();
       
       targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPose(worldFrame, 0.0, 0.0,0.0);
+      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0,0.0);
+      targetPoseInWorld.changeFrame(worldFrame);
       pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2.0,footstepLength.getDoubleValue()));
 
       pipeLine.requestNextStage();
