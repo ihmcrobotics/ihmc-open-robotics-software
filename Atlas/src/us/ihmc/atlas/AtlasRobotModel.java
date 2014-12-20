@@ -46,6 +46,8 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -59,11 +61,9 @@ public class AtlasRobotModel implements DRCRobotModel
 {
    public enum AtlasTarget
    {
-      SIM,
-      GAZEBO,
-      REAL_ROBOT
+      SIM, GAZEBO, REAL_ROBOT
    }
-   
+
    private final AtlasRobotVersion selectedVersion;
    private final AtlasTarget target;
 
@@ -71,7 +71,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
    private static final double CONTROL_DT = 0.006;
 
-   
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
 
@@ -284,11 +283,12 @@ public class AtlasRobotModel implements DRCRobotModel
 
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
-   
+
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
-      return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(), getFootstepParameters());
+      return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
+            getFootstepParameters());
    }
 
    @Override
@@ -296,11 +296,11 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return networkParameters;
    }
-   
+
    @Override
    public CapturePointPlannerParameters getCapturePointPlannerParameters()
    {
-	   return capturePointPlannerParameters;
+      return capturePointPlannerParameters;
    }
 
    @Override
@@ -332,21 +332,23 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer, GlobalDataProducer globalDataProducer)
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer,
+         GlobalDataProducer globalDataProducer)
    {
       switch (getHandType())
       {
-         case ROBOTIQ:
-        	 return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
-         default:
-        	 return null;
+      case ROBOTIQ:
+         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
+      default:
+         return null;
       }
    }
-   
+
    @Override
-   public FootstepParameters getFootstepParameters() {
-	   // TODO Auto-generated method stub
-	   return new AtlasFootstepParameters();
+   public FootstepParameters getFootstepParameters()
+   {
+      // TODO Auto-generated method stub
+      return new AtlasFootstepParameters();
    }
 
    @Override
@@ -354,4 +356,11 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return new SDFLogModelProvider(jointMap.getModelName(), selectedVersion.getSdfFileAsStream(), selectedVersion.getResourceDirectories());
    }
+
+   @Override
+   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
+   {
+      return null;
+   }
+
 }

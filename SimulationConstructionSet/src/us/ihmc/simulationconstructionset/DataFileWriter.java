@@ -439,7 +439,11 @@ public class DataFileWriter
             for (int j = 0; j < bufferLength; j++)
             {
                // dataStream.writeFloat(((float) data[j]));
-               printStream.print(dataToWrite[i][j] + " ");
+               double dataElement =dataToWrite[i][j];
+               if(Double.isInfinite(dataElement))
+            	   printStream.print("inf" + " ");
+               else
+            	   printStream.print( dataElement+ " ");
             }
 
             printStream.println("];");

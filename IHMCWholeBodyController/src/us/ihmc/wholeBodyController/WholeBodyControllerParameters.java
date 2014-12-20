@@ -6,6 +6,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 public interface WholeBodyControllerParameters
 {
@@ -26,4 +28,7 @@ public interface WholeBodyControllerParameters
 	public SDFRobot createSdfRobot(boolean createCollisionMeshes);
 	
 	public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
+	
+	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
+
 }
