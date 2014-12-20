@@ -107,10 +107,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
             return defaultChestOrientationControlJointNames;
    }
 
-   private final double minimumHeightAboveGround = 0.595 + 0.03;
-   private double nominalHeightAboveGround = 0.675 + 0.03;
-   private final double maximumHeightAboveGround = 0.735 + 0.03;
-   private final double additionalOffsetHeightBono = 0.05 + 0.7;
+   private final double minimumHeightAboveGround = 0.595;
+   private double nominalHeightAboveGround = 0.670;
+   private final double maximumHeightAboveGround = 0.735 ;
+   private final double additionalOffsetHeightBono = 0.15;
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -616,7 +616,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDesiredTouchdownVelocity()
    {
-      return -0.5;
+      return -0.2;
    }
 
    @Override
