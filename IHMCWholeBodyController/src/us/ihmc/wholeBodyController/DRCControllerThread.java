@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.JointAxisVisualizer;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -64,6 +65,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
 
    private final SDFFullRobotModel controllerFullRobotModel;
+   private final OutputProcessor outputProcessor;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
    
    private final ReferenceFrames controllerReferenceFrames;
@@ -109,6 +111,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(estimatorDT);
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
       
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -143,7 +146,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel);
 
-      robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
+      robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor, controllerReferenceFrames, sensorInformation,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, yoGraphicsListRegistry,
             registry, dataProducer, listOfJointsToIgnore.toArray(new InverseDynamicsJoint[]{}));
       
@@ -165,7 +168,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
+   public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, OutputProcessor outputProcessor, ReferenceFrames referenceFramesForController,
          DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
          double gravity, ForceSensorDataHolder forceSensorDataHolderForController, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
@@ -206,6 +209,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.setSensorProcessor(sensorProcessor);
       modularRobotController.addRobotController(robotController);
+      if(outputProcessor!=null)
+         modularRobotController.setOutputProcessor(outputProcessor);
+         
 
       if (yoGraphicsListRegistry != null)
       {
@@ -379,5 +385,15 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          return lastEstimatorStartTime.getLongValue()  + controlDTInNS + estimatorDTInNS;
       }
+   }
+   
+   public RobotController getRobotController()
+   {
+	   return robotController;
+   }
+   
+   public FullRobotModel getFullRobotModel()
+   {
+	   return controllerFullRobotModel;
    }
 }
