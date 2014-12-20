@@ -68,7 +68,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
          List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-         if (contactPoints.size() == 0)
+         if (contactPoints !=null && contactPoints.size() == 0)
             throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
          Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
          
