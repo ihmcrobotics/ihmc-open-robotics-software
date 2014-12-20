@@ -18,4 +18,8 @@ public class QuadratureControlEffort implements StepprSlowSensor
       quadratureControlEffort.set(((double)((short) value)) / 100.0);
    }
 
+   public double getValue()
+   {
+	   return quadratureControlEffort.getValueAsDouble();
+   }
 }

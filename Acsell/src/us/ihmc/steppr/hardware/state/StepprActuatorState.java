@@ -34,7 +34,7 @@ public class StepprActuatorState
    private final YoVariableRegistry registry;
 
    private final double motorKt;
-   private final int kinematicDirection;
+   private final int SensedCurrentToTorqueDirection;
 
    private final LongYoVariable microControllerTime;
 
@@ -49,24 +49,24 @@ public class StepprActuatorState
    private final DoubleYoVariable jointEncoderPosition;
    private final DoubleYoVariable jointEncoderVelocity;
 
+   private final DoubleYoVariable motorPower;
+
    private final LongYoVariable lastReceivedControlID;
 
    private final int[] slowSensorSlotIDs = new int[7];
-   
-   private final LongYoVariable checksumFailures;
-   
-   private final DoubleYoVariable motorAngleOffset;
-   
-   private final int STRAIN_SENSOR_BASE_15=15;
-   private final int PRESSURE_SENSOR_BASE_11=11;
-   
-   
 
-   public StepprActuatorState(String name, double motorKt, int kinematicDirection, YoVariableRegistry parentRegistry)
+   private final LongYoVariable checksumFailures;
+
+   private final DoubleYoVariable motorAngleOffset;
+
+   private final int STRAIN_SENSOR_BASE_15 = 15;
+   private final int PRESSURE_SENSOR_BASE_11 = 11;
+
+   public StepprActuatorState(String name, double motorKt, int SensedCurrentToTorqueDirection, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.motorKt = motorKt;
-      this.kinematicDirection = kinematicDirection;
+      this.SensedCurrentToTorqueDirection = SensedCurrentToTorqueDirection;
       this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
 
       this.inphaseCompositeStatorCurrent = new DoubleYoVariable(name + "InphaseCompositeStatorCurrent", registry);
@@ -79,12 +79,14 @@ public class StepprActuatorState
       this.jointEncoderPosition = new DoubleYoVariable(name + "JointEncoderPosition", registry);
       this.jointEncoderVelocity = new DoubleYoVariable(name + "JointEncoderVelocity", registry);
 
+      this.motorPower = new DoubleYoVariable(name + "MotorPower", registry);
+
       this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
 
       this.motorAngleOffset = new DoubleYoVariable(name + "MotorAngleOffset", registry);
-      
+
       this.checksumFailures = new LongYoVariable("checksumFailures", registry);
-      
+
       createSlowSensors(name);
 
       parentRegistry.addChild(registry);
@@ -115,9 +117,9 @@ public class StepprActuatorState
       slowSensors[13] = new PressureSensor(name, 2, slowSensorRegistry);
       slowSensors[14] = new PressureSensor(name, 3, slowSensorRegistry);
 
-      slowSensors[STRAIN_SENSOR_BASE_15+0] = new StrainSensor(name, 0, slowSensorRegistry);
-      slowSensors[STRAIN_SENSOR_BASE_15+1] = new StrainSensor(name, 1, slowSensorRegistry);
-      slowSensors[STRAIN_SENSOR_BASE_15+2] = new StrainSensor(name, 2, slowSensorRegistry);
+      slowSensors[STRAIN_SENSOR_BASE_15 + 0] = new StrainSensor(name, 0, slowSensorRegistry);
+      slowSensors[STRAIN_SENSOR_BASE_15 + 1] = new StrainSensor(name, 1, slowSensorRegistry);
+      slowSensors[STRAIN_SENSOR_BASE_15 + 2] = new StrainSensor(name, 2, slowSensorRegistry);
 
       slowSensors[18] = new IMUAccelSensor(name, "X", slowSensorRegistry);
       slowSensors[19] = new IMUAccelSensor(name, "Y", slowSensorRegistry);
@@ -136,7 +138,17 @@ public class StepprActuatorState
       slowSensors[29] = new MotorTemperature(name, slowSensorRegistry);
       this.registry.addChild(slowSensorRegistry);
    }
-   
+
+   private double getInphaseControlEffort()
+   {
+      return ((InphaseControlEffort) slowSensors[9]).getValue();
+   }
+
+   private double getQuadratureControlEffort()
+   {
+      return ((QuadratureControlEffort) slowSensors[10]).getValue();
+   }
+
    public void getIMUAccelerationVector(Vector3d vectorToPack)
    {
       double x = ((IMUAccelSensor) slowSensors[18]).getValue();
@@ -144,17 +156,15 @@ public class StepprActuatorState
       double z = ((IMUAccelSensor) slowSensors[20]).getValue();
       vectorToPack.set(x, y, z);
    }
-   
+
    public void getIMUMagnetoVector(Vector3d vectorToPack)
    {
       double x = ((IMUMagSensor) slowSensors[24]).getValue();
       double y = ((IMUMagSensor) slowSensors[25]).getValue();
       double z = ((IMUMagSensor) slowSensors[26]).getValue();
       vectorToPack.set(x, y, z);
-      
+
    }
-   
-   
 
    public void update(ByteBuffer buffer) throws IOException
    {
@@ -167,17 +177,17 @@ public class StepprActuatorState
       int length = buffer.get() & 0xFF;
 
       buffer.mark();
-      
+
       int calculatedChecksum = 0;
-      for(int i = 0; i < 58; i++)
+      for (int i = 0; i < 58; i++)
       {
-         calculatedChecksum = (calculatedChecksum + (buffer.get() & 0xFF)) & 0xFF;         
+         calculatedChecksum = (calculatedChecksum + (buffer.get() & 0xFF)) & 0xFF;
       }
       int checksum = buffer.get() & 0xFF;
-      
+
       @SuppressWarnings("unused")
       int unused = buffer.get();
-      
+
       if (calculatedChecksum != checksum)
       {
          checksumFailures.increment();
@@ -210,7 +220,7 @@ public class StepprActuatorState
       {
          int id = slowSensorSlotIDs[i];
          int slowSensorValue = buffer.getShort() & 0xFFFF;
-         
+
          if (id < slowSensors.length)
          {
             if (slowSensors[id] != null)
@@ -220,11 +230,12 @@ public class StepprActuatorState
          }
       }
 
-
       checksum = buffer.get() & 0xFF;
 
       unused = buffer.get();
 
+      motorPower.set(3.0 / 4.0 * (quadratureCompositeStatorCurrent.getDoubleValue() * getQuadratureControlEffort() + inphaseCompositeStatorCurrent
+            .getDoubleValue() * getInphaseControlEffort()));
 
    }
 
@@ -241,12 +252,12 @@ public class StepprActuatorState
    public void updateCanonicalAngle(double angle, double clocking)
    {
       double delta = angle - (motorEncoderPosition.getDoubleValue() - motorAngleOffset.getDoubleValue());
-      
+
       double offset = Math.round(delta / clocking) * clocking;
       motorAngleOffset.set(offset);
-      
+
    }
-   
+
    public double getMotorPosition()
    {
       return motorEncoderPosition.getDoubleValue();
@@ -269,11 +280,16 @@ public class StepprActuatorState
 
    public double getMotorTorque()
    {
-      return quadratureCompositeStatorCurrent.getDoubleValue() * motorKt * kinematicDirection;
+      return quadratureCompositeStatorCurrent.getDoubleValue() * motorKt * SensedCurrentToTorqueDirection;
    }
-   
+
    public StepprSlowSensor[] getSlowSensors()
    {
       return slowSensors;
+   }
+
+   public double getMotorPower()
+   {
+      return motorPower.getDoubleValue();
    }
 }

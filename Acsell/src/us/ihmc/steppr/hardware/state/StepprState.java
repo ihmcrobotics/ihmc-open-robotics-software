@@ -18,6 +18,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class StepprState
@@ -36,6 +37,7 @@ public class StepprState
 
    private final EnumMap<StepprActuator, StepprActuatorState> actuatorStates = new EnumMap<>(StepprActuator.class);
    private final StepprPowerDistributionADCState powerDistributionState = new StepprPowerDistributionADCState("powerDistribution", registry);
+   private final DoubleYoVariable totalMotorPower = new DoubleYoVariable("totalMotorPower", registry);
    private final StepprXSensState xsens = new StepprXSensState("xsens", registry);
 
    private final EnumMap<StepprJoint, StepprJointState> jointStates = new EnumMap<>(StepprJoint.class);
@@ -125,7 +127,7 @@ public class StepprState
       for (StepprActuator actuatorName : StepprActuator.values)
       {
          actuatorStates
-               .put(actuatorName, new StepprActuatorState(actuatorName.getName(), actuatorName.getKt(), actuatorName.getKinematicDirection(), registry));
+               .put(actuatorName, new StepprActuatorState(actuatorName.getName(), actuatorName.getKt(), actuatorName.getSensedCurrentToTorqueDirection(), registry));
       }
    }
 
@@ -194,6 +196,20 @@ public class StepprState
          rightFootStrainGauge.tare();
          tareSensors.set(false);
       }
+    
+      updateMotorPower();
+      
+   }
+   
+   private void updateMotorPower()
+   {
+	   double accTotalMotorPower = 0;
+	   
+	   for (StepprActuator actuatorName : StepprActuator.values)
+	   {
+	      accTotalMotorPower += actuatorStates.get(actuatorName).getMotorPower();
+	   }
+	   totalMotorPower.set(accTotalMotorPower);
    }
 
    private void tarePressureSensors()

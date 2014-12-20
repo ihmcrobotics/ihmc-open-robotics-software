@@ -69,7 +69,7 @@ public class StepprAnkleJointState
       motorAngle[1] = leftActuator.getMotorPosition();
       
       interpolator.updateAnkleState(motorAngle[0], motorAngle[1], rightActuator.getMotorVelocity(),
-            leftActuator.getMotorVelocity(), rightActuator.getMotorTorque(), rightActuator.getMotorTorque());
+            leftActuator.getMotorVelocity(), rightActuator.getMotorTorque(), leftActuator.getMotorTorque());
 
       this.q_calc_x.set(interpolator.getQAnkleX());
       this.q_calc_y.set(interpolator.getQAnkleY());

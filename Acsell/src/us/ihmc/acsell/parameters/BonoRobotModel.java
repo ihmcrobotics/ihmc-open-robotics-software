@@ -33,6 +33,9 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -48,11 +51,7 @@ public class BonoRobotModel implements DRCRobotModel
    private static final double CONTROLLER_DT = 0.004;
    private static final double ESTIMATOR_DT = 0.001;
 
-   private final String[] resourceDirectories = new String[] {
-         "models/axl/",
-         "models/axl/axl_description/",
-         "models/axl/axl_description/bono/",
-   };
+   private final String[] resourceDirectories = new String[] { "models/axl/", "models/axl/axl_description/", "models/axl/axl_description/bono/", };
 
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
@@ -158,7 +157,7 @@ public class BonoRobotModel implements DRCRobotModel
       return new BonoInitialSetup(groundHeight, initialYaw);
    }
 
-   //XXX: fix this
+   // XXX: fix this
    @Override
    public DRCRobotContactPointParameters getContactPointParameters()
    {
@@ -236,7 +235,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
-   
+
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
@@ -246,20 +245,20 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public RobotNetworkParameters getNetworkParameters()
    {
-	   return null;
+      return null;
    }
 
    @Override
    public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
    {
-	   return null;
+      return null;
    }
 
-	@Override
-	public CapturePointPlannerParameters getCapturePointPlannerParameters()
-	{
-		return capturePointPlannerParameters;
-	}
+   @Override
+   public CapturePointPlannerParameters getCapturePointPlannerParameters()
+   {
+      return capturePointPlannerParameters;
+   }
 
    @Override
    public DRCHandType getDRCHandType()
@@ -268,20 +267,28 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer, GlobalDataProducer globalDataProducersw)
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer,
+         GlobalDataProducer globalDataProducersw)
    {
       return null;
    }
 
    @Override
-   public FootstepParameters getFootstepParameters() {
-      // TODO Auto-generated method stub
+   public FootstepParameters getFootstepParameters()
+   {
       return null;
    }
-   
+
    @Override
    public LogModelProvider getLogModelProvider()
    {
       return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
    }
+
+   @Override
+   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
+   {
+      return new StepprOutputProcessor(controllerFullRobotModel);
+   }
+
 }

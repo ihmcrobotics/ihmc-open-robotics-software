@@ -63,6 +63,11 @@ public abstract class StepprActuatorCommand
       enabled.set(false);
    }
    
+   protected double getTauDesired()
+   {
+	   return tauDesired.getDoubleValue();
+   }
+   
    protected void setTauDesired(double tau)
    {
       tauDesired.set(tau);
