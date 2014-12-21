@@ -83,8 +83,8 @@ public class StepprAnkleJointState
       this.qd_y.set(leftActuator.getJointVelocity());
       
       //TODO: Check right/left
-      this.q_m_calc_rightActuator.set(interpolator.calculateMotor1Angle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
-      this.q_m_calc_leftActuator.set(interpolator.calculateMotor2Angle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
+      this.q_m_calc_rightActuator.set(interpolator.calculateRightMotorAngle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
+      this.q_m_calc_leftActuator.set(interpolator.calculateLeftMotorAngle(this.q_x.getDoubleValue(), this.q_y.getDoubleValue()));
 
       //update tau
       this.tau_x.set(interpolator.getTauAnkleX());

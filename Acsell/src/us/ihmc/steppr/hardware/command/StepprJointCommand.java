@@ -27,26 +27,6 @@ public class StepprJointCommand
       
       parentRegistry.addChild(registry);
    }
-   
-   /**
-    * 
-    * @param tau_d
-    * @param q
-    * @param qd
-    * @param motorAngles - for ankle motorAngles=2;
-    */
-   public void setTauDesired(double tau_d, double q, double qd, double...motorAngles)
-   {
-	      this.tauDesired.set(tau_d);
-	      
-	      this.q = q;
-	      this.qd = qd;
-	      for(int i = 0; i < numberOfActuators; i++)
-	      {
-	         this.motorAngles[i] = motorAngles[i];
-	      }
-   }
-   
      
    public void setTauDesired(double tau_d, RawJointSensorDataHolder rawSensorData)
    {

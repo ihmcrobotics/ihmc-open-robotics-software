@@ -6,8 +6,6 @@ import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
-import us.ihmc.steppr.hardware.command.StepprCommand;
-import us.ihmc.steppr.hardware.command.StepprJointCommand;
 import us.ihmc.steppr.hardware.state.StepprAnkleInterpolator;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -18,11 +16,10 @@ public class StepprOutputProcessor implements OutputProcessor
 {
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprOutputProcessor");
-   private final EnumMap<StepprActuator, DoubleYoVariable> outputActuators = new EnumMap<StepprActuator, DoubleYoVariable>(StepprActuator.class);
-   private final DoubleYoVariable totalDesiredRobotPower = new DoubleYoVariable("totalDesiredMotorPowoer", registry);
+   private final EnumMap<StepprActuator, DoubleYoVariable> predictedMotorPower = new EnumMap<StepprActuator, DoubleYoVariable>(StepprActuator.class);
+   private final DoubleYoVariable totalPredictedRobotPower = new DoubleYoVariable("totalPredictedMotorPowoer", registry);
    private final StepprAnkleInterpolator ankleInterpolator = new StepprAnkleInterpolator();
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
-   private final StepprCommand command = new StepprCommand(registry);
 
    public StepprOutputProcessor(FullRobotModel controllerFullRobotModel)
    {
@@ -30,7 +27,7 @@ public class StepprOutputProcessor implements OutputProcessor
 
       for (StepprActuator actuator : StepprActuator.values)
       {
-         outputActuators.put(actuator, new DoubleYoVariable(actuator.getName() + "MotorPower", registry));
+         predictedMotorPower.put(actuator, new DoubleYoVariable(actuator.getName() + "PredictedMotorPower", registry));
       }
    }
 
@@ -63,40 +60,54 @@ public class StepprOutputProcessor implements OutputProcessor
    {
       for (StepprJoint joint : StepprJoint.values)
       {
+         double actuatorTau = 0, actuatorQd = 0;
          OneDoFJoint oneDoFJoint = wholeBodyControlJoints.get(joint);
-         StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
-         jointCommand.setTauDesired(oneDoFJoint.getTau(), oneDoFJoint.getQ(), oneDoFJoint.getQd(), Double.NaN, Double.NaN);
+         if (joint.isLinear() || joint == StepprJoint.LEFT_KNEE_Y || joint == StepprJoint.RIGHT_KNEE_Y)
+         {
+            actuatorTau = oneDoFJoint.getTau() / joint.getRatio();
+            actuatorQd = oneDoFJoint.getQd() * joint.getRatio();
+            StepprActuator actuator = joint.getActuators()[0];
+            predictedMotorPower.get(actuator).set(calcPower(actuatorTau, actuatorQd, actuator.getKm()));
+         }
       }
-      
-      updateAnkle(StepprJoint.LEFT_ANKLE_X, StepprJoint.LEFT_ANKLE_Y);
-      updateAnkle(StepprJoint.RIGHT_ANKLE_X, StepprJoint.RIGHT_ANKLE_Y);
-      command.updateActuatorCommandsFromJointCommands();
 
-      double accTotalRobotPower =0;
+      updateAnkle(StepprJoint.LEFT_ANKLE_X, StepprJoint.LEFT_ANKLE_Y, StepprActuator.LEFT_ANKLE_LEFT, StepprActuator.LEFT_ANKLE_RIGHT);
+      updateAnkle(StepprJoint.RIGHT_ANKLE_X, StepprJoint.RIGHT_ANKLE_Y, StepprActuator.RIGHT_ANKLE_LEFT, StepprActuator.RIGHT_ANKLE_RIGHT);
+
+      double sumTotalMotorPower = 0;
       for (StepprActuator actuator : StepprActuator.values)
-      {         
-         double actuatorTau=command.getAcutatorTau(actuator);
-         double actuatorPower = square( actuatorTau/ actuator.getKm());
-         outputActuators.get(actuator).set(actuatorPower);
-         accTotalRobotPower += actuatorPower;
+      {
+         sumTotalMotorPower += predictedMotorPower.get(actuator).getDoubleValue();
       }
-      totalDesiredRobotPower.set(accTotalRobotPower);
+      totalPredictedRobotPower.set(sumTotalMotorPower);
    }
 
-   private double square(double v)
-   {
-      return v * v;
-   }
-
-   private void updateAnkle(StepprJoint ankleX, StepprJoint ankleY)
+   private void updateAnkle(StepprJoint ankleX, StepprJoint ankleY, StepprActuator ankleLeftActuator, StepprActuator ankleRightActuator)
    {
 
       OneDoFJoint oneDofAnkleX = wholeBodyControlJoints.get(ankleX);
       OneDoFJoint oneDofAnkleY = wholeBodyControlJoints.get(ankleY);
-      double motor1 = ankleInterpolator.calculateMotor1Angle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
-      double motor2 = ankleInterpolator.calculateMotor2Angle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
-      command.getStepprJointCommand(ankleX).setTauDesired(oneDofAnkleX.getTau(), oneDofAnkleX.getQ(), oneDofAnkleX.getQd(), motor1, motor2);
-      command.getStepprJointCommand(ankleY).setTauDesired(oneDofAnkleY.getTau(), oneDofAnkleY.getQ(), oneDofAnkleY.getQd(), motor1, motor2);
+      double qRightMotor = ankleInterpolator.calculateRightMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
+      double qLeftMotor = ankleInterpolator.calculateLeftMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
+
+      ankleInterpolator.calculateDesiredTau(qRightMotor, qLeftMotor, oneDofAnkleX.getTau(), oneDofAnkleY.getTau());
+      ankleInterpolator.calculateDesiredQd(qRightMotor, qLeftMotor, oneDofAnkleX.getQd(), oneDofAnkleY.getQd());
+
+      predictedMotorPower.get(ankleRightActuator).set(
+            calcPower(ankleInterpolator.getTauRightActuator(), ankleInterpolator.getMotorVelocityRight(), ankleRightActuator.getKm()));
+
+      predictedMotorPower.get(ankleLeftActuator).set(
+            calcPower(ankleInterpolator.getTauLeftActuator(), ankleInterpolator.getMotorVelocityLeft(), ankleLeftActuator.getKm()));
+
    }
 
+   private double calcPower(double tau, double qd, double km)
+   {
+      return square(tau / km);
+   }
+
+   private static double square(double v)
+   {
+      return v * v;
+   }
 }

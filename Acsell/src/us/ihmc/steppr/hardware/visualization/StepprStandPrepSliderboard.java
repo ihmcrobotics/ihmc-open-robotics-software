@@ -17,6 +17,7 @@ import us.ihmc.steppr.hardware.controllers.StepprStandPrepSetpoints;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -55,6 +56,16 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       YoVariable<?> icpX = registry.getVariable("WalkingHighLevelHumanoidController", "icpStandOffsetX");
       YoVariable<?> icpY = registry.getVariable("WalkingHighLevelHumanoidController", "icpStandOffsetY");
       
+      final YoVariable<?> motorPowerStateRequest = registry.getVariable("StepprSetup", "motorPowerStateRequest");
+      BooleanYoVariable requestPowerOff = new BooleanYoVariable("requestPowerOff", registry);
+      requestPowerOff.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            motorPowerStateRequest.setValueFromDouble(-1);
+         }
+      });
       
       for (StepprStandPrepSetpoints setpoint : StepprStandPrepSetpoints.values)
       {
@@ -73,7 +84,9 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          sliderBoardConfigurationManager.setSlider(8, icpY, -0.3, 0.3);
          
 
-         
+         sliderBoardConfigurationManager.setButton(1, registry.getVariable("StepprOutputWriter","enableOutput"));
+         sliderBoardConfigurationManager.setButton(2, registry.getVariable("StepprStandPrep","startStandPrep"));
+         sliderBoardConfigurationManager.setButton(8, requestPowerOff);
          
          sliderBoardConfigurationManager.saveConfiguration(setpoint.toString());
 

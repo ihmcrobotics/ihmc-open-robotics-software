@@ -26,6 +26,7 @@ public class StepprOutputWriter implements DRCOutputWriter
    private final StepprCommand command = new StepprCommand(registry);
 
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
+   private EnumMap<StepprJoint, DoubleYoVariable> tauControllerOutput;
    private final EnumMap<StepprJoint, OneDoFJoint> standPrepJoints;
    private final StepprStandPrep standPrep = new StepprStandPrep();
 
@@ -44,6 +45,10 @@ public class StepprOutputWriter implements DRCOutputWriter
 
       SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
+      
+      tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+      for(StepprJoint joint: StepprJoint.values)
+         tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName()+"tauControllerOutput", registry));
 
       outputWriter = new UDPStepprOutputWriter(command);
 
@@ -54,7 +59,7 @@ public class StepprOutputWriter implements DRCOutputWriter
 
       yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
       yoTauSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-
+      
    }
 
    @Override
@@ -109,8 +114,9 @@ public class StepprOutputWriter implements DRCOutputWriter
                yoTauSpring.get(joint).set(tauSpring);
             }
 
-//            jointCommand.setTauDesired(tau-tauSpring, rawSensorData); //use when Springs are installed
-            jointCommand.setTauDesired(tau, rawSensorData);
+            tauControllerOutput.get(joint).set(tau);
+            jointCommand.setTauDesired(tau-tauSpring, rawSensorData); //use when Springs are installed
+//            jointCommand.setTauDesired(tau, rawSensorData);
             jointCommand.setDamping(kd);
 
          }
