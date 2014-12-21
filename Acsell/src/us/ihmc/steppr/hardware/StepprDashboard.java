@@ -101,7 +101,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       JPanel logicPanel = new JPanel();
       logicPanel.setLayout(new BoxLayout(logicPanel, BoxLayout.X_AXIS));
       final YoVariable<?> logicPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "logicPowerStateRequest");
-      JButton logicPowerOn = new JButton("Logic power on");
+      final JButton logicPowerOn = new JButton("Logic power on");
       logicPowerOn.addActionListener(new ActionListener()
       {
 
@@ -109,6 +109,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          public void actionPerformed(ActionEvent e)
          {
             logicPowerStateRequest.setValueFromDouble(1.0);
+            logicPowerOn.setEnabled(false);
          }
       });
       JButton logicPowerOff = new JButton("Logic power off");
@@ -131,7 +132,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       JPanel motorPanel = new JPanel();
       motorPanel.setLayout(new BoxLayout(motorPanel, BoxLayout.X_AXIS));
       final YoVariable<?> motorPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "motorPowerStateRequest");
-      JButton motorPowerOn = new JButton("Motor power on");
+      final JButton motorPowerOn = new JButton("Motor power on");
       motorPowerOn.addActionListener(new ActionListener()
       {
 
@@ -139,6 +140,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          public void actionPerformed(ActionEvent e)
          {
             motorPowerStateRequest.setValueFromDouble(1.0);
+            motorPowerOn.setEnabled(false);
          }
       });
       JButton motorPowerOff = new JButton("Motor power off");

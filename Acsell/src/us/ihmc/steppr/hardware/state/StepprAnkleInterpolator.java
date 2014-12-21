@@ -88,8 +88,10 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 
    private final double[] Jit = new double[4];
    private final double[] Jt = new double[4];
+   private final double[] J = new double[4];
    private double qAnkleX, qAnkleY;
    private double qdAnkleX, qdAnkleY;
+   private double motorVelocityRight, motorVelocityLeft;
 
    private double tauRightActuator, tauLeftActuator;
    private double tauAnkleX, tauAnkleY;
@@ -147,13 +149,13 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 
    
    @Override
-   public double calculateMotor1Angle(double ankleX, double ankleY)
+   public double calculateRightMotorAngle(double ankleX, double ankleY)
    {
       return CubicApprox(pM1, ankleX, ankleY);
    }
 
    @Override
-   public double calculateMotor2Angle(double ankleX, double ankleY)
+   public double calculateLeftMotorAngle(double ankleX, double ankleY)
    {
       return CubicApprox(pM2, ankleX, ankleY);
    }
@@ -182,12 +184,34 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
       return tauAnkleY;
    }
    
+
+   
    @Override
    public double getRatio()
    {
       return N;
    }
 
+   
+   @Override
+   public void calculateDesiredQd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY)
+   {
+      JacobianInverseTranspose(Jit, motorAngleRight, motorAngleLeft);
+      twobytwoInverseTranspose(J, Jit);
+      motorVelocityRight = (J[0] * qdAnkleX + Jit[1] * qdAnkleY) * N;
+      motorVelocityLeft = (J[2] * qdAnkleX + Jit[3] * qdAnkleY) * N;
+   }
+   @Override
+   public double getMotorVelocityRight()
+   {
+      return motorVelocityRight;
+   }
+   
+   @Override
+   public double getMotorVelocityLeft()
+   {
+      return motorVelocityLeft;
+   }   
 
 
 }

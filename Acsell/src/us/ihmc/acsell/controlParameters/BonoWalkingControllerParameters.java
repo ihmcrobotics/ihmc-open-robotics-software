@@ -381,7 +381,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
-      double kp = runningOnRealRobot ? 40.0 : 100.0;
+      double kp = runningOnRealRobot ? 100.0 : 100.0;
       double zeta = runningOnRealRobot ? 0.7 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
