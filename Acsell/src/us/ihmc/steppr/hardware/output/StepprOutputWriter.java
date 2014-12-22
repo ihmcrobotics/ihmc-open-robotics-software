@@ -110,7 +110,7 @@ public class StepprOutputWriter implements DRCOutputWriter
             double tauSpring = 0;
             if (yoTauSpring.get(joint) != null)
             {
-               tauSpring = calcSpringTorque(joint, wholeBodyControlJoint.getQ());
+               tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
                yoTauSpring.get(joint).set(tauSpring);
             }
 
