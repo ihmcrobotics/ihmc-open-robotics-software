@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGeneratorVisu
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -36,8 +36,6 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepValidityMetric;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurningThenStraightFootstepGenerator;
-
-import us.ihmc.simulationconstructionset.Robot;
 
 public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTestInterface
 {
