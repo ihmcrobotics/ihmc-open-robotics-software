@@ -88,11 +88,13 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
 	   }
    }
    
+   @Override
    public void attachStateListener(NetStateListener stateListener)
    {
       stateListeners.add(stateListener);
    }
    
+   @Override
    public <T> void attachListener(Class<T> clazz, ObjectConsumer<T> listener)
    {
       if(listeners.containsKey(clazz))
@@ -105,6 +107,7 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
       }
    }
    
+   @Override
    public <T> void detachListener(Class<T> clazz, ObjectConsumer<T> listener)
    {
       if(listeners.containsKey(clazz))
@@ -117,11 +120,13 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
       }
    }
    
+   @Override
    public void attachGlobalListener(GlobalObjectConsumer listener)
    {
 	   globalListeners.add(listener);
    }
    
+   @Override
    public void detachGlobalListener(GlobalObjectConsumer listener)
    {
       if (globalListeners.contains(listener))
@@ -130,11 +135,13 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
       }
    }
    
+   @Override
    public synchronized void consumeObject(Object object)
    {
       consumeObject(object, true);
    }
    
+   @Override
    public synchronized void consumeObject(Object object, boolean consumeGlobal)
    {
       if (!consumeGlobal && !listeners.containsKey(object.getClass()))
@@ -179,6 +186,7 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
                executorService.execute(new Runnable()
                {
                   
+                  @Override
                   public void run()
                   {
                      for(GlobalObjectConsumer listener : globalListeners)
@@ -227,11 +235,13 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
       endPoint.addListener(listener);
    }
 
+   @Override
    public final void connect() throws IOException
    {
       openConnection();
    }
    
+   @Override
    public final void close()
    {
       closeConnection();
@@ -247,6 +257,7 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
 
    protected abstract int sendTCP(Object object);
    
+   @Override
    public abstract boolean isConnected();
 
    protected abstract void closeConnection();
