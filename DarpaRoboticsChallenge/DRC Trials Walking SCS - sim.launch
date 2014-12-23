@@ -19,12 +19,12 @@
 <listEntry value="$Proxy*"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/DarpaRoboticsChallenge/src/us/ihmc/darpaRoboticsChallenge/DRCDemo01.java"/>
+<listEntry value="/IHMCHumanoidOperatorInterface"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="1"/>
+<listEntry value="4"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.DRCDemo01"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="images.DRCDemo01"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--sim --start DRC_TRIALS_TRAINING_WALKING"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DarpaRoboticsChallenge"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="IHMCHumanoidOperatorInterface"/>
 </launchConfiguration>

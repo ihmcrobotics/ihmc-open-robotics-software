@@ -55,7 +55,6 @@ import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
-//import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
@@ -919,7 +918,7 @@ public class DRCDashboard
          {
             try
             {
-               Class<?> clazz = Class.forName("us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface");
+               Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.DRCOperatorInterface");
                uiSpawner.spawn(clazz, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
             }
             catch (ClassNotFoundException e1)
@@ -1212,7 +1211,7 @@ public class DRCDashboard
       {
          try
          {
-            Class<?> clazz = Class.forName("us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface");
+            Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.DRCOperatorInterface");
             uiSpawner.spawn(clazz, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
          }
          catch (ClassNotFoundException e)

@@ -8,5 +8,5 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.userInterface.StatisticsDisplay"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-m DRC_NO_HANDS"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DarpaRoboticsChallenge"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="IHMCHumanoidOperatorInterface"/>
 </launchConfiguration>
