@@ -3,54 +3,66 @@ package us.ihmc.communication;
 import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.communication.net.GlobalObjectConsumer;
-import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
 public class NetworkProcessor
 {
-   private final TIntObjectHashMap<ObjectCommunicator> communicators = new TIntObjectHashMap<ObjectCommunicator>();
-   private final TIntObjectHashMap<ObjectConsumer<Packet>> consumers = new TIntObjectHashMap<ObjectConsumer<Packet>>();
+   private final TIntObjectHashMap<PacketCommunicator> communicators = new TIntObjectHashMap<PacketCommunicator>();
+   private final TIntObjectHashMap<PacketConsumer<Packet>> consumers = new TIntObjectHashMap<PacketConsumer<Packet>>();
    private final TIntIntHashMap redirects = new TIntIntHashMap();
 
    public NetworkProcessor()
    {
-
    }
 
-   public void attachObjectCommunicator(ObjectCommunicator objectCommunicator, int id)
+   public void attachPacketCommunicator(PacketCommunicator packetCommunicator, int id)
    {
-      GlobalObjectConsumer packetConsumer = new GlobalObjectConsumer()
+      PacketConsumer<Packet> packetConsumer = new PacketConsumer<Packet>()
       {
          @Override
-         public void consumeObject(Object packet)
+         public void receivedPacket(Packet packet)
          {
-//            int destination = packet.getDestination();
-//            if (redirects.containsKey(destination))
-//            {
-//               destination = redirects.get(destination);
-//            }
-//
-//            communicators.get(destination).consumeObject(packet);
-         }
-
-         @Override
-         public void consumeObject(Object packet, boolean consumeGlobal)
-         {
-            consumeObject(packet);
+            int destination = packet.getDestination();
+            if (redirects.containsKey(destination))
+            {
+               destination = getRedirectDestination(destination);
+               packet.setDestination(destination);
+            }
+            PacketCommunicator destinationCommunicator = communicators.get(destination);
+            if (destinationCommunicator != null && destinationCommunicator.isConnected())
+            {
+               destinationCommunicator.receivedPacket(packet);
+            }
          }
       };
-      
-//      objectCommunicator.attachListener(Packet.class, packetConsumer);
-//      consumers.put(id, packetConsumer);
-      communicators.put(id, objectCommunicator);
+
+      packetCommunicator.setGlobalListener(packetConsumer);
+
+      consumers.put(id, packetConsumer);
+      communicators.put(id, packetCommunicator);
+   }
+   
+   /**
+    * possible infinite recursion for funs.
+    */
+   private int getRedirectDestination(int destination)
+   {
+      if (redirects.containsKey(destination))
+      {
+         destination = getRedirectDestination(redirects.get(destination));
+      }
+      return destination;
    }
 
    public void detatchObjectCommunicator(int id)
    {
-      communicators.remove(id);
-      consumers.remove(id);
+      PacketCommunicator communicator = communicators.remove(id);
+      PacketConsumer<Packet> consumer = consumers.remove(id);
+      
+      communicator.removeGlobalListener();
+      
       redirects.remove(id);
 
       if (redirects.containsValue(id))
