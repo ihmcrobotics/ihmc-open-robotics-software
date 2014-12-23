@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/DarpaRoboticsChallenge"/>
+<listEntry value="/IHMCHumanoidOperatorInterface"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>
@@ -11,5 +11,5 @@
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.gazebo.AtlasROSControllerHelper"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-n"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DarpaRoboticsChallenge"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="IHMCHumanoidOperatorInterface"/>
 </launchConfiguration>
