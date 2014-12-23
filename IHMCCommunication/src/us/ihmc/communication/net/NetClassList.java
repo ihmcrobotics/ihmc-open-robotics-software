@@ -41,13 +41,18 @@ public class NetClassList
          registerPacketField(type);
       }
    }
+   
+   public void getPacketClassList(ArrayList<Class<?>> listToPack)
+   {
+      listToPack.addAll(classList);
+   }
 
-   /* package-private */ ArrayList<Class<?>> getPacketClassList()
+   public ArrayList<Class<?>> getPacketClassList()
    {
       return classList;
    }
 
-   /* package-private */ ArrayList<Class<?>> getPacketFieldList()
+   public ArrayList<Class<?>> getPacketFieldList()
    {
       return typeList;
    }
