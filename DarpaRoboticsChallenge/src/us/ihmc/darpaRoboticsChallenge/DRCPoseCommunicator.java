@@ -13,14 +13,18 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
+import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.AsyncContinuousExecutor;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
@@ -43,6 +47,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final SideDependentList<String> footForceSensorNames;
    private final SideDependentList<String> wristForceSensorNames;
 
+   private final SideDependentList<ReferenceFrame> wristForceSensorFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ForceSensorDistalMassCompensator> wristForceSensorDistalMassCompensators = new SideDependentList<ForceSensorDistalMassCompensator>();
+
    private State currentState;
 
    private final ConcurrentRingBuffer<State> stateRingBuffer;
@@ -53,14 +60,39 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+      setupForceSensorMassCompensators(estimatorModel);
 
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
       stateRingBuffer = new ConcurrentRingBuffer<State>(new State.Builder(jointConfigurationGathererAndProducer.getNumberOfJoints(),
             jointConfigurationGathererAndProducer.getNumberOfForceSensors()), 16);
       setupSensorFrames(sensorInformation, estimatorModel);
       startWriterThread();
+   }
+
+   private void setupForceSensorMassCompensators(SDFFullRobotModel estimatorModel)
+   {
+      ForceSensorDefinition[] forceSensorDefinitions = estimatorModel.getForceSensorDefinitions();
+
+      for (int i = 0; i < forceSensorDefinitions.length; i++)
+      {
+         ForceSensorDefinition sensorDef = forceSensorDefinitions[i];
+         String forceSensorName = sensorDef.getSensorName();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (forceSensorName == wristForceSensorNames.get(robotSide))
+            {
+               ForceSensorDistalMassCompensator massComp = new ForceSensorDistalMassCompensator(sensorDef, registry);
+               wristForceSensorDistalMassCompensators.put(robotSide, massComp);
+
+               ReferenceFrame sensorFrame = sensorDef.getSensorFrame();
+               wristForceSensorFrames.put(robotSide, sensorFrame);
+            }
+         }
+      }
    }
 
    private void setupSensorFrames(DRCRobotSensorInformation sensorInformation, SDFFullRobotModel estimatorModel)
@@ -174,6 +206,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
             }
          }
 
+         Wrench forceSensorWrench = new Wrench();
+
          private void setSensorPacketFromRobotConfigData(AtlasWristFeetSensorPacket wristFeetSensorPacket, RobotConfigurationData robotConfigData)
          {
             String[] forceSensorNames = robotConfigData.getForceSensorNames();
@@ -203,24 +237,44 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
                   else if (sensorName == wristForceSensorNames.get(RobotSide.LEFT))
                   {
+                     forceSensorWrench.set(wristForceSensorFrames.get(RobotSide.LEFT), momentAndForceVector);
+                     ForceSensorDistalMassCompensator massComp = wristForceSensorDistalMassCompensators.get(RobotSide.LEFT);
+                     
+                     massComp.update(forceSensorWrench);
+                     FrameVector forceMassCompensated = massComp.getSensorForceMassCompensated();
+
                      wristFeetSensorPacket.setLeftWristMx(momentAndForceVector.get(0));
                      wristFeetSensorPacket.setLeftWristMy(momentAndForceVector.get(1));
                      wristFeetSensorPacket.setLeftWristMz(momentAndForceVector.get(2));
 
-                     wristFeetSensorPacket.setLeftWristFx(momentAndForceVector.get(3));
-                     wristFeetSensorPacket.setLeftWristFy(momentAndForceVector.get(4));
-                     wristFeetSensorPacket.setLeftWristFz(momentAndForceVector.get(5));
+                     wristFeetSensorPacket.setLeftWristFx(forceMassCompensated.getX());
+                     wristFeetSensorPacket.setLeftWristFy(forceMassCompensated.getY());
+                     wristFeetSensorPacket.setLeftWristFz(forceMassCompensated.getZ());
+
+                     //                     wristFeetSensorPacket.setLeftWristFx(momentAndForceVector.get(3));
+                     //                     wristFeetSensorPacket.setLeftWristFy(momentAndForceVector.get(4));
+                     //                     wristFeetSensorPacket.setLeftWristFz(momentAndForceVector.get(5));
                   }
 
                   else if (sensorName == wristForceSensorNames.get(RobotSide.RIGHT))
                   {
+                     forceSensorWrench.set(wristForceSensorFrames.get(RobotSide.RIGHT), momentAndForceVector);
+                     ForceSensorDistalMassCompensator massComp = wristForceSensorDistalMassCompensators.get(RobotSide.RIGHT);
+
+                     massComp.update(forceSensorWrench);
+                     FrameVector forceMassCompensated = massComp.getSensorForceMassCompensated();
+
                      wristFeetSensorPacket.setRightWristMx(momentAndForceVector.get(0));
                      wristFeetSensorPacket.setRightWristMy(momentAndForceVector.get(1));
                      wristFeetSensorPacket.setRightWristMz(momentAndForceVector.get(2));
 
-                     wristFeetSensorPacket.setRightWristFx(momentAndForceVector.get(3));
-                     wristFeetSensorPacket.setRightWristFy(momentAndForceVector.get(4));
-                     wristFeetSensorPacket.setRightWristFz(momentAndForceVector.get(5));
+                     wristFeetSensorPacket.setRightWristFx(forceMassCompensated.getX());
+                     wristFeetSensorPacket.setRightWristFy(forceMassCompensated.getY());
+                     wristFeetSensorPacket.setRightWristFz(forceMassCompensated.getZ());
+                     
+                     //                     wristFeetSensorPacket.setRightWristFx(momentAndForceVector.get(3));
+                     //                     wristFeetSensorPacket.setRightWristFy(momentAndForceVector.get(4));
+                     //                     wristFeetSensorPacket.setRightWristFz(momentAndForceVector.get(5));
                   }
                }
             }
