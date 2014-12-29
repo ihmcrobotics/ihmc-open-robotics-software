@@ -21,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
 {
@@ -32,7 +33,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
 
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;
-   private ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
    private JMELidarScanVisualizer jmeLidarScanVisualizer;
    
    @Before
@@ -85,10 +86,10 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
    private class LidarConsumer implements ObjectConsumer<SparseLidarScanPacket>
    {
       @Override
-      public void consumeObject(SparseLidarScanPacket sparseLidarScan)
+      public void consumeObject(SparseLidarScanPacket sparseLidarScanPacket)
       {
          numberOfLidarScansConsumed++;
-
+         SparseLidarScan sparseLidarScan = sparseLidarScanPacket.createFullSparseLidarScan();
          jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());
          jmeLidarScanVisualizer.addPointCloud(sparseLidarScan.getAllPoints3f());
 
