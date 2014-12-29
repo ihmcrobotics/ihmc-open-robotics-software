@@ -16,7 +16,6 @@ import us.ihmc.userInterface.util.DecayingResolutionFilter;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.SphericalLinearResolutionProvider;
-import us.ihmc.utilities.lidar.polarLidar.AbstractLidarScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -40,7 +39,7 @@ public class DepthDataFilter
 
    // Adjustment which is applied to LIDAR points.  Must be applied while points are still in LIDAR frame.  Allows users correct for errors
    // See DRCManualLidarTransform and DRCLidarVisualizationManager. This is a bit of a hack but less likely to have unintended consequences.
-   private RigidBodyTransform worldToCorrected = new RigidBodyTransform();
+   private final RigidBodyTransform worldToCorrected = new RigidBodyTransform();
 
    public DepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel)
    {
@@ -104,7 +103,7 @@ public class DepthDataFilter
       return new SparseLidarScanPacket(lidarScan, indexes);
    }
 
-   public boolean addPoint(AbstractLidarScan lidarScan, int i)
+   public boolean addPoint(LidarScan lidarScan, int i)
    {
       Point3d lidarOrigin = new Point3d();
       lidarScan.getAverageTransform().transform(lidarOrigin);
