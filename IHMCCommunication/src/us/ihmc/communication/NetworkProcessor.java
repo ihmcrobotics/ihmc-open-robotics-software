@@ -3,8 +3,8 @@ package us.ihmc.communication;
 import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packetCommunicator.PacketConsumer;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
 public class NetworkProcessor
