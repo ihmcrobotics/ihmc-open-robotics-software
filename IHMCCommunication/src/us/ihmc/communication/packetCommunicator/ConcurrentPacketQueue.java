@@ -2,6 +2,7 @@ package us.ihmc.communication.packetCommunicator;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
 public class ConcurrentPacketQueue<T extends Packet> implements PacketConsumer<T>

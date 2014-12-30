@@ -1,4 +1,4 @@
-package us.ihmc.communication.packetCommunicator;
+package us.ihmc.communication.net;
 
 import us.ihmc.communication.packets.Packet;
 
