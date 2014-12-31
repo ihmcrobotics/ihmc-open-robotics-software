@@ -462,7 +462,6 @@
         <parent link="r_hand"/>
         <child  link="r_ee_link"/>
         <origin rpy="1.5708 0 -1.5708" xyz="-0.0 -0.26  -0.00"/>
-         <!-- origin rpy="0 0 -1.5708" xyz="-0.0 -0.10  -0.00"/ -->
     </joint>    
     <link name="r_ee_link"/>
 
