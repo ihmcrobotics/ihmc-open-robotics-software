@@ -38,6 +38,7 @@ dependencies {
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output
     testCompile project(':IHMCHumanoidOperatorInterface')
+    testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
     compile project(':Graphics3DAdapter')
     compile project(':IHMCROSTools')
     compile project(':ImageProcessing')
