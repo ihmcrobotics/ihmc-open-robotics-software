@@ -44,7 +44,6 @@ public class AtlasStatisticsDisplay
 
          return;
       }
-      new StatisticsDisplay(model.createFullRobotModel());
       
       try
       {
