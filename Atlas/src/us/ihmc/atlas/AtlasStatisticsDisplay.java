@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.userInterface.StatisticsDisplay;
+import us.ihmc.humanoidOperatorInterface.networking.StatisticsDisplay;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -48,7 +48,7 @@ public class AtlasStatisticsDisplay
       
       try
       {
-    	  Class<?> clazz = Class.forName("us.ihmc.darpaRoboticsChallenge.userInterface.StatisticsDisplay");
+    	  Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.networking.StatisticsDisplay");
     	  Constructor<?> constructor = clazz.getDeclaredConstructor(us.ihmc.SdfLoader.SDFFullRobotModel.class);
     	  constructor.newInstance(model.createFullRobotModel());
       }
