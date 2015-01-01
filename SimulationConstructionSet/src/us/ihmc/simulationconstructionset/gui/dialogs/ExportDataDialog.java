@@ -145,16 +145,16 @@ public class ExportDataDialog extends JDialog implements ActionListener
          dataRadioButton.setSelected(true);
          dataRadioButton.addActionListener(this);
 
-         asciiRadioButton.setText("ASCII");
+         asciiRadioButton.setText("ASCII (Similar to Matlab/Octave Script)");
          asciiRadioButton.setSelected(false);
          asciiRadioButton.addActionListener(this);
          binaryRadioButton.setText("Binary");
          binaryRadioButton.setSelected(true);
          binaryRadioButton.addActionListener(this);
-         matlabRadioButton.setText("Matlab");
+         matlabRadioButton.setText("Matlab/Octave (*.mat)");
          matlabRadioButton.setSelected(false);
          matlabRadioButton.addActionListener(this);
-         spreadsheetRadioButton.setText("spreadsheet");
+         spreadsheetRadioButton.setText("Comma-Separated-Values (CSV)");
          spreadsheetRadioButton.setSelected(false);
          spreadsheetRadioButton.addActionListener(this);
 
