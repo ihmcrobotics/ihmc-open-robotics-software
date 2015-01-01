@@ -11,6 +11,7 @@ import us.ihmc.simulationconstructionset.gui.ExportDataDialogListener;
 import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogs.ExportDataDialog;
+import us.ihmc.simulationconstructionset.gui.dialogs.SCSExportDataFormat;
 
 public class ExportDataDialogGenerator implements ExportDataDialogConstructor, ExportDataDialogListener
 {
@@ -22,7 +23,7 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
    private File chosenFile;
 
    private javax.swing.filechooser.FileFilter stateFileFilter = new MyFileFilter(new String[] {".state", ".state.gz"}, "State (.state, .state.gz)");
-   private javax.swing.filechooser.FileFilter dataFileFilter = new MyFileFilter(new String[] {".data", ".data.gz", ".data.csv"},
+   private javax.swing.filechooser.FileFilter dataFileFilter = new MyFileFilter(new String[] {".data", ".data.gz", ".data.csv", ".mat"},
                                                                   "Data (.data, .data.gz, .data.csv)");
 
 
@@ -72,13 +73,14 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
       sim = null;
       varGroupList = null;
 
-      dataFileChooser = null; stateFileChooser = null;
+      dataFileChooser = null;
+      stateFileChooser = null;
       chosenFile = null;
 
       stateFileFilter = null;
       dataFileFilter = null;
    }
-   
+
    public void setCurrentDirectory(File dir)
    {
       stateFileChooser.setCurrentDirectory(dir);
@@ -97,7 +99,7 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
       new ExportDataDialog(frame, varGroupList, this);
    }
 
-   public void export(String varGroup, int dataType, int dataFormat, int dataCompression, boolean spreadsheetFormatted)
+   public void export(String varGroup, int dataType, SCSExportDataFormat dataFormat, int dataCompression)
    {
       // if (true) return;
       sim.disableGUIComponents();
@@ -108,11 +110,14 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
          fileEnding = ".data";
       else
          fileEnding = ".state";
-      if (dataCompression == ExportDataDialog.COMPRESS)
+      
+      if ((dataFormat==SCSExportDataFormat.ASCII || dataFormat==SCSExportDataFormat.BINARY) &&dataCompression == ExportDataDialog.COMPRESS)
          fileEnding = fileEnding.concat(".gz");
 
-      if ((spreadsheetFormatted) && (dataType == ExportDataDialog.DATA) && (dataCompression == ExportDataDialog.NO_COMPRESS))
+      if (dataFormat == SCSExportDataFormat.SPREADSHEET)
          fileEnding = fileEnding.concat(".csv");
+      else if (dataFormat == SCSExportDataFormat.MATLAB)
+         fileEnding = ".mat"; //matlab hates .data.mat so replace instead of concat
 
 
       if (dataType == ExportDataDialog.DATA)
@@ -133,13 +138,26 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
                }
             }
 
-            boolean binary = (dataFormat == ExportDataDialog.BINARY);
             boolean compress = (dataCompression == ExportDataDialog.COMPRESS);
 
-            if (!binary &&!compress && spreadsheetFormatted)
-               sim.writeSpreadsheetFormattedData(varGroup, chosenFile);
-            else
-               sim.writeData(varGroup, binary, compress, chosenFile);
+            switch (dataFormat)
+            {
+               case ASCII :
+                  sim.writeData(varGroup, false, compress, chosenFile);
+                  break;
+
+               case BINARY :
+                  sim.writeData(varGroup, true, compress, chosenFile);
+                  break;
+
+               case MATLAB :
+                  sim.writeMatlabData(varGroup, chosenFile);
+                  break;
+
+               case SPREADSHEET :
+                  sim.writeSpreadsheetFormattedData(varGroup, chosenFile);
+                  break;
+            }
          }
       }
 
@@ -161,17 +179,25 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
                }
             }
 
-            boolean binary = (dataFormat == ExportDataDialog.BINARY);
             boolean compress = (dataCompression == ExportDataDialog.COMPRESS);
 
-            if (spreadsheetFormatted)
+            switch(dataFormat)
+            {
+            case ASCII:
+               sim.writeState(varGroup, false, compress, chosenFile);
+               break;
+            case BINARY:
+               sim.writeState(varGroup, true, compress, chosenFile);
+               break;
+            case SPREADSHEET:
                sim.writeSpreadsheetFormattedState(varGroup, chosenFile);
-            else
-               sim.writeState(varGroup, binary, compress, chosenFile);
+               break;
+            case MATLAB:
+               sim.writeMatlabData(varGroup, chosenFile);
+            }
          }
       }
 
       sim.enableGUIComponents();
    }
 }
-
