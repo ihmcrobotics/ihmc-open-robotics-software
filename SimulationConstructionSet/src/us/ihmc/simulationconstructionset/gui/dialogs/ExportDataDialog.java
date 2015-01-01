@@ -34,7 +34,7 @@ public class ExportDataDialog extends JDialog implements ActionListener
    private static final long serialVersionUID = 8567689788428234128L;
 
    public static final int
-      STATE = 0, DATA = 1, ASCII = 3, BINARY = 4, COMPRESS = 5, NO_COMPRESS = 6;
+      STATE = 0, DATA = 1, COMPRESS = 5, NO_COMPRESS = 6;
 
    private JButton exportButton, cancelButton;
    private ExportDataPanel exportPanel;
@@ -76,12 +76,8 @@ public class ExportDataDialog extends JDialog implements ActionListener
 
       // Enlarge Text Fields:
 
-
-
-
       /*
-       * size = currentTextField.getSize();
-       * size.width = size.width*5/4;
+       * size = currentTextField.getSize(); size.width = size.width*5/4;
        * currentTextField.setSize(size);
        * currentTextField.setPreferredSize(size);
        * currentTextField.setMinimumSize(size);
@@ -91,7 +87,6 @@ public class ExportDataDialog extends JDialog implements ActionListener
       this.setVisible(true);
 
       parentFrame.repaint();    // This is a horrible way to get the graphs to repaint...
-
 
    }
 
@@ -111,7 +106,6 @@ public class ExportDataDialog extends JDialog implements ActionListener
       parentFrame.repaint();    // This is a horrible way to get the graphs to repaint...
    }
 
-
    private class ExportDataPanel extends JPanel implements ActionListener
    {
       /**
@@ -125,9 +119,10 @@ public class ExportDataDialog extends JDialog implements ActionListener
       private JRadioButton stateRadioButton = new JRadioButton();
       private JRadioButton dataRadioButton = new JRadioButton();
       private JRadioButton asciiRadioButton = new JRadioButton();
-      private JCheckBox spreadsheetFormatCheckBox = new JCheckBox();
+      private JRadioButton matlabRadioButton = new JRadioButton();
+      private JRadioButton spreadsheetRadioButton = new JRadioButton();
       private JRadioButton binaryRadioButton = new JRadioButton();
-      private ButtonGroup asciiBinaryButtonGroup = new ButtonGroup();
+      private ButtonGroup dataFormatButtonGroup = new ButtonGroup();
       private JRadioButton compressRadioButton = new JRadioButton();
       private JRadioButton noCompressRadioButton = new JRadioButton();
       private ButtonGroup compressButtonGroup = new ButtonGroup();
@@ -156,6 +151,12 @@ public class ExportDataDialog extends JDialog implements ActionListener
          binaryRadioButton.setText("Binary");
          binaryRadioButton.setSelected(true);
          binaryRadioButton.addActionListener(this);
+         matlabRadioButton.setText("Matlab");
+         matlabRadioButton.setSelected(false);
+         matlabRadioButton.addActionListener(this);
+         spreadsheetRadioButton.setText("spreadsheet");
+         spreadsheetRadioButton.setSelected(false);
+         spreadsheetRadioButton.addActionListener(this);
 
          compressRadioButton.setText("Compress");
          compressRadioButton.setSelected(true);
@@ -164,16 +165,14 @@ public class ExportDataDialog extends JDialog implements ActionListener
          noCompressRadioButton.setSelected(false);
          noCompressRadioButton.addActionListener(this);
 
-         spreadsheetFormatCheckBox.setText("Spreadsheet Formatted");
-         spreadsheetFormatCheckBox.setSelected(false);
-         spreadsheetFormatCheckBox.setEnabled(false);
-         spreadsheetFormatCheckBox.addActionListener(this);
-
          stateDataButtonGroup.add(stateRadioButton);
          stateDataButtonGroup.add(dataRadioButton);
 
-         asciiBinaryButtonGroup.add(asciiRadioButton);
-         asciiBinaryButtonGroup.add(binaryRadioButton);
+         dataFormatButtonGroup.add(asciiRadioButton);
+         dataFormatButtonGroup.add(binaryRadioButton);
+         dataFormatButtonGroup.add(matlabRadioButton);
+         dataFormatButtonGroup.add(spreadsheetRadioButton);
+         
 
          compressButtonGroup.add(compressRadioButton);
          compressButtonGroup.add(noCompressRadioButton);
@@ -205,8 +204,11 @@ public class ExportDataDialog extends JDialog implements ActionListener
 
          add(verticalStrut1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-         add(asciiRadioButton, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
          add(binaryRadioButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(asciiRadioButton, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(matlabRadioButton, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(spreadsheetRadioButton,
+             new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
          add(verticalStrut1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
@@ -215,10 +217,6 @@ public class ExportDataDialog extends JDialog implements ActionListener
              new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
          add(verticalStrut1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
-         add(spreadsheetFormatCheckBox,
-             new GridBagConstraints(3, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
 
          Border blackLine = BorderFactory.createLineBorder(Color.black);
 
@@ -234,6 +232,8 @@ public class ExportDataDialog extends JDialog implements ActionListener
          {
             asciiRadioButton.setSelected(true);
             binaryRadioButton.setEnabled(false);
+            matlabRadioButton.setEnabled(false);
+            spreadsheetRadioButton.setEnabled(false);
             noCompressRadioButton.setSelected(true);
          }
 
@@ -241,6 +241,8 @@ public class ExportDataDialog extends JDialog implements ActionListener
          {
             binaryRadioButton.setEnabled(true);
             binaryRadioButton.setSelected(true);
+            matlabRadioButton.setEnabled(true);
+            spreadsheetRadioButton.setEnabled(true);            
             compressRadioButton.setSelected(true);
          }
 
@@ -252,28 +254,18 @@ public class ExportDataDialog extends JDialog implements ActionListener
          if (event.getSource() == binaryRadioButton)
          {
             compressRadioButton.setSelected(true);
-
-            spreadsheetFormatCheckBox.setEnabled(false);
-            spreadsheetFormatCheckBox.setSelected(false);
          }
 
-         if (event.getSource() == spreadsheetFormatCheckBox)
-         {
-            if (spreadsheetFormatCheckBox.isSelected())
-            {
-               asciiRadioButton.setSelected(true);
-               noCompressRadioButton.setSelected(true);
-            }
-         }
 
-         if (asciiRadioButton.isSelected() && noCompressRadioButton.isSelected())
+         if (event.getSource() == matlabRadioButton || event.getSource() == spreadsheetRadioButton)
          {
-            spreadsheetFormatCheckBox.setEnabled(true);
+            compressRadioButton.setEnabled(false);
+            noCompressRadioButton.setEnabled(false);
          }
          else
          {
-            spreadsheetFormatCheckBox.setSelected(false);
-            spreadsheetFormatCheckBox.setEnabled(false);
+            compressRadioButton.setEnabled(true);
+            noCompressRadioButton.setEnabled(true);
          }
 
       }
@@ -282,11 +274,28 @@ public class ExportDataDialog extends JDialog implements ActionListener
       {
          String varGroup = varGroupComboBox.getSelectedItem().toString();
          int dataType = stateRadioButton.isSelected() ? STATE : DATA;
-         int dataFormat = asciiRadioButton.isSelected() ? ASCII : BINARY;        
-         boolean spreadsheetFormat = spreadsheetFormatCheckBox.isSelected() ? true : false;
+         SCSExportDataFormat dataFormat;
+         if (asciiRadioButton.isSelected())
+         {
+            dataFormat = SCSExportDataFormat.ASCII;
+         }
+         else if (binaryRadioButton.isSelected())
+         {
+            dataFormat = SCSExportDataFormat.BINARY;
+         }
+         else if(matlabRadioButton.isSelected())
+         {
+            dataFormat = SCSExportDataFormat.MATLAB;
+         }
+         else if(spreadsheetRadioButton.isSelected())
+         {
+            dataFormat=SCSExportDataFormat.SPREADSHEET;
+         }else
+            throw new RuntimeException("unknown data format");
+
          int dataCompression = compressRadioButton.isSelected() ? COMPRESS : NO_COMPRESS;
 
-         listener.export(varGroup, dataType, dataFormat, dataCompression, spreadsheetFormat);
+         listener.export(varGroup, dataType, dataFormat, dataCompression);
       }
    }
 }

@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import com.jmatio.io.MatFileIncrementalWriter;
+import com.jmatio.types.MLDouble;
 
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileWriter
@@ -131,8 +133,12 @@ public class DataFileWriter
       if (binary)
          writeBinaryData(model, recordDT, dataBuffer, vars, compress, robot);
       else
+      {
          writeASCIIData(model, recordDT, dataBuffer, vars, compress);
+      }
+      
    }
+
 
    public void writeState(String model, double recordDT, ArrayList<YoVariable<?>> variables, boolean binary, boolean compress)
    {
@@ -344,6 +350,46 @@ public class DataFileWriter
       {
          double value = dataToWrite[i];
          dataOutputStream.writeFloat((float) value);
+      }
+   }
+   
+   public void writeMatlabBinaryData(double recordDT, DataBuffer dataBuffer, ArrayList<YoVariable<?>> vars)
+   {
+      MatFileIncrementalWriter writer;
+      try
+      {
+         writer = new MatFileIncrementalWriter(outFile);
+
+         int bufferLength = dataBuffer.getBufferInOutLength();
+         ArrayList<DataBufferEntry> entries = dataBuffer.getEntries();
+         
+         MLDouble dt = new MLDouble("DT", new double[][]{{recordDT}});
+         writer.write(dt);
+
+         for (int i = 0; i < entries.size(); i++)
+         {
+            DataBufferEntry entry = entries.get(i);
+            YoVariable<?> variable = entry.getVariable();
+
+            if (vars.contains(variable))
+            {
+               double[] data = entry.getWindowedData(dataBuffer.getInPoint(), bufferLength);
+
+               MLDouble outArray = new MLDouble(variable.getFullNameWithNameSpace(), new int[] { 1, bufferLength });
+               for (int j = 0; j < bufferLength; j++)
+               {
+                  outArray.set(data[j], j);
+
+               }
+
+               writer.write(outArray);
+            }
+         }
+         writer.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
    }
 

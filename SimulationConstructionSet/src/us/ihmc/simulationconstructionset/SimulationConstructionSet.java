@@ -3253,8 +3253,17 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
       System.out.println("Writing Data File " + chosenFile.getName()); // filename);
 
-      // ArrayList vars = myGUI.getVarsFromGroup(varGroup);
       dataWriter.writeData(robots[0].getName(), mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars, binary, compress, robots[0]);
+   }
+   
+
+   public void writeMatlabData(String varGroup, File chosenFile)
+   {
+      DataFileWriter dataWriter = new DataFileWriter(chosenFile);
+      System.out.println("Writing Data File " + chosenFile.getName()); // filename);
+
+      ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroup, varGroupList);
+      dataWriter.writeMatlabBinaryData( mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);      
    }
 
    public File createMovie(String movieFilename)
@@ -4253,6 +4262,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
       
    }
+
 
 
 
