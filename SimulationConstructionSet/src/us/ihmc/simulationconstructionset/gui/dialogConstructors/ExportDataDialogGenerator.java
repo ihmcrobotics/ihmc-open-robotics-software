@@ -24,7 +24,7 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
 
    private javax.swing.filechooser.FileFilter stateFileFilter = new MyFileFilter(new String[] {".state", ".state.gz"}, "State (.state, .state.gz)");
    private javax.swing.filechooser.FileFilter dataFileFilter = new MyFileFilter(new String[] {".data", ".data.gz", ".data.csv", ".mat"},
-                                                                  "Data (.data, .data.gz, .data.csv)");
+                                                                  "Data (.data, .data.gz, .data.csv .mat)");
 
 
    public ExportDataDialogGenerator(SimulationConstructionSet sim, VarGroupList varGroupList, JFrame frame)
