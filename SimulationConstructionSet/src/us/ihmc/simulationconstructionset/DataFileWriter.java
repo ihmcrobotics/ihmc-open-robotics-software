@@ -10,12 +10,21 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.zip.GZIPOutputStream;
 
-import com.jmatio.io.MatFileIncrementalWriter;
-import com.jmatio.types.MLDouble;
+import javax.xml.stream.events.Namespace;
 
+import org.tmatesoft.sqljet.core.internal.lang.SqlParser.numeric_literal_value_return;
+
+import com.jmatio.io.MatFileIncrementalWriter;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLDouble;
+import com.jmatio.types.MLStructure;
+
+import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
@@ -353,37 +362,79 @@ public class DataFileWriter
       }
    }
    
-   public void writeMatlabBinaryData(double recordDT, DataBuffer dataBuffer, ArrayList<YoVariable<?>> vars)
+   
+   public void writeMatlabBinaryData(double recordDT, DataBuffer dataBufferSortedByNamespace, ArrayList<YoVariable<?>> vars)
    {
       MatFileIncrementalWriter writer;
       try
       {
          writer = new MatFileIncrementalWriter(outFile);
 
-         int bufferLength = dataBuffer.getBufferInOutLength();
-         ArrayList<DataBufferEntry> entries = dataBuffer.getEntries();
+         int bufferLength = dataBufferSortedByNamespace.getBufferInOutLength();
+         ArrayList<DataBufferEntry> entries = dataBufferSortedByNamespace.getEntries();
          
          MLDouble dt = new MLDouble("DT", new double[][]{{recordDT}});
          writer.write(dt);
+         
 
+         MLStructure mlRoot=null, mlNode;
          for (int i = 0; i < entries.size(); i++)
          {
             DataBufferEntry entry = entries.get(i);
             YoVariable<?> variable = entry.getVariable();
+            
+            ArrayList<String> subNames = variable.getNameSpace().getSubNames();
+            int subNameDepth= 0;
 
             if (vars.contains(variable))
             {
-               double[] data = entry.getWindowedData(dataBuffer.getInPoint(), bufferLength);
 
-               MLDouble outArray = new MLDouble(variable.getFullNameWithNameSpace(), new int[] { 1, bufferLength });
-               for (int j = 0; j < bufferLength; j++)
+               //find/create root
+               String rootName = subNames.get(subNameDepth++);
+               if(mlRoot==null)
                {
-                  outArray.set(data[j], j);
-
+                  mlRoot = new MLStructure(rootName, new int[]{1,1});
+               }
+               else 
+               {
+                  if(!mlRoot.getName().equals(rootName)) 
+                  {
+                          writer.write(mlRoot);
+                          System.err.println("write "+ mlRoot.getName());
+                          mlRoot = new MLStructure(rootName, new int[]{1,1});
+                  }
+               }
+               
+               //query/create node
+               mlNode = mlRoot;
+               while(subNameDepth < subNames.size())
+               {
+                  String childSubName = subNames.get(subNameDepth);
+                  MLStructure mlSubNode = (MLStructure)mlNode.getField(childSubName);
+                  if(mlSubNode==null)
+                  {
+                     mlSubNode = new MLStructure(childSubName, new int[]{1,1});
+                     mlNode.setField(childSubName, mlSubNode);
+                  }
+                  mlNode=mlSubNode;
+                  subNameDepth++;
                }
 
-               writer.write(outArray);
+               //store yo-variable as a new field
+               double[] data = entry.getWindowedData(dataBufferSortedByNamespace.getInPoint(), bufferLength);
+               MLDouble outArray = new MLDouble(variable.getName(), new int[] { 1, bufferLength });
+               for (int j = 0; j < bufferLength; j++)
+               {
+                  ((MLDouble)outArray).set(data[j], j);
+               }
+
+               mlNode.setField(variable.getName(), outArray);
             }
+         }
+         if (mlRoot != null)
+         {
+            writer.write(mlRoot);
+            System.err.println("write " + mlRoot.getName());
          }
          writer.close();
       }
@@ -392,6 +443,7 @@ public class DataFileWriter
          e.printStackTrace();
       }
    }
+   
 
    private void writeBinaryData(String model, double recordDT, DataBuffer dataBuffer, ArrayList<YoVariable<?>> vars, boolean compress, Robot robot)
    {
