@@ -249,4 +249,5 @@ public class JMEDataTypeUtils
 	   Vector3d vect = new Vector3d(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
 	   rigidBodyTransformToPack.set(quat, vect);
    }
+   
 }
