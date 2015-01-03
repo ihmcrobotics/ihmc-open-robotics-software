@@ -374,25 +374,7 @@
         <child link="pelvis" />
         <limit effort="150" velocity="12" lower="-0.786794" upper="0.174358" />
     </joint> 
-
-    <joint name="back_bkx" type="revolute">
-        <origin xyz="0 0 0.05" rpy="0 -0 0" />
-        <axis xyz="1 0 0" />
-        <parent link="mtorso" />
-        <child link="utorso" />
-        <dynamics damping="0.1" friction="0" />
-        <limit effort="163" velocity="12" lower="-0.523599" upper="0.523599" />
-        <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.5236" soft_upper_limit="10.5236" />
-    </joint>
-    <joint name="back_bky" type="revolute">
-        <origin xyz="0 0 0.162" rpy="0 -0 0" />
-        <axis xyz="0 1 0" />
-        <parent link="ltorso" />
-        <child link="mtorso" />
-        <dynamics damping="0.1" friction="0" />
-        <limit effort="245" velocity="9" lower="-0.219388" upper="0.538783" />
-        <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.2194" soft_upper_limit="10.5388" />
-    </joint>
+    
     <joint name="back_bkz" type="revolute">
         <origin xyz="-0.0125 0 0" rpy="0 -0 0" />
         <axis xyz="0 0 1" />
@@ -402,6 +384,28 @@
         <limit effort="62" velocity="12" lower="-0.663225" upper="0.663225" />
         <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6632" soft_upper_limit="10.6632" />
     </joint>
+    
+   <joint name="back_bky" type="revolute">
+        <origin xyz="0 0 0.162" rpy="0 -0 0" />
+        <axis xyz="0 1 0" />
+        <parent link="ltorso" />
+        <child link="mtorso" />
+        <dynamics damping="0.1" friction="0" />
+        <limit effort="245" velocity="9" lower="-0.219388" upper="0.538783" />
+        <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.2194" soft_upper_limit="10.5388" />
+    </joint>
+    
+    <joint name="back_bkx" type="revolute">
+        <origin xyz="0 0 0.05" rpy="0 -0 0" />
+        <axis xyz="1 0 0" />
+        <parent link="mtorso" />
+        <child link="utorso" />
+        <dynamics damping="0.1" friction="0" />
+        <limit effort="163" velocity="12" lower="-0.523599" upper="0.523599" />
+        <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.5236" soft_upper_limit="10.5236" />
+    </joint>
+ 
+
 
     <joint name="r_arm_shz" type="revolute">
         <origin xyz="0.1406 -0.2036 0.4776" rpy="0 -0 0" />
