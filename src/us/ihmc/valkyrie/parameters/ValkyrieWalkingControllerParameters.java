@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.sensors.FootSwitchType;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -677,5 +678,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean doFancyOnToesControl()
    {
       return !runningOnRealRobot;
+   }
+   
+   @Override
+   public FootSwitchType getFootSwitchType()
+   {
+      return FootSwitchType.WrenchBased;
    }
 }
