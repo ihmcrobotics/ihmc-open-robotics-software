@@ -85,9 +85,16 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       //      this.registry = ikExample.getControllerFactory().getRegistry();
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
       this.wholeBodyIKSolver = new WholeBodyIkSolver(robotModel, fullRobotModel, "models/atlas_v4_wb.urdf");
-      wholeBodyIKSolver.enableHandRotation(RobotSide.RIGHT, true);
-      wholeBodyIKSolver.enableHandTranslation(RobotSide.RIGHT, true);
-      wholeBodyIKSolver.enableHandRotAndTranslation(RobotSide.LEFT, false);
+      
+      // NEW API
+     // wholeBodyIKSolver.enableHandRotation(RobotSide.RIGHT, true);
+     // wholeBodyIKSolver.enableHandTranslation(RobotSide.RIGHT, true);
+     // wholeBodyIKSolver.enableHandRotAndTranslation(RobotSide.LEFT, false);
+      
+      
+      wholeBodyIKSolver.setNumberOfControlledDoF( RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P3R );
+      wholeBodyIKSolver.setNumberOfControlledDoF( RobotSide.LEFT,  WholeBodyIkSolver.ControlledDoF.DOF_NONE );
+      
       this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel);
 
       while (true)
