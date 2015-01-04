@@ -1708,8 +1708,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          return;
       }
+      
 
-      myEntryBoxArrayPanel.getCurrentPanel().removeAllEntryBoxes();
+      myEntryBoxArrayPanel.getCurrentPanel(true).removeAllEntryBoxes();
 
       String[] entryBoxVars = group.getEntryBoxVars();
       String[] entryBoxRegularExpressions = group.getEntryBoxRegularExpressions();

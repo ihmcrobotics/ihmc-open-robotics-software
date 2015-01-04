@@ -31,7 +31,7 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
    private final Container parentContainer;
    private final SelectedVariableHolder selectedVariableHolder;
 
-   public EntryBoxArrayTabbedPanel( Container parentContainer, SelectedVariableHolder selectedVariableHolder)
+   public EntryBoxArrayTabbedPanel(Container parentContainer, SelectedVariableHolder selectedVariableHolder)
    {
       this.parentContainer = parentContainer;
       this.selectedVariableHolder = selectedVariableHolder;
@@ -48,9 +48,15 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
 
    public EntryBoxArrayPanel getCurrentPanel()
    {
-      // TODO Auto-generated method stub
-	  if(getSelectedComponent()==null)
-		  addEmptyTab();
+      return getCurrentPanel(false);
+   }
+
+   public EntryBoxArrayPanel getCurrentPanel(boolean createNewTabWhenNecessary)
+   {
+      if (getSelectedComponent() == null && createNewTabWhenNecessary)
+      {
+         addEmptyTab();
+      }
       return (EntryBoxArrayPanel) getSelectedComponent();
    }
 
