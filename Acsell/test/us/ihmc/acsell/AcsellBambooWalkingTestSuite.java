@@ -16,5 +16,6 @@ public class AcsellBambooWalkingTestSuite
 	public static void main(String[] args)
 	{
       JUnitTestSuiteConstructor.generateTestSuite(AcsellBambooWalkingTestSuite.class);
+      JUnitTestSuiteConstructor.generateTestSuite(BonoFlatGroundWalkingKinematicFootSwitchTest.class);
 	}
 }

@@ -252,7 +252,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getContactThresholdHeight()
    {
-      return 0.05;
+      return 0.01;
    }
 
    @Override
