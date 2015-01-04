@@ -200,7 +200,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getInPlaceWidth()
    {
-      return 0.25;
+      return 0.30;
    }
 
    @Override
