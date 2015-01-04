@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
@@ -277,6 +278,19 @@ public class ComposableStateEstimatorEvaluator
          {
             // TODO Auto-generated method stub
             return 0;
+         }
+
+         @Override
+         public double getContactThresholdHeight()
+         {
+            // TODO Auto-generated method stub
+            return 0;
+         }
+
+         @Override
+         public FootSwitchType getFootSwitchType()
+         {
+            return null;
          }
       };
 

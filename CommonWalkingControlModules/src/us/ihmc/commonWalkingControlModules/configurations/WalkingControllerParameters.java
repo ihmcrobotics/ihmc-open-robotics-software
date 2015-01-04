@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchType;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
@@ -148,5 +148,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doFancyOnToesControl();
 
    public abstract FootSwitchType getFootSwitchType();
+
+   public abstract double getContactThresholdHeight();
 
 }

@@ -8,7 +8,7 @@ import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchType;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -728,6 +728,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public boolean doFancyOnToesControl()
    {
       return !(target == AtlasTarget.REAL_ROBOT);
+   }
+
+   @Override
+   public double getContactThresholdHeight()
+   {
+      return 0.05;
    }
 
    @Override

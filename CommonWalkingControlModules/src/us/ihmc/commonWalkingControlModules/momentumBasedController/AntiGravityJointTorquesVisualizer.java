@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;

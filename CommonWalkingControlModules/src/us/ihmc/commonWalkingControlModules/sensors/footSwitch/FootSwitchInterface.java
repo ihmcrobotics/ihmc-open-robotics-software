@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.sensors;
+package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,4 +17,6 @@ public interface FootSwitchInterface
    public abstract ReferenceFrame getMeasurementFrame();
 
    public void reset();
+
+   public abstract boolean getForceMagnitudePastThreshhold();
 }
