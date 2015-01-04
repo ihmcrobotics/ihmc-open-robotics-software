@@ -5,6 +5,7 @@ import java.util.Map;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -274,5 +275,17 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
       return new Pair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
+   }
+   
+   @Override
+   public double getContactThresholdHeight()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public FootSwitchType getFootSwitchType()
+   {
+      return FootSwitchType.WrenchBased;
    }
 }
