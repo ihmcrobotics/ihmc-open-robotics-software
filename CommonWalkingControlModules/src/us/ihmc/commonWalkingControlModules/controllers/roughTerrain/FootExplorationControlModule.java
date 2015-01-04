@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInte
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
@@ -88,7 +88,7 @@ public class FootExplorationControlModule
    private static double copToContactPointScalingFactor = 0.8; // how far we explore, max 1.0
    private static double copPercentageToSwitchToNextContactPoint = 2; // if this value is >1 the exploration will continue to keep the desired cop at the maximum value of copToContactPointScalingFactor
    private static double maxAbsCoPError = 0.04;
-   private static boolean adjustContactPointInXNOnly = false;
+   private static boolean adjustContactPointInXNOnly = true;
    
    // swing state parameters
    private static double icpBiasToInnerSole = 0.01;
