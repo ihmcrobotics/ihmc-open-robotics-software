@@ -5,6 +5,7 @@ import java.util.Map;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.Pair;
@@ -246,5 +247,17 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    {
       // TODO For Valkyrie. Probably have to make more generic.
       return null;
+   }
+   
+   @Override
+   public double getContactThresholdHeight()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public FootSwitchType getFootSwitchType()
+   {
+      return FootSwitchType.WrenchBased;
    }
 }
