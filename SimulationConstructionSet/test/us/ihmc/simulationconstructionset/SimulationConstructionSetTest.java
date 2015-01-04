@@ -51,6 +51,7 @@ public class SimulationConstructionSetTest
       scs.setFrameMaximized();
       scs.startOnAThread();
       scs.setSimulateDuration(2.0);
+      scs.hideViewport();
 
 
       SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
