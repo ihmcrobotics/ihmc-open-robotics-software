@@ -2,7 +2,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -262,7 +262,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
     * @param trustedSide
     * @param footSwitch
     */
-   private void updateCoPPosition(RobotSide trustedSide, WrenchBasedFootSwitch footSwitch)
+   private void updateCoPPosition(RobotSide trustedSide, FootSwitchInterface footSwitch)
    {
       AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
       ReferenceFrame footFrame = footFrames.get(trustedSide);
@@ -382,24 +382,24 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
    }
 
-   public void estimatePelvisLinearStateForDoubleSupport(SideDependentList<WrenchBasedFootSwitch> footSwitches)
+   public void estimatePelvisLinearStateForDoubleSupport(SideDependentList<FootSwitchInterface> footSwitches)
    {
       estimatePelvisLinearState(footSwitches, RobotSide.values);
    }
 
-   public void estimatePelvisLinearStateForSingleSupport(FramePoint pelvisPosition, SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide trustedSide)
+   public void estimatePelvisLinearStateForSingleSupport(FramePoint pelvisPosition, SideDependentList<FootSwitchInterface> footSwitches, RobotSide trustedSide)
    {
       estimatePelvisLinearState(footSwitches, trustedSide);
       updateFootPosition(trustedSide.getOppositeSide(), pelvisPosition);
    }
 
-   private void estimatePelvisLinearState(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide trustedSide)
+   private void estimatePelvisLinearState(SideDependentList<FootSwitchInterface> footSwitches, RobotSide trustedSide)
    {
       singleElementRobotSideArray[0] = trustedSide;
       estimatePelvisLinearState(footSwitches, singleElementRobotSideArray);
    }
    
-   private void estimatePelvisLinearState(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide[] listOfTrustedSides)
+   private void estimatePelvisLinearState(SideDependentList<FootSwitchInterface> footSwitches, RobotSide[] listOfTrustedSides)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");

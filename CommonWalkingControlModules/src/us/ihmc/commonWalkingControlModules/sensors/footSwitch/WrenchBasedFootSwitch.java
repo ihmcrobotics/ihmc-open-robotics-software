@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.sensors;
+package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import java.util.List;
 

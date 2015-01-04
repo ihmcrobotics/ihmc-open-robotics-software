@@ -1,6 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -9,9 +9,9 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
@@ -27,9 +27,9 @@ public class CenterOfPressureVisualizer
    private final FramePoint2d tempRawCoP2d = new FramePoint2d();
    private final FramePoint tempRawCoP = new FramePoint();
    private final Wrench tempWrench = new Wrench();
-   private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
+   private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   public CenterOfPressureVisualizer(SideDependentList<WrenchBasedFootSwitch> footSwitches,
+   public CenterOfPressureVisualizer(SideDependentList<FootSwitchInterface> footSwitches,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;

@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerat
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;

@@ -54,4 +54,8 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract double getContactThresholdForce();
 
    public abstract double getFootSwitchCoPThresholdFraction();
+
+   public abstract double getContactThresholdHeight();
+
+   public abstract FootSwitchType getFootSwitchType();
 }

@@ -2,7 +2,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import javax.vecmath.AxisAngle4d;
 
-import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -70,12 +70,12 @@ public class IMUDriftCompensator
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
 
-   private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
+   private final SideDependentList<FootSwitchInterface> footSwitches;
    private final DoubleYoVariable totalLoadPercentageOnFeet = new DoubleYoVariable("totalLoadPercentageOnFeet", registry);
    private final DoubleYoVariable loadPercentageOnFeetThresholdForIMUDrift = new DoubleYoVariable("loadPercentageOnFeetThresholdForIMUDrift", registry);
    
    public IMUDriftCompensator(SideDependentList<ReferenceFrame> footFrames, FullInverseDynamicsStructure inverseDynamicsStructure,
-         SideDependentList<WrenchBasedFootSwitch> footSwitches, double estimatorDT, YoVariableRegistry parentRegistry)
+         SideDependentList<FootSwitchInterface> footSwitches, double estimatorDT, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.footFrames = footFrames;

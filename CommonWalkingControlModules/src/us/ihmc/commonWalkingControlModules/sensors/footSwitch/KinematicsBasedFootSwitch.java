@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.sensors;
+package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import javax.vecmath.Point3d;
 
@@ -17,19 +17,24 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 {
    DoubleYoVariable distanceFromGround;
    YoVariableRegistry registry;
-   BooleanYoVariable hitGround;
+   BooleanYoVariable hitGround, fixedOnGround;
    DoubleYoVariable switchZThreshold;
    SideDependentList<ContactablePlaneBody> bipedFeet;
    RobotSide side;
+   ReferenceFrame comFrame;
+   double totalRobotWeight;
 
-   public KinematicsBasedFootSwitch(String footName, SideDependentList<ContactablePlaneBody> bipedFeet, RobotSide side, YoVariableRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName, SideDependentList<ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
       this.bipedFeet = bipedFeet;
       this.side = side;
+      this.totalRobotWeight = totalRobotWeight;
       hitGround = new BooleanYoVariable(footName + "hitGround", registry);
-      switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
-      switchZThreshold.set(0.03);
+      fixedOnGround= new BooleanYoVariable(footName+"fixedOnGround", registry);
+      
+      this.switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
+      this.switchZThreshold.set(switchZThreshold);
       distanceFromGround = new DoubleYoVariable(footName + "Height", registry);
       parentRegistry.addChild(registry);
 
@@ -62,13 +67,15 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void computeAndPackCoP(FramePoint2d copToPack)
    {
-      copToPack.set(Double.NaN, Double.NaN);
+      copToPack.setToNaN(getMeasurementFrame());
    }
 
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      throw new RuntimeException("no such thing");
+      footWrenchToPack.setToZero();
+      if(hasFootHitGround())
+         footWrenchToPack.setLinearPartZ(totalRobotWeight);
    }
 
    @Override
@@ -80,7 +87,15 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void reset()
    {
-      hitGround.set(false);
    }
 
+   @Override
+   public boolean getForceMagnitudePastThreshhold()
+   {
+      //a more liberal version of hasFootHitGround
+      double thisFootZ = getPointInWorld(bipedFeet.get(side).getSoleFrame()).getZ();
+      double otherFootZ = getPointInWorld(bipedFeet.get(side.getOppositeSide()).getSoleFrame()).getZ();
+      fixedOnGround.set((thisFootZ-otherFootZ) < switchZThreshold.getDoubleValue()*2);  
+      return fixedOnGround.getBooleanValue();
+   }
 }
