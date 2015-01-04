@@ -177,6 +177,16 @@
          <geometry>  <sphere radius="0.21"/> </geometry>
          <origin  xyz="0.06  0.08  0.2"/>
        </visual>
+       
+       <visual  name="capsule_p1">
+         <geometry>  <sphere radius="0.22"/> </geometry>
+         <origin xyz="0.10  -0.0 0.54"/>
+       </visual>
+       
+       <visual  name="capsule_p2">
+         <geometry>  <sphere radius="0.22"/> </geometry>
+         <origin  xyz="-0.17  -0.0 0.50"/>
+       </visual>
     </link>
     
     
@@ -748,7 +758,7 @@
         </visual>   
         <visual  name="capsule_p2">
 			<geometry>  <sphere radius="0.12" />  </geometry>
-            <origin xyz="-0.02  -0.02 -0.33"  />
+            <origin xyz="-0.02  -0.01 -0.33"  />
         </visual>
     </link>
 
