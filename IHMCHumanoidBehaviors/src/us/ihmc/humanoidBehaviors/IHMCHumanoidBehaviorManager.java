@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import java.util.Arrays;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
@@ -52,9 +52,9 @@ public class IHMCHumanoidBehaviorManager
 
    private YoVariableServer yoVariableServer = null;
 
-   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = true;
+   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
-   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, LogModelProvider modelProvider, DRCRobotSensorInformation sensorInfo, ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator, WalkingControllerParameters walkingControllerParameters)
+   public IHMCHumanoidBehaviorManager(FullRobotModel fullRobotModel, LogModelProvider modelProvider, DRCRobotSensorInformation sensorInfo, PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator, WalkingControllerParameters walkingControllerParameters)
    {
       System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
 

@@ -11,7 +11,8 @@ import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
@@ -22,7 +23,6 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.utilities.ComparableDataObject;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -42,8 +42,8 @@ public class ThePeoplesGloriousNetworkProcessor
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RosMainNode rosMainNode;
    private final DRCRobotModel robotModel;
-   private final ObjectCommunicator controllerCommunicationBridge;
-   private final ObjectCommunicator scsSensorCommunicationBridge;
+   private final PacketCommunicator controllerCommunicationBridge;
+   private final PacketCommunicator scsSensorCommunicationBridge;
 
    private final ArrayList<AbstractRosTopicSubscriber<?>> subscribers;
    private final ArrayList<RosTopicPublisher<?>> publishers;
@@ -52,7 +52,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, ObjectCommunicator scsSensorCommunicationBridge, PPSTimestampOffsetProvider ppsOffsetProvider, 
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, PacketCommunicator scsSensorCommunicationBridge, PPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
@@ -78,7 +78,7 @@ public class ThePeoplesGloriousNetworkProcessor
       controllerCommunicationBridge.connect();
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, ObjectCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
          IOException
    {
       this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace);
@@ -108,7 +108,7 @@ public class ThePeoplesGloriousNetworkProcessor
       {
          Message message = messageFactory.newFromType(e.getKey());
 
-         IHMCPacketToMsgPublisher<Message, ComparableDataObject> publisher = IHMCPacketToMsgPublisher.CreateIHMCPacketToMsgPublisher(message, false,
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.CreateIHMCPacketToMsgPublisher(message, false,
                controllerCommunicationBridge, e.getValue());
          publishers.add(publisher);
          rosMainNode.attachPublisher(namespace + "/" + e.getKey(), publisher);

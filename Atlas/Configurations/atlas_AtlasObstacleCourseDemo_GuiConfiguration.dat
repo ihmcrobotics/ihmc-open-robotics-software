@@ -1,7 +1,49 @@
 <GraphGroup>
 	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.atlas.t</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Tab

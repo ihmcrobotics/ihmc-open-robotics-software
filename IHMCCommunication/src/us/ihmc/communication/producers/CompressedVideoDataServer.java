@@ -16,7 +16,7 @@ import us.ihmc.codecs.h264.NALType;
 import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUV420Picture;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.utilities.VideoDataServer;
 import us.ihmc.utilities.math.MathTools;
@@ -24,7 +24,7 @@ import us.ihmc.utilities.math.TimeTools;
 
 import com.google.code.libyuv.FilterModeEnum;
 
-public class CompressedVideoDataServer implements NetStateListener, VideoDataServer, ObjectConsumer<VideoControlPacket>
+public class CompressedVideoDataServer implements NetStateListener, VideoDataServer, PacketConsumer<VideoControlPacket>
 {
    private OpenH264Encoder encoder;
 
@@ -212,7 +212,7 @@ public class CompressedVideoDataServer implements NetStateListener, VideoDataSer
       }
    }
 
-   public void consumeObject(VideoControlPacket object)
+   public void receivedPacket(VideoControlPacket object)
    {
       setVideoControlSettings(object);
    }

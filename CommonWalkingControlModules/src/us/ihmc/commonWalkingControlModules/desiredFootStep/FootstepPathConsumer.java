@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -24,7 +24,7 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
  * User: Matt
  * Date: 1/18/13
  */
-public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
+public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
 {
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
@@ -39,7 +39,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
    }
 
-   public void consumeObject(FootstepDataList footstepList)
+   public void receivedPacket(FootstepDataList footstepList)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
       

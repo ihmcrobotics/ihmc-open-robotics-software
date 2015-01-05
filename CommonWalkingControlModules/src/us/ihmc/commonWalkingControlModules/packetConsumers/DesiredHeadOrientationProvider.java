@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -30,27 +30,27 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
       headOrientation = new FrameOrientation(headOrientationFrame);
    }
 
-   public ObjectConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
+   public PacketConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
    {
       return headOrientationPacketConsumer;
    }
 
-   public ObjectConsumer<LookAtPacket> getLookAtPacketConsumer()
+   public PacketConsumer<LookAtPacket> getLookAtPacketConsumer()
    {
       return lookAtPacketConsumer;
    }
 
-   private class LookAtPacketConsumer implements ObjectConsumer<LookAtPacket>
+   private class LookAtPacketConsumer implements PacketConsumer<LookAtPacket>
    {
-      public void consumeObject(LookAtPacket object)
+      public void receivedPacket(LookAtPacket object)
       {
          lookAtPacket.set(object);
       }
    }
 
-   private class HeadOrientationPacketConsumer implements ObjectConsumer<HeadOrientationPacket>
+   private class HeadOrientationPacketConsumer implements PacketConsumer<HeadOrientationPacket>
    {
-      public void consumeObject(HeadOrientationPacket packet)
+      public void receivedPacket(HeadOrientationPacket packet)
       {
          headOrientationPacket.set(packet);
       }

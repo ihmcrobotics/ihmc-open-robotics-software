@@ -11,8 +11,8 @@ import multisense_ros.RawImuData;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
-import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
@@ -30,7 +30,7 @@ public class IMUBasedHeadPoseCalculatorFactory {
 	{
 	}
 	
-	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation, ObjectCommunicator scsCommunicator)
+	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation, PacketCommunicator scsCommunicator)
 	{
 		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator, sensorInformation);
 		scsCommunicator.attachListener(RawIMUPacket.class, calculator); return calculator;
@@ -102,7 +102,7 @@ class RunningStatistics
 	
 }
 
-class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_ros.RawImuData> implements ObjectConsumer<RawIMUPacket>
+class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_ros.RawImuData> implements PacketConsumer<RawIMUPacket>
 {
 	
 	NetworkProcessorControllerStateHandler uiCommunicator;
@@ -149,7 +149,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 				headPosePacket.status = MeasurementStatus.UNSTABLE_WAIT;
 			}
 
-		uiCommunicator.sendSerializableObject(headPosePacket);
+		uiCommunicator.sendPacket(headPosePacket);
 	}
 	private static double[] EulerAnglesFromVectors(Vector3d vectorPreTransform, Vector3d vectorPostTransform)
 	{
@@ -165,7 +165,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 	}
 	
 	@Override
-	public void consumeObject(RawIMUPacket packet) {
+	public void receivedPacket(RawIMUPacket packet) {
 		process(packet.timestampInNanoSecond, packet.linearAcceleration);
 	}
 	

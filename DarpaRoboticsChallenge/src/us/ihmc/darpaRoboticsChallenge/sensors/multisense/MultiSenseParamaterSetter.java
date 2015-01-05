@@ -10,7 +10,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
@@ -24,7 +24,7 @@ import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
 
-public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParameterPacket>
+public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParameterPacket>
 {
    private static double gain;
    private static double motorSpeed;
@@ -158,7 +158,7 @@ public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParam
          return;
       }
 
-      networkingManager.getControllerStateHandler().sendSerializableObject(
+      networkingManager.getControllerStateHandler().sendPacket(
             new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
                   .getDouble("/multisense/led_duty_cycle"), params.getString("/multisense/resolution"), params.getBoolean("/multisense/lighting"), params
                   .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
@@ -403,7 +403,7 @@ public class MultiSenseParamaterSetter implements ObjectConsumer<MultisenseParam
             });
    }
 
-   public void consumeObject(MultisenseParameterPacket object)
+   public void receivedPacket(MultisenseParameterPacket object)
    {
       handleMultisenseParameters(object);
    }

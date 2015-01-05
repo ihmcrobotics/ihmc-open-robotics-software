@@ -7,7 +7,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -16,7 +16,7 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 
-public class BlackFlyParameterSetter implements ObjectConsumer<BlackFlyParameterPacket>
+public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameterPacket>
 {
    private static double gain;
    private static double brightness;
@@ -61,7 +61,7 @@ public class BlackFlyParameterSetter implements ObjectConsumer<BlackFlyParameter
          return;
       }
 
-      networkingManager.getControllerStateHandler().sendSerializableObject(
+      networkingManager.getControllerStateHandler().sendPacket(
             new BlackFlyParameterPacket(false, params.getDouble("/blackfly/prop_gain"), params.getDouble("/blackfly/prop_brightness"), params
                   .getDouble("/blackfly/prop_frame_rate"), params.getDouble("/blackfly/prop_shutter")));
    }
@@ -200,7 +200,7 @@ public class BlackFlyParameterSetter implements ObjectConsumer<BlackFlyParameter
       });
    }
 
-   public void consumeObject(BlackFlyParameterPacket object)
+   public void receivedPacket(BlackFlyParameterPacket object)
    {
       handleBlackFlyParameters(object);
    }

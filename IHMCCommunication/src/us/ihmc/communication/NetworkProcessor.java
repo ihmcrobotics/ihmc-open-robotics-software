@@ -38,7 +38,7 @@ public class NetworkProcessor
          }
       };
 
-      packetCommunicator.setGlobalListener(packetConsumer);
+      packetCommunicator.attacthGlobalListener(packetConsumer);
 
       consumers.put(id, packetConsumer);
       communicators.put(id, packetCommunicator);
@@ -61,7 +61,7 @@ public class NetworkProcessor
       PacketCommunicator communicator = communicators.remove(id);
       PacketConsumer<Packet> consumer = consumers.remove(id);
       
-      communicator.removeGlobalListener();
+      communicator.detachGlobalListener(consumer);
       
       redirects.remove(id);
 

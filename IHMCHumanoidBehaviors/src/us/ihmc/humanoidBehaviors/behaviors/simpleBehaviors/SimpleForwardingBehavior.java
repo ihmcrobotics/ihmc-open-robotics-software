@@ -2,15 +2,14 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 
 public class SimpleForwardingBehavior extends BehaviorInterface
 {
    private final BehaviorCommunicationBridge communicationBridge;
 
-   public SimpleForwardingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, BehaviorCommunicationBridge communicationBridge)
+   public SimpleForwardingBehavior(BehaviorCommunicationBridge communicationBridge)
    {
-      super(outgoingCommunicationBridge);
+      super(communicationBridge);
 
       this.communicationBridge = communicationBridge;
    }

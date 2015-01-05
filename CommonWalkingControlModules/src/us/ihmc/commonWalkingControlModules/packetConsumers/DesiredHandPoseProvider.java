@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -18,7 +18,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, HandPoseProvider
+public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, HandPoseProvider
 {
    private final SideDependentList<AtomicReference<HandPosePacket>> packets = new SideDependentList<AtomicReference<HandPosePacket>>();
    private final SideDependentList<AtomicReference<HandPoseListPacket>> handPoseListPackets = new SideDependentList<AtomicReference<HandPoseListPacket>>();
@@ -34,9 +34,9 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
    private final FullRobotModel fullRobotModel;
-   private final ObjectConsumer<StopArmMotionPacket> handPauseCommandConsumer;
+   private final PacketConsumer<StopArmMotionPacket> handPauseCommandConsumer;
 
-   private final ObjectConsumer<HandPoseListPacket> handPoseListConsumer;
+   private final PacketConsumer<HandPoseListPacket> handPoseListConsumer;
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame)
    {
@@ -58,19 +58,19 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
          desiredJointAngleForWaypointTrajectoryMaps.put(robotSide, new LinkedHashMap<OneDoFJoint, double[]>());
       }
 
-      handPauseCommandConsumer = new ObjectConsumer<StopArmMotionPacket>()
+      handPauseCommandConsumer = new PacketConsumer<StopArmMotionPacket>()
       {
          @Override
-         public void consumeObject(StopArmMotionPacket object)
+         public void receivedPacket(StopArmMotionPacket object)
          {
             pausePackets.get(object.getRobotSide()).set(object);
          }
       };
       
-      handPoseListConsumer = new ObjectConsumer<HandPoseListPacket>()
+      handPoseListConsumer = new PacketConsumer<HandPoseListPacket>()
       {
          @Override
-         public void consumeObject(HandPoseListPacket object)
+         public void receivedPacket(HandPoseListPacket object)
          {
             handPoseListPackets.get(object.getRobotSide()).set(object);
          }
@@ -223,7 +223,7 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
    }
 
    @Override
-   public void consumeObject(HandPosePacket object)
+   public void receivedPacket(HandPosePacket object)
    {
       packets.get(object.getRobotSide()).set(object);
    }
@@ -240,12 +240,12 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, 
       return ret;
    }
 
-   public ObjectConsumer<StopArmMotionPacket> getHandPauseCommandConsumer()
+   public PacketConsumer<StopArmMotionPacket> getHandPauseCommandConsumer()
    {
       return handPauseCommandConsumer;
    }
 
-   public ObjectConsumer<HandPoseListPacket> getHandPoseListConsumer()
+   public PacketConsumer<HandPoseListPacket> getHandPoseListConsumer()
    {
       return handPoseListConsumer;
    }

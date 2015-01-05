@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
@@ -47,7 +47,7 @@ public class DRCSimulationTestHelper
    private final SimulationConstructionSet scs;
    private final SDFRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
-   private final ObjectCommunicator networkObjectCommunicator;
+   private final PacketCommunicator networkObjectCommunicator;
 
    private final boolean checkNothingChanged;
    private final NothingChangedVerifier nothingChangedVerifier;
@@ -76,7 +76,7 @@ public class DRCSimulationTestHelper
             createMovie, false, robotModel);
    }
          
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, ObjectCommunicator networkObjectCommunicator, String name, 
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
          String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
    {

@@ -1,11 +1,9 @@
 package us.ihmc.utilities.ros.publisher;
 
-import java.util.Arrays;
-
 import org.ros.message.Time;
 
 import std_msgs.Header;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.communication.packets.sensing.LidarScanPacket;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
@@ -26,7 +24,7 @@ public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
    
    private float[] fakeIntensities = null;
 
-   public void publish(LidarScan lidarScan, String frameId, Time timestamp)
+   public void publish(LidarScanPacket lidarScan, String frameId, Time timestamp)
    {
       sensor_msgs.LaserScan message = getMessage();
       
@@ -36,7 +34,7 @@ public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
       header.setSeq(seq++);
       message.setHeader(header);
       
-      LidarScanParameters parameters = lidarScan.getScanParameters();
+      LidarScanParameters parameters = lidarScan.getLidarScanParameters();
       message.setAngleMin(parameters.getSweepYawMin());
       message.setAngleMax(parameters.getSweepYawMax());
       message.setAngleIncrement(parameters.getAngleIncrement());

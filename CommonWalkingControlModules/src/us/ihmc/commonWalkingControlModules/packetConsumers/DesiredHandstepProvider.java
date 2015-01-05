@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -16,7 +16,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 
-public class DesiredHandstepProvider implements ObjectConsumer<HandstepPacket>, HandstepProvider
+public class DesiredHandstepProvider implements PacketConsumer<HandstepPacket>, HandstepProvider
 {
    private final AtomicReference<HandstepPacket> handstepPacket = new AtomicReference<HandstepPacket>();
    private final FullRobotModel fullRobotModel;
@@ -60,7 +60,7 @@ public class DesiredHandstepProvider implements ObjectConsumer<HandstepPacket>, 
       return desiredHandstep;
    }
 
-   public void consumeObject(HandstepPacket object)
+   public void receivedPacket(HandstepPacket object)
    {
       handstepPacket.set(object);
    }

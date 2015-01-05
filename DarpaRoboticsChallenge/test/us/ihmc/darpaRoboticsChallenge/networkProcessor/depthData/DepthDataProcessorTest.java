@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
@@ -42,7 +42,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before: ");
    }
 
-   @Test
+   @Test 
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect()
    {
       BambooTools.reportTestStartedMessage();
@@ -83,10 +83,10 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       }
    }
 
-   private class LidarConsumer implements ObjectConsumer<SparseLidarScanPacket>
+   private class LidarConsumer implements PacketConsumer<SparseLidarScanPacket>
    {
       @Override
-      public void consumeObject(SparseLidarScanPacket sparseLidarScanPacket)
+      public void receivedPacket(SparseLidarScanPacket sparseLidarScanPacket)
       {
          numberOfLidarScansConsumed++;
          SparseLidarScan sparseLidarScan = sparseLidarScanPacket.createFullSparseLidarScan();

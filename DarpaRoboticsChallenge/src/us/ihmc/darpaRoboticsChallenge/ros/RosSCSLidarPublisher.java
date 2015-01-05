@@ -5,19 +5,19 @@ import javax.vecmath.AxisAngle4d;
 import org.ros.message.Time;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.sensing.LidarScanPacket;
 import us.ihmc.communication.packets.sensing.SpindleAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SpindleAngleReceiver;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosLidarPublisher;
 
-public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
+public class RosSCSLidarPublisher implements PacketConsumer<LidarScanPacket>
 {
    private final RosLidarPublisher[] lidarPublisher;
    private final RosMainNode rosMainNode;
@@ -28,7 +28,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
    private final RosTfPublisher tfPublisher;
    private final int nSensors;
 
-   public RosSCSLidarPublisher(ObjectCommunicator scsCommunicator,
+   public RosSCSLidarPublisher(PacketCommunicator scsCommunicator,
          RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          SDFFullRobotModel fullRobotModel,
@@ -52,16 +52,16 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
          rosMainNode.attachPublisher(rosTopic, lidarPublisher[sensorId]);
       }
 
-      scsCommunicator.attachListener(LidarScan.class, this);
+      scsCommunicator.attachListener(LidarScanPacket.class, this);
       scsCommunicator.attachListener(SpindleAnglePacket.class, spindleAngleReceiver);
    }
    
    @Override
-   public void consumeObject(LidarScan object)
+   public void receivedPacket(LidarScanPacket object)
    {
       if(rosMainNode.isStarted()){
          int sensorId = object.getSensorId();
-         long timestamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getScanParameters().getTimestamp());
+         long timestamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getLidarScanParameters().getTimestamp());
          Time time = Time.fromNano(timestamp);
          String frameId = lidarParameters[sensorId].getEndFrameForRosTransform();
          publishLidarScanFrame(sensorId, timestamp);

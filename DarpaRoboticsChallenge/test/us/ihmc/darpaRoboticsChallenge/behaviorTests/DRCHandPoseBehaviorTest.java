@@ -10,8 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
@@ -47,12 +48,12 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
-   private DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private ObjectCommunicator controllerCommunicator = new LocalObjectCommunicator();
+   private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
+   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCHandPoseBehaviorTestControllerCommunicator");
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private RobotSide robotSideToTest = RobotSide.LEFT;
+   private final RobotSide robotSideToTest = RobotSide.LEFT;
 
    private DoubleYoVariable yoTime;
 
@@ -84,7 +85,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      ObjectCommunicator junkyObjectCommunicator = new LocalObjectCommunicator();
+      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCHandPoseBehaviorTestJunkyCommunicator");
 
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
 
@@ -119,7 +120,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
 
-      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalObjectConsumer());
+      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
       fullRobotModel.updateFrames();
 
@@ -195,7 +196,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
 
-      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalObjectConsumer());
+      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
       fullRobotModel.updateFrames();
 
@@ -398,7 +399,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
 
-      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalObjectConsumer());
+      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
       fullRobotModel.updateFrames();
 

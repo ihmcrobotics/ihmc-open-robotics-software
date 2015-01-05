@@ -2,20 +2,22 @@ package us.ihmc.communication.streamingData;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import us.ihmc.communication.net.ObjectProducer;
+import us.ihmc.communication.packetCommunicator.PacketProducer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.AsyncContinuousExecutor;
-import us.ihmc.utilities.ThreadTools;
 
 /**
  * User: Matt
  * Date: 1/10/13
  */
-public class QueueBasedStreamingDataProducer<T> extends ObjectProducer<T>
+public class QueueBasedStreamingDataProducer<T extends Packet> extends PacketProducer<T>
 {
    private final LinkedBlockingQueue<T> queuedData = new LinkedBlockingQueue<T>();
-
-   public QueueBasedStreamingDataProducer()
+   private final String name;
+   
+   public QueueBasedStreamingDataProducer(String name)
    {
+      this.name = name;
    }
 
 
@@ -53,6 +55,6 @@ public class QueueBasedStreamingDataProducer<T> extends ObjectProducer<T>
                }
          }
       };
-      AsyncContinuousExecutor.executeContinuously(runnable, "Queued Streaming Data Producer");
+      AsyncContinuousExecutor.executeContinuously(runnable, name + "Queued Streaming Data Producer");
    }
 }

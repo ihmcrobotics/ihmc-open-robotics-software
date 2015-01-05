@@ -4,36 +4,37 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.TimestampListener;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 
 public class CommandPlayer implements TimestampListener
 {
    private final ExecutorService threadPool = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory("CommandPlaybackThread"));
    private final TimestampProvider timestampProvider;
-   private final ObjectCommunicator fieldComputerClient;
+   private final PacketCommunicator fieldComputerClient;
    
-   private Object syncObject = new Object();
+   private final Object syncObject = new Object();
    
    private boolean playingBack = false;
    private boolean playbackNextPacket = false;
-   private RigidBodyTransform playbackTransform = new RigidBodyTransform();
+   private final RigidBodyTransform playbackTransform = new RigidBodyTransform();
    private long startTime = Long.MIN_VALUE; 
    private long nextCommandtimestamp = Long.MIN_VALUE;
    
    private ScriptFileLoader loader;
    
-   public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, ObjectCommunicator fieldComputerClient, IHMCCommunicationKryoNetClassList drcNetClassList)
+   public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, PacketCommunicator fieldComputerClient, IHMCCommunicationKryoNetClassList drcNetClassList)
    {
       this.timestampProvider = timestampProvider;
       this.fieldComputerClient = fieldComputerClient;
@@ -98,7 +99,7 @@ public class CommandPlayer implements TimestampListener
    {
       try
       {
-         Object object = loader.getObject(playbackTransform);
+         Packet object = (Packet) loader.getObject(playbackTransform);
 
          boolean consumeObject = true;
 
@@ -118,7 +119,7 @@ public class CommandPlayer implements TimestampListener
 
 
          if (consumeObject)
-            fieldComputerClient.consumeObject(object);
+            fieldComputerClient.send(object);
          
          synchronized (syncObject)
          {

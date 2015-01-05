@@ -2,5 +2,5 @@ package us.ihmc.communication.packets;
 
 public enum PacketDestination
 {
-   CONTROLLER, NETWORK_PROCESSOR, UI
+   BROADCAST, CONTROLLER, NETWORK_PROCESSOR, UI, BEHAVIOR_MODULE, SCS_SENSORS, HAND_MANAGER
 }

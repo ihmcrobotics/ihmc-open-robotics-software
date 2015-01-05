@@ -3,23 +3,29 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 import java.io.IOException;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.KryoObjectServer;
+import us.ihmc.communication.packetCommunicator.KryoPacketClient;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public abstract class HandCommandManager
 {
 	private static final String TCP_PORT = "4270";
+	private static final String SERVER_ADDRESS = "localhost";
 	   
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
-	protected KryoObjectServer server = new KryoObjectServer(Integer.parseInt(TCP_PORT), new IHMCCommunicationKryoNetClassList());
+	
+	
+	protected KryoPacketClient packetCommunicator = new KryoPacketClient(SERVER_ADDRESS, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+         new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),PacketDestination.NETWORK_PROCESSOR.ordinal(),"AtlasROSAPINetworkProcessor");
 	
 	public HandCommandManager(Class<? extends Object> clazz)
 	{
 		spawnHandControllerThreadManager(clazz);
-		
 		try
 		{
-			server.connect();
+		   packetCommunicator.connect();
 		}
 		catch (IOException e)
 		{
@@ -32,9 +38,9 @@ public abstract class HandCommandManager
 		spawner.spawn(clazz, new String[]{"--port", TCP_PORT});
 	}
    
-	public void sendHandCommand(Object packet)
+	public void sendHandCommand(Packet packet)
 	{
-	   server.consumeObject(packet);
+	   packetCommunicator.send(packet);
 	}
 	
 	protected abstract void setupInboundPacketListeners();

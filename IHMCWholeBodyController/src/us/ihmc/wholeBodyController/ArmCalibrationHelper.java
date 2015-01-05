@@ -9,13 +9,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.imageio.ImageIO;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 
-public class ArmCalibrationHelper implements DRCStereoListener, ObjectConsumer<CalibrateArmPacket>
+public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<CalibrateArmPacket>
 {
    private final static String basedir = "/tmp/calibration";
 
@@ -28,7 +28,7 @@ public class ArmCalibrationHelper implements DRCStereoListener, ObjectConsumer<C
 
    private RobotConfigurationData lastJointConfigurationData;
 
-   public ArmCalibrationHelper(ObjectCommunicator fieldComputerClient, AbstractNetworkProcessorNetworkingManager networkingManager,
+   public ArmCalibrationHelper(PacketCommunicator fieldComputerClient, AbstractNetworkProcessorNetworkingManager networkingManager,
          DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
@@ -80,10 +80,10 @@ public class ArmCalibrationHelper implements DRCStereoListener, ObjectConsumer<C
 
    }
 
-   private class JointAngleConsumer implements ObjectConsumer<RobotConfigurationData>
+   private class JointAngleConsumer implements PacketConsumer<RobotConfigurationData>
    {
       @Override
-      public void consumeObject(RobotConfigurationData object)
+      public void receivedPacket(RobotConfigurationData object)
       {
          lock.lock();
          lastJointConfigurationData = object;
@@ -149,7 +149,7 @@ public class ArmCalibrationHelper implements DRCStereoListener, ObjectConsumer<C
       }
    }
 
-   public void consumeObject(CalibrateArmPacket object)
+   public void receivedPacket(CalibrateArmPacket object)
    {
       calibrateArm();
    }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.utilities.GraphicsUpdatable;
@@ -14,7 +14,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
-public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>
+public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {
    private final SideDependentList<HashMap<HandJointName, OneDoFJoint>> handJoints = new SideDependentList<HashMap<HandJointName, OneDoFJoint>>();
    private final AtomicReference<HandJointAnglePacket> packet = new AtomicReference<HandJointAnglePacket>();
@@ -79,7 +79,7 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
 	   }
    }
 
-   public void consumeObject(HandJointAnglePacket object)
+   public void receivedPacket(HandJointAnglePacket object)
    {
 	   packet.set(object);
 	   

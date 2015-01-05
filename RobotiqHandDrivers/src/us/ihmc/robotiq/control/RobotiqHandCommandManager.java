@@ -1,7 +1,7 @@
 package us.ihmc.robotiq.control;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
@@ -26,17 +26,17 @@ public class RobotiqHandCommandManager extends HandCommandManager
 
    protected void setupInboundPacketListeners()
    {
-      networkManager.getControllerCommandHandler().attachListener(FingerStatePacket.class, new ObjectConsumer<FingerStatePacket>()
+      networkManager.getControllerCommandHandler().attachListener(FingerStatePacket.class, new PacketConsumer<FingerStatePacket>()
       {
-         public void consumeObject(FingerStatePacket object)
+         public void receivedPacket(FingerStatePacket object)
          {
             sendHandCommand(object);
          }
       });
       
-      networkManager.getControllerCommandHandler().attachListener(ManualHandControlPacket.class, new ObjectConsumer<ManualHandControlPacket>()
+      networkManager.getControllerCommandHandler().attachListener(ManualHandControlPacket.class, new PacketConsumer<ManualHandControlPacket>()
       {
-         public void consumeObject(ManualHandControlPacket object)
+         public void receivedPacket(ManualHandControlPacket object)
          {
             sendHandCommand(object);
          }
@@ -45,11 +45,11 @@ public class RobotiqHandCommandManager extends HandCommandManager
 
    protected void setupOutboundPacketListeners()
    {
-      server.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
+      packetCommunicator.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
       {
-         public void consumeObject(HandJointAnglePacket object)
+         public void receivedPacket(HandJointAnglePacket object)
          {
-            networkManager.getControllerStateHandler().sendSerializableObject(object);
+            networkManager.getControllerStateHandler().sendPacket(object);
          }
       });
    }

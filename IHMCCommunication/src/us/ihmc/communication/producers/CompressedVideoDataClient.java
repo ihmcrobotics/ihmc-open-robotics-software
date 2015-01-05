@@ -9,8 +9,8 @@ import javax.vecmath.Quat4d;
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPicture;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.utilities.VideoStreamer;
 
@@ -69,11 +69,11 @@ public class CompressedVideoDataClient implements NetStateListener
       close();
    }
    
-   public void attachVideoPacketListener(ObjectCommunicator communicator)
+   public void attachVideoPacketListener(PacketCommunicator communicator)
    {
-      communicator.attachListener(VideoPacket.class, new ObjectConsumer<VideoPacket>()
+      communicator.attachListener(VideoPacket.class, new PacketConsumer<VideoPacket>()
       {
-         public void consumeObject(VideoPacket object)
+         public void receivedPacket(VideoPacket object)
          {
             CompressedVideoDataClient.this.consumeObject(object.getData(), object.getPosition(), object.getOrientation(), object.getFieldOfView());
          }

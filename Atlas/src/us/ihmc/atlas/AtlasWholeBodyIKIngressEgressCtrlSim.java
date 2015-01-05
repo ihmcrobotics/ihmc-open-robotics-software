@@ -5,33 +5,27 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.net.KryoLocalObjectCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIKPacketCreator;
 import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -50,8 +44,8 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    //   private DoubleYoVariable hik_arm_pos_y_d;
    //   private DoubleYoVariable hik_arm_pos_z_d;
    private final SDFFullRobotModel fullRobotModel;
-   private final KryoLocalObjectCommunicator fieldObjectCommunicator;
-   private ArrayList<Object> packetsToSend = new ArrayList<Object>();
+   private final KryoLocalPacketCommunicator fieldObjectCommunicator;
+   private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
    private final boolean DEBUG = true;
    private boolean USE_INGRESS_ONLY = false;
@@ -149,7 +143,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       {
          if (DEBUG)
          {
-            fieldObjectCommunicator.consumeObject(packetsToSend.get(i));
+            fieldObjectCommunicator.send(packetsToSend.get(i));
          }
       }
       packetsToSend.clear();

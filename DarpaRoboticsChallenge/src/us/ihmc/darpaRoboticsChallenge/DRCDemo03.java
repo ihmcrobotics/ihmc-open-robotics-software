@@ -5,8 +5,10 @@ import java.io.IOException;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -16,11 +18,11 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.HeightMapFromGroundContactModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public abstract class DRCDemo03
 {
@@ -48,7 +50,7 @@ public abstract class DRCDemo03
 
       environment.activateDisturbanceControllerOnSteeringWheel(YoFunctionGeneratorMode.SINE);
 
-      ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
+      PacketCommunicator drcNetworkProcessorServer = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCDemo03ControllerCommunicator");
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       HighLevelState initialBehavior = HighLevelState.DRIVING;
@@ -64,7 +66,7 @@ public abstract class DRCDemo03
 
       if (START_NETWORK)
       {
-         LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotModel);
+         PacketCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotModel);
 
          new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer, robotModel);
 

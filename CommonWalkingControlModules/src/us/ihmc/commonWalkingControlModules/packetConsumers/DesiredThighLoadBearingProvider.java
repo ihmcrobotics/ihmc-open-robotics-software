@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-public class DesiredThighLoadBearingProvider implements ObjectConsumer<ThighStatePacket>
+public class DesiredThighLoadBearingProvider implements PacketConsumer<ThighStatePacket>
 {
    private final SideDependentList<AtomicInteger> loadBearingState = new SideDependentList<AtomicInteger>();
    
@@ -29,7 +29,7 @@ public class DesiredThighLoadBearingProvider implements ObjectConsumer<ThighStat
       return loadBearingState.get(robotSide).getAndSet(-1) == 1;
    }
 
-   public void consumeObject(ThighStatePacket object)
+   public void receivedPacket(ThighStatePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       loadBearingState.get(robotSide).set(object.isLoadBearing() ? 1 : 0);

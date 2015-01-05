@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -23,20 +23,20 @@ public class DesiredComHeightProvider
       comHeightPacketConsumer = new ComHeightPacketConsumer();
    }
 
-   public ObjectConsumer<ComHeightPacket> getComHeightPacketConsumer()
+   public PacketConsumer<ComHeightPacket> getComHeightPacketConsumer()
    {
       return comHeightPacketConsumer;
    }
 
 
-   private class ComHeightPacketConsumer implements ObjectConsumer<ComHeightPacket>
+   private class ComHeightPacketConsumer implements PacketConsumer<ComHeightPacket>
    {
       public ComHeightPacketConsumer()
       {
       }
 
       @Override
-      public void consumeObject(ComHeightPacket packet)
+      public void receivedPacket(ComHeightPacket packet)
       {
          newDataAvailable.set(true);
          comHeightOffset.set(packet.getHeightOffset());

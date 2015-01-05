@@ -109,7 +109,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          {
             HandLoadBearingPacket handLoadBearingPacket = new HandLoadBearingPacket(robotSide, true);
             DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = (DesiredHandLoadBearingProvider) variousWalkingProviders.getDesiredHandLoadBearingProvider();
-            desiredHandLoadBearingProvider.consumeObject(handLoadBearingPacket);
+            desiredHandLoadBearingProvider.receivedPacket(handLoadBearingPacket);
          }
 
          if (initializeFeetInContact.get(robotSide).booleanValue())

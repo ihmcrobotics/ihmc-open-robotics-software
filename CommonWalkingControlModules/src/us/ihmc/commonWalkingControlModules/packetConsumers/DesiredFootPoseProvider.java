@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,7 +17,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
  * To change this template use File | Settings | File Templates.
  */
 
-public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, FootPoseProvider
+public class DesiredFootPoseProvider implements PacketConsumer<FootPosePacket>, FootPoseProvider
 {
    private final AtomicReference<FootPosePacket> footPosePacket = new AtomicReference<FootPosePacket>();
 
@@ -70,7 +70,7 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, 
    }
 
    @Override
-   public void consumeObject(FootPosePacket object)
+   public void receivedPacket(FootPosePacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       footPoseSide.set(robotSide == RobotSide.LEFT ? 0 : 1);

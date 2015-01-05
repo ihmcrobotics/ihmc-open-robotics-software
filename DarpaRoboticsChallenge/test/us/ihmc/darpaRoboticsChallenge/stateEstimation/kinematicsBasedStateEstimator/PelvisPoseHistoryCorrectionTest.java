@@ -18,7 +18,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.KryoLocalObjectCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -74,7 +75,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
-   private KryoLocalObjectCommunicator kryoLocalObjectCommunicator = new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList());
+   private final KryoLocalPacketCommunicator kryoLocalObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "PelvisPoseHistoryCorrectionTestLocalControllerCommunicator");
    private final Random random = new Random();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private FlatGroundEnvironment flatGroundEnvironment;
@@ -95,7 +96,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private DoubleYoVariable maxVelocityClip;
    private DoubleYoVariable clippedAlphaValue;
    private DoubleYoVariable previousClippedAlphaValue;
-   private double previousAlphaValue = Double.POSITIVE_INFINITY;
+   private final double previousAlphaValue = Double.POSITIVE_INFINITY;
    
    private DoubleYoVariable pelvisX;
    private DoubleYoVariable pelvisY;
@@ -392,7 +393,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private boolean yawBigInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
       FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
-      kryoLocalObjectCommunicator.consumeObject(packet);
+      kryoLocalObjectCommunicator.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
@@ -406,7 +407,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private boolean localizeOutsideOfFootInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
       FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
-      kryoLocalObjectCommunicator.consumeObject(packet);
+      kryoLocalObjectCommunicator.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
       RigidBodyTransform outsideOfFootTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1.5, 1, 0.8, 0, 0, 0);
@@ -745,7 +746,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       }
 
       @Override
-      public void consumeObject(StampedPosePacket object)
+      public void receivedPacket(StampedPosePacket object)
       {
          //doNothing
       }

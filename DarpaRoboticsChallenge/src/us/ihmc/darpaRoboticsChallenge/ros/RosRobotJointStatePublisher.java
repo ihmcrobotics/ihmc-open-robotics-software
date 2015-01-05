@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import org.ros.message.Time;
 import org.ros.time.WallTimeProvider;
 
-import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 
-public class RosRobotJointStatePublisher implements ObjectConsumer<RobotConfigurationData>
+public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigurationData>
 {
    private final RosJointStatePublisher jointStatePublisher;
    private final WallTimeProvider wallTime;
@@ -20,7 +20,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<RobotConfigur
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
-   public RosRobotJointStatePublisher(ObjectCommunicator fieldComputer, final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+   public RosRobotJointStatePublisher(PacketCommunicator fieldComputer, final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          String rosNameSpace)
    {
       this.rosMainNode = rosMainNode;
@@ -33,7 +33,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<RobotConfigur
    }
 
    @Override
-   public void consumeObject(RobotConfigurationData object)
+   public void receivedPacket(RobotConfigurationData object)
    {
       if (rosMainNode.isStarted())
       {

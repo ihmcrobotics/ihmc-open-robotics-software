@@ -2,7 +2,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.LowLevelDrivingAction;
 import us.ihmc.communication.packets.driving.LowLevelDrivingCommand;
 import us.ihmc.communication.packets.driving.LowLevelDrivingStatus;
@@ -10,7 +10,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContro
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.DrivingInterface.GearName;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjects;
 
-public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCommand>
+public class DrivingCommandProvider implements PacketConsumer<LowLevelDrivingCommand>
 {
    private final ConcurrentLinkedQueue<LowLevelDrivingCommand> drivingCommands = new ConcurrentLinkedQueue<LowLevelDrivingCommand>();
    private DrivingInterface drivingInterface;
@@ -23,7 +23,7 @@ public class DrivingCommandProvider implements ObjectConsumer<LowLevelDrivingCom
    private double clearanceFromPedals;
 
 
-   public void consumeObject(LowLevelDrivingCommand object)
+   public void receivedPacket(LowLevelDrivingCommand object)
    {
       drivingCommands.add(object);
    }

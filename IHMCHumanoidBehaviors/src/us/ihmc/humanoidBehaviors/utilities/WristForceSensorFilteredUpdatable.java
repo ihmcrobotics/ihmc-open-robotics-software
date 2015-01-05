@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -58,11 +58,11 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final BooleanYoVariable stopArmMotionIfImpactDetected;
    private final BooleanYoVariable addSimulatedSensorNoise;
 
-   private final ObjectCommunicator controllerCommunicator;
+   private final PacketCommunicator controllerCommunicator;
    
 
    public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
-         ForceSensorDataHolder forceSensorDataHolder, double DT, ObjectCommunicator controllerCommunicator, YoVariableRegistry registry)
+         ForceSensorDataHolder forceSensorDataHolder, double DT, PacketCommunicator controllerCommunicator, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
 
@@ -201,7 +201,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
             {
                StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
                pausePacket.setDestination(PacketDestination.CONTROLLER);
-               controllerCommunicator.consumeObject(pausePacket);
+               controllerCommunicator.send(pausePacket);
             }
          }
       }

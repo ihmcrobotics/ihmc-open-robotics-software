@@ -5,24 +5,24 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packets.sensing.LidarScanPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
+import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class DRCLidar
 {
@@ -48,7 +48,7 @@ public class DRCLidar
       return lidarSensors.get(0);
    }
 
-   public static void setupDRCRobotLidar(DRCSimulationFactory drcSimulation, ObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
+   public static void setupDRCRobotLidar(DRCSimulationFactory drcSimulation, PacketCommunicator objectCommunicator, DRCRobotJointMap jointMap,
          DRCRobotLidarParameters lidarParams, TimestampProvider timestampProvider, boolean startLidar)
  {
     Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
@@ -68,7 +68,7 @@ public class DRCLidar
     }
  }
 
-   public static void setupDRCRobotPointCloud(DRCSimulationFactory drcSimulation, ObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
+   public static void setupDRCRobotPointCloud(DRCSimulationFactory drcSimulation, PacketCommunicator objectCommunicator, DRCRobotJointMap jointMap,
          DRCRobotPointCloudParameters pointCloudParams, TimestampProvider timestampProvider, boolean startLidar)
  {
     Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
@@ -92,11 +92,11 @@ public class DRCLidar
    {
       private final Executor pool = Executors.newSingleThreadExecutor();
 
-      private final ObjectCommunicator objectCommunicator;
+      private final PacketCommunicator objectCommunicator;
       private final LidarScanParameters lidarScanParameters;
-      private int pointCloudSensorId;
+      private final int pointCloudSensorId;
 
-      public DRCLidarToPointCloudCallback(ObjectCommunicator objectCommunicator, LidarScanParameters lidarScanParameters, int pointCloudSensorId)
+      public DRCLidarToPointCloudCallback(PacketCommunicator objectCommunicator, LidarScanParameters lidarScanParameters, int pointCloudSensorId)
       {
          this.objectCommunicator = objectCommunicator;
          this.lidarScanParameters = lidarScanParameters;
@@ -121,7 +121,7 @@ public class DRCLidar
             @Override
             public void run()
             {
-               objectCommunicator.consumeObject(pointCloud);
+               objectCommunicator.send(pointCloud);
             }
          });
       }
@@ -131,13 +131,13 @@ public class DRCLidar
 
    public static class DRCLidarCallback implements GPULidarListener
    {
-      private final Executor pool = Executors.newSingleThreadExecutor();
+//      private final Executor pool = Executors.newSingleThreadExecutor();
 
-      private final ObjectCommunicator objectCommunicator;
+      private final PacketCommunicator objectCommunicator;
       private final LidarScanParameters lidarScanParameters;
       private final int lidarSensorId;
 
-      public DRCLidarCallback(ObjectCommunicator objectCommunicator, LidarScanParameters lidarScanParameters, int lidarSensorId)
+      public DRCLidarCallback(PacketCommunicator objectCommunicator, LidarScanParameters lidarScanParameters, int lidarSensorId)
       {
          this.objectCommunicator = objectCommunicator;
          this.lidarScanParameters = lidarScanParameters;
@@ -148,17 +148,18 @@ public class DRCLidar
       public void scan(float[] scan, RigidBodyTransform lidarTransform, double time)
       {
          RigidBodyTransform transform = new RigidBodyTransform(lidarTransform);
-         final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
-                                        Arrays.copyOf(scan, scan.length),lidarSensorId);
+         final LidarScanPacket lidarScan = new LidarScanPacket(lidarSensorId, new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
+                                        Arrays.copyOf(scan, scan.length));
 
-         pool.execute(new Runnable()
-         {
-            @Override
-            public void run()
-            {
-               objectCommunicator.consumeObject(lidarScan);
-            }
-         });
+         objectCommunicator.send(lidarScan);
+//         pool.execute(new Runnable()
+//         {
+//            @Override
+//            public void run()
+//            {
+//               objectCommunicator.send(lidarScan);
+//            }
+//         });
       }
    }
 
