@@ -101,12 +101,14 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
       activeSetB.reshape(activeSetB.numRows+1, 1, true);
       activeSetB.set(activeSetB.numRows-1, 0, linearInequalityConstraintB.get(inequalityConstraintIndex,0));
 
-      inActiveSet[inequalityConstraintIndex]=true;
+      inActiveSet[linearEqualityConstraintA.numRows+inequalityConstraintIndex]=true;
       return activeSetB.numRows-1;
    }
 
    private void removeConstraintFromActiveSet(int indexInActiveSet)
    {
+      if(indexInActiveSet<linearEqualityConstraintA.numRows)
+         throw new RuntimeException("shouldn't try to remove equality constraint");
       inActiveSet[indexInActiveSet]=false;
 
       DenseMatrix64F tmpA = new DenseMatrix64F(activeSetA);
