@@ -12,7 +12,7 @@ public class SimpleActiveSetQPSolverTest
    public void testSimpleUnconstrainedOptimization()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2; (Solution = [1, 2])
-      AbstractActiveSetQPSolver solver = new MITActiveSetQPSolver();
+      AbstractActiveSetQPSolver solver = new SimpleActiveSetQPSolver();
 
       double[][] quadraticCostFunctionPMatrix = new double[][]
       {
@@ -34,7 +34,7 @@ public class SimpleActiveSetQPSolverTest
    public void testSimpleEqualityConstrainedOptimization()
    {
       // Minimize 1/2 * (x1^2 + x2^2) subject to x1 + x2 = 2; (Solution = [1, 1])
-      AbstractActiveSetQPSolver solver = new MITActiveSetQPSolver();
+      AbstractActiveSetQPSolver solver = new SimpleActiveSetQPSolver();
 
       double[][] quadraticCostFunctionPMatrix = new double[][]
       {
@@ -64,7 +64,7 @@ public class SimpleActiveSetQPSolverTest
    public void testSimpleInequalityConstrainedOptimizationWithActiveConstraint()
    {
       // Minimize 1/2 * (x1^2 + x2^2) subject to x1 + x2 <= -2; (Solution = [-1, -1])
-      AbstractActiveSetQPSolver solver = new MITActiveSetQPSolver();
+      AbstractActiveSetQPSolver solver = new SimpleActiveSetQPSolver();
 
       double[][] quadraticCostFunctionPMatrix = new double[][]
       {
@@ -93,7 +93,7 @@ public class SimpleActiveSetQPSolverTest
    public void testSimpleInequalityConstrainedOptimizationWithInactiveConstraint()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 + x2 <= 4; (Solution = [1, 2])
-      AbstractActiveSetQPSolver solver = new MITActiveSetQPSolver();
+      AbstractActiveSetQPSolver solver = new SimpleActiveSetQPSolver();
 
       double[][] quadraticCostFunctionPMatrix = new double[][]
       {
@@ -124,7 +124,7 @@ public class SimpleActiveSetQPSolverTest
    public void testNoValidSolutionDueToNonSolvableEqualityConstraints()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 + x2 = 1; x1 + x2 = 2; (No solution)
-      AbstractActiveSetQPSolver solver = new MITActiveSetQPSolver();
+      AbstractActiveSetQPSolver solver = new SimpleActiveSetQPSolver();
 
       double[][] quadraticCostFunctionPMatrix = new double[][]
       {
@@ -149,12 +149,12 @@ public class SimpleActiveSetQPSolverTest
       assertTrue(Double.isNaN(solution[1]));
    }
 
-   //@Ignore // Fails when conflicting constraints are active... Need to fix this case.
+   @Ignore // Fails when conflicting constraints are active... Need to fix this case.
    @Test
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 = -4; x1 < 4; (Solution = [-4, 2])
-      AbstractActiveSetQPSolver solver = new MITActiveSetQPSolver();
+      AbstractActiveSetQPSolver solver = new SimpleActiveSetQPSolver();
 
       double[][] quadraticCostFunctionPMatrix = new double[][]
       {
