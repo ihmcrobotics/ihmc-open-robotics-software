@@ -2,7 +2,7 @@ package us.ihmc.communication.util;
 
 public class NetworkConfigParameters
 {
-   public static final boolean USE_BEHAVIORS_MODULE = true;
+   public static final boolean USE_BEHAVIORS_MODULE = false;
 
    public static final boolean ENABLE_TESTBED_ALIGNMENT = false;
    
