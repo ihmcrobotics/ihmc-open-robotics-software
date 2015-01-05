@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CQPMomentumBasedOptimizer;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerAdapter;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CompositeActiveSetQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerInterface;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
@@ -50,14 +51,16 @@ import us.ihmc.yoUtilities.time.ExecutionTimer;
 
 public class OptimizationMomentumControlModule implements MomentumControlModule
 {
-
    public enum QPSolverFlavor
    {
-      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT, EIGEN_ACTIVESET_DIRECT_JNA, CQP_OASES_DIRECT, CQP_QUADPROG_DIRECT
-   };
+      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT, EIGEN_ACTIVESET_DIRECT_JNA, CQP_OASES_DIRECT, CQP_QUADPROG_DIRECT,
+      SIMPLE_ACTIVE_SET
+   }
+
+   ;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   
+
    private final CentroidalMomentumHandler centroidalMomentumHandler;
    private final ExternalWrenchHandler externalWrenchHandler;
 
@@ -67,7 +70,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    private final PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator;
 
-   private final Map<QPSolverFlavor,MomentumOptimizerInterface>  momentumOptimizers  = new LinkedHashMap<>();
+   private final Map<QPSolverFlavor, MomentumOptimizerInterface> momentumOptimizers = new LinkedHashMap<>();
    private MomentumOptimizerInterface momentumOptimizer;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
@@ -76,10 +79,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
    private final ExecutionTimer probingTimer = new ExecutionTimer("probingTimer", 0, registry);
 
-   private final boolean INSPECT_CONSTRAINTS=false;
-   private final DoubleYoVariable primaryResNorm= new DoubleYoVariable("primaryResNorm", registry);
-   private final DoubleYoVariable secondaryResNorm= new DoubleYoVariable("secondaryResNorm", registry);
-   
+   private final boolean INSPECT_CONSTRAINTS = false;
+   private final DoubleYoVariable primaryResNorm = new DoubleYoVariable("primaryResNorm", registry);
+   private final DoubleYoVariable secondaryResNorm = new DoubleYoVariable("secondaryResNorm", registry);
+
 
    private final EnumYoVariable<QPSolverFlavor> requestedQPSolver = new EnumYoVariable<>("requestedQPSolver", registry, QPSolverFlavor.class);
    private final EnumYoVariable<QPSolverFlavor> currentQPSolver = new EnumYoVariable<>("currentQPSolver", registry, QPSolverFlavor.class);
@@ -94,8 +97,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, double gravityZ,
            MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
-           Collection<? extends PlaneContactState> planeContactStates, YoGraphicsListRegistry yoGraphicsListRegistry,
-           YoVariableRegistry parentRegistry)
+           Collection<? extends PlaneContactState> planeContactStates, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
@@ -104,29 +106,30 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.secondaryMotionConstraintHandler = new MotionConstraintHandler("secondary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
 
       nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      
-      //setup solvers
+
+      // setup solvers
       momentumOptimizers.put(QPSolverFlavor.CVX_NULL, new CVXMomentumOptimizerAdapter(nDoF));
-      ActiveSetQPMomentumOptimizer eigenQP = 
-                 new ActiveSetQPMomentumOptimizer(nDoF, false)
-                 {
-                  public int solve() throws NoConvergenceException
-                    {
-                       return super.solve(true);
-                    }
-                 };
+      ActiveSetQPMomentumOptimizer eigenQP = new ActiveSetQPMomentumOptimizer(nDoF, false)
+      {
+         public int solve() throws NoConvergenceException
+         {
+            return super.solve(true);
+         }
+      };
       eigenQP.setSaveNoConvergeProblem(false);
       momentumOptimizers.put(QPSolverFlavor.EIGEN_NULL, eigenQP);
       momentumOptimizers.put(QPSolverFlavor.EIGEN_DIRECT, eigenQP);
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_NULL, new ActiveSetQPMomentumOptimizer(nDoF, false));
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF, false));
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT_JNA, new ActiveSetQPMomentumOptimizer(nDoF, true));
-//      momentumOptimizers.put(QPSolverFlavor.CQP_OASES_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new OASESConstrainedQPSolver(registry)));
-//      momentumOptimizers.put(QPSolverFlavor.CQP_QUADPROG_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new QuadProgSolver(registry)));
-//      momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
+      momentumOptimizers.put(QPSolverFlavor.CQP_OASES_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new OASESConstrainedQPSolver(registry)));
+      momentumOptimizers.put(QPSolverFlavor.SIMPLE_ACTIVE_SET, new CQPMomentumBasedOptimizer(nDoF, new CompositeActiveSetQPSolver(registry)));
+      momentumOptimizers.put(QPSolverFlavor.CQP_QUADPROG_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new QuadProgSolver(registry)));
 
-      //initialize default solver
-      final QPSolverFlavor defaultSolver =QPSolverFlavor.CVX_NULL;
+//    momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
+
+      // initialize default solver
+      final QPSolverFlavor defaultSolver = QPSolverFlavor.CVX_NULL;
       requestedQPSolver.set(defaultSolver);
       currentQPSolver.set(defaultSolver);
       momentumOptimizer = momentumOptimizers.get(defaultSolver);
@@ -139,7 +142,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       double wRhoPenalizer = momentumOptimizationSettings.getPenalizerOfRhoPlaneContactRegularization();
 
       wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nPointsPerPlane, nSupportVectors, wRhoPlaneContacts,
-            wRhoSmoother, wRhoPenalizer, planeContactStates, registry);
+              wRhoSmoother, wRhoPenalizer, planeContactStates, registry);
 
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
@@ -190,41 +193,43 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
            throws MomentumControlModuleException
 
    {
-	   checkQPSolverSwitch();
-      
-      switch(currentQPSolver.getEnumValue())
-      {
-      case EIGEN_ACTIVESET_DIRECT_JNA:
-      case EIGEN_ACTIVESET_DIRECT:
-      case EIGEN_DIRECT:
-      case CQP_OASES_DIRECT:
-      case CQP_QUADPROG_DIRECT:
-//      case CQP_JOPT_DIRECT:
-         return compute(contactStates, upcomingSupportLeg,false);
-         
-      case CVX_NULL:
-      case EIGEN_ACTIVESET_NULL:
-      case EIGEN_NULL:
-         return compute(contactStates, upcomingSupportLeg,true);
+      checkQPSolverSwitch();
 
-      default:
-         throw new RuntimeException("Unlisted solverFlavor, please added it in the case above");
+      switch (currentQPSolver.getEnumValue())
+      {
+         case EIGEN_ACTIVESET_DIRECT_JNA :
+         case EIGEN_ACTIVESET_DIRECT :
+         case EIGEN_DIRECT :
+         case CQP_OASES_DIRECT :
+         case CQP_QUADPROG_DIRECT :
+         case SIMPLE_ACTIVE_SET :
+
+//          case CQP_JOPT_DIRECT:
+            return compute(contactStates, upcomingSupportLeg, false);
+
+         case CVX_NULL :
+         case EIGEN_ACTIVESET_NULL :
+         case EIGEN_NULL :
+            return compute(contactStates, upcomingSupportLeg, true);
+
+         default :
+            throw new RuntimeException("Unlisted solverFlavor, please added it in the case above");
       }
    }
-   
+
    public void checkQPSolverSwitch()
    {
-      if(currentQPSolver.getEnumValue()!=requestedQPSolver.getEnumValue())
+      if (currentQPSolver.getEnumValue() != requestedQPSolver.getEnumValue())
       {
          momentumOptimizer = momentumOptimizers.get(requestedQPSolver.getEnumValue());
-         if(momentumOptimizer instanceof ActiveSetQPMomentumOptimizer)
-            ((ActiveSetQPMomentumOptimizer)momentumOptimizer).loadNativeLibraries();
+         if (momentumOptimizer instanceof ActiveSetQPMomentumOptimizer)
+            ((ActiveSetQPMomentumOptimizer) momentumOptimizer).loadNativeLibraries();
          currentQPSolver.set(requestedQPSolver.getEnumValue());
       }
    }
-      
+
    private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg,
-         boolean useNullSpaceProjection)
+           boolean useNullSpaceProjection)
            throws MomentumControlModuleException
 
    {
@@ -236,25 +241,26 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       primaryMotionConstraintHandler.compute();
       centroidalMomentumHandler.compute();
 
-      //C1:  J vd = p
+      // C1:  J vd = p
       DenseMatrix64F jPrimary = primaryMotionConstraintHandler.getJacobian();
       DenseMatrix64F pPrimary = primaryMotionConstraintHandler.getRightHandSide();
 
-      //C2:  A vd = b = hd - Ad v 
+      // C2:  A vd = b = hd - Ad v
       DenseMatrix64F a = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
       DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData);
       bOriginal.set(b);
 
-      
-      if(useNullSpaceProjection)
+
+      if (useNullSpaceProjection)
       {
-          //put C1 into C2, find solution w \in null(J), ie: vd = null(J)w + J\p, from now on, we solve for w instead of vd
-          /*
-           *  A'= A*(I-J^+ J)
-           *  b'=b- A J^+
-           */
-          equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
-          equalityConstraintEnforcer.constrainEquation(a, b);
+         // put C1 into C2, find solution w \in null(J), ie: vd = null(J)w + J\p, from now on, we solve for w instead of vd
+
+         /*
+          *  A'= A*(I-J^+ J)
+          *  b'=b- A J^+
+          */
+         equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
+         equalityConstraintEnforcer.constrainEquation(a, b);
       }
 
 
@@ -268,45 +274,39 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
       DenseMatrix64F pSecondary = secondaryMotionConstraintHandler.getRightHandSide();
       DenseMatrix64F weightMatrixSecondary = secondaryMotionConstraintHandler.getWeightMatrix();
-      if(useNullSpaceProjection)
+      if (useNullSpaceProjection)
       {
          equalityConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
       }
 
-      //C
+      // C
       momentumOptimizationSettings.packDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
 
-      //Lambda
+      // Lambda
       DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace());
 
-      if(useNullSpaceProjection)
+      if (useNullSpaceProjection)
       {
-              momentumOptimizer.setInputs(
-                    a, b, momentumDotWeight, 
-                    jSecondary, pSecondary, weightMatrixSecondary,
-                    wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, 
-                    wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
-                    wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, 
-                    wrenchMatrixCalculator.getRhoMin(), wrenchMatrixCalculator.getQFeetCoP());
+         momentumOptimizer.setInputs(a, b, momentumDotWeight, jSecondary, pSecondary, weightMatrixSecondary, wrenchMatrixCalculator.getWRho(),
+                                     dampedLeastSquaresFactorMatrix, wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(),
+                                     wrenchMatrixCalculator.getWRhoPenalizer(), wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide,
+                                     wrenchMatrixCalculator.getRhoMin(), wrenchMatrixCalculator.getQFeetCoP());
       }
       else
       {
-              momentumOptimizer.setInputs(
-                    a, b, momentumDotWeight, 
-                    jPrimary, pPrimary,
-                    jSecondary, pSecondary, weightMatrixSecondary,
-                    wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, 
-                    wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
-                    wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, 
-                    wrenchMatrixCalculator.getRhoMin(), wrenchMatrixCalculator.getQFeetCoP());
+         momentumOptimizer.setInputs(a, b, momentumDotWeight, jPrimary, pPrimary, jSecondary, pSecondary, weightMatrixSecondary,
+                                     wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, wrenchMatrixCalculator.getWRhoSmoother(),
+                                     wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
+                                     wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, wrenchMatrixCalculator.getRhoMin(),
+                                     wrenchMatrixCalculator.getQFeetCoP());
       }
-              
+
       NoConvergenceException noConvergenceException = null;
       try
       {
-         probingTimer.startMeasurement(); 
+         probingTimer.startMeasurement();
          optimize();
-         probingTimer.stopMeasurement(); 
+         probingTimer.stopMeasurement();
       }
       catch (NoConvergenceException e)
       {
@@ -318,7 +318,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
       DenseMatrix64F jointAccelerations;
-      if(useNullSpaceProjection)
+      if (useNullSpaceProjection)
       {
          jointAccelerations = equalityConstraintEnforcer.constrainResult(momentumOptimizer.getOutputJointAccelerations());
       }
@@ -326,12 +326,12 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       {
          jointAccelerations = momentumOptimizer.getOutputJointAccelerations();
       }
-      
-      //check constraint quality
-      if(INSPECT_CONSTRAINTS)
+
+      // check constraint quality
+      if (INSPECT_CONSTRAINTS)
       {
-        primaryResNorm.set(LinearConstraintResNorm(jPrimary, pPrimary, jointAccelerations));
-        secondaryResNorm.set(LinearConstraintResNorm(jSecondary, pSecondary, jointAccelerations));
+         primaryResNorm.set(LinearConstraintResNorm(jPrimary, pPrimary, jointAccelerations));
+         secondaryResNorm.set(LinearConstraintResNorm(jSecondary, pSecondary, jointAccelerations));
       }
 
 
@@ -358,7 +358,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    {
       DenseMatrix64F resVector = p.copy();
       CommonOps.multAdd(-1, J, x, resVector);
-      double norm=NormOps.normP1(resVector);
+      double norm = NormOps.normP1(resVector);
+
       return norm;
    }
 
@@ -372,6 +373,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       catch (NoConvergenceException e)
       {
          qpSolverIteration.set(e.getIter());
+
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
@@ -386,7 +388,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          throw e;
       }
    }
-   
+
 
    private void updateMomentumControlModuleSolverListener(DenseMatrix64F jPrimary, DenseMatrix64F pPrimary, DenseMatrix64F a, DenseMatrix64F b,
            DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F jointAccelerations)
@@ -414,13 +416,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   
+
    public void resetGroundReactionWrenchFilter()
    {
       // empty for now
    }
 
-   
+
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       if (desiredJointAccelerationCommand.getHasWeight())
@@ -433,7 +435,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   
+
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       if (desiredSpatialAccelerationCommand.getHasWeight())
@@ -446,7 +448,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   
+
    public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
@@ -466,18 +468,18 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   
+
    public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
    {
       this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData());
    }
 
-   
+
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
-   
+
    public void setFootCoPControlData(RobotSide side, ReferenceFrame frame)
    {
       wrenchMatrixCalculator.setFootCoPControlData(side, frame);

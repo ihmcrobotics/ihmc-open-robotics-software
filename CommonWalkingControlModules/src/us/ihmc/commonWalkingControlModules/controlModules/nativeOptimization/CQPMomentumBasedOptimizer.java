@@ -13,7 +13,6 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
    private final ConstrainedQPSolver CQPsolver;
    private boolean firstCall;
    final boolean useBoxContraints;
-   double wCoP=1;
 
    DenseMatrix64F AtC, JstWs, Q, QBlk1, QBlk2, f, fBlk1, fBlk2, Aeq, negA, beq, Ain, bin, x0, IdentityMatrix;
    DenseMatrix64F lb, ub;
@@ -57,20 +56,6 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       this.CQPsolver = CQPsolver;
    }
 
-   private static double findMinEigenValue(DenseMatrix64F Q)
-   {
-      EigenDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.eig(Q.numCols, false, true);
-      decomposer.decompose(Q);
-
-      double minVal = Double.MAX_VALUE;
-      for (int i = 0; i < Q.numCols; i++)
-      {
-         double ev = decomposer.getEigenvalue(i).getReal();
-         if (minVal > ev)
-            minVal = ev;
-      }
-      return minVal;
-   }
 
    @Override
    public int solve() throws NoConvergenceException
@@ -89,7 +74,7 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
 
       CommonOps.add(WRho, WRhoSmoother, QBlk2);
       CommonOps.add(QBlk2, WRhoCoPPenalty, QBlk2);
-      CommonOps.multAddTransA(wCoP,QfeetCop, QfeetCop, QBlk2);
+      CommonOps.multAddTransA(QfeetCop, QfeetCop, QBlk2);
 
       CommonOps.insert(QBlk1, Q, 0, 0);
       CommonOps.insert(QBlk2, Q, nDoF, nDoF);
@@ -177,6 +162,7 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
           {
         	 System.out.println(Aeq);
         	 System.out.println(e.getMessage());
+        	 throw e;
           }
       }
       firstCall = false;
