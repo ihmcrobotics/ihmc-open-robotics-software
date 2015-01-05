@@ -16,7 +16,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.KryoObjectServer;
+import us.ihmc.communication.packetCommunicator.KryoPacketServer;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -65,8 +66,8 @@ public class StepprControllerFactory
       /*
        * Create network servers/clients
        */
-      KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-            new IHMCCommunicationKryoNetClassList());
+      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+            new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "StepprControllerCommunicator" );
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC,
             LogUtils.getMyIP(StepprNetworkParameters.CONTROL_COMPUTER_HOST), robotModel.getEstimatorDT());
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
