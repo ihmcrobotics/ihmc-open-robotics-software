@@ -30,6 +30,9 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'gdx', version: '1.0.1'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet', version: '1.0.1'
 	compile group: 'us.ihmc.thirdparty', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop'
+	compile group: 'us.ihmc.thirdparty.gdata', name: 'gdata-youtube', version: 'x'
+	compile group: 'us.ihmc.thirdparty.gdata', name: 'gdata-media', version: 'x'
+	compile group: 'us.ihmc.thirdparty.gdata', name: 'gdata-core', version: 'x'
 	compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '1.8.4'
 	
 	compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
