@@ -2,7 +2,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -11,7 +11,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  * @author twan
  *         Date: 5/14/13
  */
-public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
+public class TorusPoseProvider implements PacketConsumer<TorusPosePacket>
 {
 
    private final AtomicReference<TorusPosePacket> torusPosePacket = new AtomicReference<TorusPosePacket>();
@@ -24,7 +24,7 @@ public class TorusPoseProvider implements ObjectConsumer<TorusPosePacket>
 
    }
 
-   public void consumeObject(TorusPosePacket object)
+   public void receivedPacket(TorusPosePacket object)
    {
       torusPosePacket.set(object);
    }

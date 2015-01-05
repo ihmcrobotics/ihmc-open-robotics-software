@@ -95,7 +95,7 @@ public abstract class CameraDataReceiver
 
       public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView)
       {
-         networkingManager.getControllerStateHandler().sendSerializableObject(
+         networkingManager.getControllerStateHandler().sendPacket(
                new VideoPacket(timeStamp, data, position, orientation, fieldOfView));
       }
 

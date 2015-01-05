@@ -8,7 +8,7 @@ import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.NetworkProcessorControllerCommandHandler;
 import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
@@ -59,8 +59,8 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          lidarDataFilter.clearLidarData(DepthDataTree.QUADTREE);
          lidarDataFilter.clearLidarData(DepthDataTree.OCTREE);
 
-         controllerStateHandler.sendSerializableObject(clearQuadTreeCommand);
-         controllerStateHandler.sendSerializableObject(clearOctTreeCommand);
+         controllerStateHandler.sendPacket(clearQuadTreeCommand);
+         controllerStateHandler.sendPacket(clearOctTreeCommand);
       }
    }
 
@@ -93,7 +93,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
             sendData.set(false);
          }
 
-         controllerStateHandler.sendSerializableObject(new DepthDataStateCommand(lidarState));
+         controllerStateHandler.sendPacket(new DepthDataStateCommand(lidarState));
       }
    }
 
@@ -138,7 +138,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
 
                if (rosPointCloud.getNumberOfPoints() > 0)
                {
-                  controllerStateHandler.sendSerializableObject(rosPointCloud);
+                  controllerStateHandler.sendPacket(rosPointCloud);
                }
             }
          }
@@ -163,25 +163,25 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
    {
       public LidarStateCommandListener(NetworkProcessorControllerCommandHandler commandHandler)
       {
-         commandHandler.attachListener(DepthDataStateCommand.class, new ObjectConsumer<DepthDataStateCommand>()
+         commandHandler.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
          {
-            public void consumeObject(DepthDataStateCommand object)
+            public void receivedPacket(DepthDataStateCommand object)
             {
                setLidarState(object);
             }
          });
          
-         commandHandler.attachListener(DepthDataClearCommand.class, new ObjectConsumer<DepthDataClearCommand>()
+         commandHandler.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
          {
-            public void consumeObject(DepthDataClearCommand object)
+            public void receivedPacket(DepthDataClearCommand object)
             {
                clearLidar(object);
             }
          });
          
-         commandHandler.attachListener(DepthDataFilterParameters.class, new ObjectConsumer<DepthDataFilterParameters>()
+         commandHandler.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
          {
-            public void consumeObject(DepthDataFilterParameters object)
+            public void receivedPacket(DepthDataFilterParameters object)
             {
                setFilterParameters(object);
             }
@@ -201,7 +201,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          synchronized (commandLock)
          {
             lidarDataFilter.clearLidarData(object.getDepthDataTree());
-            controllerStateHandler.sendSerializableObject(object);
+            controllerStateHandler.sendPacket(object);
          }
       }
 
@@ -210,7 +210,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          synchronized (commandLock)
          {
             lidarDataFilter.setParameters(parameters);
-            controllerStateHandler.sendSerializableObject(parameters);
+            controllerStateHandler.sendPacket(parameters);
          }
       }
    }

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.AtlasWristFeetSensorPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
@@ -41,7 +41,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
    private final RigidBodyTransform rootTransform = new RigidBodyTransform();
 
-   private final ObjectCommunicator networkProcessorCommunicator;
+   private final PacketCommunicator networkProcessorCommunicator;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SideDependentList<String> footForceSensorNames;
@@ -55,7 +55,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<State> stateRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         ObjectCommunicator networkProcessorCommunicator, SensorOutputMapReadOnly sensorOutputMapReadOnly, DRCRobotSensorInformation sensorInformation)
+         PacketCommunicator networkProcessorCommunicator, SensorOutputMapReadOnly sensorOutputMapReadOnly, DRCRobotSensorInformation sensorInformation)
    {
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
@@ -194,13 +194,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   RobotPoseData robotPoseData = currentState.poseData;
                   RobotConfigurationData robotConfigData = currentState.jointData;
 
-                  networkProcessorCommunicator.consumeObject(robotPoseData);
-                  networkProcessorCommunicator.consumeObject(robotConfigData);
+                  networkProcessorCommunicator.send(robotPoseData);
+                  networkProcessorCommunicator.send(robotConfigData);
 
                   AtlasWristFeetSensorPacket wristFeetSensorPacket = new AtlasWristFeetSensorPacket();
                   setSensorPacketFromRobotConfigData(wristFeetSensorPacket, robotConfigData);
 
-                  networkProcessorCommunicator.consumeObject(wristFeetSensorPacket);
+                  networkProcessorCommunicator.send(wristFeetSensorPacket);
                }
                stateRingBuffer.flush();
             }

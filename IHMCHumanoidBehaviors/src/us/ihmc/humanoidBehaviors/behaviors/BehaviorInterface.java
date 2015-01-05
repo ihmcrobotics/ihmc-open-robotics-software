@@ -3,16 +3,17 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.communication.net.GlobalObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.ControllerGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.NetworkProcessorGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.utilities.FormattingTools;
 
 /**
  * Any behavior needs to implement this abstract class.
@@ -53,12 +54,12 @@ public abstract class BehaviorInterface implements RobotController
       isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
    }
 
-   public void sendPacketToController(Object obj)
+   public void sendPacketToController(Packet obj)
    {
       outgoingCommunicationBridge.sendPacketToController(obj);
    }
 
-   public void sendPacketToNetworkProcessor(Object obj)
+   public void sendPacketToNetworkProcessor(Packet obj)
    {
       outgoingCommunicationBridge.sendPacketToNetworkProcessor(obj);
    }
@@ -177,12 +178,12 @@ public abstract class BehaviorInterface implements RobotController
     */
    public abstract void initialize();
    
-   public GlobalObjectConsumer getNetworkProcessorGlobalObjectConsumer()
+   public PacketConsumer getNetworkProcessorGlobalObjectConsumer()
    {
       return networkProcessorObjectConsumer;
    }
    
-   public GlobalObjectConsumer getControllerGlobalObjectConsumer()
+   public PacketConsumer getControllerGlobalPacketConsumer()
    {
       return controllerObjectConsumer;
    }

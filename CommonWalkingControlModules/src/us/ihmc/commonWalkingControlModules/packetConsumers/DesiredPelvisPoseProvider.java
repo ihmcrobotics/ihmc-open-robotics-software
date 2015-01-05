@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -12,7 +12,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  * User: Matt
  * Date: 2/18/13
  */
-public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisPosePacket>, PelvisPoseProvider
+public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacket>, PelvisPoseProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -56,7 +56,7 @@ public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisPosePacke
    }
 
    @Override
-   public void consumeObject(PelvisPosePacket object)
+   public void receivedPacket(PelvisPosePacket object)
    {
       if (object == null)
          return;

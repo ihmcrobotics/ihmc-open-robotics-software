@@ -1,19 +1,19 @@
 package us.ihmc.atlas;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
+import java.io.IOException;
+import java.net.URI;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.KryoObjectClient;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketClient;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 
-import java.io.IOException;
-import java.net.URI;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasROSAPINetworkProcessor
 {
@@ -23,12 +23,11 @@ public class AtlasROSAPINetworkProcessor
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
       String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
-      ObjectCommunicator controllerCommunicator = new KryoObjectClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-            new IHMCCommunicationKryoNetClassList());
-      ((KryoObjectClient) controllerCommunicator).setReconnectAutomatically(true);
-
+      
+      KryoPacketClient controllerCommunicator = new KryoPacketClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+            new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),PacketDestination.NETWORK_PROCESSOR.ordinal(),"AtlasROSAPINetworkProcessor");
+      
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
-
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, robotModel, nameSpace);
    }
    

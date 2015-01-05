@@ -2,17 +2,18 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.HashMap;
 
-import us.ihmc.communication.net.GlobalObjectConsumer;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.Packet;
 
-public class BehaviorPacketPassThroughManager implements GlobalObjectConsumer
+public class BehaviorPacketPassThroughManager implements PacketConsumer<Packet>
 {
 
-   private final ObjectCommunicator toCommunicator;
+   private final PacketCommunicator toCommunicator;
    private final HashMap<Class, Boolean> classPassthroughMap;
    private boolean passThroughActive;
 
-   public BehaviorPacketPassThroughManager(ObjectCommunicator fromCommunicator, ObjectCommunicator toCommunicator, Class[] packetsToPass)
+   public BehaviorPacketPassThroughManager(PacketCommunicator fromCommunicator, PacketCommunicator toCommunicator, Class[] packetsToPass)
    {
       this.toCommunicator = toCommunicator;
 
@@ -24,7 +25,7 @@ public class BehaviorPacketPassThroughManager implements GlobalObjectConsumer
       }
 
       passThroughActive = true;
-      fromCommunicator.attachGlobalListener(this);
+      fromCommunicator.attacthGlobalListener(this);
    }
    
    public void setPassThrough(Class clzz, boolean activatePassthrough)
@@ -33,17 +34,11 @@ public class BehaviorPacketPassThroughManager implements GlobalObjectConsumer
    }
 
    @Override
-   public void consumeObject(Object object)
+   public void receivedPacket(Packet packet)
    {
-
-   }
-
-   @Override
-   public void consumeObject(Object object, boolean consumeGlobal)
-   {
-      if (passThroughActive && classPassthroughMap.containsKey(object.getClass()) && classPassthroughMap.get(object.getClass()))
+      if (passThroughActive && classPassthroughMap.containsKey(packet.getClass()) && classPassthroughMap.get(packet.getClass()))
       {
-         toCommunicator.consumeObject(object);
+         toCommunicator.send(packet);
       }
    }
 

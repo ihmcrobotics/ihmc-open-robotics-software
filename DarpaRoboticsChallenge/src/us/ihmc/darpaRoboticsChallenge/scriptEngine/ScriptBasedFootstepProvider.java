@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -27,6 +26,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -113,20 +113,20 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       else if (scriptObject instanceof FootPosePacket)
       { 
          FootPosePacket footPosePacket = (FootPosePacket) scriptObject;
-         desiredFootPoseProvider.consumeObject(footPosePacket);
+         desiredFootPoseProvider.receivedPacket(footPosePacket);
          setupTimesForNewScriptEvent(0.5);
       }
       else if (scriptObject instanceof HandPosePacket)
       {
          HandPosePacket handPosePacket = (HandPosePacket) scriptObject;
-         desiredHandPoseProvider.consumeObject(handPosePacket);
+         desiredHandPoseProvider.receivedPacket(handPosePacket);
          
          setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
       }
       else if (scriptObject instanceof PelvisPosePacket)
       {
          PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
-         desiredPelvisPoseProvider.consumeObject(pelvisPosePacket);
+         desiredPelvisPoseProvider.receivedPacket(pelvisPosePacket);
          
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
@@ -139,7 +139,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       else if (scriptObject instanceof ComHeightPacket )
       {
          ComHeightPacket comHeightPacket = (ComHeightPacket) scriptObject;
-         desiredComHeightProvider.getComHeightPacketConsumer().consumeObject(comHeightPacket);
+         desiredComHeightProvider.getComHeightPacketConsumer().receivedPacket(comHeightPacket);
          setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
       }
    }

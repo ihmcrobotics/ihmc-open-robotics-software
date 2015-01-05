@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
+public class FingerStateProvider implements PacketConsumer<FingerStatePacket>
 {
    private final ConcurrentLinkedQueue<FingerStatePacket> packetQueue = new ConcurrentLinkedQueue<FingerStatePacket>();
    private RobotSide robotSide;
@@ -16,7 +16,7 @@ public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
 	   this.robotSide = robotSide;
    }
    
-   public void consumeObject(FingerStatePacket packet)
+   public void receivedPacket(FingerStatePacket packet)
    {
 	   if(this.robotSide == null)
 	      packetQueue.add(packet);

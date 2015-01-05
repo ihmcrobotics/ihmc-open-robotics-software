@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -18,14 +18,14 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ObjectCommunicator networkProcessorCommunicator;
+   private final PacketCommunicator networkProcessorCommunicator;
    private final ConcurrentRingBuffer<HandJointAnglePacket> packetRingBuffer;
    private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
    private HandJointAnglePacket currentPacket;
 
-   public HandJointAngleCommunicator(RobotSide side, ObjectCommunicator networkProcessorCommunicator)
+   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator networkProcessorCommunicator)
    {
       this.side = side;
       this.networkProcessorCommunicator = networkProcessorCommunicator;
@@ -49,7 +49,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
                   {
                      System.out.println("Net Proc Comm");
                   }
-                  networkProcessorCommunicator.consumeObject(currentPacket);
+                  networkProcessorCommunicator.send(currentPacket);
                }
                packetRingBuffer.flush();
             }

@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 
 
-public class BlindWalkingPacketConsumer implements ObjectConsumer<BlindWalkingPacket>
+public class BlindWalkingPacketConsumer implements PacketConsumer<BlindWalkingPacket>
 {
    private FootstepPathCoordinator footstepPathCoordinator;
 
@@ -13,7 +13,7 @@ public class BlindWalkingPacketConsumer implements ObjectConsumer<BlindWalkingPa
       this.footstepPathCoordinator = footstepPathCoordinator;
    }
 
-   public void consumeObject(BlindWalkingPacket blindWalkingPacket)
+   public void receivedPacket(BlindWalkingPacket blindWalkingPacket)
    {
       footstepPathCoordinator.setBlindWalking(blindWalkingPacket);
    }

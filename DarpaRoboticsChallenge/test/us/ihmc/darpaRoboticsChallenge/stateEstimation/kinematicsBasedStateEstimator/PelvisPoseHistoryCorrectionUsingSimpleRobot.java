@@ -511,7 +511,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobot
       }
 
       @Override
-      public void consumeObject(StampedPosePacket object)
+      public void receivedPacket(StampedPosePacket object)
       {
          //doNothing
       }

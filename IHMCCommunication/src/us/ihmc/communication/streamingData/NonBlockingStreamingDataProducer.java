@@ -2,10 +2,11 @@ package us.ihmc.communication.streamingData;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.net.ObjectProducer;
+import us.ihmc.communication.packetCommunicator.PacketProducer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ThreadTools;
 
-public class NonBlockingStreamingDataProducer<T> extends ObjectProducer<T>
+public class NonBlockingStreamingDataProducer<T extends Packet> extends PacketProducer<T>
 {
    private final ConcurrentLinkedQueue<T> queuedData = new ConcurrentLinkedQueue<T>(); 
    

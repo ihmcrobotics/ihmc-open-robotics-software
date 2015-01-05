@@ -4,7 +4,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
@@ -91,7 +93,7 @@ public class AtlasNetworkProcessor
     	  {
     	     System.err
     	     .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
-    	     LocalObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
+    	     KryoLocalPacketCommunicator objectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "AtlasNetworkProcessorSimulatedControllerCommunicator");
     	     
     	     new DummyController(rosMasterURI, objectCommunicator, model);
     	     new DRCNetworkProcessor(objectCommunicator, model);

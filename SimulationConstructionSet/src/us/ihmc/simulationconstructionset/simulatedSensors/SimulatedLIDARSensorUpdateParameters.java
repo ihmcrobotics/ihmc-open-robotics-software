@@ -1,13 +1,13 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 
 public class SimulatedLIDARSensorUpdateParameters
 {
    private boolean alwaysOn;
    private double updateRate;
 
-   private ObjectCommunicator objectCommunicator;
+   private PacketCommunicator objectCommunicator;
 
    public boolean isAlwaysOn()
    {
@@ -29,12 +29,12 @@ public class SimulatedLIDARSensorUpdateParameters
       this.updateRate = updateRate;
    }
 
-   public void setObjectCommunicator(ObjectCommunicator objectCommunicator)
+   public void setObjectCommunicator(PacketCommunicator objectCommunicator)
    {
       this.objectCommunicator = objectCommunicator;
    }
    
-   public ObjectCommunicator getObjectCommunicator()
+   public PacketCommunicator getObjectCommunicator()
    {
       return objectCommunicator;
    }

@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootStatePacket;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-public class DesiredFootStateProvider implements ObjectConsumer<FootStatePacket>
+public class DesiredFootStateProvider implements PacketConsumer<FootStatePacket>
 {
    private SideDependentList<AtomicBoolean> hasLoadBearingBeenRequested = new SideDependentList<AtomicBoolean>();
    
@@ -24,7 +24,7 @@ public class DesiredFootStateProvider implements ObjectConsumer<FootStatePacket>
       return hasLoadBearingBeenRequested.get(robotSide).getAndSet(false);
    }
 
-   public void consumeObject(FootStatePacket object)
+   public void receivedPacket(FootStatePacket object)
    {
       hasLoadBearingBeenRequested.get(object.getRobotSide()).set(true);;
    }

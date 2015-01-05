@@ -1,14 +1,15 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.communication.net.GlobalObjectConsumer;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeInterface, IncomingCommunicationBridgeInterface
 {
-   private final ObjectCommunicator networkProcessorCommunicator;
-   private final ObjectCommunicator controllerCommunicator;
+   private final PacketCommunicator networkProcessorCommunicator;
+   private final PacketCommunicator controllerCommunicator;
    private final NonBlockingGlobalObjectConsumerRelay networkProcessorToControllerRelay;
    private final NonBlockingGlobalObjectConsumerRelay controllerToNetworkProcessorRelay;
    private final BehaviorPacketPassThroughManager behaviorPacketPassThroughFromNpToController;
@@ -16,7 +17,7 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
    private final YoVariableRegistry registry;
    private final BooleanYoVariable packetPassthrough;
 
-   public BehaviorCommunicationBridge(ObjectCommunicator networkProcessorCommunicator, ObjectCommunicator controllerCommunicator,
+   public BehaviorCommunicationBridge(PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator,
          YoVariableRegistry parentRegistry)
    {
       this.networkProcessorCommunicator = networkProcessorCommunicator;
@@ -26,46 +27,44 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
       this.behaviorPacketPassThroughFromNpToController = new BehaviorPacketPassThroughManager(networkProcessorCommunicator, controllerCommunicator,
             BehaviorPacketPassthroughList.PACKETS_TO_ALWAYS_PASS_FROM_NP_TO_CONTROLLER_THROUGH_BEHAVIORS);
       
-      this.
-      
-      registry = new YoVariableRegistry("BehaviorCommunicationBridge");
+      this.registry = new YoVariableRegistry("BehaviorCommunicationBridge");
       parentRegistry.addChild(registry);
       controllerToNetworkProcessorRelay.enableForwarding();
       packetPassthrough = new BooleanYoVariable("Behavior_packetPassthrough", registry);
    }
 
    @Override
-   public void sendPacketToController(Object obj)
+   public void sendPacketToController(Packet obj)
    {
-      networkProcessorToControllerRelay.consumeObject(obj);
+      networkProcessorToControllerRelay.receivedPacket(obj);
    }
 
    @Override
-   public void sendPacketToNetworkProcessor(Object obj)
+   public void sendPacketToNetworkProcessor(Packet obj)
    {
-      controllerToNetworkProcessorRelay.consumeObject(obj);
+      controllerToNetworkProcessorRelay.receivedPacket(obj);
    }
 
    @Override
-   public void attachGlobalListenerToController(GlobalObjectConsumer listener)
+   public void attachGlobalListenerToController(PacketConsumer listener)
    {
-      controllerCommunicator.attachGlobalListener(listener);
+      controllerCommunicator.attacthGlobalListener(listener);
    }
 
    @Override
-   public void attachGlobalListenerToNetworkProcessor(GlobalObjectConsumer listener)
+   public void attachGlobalListenerToNetworkProcessor(PacketConsumer listener)
    {
-      networkProcessorCommunicator.attachGlobalListener(listener);
+      networkProcessorCommunicator.attacthGlobalListener(listener);
    }
 
    @Override
-   public void detachGlobalListenerFromController(GlobalObjectConsumer listener)
+   public void detachGlobalListenerFromController(PacketConsumer listener)
    {
       controllerCommunicator.detachGlobalListener(listener);
    }
 
    @Override
-   public void detachGlobalListenerFromNetworkProcessor(GlobalObjectConsumer listener)
+   public void detachGlobalListenerFromNetworkProcessor(PacketConsumer listener)
    {
       networkProcessorCommunicator.detachGlobalListener(listener);
    }

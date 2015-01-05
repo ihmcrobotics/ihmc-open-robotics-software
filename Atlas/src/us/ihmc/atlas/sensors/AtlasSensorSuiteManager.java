@@ -6,8 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
@@ -65,7 +64,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    @Override
-   public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldObjectCommunicator, RobotPoseBuffer robotPoseBuffer,
+   public void initializeSimulatedSensors(PacketCommunicator scsCommunicator, PacketCommunicator fieldObjectCommunicator, RobotPoseBuffer robotPoseBuffer,
                                           AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
@@ -124,7 +123,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       {
     	  SCSLidarDataReceiver scsLidarDataReceiver = new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
                sensorInformation.getLidarParameters());
-    	  Thread lidarThread = new Thread(scsLidarDataReceiver);
+    	  Thread lidarThread = new Thread(scsLidarDataReceiver, "scsLidarDataReceiver");
     	  lidarThread.start();
          
          if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
@@ -152,7 +151,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
+                                         SDFFullRobotModel sdfFullRobotModel, PacketCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);

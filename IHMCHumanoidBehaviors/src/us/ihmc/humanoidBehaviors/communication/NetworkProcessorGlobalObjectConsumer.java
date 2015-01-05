@@ -1,9 +1,10 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.communication.net.GlobalObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 
-public class NetworkProcessorGlobalObjectConsumer implements GlobalObjectConsumer
+public class NetworkProcessorGlobalObjectConsumer implements PacketConsumer
 {
    private final BehaviorInterface behavior;
    public NetworkProcessorGlobalObjectConsumer(BehaviorInterface behavior)
@@ -12,14 +13,8 @@ public class NetworkProcessorGlobalObjectConsumer implements GlobalObjectConsume
    }
 
    @Override
-   public void consumeObject(Object object)
+   public void receivedPacket(Packet packet)
    {
-      behavior.consumeObjectFromNetworkProcessor(object);
-   }
-
-   @Override
-   public void consumeObject(Object object, boolean consumeGlobal)
-   {
-      behavior.consumeObjectFromNetworkProcessor(object);
+      behavior.consumeObjectFromNetworkProcessor(packet);
    }
 }

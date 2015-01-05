@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.packetProviders;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 
-public class DesiredHighLevelStateProvider implements ObjectConsumer<HighLevelStatePacket>
+public class DesiredHighLevelStateProvider implements PacketConsumer<HighLevelStatePacket>
 {
    private final AtomicReference<HighLevelState> highLevelState = new AtomicReference<HighLevelState>(null);
    
@@ -24,7 +24,7 @@ public class DesiredHighLevelStateProvider implements ObjectConsumer<HighLevelSt
       return highLevelState.getAndSet(null);
    }
    
-   public void consumeObject(HighLevelStatePacket object)
+   public void receivedPacket(HighLevelStatePacket object)
    {
        highLevelState.set(object.getHighLevelState());
    }

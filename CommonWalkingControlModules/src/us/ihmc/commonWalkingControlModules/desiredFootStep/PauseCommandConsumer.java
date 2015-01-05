@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.PauseCommand;
 
 /**
  * User: Matt
  * Date: 1/18/13
  */
-public class PauseCommandConsumer implements ObjectConsumer<PauseCommand>
+public class PauseCommandConsumer implements PacketConsumer<PauseCommand>
 {
    private FootstepPathCoordinator footstepPathCoordinator;
 
@@ -16,7 +16,7 @@ public class PauseCommandConsumer implements ObjectConsumer<PauseCommand>
       this.footstepPathCoordinator = footstepPathCoordinator;
    }
 
-   public void consumeObject(PauseCommand object)
+   public void receivedPacket(PauseCommand object)
    {
       footstepPathCoordinator.setPaused(object.isPaused());
    }

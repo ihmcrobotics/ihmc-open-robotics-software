@@ -14,8 +14,8 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.KryoLocalObjectCommunicator;
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -33,10 +33,10 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 {
-   private KryoLocalObjectCommunicator networkObjectCommunicator = new KryoLocalObjectCommunicator(new IHMCCommunicationKryoNetClassList());
-   private DRCDemo01NavigationEnvironment demo01NavEnvironmant = new DRCDemo01NavigationEnvironment();
+   private final KryoLocalPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(), "HandPoseStatusTest");
+   private final DRCDemo01NavigationEnvironment demo01NavEnvironmant = new DRCDemo01NavigationEnvironment();
 
-   private boolean showGUI = true;
+   private final boolean showGUI = true;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -77,13 +77,13 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
    private void sendHandPosePacket(HandPosePacket handPosePacket)
    {
-      networkObjectCommunicator.consumeObject(handPosePacket);
+      networkObjectCommunicator.send(handPosePacket);
    }
 
    private void sendHandPausePacket(RobotSide side)
    {
 
-      networkObjectCommunicator.consumeObject(new StopArmMotionPacket(side));
+      networkObjectCommunicator.send(new StopArmMotionPacket(side));
    }
 
    private HandPosePacket createRandomHandPosePacket()
@@ -119,10 +119,10 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       hasSimulationBeenInitialized = false;
 
-      networkObjectCommunicator.attachListener(HandPoseStatus.class, new ObjectConsumer<HandPoseStatus>()
+      networkObjectCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
-         public void consumeObject(HandPoseStatus object)
+         public void receivedPacket(HandPoseStatus object)
          {
             if (object.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
                statusStartedCounter++;
@@ -154,10 +154,10 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       hasSimulationBeenInitialized = false;
 
-      networkObjectCommunicator.attachListener(HandPoseStatus.class, new ObjectConsumer<HandPoseStatus>()
+      networkObjectCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
-         public void consumeObject(HandPoseStatus object)
+         public void receivedPacket(HandPoseStatus object)
          {
             if (object.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
                statusStartedCounter++;
@@ -203,10 +203,10 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       hasSimulationBeenInitialized = false;
 
-      networkObjectCommunicator.attachListener(HandPoseStatus.class, new ObjectConsumer<HandPoseStatus>()
+      networkObjectCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
-         public void consumeObject(HandPoseStatus object)
+         public void receivedPacket(HandPoseStatus object)
          {
             if (object.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
                statusStartedCounter++;
@@ -255,10 +255,10 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       hasSimulationBeenInitialized = false;
 
-      networkObjectCommunicator.attachListener(HandPoseStatus.class, new ObjectConsumer<HandPoseStatus>()
+      networkObjectCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
-         public void consumeObject(HandPoseStatus object)
+         public void receivedPacket(HandPoseStatus object)
          {
             if (object.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
             {

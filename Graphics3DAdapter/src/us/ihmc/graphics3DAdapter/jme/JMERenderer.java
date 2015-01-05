@@ -119,7 +119,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private Node terrain;
    private Node zUpNode;
    
-   private ArrayList<JMEGPULidar> gpuLidars = new ArrayList<>();
+   private final ArrayList<JMEGPULidar> gpuLidars = new ArrayList<>();
    private ArrayList<PBOAwtPanel> pboAwtPanels;
 
    private DirectionalLight primaryLight;

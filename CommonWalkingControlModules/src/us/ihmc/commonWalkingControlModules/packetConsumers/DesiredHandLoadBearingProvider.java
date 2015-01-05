@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
-public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBearingPacket>, HandLoadBearingProvider
+public class DesiredHandLoadBearingProvider implements PacketConsumer<HandLoadBearingPacket>, HandLoadBearingProvider
 {
    private SideDependentList<AtomicInteger> hasLoadBearingBeenRequested = new SideDependentList<AtomicInteger>();
 
@@ -29,7 +29,7 @@ public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBe
       return hasLoadBearingBeenRequested.get(robotSide).getAndSet(-1) == 1;
    }
 
-   public void consumeObject(HandLoadBearingPacket object)
+   public void receivedPacket(HandLoadBearingPacket object)
    {
       RobotSide robotSide = object.getRobotSide();
       hasLoadBearingBeenRequested.get(robotSide).set(object.isLoadBearing() ? 1 : 0);

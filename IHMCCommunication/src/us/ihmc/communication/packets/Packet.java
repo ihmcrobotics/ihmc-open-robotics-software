@@ -20,4 +20,9 @@ public abstract class Packet<T> implements ComparableDataObject<T>
    {
       return destination;
    }
+
+   public boolean isClonable()
+   {
+      return true;
+   }
 }

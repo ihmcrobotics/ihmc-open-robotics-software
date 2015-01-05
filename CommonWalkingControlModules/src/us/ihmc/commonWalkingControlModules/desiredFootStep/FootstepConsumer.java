@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -13,7 +13,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
-public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, ObjectConsumer<FootstepData>
+public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, PacketConsumer<FootstepData>
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
@@ -126,7 +126,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    }
 
    @Override
-   public void consumeObject(FootstepData object)
+   public void receivedPacket(FootstepData object)
    {
       // TODO Auto-generated method stub
    }

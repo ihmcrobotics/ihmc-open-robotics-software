@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoObjectServer;
-import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -32,7 +30,7 @@ public class AtlasROSAPISimulator
 {
    private static String defaultRosNameSpace = "atlas";
    private static String defaultRobotModel = "DRC_NO_HANDS";
-   private boolean startUI = true;
+   private final boolean startUI = true;
    
    public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
@@ -43,7 +41,7 @@ public class AtlasROSAPISimulator
       
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
       
-      ObjectCommunicator controllerCommunicator = new LocalObjectCommunicator();
+      PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 0, "AtlasROSAPISimulatorLocalCommunicator");
       GlobalDataProducer dataProducer = new GlobalDataProducer(controllerCommunicator);
 
       DRCObstacleCourseSimulation simulation = new DRCObstacleCourseSimulation(environment, scriptToLoad, dataProducer, robotInitialSetup,
@@ -53,7 +51,7 @@ public class AtlasROSAPISimulator
 
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
-      ObjectCommunicator sensorCommunicator = simulation.getLocalObjectCommunicator();
+      PacketCommunicator sensorCommunicator = simulation.getLocalObjectCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
