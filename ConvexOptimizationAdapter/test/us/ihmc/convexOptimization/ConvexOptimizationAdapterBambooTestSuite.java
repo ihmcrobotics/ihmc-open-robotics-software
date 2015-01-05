@@ -7,7 +7,8 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   
+//  us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class, 
+//  us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class
 })
 
 public class ConvexOptimizationAdapterBambooTestSuite
