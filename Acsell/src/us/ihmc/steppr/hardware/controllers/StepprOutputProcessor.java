@@ -11,6 +11,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.SimpleMovingAverageFilteredYoVariable;
 
 public class StepprOutputProcessor implements OutputProcessor
 {
@@ -18,6 +19,9 @@ public class StepprOutputProcessor implements OutputProcessor
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprOutputProcessor");
    private final EnumMap<StepprActuator, DoubleYoVariable> predictedMotorPower = new EnumMap<StepprActuator, DoubleYoVariable>(StepprActuator.class);
    private final DoubleYoVariable totalPredictedRobotPower = new DoubleYoVariable("totalPredictedMotorPower", registry);
+   private final SimpleMovingAverageFilteredYoVariable totalPredictedRobotPowerAverage = new SimpleMovingAverageFilteredYoVariable(
+         totalPredictedRobotPower.getName() + "MovingAverage", 1000, totalPredictedRobotPower, registry);
+
    private final StepprAnkleInterpolator ankleInterpolator = new StepprAnkleInterpolator();
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
 
@@ -80,6 +84,7 @@ public class StepprOutputProcessor implements OutputProcessor
          sumTotalMotorPower += predictedMotorPower.get(actuator).getDoubleValue();
       }
       totalPredictedRobotPower.set(sumTotalMotorPower);
+      totalPredictedRobotPowerAverage.update();
    }
 
    private void updateAnkle(StepprJoint ankleX, StepprJoint ankleY, StepprActuator ankleLeftActuator, StepprActuator ankleRightActuator)
