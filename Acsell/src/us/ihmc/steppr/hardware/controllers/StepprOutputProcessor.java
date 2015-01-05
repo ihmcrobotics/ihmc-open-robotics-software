@@ -17,7 +17,7 @@ public class StepprOutputProcessor implements OutputProcessor
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprOutputProcessor");
    private final EnumMap<StepprActuator, DoubleYoVariable> predictedMotorPower = new EnumMap<StepprActuator, DoubleYoVariable>(StepprActuator.class);
-   private final DoubleYoVariable totalPredictedRobotPower = new DoubleYoVariable("totalPredictedMotorPowoer", registry);
+   private final DoubleYoVariable totalPredictedRobotPower = new DoubleYoVariable("totalPredictedMotorPower", registry);
    private final StepprAnkleInterpolator ankleInterpolator = new StepprAnkleInterpolator();
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
 
