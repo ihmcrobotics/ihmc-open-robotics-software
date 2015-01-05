@@ -1665,7 +1665,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public EntryBoxArrayPanel getEntryBoxArrayPanel()
    {
-      return myEntryBoxArrayPanel.getCurrentPanel();
+      return myEntryBoxArrayPanel.getCurrentPanel(true);
    }
 
    public void createNewEntryBoxTabFromEntryGoxGroup(String name)
