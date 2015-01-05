@@ -87,6 +87,7 @@ public abstract class AbstractActiveSetQPSolver
    {
       linearInequalityConstraintA=inequalityA;
       linearInequalityConstraintB=inequalityB;
+      linearInequalityActiveSet = new boolean[inequalityA.getNumRows()];
       setAndAssertCorrectNumberOfVariablesToSolve(linearInequalityConstraintA.numCols);
    }
 
