@@ -43,7 +43,6 @@ dependencies {
 	
 	compile project(':IHMCRealtime')
 	compile project(':IHMCROSTools')
-	compile project(':BambooTools')
 	compile project(':CommonWalkingControlModules')
 	compile project(':Graphics3DAdapter')
 	compile project(':IHMCControlFlow')

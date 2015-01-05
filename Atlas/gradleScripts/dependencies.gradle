@@ -32,7 +32,6 @@ dependencies {
     compile group: 'net.java.jinput', name: 'jinput-platform', version: '2.0.5'
    
     compile project(':IHMCUtilities')
-    compile project(':BambooTools')
     compile project(':CommonWalkingControlModules')
     compile project(':DarpaRoboticsChallenge')
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
