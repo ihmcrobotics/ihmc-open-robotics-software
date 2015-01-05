@@ -27,7 +27,6 @@ import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.communication.streamingData.QueueBasedStreamingDataProducer;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -66,17 +65,17 @@ public class FootstepDataTest
     * This test verifies that FootstepData can be sent and received using our current message passing utilities
     * @throws IOException 
     */
-   @Test(timeout = 6000)
+   @Test //(timeout = 6000)
    public void testPassingFootstepData() throws IOException
    {
       // setup comms
       int port = 8833;
-      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
+//      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
+      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepData.class, footstepDataConsumer, port);
       ThreadTools.sleep(100);
-      queueBasedStreamingDataProducer.startProducingData();
+//      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
@@ -87,7 +86,8 @@ public class FootstepDataTest
     	  footstep.getPose(location, orientation);
     	  
          FootstepData footstepData = new FootstepData(robotSide, location, orientation);
-         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
+         tcpServer.send(footstepData);
+//         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
 
       ThreadTools.sleep(100);
@@ -107,19 +107,19 @@ public class FootstepDataTest
       Random random = new Random(1582l);
       // setup comms
       int port = 8833;
-      QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
+//      QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
+      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, port);
       ThreadTools.sleep(100);
-      queueBasedStreamingDataProducer.startProducingData();
+//      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
 
-      queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
+      tcpServer.send(footstepsData);
       ThreadTools.sleep(100);
 
       tcpClient.close();
@@ -135,13 +135,13 @@ public class FootstepDataTest
    {
       // setup comms
       int port = 8833;
-      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
+//      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
+      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       PauseConsumer pauseConsumer = new PauseConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(PauseCommand.class, pauseConsumer, port);
       ThreadTools.sleep(100);
-      queueBasedStreamingDataProducer.startProducingData();
+//      queueBasedStreamingDataProducer.startProducingData();
 
       // create test commands
       ArrayList<Boolean> commands = new ArrayList<Boolean>();
@@ -151,7 +151,7 @@ public class FootstepDataTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         queueBasedStreamingDataProducer.queueDataToSend(new PauseCommand(isPaused));
+         tcpServer.send(new PauseCommand(isPaused));
       }
 
       ThreadTools.sleep(100);
@@ -175,12 +175,12 @@ public class FootstepDataTest
       // Create one server for two types of data
       int pathPort = 8833;
 
-      QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
+//      QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
 
-      QueueBasedStreamingDataProducer<PauseCommand> pauseQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
+//      QueueBasedStreamingDataProducer<PauseCommand> pauseQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
 
-      PacketCommunicator streamingDataTCPServer = createAndStartStreamingDataTCPServer(pathQueueBasedStreamingDataProducer, pathPort);
-      pauseQueueBasedStreamingDataProducer.addConsumer(streamingDataTCPServer);
+      PacketCommunicator streamingDataTCPServer = createAndStartStreamingDataTCPServer( pathPort);
+//      pauseQueueBasedStreamingDataProducer.addConsumer(streamingDataTCPServer);
 
       // create one client for two types of data
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
@@ -190,8 +190,8 @@ public class FootstepDataTest
       streamingDataTCPClient.attachListener(PauseCommand.class, pauseConsumer);
 
       ThreadTools.sleep(100);
-      pathQueueBasedStreamingDataProducer.startProducingData();
-      pauseQueueBasedStreamingDataProducer.startProducingData();
+//      pathQueueBasedStreamingDataProducer.startProducingData();
+//      pauseQueueBasedStreamingDataProducer.startProducingData();
 
       Random random = new Random(777);
 
@@ -199,7 +199,7 @@ public class FootstepDataTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
 
-      pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
+      streamingDataTCPServer.send(footstepsData);
       ThreadTools.sleep(100);
 
       // send some commands
@@ -209,7 +209,7 @@ public class FootstepDataTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         pauseQueueBasedStreamingDataProducer.queueDataToSend(new PauseCommand(isPaused));
+         streamingDataTCPServer.send(new PauseCommand(isPaused));
       }
 
       ThreadTools.sleep(100);
@@ -218,7 +218,7 @@ public class FootstepDataTest
       ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
       footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null, random.nextDouble(), random.nextDouble());
 
-      pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
+      streamingDataTCPServer.send(footstepsData);
       sentFootsteps.addAll(sentFootsteps2);
       ThreadTools.sleep(100);
 
@@ -244,13 +244,11 @@ public class FootstepDataTest
    {
       // setup comms
       int port = 8833;
-      QueueBasedStreamingDataProducer<FootstepStatus> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>("FootstepStatus");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
+      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatus.class, footstepStatusConsumer, port);
       ThreadTools.sleep(100);
-      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
       Random random = new Random(777);
@@ -266,7 +264,7 @@ public class FootstepDataTest
 
          FootstepStatus footstepStatus = new FootstepStatus(status, i);
          sentFootstepStatus.add(footstepStatus);
-         queueBasedStreamingDataProducer.queueDataToSend(footstepStatus);
+         tcpServer.send(footstepStatus);
       }
 
       ThreadTools.sleep(100);
@@ -298,14 +296,14 @@ public class FootstepDataTest
       return netClassList;
    }
 
-   private PacketCommunicator createAndStartStreamingDataTCPServer(QueueBasedStreamingDataProducer<?> queueBasedStreamingDataProducer, int port)
+   private PacketCommunicator createAndStartStreamingDataTCPServer(int port)
          throws IOException
    {
 
       
-      KryoPacketServer server = new KryoPacketServer(port, getNetClassList(), 0, getClass().getSimpleName() + "server");
+      KryoPacketServer server = new KryoPacketServer(port, getNetClassList(), 10, getClass().getSimpleName() + "server");
       server.connect();
-      queueBasedStreamingDataProducer.addConsumer(server);
+//      queueBasedStreamingDataProducer.addConsumer(server);
       return server;
    }
 
@@ -395,6 +393,7 @@ public class FootstepDataTest
          boolean trustHeight = true;
          Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          reconstructedFootsteps.add(footstep);
+         System.out.println("received packet!!");
       }
 
       public ArrayList<Footstep> getReconstructedFootsteps()
