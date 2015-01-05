@@ -25,6 +25,7 @@ dependencies {
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')
     compile project(':IHMCCommunication')
+    compile project(':ConvexOptimizationAdapter');
 
     testCompile project(':IHMCUtilities').sourceSets.test.output
 }

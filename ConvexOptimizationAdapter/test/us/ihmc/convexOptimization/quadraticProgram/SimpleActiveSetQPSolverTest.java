@@ -190,6 +190,4 @@ public class SimpleActiveSetQPSolverTest
    }
 
 
-
-
 }
