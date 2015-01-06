@@ -25,7 +25,7 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 public class FootstepPathCoordinator implements FootstepProvider
 {
-   private boolean DEBUG = false;
+   private final boolean DEBUG = false;
 
    private final FootstepTimingParameters footstepTimingParameters;
 
@@ -232,7 +232,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue());
          }
 
-         footstepStatusDataProducer.queueDataToSend(footstepStatus);
+         footstepStatusDataProducer.sendPacket(footstepStatus);
       }
    }
 
@@ -279,7 +279,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       if (footstepStatusDataProducer != null)
       {
          FootstepStatus footstepStatus = FootstepStatus.createWalkingIsDonePacket();
-         footstepStatusDataProducer.queueDataToSend(footstepStatus);
+         footstepStatusDataProducer.sendPacket(footstepStatus);
       }
    }
 
