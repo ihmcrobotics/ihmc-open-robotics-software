@@ -18,6 +18,6 @@ public class CapturabilityBasedStatusProducer
    public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FrameConvexPolygon2d supportPolygon, RobotSide supportLeg)
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon, supportLeg);
-      objectCommunicator.queueDataToSend(capturabilityBasedStatus);
+      objectCommunicator.sendPacket(capturabilityBasedStatus);
    }
 }
