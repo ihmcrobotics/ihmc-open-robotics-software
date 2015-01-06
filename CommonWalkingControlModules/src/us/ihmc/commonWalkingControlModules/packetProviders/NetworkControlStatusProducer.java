@@ -17,7 +17,7 @@ public class NetworkControlStatusProducer implements ControlStatusProducer
 
    public void notifyHandTrajectoryInfeasible(RobotSide robotSide)
    {
-      globalDataProducer.queueDataToSend(new ControlStatusPacket(robotSide, ControlStatus.HAND_TRAJECTORY_INFEASIBLE));
+      globalDataProducer.sendPacket(new ControlStatusPacket(robotSide, ControlStatus.HAND_TRAJECTORY_INFEASIBLE));
    }
 
 }

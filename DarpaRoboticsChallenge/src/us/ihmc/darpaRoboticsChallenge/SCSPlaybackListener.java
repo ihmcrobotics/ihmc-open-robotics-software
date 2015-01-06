@@ -22,7 +22,7 @@ public class SCSPlaybackListener implements PlaybackListener
    {
 //      System.out.println("SCSPlaybackListener: stopped");
       if (networkServer != null)
-         networkServer.queueDataToSend(new SCSListenerPacket());
+         networkServer.sendPacket(new SCSListenerPacket());
    }
 
    public void indexChanged(int newIndex, double newTime)

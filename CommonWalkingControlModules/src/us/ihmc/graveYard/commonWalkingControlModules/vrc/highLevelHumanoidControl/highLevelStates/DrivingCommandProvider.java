@@ -109,7 +109,7 @@ public class DrivingCommandProvider implements PacketConsumer<LowLevelDrivingCom
          if(currentTime > doNothingEndTime)
          {
             doNothing = false;
-            drivingInterface.getStatusProducer().queueDataToSend(new LowLevelDrivingStatus(LowLevelDrivingAction.DO_NOTHING, true));
+            drivingInterface.getStatusProducer().sendPacket(new LowLevelDrivingStatus(LowLevelDrivingAction.DO_NOTHING, true));
          }
       }
    }

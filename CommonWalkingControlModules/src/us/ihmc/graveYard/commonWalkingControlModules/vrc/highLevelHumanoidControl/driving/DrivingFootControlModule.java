@@ -404,7 +404,7 @@ public class DrivingFootControlModule
 
          if (positionTrajectoryGenerator.isDone() && notifyIfDone)
          {
-            statusProducer.queueDataToSend(new LowLevelDrivingStatus(action, true));
+            statusProducer.sendPacket(new LowLevelDrivingStatus(action, true));
             notifyIfDone = false;
          }
 
