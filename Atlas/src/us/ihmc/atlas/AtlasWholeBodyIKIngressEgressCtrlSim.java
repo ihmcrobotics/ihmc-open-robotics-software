@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIKPacketCreator;
 import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver;
+import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -135,8 +136,10 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       //      desiredToWorldTransform.setTranslation(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
       //      desiredToWorldTransform.setTranslation(hik_arm_pos_x_d.getDoubleValue(), hik_arm_pos_y_d.getDoubleValue(), hik_arm_pos_z_d.getDoubleValue());
       //      System.out.println(hik_arm_pos_x_d.getDoubleValue() + ", " + hik_arm_pos_y_d.getDoubleValue() + ", " + hik_arm_pos_z_d.getDoubleValue());
+     
       wholeBodyIKSolver.setHandTarget(RobotSide.RIGHT, desiredReferenceFrame);
-      wholeBodyIKSolver.compute(fullRobotModel);
+      wholeBodyIKSolver.compute( fullRobotModel );
+      
       wholeBodyIKPacketCreator.createPackets(fullRobotModel, 3.0, packetsToSend);
       System.out.println("AtlasWholeBodyIKIngressEgressCtrlSim: Sending packets");
       for (int i = 0; i < packetsToSend.size(); i++)
