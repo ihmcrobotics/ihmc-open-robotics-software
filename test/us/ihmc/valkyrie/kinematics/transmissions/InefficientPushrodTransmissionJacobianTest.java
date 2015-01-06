@@ -66,7 +66,7 @@ public class InefficientPushrodTransmissionJacobianTest
    @Test
    public void testInefficientPushrodTransmissionForAnkles()
    {
-      Robot robot = new Robot("testPushrodTransmission");
+      Robot robot = new ValkyrieAnkleRobot();
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
@@ -165,7 +165,7 @@ public class InefficientPushrodTransmissionJacobianTest
    @Test
    public void testInefficientPushrodTransmissionForWaist()
    {
-      Robot robot = new ValkyrieWaistRobot();
+      Robot robot = new ValkyrieWaistRobot();      
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
@@ -314,6 +314,32 @@ public class InefficientPushrodTransmissionJacobianTest
          linkGraphics.translate(0.10705, 0.37547, -0.22417);
 
          linkGraphics.addModelFile("models/waistPushrods/waist_assem.STL", YoAppearance.Gold());
+
+         this.addStaticLinkGraphics(linkGraphics);
+
+         linkGraphics = new Graphics3DObject();
+         linkGraphics.addCoordinateSystem(0.1);
+         this.addStaticLinkGraphics(linkGraphics);
+
+      }
+   }
+   
+   private class ValkyrieAnkleRobot extends Robot
+   {
+      public ValkyrieAnkleRobot()
+      {
+         super("ValkyrieAnkleRobot");
+         
+         Graphics3DObject linkGraphics = new Graphics3DObject();
+
+//         double heightOfTopAxisAboveBottomAxis = 0.02032;
+
+//         linkGraphics.translate(0.0, 0.0, 1.0 - heightOfTopAxisAboveBottomAxis);
+         linkGraphics.translate(0.0, 0.0, 1.0);
+         linkGraphics.rotate(Math.PI/2.0, Axis.X);
+         linkGraphics.translate(-0.03635, -0.0864, -0.07257);
+
+         linkGraphics.addModelFile("models/anklePushrods/ankle_assem.STL", YoAppearance.Gold());
 
          this.addStaticLinkGraphics(linkGraphics);
 
