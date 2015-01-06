@@ -1708,7 +1708,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          return;
       }
-      
 
       myEntryBoxArrayPanel.getCurrentPanel(true).removeAllEntryBoxes();
 
@@ -1733,11 +1732,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void setupEntryBox(String varname)
    {
-      YoVariable<?> v = rootRegistry.getVariable(varname);
+      final YoVariable<?> v = rootRegistry.getVariable(varname);
 
       if (v != null)
       {
-         this.myEntryBoxArrayPanel.getCurrentPanel().addEntryBox(v);
+         EventDispatchThreadHelper.invokeAndWait(new Runnable()
+         {
+            public void run()
+            {
+               myEntryBoxArrayPanel.getCurrentPanel(true).addEntryBox(v);
+            }
+         });
       }
 
       // numericContentPane.updateUI();
@@ -1760,7 +1765,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
                if (v != null)
                {
-                  myEntryBoxArrayPanel.getCurrentPanel().addEntryBox(v);
+                  myEntryBoxArrayPanel.getCurrentPanel(true).addEntryBox(v);
                }
             }
          }
@@ -3040,7 +3045,5 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       myEntryBoxArrayPanel.closeAndDispose();
 
    }
-
- 
 
 }
