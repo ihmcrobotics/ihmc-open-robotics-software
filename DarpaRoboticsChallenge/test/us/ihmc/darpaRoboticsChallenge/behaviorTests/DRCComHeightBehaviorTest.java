@@ -38,8 +38,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = true;
-   private static final boolean DEBUG = true;
+   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean DEBUG = false;
 
    private final double POSITION_THRESHOLD = 0.007;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
