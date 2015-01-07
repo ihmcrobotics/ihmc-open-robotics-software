@@ -64,7 +64,7 @@ public class ClosedFormJacobianTest
         0.051849035209403, 0.044875400766635
     };
 
-    @Test
+    @Test(timeout=300000)
     public void testJacobianMatchesMATLABAnkle() 
     {
         for (int i = 0; i < 7; i++) 
@@ -81,7 +81,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-    @Test
+    @Test(timeout=300000)
     public void testJacobianMatchesMATLABWaist() 
     {
         for (int i = 0; i < 7; i++) 
@@ -98,7 +98,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-    @Test
+    @Test(timeout=300000)
     public void testEfficientMatchesInefficientJacobianAnkle() 
     {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
@@ -121,7 +121,7 @@ public class ClosedFormJacobianTest
 
     // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
     @Ignore
-    @Test
+    @Test(timeout=300000)
     public void testEfficientKindaMatchesInefficientJacobianAnkle() {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
 
@@ -142,7 +142,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-    @Test
+    @Test(timeout=300000)
     public void testEfficientMatchesInefficientJacobianWaist() 
     {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
@@ -163,7 +163,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-    @Test
+    @Test(timeout=300000)
     public void testEfficentMatchesInterpolatedJacobianAnkle() 
     {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
@@ -186,7 +186,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-    @Test
+    @Test(timeout=300000)
     public void testEfficentMatchesInterpolatedJacobianWaist() 
     {
         closedFormJacobianWaistRenishaws.useFuteks(false);
@@ -210,7 +210,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-    @Test
+    @Test(timeout=300000)
     public void cosineTestAnkles() 
     {
 
@@ -247,7 +247,7 @@ public class ClosedFormJacobianTest
         }
     }
     
-    @Test
+    @Test(timeout=300000)
     public void consineTestWaist() 
     {
 //      A Test to ensure Renishaw and Futek Jacobians are in agreement with each other

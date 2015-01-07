@@ -26,7 +26,7 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
    private static final boolean VISUALIZE = false;
    
-   @Test
+   @Test(timeout=300000)
    public void testCompareInefficientToEfficientAnkle()
    {
       Random random = new Random(1255L);
@@ -48,7 +48,7 @@ public class ComparePushRodTransmissionsTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testTiming()
    {
       Random random = new Random(1255L);
@@ -69,7 +69,7 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCompareInefficientToEfficientWaist()
    {
       Random random = new Random(1255L);
@@ -93,7 +93,7 @@ public class ComparePushRodTransmissionsTest
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testCompareInefficientToInterpolatedAnkles()
    {
       Random random = new Random(1255L);
@@ -120,7 +120,7 @@ public class ComparePushRodTransmissionsTest
    }
    
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testCompareInefficientToInterpolatedWaist()
    {
       Random random = new Random(1255L);
