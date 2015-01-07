@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedSta
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
@@ -87,7 +88,7 @@ public class VariousWalkingProviders
       if (desiredPelvisPoseProvider != null)
       {
          desiredPelvisPoseProvider.getDesiredPelvisPosition();
-         desiredPelvisPoseProvider.getDesiredPelvisOrientation();
+         desiredPelvisPoseProvider.getDesiredPelvisOrientation(ReferenceFrame.getWorldFrame());
       }
       if (desiredChestOrientationProvider != null)
       {
