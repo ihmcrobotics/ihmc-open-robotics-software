@@ -1,17 +1,17 @@
-package us.ihmc.atlas.ObstacleCourseTests;
+package us.ihmc.atlas.behaviorTests;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCDetectCollisionUsingWristSensorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCWallCollisionTest;
 
-public class AtlasWallCollisionTest extends DRCWallCollisionTest
+public class AtlasDetectCollisionUsingWristSensorTest extends DRCDetectCollisionUsingWristSensorTest
 {
    private final AtlasRobotModel robotModel;
    
-   public AtlasWallCollisionTest()
+   public AtlasDetectCollisionUsingWristSensorTest()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
       

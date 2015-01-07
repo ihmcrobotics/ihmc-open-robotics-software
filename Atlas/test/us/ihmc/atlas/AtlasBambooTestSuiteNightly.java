@@ -39,7 +39,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsTerrainTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasWallCollisionTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
