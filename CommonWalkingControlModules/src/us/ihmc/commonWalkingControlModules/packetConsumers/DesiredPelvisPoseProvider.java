@@ -46,6 +46,9 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    public FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
    {
       FrameOrientation ret = desiredPelvisOrientation.getAndSet(null);
+      
+      if (ret == null) return null;
+      
       ret.changeFrame(desiredPelvisFrame);
       return ret;
    }
