@@ -5,12 +5,12 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import Jama.Matrix;
 
 public class TaskSpaceStiffnessCalculator
 {
@@ -25,18 +25,17 @@ public class TaskSpaceStiffnessCalculator
    private final FilteredVelocityYoFrameVector yoForcePointVelocity;
    private final FilteredVelocityYoFrameVector yoForcePointForceRateOfChange;
 
-   private final DoubleYoVariable yoForceChangeAlongDirectionOfMotion;
+   private final DoubleYoVariable yoForceAlongDirectionOfMotion;
+   private final DoubleYoVariable yoForceRateOfChangeAlongDirectionOfMotion;
+
    private final DoubleYoVariable yoStiffnessAlongDirectionOfMotion;
    private final DoubleYoVariable yoMaxStiffness;
 
    private final YoFrameVector yoCrossProductOfCurrentVelWithForce;
    private final YoFrameVector yoDirectionOfFreeMotion;
 
-   //   private final DoubleYoVariable yoVelocityAlongDirectionOfForceChange;
+   private final BooleanYoVariable addSimulatedSensorNoise;
 
-   //   private final YoFrameVector yoForceMagnitudeGradient;
-   //   private final YoFrameVector yoCrossProductOfCurrentVelWithForceMagGradient;
-   //   private final YoFrameVector yoDirectionNormalToForceMagGradientCoplanarWithCurrentVelocity;
 
    public TaskSpaceStiffnessCalculator(String namePrefix, double controlDT, YoVariableRegistry registry)
    {
@@ -51,20 +50,34 @@ public class TaskSpaceStiffnessCalculator
       yoForcePointForceRateOfChange = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix + "ForceRateOfChange", "", alphaLowPass,
             controlDT, registry, yoForcePointForce);
 
-      yoForceChangeAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "DeltaForceAlongDirOfMotion", registry);
+      yoForceAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "ForceAlongDirOfMotion", registry);
+      yoForceRateOfChangeAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "DeltaForceAlongDirOfMotion", registry);
+            
       yoStiffnessAlongDirectionOfMotion = new DoubleYoVariable(namePrefix + "StiffnessAlongDirOfMotion", registry);
       yoMaxStiffness = new DoubleYoVariable(namePrefix + "MaxStiffness", registry);
 
       yoCrossProductOfCurrentVelWithForce = new YoFrameVector(namePrefix + "VelocityCrossForce", world, registry);
       yoDirectionOfFreeMotion = new YoFrameVector(namePrefix + "DirOfFreeMotion", world, registry);
 
-      //      yoVelocityAlongDirectionOfForceChange = new DoubleYoVariable(namePrefix + "VelocityAlongDirOfForceChange", registry);
-
-      //      yoForceMagnitudeGradient = new YoFrameVector(namePrefix + "ForceMagGradient", world, registry);
-      //      yoCrossProductOfCurrentVelWithForceMagGradient = new YoFrameVector(namePrefix + "VelocityCrossForceMagGradient", world, registry);
-      //      yoDirectionNormalToForceMagGradientCoplanarWithCurrentVelocity = new YoFrameVector(namePrefix + "DirOfFreeMotion", world, registry);
+      addSimulatedSensorNoise = new BooleanYoVariable(namePrefix + "AddSimulatedNoise", registry);
+      addSimulatedSensorNoise.set(false);
    }
 
+   public double getForceAlongDirectionOfMotion()
+   {
+      return yoForceAlongDirectionOfMotion.getDoubleValue();
+   }
+   
+   public FrameVector getForceRateOfChange()
+   {
+      return yoForcePointForceRateOfChange.getFrameTuple();
+   }
+   
+   public double getForceRateOfChangeAlongDirectionOfMotion()
+   {
+      return yoForceRateOfChangeAlongDirectionOfMotion.getDoubleValue();
+   }
+   
    public double getStiffnessAlongDirectionOfMotion()
    {
       return yoStiffnessAlongDirectionOfMotion.getDoubleValue();
@@ -82,6 +95,14 @@ public class TaskSpaceStiffnessCalculator
    public void update(FramePoint forcePointPosition, FrameVector force)
    {
       yoForcePointPosition.set(forcePointPosition);
+
+      if (addSimulatedSensorNoise.getBooleanValue())
+      {
+         double amp = 0.03;
+         double bias = 0.05;
+         yoForcePointPosition.add(amp * 2.0 * (Math.random() - 0.5) + bias, amp * 2.0 * (Math.random() - 0.5) + bias, amp * 2.0 * (Math.random() - 0.5) + bias);
+      }
+      
       yoForcePointForce.set(force);
 
       if (updateHasBeenCalled)
@@ -96,9 +117,10 @@ public class TaskSpaceStiffnessCalculator
             directionOfMotion.normalize();
          }
 
-         yoForceChangeAlongDirectionOfMotion.set(yoForcePointForceRateOfChange.dot(directionOfMotion));
+         yoForceAlongDirectionOfMotion.set(yoForcePointForce.dot(directionOfMotion));
+         yoForceRateOfChangeAlongDirectionOfMotion.set(yoForcePointForceRateOfChange.dot(directionOfMotion));
 
-         double deltaForce = Math.abs(yoForceChangeAlongDirectionOfMotion.getDoubleValue());
+         double deltaForce = Math.abs(yoForceRateOfChangeAlongDirectionOfMotion.getDoubleValue());
          double velocity = yoForcePointVelocity.length();
 
          if (velocity > 1e-8)
@@ -111,30 +133,9 @@ public class TaskSpaceStiffnessCalculator
             }
          }
 
-         
-         
-         temp.cross(yoForcePointVelocity.getFrameTuple(), yoForcePointForce.getFrameTuple());
-         if (temp.length() > 0)
-         {
-            temp.normalize();
-         }
-         yoCrossProductOfCurrentVelWithForce.set(world, temp.getX(), temp.getY(), temp.getZ());
+         doYoVectorCrossProduct(yoForcePointForce, yoForcePointVelocity, yoCrossProductOfCurrentVelWithForce);
 
-         
-         
-         temp.cross(yoCrossProductOfCurrentVelWithForce.getFrameTuple(), yoForcePointForce.getFrameTuple());
-         if (temp.length() > 0)
-         {
-            temp.normalize();
-         }
-         yoDirectionOfFreeMotion.set(world, temp.getX(), temp.getY(), temp.getZ());
-
-         //         updateForceMagnitudeGradient();
-
-         //         updateForceGradient();
-
-         //         computeDirectionOfFreeMotion();
-
+         doYoVectorCrossProduct(yoCrossProductOfCurrentVelWithForce, yoForcePointForce, yoDirectionOfFreeMotion);
       }
       else
       {
@@ -143,75 +144,14 @@ public class TaskSpaceStiffnessCalculator
    }
 
    private final FrameVector temp = new FrameVector();
-   //
-   //   private void computeDirectionOfFreeMotion()
-   //   {
-   //      temp.cross(yoForcePointVelocity.getFrameTuple(), yoForcePointForceRateOfChange.getFrameTuple());
-   //      if (temp.length() > 0)
-   //      {
-   //         temp.normalize();
-   //      }
-   //      yoCrossProductOfCurrentVelWithForceMagGradient.set(world, temp.getX(), temp.getY(), temp.getZ());
-   //
-   //      temp.cross(yoCrossProductOfCurrentVelWithForceMagGradient.getFrameTuple(), yoForcePointForceRateOfChange.getFrameTuple());
-   //      if (temp.length() > 0)
-   //      {
-   //         temp.normalize();
-   //      }
-   //      yoDirectionNormalToForceMagGradientCoplanarWithCurrentVelocity.set(world, temp.getX(), temp.getY(), temp.getZ());
-   //   }
 
-   //   private final FrameVector temp = new FrameVector();
-   //
-   //   private void computeDirectionOfFreeMotion()
-   //   {
-   //      temp.cross(yoForcePointVelocity.getFrameTuple(), yoForceMagnitudeGradient.getFrameTuple());
-   //      if (temp.length() > 0)
-   //      {
-   //         temp.normalize();
-   //      }
-   //      yoCrossProductOfCurrentVelWithForceMagGradient.set(world, temp.getX(), temp.getY(), temp.getZ());
-   //
-   //      temp.cross(yoCrossProductOfCurrentVelWithForceMagGradient.getFrameTuple(), yoForceMagnitudeGradient.getFrameTuple());
-   //      if (temp.length() > 0)
-   //      {
-   //         temp.normalize();
-   //      }
-   //      yoDirectionNormalToForceMagGradientCoplanarWithCurrentVelocity.set(world, temp.getX(), temp.getY(), temp.getZ());
-   //   }
-
-   //   private final FrameVector directionOfForceChange = new FrameVector();
-   //
-   //   private void updateForceMagnitudeGradient()
-   //   {
-   //      directionOfForceChange.set(yoForcePointForceRateOfChange.getFrameTuple());
-   //      if (directionOfForceChange.length() > 0.0)
-   //      {
-   //         directionOfForceChange.normalize();
-   //      }
-   //
-   //      yoVelocityAlongDirectionOfForceChange.set(yoForcePointVelocity.dot(directionOfForceChange));
-   //      directionOfForceChange.scale(yoVelocityAlongDirectionOfForceChange.getDoubleValue());
-   //
-   //      double forceMagRateOfChange = yoForcePointForceRateOfChange.length();
-   //      yoForceMagnitudeGradient.set(world, forceMagRateOfChange / directionOfForceChange.getX(), forceMagRateOfChange / directionOfForceChange.getY(),
-   //            forceMagRateOfChange / directionOfForceChange.getZ());
-   //   }
-
-   //   private final Matrix forceGradient = new Matrix(3, 3);
-   //
-   //   private void updateForceGradient()
-   //   {
-   //      forceGradient.set(0, 0, yoForcePointForceRateOfChange.getX() / yoForcePointVelocity.getX());
-   //      forceGradient.set(0, 1, yoForcePointForceRateOfChange.getX() / yoForcePointVelocity.getY());
-   //      forceGradient.set(0, 2, yoForcePointForceRateOfChange.getX() / yoForcePointVelocity.getZ());
-   //
-   //      forceGradient.set(1, 0, yoForcePointForceRateOfChange.getY() / yoForcePointVelocity.getX());
-   //      forceGradient.set(1, 1, yoForcePointForceRateOfChange.getY() / yoForcePointVelocity.getY());
-   //      forceGradient.set(1, 2, yoForcePointForceRateOfChange.getY() / yoForcePointVelocity.getZ());
-   //
-   //      forceGradient.set(2, 0, yoForcePointForceRateOfChange.getZ() / yoForcePointVelocity.getX());
-   //      forceGradient.set(2, 1, yoForcePointForceRateOfChange.getZ() / yoForcePointVelocity.getY());
-   //      forceGradient.set(2, 2, yoForcePointForceRateOfChange.getZ() / yoForcePointVelocity.getZ());
-   //   }
+   private void doYoVectorCrossProduct(YoFrameVector v1, YoFrameVector v2, YoFrameVector vecToPack)
+   {
+      temp.cross(v1.getFrameTuple(), v2.getFrameTuple());
+      if (temp.length() > 0)
+      {
+         temp.normalize();
+      }
+      vecToPack.set(world, temp.getX(), temp.getY(), temp.getZ());
+   }
 }

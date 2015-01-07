@@ -85,7 +85,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          {
             if (forceSensorName == wristForceSensorNames.get(robotSide))
             {
-               ForceSensorDistalMassCompensator massComp = new ForceSensorDistalMassCompensator(sensorDef, registry);
+               ForceSensorDistalMassCompensator massComp = new ForceSensorDistalMassCompensator(sensorDef, WORKER_SLEEP_TIME_MILLIS, registry);
                wristForceSensorDistalMassCompensators.put(robotSide, massComp);
 
                ReferenceFrame sensorFrame = sensorDef.getSensorFrame();
@@ -241,7 +241,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
                      ForceSensorDistalMassCompensator massComp = wristForceSensorDistalMassCompensators.get(RobotSide.LEFT);
                      
                      massComp.update(forceSensorWrench);
-                     FrameVector forceMassCompensated = massComp.getSensorForceMassCompensated();
+                     ReferenceFrame sensorFrame = massComp.getSensorReferenceFrame();
+                     FrameVector forceMassCompensated = massComp.getSensorForceMassCompensated(sensorFrame);
 
                      wristFeetSensorPacket.setLeftWristMx(momentAndForceVector.get(0));
                      wristFeetSensorPacket.setLeftWristMy(momentAndForceVector.get(1));
@@ -262,7 +263,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
                      ForceSensorDistalMassCompensator massComp = wristForceSensorDistalMassCompensators.get(RobotSide.RIGHT);
 
                      massComp.update(forceSensorWrench);
-                     FrameVector forceMassCompensated = massComp.getSensorForceMassCompensated();
+                     ReferenceFrame sensorFrame = massComp.getSensorReferenceFrame();
+                     FrameVector forceMassCompensated = massComp.getSensorForceMassCompensated(sensorFrame);
 
                      wristFeetSensorPacket.setRightWristMx(momentAndForceVector.get(0));
                      wristFeetSensorPacket.setRightWristMy(momentAndForceVector.get(1));
