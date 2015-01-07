@@ -13,11 +13,9 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -25,10 +23,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 public class WristForceSensorFilteredUpdatable implements Updatable
 {
+   private final double DT;
    private final RobotSide robotSide;
 
    private final double forceSensorMinPassThroughFreq_Hz = 0.1;
@@ -41,14 +39,13 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
    private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
 
+   private final BooleanYoVariable yoForceLimitExceeded;
+   private final BooleanYoVariable yoStiffnessLimitExceeded;
    private final BooleanYoVariable yoImpactDetected;
    private final DoubleYoVariable yoImpactTime;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame sensorFrame;
-   private final FramePose sensorPose;
-   private final YoFramePoint yoSensorPosition;
-   
+
    private final ForceSensorDistalMassCompensator sensorMassCompensator;
 
    private final TaskSpaceStiffnessCalculator taskspaceStiffnessCalc;
@@ -56,14 +53,13 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final DoubleYoVariable yoImpactStiffnessThreshold_NperM;
    private final DoubleYoVariable yoImpactForceThreshold_N;
    private final BooleanYoVariable stopArmMotionIfImpactDetected;
-   private final BooleanYoVariable addSimulatedSensorNoise;
 
    private final PacketCommunicator controllerCommunicator;
-   
 
    public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
          ForceSensorDataHolder forceSensorDataHolder, double DT, PacketCommunicator controllerCommunicator, YoVariableRegistry registry)
    {
+      this.DT = DT;
       this.robotSide = robotSide;
 
       String sidePrefix = robotSide.getLowerCaseName();
@@ -87,31 +83,29 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       wristSensorWrench = new Wrench();
       forceSensorData.packWrench(wristSensorWrench);
 
-      this.sensorFrame = wristSensorDefinition.getSensorFrame();
-      this.sensorPose = new FramePose(world);
-      this.yoSensorPosition = new YoFramePoint(sidePrefix + "WristSensorPosition", world, registry);
+      this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 
-      this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, registry);
-
-      yoWristSensorForceMagnitude = new DoubleYoVariable(sidePrefix + "WristForceMag", registry);
-      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(sidePrefix + "WristForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS, registry);
-      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(sidePrefix + "WristForceMagFiltered", "",
+      yoWristSensorForceMagnitude = new DoubleYoVariable(forceSensorName + "ForceMag", registry);
+      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias", "", 0.0001, DT, FirstOrderFilterType.LOW_PASS, registry);
+      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(forceSensorName + "ForceMagFiltered", "",
             forceSensorMinPassThroughFreq_Hz, forceSensorMaxPassThroughFreq_Hz, DT, registry);
 
       taskspaceStiffnessCalc = new TaskSpaceStiffnessCalculator(sidePrefix, DT, registry);
 
-      yoImpactStiffnessThreshold_NperM = new DoubleYoVariable(sidePrefix + "ImpactStiffnessThreshold_NperM", registry);
-      yoImpactForceThreshold_N = new DoubleYoVariable(sidePrefix + "ImpactForceThreshold_N", registry);
-      yoImpactDetected = new BooleanYoVariable(sidePrefix + "WristImpactDetected", registry);
+      yoImpactStiffnessThreshold_NperM = new DoubleYoVariable(forceSensorName + "ImpactStiffnessThreshold_NperM", registry);
+      yoImpactForceThreshold_N = new DoubleYoVariable(forceSensorName + "ImpactForceThreshold_N", registry);
+
+      yoForceLimitExceeded = new BooleanYoVariable(forceSensorName + "forceLimitExceeded", registry);
+      yoStiffnessLimitExceeded = new BooleanYoVariable(forceSensorName + "stiffnessLimitExceeded", registry);
+      yoImpactDetected = new BooleanYoVariable(forceSensorName + "ImpactDetected", registry);
       yoImpactDetected.set(false);
 
-      yoImpactTime = new DoubleYoVariable(sidePrefix + "WristImpactTime", registry);
+      yoImpactTime = new DoubleYoVariable(forceSensorName + "ImpactTime", registry);
 
       //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
 
-      addSimulatedSensorNoise = new BooleanYoVariable(robotSide.getShortLowerCaseName() + "AddSimulatedNoise", registry);
-      stopArmMotionIfImpactDetected = new BooleanYoVariable(robotSide.getShortLowerCaseName() + "stopArmMotionIfImpactDetected", registry);
+      stopArmMotionIfImpactDetected = new BooleanYoVariable(forceSensorName + "stopArmMotionIfImpactDetected", registry);
 
       this.controllerCommunicator = controllerCommunicator;
 
@@ -120,28 +114,42 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private void initialize()
    {
-      addSimulatedSensorNoise.set(false);
       stopArmMotionIfImpactDetected.set(false);
 
-      yoImpactForceThreshold_N.set(20.0);
-      yoImpactStiffnessThreshold_NperM.set(20000.0);
+      yoImpactForceThreshold_N.set(100.0);
+      yoImpactStiffnessThreshold_NperM.set(10000.0);
+   }
+
+   public double getDT()
+   {
+      return DT;
    }
 
    public void setStopMotionIfCollision(boolean stop)
    {
       stopArmMotionIfImpactDetected.set(stop);
    }
-   
+
    public double getHandMass()
    {
       return sensorMassCompensator.getDistalMass();
    }
-
-   public FrameVector getWristForceMassCompensated()
-   {
-      return sensorMassCompensator.getSensorForceMassCompensated();
-   }
    
+   public FramePoint getWristPositionInWorld()
+   {
+      return sensorMassCompensator.getSensorPosition();
+   }
+
+   public FrameVector getWristForceRawInWorld()
+   {
+      return sensorMassCompensator.getSensorForceRaw(world);
+   }
+
+   public FrameVector getWristForceMassCompensatedInWorld()
+   {
+      return sensorMassCompensator.getSensorForceMassCompensated(world);
+   }
+
    public DoubleYoVariable getWristForceMagnitude()
    {
       return yoWristSensorForceMagnitude;
@@ -152,9 +160,24 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       return yoWristSensorForceMagnitudeBandPassFiltered;
    }
 
-   public Boolean getIsHandCurrentlyColliding()
+   public double getSensorZForceLowPassFilteredInWorld()
+   {
+      return sensorMassCompensator.getSensorZForceLowPassFilteredInWorld();
+   }
+   
+   public double getForceRateOfChangeAlongDirectionOfMotion()
+   {
+      return taskspaceStiffnessCalc.getForceRateOfChangeAlongDirectionOfMotion();
+   }
+
+   public Boolean hasHandCollidedWithSomething()
    {
       return this.yoImpactDetected.getBooleanValue();
+   }
+
+   public void resetHandCollisionDetector()
+   {
+      yoImpactDetected.set(false);
    }
 
    public double getHandImpactTime()
@@ -174,14 +197,10 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       forceSensorData.packWrench(wristSensorWrench);
       sensorMassCompensator.update(forceSensorData);
 
-      yoWristSensorForceMagnitude.set(sensorMassCompensator.getSensorForceRaw().length());
-
-      if (addSimulatedSensorNoise.getBooleanValue())
-      {
-         yoWristSensorForceMagnitude.add(0.1 * 2.0 * (Math.random() - 0.5) + 0.25);
-      }
+      FrameVector sensorForceRawInWorld = sensorMassCompensator.getSensorForceRaw(world);
+      yoWristSensorForceMagnitude.set(sensorForceRawInWorld.length());
    }
-   
+
    private void stopArmIfHandCollisionIsDetected(double time)
    {
       estimateStiffnessOfConstraintsActingUponWrist();
@@ -189,8 +208,10 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoWristSensorForceMagnitudeBias.update(yoWristSensorForceMagnitude.getDoubleValue());
       yoWristSensorForceMagnitudeBandPassFiltered.update(yoWristSensorForceMagnitude.getDoubleValue());
 
-      //      if (Math.abs(yoWristForceHandMassCompensated.length()) > yoImpactForceThreshold_N.getDoubleValue())
-      if (taskspaceStiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue())
+      yoForceLimitExceeded.set( taskspaceStiffnessCalc.getForceAlongDirectionOfMotion() > yoImpactForceThreshold_N.getDoubleValue() );
+      yoStiffnessLimitExceeded.set( taskspaceStiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue() );
+
+      if ( yoForceLimitExceeded.getBooleanValue() || yoStiffnessLimitExceeded.getBooleanValue() )
       {
          if (!yoImpactDetected.getBooleanValue() && time > 1.0)
          {
@@ -207,20 +228,15 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       }
    }
 
-   private final FramePoint temp = new FramePoint();
-   
+   private final FrameVector wristSensorForceInWorld = new FrameVector();
+
    private void estimateStiffnessOfConstraintsActingUponWrist()
    {
-      sensorPose.setPose(sensorFrame.getTransformToDesiredFrame(world));
-      sensorPose.getPositionIncludingFrame(temp);
-      yoSensorPosition.set(temp.getReferenceFrame(), temp.getX(), temp.getY(), temp.getZ());
+      FramePoint sensorPositionInWorld = sensorMassCompensator.getSensorPosition();
 
-      FrameVector wristSensorForce = sensorMassCompensator.getSensorForceRaw();
-      ReferenceFrame changeBackToThisFrame = wristSensorForce.getReferenceFrame();
-      wristSensorForce.changeFrame(world);
+      FrameVector forceInWorldFrame = sensorMassCompensator.getSensorForceMassCompensated(world);
+      wristSensorForceInWorld.setIncludingFrame(forceInWorldFrame);
 
-      taskspaceStiffnessCalc.update(yoSensorPosition.getFrameTuple(), wristSensorForce);
-      
-      wristSensorForce.changeFrame(changeBackToThisFrame);
+      taskspaceStiffnessCalc.update(sensorPositionInWorld, wristSensorForceInWorld);
    }
 }

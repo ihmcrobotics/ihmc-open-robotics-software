@@ -19,7 +19,6 @@ import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -57,16 +56,18 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private final DRCWallWorldEnvironment testEnvironment = new DRCWallWorldEnvironment(-0.5, 2.5);
-   private final PacketCommunicator controllerObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCWallCollisionTestControllerLocalCommunicator");
-   private final PacketCommunicator npObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "DRCWallCollisionTestNPLocalCommunicator");
+   private final PacketCommunicator controllerObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+         PacketDestination.CONTROLLER.ordinal(), "DRCWallCollisionTestControllerLocalCommunicator");
+   private final PacketCommunicator npObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+         PacketDestination.NETWORK_PROCESSOR.ordinal(), "DRCWallCollisionTestNPLocalCommunicator");
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private Robot robotToTest;
    private final RobotSide robotSideToTest = RobotSide.LEFT;
-
    private FullRobotModel fullRobotModel;
-   private DRCRobotSensorInformation sensorInfo;
+
+   private BehaviorCommunicationBridge communicationBridge;
 
    private WristForceSensorFilteredUpdatable wristUpdatable;
    private UpdateForceSensorFromRobotController updateForceSensorController;
@@ -86,12 +87,14 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       robotToTest = drcSimulationTestHelper.getRobot();
       fullRobotModel = getRobotModel().createFullRobotModel();
 
+      communicationBridge = new BehaviorCommunicationBridge(npObjectCommunicator, controllerObjectCommunicator, robotToTest.getRobotsYoVariableRegistry());
+
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       controllerObjectCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       wristUpdatable = setupWristForceSensorUpdatable(forceSensorDataHolder);
 
-      updateForceSensorController = setupUpdateForceSensorController(robotDataReceiver);
+      updateForceSensorController = setupUpdateForceSensorController(robotDataReceiver, wristUpdatable);
       robotToTest.setController(updateForceSensorController);
 
       wristGCPoint = drcSimulationTestHelper.getRobot().getHandGroundContactPoints(robotSideToTest).get(0);
@@ -121,27 +124,19 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private void sendHandPosePacket(HandPosePacket handPosePacket)
-   {
-      controllerObjectCommunicator.send(handPosePacket);
-   }
-
    private WristForceSensorFilteredUpdatable setupWristForceSensorUpdatable(ForceSensorDataHolder forceSensorDataHolder)
    {
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      YoVariableRegistry robotYoVariableRegistry = robotToTest.getRobotsYoVariableRegistry();
-
-      FullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       DRCRobotSensorInformation sensorInfo = getRobotModel().getSensorInformation();
-
       double DT = drcSimulationTestHelper.getSimulationConstructionSet().getDT();
+
       WristForceSensorFilteredUpdatable ret = new WristForceSensorFilteredUpdatable(robotSideToTest, fullRobotModel, sensorInfo, forceSensorDataHolder, DT,
-            controllerObjectCommunicator, robotYoVariableRegistry);
+            controllerObjectCommunicator, robotToTest.getRobotsYoVariableRegistry());
 
       return ret;
    }
 
-   private UpdateForceSensorFromRobotController setupUpdateForceSensorController(RobotDataReceiver robotDataReceiver)
+   private UpdateForceSensorFromRobotController setupUpdateForceSensorController(RobotDataReceiver robotDataReceiver,
+         WristForceSensorFilteredUpdatable wristUpdatable)
    {
       ArrayList<WrenchCalculatorInterface> forceSensors = new ArrayList<WrenchCalculatorInterface>();
 
@@ -158,7 +153,7 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      double timeToStartMotionConstraint = 1.1 * 1.0;
+      double timeToStartMotionConstraint = 1.3 * 1.0;
       double arrestStiffness_NperM = 10000.0;
       GCPointMotionConstrainer handGCArrestor = new GCPointMotionConstrainer(robotToTest, wristGCPoint, timeToStartMotionConstraint, arrestStiffness_NperM);
 
@@ -168,7 +163,13 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       wristUpdatable.setStopMotionIfCollision(true);
 
-      sendHandPoseBehaviorAndSimulate(success, 4.0 * Math.random() + 0.2, 0.4, 0, 0, 0);
+      double trajectoryTime = 2.0;
+      double handDeltaX = 0.4;
+      double handDeltaY = 0.0;
+      double handDeltaZ = 0.0;
+      double handDeltaOmega = 0.0;
+
+      success = success && sendHandPoseBehaviorAndSimulate(trajectoryTime, handDeltaX, handDeltaY, handDeltaZ, handDeltaOmega);
 
       double actualHandGcCollisionTime = handImpactDetector.getHandImpactTime();
       double wristForceSensorCollisionTime = wristUpdatable.getHandImpactTime();
@@ -188,7 +189,13 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       wristUpdatable.setStopMotionIfCollision(true);
 
-      sendHandPoseBehaviorAndSimulate(success, 2.0, 0.4, 0.0, 0.0, 0.0);
+      double trajectoryTime = 2.0;
+      double handDeltaX = 0.4;
+      double handDeltaY = 0.0;
+      double handDeltaZ = 0.0;
+      double handDeltaOmega = 0.0;
+
+      success = success && sendHandPoseBehaviorAndSimulate(trajectoryTime, handDeltaX, handDeltaY, handDeltaZ, handDeltaOmega);
 
       double actualHandGcCollisionTime = handImpactDetector.getHandImpactTime();
       double wristForceSensorCollisionTime = wristUpdatable.getHandImpactTime();
@@ -200,7 +207,7 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
    }
 
    //FIXME: Running more than one test causes the following error: java.lang.RuntimeException: java.net.BindException: Address already in use: bind
-   //   @Test
+   //      @Test
    public void testHandMassCompensationBySlowlyRotatingHands() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -209,7 +216,13 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      sendHandPoseBehaviorAndSimulate(success, 2.0, 0, 0, 0, 3.0);
+      double trajectoryTime = 2.0;
+      double handDeltaX = 0.4;
+      double handDeltaY = 0.0;
+      double handDeltaZ = 0.0;
+      double handDeltaOmega = 0.0;
+
+      success = success && sendHandPoseBehaviorAndSimulate(trajectoryTime, handDeltaX, handDeltaY, handDeltaZ, handDeltaOmega);
 
       double maxWristForceMassCompensated = updateForceSensorController.getMaxWristForceMassCompensated();
       double reasonableMaxValue = 0.5 * Math.abs(9.81 * wristUpdatable.getHandMass());
@@ -224,14 +237,12 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
    private final Quat4d handOrientation = new Quat4d();
 
-   private void sendHandPoseBehaviorAndSimulate(boolean success, double swingTrajectoryTime, double deltaX, double deltaY, double deltaZ, double deltaOmega)
+   private boolean sendHandPoseBehaviorAndSimulate(final double swingTrajectoryTime, double deltaX, double deltaY, double deltaZ, double deltaOmega)
          throws SimulationExceededMaximumTimeException
    {
-      BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(npObjectCommunicator, controllerObjectCommunicator,
-            robotToTest.getRobotsYoVariableRegistry());
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
 
-      FramePose handPose = new FramePose();
+      final FramePose handPose = new FramePose();
       handPose.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
 
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -244,7 +255,7 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
       handOrientation.setW(handOrientation.w + deltaOmega);
       handPose.setOrientation(handOrientation);
 
-      RigidBodyTransform handPoseTransform = new RigidBodyTransform();
+      final RigidBodyTransform handPoseTransform = new RigidBodyTransform();
       handPose.getPose(handPoseTransform);
 
       handPoseBehavior.setInput(Frame.WORLD, handPoseTransform, robotSideToTest, swingTrajectoryTime);
@@ -279,8 +290,9 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       handPoseBehaviorThread.start();
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-      assertTrue(success);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+
+      return success;
    }
 
    private class UpdateForceSensorFromRobotController implements RobotController
@@ -328,7 +340,7 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
          robotDataReceiver.updateRobotModel();
          wristUpdatable.update(yoTime.getDoubleValue());
 
-         double wristForceMassCompensated = wristUpdatable.getWristForceMassCompensated().length();
+         double wristForceMassCompensated = wristUpdatable.getWristForceMassCompensatedInWorld().length();
          if (wristForceMassCompensated > maxWristForceMassCompensated.getDoubleValue() && yoTime.getDoubleValue() > 1.0)
          {
             maxWristForceMassCompensated.set(wristForceMassCompensated);
@@ -435,7 +447,7 @@ public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
 
       public void initialize()
       {
-         allowableDirectionOfMotion.set(1.0, 0, 2.0);
+         allowableDirectionOfMotion.set(1.0, 0, 1.0);
          allowableDirectionOfMotion.normalize();
       }
 
