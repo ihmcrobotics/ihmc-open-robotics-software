@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation;
+package us.ihmc.stateEstimation.humanoid;
 
 import java.util.Random;
 

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.stateEstimation;
+package us.ihmc.stateEstimation.humanoid;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -13,7 +13,6 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.ControlFlowGraphExecu
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
-import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
