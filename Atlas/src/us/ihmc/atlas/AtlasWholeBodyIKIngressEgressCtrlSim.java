@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
@@ -19,9 +20,11 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -30,36 +33,29 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-//import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-//import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-//import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 
 public class AtlasWholeBodyIKIngressEgressCtrlSim
 {
-
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
-   //   private final YoVariableRegistry registry;
-   //   private DoubleYoVariable hik_arm_pos_x_d;
-   //   private DoubleYoVariable hik_arm_pos_y_d;
-   //   private DoubleYoVariable hik_arm_pos_z_d;
    private final SDFFullRobotModel fullRobotModel;
    private final KryoLocalPacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
+   private final ArrayList<ReferenceFrame> desiredReferenceFrameList = new ArrayList<ReferenceFrame>();
    private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
-   private final boolean DEBUG = true;
    private boolean USE_INGRESS_ONLY = false;
    private final YoVariableRegistry registry;
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
    private final YoGraphicShape yoGraphicsShape;
    private final DoubleYoVariable hik_x_des, hik_y_des, hik_z_des;
+   private final boolean random = false;
+   private final double ERROR_DISTANCE_TOLERANCE = 0.25;
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws IOException
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
-
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
       this.registry = hikIngEgCtrlSim.getControllerFactory().getRegistry();
       hik_x_des = new DoubleYoVariable("hik_x_des", registry);
@@ -76,37 +72,32 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShape);
       hikIngEgCtrlSim.getDRCSimulation().start();
       this.fullRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
-      //      this.fullRobotModel = robotModel.createFullRobotModel();
-      //      this.registry = ikExample.getControllerFactory().getRegistry();
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
       this.wholeBodyIKSolver = new WholeBodyIkSolver( robotModel, fullRobotModel );
-      
-      // NEW API
-     // wholeBodyIKSolver.enableHandRotation(RobotSide.RIGHT, true);
-     // wholeBodyIKSolver.enableHandTranslation(RobotSide.RIGHT, true);
-     // wholeBodyIKSolver.enableHandRotAndTranslation(RobotSide.LEFT, false);
-      
-      
-      wholeBodyIKSolver.setNumberOfControlledDoF( RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P3R );
-      wholeBodyIKSolver.setNumberOfControlledDoF( RobotSide.LEFT,  WholeBodyIkSolver.ControlledDoF.DOF_NONE );
+      wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
+      wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
+      wholeBodyIKSolver.getHierarchicalSolver().setVerbose(false);
       
       this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel);
-
-      while (true)
+      createDesiredFramesList();
+      for (int i = 0; i < desiredReferenceFrameList.size(); i++)
       {
          if (USE_INGRESS_ONLY)
          {
             if (ingressEgressModeActivated())
             {
-
+               ThreadTools.sleep(7000);
+               doControl(i);
                ThreadTools.sleep(10000);
-               doControl();
+               checkIfTargetWasReached(i);
             }
          }
          else
          {
+            ThreadTools.sleep(7000);
+            doControl(i);
             ThreadTools.sleep(10000);
-            doControl();
+            checkIfTargetWasReached(i);
          }
       }
    }
@@ -116,41 +107,96 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       new AtlasWholeBodyIKIngressEgressCtrlSim();
    }
 
-   private void doControl()
+   private void createDesiredFramesList()
    {
-      Random random = new Random();
-      Point3d randomPoint = RandomTools.generateRandomPoint(random, -0.2, -0.2, 0.2, 0.2, 1.0, 1.5);
-      FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), randomPoint, "dontCareFramePoint");
-      //      Vector3d translationVector = new Vector3d();
-      //      ReferenceFrame desiredReferenceFrame = fullRobotModel.getEndEffector(RobotSide.LEFT, LimbName.ARM).getBodyFixedFrame();
-//      FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), hik_x_des.getDoubleValue(), hik_y_des.getDoubleValue(), hik_z_des.getDoubleValue());
-      FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
-      ReferenceFrame desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCare", point, zAxis); //new ReferenceFrame("desriedFrame",ReferenceFrame.getWorldFrame(),transformToWorldFrame, false, false, true);
+      final double reachLength = 0.5;
+      for (int i = 0; i < 4; i++)
+      {
+         FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), reachLength * Math.cos(-i * Math.PI / 4), reachLength * Math.sin(-i * Math.PI / 4),
+               0.3);
+         FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+         ReferenceFrame desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCareEither", point, zAxis);
+         desiredReferenceFrameList.add(desiredReferenceFrame);
+      }
+   }
+
+   private ReferenceFrame getNextDesiredReferenceFrame(int index)
+   {
+      ReferenceFrame desiredReferenceFrame;
+      if (random)
+      {
+         Random random = new Random();
+         Point3d randomPoint = RandomTools.generateRandomPoint(random, -0.2, -0.2, 0.2, 0.2, 1.0, 1.5);
+         FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), randomPoint, "dontCareFramePoint");
+         FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+         desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCare", point, zAxis);
+      }
+      else
+      {
+         desiredReferenceFrame = desiredReferenceFrameList.get(index);
+      }
+      return desiredReferenceFrame;
+   }
+
+   private void doControl(int index)
+   {
+      ReferenceFrame desiredReferenceFrame = getNextDesiredReferenceFrame(index);
       yoGraphicsShape.setToReferenceFrame(desiredReferenceFrame);
-      //      RigidBodyTransform transformToWorld = desiredReferenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      //      transformToWorld.getTranslation(translationVector);
-      //      System.out.println("AtlasWholeBodyIKIngressEgressCtrlSim: x: " + translationVector.getX() + ", y: " + translationVector.getY() + ", z: "
-      //            + translationVector.getZ());
-      //      desiredToWorldTransform.setTranslation(randomPoint.getX(), randomPoint.getY(), randomPoint.getZ());
-      //      desiredToWorldTransform.setTranslation(0.0, 0.0, 1.0);
-      //      desiredToWorldTransform.setTranslation(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
-      //      desiredToWorldTransform.setTranslation(hik_arm_pos_x_d.getDoubleValue(), hik_arm_pos_y_d.getDoubleValue(), hik_arm_pos_z_d.getDoubleValue());
-      //      System.out.println(hik_arm_pos_x_d.getDoubleValue() + ", " + hik_arm_pos_y_d.getDoubleValue() + ", " + hik_arm_pos_z_d.getDoubleValue());
-     
       wholeBodyIKSolver.setHandTarget(RobotSide.RIGHT, desiredReferenceFrame);
-      wholeBodyIKSolver.compute( fullRobotModel );
-      
+      wholeBodyIKSolver.compute(fullRobotModel);
       wholeBodyIKPacketCreator.createPackets(fullRobotModel, 3.0, packetsToSend);
       System.out.println("AtlasWholeBodyIKIngressEgressCtrlSim: Sending packets");
       for (int i = 0; i < packetsToSend.size(); i++)
       {
-         if (DEBUG)
-         {
-            fieldObjectCommunicator.send(packetsToSend.get(i));
-         }
+         fieldObjectCommunicator.send(packetsToSend.get(i));
       }
       packetsToSend.clear();
    }
+
+   private void checkIfTargetWasReached(int index)
+   {
+      ReferenceFrame rightHandPosition = fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
+      ReferenceFrame desiredReference = getNextDesiredReferenceFrame(index);
+      RigidBodyTransform rBT = rightHandPosition.getTransformToDesiredFrame(desiredReference);
+      Vector3d vector = new Vector3d();
+      rBT.getTranslation(vector);
+      System.out.println("error: \n" + vector);
+      
+      /*ReferenceFrame workingHandFrame = wholeBodyIKSolver.getHandFrame(RobotSide.RIGHT, ReferenceFrame.getWorldFrame());
+      
+      RigidBodyTransform tempTransform =  workingHandFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      System.out.println("whole body: \n" + tempTransform);
+      
+      tempTransform =  desiredReference.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      System.out.println("desired: \n" + tempTransform);*/
+      
+      ReferenceFrame workingFrame = wholeBodyIKSolver.getDesiredPelvisFrame( ReferenceFrame.getWorldFrame());
+      RigidBodyTransform tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      System.out.println("whole body pelvis: \n" + tempTransform);
+      
+      ReferenceFrame actualFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      System.out.println("actual pelvis: \n" + tempTransform);
+      
+     
+      workingFrame = wholeBodyIKSolver.getDesiredBodyFrame("r_foot", ReferenceFrame.getWorldFrame());
+      tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      System.out.println("whole body akle: \n" + tempTransform);
+      
+      actualFrame = fullRobotModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
+      tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      System.out.println("actual akle: \n" + tempTransform);
+      
+      
+      if (vector.length() > ERROR_DISTANCE_TOLERANCE)
+      {
+         System.out.println(this.getClass().getName() + ": FAILED TO REACH DESIRED POINT");
+      }
+      else
+      {
+         System.out.println(this.getClass().getName() + ": SUCCESFULLY REACHED POINT");
+      }
+   };
 
    private boolean ingressEgressModeActivated()
    {
@@ -160,10 +206,9 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       {
          if (yoVariable.getName() == "highLevelState")
          {
-
             @SuppressWarnings("unchecked")
             EnumYoVariable<HighLevelState> enumYoVariable = (EnumYoVariable<HighLevelState>) yoVariable;
-            //            enumYoVariable.set(HighLevelState.INGRESS_EGRESS);
+            // enumYoVariable.set(HighLevelState.INGRESS_EGRESS);
             if (enumYoVariable.getEnumValue() == HighLevelState.INGRESS_EGRESS)
             {
                bool = true;
@@ -176,5 +221,4 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       }
       return bool;
    }
-
 }
