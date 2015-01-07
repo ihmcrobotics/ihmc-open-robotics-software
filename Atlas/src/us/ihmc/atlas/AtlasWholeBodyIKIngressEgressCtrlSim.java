@@ -16,6 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIKPacketCreator;
 import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver;
 import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
@@ -33,7 +34,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 
 public class AtlasWholeBodyIKIngressEgressCtrlSim
 {
