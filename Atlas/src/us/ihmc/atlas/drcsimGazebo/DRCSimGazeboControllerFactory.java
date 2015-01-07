@@ -76,7 +76,7 @@ public class DRCSimGazeboControllerFactory
        * Create output writer
        */
 
-      DRCSimGazeboOutputWriter outputWriter = new DRCSimGazeboOutputWriter(robotModel);
+      AtlasDRCSimGazeboOutputWriter outputWriter = new AtlasDRCSimGazeboOutputWriter(robotModel);
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer.getObjectCommunicator());
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
