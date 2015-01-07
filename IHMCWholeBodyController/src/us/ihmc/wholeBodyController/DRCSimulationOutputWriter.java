@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.outputs;
+package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,6 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.DelayedDoubleYoVariable;
