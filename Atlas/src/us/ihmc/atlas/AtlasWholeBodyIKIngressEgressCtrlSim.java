@@ -79,7 +79,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       //      this.fullRobotModel = robotModel.createFullRobotModel();
       //      this.registry = ikExample.getControllerFactory().getRegistry();
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
-      this.wholeBodyIKSolver = new WholeBodyIkSolver(robotModel, fullRobotModel, "models/atlas_v4_wb.urdf");
+      this.wholeBodyIKSolver = new WholeBodyIkSolver( robotModel, fullRobotModel );
       
       // NEW API
      // wholeBodyIKSolver.enableHandRotation(RobotSide.RIGHT, true);

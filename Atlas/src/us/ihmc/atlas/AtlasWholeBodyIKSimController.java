@@ -67,7 +67,7 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
    @Override
    public WholeBodyIkSolver initializeAndReturnIkSolver(DRCRobotModel drcRobotModel, SDFFullRobotModel sdfFullRobotModel) throws IOException
    {
-      return new WholeBodyIkSolver(drcRobotModel, sdfFullRobotModel, "models/atlas_v4_dual.urdf");
+      return new WholeBodyIkSolver(drcRobotModel, sdfFullRobotModel);
    }
 
    @Override
