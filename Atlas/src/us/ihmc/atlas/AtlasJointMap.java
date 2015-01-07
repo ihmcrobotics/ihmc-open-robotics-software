@@ -45,6 +45,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -328,11 +329,15 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
-
+   
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
-      return AtlasPhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+      RigidBodyTransform transA =  JMEDataTypeUtils.jmeTransformToTransform3D( atlasVersion.getOffsetFromWrist(robotSide) );
+      RigidBodyTransform transB = AtlasPhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+      RigidBodyTransform transC = new RigidBodyTransform();
+      transC.multiply( transB, transA );
+      return transC;
    }
 
    @Override
