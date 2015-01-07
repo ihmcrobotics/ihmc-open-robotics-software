@@ -108,7 +108,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testComHeightMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

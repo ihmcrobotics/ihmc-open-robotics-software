@@ -20,7 +20,7 @@ public class SimulationDispatcherTestClient
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-   @Test
+   @Test(timeout=300000)
    public void test()
    {
 //    YoVariable foo = new YoVariable("foo", null);

@@ -31,7 +31,7 @@ public class StateFileComparerTest
    {
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAbsoluteCompareStateFiles() throws FileNotFoundException
    {
       File fileOne = new File("fileOne.state");
@@ -96,7 +96,7 @@ public class StateFileComparerTest
    }
   
    
-   @Test
+   @Test(timeout=300000)
    public void testCompareVarLists()
    {
       YoVariableRegistry registry1 = createRegistryAndFillWithVariables();

@@ -24,7 +24,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSetThrowsException()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -53,7 +53,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testMultiplicativeDoubleGlobalParameter()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -77,7 +77,7 @@ public class MultiplicativeDoubleGlobalParameterTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testMultiplicativeDoubleGlobalParameterUpdate()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -113,7 +113,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue(), eps);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFamilyTree()
    {
 //    SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();

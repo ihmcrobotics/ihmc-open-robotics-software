@@ -39,7 +39,7 @@ import java.util.List;
  */
 public class MasterXmlRpcEndpointImplTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testGetUri() throws Exception {
     URI testUri = new URI("http://foo.bar:8080");
     MasterServer mockMaster = mock(MasterServer.class);
@@ -50,7 +50,7 @@ public class MasterXmlRpcEndpointImplTest {
     assertEquals(testUri.toString(), response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testLookupNodeExisting() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
     final GraphName nodeName = GraphName.of("/foo");
@@ -62,7 +62,7 @@ public class MasterXmlRpcEndpointImplTest {
     assertEquals(nodeSlaveUri.toString(), response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testLookupNodeNotExisting() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.lookupNode(Matchers.<GraphName>any())).thenReturn(null);
@@ -72,7 +72,7 @@ public class MasterXmlRpcEndpointImplTest {
     assertEquals("null", response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRegisterPublisherWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(
@@ -85,7 +85,7 @@ public class MasterXmlRpcEndpointImplTest {
     assertEquals(Lists.newArrayList(), response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRegisterPublisher() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
     final GraphName nodeName = GraphName.of("/slave");
@@ -104,7 +104,7 @@ public class MasterXmlRpcEndpointImplTest {
     assertEquals(Lists.newArrayList(nodeSlaveUri.toString()), response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRegisterSubscriberWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(
@@ -117,7 +117,7 @@ public class MasterXmlRpcEndpointImplTest {
     assertEquals(Lists.newArrayList(), response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRegisterSubscriber() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
     final GraphName nodeName = GraphName.of("/slave");

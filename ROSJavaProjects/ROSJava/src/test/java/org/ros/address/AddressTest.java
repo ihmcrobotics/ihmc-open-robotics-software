@@ -30,14 +30,14 @@ import java.net.UnknownHostException;
  */
 public class AddressTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testLocalhost() {
     InetAddress localhost = InetAddressFactory.newFromHostString(Address.LOCALHOST);
     assertEquals(Address.LOCALHOST, localhost.getHostName());
     assertTrue(localhost.isLoopbackAddress());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testLoopback() {
     InetAddress loopback = InetAddressFactory.newFromHostString(Address.LOOPBACK);
     assertEquals(Address.LOOPBACK, loopback.getHostName());
@@ -54,7 +54,7 @@ public class AddressTest {
     assertFalse(publicHost.isLoopbackAddress());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testPublicIpv4() {
     String host = "1.2.3.4";
     InetAddress publicHost = InetAddressFactory.newFromHostString(host);

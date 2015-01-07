@@ -84,7 +84,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE.setRotation(rotFull);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void perfect() throws IOException
    {
       // No offsets to make things easy
@@ -127,7 +127,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    /**
     * Pass it into an optimization function and see if it works
     */
-   @Test
+   @Test(timeout=300000)
    public void smallError() throws IOException
    {
       // some small offests, which won't be provided to the algorithm
@@ -174,7 +174,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    /**
     * Pass it into an optimization function and see if it works
     */
-   @Test
+   @Test(timeout=300000)
    public void optimize() throws IOException
    {
       // some small offests, which won't be provided to the algorithm

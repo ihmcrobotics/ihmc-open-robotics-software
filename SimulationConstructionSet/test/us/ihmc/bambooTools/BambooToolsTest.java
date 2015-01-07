@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class BambooToolsTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testGetClassAndMethodName()
    {
       String classAndMethodName = BambooTools.getClassAndMethodName();
@@ -22,7 +22,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {
       BambooTools.reportTestStartedMessage();

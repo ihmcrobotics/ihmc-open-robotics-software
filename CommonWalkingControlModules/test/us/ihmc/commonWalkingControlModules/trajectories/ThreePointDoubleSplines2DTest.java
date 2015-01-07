@@ -29,7 +29,7 @@ public class ThreePointDoubleSplines2DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testSimpleFlatExample()
    {
       ThreePointDoubleSplines2D spline = new ThreePointDoubleSplines2D();
@@ -47,7 +47,7 @@ public class ThreePointDoubleSplines2DTest
       assertFlatAndAtHeight(zHeight, zSlopeAndSecondDerivative);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testInitialInALineExample()
    {
       ThreePointDoubleSplines2D spline = new ThreePointDoubleSplines2D();
@@ -69,7 +69,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testInitialInALineExampleTwo()
    {
       ThreePointDoubleSplines2D spline = new ThreePointDoubleSplines2D();
@@ -108,7 +108,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testInitialInALineExampleThree()
    {
       Random random = new Random(1776L);
@@ -155,7 +155,7 @@ public class ThreePointDoubleSplines2DTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testAFewQueriesOnFlatExampleOne()
    {
       double zHeight = 1.3;
@@ -187,7 +187,7 @@ public class ThreePointDoubleSplines2DTest
    
    
    @Ignore // Not passing!
-   @Test
+   @Test(timeout=300000)
    public void testAFewQueries()
    {
       Random random = new Random(1776L);

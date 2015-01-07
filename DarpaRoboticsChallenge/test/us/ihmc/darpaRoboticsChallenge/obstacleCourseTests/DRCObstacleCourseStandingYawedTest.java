@@ -58,7 +58,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
      
       
-      @Test
+      @Test(timeout=300000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {
          BambooTools.reportTestStartedMessage();

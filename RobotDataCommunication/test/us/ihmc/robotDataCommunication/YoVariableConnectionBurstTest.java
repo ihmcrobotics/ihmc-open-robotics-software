@@ -26,7 +26,7 @@ public class YoVariableConnectionBurstTest
 
    
    
-//   @Test
+//   @Test(timeout=300000)
    public void TestYoVariableConnectionBurst()
    {
       

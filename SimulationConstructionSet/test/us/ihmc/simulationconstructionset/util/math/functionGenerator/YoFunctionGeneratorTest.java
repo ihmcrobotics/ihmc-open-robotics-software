@@ -24,7 +24,7 @@ public class YoFunctionGeneratorTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroFrequencyDC()
    {
 	   yoFunctionGenerator.setMode(YoFunctionGeneratorMode.DC);
@@ -40,7 +40,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testOutputContinuityDuringFrequencyChange()
    {
 	   double freq0=10,amp0=10;
@@ -76,7 +76,7 @@ public class YoFunctionGeneratorTest
 	   assertEquals("|"+output0+"-"+output1+"|<" + tolerance,0,output1-output0, tolerance);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroFrequencySine()
    {
 	   yoFunctionGenerator.setMode(YoFunctionGeneratorMode.SINE);
@@ -93,7 +93,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testTriangle()
    {
       yoFunctionGenerator.setMode(YoFunctionGeneratorMode.TRIANGLE);

@@ -64,7 +64,7 @@ public class CommandLineLoaderTest {
     emptyArgv = Lists.newArrayList("Foo");
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCommandLineLoader() {
     // Test with no args.
     CommandLineLoader loader = new CommandLineLoader(emptyArgv);
@@ -92,7 +92,7 @@ public class CommandLineLoaderTest {
    * Test createConfiguration() with respect to reading of the environment
    * configuration, including command-line overrides.
    */
-  @Test
+  @Test(timeout=300000)
   public void testcreateConfigurationEnvironment() {
     // Construct artificial environment. Test failure without required settings.
     // Failure: ROS_ROOT not set.
@@ -147,7 +147,7 @@ public class CommandLineLoaderTest {
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreateConfigurationCommandLine() throws URISyntaxException {
     Map<String, String> env = getDefaultEnv();
 
@@ -209,7 +209,7 @@ public class CommandLineLoaderTest {
   /**
    * Test the {@link NameResolver} created by createConfiguration().
    */
-  @Test
+  @Test(timeout=300000)
   public void testcreateConfigurationResolver() {
     // Construct artificial environment. Set required environment variables.
     HashMap<String, String> env = getDefaultEnv();

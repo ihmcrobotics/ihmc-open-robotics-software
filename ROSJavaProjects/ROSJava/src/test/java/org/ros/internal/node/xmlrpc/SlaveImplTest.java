@@ -41,7 +41,7 @@ import com.google.common.collect.Sets;
  */
 public class SlaveImplTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testGetPublicationsEmptyList() {
     SlaveServer mockSlave = mock(SlaveServer.class);
     when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList());
@@ -51,7 +51,7 @@ public class SlaveImplTest {
     assertEquals(response.get(2), Lists.newArrayList());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetPublications() {
     SlaveServer mockSlave = mock(SlaveServer.class);
     DefaultPublisher<?> mockPublisher = mock(DefaultPublisher.class);
@@ -67,7 +67,7 @@ public class SlaveImplTest {
     assertEquals(protocols, response.get(2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRequestTopic() throws ServerException {
     SlaveServer mockSlave = mock(SlaveServer.class);
     AdvertiseAddress address = AdvertiseAddress.newPrivate();
@@ -84,7 +84,7 @@ public class SlaveImplTest {
     assertEquals(response.get(2), protocol.toList());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetPid() {
     SlaveServer mockSlave = mock(SlaveServer.class);
     AdvertiseAddress address = AdvertiseAddress.newPrivate();
@@ -96,7 +96,7 @@ public class SlaveImplTest {
     assertEquals(response.get(2), 1234);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetPidNotSupported() {
     SlaveServer mockSlave = mock(SlaveServer.class);
     AdvertiseAddress address = AdvertiseAddress.newPrivate();

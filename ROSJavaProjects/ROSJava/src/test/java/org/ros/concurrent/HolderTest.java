@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HolderTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testHolderFailsWithNoValue() {
     Holder<String> holder = Holder.newEmpty();
     try {
@@ -43,7 +43,7 @@ public class HolderTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testHolderFailsIfSetTwice() {
     Holder<String> holder = Holder.newEmpty();
     holder.set("Hello, world!");
@@ -55,7 +55,7 @@ public class HolderTest {
     }
   }
   
-  @Test
+  @Test(timeout=300000)
   public void testHolderEquality() {
     Holder<String> holder1 = Holder.newEmpty();
     Holder<String> holder2 = Holder.newEmpty();
@@ -63,7 +63,7 @@ public class HolderTest {
     assertFalse(holder1.equals(holder2));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testHolderAwait() throws InterruptedException {
     final Holder<String> holder = Holder.newEmpty();
     final String message = "Hello, world!";

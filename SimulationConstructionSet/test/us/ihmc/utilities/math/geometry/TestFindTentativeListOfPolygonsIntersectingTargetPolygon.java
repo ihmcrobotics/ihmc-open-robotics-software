@@ -35,7 +35,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
    private static final boolean VERBOSE = false;
    private static final boolean SHOW_PLOTTER = false;
 
-   @Test
+   @Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygon()
    {
 
@@ -133,7 +133,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
 
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTwo()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -190,7 +190,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonThree()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -287,7 +287,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {
       Random random = new Random(1776L);
@@ -383,7 +383,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
 
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testBadCase()
    {
       ArrayList<Point2d> points = new ArrayList<Point2d>();

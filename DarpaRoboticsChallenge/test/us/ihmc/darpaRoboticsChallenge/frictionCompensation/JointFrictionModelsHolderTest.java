@@ -58,7 +58,7 @@ public class JointFrictionModelsHolderTest
    private String name = "simpleHolder";
    private YoVariableRegistry registry = new YoVariableRegistry("simpleRegistry");
 
-   @Test
+   @Test(timeout=300000)
    public void testConstructorAndFrictionStateSelection()
    {
       JointFrictionModelsHolderForTest holder = new JointFrictionModelsHolderForTest(name, registry);

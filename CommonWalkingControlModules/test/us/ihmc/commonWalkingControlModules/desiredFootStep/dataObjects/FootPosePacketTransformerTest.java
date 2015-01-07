@@ -29,7 +29,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
  */
 public class FootPosePacketTransformerTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testTransformHandPosePacket() throws Exception
    {
       int numberOfTests = 10;

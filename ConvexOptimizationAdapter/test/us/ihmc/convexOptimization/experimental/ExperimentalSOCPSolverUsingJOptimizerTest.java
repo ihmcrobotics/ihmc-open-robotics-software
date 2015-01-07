@@ -17,7 +17,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
 {
    public static final boolean VERBOSE = false;
 
-   @Test
+   @Test(timeout=300000)
    public void testASimpleSecondOrderConeProblem()
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and ||(x, y, 0)|| <= z. Answer should be (3, 3, sqrt(18))
@@ -48,7 +48,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
       assertEquals(Math.sqrt(18.0), solution[2], 1e-5);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testARotatedSecondOrderConeProblem()
    {
       // Cone constraint: Given cone tilted to a normal vector and friction like constraints, with mu

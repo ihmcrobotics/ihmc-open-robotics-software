@@ -96,7 +96,7 @@ public class AtlasSDFVerificationTest
 
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage();

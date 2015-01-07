@@ -80,7 +80,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException
    {
       Robot robot = new Robot("TestSinglePinJoint");
@@ -114,7 +114,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException
    {
       Robot robot = new Robot("TestTwoPinJoints");
@@ -167,7 +167,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException
    {
       Robot robot = new Robot("TestSingleFloatingJoint");
@@ -206,7 +206,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
 
 
-   @Test
+   @Test(timeout=300000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(1984L);

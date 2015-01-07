@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class ConstrainedQPSolverTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void testSolveContrainedQP() throws NoConvergenceException
    {
       YoVariableRegistry registry = new YoVariableRegistry("root");

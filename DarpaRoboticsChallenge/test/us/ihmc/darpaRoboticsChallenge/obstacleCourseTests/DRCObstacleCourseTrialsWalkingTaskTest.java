@@ -58,7 +58,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestFinishedMessage();
    }
 
-   // @Test, we don't need step on/off two layer CinderBlocks anymore
+   // @Test(timeout=300000), we don't need step on/off two layer CinderBlocks anymore
    //Note: this test will fail because of bounding box that needs to be "tuned"
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {

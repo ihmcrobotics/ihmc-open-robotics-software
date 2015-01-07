@@ -40,7 +40,7 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.AboutDialogConst
 
 public class ActionsTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testAboutAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -59,7 +59,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAddCameraKeyAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -78,7 +78,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testAddKeyPointAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -97,7 +97,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCreateNewGraphWindowAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -133,7 +133,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCreateNewViewportWindowAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -168,7 +168,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCropBufferAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -187,7 +187,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testCutBufferAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -206,7 +206,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGotoInPointAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -225,7 +225,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGotoOutPointAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -244,7 +244,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testHideShowViewportAction()
    {
       final boolean[] isViewportHidden = new boolean[] {false};
@@ -296,7 +296,7 @@ public class ActionsTest
       assertTrue(executorCalled[1]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testNextCameraKeyAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -315,7 +315,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPackBufferAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -334,7 +334,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPlayAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -353,7 +353,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPreviousCameraKeyAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -372,7 +372,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testRemoveCameraKeyAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -391,7 +391,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSetInPointAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -410,7 +410,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSetOutPointAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -429,7 +429,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimulateAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -453,7 +453,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testStepBackwardAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -472,7 +472,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testStepForwardAction()
    {
       final boolean[] executorCalled = new boolean[] {false};
@@ -491,7 +491,7 @@ public class ActionsTest
       assertTrue(executorCalled[0]);
    }
 
- @Test
+ @Test(timeout=300000)
  public void testStopAction()
  {
     final boolean[] executorCalled = new boolean[] {false};
@@ -510,7 +510,7 @@ public class ActionsTest
     assertTrue(executorCalled[0]);
  }
 
- @Test
+ @Test(timeout=300000)
  public void testToggleCameraKeyModeAction()
  {
     final boolean[] executorCalled = new boolean[] {false};
@@ -529,7 +529,7 @@ public class ActionsTest
     assertTrue(executorCalled[0]);
  }
    
- @Test
+ @Test(timeout=300000)
  public void testToggleKeyPointModeAction()
  {
     final boolean[] executorCalled = new boolean[] {false, false, false};
@@ -579,7 +579,7 @@ public class ActionsTest
 
  }
    
- @Test
+ @Test(timeout=300000)
  public void testZoomInAction()
  {
     final boolean[] executorCalled = new boolean[] {false};
@@ -603,7 +603,7 @@ public class ActionsTest
     assertTrue(executorCalled[0]);
  }
    
- @Test
+ @Test(timeout=300000)
  public void testZoomOutAction()
  {
     final boolean[] executorCalled = new boolean[] {false};

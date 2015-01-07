@@ -21,7 +21,7 @@ public class YoFrameVectorControlFlowOutputPortTest
 
    private static final double EPS = 1e-17;
 
-   @Test
+   @Test(timeout=300000)
    public void simpleWritingReadingTest()
    {
       ControlFlowElement controlFlowElement = new NullControlFlowElement();

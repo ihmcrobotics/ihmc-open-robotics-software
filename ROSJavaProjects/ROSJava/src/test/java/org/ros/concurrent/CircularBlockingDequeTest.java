@@ -43,7 +43,7 @@ public class CircularBlockingDequeTest {
     executorService = Executors.newCachedThreadPool();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testAddAndTake() throws InterruptedException {
     CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(10);
     String expectedString1 = "Hello, world!";
@@ -54,7 +54,7 @@ public class CircularBlockingDequeTest {
     assertEquals(expectedString2, deque.takeFirst());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testAddFirstAndTakeLast() throws InterruptedException {
     CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(10);
     String expectedString1 = "Hello, world!";
@@ -68,7 +68,7 @@ public class CircularBlockingDequeTest {
     assertEquals(expectedString2, deque.takeFirst());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testOverwrite() throws InterruptedException {
     CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(2);
     String expectedString = "Hello, world!";
@@ -78,7 +78,7 @@ public class CircularBlockingDequeTest {
     assertEquals(expectedString, deque.takeFirst());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIterator() throws InterruptedException {
     // We keep the queue short and throw in an unused element so that the deque
     // wraps around the backing array.
@@ -104,7 +104,7 @@ public class CircularBlockingDequeTest {
     assertFalse(iterator.hasNext());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testBlockingTake() throws InterruptedException {
     final CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(1);
     final String expectedString = "Hello, world!";

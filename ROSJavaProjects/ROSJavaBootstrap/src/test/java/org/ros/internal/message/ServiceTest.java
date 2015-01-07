@@ -41,7 +41,7 @@ public class ServiceTest {
         new ServiceResponseMessageFactory(serviceDefinitionResourceProvider);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreateEchoService() {
     RawMessage request = serviceRequestMessageFactory.newFromType("foo/Echo");
     RawMessage response = serviceResponseMessageFactory.newFromType("foo/Echo");

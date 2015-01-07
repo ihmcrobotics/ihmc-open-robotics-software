@@ -13,7 +13,7 @@ import com.jme3.math.Transform;
 
 public class JMEDataTypeUtilsTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testTransforms()
    {
       for (int i = 0; i < 1000; i++)

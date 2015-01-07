@@ -26,7 +26,7 @@ public class DampedLeastSquaresJacobianSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void test()
    {
       Random random = new Random(176L);

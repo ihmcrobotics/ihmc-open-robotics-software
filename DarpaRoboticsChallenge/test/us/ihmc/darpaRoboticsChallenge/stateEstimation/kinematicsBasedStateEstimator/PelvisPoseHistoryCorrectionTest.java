@@ -248,7 +248,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -289,7 +289,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -316,7 +316,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -340,7 +340,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -365,7 +365,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -418,7 +418,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

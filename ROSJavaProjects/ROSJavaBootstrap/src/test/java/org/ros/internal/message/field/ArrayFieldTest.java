@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class ArrayFieldTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testBooleanArrayFieldVariableSize() {
     BooleanArrayField field = BooleanArrayField.newVariable("foo", -1);
     boolean[] value = new boolean[] { true, false, true, false };
@@ -46,7 +46,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testBooleanArrayFieldFixedSize() {
     BooleanArrayField field = BooleanArrayField.newVariable("foo", 4);
     field.setValue(new boolean[] { true, false, true, false });
@@ -60,7 +60,7 @@ public class ArrayFieldTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test
+  @Test(timeout=300000)
   public void testByteArrayFieldVariableSize() {
     testByteArrayFieldVariableSize(PrimitiveFieldType.INT8);
     testByteArrayFieldVariableSize(PrimitiveFieldType.BYTE);
@@ -81,7 +81,7 @@ public class ArrayFieldTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test
+  @Test(timeout=300000)
   public void testByteArrayFieldFixedSize() {
     testByteArrayFieldFixedSize(PrimitiveFieldType.INT8);
     testByteArrayFieldFixedSize(PrimitiveFieldType.BYTE);
@@ -101,7 +101,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDoubleArrayFieldVariableSize() {
     DoubleArrayField field = DoubleArrayField.newVariable("foo", -1);
     field.setValue(new double[] { 1, 2, 3, 4 });
@@ -116,7 +116,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDoubleArrayFieldFixedSize() {
     DoubleArrayField field = DoubleArrayField.newVariable("foo", 4);
     field.setValue(new double[] { 1, 2, 3, 4 });
@@ -131,7 +131,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFloatArrayFieldVariableSize() {
     FloatArrayField field = FloatArrayField.newVariable("foo", -1);
     field.setValue(new float[] { 1, 2, 3, 4 });
@@ -145,7 +145,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFloatArrayFieldFixedSize() {
     FloatArrayField field = FloatArrayField.newVariable("foo", 4);
     field.setValue(new float[] { 1, 2, 3, 4 });
@@ -158,7 +158,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIntegerArrayFieldVariableSize() {
     testIntegerArrayFieldVariableSize(PrimitiveFieldType.INT32);
     testIntegerArrayFieldVariableSize(PrimitiveFieldType.UINT32);
@@ -176,7 +176,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIntegerArrayFieldFixedSize() {
     testIntegerArrayFieldFixedSize(PrimitiveFieldType.INT32);
     testIntegerArrayFieldFixedSize(PrimitiveFieldType.UINT32);
@@ -194,7 +194,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testLongArrayFieldVariableSize() {
     testLongArrayFieldVariableSize(PrimitiveFieldType.INT64);
     testLongArrayFieldVariableSize(PrimitiveFieldType.UINT64);
@@ -214,7 +214,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testLongArrayFieldFixedSize() {
     testLongArrayFieldFixedSize(PrimitiveFieldType.INT64);
     testLongArrayFieldFixedSize(PrimitiveFieldType.UINT64);
@@ -234,7 +234,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testShortArrayFieldVariableSize() {
     testShortArrayFieldVariableSize(PrimitiveFieldType.INT16);
     testShortArrayFieldVariableSize(PrimitiveFieldType.UINT16);
@@ -252,7 +252,7 @@ public class ArrayFieldTest {
     assertArrayEquals(expected, actual);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testShortArrayFieldFixedSize() {
     testShortArrayFieldFixedSize(PrimitiveFieldType.INT16);
     testShortArrayFieldFixedSize(PrimitiveFieldType.UINT16);

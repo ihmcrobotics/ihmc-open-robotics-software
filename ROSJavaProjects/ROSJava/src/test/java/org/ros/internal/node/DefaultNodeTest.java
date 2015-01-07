@@ -83,32 +83,32 @@ public class DefaultNodeTest extends RosTest {
     assertEquals(holder.get().getHostName(), host);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreatePublic() throws Exception {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
     checkNodeAddress(host);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreatePublicWithIpv4() throws InterruptedException {
     String host = "1.2.3.4";
     checkNodeAddress(host);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreatePublicWithIpv6() throws InterruptedException {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     checkNodeAddress(host);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreatePrivate() throws InterruptedException {
     checkNodeAddress(nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
   }
 
   @SuppressWarnings("unchecked")
-  @Test
+  @Test(timeout=300000)
   public void testRegistration() throws InterruptedException {
     final CountDownPublisherListener<std_msgs.String> publisherListener =
         CountDownPublisherListener.newDefault();
@@ -152,7 +152,7 @@ public class DefaultNodeTest extends RosTest {
     assertEquals(0, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_SUBSCRIBERS)).size());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testResolveName() throws InterruptedException {
     final Holder<ConnectedNode> holder = Holder.newEmpty();
     nodeConfiguration.setParentResolver(NameResolver.newFromNamespace("/ns1"));
@@ -190,7 +190,7 @@ public class DefaultNodeTest extends RosTest {
     assertGraphNameEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testPublicAddresses() throws InterruptedException {
     RosCore rosCore = RosCore.newPublic();
     rosCore.start();

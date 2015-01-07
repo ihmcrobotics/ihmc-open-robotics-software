@@ -41,7 +41,7 @@ public class ListenerGroupTest {
     listenerGroup = new ListenerGroup<Runnable>(executorService);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testOneListenerMultipleSignals() throws InterruptedException {
     int numberOfSignals = 10;
     final CountDownLatch latch = new CountDownLatch(numberOfSignals);
@@ -62,7 +62,7 @@ public class ListenerGroupTest {
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testMultipleListenersMultipleSignals() throws InterruptedException {
     int numberOfSignals = 10;
     final CountDownLatch latch1 = new CountDownLatch(numberOfSignals);
@@ -95,7 +95,7 @@ public class ListenerGroupTest {
     void run(int count);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSignalOrder() throws InterruptedException {
     int numberOfSignals = 100;
     final CountDownLatch latch = new CountDownLatch(numberOfSignals);

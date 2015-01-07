@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 
 public class LinearStickSlipGroundContactModelTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testOnFlatGroundNoSlipCompareWithAndWithoutNormals()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -120,7 +120,7 @@ public class LinearStickSlipGroundContactModelTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 0.0), force, 1e-7);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testOnSlantedGroundCompareWithAndWithoutNormals()
    {
       YoVariableRegistry registryOnFlat = new YoVariableRegistry("TestRegistryOnFlat");

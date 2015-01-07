@@ -17,7 +17,7 @@ public class ElasticityCompensatorYoVariableTest
 {
    private static final double EPSILON = 1e-10;
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroJointTau1()
    {
       Random random = new Random(1561651L);
@@ -50,7 +50,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroJointTau2()
    {
       Random random = new Random(1561651L);
@@ -81,7 +81,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroJointTau3()
    {
       Random random = new Random(1561651L);
@@ -104,7 +104,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroJointTau4()
    {
       Random random = new Random(1561651L);
@@ -126,7 +126,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroStiffness4()
    {
       Random random = new Random(1561651L);
@@ -156,7 +156,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testZeroMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -180,7 +180,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testDefaultMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -206,7 +206,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testInfiniteMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -231,7 +231,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testRandomMaximumDeflection4()
    {
       Random random = new Random(1561651L);

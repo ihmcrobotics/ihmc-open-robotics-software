@@ -64,7 +64,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetNonExistentParameter() {
     try {
       parameters.getBoolean("bloop");
@@ -74,7 +74,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetParameterOfWrongType() {
     parameters.set("bloop", "foo");
     try {
@@ -85,7 +85,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetParameterWithDefault() {
     assertTrue(parameters.getBoolean("bloop", true));
     List<String> expectedList = Lists.newArrayList("foo", "bar", "baz");
@@ -94,7 +94,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     assertEquals(expectedList, parameters.getList("bloop", Lists.newArrayList()));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetParameterWithDefaultOfWrongType() {
     parameters.set("bloop", "foo");
     try {
@@ -105,7 +105,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetAndGetStrings() {
     parameters.set("/foo/bar", "baz");
     assertEquals("baz", parameters.getString("/foo/bar"));
@@ -116,7 +116,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     assertEquals(expected, parameters.getMap("/foo"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetAndGetAllTypes() {
     String name = "/foo/bar";
     parameters.set(name, true);
@@ -137,7 +137,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     assertEquals(expectedMap, parameters.getMap(name));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDeleteAndHas() {
     parameters.set("/foo/bar", "baz");
     assertTrue(parameters.has("/foo/bar"));
@@ -145,7 +145,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     assertFalse(parameters.has("/foo/bar"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetNames() {
     parameters.set("/foo/bar", "baz");
     parameters.set("/bloop", "doh");
@@ -155,7 +155,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     assertTrue(names.contains(GraphName.of("/bloop")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testParameterPubSub() throws InterruptedException {
     final CountDownLatch nodeLatch = new CountDownLatch(1);
     final CountDownLatch parameterLatch = new CountDownLatch(1);

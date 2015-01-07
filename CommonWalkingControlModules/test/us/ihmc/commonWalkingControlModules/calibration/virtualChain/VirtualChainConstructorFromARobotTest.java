@@ -34,7 +34,7 @@ public class VirtualChainConstructorFromARobotTest
    }
    
 
-   @Test
+   @Test(timeout=300000)
    public void testOneAtZero()
    {
       VirtualChainConstructorFromARobot constructor = new VirtualChainConstructorFromARobot();
@@ -108,28 +108,28 @@ public class VirtualChainConstructorFromARobotTest
       assertTupleEquals(centerOfMass, comEstimateAtZero);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testOnePartTwo()
    {
       VirtualChainExampleRobot testRobotOne = VirtualChainExampleRobot.constructExampleOne();
       testRobotInRandomPositions(testRobotOne);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTwo()
    {
       VirtualChainExampleRobot testRobotTwo = VirtualChainExampleRobot.constructExampleTwo();
       testRobotInRandomPositions(testRobotTwo);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testThree()
    {
       VirtualChainExampleRobot testRobotThree = VirtualChainExampleRobot.constructExampleThree();
       testRobotInRandomPositions(testRobotThree);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFour()
    {
       VirtualChainExampleRobot testRobotFour = VirtualChainExampleRobot.constructExampleFour();

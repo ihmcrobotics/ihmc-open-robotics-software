@@ -15,7 +15,7 @@ public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
    
-   @Test
+   @Test(timeout=300000)
    public void testRootRegistryNothingFancy()
    {
       Robot robot = new Robot("RobotsRootRegistry");
@@ -52,7 +52,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
    
-   @Test 
+   @Test(timeout=300000) 
    public void testVarGroups()
    {
       Robot robot = new Robot("testVarGroups");
@@ -98,7 +98,7 @@ public class SimulationConstructionSetRootRegistryTest
    
    
    
-   @Test
+   @Test(timeout=300000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {
       Robot robot = new Robot("TestAfterConstruction");

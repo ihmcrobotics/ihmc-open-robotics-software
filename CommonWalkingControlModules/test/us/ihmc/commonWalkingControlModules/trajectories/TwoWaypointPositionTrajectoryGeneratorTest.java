@@ -30,7 +30,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 
 	private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@Test
+	@Test(timeout=300000)
 	public void testSimpleTrajectories()
 	{
 		testSimpleTrajectory(3);

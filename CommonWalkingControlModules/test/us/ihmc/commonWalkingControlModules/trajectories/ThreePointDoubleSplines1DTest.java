@@ -25,7 +25,7 @@ public class ThreePointDoubleSplines1DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testSimpleFlatExample()
    {
       ThreePointDoubleSplines1D spline = new ThreePointDoubleSplines1D();
@@ -55,7 +55,7 @@ public class ThreePointDoubleSplines1DTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testPerfectLineExample()
    {
       ThreePointDoubleSplines1D spline = new ThreePointDoubleSplines1D();
@@ -86,7 +86,7 @@ public class ThreePointDoubleSplines1DTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testFooExample()
    {
       double xAtOne = 0.2;
@@ -97,7 +97,7 @@ public class ThreePointDoubleSplines1DTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testFooExamplePointsOutOfOrder()
    {
       double xAtOne = 5.5;
@@ -166,7 +166,7 @@ public class ThreePointDoubleSplines1DTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testCompareOutOfOrderSplineWithNormalOne()
    {
       ThreePointDoubleSplines1D spline1 = new ThreePointDoubleSplines1D();

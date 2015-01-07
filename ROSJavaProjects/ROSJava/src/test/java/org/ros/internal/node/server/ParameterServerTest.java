@@ -40,25 +40,25 @@ public class ParameterServerTest {
     server = new ParameterServer();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetNonExistent() {
     assertEquals(null, server.get(GraphName.of("/foo")));
     assertEquals(null, server.get(GraphName.of("/foo/bar")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetAndGetShallow() {
     server.set(GraphName.of("/foo"), "bloop");
     assertEquals("bloop", server.get(GraphName.of("/foo")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetAndGetDeep() {
     server.set(GraphName.of("/foo/bar"), "bloop");
     assertEquals("bloop", server.get(GraphName.of("/foo/bar")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetAndGet() {
     server.set(GraphName.of("/foo"), "bloop");
     assertEquals("bloop", server.get(GraphName.of("/foo")));
@@ -68,7 +68,7 @@ public class ParameterServerTest {
     assertEquals("bloop", server.get(GraphName.of("/foo/bar/baz")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetDeepAndGetShallow() {
     server.set(GraphName.of("/foo/bar"), "bloop");
     Map<String, Object> expected = Maps.newHashMap();
@@ -76,7 +76,7 @@ public class ParameterServerTest {
     assertEquals(expected, server.get(GraphName.of("/foo")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetOverwritesMap() {
     server.set(GraphName.of("/foo/bar"), "bloop");
     assertEquals("bloop", server.get(GraphName.of("/foo/bar")));
@@ -84,14 +84,14 @@ public class ParameterServerTest {
     assertEquals("bloop", server.get(GraphName.of("/foo")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSetAndGetFloat() {
     GraphName name = GraphName.of("/foo/bar");
     server.set(name, 0.42f);
     assertEquals(0.42, (Double) server.get(name), 0.1);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDeleteShallow() {
     GraphName name = GraphName.of("/foo");
     server.set(name, "bloop");
@@ -99,7 +99,7 @@ public class ParameterServerTest {
     assertEquals(null, server.get(name));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDeleteDeep() {
     GraphName name = GraphName.of("/foo/bar");
     server.set(name, "bloop");
@@ -107,7 +107,7 @@ public class ParameterServerTest {
     assertEquals(null, server.get(name));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testHas() {
     server.set(GraphName.of("/foo/bar/baz"), "bloop");
     assertTrue(server.has(GraphName.of("/foo/bar/baz")));
@@ -116,7 +116,7 @@ public class ParameterServerTest {
     assertTrue(server.has(GraphName.of("/")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetNames() {
     GraphName name1 = GraphName.of("/foo/bar/baz");
     server.set(name1, "bloop");

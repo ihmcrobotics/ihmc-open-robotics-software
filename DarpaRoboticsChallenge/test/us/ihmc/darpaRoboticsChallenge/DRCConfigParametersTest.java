@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 public class DRCConfigParametersTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void test()
    {
       assertFalse("Do not check in DRCConfigParameters.SEND_HIGH_SPEED_CONFIGURATION_DATA < 100!!", DRCConfigParameters.UI_JOINT_CONFIGURATION_UPDATE_MILLIS < 100);

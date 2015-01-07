@@ -7,7 +7,7 @@ import us.ihmc.utilities.ThreadTools;
 public class StreamingDataProducerConsumerTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void testTypicalUsage()
    {
       SimpleStreamingDataProducer simpleStreamingDataProducer = new SimpleStreamingDataProducer();
@@ -22,7 +22,7 @@ public class StreamingDataProducerConsumerTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testMultipleProducersAndConsumers()
    {
       SimpleStreamingDataProducer simpleStreamingDataProducerA = new SimpleStreamingDataProducer();

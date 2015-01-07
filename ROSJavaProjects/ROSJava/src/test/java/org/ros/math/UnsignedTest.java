@@ -25,7 +25,7 @@ import org.junit.Test;
  */
 public class UnsignedTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testIntToLong() {
     assertEquals(Unsigned.intToLong(0xffffffff), 0xffffffffl);
     assertEquals(Unsigned.intToLong(0xffff), 0xffffl);
@@ -33,7 +33,7 @@ public class UnsignedTest {
     assertEquals(Unsigned.intToLong(42), 42);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testShortToInt() {
     assertEquals(Unsigned.shortToInt((short) 0xffff), 0xffff);
     assertEquals(Unsigned.shortToInt((short) 0xff), 0xff);
@@ -41,7 +41,7 @@ public class UnsignedTest {
     assertEquals(Unsigned.shortToInt((short) 42), 42);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testByteToShort() {
     assertEquals(Unsigned.byteToShort((byte) 0xff), 0xff);
     assertEquals(Unsigned.byteToShort((byte) 0xf), 0xf);

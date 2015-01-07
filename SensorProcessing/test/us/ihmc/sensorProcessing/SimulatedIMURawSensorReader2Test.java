@@ -32,7 +32,7 @@ public class SimulatedIMURawSensorReader2Test
       random = new Random(1776L);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       SingleRigidBodyRobot robot = new SingleRigidBodyRobot();

@@ -14,7 +14,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 
 public class TestSDFLinkHolder
 {
-   @Test
+   @Test(timeout=300000)
    public void noInertialPose()
    {
       // Setup
@@ -52,7 +52,7 @@ public class TestSDFLinkHolder
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void inertialPoseTranslationOnly()
    {
       // Setup
@@ -90,7 +90,7 @@ public class TestSDFLinkHolder
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
    
-   @Test
+   @Test(timeout=300000)
    public void inertialPoseWithRotationOnly()//This one should have right COM, but inertia will have to change.
    {
       // Setup
@@ -148,7 +148,7 @@ public class TestSDFLinkHolder
       //assertTrue("Inertia matrix should be changed to link frame. " + helpMessage, inertiaEqual);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void inertialPoseProximaliRobotWithRotationAndTranslation()
    {      
       // Setup
@@ -213,7 +213,7 @@ public class TestSDFLinkHolder
       assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.m00, inertiaMatrix.m01, inertiaMatrix.m02, inertiaMatrix.m11, inertiaMatrix.m12, inertiaMatrix.m22}, 3e-9);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void inertialPoseDistaliRobotWithRotationAndTranslation()
    {      
       // Setup

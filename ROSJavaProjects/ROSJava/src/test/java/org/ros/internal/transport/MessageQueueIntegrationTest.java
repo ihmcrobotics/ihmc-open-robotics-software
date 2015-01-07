@@ -196,7 +196,7 @@ public class MessageQueueIntegrationTest {
     assertTrue(secondLatch.await(3, TimeUnit.SECONDS));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSendAndReceiveMessage() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
@@ -205,7 +205,7 @@ public class MessageQueueIntegrationTest {
     expectMessages();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSendAndReceiveLatchedMessage() throws InterruptedException {
     // Setting latched mode and writing a message should cause any
     // IncomingMessageQueues that connect in the future to receive the message.
@@ -226,7 +226,7 @@ public class MessageQueueIntegrationTest {
     expectMessages();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
@@ -235,7 +235,7 @@ public class MessageQueueIntegrationTest {
     outgoingMessageQueue.add(expectedMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSendAfterServerChannelClosed() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
@@ -244,7 +244,7 @@ public class MessageQueueIntegrationTest {
     outgoingMessageQueue.add(expectedMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();

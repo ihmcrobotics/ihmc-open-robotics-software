@@ -25,7 +25,7 @@ import org.junit.Test;
  */
 public class Vector3Test {
 
-  @Test
+  @Test(timeout=300000)
   public void testAdd() {
     Vector3 vector1 = new Vector3(1, 2, 3);
     Vector3 vector2 = new Vector3(2, 3, 4);
@@ -35,7 +35,7 @@ public class Vector3Test {
     assertEquals(result.getZ(), 7, 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testSubtract() {
     Vector3 vector1 = new Vector3(1, 2, 3);
     Vector3 vector2 = new Vector3(2, 3, 4);
@@ -45,7 +45,7 @@ public class Vector3Test {
     assertEquals(result.getZ(), -1, 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInvert() {
     Vector3 result = new Vector3(1, 1, 1).invert();
     assertEquals(result.getX(), -1, 1e-9);
@@ -53,14 +53,14 @@ public class Vector3Test {
     assertEquals(result.getZ(), -1, 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDotProduct() {
     Vector3 vector1 = new Vector3(1, 2, 3);
     Vector3 vector2 = new Vector3(2, 3, 4);
     assertEquals(20.0, vector1.dotProduct(vector2), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testLength() {
     assertEquals(2, new Vector3(2, 0, 0).getMagnitude(), 1e-9);
     assertEquals(2, new Vector3(0, 2, 0).getMagnitude(), 1e-9);

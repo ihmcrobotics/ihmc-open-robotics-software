@@ -15,7 +15,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DoubleYoVariableJoystickEventListenerTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testMinMaxAverage()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

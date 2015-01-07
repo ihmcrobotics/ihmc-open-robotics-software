@@ -9,7 +9,7 @@ import org.junit.Test;
 public class ExampleOptimizationProblemOneTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void testSimpleXSquaredOptimization()
    {
       SimpleXSquaredCostFunction sampleCostFunction = new SimpleXSquaredCostFunction();      
@@ -85,7 +85,7 @@ public class ExampleOptimizationProblemOneTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testSimpleThreeParameterCostFunction()
    {      
       SimpleThreeParameterCostFunction sampleCostFunction = new SimpleThreeParameterCostFunction();

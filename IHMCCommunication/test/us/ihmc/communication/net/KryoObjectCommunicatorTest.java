@@ -28,7 +28,7 @@ public class KryoObjectCommunicatorTest
 {
 
    @Ignore("This test causes problems on Linux due to a bug in the way Java does its epoll wrapper")
-   @Test
+   @Test(timeout=300000)
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));
@@ -98,7 +98,7 @@ public class KryoObjectCommunicatorTest
       server.close();
    }
    
-   @Test 
+   @Test(timeout=300000) 
    public void testStateListener() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));
@@ -149,7 +149,7 @@ public class KryoObjectCommunicatorTest
       client.close();
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));
@@ -222,7 +222,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSendAndReceive() throws IOException, InterruptedException
    {
       int TCP_PORT = 49152 + (int)(Math.random() * (65535 - 49152));

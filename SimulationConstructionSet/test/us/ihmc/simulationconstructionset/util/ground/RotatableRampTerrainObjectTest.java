@@ -79,66 +79,66 @@ public class RotatableRampTerrainObjectTest
       ramp90Translated = new RotatableRampTerrainObject(transX, transY, 1, 2, 1, 90);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testHeightAt()
    {
       testHeightAtRampForAnyRamp(pointsOnSimpleRamp, simpleRamp);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testHeightAtForRampDown()
    {
       testHeightAtRampForAnyRamp(strictlyInternalPointsOnSimpleRampDown, simpleRampDown);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
       testSurfaceNormalsForAnyRampFace(simpleRamp, expectedSimpleSurfaceNormal, pointsOnSimpleRamp);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testOtherSurfaceNormalAt()
    {
       testSurfaceNormalsForAnyOtherRampSides(simpleRamp, 
             expectedSimpleSurfaceNormalOnOtherFaces, pointsOnOtherRampFaces);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSurfaceNormalAtForSlopedDown()
    {
       testSurfaceNormalsForAnyRampFace(simpleRampDown, 
             expectedSimpleSurfaceNormalSlopeDown, strictlyInternalPointsOnSimpleRampDown);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testOtherSurfaceNormalAtForSlopedDown()
    {
       testSurfaceNormalsForAnyOtherRampSides(simpleRampDown,
             expectedSimpleSurfaceNormalOnOtherFacesSlopeDown, pointsOnOtherRampFacesSlopeDown);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testHeightAtRamp90()
    {
       testHeightAtRampForAnyRamp(pointsOnRamp90, ramp90);
       testHeightAtRampForAnyRamp(pointsOnRamp90PassingHeightCornerCases, ramp90);      
    }
    
-   @Test @Ignore
+   @Test(timeout=300000) @Ignore
    public void HeightAtRamp90EdgeCasesFailDueToNumericalErrorTest()
    {
       testHeightAtRampForAnyRamp(pointsOnRamp90withNumericalRotationError, ramp90);
    }   
 
-   @Test   
+   @Test(timeout=300000)   
    public void testSurfaceNormalForRamp90()
    {
       testSurfaceNormalsForAnyRampFace(ramp90, 
             expectedSurfaceNormalRamp90, pointsOnRamp90);
    }
 
-   @Test   
+   @Test(timeout=300000)   
    public void testOtherSurfaceNormalForRamp90()
    {
       testSurfaceNormalsForAnyOtherRampSides(ramp90, 
@@ -164,13 +164,13 @@ public class RotatableRampTerrainObjectTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testHeightAtTranslation()
    {
       testHeightAtRampForAnyRampWithTranslation(pointsOnSimpleRamp, simpleRampTranslated, new Vector3d(transX,transY,0));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testHeightAt90Translation()
    {
       testHeightAtRampForAnyRampWithTranslation(pointsOnRamp90Translated, ramp90Translated, new Vector3d(transX,transY,0));

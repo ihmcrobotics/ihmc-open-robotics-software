@@ -41,7 +41,7 @@ public class ServiceIntegrationTest extends RosTest {
 
   private static final String SERVICE_NAME = "/add_two_ints";
 
-  @Test
+  @Test(timeout=300000)
   public void testPesistentServiceConnection() throws Exception {
     final CountDownServiceServerListener<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
@@ -134,7 +134,7 @@ public class ServiceIntegrationTest extends RosTest {
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRequestFailure() throws Exception {
     final String errorMessage = "Error!";
     final CountDownServiceServerListener<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> countDownServiceServerListener =

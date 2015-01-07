@@ -13,7 +13,7 @@ public class DataProcessingFunctionTest
 {
    private static final boolean SHOW_GUI = false;
 
-   @Test
+   @Test(timeout=300000)
    public void testSimpleDataProcessingFunction() throws SimulationExceededMaximumTimeException
    {
       final Robot robot = new Robot("DataProcessingFunctionTestRobot");

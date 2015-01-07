@@ -66,7 +66,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
    }
 
    
-   @Test
+   @Test(timeout=300000)
    public void testBigStepUpWithHandPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

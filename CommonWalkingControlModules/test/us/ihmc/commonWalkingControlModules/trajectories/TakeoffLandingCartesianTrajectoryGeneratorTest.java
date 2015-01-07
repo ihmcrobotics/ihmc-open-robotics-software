@@ -34,7 +34,7 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testOne()
    {
       boolean pause = false;

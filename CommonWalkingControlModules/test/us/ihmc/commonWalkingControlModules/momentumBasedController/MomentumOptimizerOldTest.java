@@ -49,7 +49,7 @@ public class MomentumOptimizerOldTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testFloatingChain()
    {
       Random random = new Random(44345L);
@@ -78,7 +78,7 @@ public class MomentumOptimizerOldTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testFloatingTree()
    {
       Random random = new Random(44345L);

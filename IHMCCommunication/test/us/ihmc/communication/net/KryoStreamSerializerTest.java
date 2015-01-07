@@ -14,7 +14,7 @@ import us.ihmc.communication.net.KryoStreamSerializer;
 public class KryoStreamSerializerTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void test() throws IOException
    {
       KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(14);

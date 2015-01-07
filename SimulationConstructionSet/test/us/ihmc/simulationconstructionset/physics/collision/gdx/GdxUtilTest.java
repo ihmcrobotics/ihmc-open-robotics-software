@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Matrix4;
  */
 public class GdxUtilTest
 {
-	@Test
+	@Test(timeout=300000)
 	public void convert_t2m()
 	{
 		float[] m = new float[]{
@@ -43,7 +43,7 @@ public class GdxUtilTest
       assertEquals(m[15],a[15],1e-6f);
 	}
 
-	@Test
+	@Test(timeout=300000)
 	public void convert_m2t()
 	{
 		float[] m = new float[]{

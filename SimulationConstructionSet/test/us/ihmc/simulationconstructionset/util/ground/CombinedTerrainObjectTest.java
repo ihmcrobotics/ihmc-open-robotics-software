@@ -12,7 +12,7 @@ public class CombinedTerrainObjectTest
 {
 
    //TODO: Flesh out this test case to be a really good one.
-   @Test
+   @Test(timeout=300000)
    public void testTwoIntersectingBoxes()
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("Combined Terrain Object to Test");

@@ -19,7 +19,7 @@ public class TestFitNoisyGaussian2D {
    /**
     * Test with no noise added
     */
-   @Test
+   @Test(timeout=300000)
    public void perfectTest() {
       double meanX = 5;
       double meanY = 10;
@@ -53,7 +53,7 @@ public class TestFitNoisyGaussian2D {
    /**
     * Test with a few outliers added
     */
-   @Test
+   @Test(timeout=300000)
    public void obviousOutliers() {
       double meanX = 5;
       double meanY = 10;

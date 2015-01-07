@@ -73,7 +73,7 @@ public class AtlasMultiContactTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testMultiContactLocomotion() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

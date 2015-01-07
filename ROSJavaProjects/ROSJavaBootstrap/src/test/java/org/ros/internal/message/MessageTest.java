@@ -39,19 +39,19 @@ public class MessageTest {
     messageFactory = new DefaultMessageFactory(topicDefinitionResourceProvider);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreateEmptyMessage() {
     topicDefinitionResourceProvider.add("foo/foo", "");
     messageFactory.newFromType("foo/foo");
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCreateEmptyMessageWithBlankLines() {
     topicDefinitionResourceProvider.add("foo/foo", "\n\n\n\n\n");
     messageFactory.newFromType("foo/foo");
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testString() {
     String data = "Hello, ROS!";
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/String");
@@ -59,7 +59,7 @@ public class MessageTest {
     assertEquals(data, rawMessage.getString("data"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testStringWithComments() {
     topicDefinitionResourceProvider.add("foo/foo", "# foo\nstring data\n    # string other data");
     String data = "Hello, ROS!";
@@ -68,7 +68,7 @@ public class MessageTest {
     assertEquals(data, rawMessage.getString("data"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInt8() {
     byte data = 42;
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int8");
@@ -76,7 +76,7 @@ public class MessageTest {
     assertEquals(data, rawMessage.getInt8("data"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testNestedMessage() {
     topicDefinitionResourceProvider.add("foo/foo", "bar data");
     topicDefinitionResourceProvider.add("foo/bar", "int8 data");
@@ -88,7 +88,7 @@ public class MessageTest {
     assertEquals(data, fooMessage.getMessage("data").toRawMessage().getInt8("data"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testNestedMessageList() {
     topicDefinitionResourceProvider.add("foo/foo", "bar[] data");
     topicDefinitionResourceProvider.add("foo/bar", "int8 data");
@@ -100,14 +100,14 @@ public class MessageTest {
     assertEquals(data, fooMessage.getMessageList("data").get(0).toRawMessage().getInt8("data"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testConstantInt8() {
     topicDefinitionResourceProvider.add("foo/foo", "int8 data=42");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");
     assertEquals(42, rawMessage.getInt8("data"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testConstantString() {
     topicDefinitionResourceProvider.add("foo/foo", "string data=Hello, ROS! # comment ");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");

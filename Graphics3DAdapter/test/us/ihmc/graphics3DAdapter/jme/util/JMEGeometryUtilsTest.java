@@ -27,7 +27,7 @@ import static us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils.transformFromZ
  */
 public class JMEGeometryUtilsTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testGetInverse()
    {
       RigidBodyTransform identity = new RigidBodyTransform();
@@ -54,7 +54,7 @@ public class JMEGeometryUtilsTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTransformFromJMECoordinatesToZup()
    {
       RigidBodyTransform transform3D = new RigidBodyTransform();
@@ -91,7 +91,7 @@ public class JMEGeometryUtilsTest
       assertTrue(expectedAnswer.epsilonEquals(originalVectorTransformedToZup, 1e-6));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTransformFromJMECoordinatesToZupWithItsInverse()
    {
       Random random = new Random(100L);
@@ -105,7 +105,7 @@ public class JMEGeometryUtilsTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTransformFromJMECoordinatesToZupWith90RotAboutX()
    {
       RigidBodyTransform transform3D;
@@ -160,7 +160,7 @@ public class JMEGeometryUtilsTest
       assertTrue(expectedAnswer.epsilonEquals(originalVectorTransformedToZup, 1e-6));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTransformFromZupToJMECoordinates()
    {
       Vector3f pointOriginal, pointTransformed, expectedAnswer;
@@ -193,7 +193,7 @@ public class JMEGeometryUtilsTest
       assertTrue(areVectorsEqual(expectedAnswer, pointTransformed));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTransformFromJMECoordinatesToZupPoint()
    {
       Vector3f pointOriginal, pointTransformed, expectedAnswer;
@@ -223,7 +223,7 @@ public class JMEGeometryUtilsTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testTransformFromZupToJMECoordinatesQuaternion()
    {
       Random random = new Random(100L);
@@ -239,7 +239,7 @@ public class JMEGeometryUtilsTest
 //      transformFromZupToJMECoordinates(Quaternion rotation)
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testRotationsFromAndToJMEToZupCoordinates()
    {
       //JME to World

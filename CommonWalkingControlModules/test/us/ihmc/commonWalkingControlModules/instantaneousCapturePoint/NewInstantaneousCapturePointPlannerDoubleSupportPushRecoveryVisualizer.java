@@ -221,7 +221,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       icpVelocityLineSegment = null;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void visualizePlanner()
    {
       boolean testPushInDoubleSupport = true;

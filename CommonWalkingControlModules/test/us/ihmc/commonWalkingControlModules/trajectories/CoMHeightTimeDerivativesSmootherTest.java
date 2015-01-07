@@ -32,7 +32,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testConstantHeight()
    {
       double dt = 0.001;
@@ -65,7 +65,7 @@ public class CoMHeightTimeDerivativesSmootherTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testDiscreetJump()
    {
       boolean visualize = false;
@@ -160,7 +160,7 @@ public class CoMHeightTimeDerivativesSmootherTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testSinusoidalInput()
    {
       boolean visualize = false;

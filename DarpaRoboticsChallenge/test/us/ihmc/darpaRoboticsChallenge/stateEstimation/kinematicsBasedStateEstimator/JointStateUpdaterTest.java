@@ -34,7 +34,7 @@ public class JointStateUpdaterTest
    private static final Random random = new Random(1776L);
    private static final double EPS = 1e-10;
    
-   @Test
+   @Test(timeout=300000)
    public void testConstructorNormalCase()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
@@ -60,7 +60,7 @@ public class JointStateUpdaterTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testInitializingAndReading()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");

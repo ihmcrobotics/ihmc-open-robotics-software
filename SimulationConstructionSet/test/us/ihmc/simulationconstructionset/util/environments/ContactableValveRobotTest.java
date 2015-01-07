@@ -39,7 +39,7 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   @Test
+   @Test(timeout=300000)
    public void testValveIsClosing()
    {
       boolean isValveClosed = true;

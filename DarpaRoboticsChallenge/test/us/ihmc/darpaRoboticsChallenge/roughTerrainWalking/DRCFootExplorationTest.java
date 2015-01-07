@@ -91,13 +91,13 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   //   @Test
+   //   @Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException
    {
       testDRCOverBlocksField(0.4);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testDRCOverRandomBars() throws SimulationExceededMaximumTimeException
    {
       testDRCOverBlocksField(-0.4);

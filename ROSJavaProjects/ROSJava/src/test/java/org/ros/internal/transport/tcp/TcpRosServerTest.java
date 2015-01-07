@@ -49,7 +49,7 @@ public class TcpRosServerTest {
     executorService.shutdown();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetAddressFailsIfServerNotRunning() throws UnknownHostException {
     TcpRosServer tcpRosServer =
         new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
@@ -77,7 +77,7 @@ public class TcpRosServerTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFailIfPortTaken() {
     TcpRosServer firstServer =
         new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
@@ -95,7 +95,7 @@ public class TcpRosServerTest {
     firstServer.shutdown();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFailIfStartedWhileRunning() {
     TcpRosServer tcpRosServer =
         new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,

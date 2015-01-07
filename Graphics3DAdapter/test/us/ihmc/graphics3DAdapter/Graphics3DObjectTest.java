@@ -13,7 +13,7 @@ public class Graphics3DObjectTest
    private static final double CUBE_SIDE = 2.0;
    private static final double CUBE_X = 5.0;
    
-   @Test
+   @Test(timeout=300000)
    public void testValidCubeGraphics()
    {
       Graphics3DObject cubeGraphics = new Graphics3DObject();

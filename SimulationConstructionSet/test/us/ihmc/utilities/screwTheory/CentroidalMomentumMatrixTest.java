@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class CentroidalMomentumMatrixTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testTree()
    {
       Random random = new Random(167L);
@@ -58,7 +58,7 @@ public class CentroidalMomentumMatrixTest
       JUnitTools.assertTuple3dEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFloatingBody()
    {
       Random random = new Random(167L);

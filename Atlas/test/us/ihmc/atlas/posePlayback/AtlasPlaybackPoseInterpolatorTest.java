@@ -33,7 +33,7 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
 
    //this is not a jUnit test. This is a playable pose sequence. Start the sim and press play. Remove @ignore and run locally. 
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testFromExample()
    {
       DRCRobotModel robotModel = getRobotModel();

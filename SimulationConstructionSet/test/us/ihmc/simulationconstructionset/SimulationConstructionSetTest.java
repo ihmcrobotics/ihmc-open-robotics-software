@@ -34,7 +34,7 @@ public class SimulationConstructionSetTest
       return false;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
@@ -242,7 +242,7 @@ public class SimulationConstructionSetTest
       testFixture = null;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
@@ -298,7 +298,7 @@ public class SimulationConstructionSetTest
    }
    
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
@@ -329,7 +329,7 @@ public class SimulationConstructionSetTest
    
 
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testSimulationConstructionSetMovieGenerationUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());

@@ -67,7 +67,7 @@ public class RemoteUptimeClockTest {
     remoteUptime += delta / drift;
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUnityDrift() throws Exception {
     delta = 7;
     drift = 1;
@@ -84,7 +84,7 @@ public class RemoteUptimeClockTest {
     assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDrift() throws Exception {
     delta = 31;
     drift = 2;
@@ -101,7 +101,7 @@ public class RemoteUptimeClockTest {
     assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testConvergence() {
     delta = 7;
     drift = 2;
@@ -128,7 +128,7 @@ public class RemoteUptimeClockTest {
     assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testConvergenceSensitivity() {
     delta = 7;
     drift = 2;

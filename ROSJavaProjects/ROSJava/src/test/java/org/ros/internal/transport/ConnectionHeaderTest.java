@@ -26,7 +26,7 @@ import org.junit.Test;
  */
 public class ConnectionHeaderTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testEncodeAndDecode() {
     ConnectionHeader connectionHeader = new ConnectionHeader();
     connectionHeader.addField("foo", "bar");

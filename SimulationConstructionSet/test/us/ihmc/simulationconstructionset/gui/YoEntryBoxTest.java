@@ -122,7 +122,7 @@ public class YoEntryBoxTest
 
    // GT - these values are twice the minimum working values for Trogdor.
    @Ignore // This test is for humans to view
-   @Test
+   @Test(timeout=300000)
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       SimpleController controller = new SimpleController();
@@ -135,7 +135,7 @@ public class YoEntryBoxTest
       scs.closeAndDispose();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSwitchToEnumEntry() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       SimpleController controller = new SimpleController();

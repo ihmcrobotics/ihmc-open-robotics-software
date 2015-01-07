@@ -36,7 +36,7 @@ import org.junit.Test;
  */
 public class testSTLReader
 {
-   @Test
+   @Test(timeout=300000)
    public void testASCIILoad() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("testASCIISTL.STL");
@@ -47,7 +47,7 @@ public class testSTLReader
       checkData(reader);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testBinaryLoad() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("testBinarySTL.STL");

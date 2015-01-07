@@ -66,7 +66,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
    }
 
    
-   @Test
+   @Test(timeout=300000)
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

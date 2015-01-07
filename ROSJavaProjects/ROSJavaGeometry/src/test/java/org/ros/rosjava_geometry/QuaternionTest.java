@@ -25,7 +25,7 @@ import org.junit.Test;
  */
 public class QuaternionTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testAxisAngleToQuaternion() {
     Quaternion quaternion;
 
@@ -72,7 +72,7 @@ public class QuaternionTest {
     assertEquals(-0.7071067811865475, quaternion.getW(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInvert() {
     Quaternion inverse = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2).invert();
     assertEquals(0, inverse.getX(), 1e-9);
@@ -81,7 +81,7 @@ public class QuaternionTest {
     assertEquals(0.7071067811865475, inverse.getW(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testMultiply() {
     Quaternion quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2);
     Quaternion inverse = quaternion.invert();
@@ -89,7 +89,7 @@ public class QuaternionTest {
     assertEquals(1, rotated.getW(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRotateVector() {
     Quaternion quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2);
     Vector3 vector = new Vector3(1, 0, 0);

@@ -64,14 +64,14 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testStraightLinePath()
    {
       Point3d destination = new Point3d(5.0, 0.0, 0.0);
       testPathToDestination(destination);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAngledPaths()
    {
       double maxAngle = Math.PI;

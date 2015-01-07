@@ -53,7 +53,7 @@ public class RawMessageSerializationTest {
     assertTrue(message.equals(deserializedMessage));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testBool() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Bool");
     rawMessage.setBool("data", true);
@@ -62,98 +62,98 @@ public class RawMessageSerializationTest {
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInt8() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int8");
     rawMessage.setInt8("data", (byte) 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUint8() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt8");
     rawMessage.setUInt8("data", (byte) 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInt16() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int16");
     rawMessage.setInt16("data", (short) 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUInt16() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt16");
     rawMessage.setUInt16("data", (short) 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInt32() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int32");
     rawMessage.setInt32("data", 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUInt32() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt32");
     rawMessage.setUInt32("data", 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInt64() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int64");
     rawMessage.setInt64("data", 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUInt64() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt64");
     rawMessage.setUInt64("data", 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFloat32() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Float32");
     rawMessage.setFloat32("data", 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFloat64() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Float64");
     rawMessage.setFloat64("data", 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testString() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/String");
     rawMessage.setString("data", "Hello, ROS!");
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTime() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Time");
     rawMessage.setTime("data", new Time());
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDuration() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Duration");
     rawMessage.setDuration("data", new Duration());
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testNestedMessage() {
     topicDefinitionResourceProvider.add("foo/foo", "std_msgs/String data");
     RawMessage fooMessage = messageFactory.newFromType("foo/foo");
@@ -163,7 +163,7 @@ public class RawMessageSerializationTest {
     checkSerializeAndDeserialize(fooMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testNestedMessageArray() {
     topicDefinitionResourceProvider.add("foo/foo", "std_msgs/String[] data");
     RawMessage fooMessage = messageFactory.newFromType("foo/foo");
@@ -175,7 +175,7 @@ public class RawMessageSerializationTest {
     checkSerializeAndDeserialize(fooMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testChannelBuffer() {
     topicDefinitionResourceProvider.add("foo/foo", "uint8[] data");
     ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
@@ -185,7 +185,7 @@ public class RawMessageSerializationTest {
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInt32Array() {
     topicDefinitionResourceProvider.add("foo/foo", "int32[] data");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");
@@ -193,7 +193,7 @@ public class RawMessageSerializationTest {
     checkSerializeAndDeserialize(rawMessage);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFloat64Array() {
     topicDefinitionResourceProvider.add("foo/foo", "float64[] data");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");

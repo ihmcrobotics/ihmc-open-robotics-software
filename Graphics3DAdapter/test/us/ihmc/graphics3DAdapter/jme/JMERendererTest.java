@@ -18,7 +18,7 @@ import us.ihmc.utilities.math.geometry.Sphere3d;
 
 public class JMERendererTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testInitialization()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());
@@ -33,7 +33,7 @@ public class JMERendererTest
    /**
     * Ground should flash on and off a few times.
     */
-   @Test
+   @Test(timeout=300000)
    public void testSetGroundVisible()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());
@@ -57,7 +57,7 @@ public class JMERendererTest
    /**
     * Should see a sphere orbit in a circle and leave 5 copies of itself along the way.
     */
-   @Test
+   @Test(timeout=300000)
    public void testFreezeFrame()
    {
       final JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());

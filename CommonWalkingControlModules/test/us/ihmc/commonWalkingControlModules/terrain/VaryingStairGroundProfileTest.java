@@ -22,7 +22,7 @@ public class VaryingStairGroundProfileTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void test()
    {
       double startX = -0.1;

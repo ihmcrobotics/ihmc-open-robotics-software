@@ -44,7 +44,7 @@ public class CaptureRegionCalculatorTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testOne()
    {
       ReferenceFrame leftAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("leftAnkleZUp");

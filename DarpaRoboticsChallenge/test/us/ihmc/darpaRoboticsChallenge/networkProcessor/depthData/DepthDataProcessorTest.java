@@ -42,7 +42,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before: ");
    }
 
-   @Test 
+   @Test(timeout=300000) 
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect()
    {
       BambooTools.reportTestStartedMessage();

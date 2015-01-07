@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class NtpTimeProviderTest extends RosTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testNtpUbuntuCom() throws InterruptedException {
     final NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"),

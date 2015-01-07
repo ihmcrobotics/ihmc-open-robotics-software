@@ -40,7 +40,7 @@ public class GraphNameTest {
     assertEquals(name, graphName.toString());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testToString() {
     try {
       String[] canonical = { "abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar" };
@@ -52,7 +52,7 @@ public class GraphNameTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testValidNames() {
     String[] valid =
         { "", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private", "~private/something",
@@ -62,7 +62,7 @@ public class GraphNameTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInvalidNames() {
     final String[] illegalChars = { "=", "-", "(", ")", "*", "%", "^" };
     for (String i : illegalChars) {
@@ -82,7 +82,7 @@ public class GraphNameTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIsGlobal() {
     final String[] tests = { "/", "/global", "/global2" };
     for (String t : tests) {
@@ -94,7 +94,7 @@ public class GraphNameTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIsPrivate() {
     String[] tests = { "~name", "~name/sub" };
     for (String t : tests) {
@@ -106,7 +106,7 @@ public class GraphNameTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIsRelative() {
     GraphName n = GraphName.of("name");
     assertTrue(n.isRelative());
@@ -114,7 +114,7 @@ public class GraphNameTest {
     assertFalse(n.isRelative());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetParent() {
     GraphName global = GraphName.of("/");
     GraphName empty = GraphName.of("");
@@ -134,7 +134,7 @@ public class GraphNameTest {
     assertEquals(empty, GraphName.of("wg/").getParent());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testCanonicalizeName() {
     assertGraphNameEquals("", GraphName.of(""));
     assertGraphNameEquals("/", GraphName.of("/"));
@@ -159,7 +159,7 @@ public class GraphNameTest {
     assertGraphNameEquals("~foo", GraphName.of("~/foo"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetName() {
     assertGraphNameEquals("", GraphName.of("").getBasename());
     assertGraphNameEquals("", GraphName.of("").getBasename());
@@ -171,7 +171,7 @@ public class GraphNameTest {
     assertGraphNameEquals("bar", GraphName.of("foo/bar").getBasename());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testJoin() {
     assertEquals(GraphName.of("/bar"), GraphName.of("/").join(GraphName.of("bar")));
     assertEquals(GraphName.of("bar"), GraphName.of("").join(GraphName.of("bar")));
@@ -181,7 +181,7 @@ public class GraphNameTest {
     assertEquals(GraphName.of("/bar"), GraphName.of("/foo").join(GraphName.of("/bar")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testNewAnonymous() throws InterruptedException {
     Executor executor = Executors.newFixedThreadPool(10);
     int sampleSize = 10000;
