@@ -98,7 +98,7 @@ public class ValkyriePosePlaybackDemoTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException
    {
       int numberOfPoses = 5;
@@ -117,7 +117,7 @@ public class ValkyriePosePlaybackDemoTest
    }
 
    // FlakyUnitTest: Hung on https://bamboo.ihmc.us/browse/RC-ALLGRADLE-VAL-952
-   @Test
+   @Test(timeout=300000)
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
    {
       int numberOfPoses = 5;
@@ -137,7 +137,7 @@ public class ValkyriePosePlaybackDemoTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException
    {
       int numberOfPoses = 5;

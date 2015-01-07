@@ -16,7 +16,7 @@ public class InefficientPushRodTransmissionTest
 {
    private static final boolean DEBUG = false;
 
-   @Test
+   @Test(timeout=300000)
    public void testForwardBackward()
    {
       Random random = new Random(1234L);
@@ -81,7 +81,7 @@ public class InefficientPushRodTransmissionTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testRegression()
    {
       double reflectBottom = 1.0;
