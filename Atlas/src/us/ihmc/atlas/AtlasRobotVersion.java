@@ -15,7 +15,7 @@ public enum AtlasRobotVersion
    ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS,
    DRC_NO_HANDS,
    ATLAS_DUAL_ROBOTIQ,
- GAZEBO_ATLAS_NO_HANDS;
+   GAZEBO_ATLAS_NO_HANDS;
 
    private static String[] resourceDirectories;
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
@@ -80,7 +80,7 @@ public enum AtlasRobotVersion
       }
       return offsetHandFromWrist.get(side);
    }
-
+   
    private void createTransforms()
    {
       for (RobotSide robotSide : RobotSide.values)

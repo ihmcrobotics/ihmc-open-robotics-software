@@ -65,7 +65,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private RigidBody head;
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
-   private final SideDependentList<RigidBody> hands = new SideDependentList<RigidBody>();
+   private final SideDependentList<RigidBody> wrist = new SideDependentList<RigidBody>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
@@ -117,7 +117,11 @@ public class SDFFullRobotModel implements FullRobotModel
          RigidBodyTransform handControlFrameToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
          if (handControlFrameToWristTransform != null)
          {
-            ReferenceFrame handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM), handControlFrameToWristTransform);
+            ReferenceFrame handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(
+                  sidePrefix + "HandControlFrame", 
+                  wrist.get(robotSide).getParentJoint().getFrameAfterJoint(), 
+                  handControlFrameToWristTransform );
+            
             handControlFrames.put(robotSide, handControlFrame);
          }
          else
@@ -288,7 +292,7 @@ public class SDFFullRobotModel implements FullRobotModel
          switch (limbName)
          {
          case ARM:
-            hands.put(limbSide, rigidBody);
+            wrist.put(limbSide, rigidBody);
             break;
          case LEG:
             feet.put(limbSide, rigidBody);
@@ -501,14 +505,18 @@ public class SDFFullRobotModel implements FullRobotModel
       return head;
    }
 
-   /** {@inheritDoc} */
+   /** 
+    * @deprecated The reference frame returned by getEndEffector( side, ARM)
+    * is not consistent consistent with getEndEffectorFrame( side, ARM ).
+    * */
    @Override
+   @Deprecated
    public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
    {
       switch (limbName)
       {
       case ARM:
-         return hands.get(robotSide);
+         return wrist.get(robotSide);
       case LEG:
          return feet.get(robotSide);
       default:
@@ -516,11 +524,18 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
-   /** {@inheritDoc} */
    @Override
    public ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
    {
-      return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
+      switch (limbName)
+      {
+      case LEG:
+         return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
+      case ARM:
+         return handControlFrames.get(robotSide);
+      default:
+         throw new RuntimeException("Unkown end effector");
+      }
    }
 
    /** {@inheritDoc} */
