@@ -19,12 +19,12 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrie.DiagnosticsWhenHangingController;
 import us.ihmc.valkyrie.HumanoidDiagnosticsWhenHangingSimulation;
-import us.ihmc.valkyrie.HumanoidJointPoseList;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
+import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ValkyrieDiagnosticsWhenHangingSimulation
