@@ -46,7 +46,7 @@ public class FrameTransformTreeTest {
     messageFactory = new DefaultMessageFactory(messageDefinitionProvider);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUpdateAndGet() {
     FrameTransform frameTransform =
         new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
@@ -55,7 +55,7 @@ public class FrameTransformTreeTest {
     assertEquals(frameTransform, frameTransformTree.get("foo"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testUpdateAndGetWithTransformStampedMessage() {
     FrameTransform frameTransform =
         new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
@@ -76,7 +76,7 @@ public class FrameTransformTreeTest {
     return message;
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIdentityTransforms() {
     frameTransformTree.update(newTransformStampedMessage(Transform.identity(), "baz", "bar",
         new Time()));
@@ -169,13 +169,13 @@ public class FrameTransformTreeTest {
     assertTrue(transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTransformBazToRoot() {
     updateFrameTransformTree();
     checkBazToFooTransform(frameTransformTree.transformToRoot(nameResolver.resolve("baz")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTransformBazToFoo() {
     updateFrameTransformTree();
     checkBazToFooTransform(frameTransformTree.transform("baz", "foo"));
@@ -195,20 +195,20 @@ public class FrameTransformTreeTest {
         transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTransformFuzToRoot() {
     updateFrameTransformTree();
     checkFuzToFooTransform(frameTransformTree.transformToRoot(nameResolver.resolve("fuz")));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTransformFuzToFoo() {
     updateFrameTransformTree();
     checkFuzToFooTransform(frameTransformTree.transform("fuz", "foo"));
     checkFuzToFooTransform(frameTransformTree.transform("foo", "fuz").invert());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTransformBazToFuz() {
     updateFrameTransformTree();
     FrameTransform frameTransform = frameTransformTree.transform("baz", "fuz");
@@ -222,7 +222,7 @@ public class FrameTransformTreeTest {
         transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTimeTravel() {
     FrameTransform frameTransform1 =
         new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),

@@ -49,57 +49,57 @@ public class Md5GeneratorTest {
     serviceDescriptionFactory = new ServiceDescriptionFactory(messageDefinitionProviderChain);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testPrimitives() {
     TopicDescription topicDescription =
         topicDescriptionFactory.newFromType("test_ros/TestPrimitives");
     assertEquals("3e70f428a22c0d26ca67f87802c8e00f", topicDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testString() {
     TopicDescription topicDescription = topicDescriptionFactory.newFromType("test_ros/TestString");
     assertEquals("334ff4377be93faa44ebc66d23d40fd3", topicDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testHeader() {
     TopicDescription topicDescription = topicDescriptionFactory.newFromType("test_ros/TestHeader");
     assertEquals("4b5a00f536da2f756ba6aebcf795a967", topicDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testArrays() {
     TopicDescription topicDescription = topicDescriptionFactory.newFromType("test_ros/TestArrays");
     assertEquals("4cc9b5e2cebe791aa3e994f5bc159eb6", topicDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testComposite() {
     TopicDescription topicDescription = topicDescriptionFactory.newFromType("test_ros/Composite");
     assertEquals("d8fb6eb869ad3956b50e8737d96dc9fa", topicDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testOdometry() {
     TopicDescription topicDescription = topicDescriptionFactory.newFromType("nav_msgs/Odometry");
     assertEquals("cd5e73d190d741a2f92e81eda573aca7", topicDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testEmpty() {
     ServiceDescription serviceDescription = serviceDescriptionFactory.newFromType("std_srvs/Empty");
     assertEquals("d41d8cd98f00b204e9800998ecf8427e", serviceDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testAddTwoInts() {
     ServiceDescription serviceDescription =
         serviceDescriptionFactory.newFromType("test_ros/AddTwoInts");
     assertEquals("6a2e34150c00229791cc89ff309fff21", serviceDescription.getMd5Checksum());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testTransitiveSrv() {
     ServiceDescription serviceDescription =
         serviceDescriptionFactory.newFromType("test_rospy/TransitiveSrv");

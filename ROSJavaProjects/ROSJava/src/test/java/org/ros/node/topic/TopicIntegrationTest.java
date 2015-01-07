@@ -55,7 +55,7 @@ public class TopicIntegrationTest extends RosTest {
     expectedMessage.setData("Would you like to play a game?");
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       
@@ -105,7 +105,7 @@ public class TopicIntegrationTest extends RosTest {
    * 
    * @throws InterruptedException
    */
-  @Test
+  @Test(timeout=300000)
   public void testSubscriberStartsBeforePublisher() throws InterruptedException {
     final CountDownSubscriberListener<std_msgs.String> subscriberListener =
         CountDownSubscriberListener.newDefault();
@@ -151,7 +151,7 @@ public class TopicIntegrationTest extends RosTest {
     assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testAddDisconnectedPublisher() {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       
@@ -200,7 +200,7 @@ public class TopicIntegrationTest extends RosTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testHeader() throws InterruptedException {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       

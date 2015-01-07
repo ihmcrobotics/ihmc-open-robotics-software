@@ -101,7 +101,7 @@ public class SmoothICPComputerTest
       icpVelocityLineSegment = null;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTypicalFourStepExample()
    {
       
@@ -262,7 +262,7 @@ public class SmoothICPComputerTest
 
 
 
-   @Test
+   @Test(timeout=300000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {
       double deltaT = 0.001;
@@ -668,7 +668,7 @@ public class SmoothICPComputerTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTrivialTwoStepExample()
    {
       int maxNumberOfConsideredFootsteps = 4;

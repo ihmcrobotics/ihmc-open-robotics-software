@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 public class TestDrcColorPixelDrivingClassifier
 {
 
-   @Test
+   @Test(timeout=300000)
    public void stuff()
    {
       fail("Implement");

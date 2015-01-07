@@ -65,7 +65,7 @@ public class FootstepDataTest
     * This test verifies that FootstepData can be sent and received using our current message passing utilities
     * @throws IOException 
     */
-   @Test //(timeout = 6000)
+   @Test(timeout=300000) //(timeout = 6000)
    public void testPassingFootstepData() throws IOException
    {
       // setup comms

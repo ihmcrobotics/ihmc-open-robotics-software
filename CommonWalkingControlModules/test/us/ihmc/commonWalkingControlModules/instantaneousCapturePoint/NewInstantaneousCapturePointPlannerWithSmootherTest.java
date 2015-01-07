@@ -216,7 +216,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		icpVelocityLineSegment = null;
 	}
 
-	@Test
+	@Test(timeout=300000)
 	public void testCapturePointPlannerWithSmootherNoPushOrCancelPlan()
 	{
 		boolean cancelPlan = false;
@@ -297,7 +297,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		assertEquals(expectedICP.getY(), icpPosition.getY(), 1e-4);
 	}
 
-	@Test
+	@Test(timeout=300000)
 	public void testCapturePointPlannerWithCancelPlan()
 	{
 		boolean testPush = false;

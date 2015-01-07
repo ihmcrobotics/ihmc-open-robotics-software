@@ -15,7 +15,7 @@ import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools;
 
 public class GraphicsDemoToolsTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testCreatePointCloud()
    {
       List<Point3d> worldPoints = new ArrayList<Point3d>();

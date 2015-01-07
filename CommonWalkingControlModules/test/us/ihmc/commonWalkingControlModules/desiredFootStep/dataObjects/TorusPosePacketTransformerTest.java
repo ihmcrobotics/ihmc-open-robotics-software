@@ -27,7 +27,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  */
 public class TorusPosePacketTransformerTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testTransformTorusPosePacket()
    {
       int numberOfTests = 10;

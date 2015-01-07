@@ -8,7 +8,7 @@ import static org.junit.Assert.fail;
  * @author Peter Abeles
  */
 public class TestGaussianColorClassifier {
-   @Test
+   @Test(timeout=300000)
    public void stuff() {
       fail("implement");
    }

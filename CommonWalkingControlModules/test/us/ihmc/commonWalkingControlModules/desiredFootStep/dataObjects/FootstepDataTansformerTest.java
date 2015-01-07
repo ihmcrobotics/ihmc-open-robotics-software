@@ -34,7 +34,7 @@ public class FootstepDataTansformerTest
 {
    private static Random random = new Random(100L);
 
-   @Test
+   @Test(timeout=300000)
    public void test()
    {
       RigidBodyTransform transform3D;
@@ -92,7 +92,7 @@ public class FootstepDataTansformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testDistance()
    {
       Point3d startPoint = new Point3d(2.0, 6.0, 5.0);

@@ -28,7 +28,7 @@ import java.util.Random;
  */
 public class TransformTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testMultiply() {
     Transform transform1 = new Transform(Vector3.xAxis(), Quaternion.identity());
     Transform transform2 =
@@ -53,7 +53,7 @@ public class TransformTest {
     assertEquals(0.7071067811865475, result2.getRotationAndScale().getW(), 1e-9);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInvert() {
     Transform transform =
         new Transform(Vector3.yAxis(), Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2));
@@ -71,7 +71,7 @@ public class TransformTest {
     assertTrue(neutral.almostEquals(Transform.identity(), 1e-9));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testInvertRandom() {
     Random random = new Random();
     random.setSeed(42);
@@ -85,7 +85,7 @@ public class TransformTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testMultiplyRandom() {
     Random random = new Random();
     random.setSeed(42);
@@ -103,7 +103,7 @@ public class TransformTest {
     }
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testScale() {
     assertTrue(Vector3.xAxis().scale(2)
         .almostEquals(Transform.identity().scale(2).apply(Vector3.xAxis()), 1e-9));

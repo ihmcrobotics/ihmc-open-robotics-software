@@ -36,7 +36,7 @@ public class XmlRpcServerTest {
   class FakeNode implements XmlRpcEndpoint {
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetPublicUri() {
     BindAddress bindAddress = BindAddress.newPublic();
     XmlRpcServer xmlRpcServer = new XmlRpcServer(bindAddress, new AdvertiseAddress("override"));
@@ -54,7 +54,7 @@ public class XmlRpcServerTest {
     xmlRpcServer.shutdown();
   }
   
-  @Test
+  @Test(timeout=300000)
   public void testGetPrivateUri() {
     BindAddress bindAddress = BindAddress.newPrivate();
     XmlRpcServer xmlRpcServer = new XmlRpcServer(bindAddress, AdvertiseAddress.newPrivate());

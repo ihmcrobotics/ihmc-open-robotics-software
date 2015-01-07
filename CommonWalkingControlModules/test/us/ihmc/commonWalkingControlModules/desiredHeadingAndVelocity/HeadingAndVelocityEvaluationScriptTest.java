@@ -45,7 +45,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testHeadingAndVelocityEvaluationScript()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("HeadingAndVelocityEvaluationScriptTest");

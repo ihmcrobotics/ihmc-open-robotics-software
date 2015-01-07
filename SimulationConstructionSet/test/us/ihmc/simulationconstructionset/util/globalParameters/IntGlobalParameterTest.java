@@ -24,7 +24,7 @@ public class IntGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -35,7 +35,7 @@ public class IntGlobalParameterTest
       assertEquals(DEFAULT_VALUE, intGlobalParameter.getValue());
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -62,7 +62,7 @@ public class IntGlobalParameterTest
       assertEquals(newValue, intGlobalParameter.getValue());
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
@@ -73,7 +73,7 @@ public class IntGlobalParameterTest
    }
 
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "", 0, null);

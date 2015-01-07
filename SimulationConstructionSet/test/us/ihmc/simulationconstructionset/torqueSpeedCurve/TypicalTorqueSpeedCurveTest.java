@@ -20,7 +20,7 @@ public class TypicalTorqueSpeedCurveTest
    }
 
    
-   @Test 
+   @Test(timeout=300000) 
    public void testOne()
    {
       TypicalTorqueSpeedCurve torqueSpeedCurve = new TypicalTorqueSpeedCurve();

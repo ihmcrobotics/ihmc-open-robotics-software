@@ -32,7 +32,7 @@ public class TimeTest {
   public void setUp() {
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testConstructor() {
     // Test no args constructor.
     Time t = new Time();
@@ -54,7 +54,7 @@ public class TimeTest {
     assertEquals(2, t.nsecs);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testFromMillis() {
     assertEquals(new Time(0, 0), Time.fromMillis(0));
     assertEquals(new Time(0, 1000000), Time.fromMillis(1));
@@ -64,7 +64,7 @@ public class TimeTest {
     assertEquals(new Time(1, 11000000), Time.fromMillis(1011));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testNormalize() {
     Time t = new Time(0, 0);
     t.secs = 1;
@@ -80,14 +80,14 @@ public class TimeTest {
     assertEquals(1000000000 - 1, t.nsecs);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testIsZero() {
     assertTrue(new Time(0, 0).isZero());
     assertFalse(new Time(1, 0).isZero());
     assertFalse(new Time(0, 1).isZero());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testComparable() {
     assertEquals(0, new Time(0, 0).compareTo(new Time(0, 0)));
     assertEquals(0, new Time(1, 1).compareTo(new Time(1, 1)));

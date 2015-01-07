@@ -24,14 +24,14 @@ public class YoWhiteBoardTest
 {
    private static final boolean VERBOSE = false;
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testWriteNotConnected() throws IOException
    {
       YoWhiteBoard whiteBoard = new DoNothingWhiteBoard();
       whiteBoard.writeData();
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testReadNotConnected() throws IOException
    {
       YoWhiteBoard whiteBoard = new DoNothingWhiteBoard();

@@ -148,7 +148,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       return ret;
    }
 
-   //   @Test
+   //   @Test(timeout=300000)
    public void testConstrainedHandPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -180,7 +180,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testImpactDetectionUsingHandPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -207,7 +207,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
    }
 
    //FIXME: Running more than one test causes the following error: java.lang.RuntimeException: java.net.BindException: Address already in use: bind
-   //      @Test
+   //      @Test(timeout=300000)
    public void testHandMassCompensationBySlowlyRotatingHands() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

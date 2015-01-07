@@ -36,7 +36,7 @@ public class DataFileWriterTest
    public ExpectedException expectedException = ExpectedException.none();
 
 
-   @Test
+   @Test(timeout=300000)
    public void testDataFileWriterAndReader() throws IOException, RepeatDataBufferEntryException
    {
       int numDataPoints = 10000;
@@ -146,7 +146,7 @@ public class DataFileWriterTest
    }
 
    @SuppressWarnings("deprecation")
-   @Test
+   @Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndDataInputStream() throws IOException, FileNotFoundException, NullPointerException
    {
       Random rng = new Random();
@@ -171,7 +171,7 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
    {
       expectedException.expect(EOFException.class);
@@ -206,7 +206,7 @@ public class DataFileWriterTest
       assertTrue(integerReadBack == -testInteger);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndDeferredBufferedReaderCreation() throws IOException
    {
       Random rng = new Random();
@@ -239,7 +239,7 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndBufferedReaderStringsOnly() throws IOException
    {
       String string1 = "This is the first string";

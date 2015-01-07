@@ -13,7 +13,7 @@ public class GeneticAlgorithmTest
 {
    private static final boolean SHOW_GUI = false;
 
-   @Test
+   @Test(timeout=300000)
    public void testOptimizeExampleIndividualOne()
    {
       int populationSize = 500;
@@ -50,7 +50,7 @@ public class GeneticAlgorithmTest
    }
    
    
-//   @Test
+//   @Test(timeout=300000)
    public void testOptimizeExampleIndividualTwo()
    {
       int populationSize = 50;

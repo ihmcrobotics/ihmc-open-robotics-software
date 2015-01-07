@@ -23,7 +23,7 @@ public class MatrixTest
    Matrix matrixInverted;
 
 
-   @Test
+   @Test(timeout=300000)
    public void testInvert()
    {
       if (VERBOSE)
@@ -65,7 +65,7 @@ public class MatrixTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testPseudoInvert()
    {
       if (VERBOSE)

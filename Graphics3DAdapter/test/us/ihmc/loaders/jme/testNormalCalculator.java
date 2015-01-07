@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class testNormalCalculator
 {
-   @Test
+   @Test(timeout=300000)
    public void testNormalsBasedOnTeapot() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("teapotBinary.STL");

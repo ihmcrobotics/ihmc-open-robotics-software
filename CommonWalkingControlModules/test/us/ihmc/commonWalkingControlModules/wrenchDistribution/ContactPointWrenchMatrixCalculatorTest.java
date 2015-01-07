@@ -40,7 +40,7 @@ public class ContactPointWrenchMatrixCalculatorTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-   @Test
+   @Test(timeout=300000)
    public void testComputeContactPointWrenchMatrix() throws Exception
    {
       Random random = new Random(12341253L);

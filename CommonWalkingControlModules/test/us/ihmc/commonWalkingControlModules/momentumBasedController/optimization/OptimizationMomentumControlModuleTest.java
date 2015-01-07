@@ -76,7 +76,7 @@ public class OptimizationMomentumControlModuleTest
    private final double controlDT = 1e-5;    // 5e-3;
    private final double gravityZ = 9.81;
 
-   @Test
+   @Test(timeout=300000)
    public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223521L);
@@ -130,7 +130,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testMomentumAndTaskSpaceConstraints()
    {
       Random random = new Random(1223525L);
@@ -205,7 +205,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testMomentumAndPointAccelerationConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
@@ -286,7 +286,7 @@ public class OptimizationMomentumControlModuleTest
       JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSingleRigidBody() throws NoConvergenceException
    {
       Random random = new Random(125152L);
@@ -348,7 +348,7 @@ public class OptimizationMomentumControlModuleTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testPrimaryAndSecondaryConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
@@ -442,7 +442,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testNullspaceMultipliers() throws NoConvergenceException
    {
       Random random = new Random(2534L);

@@ -21,7 +21,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 {
    private static boolean SHOW_GUI = false;
 
-   @Test
+   @Test(timeout=300000)
    public void testSimpleCombinedTerrainObjectEnvironment()
    {
       SimpleCombinedTerrainObjectsEnvironment combinedEnvironment = new SimpleCombinedTerrainObjectsEnvironment();

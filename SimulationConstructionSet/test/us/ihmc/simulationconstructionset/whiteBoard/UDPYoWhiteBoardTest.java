@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testUDPWhiteBoardOne() throws IOException
    {
       String IPAddress = "localHost";
@@ -39,7 +39,7 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testUDPWhiteBoardTwo() throws IOException
    {
       String IPAddress = "localHost";

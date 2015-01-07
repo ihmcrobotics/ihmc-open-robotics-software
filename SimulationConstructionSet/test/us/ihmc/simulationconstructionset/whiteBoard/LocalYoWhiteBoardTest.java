@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testLocalYoWhiteBoardOne() throws IOException
    {
       LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));
@@ -21,7 +21,7 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testLocalYoWhiteBoardTwo() throws IOException
    {
       LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));

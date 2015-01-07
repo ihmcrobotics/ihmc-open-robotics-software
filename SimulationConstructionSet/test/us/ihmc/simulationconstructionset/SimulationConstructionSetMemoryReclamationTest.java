@@ -17,7 +17,7 @@ public class SimulationConstructionSetMemoryReclamationTest
 {
    private static final boolean DEBUG = true;
 
-   @Test
+   @Test(timeout=300000)
    public void testMemoryReclamationForSCSWithoutARobot()
    {
       boolean useRobot = false;
@@ -31,7 +31,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobot()
    {
       boolean useRobot = true;
@@ -46,7 +46,7 @@ public class SimulationConstructionSetMemoryReclamationTest
    }
 
  
-   @Test
+   @Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndMovie()
    {
       boolean useRobot = true;

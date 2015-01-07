@@ -17,7 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterface
 {
-   @Test
+   @Test(timeout=300000)
    public void testReadAndWriteWithRandomSequence()
    {
       DRCRobotModel robotModel = getRobotModel();

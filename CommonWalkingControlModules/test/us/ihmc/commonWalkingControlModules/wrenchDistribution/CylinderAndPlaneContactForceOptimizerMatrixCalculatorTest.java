@@ -41,7 +41,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    private final ReferenceFrame comFrame = ReferenceFrame.constructAWorldFrame("com");
 
    @Ignore // Cylindrical grasping stuff has been put the grave yard.
-   @Test
+   @Test(timeout=300000)
    public void test4limbsTogether()
    {
       List<EndEffector> endEffectorsWithDefinedContactModels = new ArrayList<EndEffector>();
@@ -69,7 +69,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testLeftFootAtOrigin()
    {
       List<EndEffector> endEffectorsWithDefinedContactModels = new ArrayList<EndEffector>();
@@ -90,7 +90,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout=300000)
    public void testLeftHandAtOrigin()
    {
       List<EndEffector> endEffectorsWithDefinedContactModels = new ArrayList<EndEffector>();

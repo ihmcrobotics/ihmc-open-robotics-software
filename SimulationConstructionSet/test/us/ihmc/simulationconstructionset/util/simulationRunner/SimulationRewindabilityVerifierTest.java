@@ -35,7 +35,7 @@ public class SimulationRewindabilityVerifierTest
    {
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testRewindableSimulation() throws UnreasonableAccelerationException
    {
       SimulationConstructionSet scs1 = constructRewindableSimulationConstructionSet();
@@ -55,7 +55,7 @@ public class SimulationRewindabilityVerifierTest
    }
    
   
-   @Test
+   @Test(timeout=300000)
    public void testEasilyDetectableNonRewindableSimulation() throws UnreasonableAccelerationException
    {
       SimulationConstructionSet scs1 = constructEasilyDetectableNonRewindableSimulationConstructionSet();
@@ -81,7 +81,7 @@ public class SimulationRewindabilityVerifierTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testDifficultToDetectNonRewindableSimulation() throws UnreasonableAccelerationException
    {
       SimulationConstructionSet scs1 = constructDifficultToDetectNonRewindableSimulationConstructionSet();

@@ -13,7 +13,7 @@ import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParamet
 
 public class SimpleSimulationTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testSimpleSimulation()
    {
       SimpleRobotToOptimize robot = new SimpleRobotToOptimize();

@@ -29,7 +29,7 @@ public class NewDoubleSupportICPComputerTest
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 
-   @Test
+   @Test(timeout=300000)
    public void testComputeICPCornerPoints()
    {
       boolean visualize = false;
@@ -94,7 +94,7 @@ public class NewDoubleSupportICPComputerTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testComputeSingleSupportICP()
    {
       boolean visualize = false;

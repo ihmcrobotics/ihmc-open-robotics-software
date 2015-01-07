@@ -24,7 +24,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
    private static final boolean SHOW_GUI = true;
    
 
-   @Test
+   @Test(timeout=300000)
    public void testMoveElbowExample()
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -39,7 +39,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       playASequence(sdfRobot, sequence);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testRandomExample()
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -59,7 +59,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       
    }
    
-//   @Test
+//   @Test(timeout=300000)
 //   public void testExampleOne()
 //   {
 //      DRCRobotJointMap jointMap = robotModel.getJointMap();
@@ -72,7 +72,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
 //      playASequence(sdfRobot, sequence);
 //   }
 
-   @Test
+   @Test(timeout=300000)
    public void testLoadingAndPlayingASequence()
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -84,7 +84,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       playASequence(sdfRobot, sequence);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testLoadingAndPlayingAnotherSequence()
    {
       DRCRobotModel robotModel = getRobotModel();

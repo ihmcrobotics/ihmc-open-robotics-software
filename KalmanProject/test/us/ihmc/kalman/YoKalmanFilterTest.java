@@ -51,7 +51,7 @@ public class YoKalmanFilterTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testCompareToSimple()
    {
       KalmanFilterSimple kalmanFilterSimple = new KalmanFilterSimple();
@@ -69,7 +69,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testNotProcessCovarianceSymmetricPositiveDefinite1()
    {
       YoKalmanFilter yoKalmanFilter = null;
@@ -90,7 +90,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setProcessNoiseCovariance(Q);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testMeasurementCovarianceNotSymmetricPositiveDefinite1()
    {
       YoKalmanFilter yoKalmanFilter = null;
@@ -111,7 +111,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setMeasurementNoiseCovariance(R);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testWrongSize()
    {
       YoKalmanFilter yoKalmanFilter = new YoKalmanFilter("yo", parentRegistry);
@@ -119,7 +119,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setProcessNoiseCovariance(new DenseMatrix64F(nStates + 1, nStates + 1));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testRewindability() throws RepeatDataBufferEntryException
    {
       int nTicks = 2;
@@ -195,7 +195,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilter.getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testInfiniteMeasurementNoise()
    {
       nStates = 5;
@@ -228,7 +228,7 @@ public class YoKalmanFilterTest
       kalmanFilter.setState(x, P);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTwoUpdatesVersusOne()
    {
       nStates = 8;
@@ -272,7 +272,7 @@ public class YoKalmanFilterTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testViaSimulatingATrueSystemAndCheckingErrorDynamics()
    {
       nStates = 8;
@@ -370,7 +370,7 @@ public class YoKalmanFilterTest
 
 
 
-   @Test
+   @Test(timeout=300000)
    public void testViaKeepingCovariancesConstantAndCheckingKMatrixConvergence()
    {
       nStates = 6;

@@ -27,7 +27,7 @@ public class RobotToolsTest
       return randomFloatingChain;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testScsRobotFromInverseDynamicsRobotModel()
    {
       SCSRobotFromInverseDynamicsRobotModel scsRobotFromInverseDynamicsRobotModel = new RobotTools.SCSRobotFromInverseDynamicsRobotModel("robot",
@@ -36,7 +36,7 @@ public class RobotToolsTest
       assertNotNull(scsRobotFromInverseDynamicsRobotModel);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAddScsJointUsingIDJoint()
    {
       Joint scsRootJoint = RobotTools.addSCSJointUsingIDJoint(getRandomFloatingChain().getRootJoint(), new Robot("robot"), true);

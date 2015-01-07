@@ -38,7 +38,7 @@ public class VirtualChainBuilderTest
    }
    
 
-   @Test
+   @Test(timeout=300000)
    public void testOne()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleOne();
@@ -47,7 +47,7 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTwo()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleTwo();
@@ -56,7 +56,7 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testThree()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleThree();
@@ -65,7 +65,7 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFour()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleFour();

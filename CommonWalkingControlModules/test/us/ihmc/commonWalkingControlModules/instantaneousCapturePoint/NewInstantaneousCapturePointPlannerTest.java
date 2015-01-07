@@ -208,7 +208,7 @@ public class NewInstantaneousCapturePointPlannerTest
 		icpVelocityLineSegment = null;
 	}
 
-	@Test
+	@Test(timeout=300000)
 	public void visualizePlanner()
 	{
 		icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps, testICPPlannerParams, registry,

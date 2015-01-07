@@ -32,7 +32,7 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
 //      testFixture.showWindow();

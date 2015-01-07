@@ -18,7 +18,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class DRCArmKinematicsCalibrationTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void estimateCameraPose()
    {
       BufferedImage image = UtilImageIO.loadImage("../DarpaRoboticsChallenge/data/atlas_chessboard.jpg");

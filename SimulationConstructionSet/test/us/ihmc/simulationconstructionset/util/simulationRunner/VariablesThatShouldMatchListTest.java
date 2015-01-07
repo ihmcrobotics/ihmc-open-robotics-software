@@ -29,7 +29,7 @@ public class VariablesThatShouldMatchListTest
    {
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testOne()
    {
       YoVariableRegistry registryOne = new YoVariableRegistry("root");

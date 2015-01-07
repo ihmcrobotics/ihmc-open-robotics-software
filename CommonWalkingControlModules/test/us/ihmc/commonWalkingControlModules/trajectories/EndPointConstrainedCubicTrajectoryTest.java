@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class EndPointConstrainedCubicTrajectoryTest
 {
    
-   @Test
+   @Test(timeout=300000)
    public void TestEndPointConstrainedCubicTrajectory()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Test");

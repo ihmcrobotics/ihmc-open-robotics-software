@@ -8,7 +8,7 @@ import org.junit.Test;
 public class FileIOTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void test() throws IOException
    {
       File rootDirectory = new File("ROSMessagesAndServices");

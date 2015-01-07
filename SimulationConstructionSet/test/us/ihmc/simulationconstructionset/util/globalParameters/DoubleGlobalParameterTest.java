@@ -24,7 +24,7 @@ public class DoubleGlobalParameterTest    // extends TestCase
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -35,7 +35,7 @@ public class DoubleGlobalParameterTest    // extends TestCase
       assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue(), eps);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -62,7 +62,7 @@ public class DoubleGlobalParameterTest    // extends TestCase
       assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
@@ -72,7 +72,7 @@ public class DoubleGlobalParameterTest    // extends TestCase
    }
 
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "", 0.7, null);

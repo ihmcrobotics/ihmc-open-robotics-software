@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class IntegerParameterToOptimizeTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testGetBitsOfResolution()
    {
       testNBit(0, 0, 1);
@@ -34,7 +34,7 @@ public class IntegerParameterToOptimizeTest
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testZeroToOneConversions()
    {
       testZeroToOneConversion(0, 100);

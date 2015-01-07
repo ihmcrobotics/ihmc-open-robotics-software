@@ -25,7 +25,7 @@ public class MasterRegistrationTest extends RosTest {
   private CountDownPublisherListener<std_msgs.String> publisherListener;
   private Publisher<std_msgs.String> publisher;
 
-  @Test
+  @Test(timeout=300000)
   public void testRegisterPublisher() throws InterruptedException {
     publisherListener = CountDownPublisherListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
@@ -45,7 +45,7 @@ public class MasterRegistrationTest extends RosTest {
     assertTrue(publisherListener.awaitMasterUnregistrationSuccess(1, TimeUnit.SECONDS));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testRegisterPublisherRetries() throws InterruptedException, IOException,
       URISyntaxException {
     int port = rosCore.getUri().getPort();

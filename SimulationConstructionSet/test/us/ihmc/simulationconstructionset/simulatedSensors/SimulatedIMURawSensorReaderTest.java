@@ -77,7 +77,7 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testRead()
    {
       for (int i = 0; i < 10000; i++)

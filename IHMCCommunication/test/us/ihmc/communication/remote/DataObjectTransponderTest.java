@@ -97,7 +97,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSerializabilityOfInteger() throws IOException
    {
       Integer integer = new Integer(2);
@@ -105,7 +105,7 @@ public class DataObjectTransponderTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testSerializabilityOfIntPacket() throws IOException
    {
       IntegerPacket intPacket = new IntegerPacket(2);
@@ -113,7 +113,7 @@ public class DataObjectTransponderTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testSerializabilityOfStringPacket() throws IOException
    {
       StringPacket packet = new StringPacket("Buzzap!");

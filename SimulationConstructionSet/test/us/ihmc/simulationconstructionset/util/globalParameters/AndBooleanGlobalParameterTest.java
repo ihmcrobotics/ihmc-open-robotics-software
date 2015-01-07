@@ -24,7 +24,7 @@ public class AndBooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSetThrowsException()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -52,7 +52,7 @@ public class AndBooleanGlobalParameterTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAndBooleanGlobalParameter()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -75,7 +75,7 @@ public class AndBooleanGlobalParameterTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testAndBooleanGlobalParameterUpdate()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -110,7 +110,7 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testFamilyTree()
    {
 //    SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();

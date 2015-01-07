@@ -28,7 +28,7 @@ import org.junit.Test;
  */
 public class NodeNameResolverTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testResolveNameOneArg() {
     Map<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = GraphName.of("/node");

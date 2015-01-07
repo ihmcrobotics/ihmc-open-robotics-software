@@ -14,7 +14,7 @@ import us.ihmc.utilities.math.geometry.Ray3d;
 
 public class JMERayCollisionAdapterTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testObjectPicking()
    {
       ThreadTools.sleep(10000); // Put this in to give me time to attach the debugger to this test.

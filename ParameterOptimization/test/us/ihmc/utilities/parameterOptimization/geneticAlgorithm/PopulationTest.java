@@ -12,7 +12,7 @@ import org.junit.Test;
 public class PopulationTest
 {
 
-   @Test
+   @Test(timeout=300000)
    public void testPopulation()
    {
       Random random = new Random(1776L);

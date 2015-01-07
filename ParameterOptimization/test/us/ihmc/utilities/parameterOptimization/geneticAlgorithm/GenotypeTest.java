@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class GenotypeTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testGenotype()
    {
       Random random = new Random(1776L);
@@ -86,7 +86,7 @@ public class GenotypeTest
       }
    }
    
-   @Test 
+   @Test(timeout=300000) 
    public void testGenotypeAtExactlyOneAndZero()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -101,7 +101,7 @@ public class GenotypeTest
       }
    }
    
-   @Test 
+   @Test(timeout=300000) 
    public void testGenotypeNearOneAndZero()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -118,7 +118,7 @@ public class GenotypeTest
   
 
 
-   @Test
+   @Test(timeout=300000)
    public void testPhenotypeTwo()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -142,7 +142,7 @@ public class GenotypeTest
       } 
    }
    
-   @Test 
+   @Test(timeout=300000) 
    public void testPhenotypeReconstruction()
    {
       Random random = new Random(1984L);

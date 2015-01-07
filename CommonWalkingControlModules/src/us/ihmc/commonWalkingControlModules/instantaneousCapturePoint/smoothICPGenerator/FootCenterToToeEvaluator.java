@@ -117,7 +117,7 @@ public class FootCenterToToeEvaluator
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {
       stopSignalTime.set(1.9e100);

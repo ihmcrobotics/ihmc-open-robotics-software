@@ -42,7 +42,7 @@ public class CenterOfPressureResolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {      
       Point3d groundPoint = new Point3d();
@@ -61,7 +61,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {      
       Point3d groundPoint = new Point3d();
@@ -81,7 +81,7 @@ public class CenterOfPressureResolverTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testCenterOfPressureResolverNoForceInZ()
    {      
       Point3d groundPoint = new Point3d();
@@ -101,7 +101,7 @@ public class CenterOfPressureResolverTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testRandomExamples()
    {
       Random random = new Random(1776L);

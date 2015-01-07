@@ -38,7 +38,7 @@ public abstract class SCSCollisionDetectorTest
       margin = 0.02;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void createBox_checkBounds_noHit()
    {
       collisionDetector = createCollisionInterface();
@@ -72,7 +72,7 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void createBox_checkBounds_hit()
    {
       collisionDetector = createCollisionInterface();
@@ -108,7 +108,7 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Make a small object and see if it detects the collision correctly.  Small objects aren't already handled correctly
     */
-   @Test
+   @Test(timeout=300000)
    public void createBox_Collision_Small()
    {
       double tau = 0.0001;
@@ -137,7 +137,7 @@ public abstract class SCSCollisionDetectorTest
       collisionDetector.performCollisionDetection();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void collisionMask_hit()
    {
       collisionDetector = createCollisionInterface();
@@ -162,7 +162,7 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Makes sure the offset from the link is handled correctly
     */
-   @Test
+   @Test(timeout=300000)
    public void checkCollisionShape_offset()
    {
       collisionDetector = createCollisionInterface();

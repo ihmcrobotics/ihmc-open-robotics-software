@@ -12,7 +12,7 @@ import us.ihmc.utilities.math.geometry.AngleTools;
 public class WheelRotationEstimatorTest
 {
    private static final double eps = 1e-7;
-   @Test
+   @Test(timeout=300000)
    public void testAngleDefinitions()
    {
       int sectors = 370;
@@ -31,7 +31,7 @@ public class WheelRotationEstimatorTest
       
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testIndexBounds()
    {
       int sectors = 370;
@@ -52,7 +52,7 @@ public class WheelRotationEstimatorTest
       
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testAngleTautology()
    {
       int sectors = 11100;

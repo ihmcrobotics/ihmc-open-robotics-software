@@ -60,7 +60,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
 
   
    
-   @Test
+   @Test(timeout=300000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

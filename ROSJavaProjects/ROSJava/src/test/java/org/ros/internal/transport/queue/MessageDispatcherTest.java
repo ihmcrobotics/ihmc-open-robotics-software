@@ -52,7 +52,7 @@ public class MessageDispatcherTest {
     messageFactory = new DefaultMessageFactory(new MessageDefinitionReflectionProvider());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testMessageOrder() throws InterruptedException {
     int numberOfMessages = 100;
     final CountDownLatch latch = new CountDownLatch(numberOfMessages);

@@ -33,7 +33,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       return 0.0;
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testAllFlat()
    {
       double[][] xSlopePairs = new double[][]{{0.0, 0.0}};
@@ -49,7 +49,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testOne()
    {
       double[][] xSlopePairs = new double[][]{{1.0, 1.0}};
@@ -84,7 +84,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testTwo()
    {
       double[][] xSlopePairs = new double[][]{{0.0, 0.0}, {1.0, 1.0}, {2.0, 0.0}};
@@ -107,7 +107,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testThree()
    {
       double[][] xSlopePairs = new double[][]{{-5.0, 1.0}, {0.0, -1.0}, {5.0, 1.0}};
@@ -136,7 +136,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
    }
 
 
-   @Test
+   @Test(timeout=300000)
    public void testFour()
    {
       double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
@@ -166,14 +166,14 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(expected = RuntimeException.class,timeout=300000)
    public void testBadOrderingOne()
    {
       double[][] xSlopePairs = new double[][]{{0.0, -1.0}, {1e-10, 1.0}};
       new AlternatingSlopesGroundProfile(xSlopePairs);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(expected = RuntimeException.class, timeout=300000)
    public void testBadOrderingTwo()
    {
       double[][] xSlopePairs = new double[][]{{0.0, -1.0}, {1.0, 1.0}, {3.5, 1.0}, {3.0, 1.0}, {4.0, 1.0}};

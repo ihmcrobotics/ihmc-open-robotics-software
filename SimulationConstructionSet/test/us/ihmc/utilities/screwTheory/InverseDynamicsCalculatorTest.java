@@ -53,7 +53,7 @@ public class InverseDynamicsCalculatorTest
    {
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
       Robot robot = new Robot("robot");
@@ -106,7 +106,7 @@ public class InverseDynamicsCalculatorTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testChainNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -126,7 +126,7 @@ public class InverseDynamicsCalculatorTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -151,7 +151,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testTreeWithGravity()
    {
       Robot robot = new Robot("robot");
@@ -176,7 +176,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testDoingInverseDynamicsTermPerTerm()
    {
       Robot robot = new Robot("robot");
@@ -219,7 +219,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testDoingNothing()
    {
       Robot robot = new Robot("robot");
@@ -248,7 +248,7 @@ public class InverseDynamicsCalculatorTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
       Robot robot = new Robot("robot");
@@ -266,7 +266,7 @@ public class InverseDynamicsCalculatorTest
       assertZeroAccelerations(jointMap);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testChainWithGravity()
    {
       Robot robot = new Robot("robot");

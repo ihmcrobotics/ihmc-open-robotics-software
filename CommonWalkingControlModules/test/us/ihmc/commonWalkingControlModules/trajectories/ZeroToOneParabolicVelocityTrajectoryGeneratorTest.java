@@ -38,7 +38,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       epsilon = 1e-7;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testStartValue()
    {
       trajectoryGenerator.compute(0.0);
@@ -46,7 +46,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(0.0, trajectoryGenerator.getValue(), epsilon);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testEndValue()
    {
       trajectoryGenerator.compute(trajectoryTime);
@@ -54,7 +54,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testMidValue()
    {
       trajectoryGenerator.compute(trajectoryTime / 2.0);
@@ -62,7 +62,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(0.5, trajectoryGenerator.getValue(), epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAfterEndValue()
    {
       trajectoryGenerator.compute(trajectoryTime * 1.5);
@@ -70,7 +70,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testIsDone()
    {
       trajectoryGenerator.compute(0.0);

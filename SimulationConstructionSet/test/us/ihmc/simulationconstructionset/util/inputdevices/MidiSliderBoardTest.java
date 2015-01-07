@@ -21,7 +21,7 @@ public class MidiSliderBoardTest
    {
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testWeirdCase()
    {
       MidiSliderBoard midiSliderBoard = new MidiSliderBoard(null, false);

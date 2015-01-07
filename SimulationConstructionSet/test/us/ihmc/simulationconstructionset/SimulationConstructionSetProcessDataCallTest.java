@@ -9,7 +9,7 @@ public class SimulationConstructionSetProcessDataCallTest
 {   
    private YoVariableRegistry registry;
       
-   @Test
+   @Test(timeout=300000)
    public void testForwardCount()
    {
       Robot robot = new Robot("testRobot");
@@ -61,7 +61,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testBackwardCount()
    {
       Robot robot = new Robot("testRobot");
@@ -113,7 +113,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testForwardCopy()
    {
       Robot robot = new Robot("testRobot");
@@ -165,7 +165,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testBackwardCopy()
    {
       Robot robot = new Robot("testRobot");

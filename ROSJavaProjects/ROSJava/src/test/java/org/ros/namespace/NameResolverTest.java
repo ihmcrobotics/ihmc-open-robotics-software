@@ -29,7 +29,7 @@ import org.junit.Test;
  */
 public class NameResolverTest {
 
-  @Test
+  @Test(timeout=300000)
   public void testResolveNameOneArg() {
     NameResolver r = NameResolver.newRoot();
 
@@ -51,7 +51,7 @@ public class NameResolverTest {
     assertGraphNameEquals("/ns1/foo/bar", r.resolve("foo/bar"));
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testResolveNameTwoArg() {
     // These tests are based on test_roslib_names.py.
     NameResolver r = NameResolver.newRoot();
@@ -96,7 +96,7 @@ public class NameResolverTest {
   /**
    * Test resolveName with name remapping active.
    */
-  @Test
+  @Test(timeout=300000)
   public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     remappings.put(GraphName.of("name"), GraphName.of("/my/name"));

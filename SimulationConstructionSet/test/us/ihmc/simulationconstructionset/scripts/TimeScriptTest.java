@@ -59,7 +59,7 @@ public class TimeScriptTest
       enumVariable = null;
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testEmptyTimeScript()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Test");
@@ -70,7 +70,7 @@ public class TimeScriptTest
       timeScript.doScript(time);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testAddEntryAndDoScript()
    {
       TimeScript timeScript = new TimeScript(rootRegistry);
@@ -130,7 +130,7 @@ public class TimeScriptTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testTimeScriptCommand()
    {
       TimeScript timeScript = new TimeScript(rootRegistry);
@@ -216,7 +216,7 @@ public class TimeScriptTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void testSaveAndLoad()
    {
       Random random = new Random(1776L);

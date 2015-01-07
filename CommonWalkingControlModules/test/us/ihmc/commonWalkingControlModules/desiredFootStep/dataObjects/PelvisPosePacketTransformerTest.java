@@ -27,7 +27,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  */
 public class PelvisPosePacketTransformerTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testPelvisPosePacketTransformer()
    {
       int numberOfTests = 10;

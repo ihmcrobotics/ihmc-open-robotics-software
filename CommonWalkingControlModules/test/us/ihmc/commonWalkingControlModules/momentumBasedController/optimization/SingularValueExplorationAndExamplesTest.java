@@ -19,7 +19,7 @@ public class SingularValueExplorationAndExamplesTest
    {
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimpleCase()
    {
       DenseMatrix64F matrixJ = new DenseMatrix64F(new double[][]{{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}});
@@ -55,7 +55,7 @@ public class SingularValueExplorationAndExamplesTest
       JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void showIMinusNNTransposeJDoesntMakeSense()
    {
       
@@ -147,7 +147,7 @@ public class SingularValueExplorationAndExamplesTest
    }
    
    
-   @Test
+   @Test(timeout=300000)
    public void foo2()
    {
       

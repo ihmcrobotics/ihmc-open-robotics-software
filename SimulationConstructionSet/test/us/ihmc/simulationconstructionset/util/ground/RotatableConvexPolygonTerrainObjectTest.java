@@ -50,7 +50,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3.0);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testHeightAt()
    {
       Point2d centroid = convexPolygon.getCentroid();
@@ -65,7 +65,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testIsClose()
    {
       assertTrue(flatTopFaceOctagon3d.isClose(0.0, 0.0, 0.5));    // Point Inside
@@ -78,7 +78,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testClosestIntersectionTo()
    {
       Point3d pointToPack = new Point3d();
@@ -154,7 +154,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testIsInsideTheFace()
    {
       Point3d faceCenter = new Point3d(1.0, 0.0, 0.0);
@@ -177,7 +177,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
       Vector3d normalToPack = new Vector3d();
@@ -195,7 +195,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expected, normalToPack, epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testClosestIntersectionAndNormalAt()
    {
       Point3d pointToPack = new Point3d();
@@ -320,25 +320,25 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGetXMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getXMin(), epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGetXMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getXMax(), epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGetYMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getYMin(), epsilon);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testGetYMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getYMax(), epsilon);
@@ -346,7 +346,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    public void testSetupInEnvironment()
    {
-      // Not an actual test, could be given @Test for visual confirmation though
+      // Not an actual test, could be given @Test(timeout=300000) for visual confirmation though
       SimulationConstructionSet scs = new SimulationConstructionSet();
       scs.addStaticLinkGraphics(inclinedTopFaceOctagon3d.getLinkGraphics());
 

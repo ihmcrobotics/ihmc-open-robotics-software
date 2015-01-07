@@ -10,7 +10,7 @@ public class SimulationConstructionSetSetupTest
 {
    private static final int pauseTimeForGUIs = 5000;
 
-   @Test
+   @Test(timeout=300000)
    public void testSplashScreen()
    {
       SplashPanel splashPanel = new SplashPanel();
@@ -20,7 +20,7 @@ public class SimulationConstructionSetSetupTest
       window.dispose();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimulationConstructionSetWithoutARobot()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
@@ -31,7 +31,7 @@ public class SimulationConstructionSetSetupTest
       scs.closeAndDispose();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testSimulationConstructionSetWithARobot()
    {
       Robot robot = new Robot("NullRobot");

@@ -15,7 +15,7 @@ public class Graphics3DTextTest implements Graphics3DFrameListener
    int counter = 0;
    Graphics3DAddExtrusionInstruction instruction;
 
-   @Test
+   @Test(timeout=300000)
    public void testTextDisplay()
    {
       Graphics3DWorld world = new Graphics3DWorld(new JMEGraphics3DAdapter());

@@ -73,13 +73,13 @@ public class MasterSlaveIntegrationTest {
     executorService.shutdown();
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetMasterUri() {
     Response<URI> response = slaveClient.getMasterUri();
     assertEquals(masterServer.getUri(), response.getResult());
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testGetPid() {
     Response<Integer> response = slaveClient.getPid();
     assertTrue(response.getResult() > 0);

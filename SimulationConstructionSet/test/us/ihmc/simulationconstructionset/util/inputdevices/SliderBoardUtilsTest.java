@@ -12,7 +12,7 @@ public class SliderBoardUtilsTest
 {
 
 
-   @Test
+   @Test(timeout=300000)
    public void testSimpleConversion()
    {
       int sliderBoardMax = 128;
@@ -45,7 +45,7 @@ public class SliderBoardUtilsTest
       assertEquals(intValue, sliderValue);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testSimpleSquareConversion()
    {
       int sliderBoardMax = 128;
@@ -95,7 +95,7 @@ public class SliderBoardUtilsTest
       assertEquals(intValue, sliderValue);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testRandomConversions()
    {
       Random random = new Random(1776L);
@@ -114,7 +114,7 @@ public class SliderBoardUtilsTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testRandomConversionsWithHires()
    {
       Random random = new Random(1776L);

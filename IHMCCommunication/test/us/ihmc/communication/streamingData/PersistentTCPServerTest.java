@@ -19,7 +19,7 @@ import us.ihmc.utilities.ThreadTools;
 
 public class PersistentTCPServerTest
 {
-   @Test (timeout=6000)
+   @Test(timeout=6000)
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {
       EstablishedConnectionCounter establishedConnectionCounter = new EstablishedConnectionCounter();

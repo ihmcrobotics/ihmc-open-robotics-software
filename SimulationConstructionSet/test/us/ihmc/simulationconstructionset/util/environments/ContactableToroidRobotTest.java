@@ -15,7 +15,7 @@ import us.ihmc.utilities.RandomTools;
 
 public class ContactableToroidRobotTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testIsPointOnOrInsideAtOrigin()
    {
       double majorRadius = ContactableToroidRobot.DEFAULT_RADIUS;
@@ -48,7 +48,7 @@ public class ContactableToroidRobotTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testIsPointOnOrInsideNotAtOriginUsingTransform()
    {
       Random random = new Random(1972L);
@@ -87,7 +87,7 @@ public class ContactableToroidRobotTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testPointIsntInsideWhenUsingComOffset()
    {
       Random random = new Random(1972L);

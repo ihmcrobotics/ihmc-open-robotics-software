@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
  */
 public class StringListResultFactoryTest extends TestCase {
 
-  @Test
+  @Test(timeout=300000)
   public void testEncodeAndDecode() {
     StringListResultFactory factory = new StringListResultFactory();
     List<String> expected;

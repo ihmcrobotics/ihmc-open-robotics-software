@@ -17,7 +17,7 @@ public class JMEPointCloudVisualizerTest
       new JMEPointCloudVisualizerTest().testJMEPointCloudVisualizer();
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testJMEPointCloudVisualizer()
    {
       JMEPointCloudVisualizer jmePointCloudVisualizer = new JMEPointCloudVisualizer();

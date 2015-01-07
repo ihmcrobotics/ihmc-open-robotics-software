@@ -43,7 +43,7 @@ public class CentroidalMomentumBenchmark
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
 //   @Ignore
-   @Test
+   @Test(timeout=300000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);

@@ -55,7 +55,7 @@ public class OneStepCaptureRegionCalculatorTest
    private final YoVariableRegistry registry = new YoVariableRegistry("CaptureRegionCalculatorTest");
    
    @SuppressWarnings("unused")
-   @Test
+   @Test(timeout=300000)
    public void testConstructor()
    {
       double midFootAnkleXOffset = 0.0;
@@ -66,7 +66,7 @@ public class OneStepCaptureRegionCalculatorTest
             midFootAnkleXOffset, footWidth, kineamaticStepRange, ankleZUpFrames, registry, null);
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testPointsInsideCaptureRegion()
    {
       // do not change parameters
@@ -147,7 +147,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testProjectedFootCorners()
    {
       // do not change parameters
@@ -220,7 +220,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testCalculationWithICPInFootPolygon()
    {
       double midFootAnkleXOffset = 0.2;
@@ -293,7 +293,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCalculationWithHighSwingTime()
    {
       // do not change parameters

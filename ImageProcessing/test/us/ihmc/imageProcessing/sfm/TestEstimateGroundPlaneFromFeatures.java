@@ -29,7 +29,7 @@ public class TestEstimateGroundPlaneFromFeatures
    /**
     * Create a set of observations with perfect data and see if it can reconstruct the plane and transform
     */
-   @Test
+   @Test(timeout=300000)
    public void perfect()
    {
       StereoParameters param = new StereoParameters();

@@ -22,7 +22,7 @@ public class IhmcPointCloudOpsTest
 {
    Random rand = new Random(234);
 
-   @Test
+   @Test(timeout=300000)
    public void convert()
    {
       PlaneNormal3D_F64 orig = new PlaneNormal3D_F64(1,2,3,4,5,6);
@@ -39,7 +39,7 @@ public class IhmcPointCloudOpsTest
       assertTrue(UtilPlane3D_F64.equals(orig,found,1e-8));
    }
 
-   @Test
+   @Test(timeout=300000)
    public void adjustBoxNormals()
    {
       PlaneNormal3D_F64 a = new PlaneNormal3D_F64(1,0,0,1,0,0);

@@ -17,7 +17,7 @@ import static org.junit.Assert.fail;
  * @author Peter Abeles
  */
 public class TestLabeledPixelCodec {
-   @Test
+   @Test(timeout=300000)
    public void write_read() throws IOException {
       String expectedName = "foo";
       String expectedColor = "voo";

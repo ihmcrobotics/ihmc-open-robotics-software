@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
 public class SimulationRewoundListenerTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testSimulationRewoundListener()
    {
       boolean showGUI = false;

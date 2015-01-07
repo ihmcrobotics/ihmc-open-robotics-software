@@ -17,7 +17,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class JointWrenchSensorTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testStaticallyHangingMasses() throws UnreasonableAccelerationException
    {
       double massOne = 7.21;
@@ -65,7 +65,7 @@ public class JointWrenchSensorTest
    }
 
    
-   @Test
+   @Test(timeout=300000)
    public void testJointTorquesMatchWhenSensorAtJoint() throws UnreasonableAccelerationException
    {
       double massOne = 7.21;
@@ -111,7 +111,7 @@ public class JointWrenchSensorTest
       }
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testOffsetAtCenterOfMassWithCantileveredBeam() throws UnreasonableAccelerationException
    {
       double massOne = 7.21;

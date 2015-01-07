@@ -58,7 +58,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
    }
 
    
-   @Test
+   @Test(timeout=300000)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
       try

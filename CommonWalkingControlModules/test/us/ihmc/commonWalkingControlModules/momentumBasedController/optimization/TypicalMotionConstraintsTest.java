@@ -7,7 +7,7 @@ public class TypicalMotionConstraintsTest
 {
 
 
-   @Test
+   @Test(timeout=300000)
    public void testDoubleSupportKneesBentTypicalMotionConstraints()
    {
       // Have J x = p; A x = b. Check if an all out solution without requiring optimization. 
@@ -118,7 +118,7 @@ public class TypicalMotionConstraintsTest
 
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testDoubleSupportKneesStraightNoSingularity()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -236,7 +236,7 @@ public class TypicalMotionConstraintsTest
 
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testDoubleSupportKneesStraightNoSingularityTwo()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -369,7 +369,7 @@ public class TypicalMotionConstraintsTest
 
    }
    
-   @Test
+   @Test(timeout=300000)
    public void testDoubleSupportKneesStraightThree()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{

@@ -19,7 +19,7 @@ public class YoFrameQuaternionControlFlowOutputPortTest
 
    private static final double EPS = 1e-15;
 
-   @Test
+   @Test(timeout=300000)
    public void simpleWritingReadingTest()
    {
       ControlFlowElement controlFlowElement = new NullControlFlowElement();

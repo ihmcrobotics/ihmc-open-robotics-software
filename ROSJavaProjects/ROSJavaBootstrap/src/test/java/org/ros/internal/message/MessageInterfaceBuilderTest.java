@@ -38,7 +38,7 @@ public class MessageInterfaceBuilderTest {
     messageFactory = new DefaultMessageFactory(topicDefinitionResourceProvider);
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testDuplicateFieldNames() {
     MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
     builder.setPackageName("foo");

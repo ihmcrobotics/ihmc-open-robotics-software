@@ -14,7 +14,7 @@ import us.ihmc.utilities.ThreadTools;
 public class StreamingDataTCPServerTest
 {
 
-   @Test (timeout=4000)
+   @Test(timeout=4000)
    public void testTypicalUsage()
    {
       String hostname = "localhost";
@@ -48,7 +48,7 @@ public class StreamingDataTCPServerTest
    }
    
 
-   @Test (timeout=4000)
+   @Test(timeout=4000)
    public void testMultipleProducersAndConsumersRobustly()
    {
       String hostname = "localhost";
@@ -101,7 +101,7 @@ public class StreamingDataTCPServerTest
    }
 
 
-   @Test (timeout=6000)
+   @Test(timeout=6000)
    public void testPersistentConsumerToServerRestart()
    {
       String hostname = "localhost";

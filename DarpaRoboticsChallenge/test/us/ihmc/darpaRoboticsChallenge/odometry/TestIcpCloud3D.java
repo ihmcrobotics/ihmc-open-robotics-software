@@ -24,7 +24,7 @@ public class TestIcpCloud3D {
 
    Random rand = new Random(234);
 
-   @Test
+   @Test(timeout=300000)
    public void perfect_nomotion() {
 
       List<Point3D_F64> ref = new ArrayList<Point3D_F64>();
@@ -54,7 +54,7 @@ public class TestIcpCloud3D {
       assertTrue(found.getT().normSq()<=1e-8);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void perfect_translation() {
 
       List<Point3D_F64> ref = new ArrayList<Point3D_F64>();
@@ -89,7 +89,7 @@ public class TestIcpCloud3D {
       assertEquals(expected.getT().z,found.getT().z,1e-8);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void perfect_tran_rot() {
 
       List<Point3D_F64> ref = new ArrayList<Point3D_F64>();

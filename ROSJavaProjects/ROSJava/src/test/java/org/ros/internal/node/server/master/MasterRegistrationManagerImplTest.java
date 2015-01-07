@@ -41,7 +41,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testRegisterOnlyPublisher() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri = new URI("http://localhost:12345");
@@ -74,7 +74,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testRegisterOnlySubscriber() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri = new URI("http://localhost:12345");
@@ -108,7 +108,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testOnlySubscriberWildcard() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri = new URI("http://localhost:12345");
@@ -142,7 +142,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testSubscriberSubscriber() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -194,7 +194,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testSubscriberSubscriberWildcard() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -242,7 +242,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testSubscriberPublisher() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -292,7 +292,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testPublisherSubscriber() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -342,7 +342,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testPublisherPublisher() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -395,7 +395,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testNodeNameRepeated() throws Exception {
     GraphName nodeName = GraphName.of("/node1");
 
@@ -443,7 +443,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testSinglePublisherRemoved() throws Exception {
     GraphName nodeName = GraphName.of("/node1");
     GraphName topicName = GraphName.of("/topic1");
@@ -468,7 +468,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testTwoPublishersOneRemoved() throws Exception {
     GraphName nodeName = GraphName.of("/node1");
     URI nodeSlaveUri = new URI("http://localhost:54321");
@@ -504,7 +504,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testSingleSubscriberRemoved() throws Exception {
     GraphName nodeName = GraphName.of("/node1");
     GraphName topicName = GraphName.of("/topic1");
@@ -529,7 +529,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testTwoSubscribersOneRemoved() throws Exception {
     GraphName nodeName = GraphName.of("/node1");
     URI nodeSlaveUri = new URI("http://localhost:54321");
@@ -566,7 +566,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testSubscriberTwice() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -603,7 +603,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testPublisherTwice() throws Exception {
     GraphName topicName = GraphName.of("/topic");
 
@@ -641,7 +641,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testRegisterOnlyService() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri = new URI("http://localhost:12345");
@@ -672,7 +672,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testRegisterUnregisterService() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri = new URI("http://localhost:12345");
@@ -698,7 +698,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testRegisterUnregisterServiceWithPublisher() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri = new URI("http://localhost:12345");
@@ -729,7 +729,7 @@ public class MasterRegistrationManagerImplTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=300000)
   public void testRegisterServiceReplaceNode() throws Exception {
     GraphName nodeName = GraphName.of("/node");
     URI nodeSlaveUri1 = new URI("http://localhost:12345");

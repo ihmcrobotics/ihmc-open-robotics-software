@@ -6,7 +6,7 @@ import us.ihmc.graphics3DAdapter.examples.Graphics3DAdapterExampleOne;
 
 public class JMEGraphics3dAdapterTest
 {
-   @Test
+   @Test(timeout=300000)
    public void testSimpleObject()
    {
       JMEGraphics3DAdapter renderer = new JMEGraphics3DAdapter();

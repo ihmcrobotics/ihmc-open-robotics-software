@@ -45,7 +45,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints = new SideDependentList<FramePoint2d>();
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCenter()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -60,7 +60,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       }
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testFrameMismatch1()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -69,7 +69,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testFrameMismatch2()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -78,7 +78,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testAllWeightOnOneLeg()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -94,7 +94,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       }
    }
 
-   @Test
+   @Test(timeout=300000)
    public void testCoPOffVTPLineSegment()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));

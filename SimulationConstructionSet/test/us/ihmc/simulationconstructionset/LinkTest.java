@@ -13,7 +13,7 @@ public class LinkTest
 {
 
   
-   @Test
+   @Test(timeout=300000)
    public void testLinkInertia()
    {
       // This is a manual test. Run it with visualize = true and verify that the ellipsoid graphics rotates around the long axis.

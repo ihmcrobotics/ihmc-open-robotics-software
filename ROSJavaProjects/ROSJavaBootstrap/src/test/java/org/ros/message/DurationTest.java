@@ -32,7 +32,7 @@ public class DurationTest {
   public void setUp()  {
   }
 
-  @Test
+  @Test(timeout=300000)
   public void testConstructor() {
     // Test no args constructor.
     Duration t = new Duration();
@@ -54,7 +54,7 @@ public class DurationTest {
     assertEquals(2, t.nsecs);
   }
   
-  @Test
+  @Test(timeout=300000)
   public void testNormalize() { 
     Duration d = new Duration(0, 0);
     d.secs = 1;
@@ -70,14 +70,14 @@ public class DurationTest {
     assertEquals(1000000000-1, d.nsecs);
   }
   
-  @Test
+  @Test(timeout=300000)
   public void testIsZero() {
     assertTrue(new Duration(0, 0).isZero());
     assertFalse(new Duration(1, 0).isZero());
     assertFalse(new Duration(0, 1).isZero());
   }
   
-  @Test
+  @Test(timeout=300000)
   public void testComparable() {
     assertEquals(0, new Duration(0, 0).compareTo(new Duration(0, 0)));
     assertEquals(0, new Duration(1, 0).compareTo(new Duration(1, 0)));
