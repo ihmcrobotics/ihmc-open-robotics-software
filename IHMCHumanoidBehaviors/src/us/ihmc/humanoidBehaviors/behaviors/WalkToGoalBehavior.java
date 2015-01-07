@@ -267,6 +267,11 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 			}else{
 				break;
 			}
+         debugPrintln("Step Added To Send: " + outgoingFootsteps.footstepDataList.get(i));
+         if (outgoingFootsteps.footstepDataList.get(i).predictedContactPoints != null && outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.isEmpty()){
+            debugPrintln("Support Points are: " + outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.toString());
+            throw new RuntimeException("attempting to send footstep with empty list of support points");
+         }
 		}
 		stepsRequested = outgoingFootsteps.footstepDataList;
 		debugPrintln(stepsRequested.size() + " steps sent to controller");
