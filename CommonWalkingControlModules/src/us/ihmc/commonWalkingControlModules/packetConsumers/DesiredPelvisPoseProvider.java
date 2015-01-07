@@ -43,9 +43,11 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    }
 
    @Override
-   public FrameOrientation getDesiredPelvisOrientation()
+   public FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
    {
-      return desiredPelvisOrientation.getAndSet(null);
+      FrameOrientation ret = desiredPelvisOrientation.getAndSet(null);
+      ret.changeFrame(desiredPelvisFrame);
+      return ret;
    }
 
    // TODO That'd be nice to include the trajectory time in the packet

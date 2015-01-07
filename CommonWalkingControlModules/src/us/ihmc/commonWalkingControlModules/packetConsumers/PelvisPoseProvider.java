@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public interface PelvisPoseProvider
 {
@@ -11,7 +12,7 @@ public interface PelvisPoseProvider
 
    public abstract FramePoint getDesiredPelvisPosition();
 
-   public abstract FrameOrientation getDesiredPelvisOrientation();
+   public abstract FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame);
 
    public abstract double getTrajectoryTime();
 }
