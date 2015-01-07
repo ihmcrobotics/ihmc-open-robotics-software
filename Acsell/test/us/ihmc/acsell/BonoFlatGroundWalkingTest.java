@@ -14,7 +14,7 @@ public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
    private BonoRobotModel robotModel;
 
-   @Test
+   @Test(timeout=300000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
