@@ -162,10 +162,11 @@ public class PelvisOrientationManager
       {
          initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
          offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
+         pelvisOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+         initialPelvisOrientationOffset.set(tempOrientation);
          FrameOrientation pelvisOrientationProvided = pelvisPoseProvider.getDesiredPelvisOrientation();
          pelvisOrientationProvided.changeFrame(desiredPelvisFrame);
          tempOrientation.setIncludingFrame(pelvisOrientationProvided);
-         initialPelvisOrientationOffset.set(finalPelvisOrientationOffset);
          finalPelvisOrientationOffset.set(tempOrientation);
          pelvisOrientationOffsetTrajectoryGenerator.initialize();
       }
