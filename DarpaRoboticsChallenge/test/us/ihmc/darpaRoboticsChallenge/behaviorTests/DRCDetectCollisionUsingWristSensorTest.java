@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
+package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,7 +47,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public abstract class DRCWallCollisionTest implements MultiRobotTestInterface
+public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRobotTestInterface
 {
    private static final boolean KEEP_SCS_UP = false;
 
