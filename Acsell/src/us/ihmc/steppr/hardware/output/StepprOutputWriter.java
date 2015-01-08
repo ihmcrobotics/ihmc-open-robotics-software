@@ -18,6 +18,7 @@ import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprOutputWriter implements DRCOutputWriter
 {
@@ -39,16 +40,30 @@ public class StepprOutputWriter implements DRCOutputWriter
 
    private final UDPStepprOutputWriter outputWriter;
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauController = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+
+   enum JointControlMode
+   {
+      TORQUE_CONTROL, POSITION_CONTROL;
+   };
+
+   private final EnumMap<StepprJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, EnumYoVariable<JointControlMode>>(
+         StepprJoint.class);
 
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
 
       SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
-      
+
       tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-      for(StepprJoint joint: StepprJoint.values)
-         tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName()+"tauControllerOutput", registry));
+      for (StepprJoint joint : StepprJoint.values)
+         tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
+
+      yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+
+      initializeJointControlMode(robotModel.getWalkingControllerParameters().getJointsToIgnoreInController());
 
       outputWriter = new UDPStepprOutputWriter(command);
 
@@ -57,9 +72,6 @@ public class StepprOutputWriter implements DRCOutputWriter
 
       outputWriter.connect();
 
-      yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      
    }
 
    @Override
@@ -101,9 +113,9 @@ public class StepprOutputWriter implements DRCOutputWriter
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
-            double tau = wholeBodyControlJoint.getTau() * controlRatio.getDoubleValue() + standPrepJoint.getTau() * (1.0 - controlRatio.getDoubleValue());
-
-            double kd = wholeBodyControlJoint.getKd() * controlRatio.getDoubleValue() + standPrepJoint.getKd() * (1.0 - controlRatio.getDoubleValue());
+            double ratio = getControlRatioByJointControlMode(joint);
+            double tau = wholeBodyControlJoint.getTau() * ratio + standPrepJoint.getTau() * (1.0 - ratio);
+            double kd = wholeBodyControlJoint.getKd() * ratio + standPrepJoint.getKd() * (1.0 - ratio);
 
             StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
 
@@ -115,8 +127,7 @@ public class StepprOutputWriter implements DRCOutputWriter
             }
 
             tauControllerOutput.get(joint).set(tau);
-            jointCommand.setTauDesired(tau-tauSpring, rawSensorData); //use when Springs are installed
-//            jointCommand.setTauDesired(tau, rawSensorData);
+            jointCommand.setTauDesired(tau - tauSpring, rawSensorData); //use when Springs are installed
             jointCommand.setDamping(kd);
 
          }
@@ -126,14 +137,54 @@ public class StepprOutputWriter implements DRCOutputWriter
 
    }
 
+   private void initializeJointControlMode(String[] jointNameToIgnore)
+   {
+      for (StepprJoint joint : StepprJoint.values)
+      {
+         EnumYoVariable<JointControlMode> controlMode = new EnumYoVariable<StepprOutputWriter.JointControlMode>(joint.getSdfName()
+               + JointControlMode.class.getSimpleName(), registry, JointControlMode.class, false);
+
+         controlMode.set(JointControlMode.TORQUE_CONTROL);
+         for (String jointName : jointNameToIgnore)
+         {
+            if (joint.getSdfName().equals(jointName))
+            {
+               controlMode.set(JointControlMode.POSITION_CONTROL);
+               break;
+            }
+         }
+         jointControlMode.put(joint, controlMode);
+      }
+   }
+
+   private double getControlRatioByJointControlMode(StepprJoint joint)
+   {
+      double ratio;
+      switch (jointControlMode.get(joint).getEnumValue())
+      {
+      case POSITION_CONTROL:
+         ratio = 0.0;
+         break;
+      case TORQUE_CONTROL:
+         ratio = controlRatio.getDoubleValue();
+         break;
+      default:
+         jointControlMode.get(joint).set(JointControlMode.POSITION_CONTROL);
+         ratio = 0.0;
+      }
+      return ratio;
+   }
+
    private double calcSpringTorque(StepprJoint joint, double q)
    {
+      final double springConstant = 350; //400.0;
+      final double springEngageJointAngle = 0.085; //0.05;
       switch (joint)
       {
       case LEFT_HIP_X:
-         return 400 * Math.max(-0.05 - q, 0);
+         return springConstant * Math.max(-springEngageJointAngle - q, 0.0);
       case RIGHT_HIP_X:
-         return -400 * Math.max(q - 0.05, 0);
+         return -springConstant * Math.max(q - springEngageJointAngle, 0.0);
       default:
          return 0;
       }

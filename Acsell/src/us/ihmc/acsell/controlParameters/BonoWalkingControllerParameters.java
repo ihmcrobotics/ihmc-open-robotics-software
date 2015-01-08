@@ -95,18 +95,20 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return new String[0];
    }
 
-   @Override
-   public String[] getDefaultChestOrientationControlJointNames()
-   {
-      String[] defaultChestOrientationControlJointNames = new String[]
-            {
-                  jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-                  jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
-                  jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
-            };
+	@Override
+	public String[] getDefaultChestOrientationControlJointNames()
+	{
+		if (runningOnRealRobot)
+			return new String[] {};
 
-            return defaultChestOrientationControlJointNames;
-   }
+		String[] defaultChestOrientationControlJointNames = new String[] {
+				jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+				jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+				jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
+	   };
+
+		return defaultChestOrientationControlJointNames;
+	}
 
    private final double minimumHeightAboveGround = 0.595;
    private double nominalHeightAboveGround = 0.670;
@@ -305,8 +307,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
-      double kp = 100.0;
-      double zeta = 0.8;
+      double kp = 100;//600.0;
+      double zeta = 0.8;//0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = Double.POSITIVE_INFINITY;
@@ -635,7 +637,15 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      return null;
+      if (!runningOnRealRobot)
+         return null;
+      
+      String[] defaultChestOrientationControlJointNames = new String[] {
+            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+            jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
+
+      return defaultChestOrientationControlJointNames;
    }
 
    @Override
