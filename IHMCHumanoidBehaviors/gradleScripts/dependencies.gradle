@@ -16,4 +16,5 @@ dependencies {
 	compile project(':RobotDataCommunication')
 	compile project(':Planning')
 	compile project(':SensorProcessing')
+	compile project(':IHMCWholeBodyController')
 }
