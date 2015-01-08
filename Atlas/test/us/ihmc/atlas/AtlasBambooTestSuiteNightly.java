@@ -18,6 +18,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.atlas.AtlasPushRecoveryTest.class,
    us.ihmc.atlas.AtlasPushRecoveryWalkingTest.class,
    us.ihmc.atlas.AtlasScriptingTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class,
