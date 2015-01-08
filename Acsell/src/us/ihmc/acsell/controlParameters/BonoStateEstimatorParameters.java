@@ -39,7 +39,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
       jointVelocitySlopTimeForBacklashCompensation = 0.06;
       
-      doElasticityCompensation = true;
+      doElasticityCompensation = runningOnRealRobot;
       defaultJointStiffness = Double.POSITIVE_INFINITY;
       
       jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
