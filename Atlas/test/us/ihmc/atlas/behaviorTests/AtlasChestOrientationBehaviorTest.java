@@ -4,7 +4,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCChestOrientationBehaviorTest;
-import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCComHeightBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class AtlasChestOrientationBehaviorTest extends DRCChestOrientationBehaviorTest

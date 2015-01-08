@@ -104,30 +104,15 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
+   
    @Test(timeout = 300000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(chestOrientBehavior.getControllerGlobalPacketConsumer());
-
       Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-      chestOrientBehavior.setInput(chestOrientationPacket);
-
-      FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
-      success = success && executeBehavior(chestOrientBehavior, chestOrientationPacket.getTrajectoryTime());
-      FramePose finalChestPose = getCurrentChestPose(fullRobotModel);
-
-      FramePose desiredChestPose = new FramePose();
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), desiredChestQuat);
-      assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
-
-      assertTrue(success);
+      testChestOrientationBehavior(chestOrientationPacket);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -137,29 +122,15 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(chestOrientBehavior.getControllerGlobalPacketConsumer());
-
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
-      AxisAngle4d bla = new AxisAngle4d(0, 1, 0, rotationAngle);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0, 1, 0, rotationAngle);
       Quat4d desiredChestQuat = new Quat4d();
-      desiredChestQuat.set(bla);
+      desiredChestQuat.set(desiredAxisAngle);
 
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-      chestOrientBehavior.setInput(chestOrientationPacket);
-
-      FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
-      success = success && executeBehavior(chestOrientBehavior, chestOrientationPacket.getTrajectoryTime());
-      FramePose finalChestPose = getCurrentChestPose(fullRobotModel);
-
-      FramePose desiredChestPose = new FramePose();
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), desiredChestQuat);
-      assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
-
-      assertTrue(success);
-
+     
+      testChestOrientationBehavior(chestOrientationPacket);
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -168,29 +139,15 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(chestOrientBehavior.getControllerGlobalPacketConsumer());
-
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
-      AxisAngle4d bla = new AxisAngle4d(1, 0, 0, rotationAngle);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(1, 0, 0, rotationAngle);
       Quat4d desiredChestQuat = new Quat4d();
-      desiredChestQuat.set(bla);
+      desiredChestQuat.set(desiredAxisAngle);
 
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-      chestOrientBehavior.setInput(chestOrientationPacket);
-
-      FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
-      success = success && executeBehavior(chestOrientBehavior, chestOrientationPacket.getTrajectoryTime());
-      FramePose finalChestPose = getCurrentChestPose(fullRobotModel);
-
-      FramePose desiredChestPose = new FramePose();
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), desiredChestQuat);
-      assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
-
-      assertTrue(success);
-
+     
+      testChestOrientationBehavior(chestOrientationPacket);
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -199,30 +156,40 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0, 0, 1, rotationAngle);
+      Quat4d desiredChestQuat = new Quat4d();
+      desiredChestQuat.set(desiredAxisAngle);
+
+      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
+     
+      testChestOrientationBehavior(chestOrientationPacket);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   private void testChestOrientationBehavior(ChestOrientationPacket chestOrientationPacket) throws SimulationExceededMaximumTimeException
+   {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(chestOrientBehavior.getControllerGlobalPacketConsumer());
 
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
-      AxisAngle4d bla = new AxisAngle4d(0, 0, 1, rotationAngle);
-      Quat4d desiredChestQuat = new Quat4d();
-      desiredChestQuat.set(bla);
-
-      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 2.0);
       chestOrientBehavior.setInput(chestOrientationPacket);
 
       FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
       success = success && executeBehavior(chestOrientBehavior, chestOrientationPacket.getTrajectoryTime());
       FramePose finalChestPose = getCurrentChestPose(fullRobotModel);
 
+      if (DEBUG)
+      {
+         SysoutTool.println(" initial Chest Pose :\n" + initialChestPose);
+      }
       FramePose desiredChestPose = new FramePose();
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), desiredChestQuat);
+      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestOrientationPacket.quaternion);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);
-
-      BambooTools.reportTestFinishedMessage();
    }
 
    private FramePose getCurrentChestPose(FullRobotModel fullRobotModel)
@@ -292,8 +259,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Chest Pose : " + framePose1);
-         SysoutTool.println(" actual Chest Pose : " + framePose2);
+         SysoutTool.println(" desired Chest Pose :\n" + framePose1);
+         SysoutTool.println(" actual Chest Pose :\n" + framePose2);
 
          SysoutTool.println(" positionDistance = " + positionDistance);
          SysoutTool.println(" orientationDistance = " + orientationDistance);
