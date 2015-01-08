@@ -10,7 +10,7 @@ public interface PelvisPoseProvider
 
    public abstract boolean checkForNewOrientation();
 
-   public abstract FramePoint getDesiredPelvisPosition();
+   public abstract FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame);
 
    public abstract FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame);
 
