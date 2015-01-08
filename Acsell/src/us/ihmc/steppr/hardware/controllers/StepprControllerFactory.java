@@ -158,9 +158,7 @@ public class StepprControllerFactory
 
       double kneeAngleMultiplicationFactor = -1.0;
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
-      humanoidJointPoseList.createPoseSetters();
-      humanoidJointPoseList.createPoseSettersJustArms();
-      humanoidJointPoseList.createPoseSettersTuneWaist();
+      humanoidJointPoseList.createPoseSettersJustLegs();
       
       boolean useArms = false;
       boolean robotIsHanging = true;
