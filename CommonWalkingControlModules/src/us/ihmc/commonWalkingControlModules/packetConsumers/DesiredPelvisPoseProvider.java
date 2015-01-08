@@ -37,7 +37,7 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    }
 
    @Override
-   public FramePoint getDesiredPelvisPosition()
+   public FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame)
    {
       return desiredPelvisPosition.getAndSet(null);
    }

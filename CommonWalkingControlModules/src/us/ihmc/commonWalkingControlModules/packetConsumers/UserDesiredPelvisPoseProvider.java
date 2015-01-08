@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -11,32 +12,47 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleYoVariable userPelvisTrajectoryTime = new DoubleYoVariable("userDesiredPelvisTrajectoryTime", registry);
+
    private final BooleanYoVariable isNewPelvisOrientationInformationAvailable = new BooleanYoVariable("isNewPelvisOrientationInformationAvailable", registry);
-   private final YoFrameOrientation userPelvis;
+   private final YoFrameOrientation userPelvisOrientation = new YoFrameOrientation("userDesiredPelvis", null, registry);
+
+   private final BooleanYoVariable isNewPelvisPositionInformationAvailable = new BooleanYoVariable("isNewPelvisPositionInformationAvailable", registry);
+   private final YoFramePoint userPelvisPosition = new YoFramePoint("userDesiredPelvis", null, registry);
 
    private final Quat4d desiredQuat = new Quat4d();
+   private final Point3d desiredPoint = new Point3d();
    private final FrameOrientation frameOrientation = new FrameOrientation();
+   private final FramePoint framePoint = new FramePoint();
 
    public UserDesiredPelvisPoseProvider(YoVariableRegistry parentRegistry)
    {
-      userPelvis = new YoFrameOrientation("userDesiredPelvis", null, registry);
-
       VariableChangedListener variableChangedListener = new VariableChangedListener()
       {
          public void variableChanged(YoVariable<?> v)
          {
             isNewPelvisOrientationInformationAvailable.set(true);
-            userPelvis.getQuaternion(desiredQuat);
+            userPelvisOrientation.getQuaternion(desiredQuat);
          }
       };
 
-      userPelvis.attachVariableChangedListener(variableChangedListener);
+      userPelvisOrientation.attachVariableChangedListener(variableChangedListener);
+      
+      userPelvisPosition.attachVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            isNewPelvisPositionInformationAvailable.set(true);
+            userPelvisPosition.get(desiredPoint);
+         }
+      });
       
       parentRegistry.addChild(registry);
    }
@@ -63,13 +79,20 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    @Override
    public boolean checkForNewPosition()
    {
-      return false;
+      return isNewPelvisPositionInformationAvailable.getBooleanValue();
    }
 
    @Override
-   public FramePoint getDesiredPelvisPosition()
+   public FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame)
    {
-      return null;
+      if (!isNewPelvisPositionInformationAvailable.getBooleanValue())
+         return null;
+      
+      isNewPelvisPositionInformationAvailable.set(false);
+      
+      framePoint.setIncludingFrame(supportFrame, desiredPoint);
+      
+      return framePoint;
    }
 
    @Override

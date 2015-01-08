@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.HeelSwitch;
@@ -171,8 +170,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BipedSupportPolygons bipedSupportPolygons;
    private final YoFramePoint capturePoint;
    private final YoFramePoint2d desiredICP;
-   private final DoubleYoVariable icpStandOffsetX = new DoubleYoVariable("icpStandOffsetX", registry);
-   private final DoubleYoVariable icpStandOffsetY = new DoubleYoVariable("icpStandOffsetY", registry);
    private final YoFrameVector2d desiredICPVelocity;
 
    private final FramePoint tmpFramePoint = new FramePoint(worldFrame);
@@ -205,8 +202,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
 
    private final FootExplorationControlModule footExplorationControlModule;
-
-   private final MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(momentumBasedController.getCenterOfMassFrame());
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
@@ -516,8 +511,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
 
             desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
-            desiredICPLocal.setX(desiredICPLocal.getX() + icpStandOffsetX.getDoubleValue());
-            desiredICPLocal.setY(desiredICPLocal.getY() + icpStandOffsetY.getDoubleValue());
+            pelvisICPBasedTranslationManager.compute(null);
+            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal);
 
             FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
             supportPolygonInMidFeetZUp.orthogonalProjection(desiredICPLocal);
@@ -700,8 +695,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
-         icpStandOffsetX.set(0.0);
-         icpStandOffsetY.set(0.0);
+         pelvisICPBasedTranslationManager.enable();
 
          if (supportLeg.getEnumValue() == null) // Mean we are in double support (not transfer to side)
             upcomingFootstepList.notifyWalkingComplete();
@@ -769,10 +763,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionOutOfAction()
       {
-         icpStandOffsetX.set(0.0);
-         icpStandOffsetY.set(0.0);
+         pelvisICPBasedTranslationManager.disable();
          footstepListHasBeenUpdated.set(false);
-
          desiredECMPinSupportPolygon.set(false);
          feetManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
@@ -879,10 +871,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   desiredICPLocal);
          }
 
+         pelvisICPBasedTranslationManager.compute(supportSide);
+
          if (isInFlamingoStance.getBooleanValue())
          {
             desiredICPLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
-            desiredICPLocal.add(icpStandOffsetX.getDoubleValue(), icpStandOffsetY.getDoubleValue());
+            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal);
 
             FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
             footPolygonInAnkleZUp.orthogonalProjection(desiredICPLocal);
@@ -976,9 +970,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             FramePose nextFootPose = footPoseProvider.getDesiredFootPose(swingSide);
             feetManager.requestMoveStraight(swingSide, nextFootPose, footPoseProvider.getTrajectoryTime());
-            icpStandOffsetX.set(0.0);
-            icpStandOffsetY.set(0.0);
             isInFlamingoStance.set(true);
+            pelvisICPBasedTranslationManager.enable();
          }
 
          if (DEBUG)
@@ -1053,7 +1046,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             actualFootPoseInWorld.changeFrame(worldFrame);
             upcomingFootstepList.notifyComplete(actualFootPoseInWorld);
          }
-         isInFlamingoStance.set(false);
+         else
+         {
+            pelvisICPBasedTranslationManager.disable();
+            isInFlamingoStance.set(false);
+         }
 
          if (pushRecoveryModule.isEnabled())
          {

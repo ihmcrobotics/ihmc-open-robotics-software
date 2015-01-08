@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControl
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
@@ -33,16 +34,18 @@ public class VariousWalkingManagers
    private final ChestOrientationManager chestOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
-   private final PelvisOrientationManager pelvisOrientationManager; // mid competition hack
+   private final PelvisOrientationManager pelvisOrientationManager;
+   private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
 
    public VariousWalkingManagers(HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager,
-         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager)
+         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager, PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager)
    {
       this.headOrientationManager = headOrientationManager;
       this.chestOrientationManager = chestOrientationManager;
       this.manipulationControlModule = manipulationControlModule;
       this.feetManager = feetManager;
       this.pelvisOrientationManager = pelvisOrientationManager;
+      this.pelvisICPBasedTranslationManager = pelvisICPBasedTranslationManager;
    }
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
@@ -103,9 +106,10 @@ public class VariousWalkingManagers
       PelvisPoseProvider desiredPelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
       PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, swingTimeProvider, momentumBasedController, desiredPelvisPoseProvider, registry);
       
+      PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, desiredPelvisPoseProvider, registry);
 
       VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule,
-            feetManager, pelvisOrientationManager);
+            feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);
 
       return variousWalkingManagers;
    }
@@ -162,5 +166,10 @@ public class VariousWalkingManagers
    public PelvisOrientationManager getPelvisOrientationManager()
    {
       return pelvisOrientationManager;
+   }
+
+   public PelvisICPBasedTranslationManager getPelvisICPBasedTranslationManager()
+   {
+      return pelvisICPBasedTranslationManager;
    }
 }

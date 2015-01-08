@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
@@ -47,6 +48,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final TwistCalculator twistCalculator;
 
    protected final PelvisOrientationManager pelvisOrientationManager;
+   protected final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    protected final ChestOrientationManager chestOrientationManager;
    protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
@@ -97,6 +99,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       handPalms = momentumBasedController.getContactableHands();
 
       this.pelvisOrientationManager = variousWalkingManagers.getPelvisOrientationManager();
+      this.pelvisICPBasedTranslationManager = variousWalkingManagers.getPelvisICPBasedTranslationManager();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();

@@ -87,7 +87,7 @@ public class VariousWalkingProviders
    {
       if (desiredPelvisPoseProvider != null)
       {
-         desiredPelvisPoseProvider.getDesiredPelvisPosition();
+         desiredPelvisPoseProvider.getDesiredPelvisPosition(ReferenceFrame.getWorldFrame());
          desiredPelvisPoseProvider.getDesiredPelvisOrientation(ReferenceFrame.getWorldFrame());
       }
       if (desiredChestOrientationProvider != null)
