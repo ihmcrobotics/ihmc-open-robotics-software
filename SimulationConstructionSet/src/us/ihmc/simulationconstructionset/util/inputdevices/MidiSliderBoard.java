@@ -52,7 +52,8 @@ public class MidiSliderBoard implements ExitActionListener
    private SliderBoardTransmitterInterface transmitter = null;
    private VirtualSliderBoardGui virtualSliderBoard;
    private VariableChangedListener listener;
-
+   private YoVariableHolder holder;
+   
    public MidiSliderBoard(SimulationConstructionSet scs)
    {
       this(scs, true);
@@ -72,6 +73,11 @@ public class MidiSliderBoard implements ExitActionListener
 
          // if no devices are found
 
+         if (scs != null)
+         {
+            this.holder = scs;
+         }
+         
          if (showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
          {
             if ((scs == null) || (scs.getStandardSimulationGUI() != null))
@@ -451,8 +457,13 @@ public class MidiSliderBoard implements ExitActionListener
       setSlider(channel, holder.getVariable(name), min, max, exponent);
    }
    
+   public void setSlider(int channel, String name, double min, double max, double exponent, double hires)
+   { 
+      setSlider(channel, name, holder, min, max, exponent, hires);
+   }
+   
    public void setSlider(int channel, String name, YoVariableHolder holder, double min, double max, double exponent, double hires)
-   {
+   {  
       if (!holder.hasUniqueVariable(name))
       {
          System.err.println("trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
