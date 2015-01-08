@@ -77,11 +77,10 @@ public class TypicalMotionConstraintsTestHelper
       CommonOps.extract(centroidalMomentumAMatrixSelected, 0, centroidalMomentumAMatrixSelected.getNumRows(), 0,
                         centroidalMomentumAMatrixSelected.getNumCols(), combinedConstraintsAndDesiredMomentum, JPrimaryMotionConstraints.getNumRows(), 0);
 
-      
-      combinedRightHandSide = new DenseMatrix64F(pPrimaryMotionConstraints.getNumRows() + momentumDotEquationRightHandSide.getNumRows(), 1);
+      combinedRightHandSide = new DenseMatrix64F(pPrimaryMotionConstraints.getNumRows() + momentumDotEquationRightHandSideSelected.getNumRows(), 1);
       CommonOps.extract(pPrimaryMotionConstraints, 0, pPrimaryMotionConstraints.getNumRows(), 0, pPrimaryMotionConstraints.getNumCols(), combinedRightHandSide, 0, 0);
-      CommonOps.extract(momentumDotEquationRightHandSide, 0, momentumDotEquationRightHandSide.getNumRows(), 0,
-            momentumDotEquationRightHandSide.getNumCols(), combinedRightHandSide, pPrimaryMotionConstraints.getNumRows(), 0);
+      CommonOps.extract(momentumDotEquationRightHandSideSelected, 0, momentumDotEquationRightHandSideSelected.getNumRows(), 0,
+            momentumDotEquationRightHandSideSelected.getNumCols(), combinedRightHandSide, pPrimaryMotionConstraints.getNumRows(), 0);
       
       Pair<DenseMatrix64F[], double[]> svd = computeSVD(combinedConstraintsAndDesiredMomentum);
       DenseMatrix64F[] matrices = svd.first();
