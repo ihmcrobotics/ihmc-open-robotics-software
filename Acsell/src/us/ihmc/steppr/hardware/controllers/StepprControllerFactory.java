@@ -41,6 +41,8 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
+import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -154,6 +156,20 @@ public class StepprControllerFactory
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
             sensorInformation.getFeetForceSensorNames(), walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
 
+      double kneeAngleMultiplicationFactor = -1.0;
+      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
+      humanoidJointPoseList.createPoseSetters();
+      humanoidJointPoseList.createPoseSettersJustArms();
+      humanoidJointPoseList.createPoseSettersTuneWaist();
+      
+      boolean useArms = false;
+      boolean robotIsHanging = true;
+      
+      DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging);
+      // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
+      diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
+      controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
+      
       VariousWalkingProviderFactory variousWalkingProviderFactory;
       if (CREATE_YOVARIABLE_WALKING_PROVIDERS)
          variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
