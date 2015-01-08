@@ -879,10 +879,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   desiredICPLocal);
          }
 
-         desiredICP.set(desiredICPLocal);
          if (isInFlamingoStance.getBooleanValue())
-            desiredICP.add(icpStandOffsetX.getDoubleValue(), icpStandOffsetY.getDoubleValue());
+         {
+            desiredICPLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
+            desiredICPLocal.add(icpStandOffsetX.getDoubleValue(), icpStandOffsetY.getDoubleValue());
 
+            FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
+            footPolygonInAnkleZUp.orthogonalProjection(desiredICPLocal);
+            footPolygonInAnkleZUp.pullPointTowardsCentroid(desiredICPLocal, 0.10);
+
+            desiredICPLocal.changeFrame(worldFrame);
+         }
+
+         desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);
 
          desiredECMP.set(ecmpLocal);
