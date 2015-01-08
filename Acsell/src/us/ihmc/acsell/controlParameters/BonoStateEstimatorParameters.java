@@ -45,14 +45,11 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_X.getSdfName(), 6750.0);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_X.getSdfName(), 6750.0);
+      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_X.getSdfName(), 3600.0);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_X.getSdfName(), 3600.0);
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Y.getSdfName(), 8000.0);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Y.getSdfName(), 8000.0);
-
-      jointSpecificStiffness.put(StepprJoint.LEFT_KNEE_Y.getSdfName(), 75000.0);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_KNEE_Y.getSdfName(), 75000.0);
+      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Y.getSdfName(), 4500.0);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Y.getSdfName(), 4500.0);
    }
 
    @Override
