@@ -20,8 +20,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    BooleanYoVariable hitGround, fixedOnGround;
    DoubleYoVariable switchZThreshold;
    SideDependentList<ContactablePlaneBody> bipedFeet;
+   DoubleYoVariable soleZ,ankleZ;
    RobotSide side;
-   ReferenceFrame comFrame;
    double totalRobotWeight;
 
    public KinematicsBasedFootSwitch(String footName, SideDependentList<ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
@@ -32,10 +32,10 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       this.totalRobotWeight = totalRobotWeight;
       hitGround = new BooleanYoVariable(footName + "hitGround", registry);
       fixedOnGround= new BooleanYoVariable(footName+"fixedOnGround", registry);
-      
+      soleZ = new DoubleYoVariable(footName +"soleZ", registry);
+      ankleZ = new DoubleYoVariable(footName + "ankleZ", registry);
       this.switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
-      distanceFromGround = new DoubleYoVariable(footName + "Height", registry);
       parentRegistry.addChild(registry);
 
    }
@@ -55,6 +55,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       double thisFootZ = getPointInWorld(bipedFeet.get(side).getSoleFrame()).getZ();
       double otherFootZ = getPointInWorld(bipedFeet.get(side.getOppositeSide()).getSoleFrame()).getZ();
       hitGround.set((thisFootZ-otherFootZ) < switchZThreshold.getDoubleValue());
+      soleZ.set(thisFootZ);
+      ankleZ.set(getPointInWorld(bipedFeet.get(side).getFrameAfterParentJoint()).getZ());
       return hitGround.getBooleanValue();
    }
 
