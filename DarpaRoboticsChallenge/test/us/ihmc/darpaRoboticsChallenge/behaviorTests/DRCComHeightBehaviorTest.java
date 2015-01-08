@@ -39,15 +39,14 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
-   private static final boolean DEBUG = true;
-
-   private final double POSITION_THRESHOLD = 0.05;
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
-
+   private static final boolean DEBUG = false;
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+   private static final boolean showGUI = false || createMovie;
+
+   private final double POSITION_THRESHOLD = 0.05;
+   private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
+
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
@@ -93,11 +92,6 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
-      {
-         ThreadTools.sleepForever();
-      }
-
       if (drcSimulationTestHelper != null)
       {
          drcSimulationTestHelper.destroySimulation();
