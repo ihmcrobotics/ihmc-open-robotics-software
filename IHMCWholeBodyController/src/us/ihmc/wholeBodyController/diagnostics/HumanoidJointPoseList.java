@@ -28,11 +28,11 @@ public class HumanoidJointPoseList
    private final EnumYoVariable<HumanoidSpinePose> desiredSpinePose = new EnumYoVariable<HumanoidSpinePose>("desiredSpinePose", registry, HumanoidSpinePose.class);
    private final EnumYoVariable<HumanoidLegPose> desiredLegPose = new EnumYoVariable<HumanoidLegPose>("desiredLegPose", registry, HumanoidLegPose.class);
    
-   public HumanoidJointPoseList()
+   private final double kneeAngleMultiplicationFactor;
+   
+   public HumanoidJointPoseList(double kneeAngleMultiplicationFactor)
    {
-      createPoseSetters();
-      createPoseSettersJustArms();
-      createPoseSettersTuneWaist();
+      this.kneeAngleMultiplicationFactor = kneeAngleMultiplicationFactor;
    }
    
    public void setParentRegistry(YoVariableRegistry parentRegistry)
@@ -48,15 +48,20 @@ public class HumanoidJointPoseList
       {
          ArrayList<OneDoFJoint> armJoints = new ArrayList<OneDoFJoint>();
          
-         armJoints.add(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
-         armJoints.add(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
-         armJoints.add(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
-         armJoints.add(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
-         
+         addIfNotNull(armJoints, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
+         addIfNotNull(armJoints, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
+         addIfNotNull(armJoints, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
+         addIfNotNull(armJoints, fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
+                  
          ret.set(robotSide, armJoints);
       }
 
       return ret;
+   }
+   
+   private void addIfNotNull(ArrayList<OneDoFJoint> oneDoFJoints, OneDoFJoint oneDoFJoint)
+   {
+      if (oneDoFJoint != null) oneDoFJoints.add(oneDoFJoint);
    }
    
    public SideDependentList<ArrayList<OneDoFJoint>> getLegJoints(FullRobotModel fullRobotModel)
@@ -117,7 +122,7 @@ public class HumanoidJointPoseList
    {
       HumanoidJointPose humanoidJointPose = humanoidJointPoses.get(humanoidJointPoseIndex.getIntegerValue());
       desiredLegPose.set(humanoidJointPose.getLegPose());
-      return humanoidJointPose.getLegJointAngles();
+      return humanoidJointPose.getLegJointAngles(kneeAngleMultiplicationFactor);
    }
    
    public double[] getSpineJointAngles()
@@ -129,6 +134,8 @@ public class HumanoidJointPoseList
    
    private class HumanoidJointPose
    {
+      private static final int KNEE_INDEX = 3;
+      
       private final HumanoidArmPose armPose;
       private final HumanoidSpinePose spinePose;
       private final HumanoidLegPose legPose;
@@ -172,7 +179,7 @@ public class HumanoidJointPoseList
          return new SideDependentList<double[]>(leftArmJointAngles, rightArmJointAngles);
       }
       
-      public SideDependentList<double[]> getLegJointAngles()
+      public SideDependentList<double[]> getLegJointAngles(double kneeAngleMultiplicationFactor)
       {
          double[] leftLegJointAngles = legPose.getLegJointAngles();
          double[] rightLegJointAngles = legPose.getLegJointAngles();
@@ -181,6 +188,12 @@ public class HumanoidJointPoseList
          {
             rightLegJointAngles[1] = -1.0 * rightLegJointAngles[1];
          }
+         
+         //TODO: kneeAngleMultiplicationFactor is a hack. Need to look at the joint axes instead...
+         leftLegJointAngles[KNEE_INDEX] = kneeAngleMultiplicationFactor * leftLegJointAngles[KNEE_INDEX];
+         rightLegJointAngles[KNEE_INDEX] = kneeAngleMultiplicationFactor * rightLegJointAngles[KNEE_INDEX];
+         leftLegJointAngles[1] = kneeAngleMultiplicationFactor * leftLegJointAngles[1];
+
          
          return new SideDependentList<double[]>(leftLegJointAngles, rightLegJointAngles);
       }
@@ -192,7 +205,7 @@ public class HumanoidJointPoseList
 
    }
    
-   private void createPoseSetters()
+   public void createPoseSetters()
    {
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
       
@@ -245,8 +258,46 @@ public class HumanoidJointPoseList
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
    }
    
+   public void createPoseSettersJustLegs()
+   {
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
+      
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_BACKWARD, HumanoidLegPose.THIGHS_BACK_AND_STRAIGHT_A_LITTLE));
+//      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_BACKWARD, HumanoidLegPose.THIGHS_BACK_AND_STRAIGHT_MORE));
+      
+      // Low torque poses
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_LEFT, HumanoidLegPose.RELAXED_SLIGHTLY_BENT_KNEES));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_LEFT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.THIGHS_BACK_AND_STRAIGHT_A_LITTLE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_RIGHT, HumanoidLegPose.STAND_PREP));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.THIGHS_FORWARD_A_LITTLE_SLIGHLY_BENT_KNEES));
+  
+      
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD, HumanoidLegPose.THIGHS_FORWARD_A_LITTLE_SLIGHLY_BENT_KNEES));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD_A_LOT, HumanoidLegPose.THIGHS_UP_STRAIGHT_KNEES));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD_A_LOT, HumanoidLegPose.THIGHS_UP_BENT_KNEES));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD_A_LOT, HumanoidLegPose.THIGHS_UP_BENT_KNEES_MORE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_BIT));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_OUT_A_BIT_ROTATED_OUT));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_BACKWARD, HumanoidLegPose.LEGS_STRAIGHT_KNEES_FULLY_BENT));
+      
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD, HumanoidLegPose.STAND_PREP_LEGS_OUT_AND_FORWARD));
+      
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.LEGS_STRAIGHT_KNEES_FULLY_BENT));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.RELAXED_SLIGHTLY_BENT_KNEES));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_OUT_MORE_SLIGHTLY_BENT_KNEES));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD_A_LOT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_LEFT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_RIGHT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_IN_A_LOT));
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_OUT_MORE_SLIGHTLY_BENT_KNEES));
+      
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
+   }
    
-   private void createPoseSettersTuneWaist()
+   
+   public void createPoseSettersTuneWaist()
    {
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.LARGE_CHICKEN_WINGS, HumanoidSpinePose.LEAN_LEFT, HumanoidLegPose.STAND_PREP));
@@ -274,7 +325,7 @@ public class HumanoidJointPoseList
    }
    
    
-   private void createPoseSettersJustArms()
+   public void createPoseSettersJustArms()
    {
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.REACH_BACK, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
@@ -297,7 +348,7 @@ public class HumanoidJointPoseList
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
    }
    
-   private void createPoseSettersTuneElbowComParameters()
+   public void createPoseSettersTuneElbowComParameters()
    {
       humanoidJointPoses.add(new HumanoidJointPose( HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
 //      humanoidJointPoses.add(new HumanoidJointPose( HumanoidArmPose.ARM_STRAIGHT_DOWN, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
