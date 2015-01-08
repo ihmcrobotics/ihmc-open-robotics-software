@@ -31,7 +31,7 @@ public class NewInstantaneousCapturePointPlannerTest
 {
 	private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-	private boolean visualize = true;
+	private boolean visualize = false;
 	private boolean testPush = false;
 	boolean cancelPlan = true;
 	private final Random random = new Random();

@@ -36,7 +36,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 {
 	private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-	private boolean visualize = true;
+	private boolean visualize = false;
 	private final Random random = new Random();
 
 	private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
