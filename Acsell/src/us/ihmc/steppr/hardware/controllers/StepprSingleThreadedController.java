@@ -39,7 +39,7 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       YoVariableRegistry registry = new YoVariableRegistry("steppr");
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
-      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC, LogUtils.getMyIP(StepprNetworkParameters.LOGGER_HOST), 0.01);
+      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC, LogUtils.getMyIP(StepprNetworkParameters.CONTROL_COMPUTER_HOST), 0.01);
 
       StepprSetup stepprSetup = new StepprSetup(variableServer);
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
