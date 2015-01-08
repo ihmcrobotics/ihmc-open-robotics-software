@@ -242,7 +242,7 @@ public class SimulationConstructionSetTest
       testFixture = null;
    }
 
-   @Test(timeout=300000)
+   @Test(timeout=45000)
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
