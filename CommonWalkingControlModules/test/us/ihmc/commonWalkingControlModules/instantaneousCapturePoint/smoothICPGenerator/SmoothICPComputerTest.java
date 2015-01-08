@@ -111,7 +111,7 @@ public class SmoothICPComputerTest
 
       int maxNumberOfConsideredFootsteps = 4;
 
-//    createVisualizers(maxNumberOfConsideredFootsteps);
+      createVisualizers(maxNumberOfConsideredFootsteps);
 
       double doubleSupportFirstStepFraction = 0.5;
 
@@ -729,7 +729,7 @@ public class SmoothICPComputerTest
 
    private void createVisualizers(int maxNumberOfConsideredFootsteps)
    {
-      visualize = true;
+//      visualize = true;
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       Robot robot = new Robot("TestRobot");
