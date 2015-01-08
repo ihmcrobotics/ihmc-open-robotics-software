@@ -169,9 +169,6 @@ public class PelvisRotationalStateUpdater
 
    private void updateViz()
    {
-      yoRootJointFrameOrientation.checkReferenceFrameMatch(worldFrame);
-      yoRootJointFrameOrientation.set(rotationFromRootJointFrameToWorld);
-
       yoRootJointFrameQuaternion.checkReferenceFrameMatch(worldFrame);
       yoRootJointFrameQuaternion.set(rotationFromRootJointFrameToWorld);
 
