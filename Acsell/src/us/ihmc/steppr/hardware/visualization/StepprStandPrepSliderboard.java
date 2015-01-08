@@ -55,7 +55,9 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       YoVariable<?> height = registry.getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
       YoVariable<?> icpX = registry.getVariable("WalkingHighLevelHumanoidController", "icpStandOffsetX");
       YoVariable<?> icpY = registry.getVariable("WalkingHighLevelHumanoidController", "icpStandOffsetY");
-      
+      YoVariable<?> userPelvisRoll = registry.getVariable("UserDesiredPelvisPoseProvider","userDesiredPelvisRoll");
+      YoVariable<?> userPelvisYaw = registry.getVariable("UserDesiredPelvisPoseProvider","userDesiredPelvisYaw");
+      YoVariable<?> userPelvisPitch = registry.getVariable("UserDesiredPelvisPoseProvider","userDesiredPelvisPitch");
       final YoVariable<?> motorPowerStateRequest = registry.getVariable("StepprSetup", "motorPowerStateRequest");
       BooleanYoVariable requestPowerOff = new BooleanYoVariable("requestPowerOff", registry);
       requestPowerOff.addVariableChangedListener(new VariableChangedListener()
@@ -82,6 +84,10 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          sliderBoardConfigurationManager.setSlider(6, height, -0.3, 0.3);
          sliderBoardConfigurationManager.setSlider(7, icpX, -0.3, 0.3);
          sliderBoardConfigurationManager.setSlider(8, icpY, -0.3, 0.3);
+         sliderBoardConfigurationManager.setKnob(1, userPelvisYaw, -0.4,0.4);
+         sliderBoardConfigurationManager.setKnob(2, userPelvisPitch, -0.4,0.4);
+         sliderBoardConfigurationManager.setKnob(3, userPelvisRoll, -0.4,0.4);
+
          
 
          sliderBoardConfigurationManager.setButton(1, registry.getVariable("StepprOutputWriter","enableOutput"));

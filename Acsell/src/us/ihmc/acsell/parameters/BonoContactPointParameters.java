@@ -110,6 +110,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
       }
       
       
+      double footContactPointShrinking = 0.005;
       for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
@@ -117,10 +118,13 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
 
          ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<Pair<String, Point2d>>();
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, - toeWidth/ 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, toeWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
+         double shrinkFootLength=footLength/2.0-footContactPointShrinking;
+         double shrinkToeWidth=toeWidth/2.0-footContactPointShrinking;
+         double shrinkHeelWdith=footWidth/2.0-footContactPointShrinking;
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(shrinkFootLength, -shrinkToeWidth)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(shrinkFootLength, shrinkToeWidth)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-shrinkFootLength, -shrinkHeelWdith)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-shrinkFootLength, shrinkHeelWdith)));
 
          //SCS contact points
          for (Pair<String, Point2d> footGC : footGCs)
