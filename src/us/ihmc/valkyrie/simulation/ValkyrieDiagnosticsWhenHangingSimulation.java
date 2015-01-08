@@ -38,7 +38,12 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
-      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
+      double kneeAngleMultiplicationFactor = 1.0;
+      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
+      humanoidJointPoseList.createPoseSetters();
+      humanoidJointPoseList.createPoseSettersJustArms();
+      humanoidJointPoseList.createPoseSettersTuneWaist();
+      
       boolean robotIsHanging = true;
       HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotIsHanging, robotModel, robotInitialSetup);
       humanoidDiagnosticsWhenHangingSimulation.rememberCorruptorVariableValues();
