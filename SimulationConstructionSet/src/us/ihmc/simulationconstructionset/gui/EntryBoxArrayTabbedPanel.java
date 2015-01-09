@@ -213,7 +213,7 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
       DoubleYoVariable[] varsToEnter = new DoubleYoVariable[0];
 
       EntryBoxArrayPanel tmpEntryBoxArrayPanel = new EntryBoxArrayPanel(parentContainer, selectedVariableHolder, varsToEnter);
-      addEntryBoxArrayPanel("Tab", tmpEntryBoxArrayPanel);
+      addEntryBoxArrayPanel("Tab"+getTabCount(), tmpEntryBoxArrayPanel);
    }
 
 }

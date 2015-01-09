@@ -1558,6 +1558,10 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          return;
       }
 
+      if (entryBoxGroupList.getEntryBoxGroup(name) != null)
+      {
+         entryBoxGroupList.removeEntryBoxGroup(entryBoxGroupList.getEntryBoxGroup(name));
+      }
       EntryBoxGroup group = new EntryBoxGroup(name);
 
       if (vars != null)
@@ -1590,7 +1594,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       // selectVarGroup(config.getVarGroupName());
       selectGraphGroup(config.getGraphGroupName());
-      selectEntryBoxGroup(config.getEntryBoxGroupName());
+      createNewEntryBoxTabFromEntryBoxGroup(config.getEntryBoxGroupName());
    }
 
    public void selectVarGroup(String name)
@@ -1668,8 +1672,25 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return myEntryBoxArrayPanel.getCurrentPanel(true);
    }
 
-   public void createNewEntryBoxTabFromEntryGoxGroup(String name)
+   public void createNewEntryBoxTabFromEntryBoxGroup(String name)
    {
+      //      
+      if (myEntryBoxArrayPanel.getTabCount() > 0)
+      {
+         for (int i = 0; i < myEntryBoxArrayPanel.getTabCount(); i++)
+         {
+            if (myEntryBoxArrayPanel.getComponentAt(i) != null)
+            {
+               if (myEntryBoxArrayPanel.getComponentAt(i).getName().equals(name))
+               {
+                  myEntryBoxArrayPanel.removeTabAt(i);
+
+                  break;
+               }
+            }
+         }
+      }
+      //            
       if (myEntryBoxArrayPanel == null)
       {
          return;
@@ -1687,6 +1708,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       ArrayList<YoVariable<?>> matchingVariables = rootRegistry.getMatchingVariables(entryBoxVars, entryBoxRegularExpressions);
 
       EntryBoxArrayPanel tmpEntryBoxArrayPanel = new EntryBoxArrayPanel(parentContainer, selectedVariableHolder, matchingVariables);
+      tmpEntryBoxArrayPanel.setName(name);
       myEntryBoxArrayPanel.addEntryBoxArrayPanel(name, tmpEntryBoxArrayPanel);
 
       this.myEntryBoxArrayPanel.getCurrentPanel().checkStatus();
@@ -1708,8 +1730,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          return;
       }
-
-      myEntryBoxArrayPanel.getCurrentPanel(true).removeAllEntryBoxes();
 
       String[] entryBoxVars = group.getEntryBoxVars();
       String[] entryBoxRegularExpressions = group.getEntryBoxRegularExpressions();
