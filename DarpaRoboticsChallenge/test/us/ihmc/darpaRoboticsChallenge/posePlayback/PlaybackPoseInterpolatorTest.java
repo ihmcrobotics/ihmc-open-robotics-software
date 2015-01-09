@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInterface
 {
-   private static final boolean SHOW_GUI = true;
+   private static final boolean SHOW_GUI = false;
    
 
    @Test(timeout=300000)
