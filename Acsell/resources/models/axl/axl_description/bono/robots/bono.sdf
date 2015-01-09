@@ -384,7 +384,7 @@
     <link name='l_uleg'>
       <pose>0.0 0.146158 -0.085547 0 0 0</pose>
       <inertial>
-        <pose>-0.01225 0.05246 -0.14802 0 -0 0</pose>
+        <pose>-0.02 0.0525 -0.218 0 -0 0</pose>
         <mass>7.76096</mass>
         <inertia>
           <ixx> 0.13628</ixx>
@@ -482,7 +482,7 @@
    <link name='l_lleg'>
       <pose>0.0 0.146158 -0.462483 0 0 0</pose>
       <inertial>
-        <pose>0.00850 0.00046 -0.05588 0 -0 0</pose>
+        <pose>0.013 -0.02 -0.06 0 -0 0</pose>
         <mass>8.89814</mass>
         <inertia>
           <ixx>0.11869</ixx>
@@ -697,7 +697,7 @@
     <link name='l_foot'>
       <pose>0.0 0.146158 -0.884123 0 0 0</pose>
       <inertial>
-        <pose>0.07958 0.00001 -0.03190 0 -0 0</pose>
+        <pose>0.121 0.0 0.0 0 -0 0</pose>
         <mass>1.62221</mass>
         <inertia>
           <ixx>0.00344</ixx>
@@ -1091,7 +1091,7 @@
     <link name='r_uleg'>
       <pose>0.0 -0.146158 -0.085547 0 0 0</pose>
       <inertial>
-        <pose>-0.01220 -0.05253 -0.14810 0 -0 0</pose>
+        <pose>-0.02 -0.0525 -0.218 0 -0 0</pose>
         <mass>7.76243</mass>
         <inertia>
           <ixx>0.13623</ixx>
@@ -1189,7 +1189,7 @@
   <link name='r_lleg'>
       <pose>0.0 -0.146158 -0.462483 0 0 0</pose>
       <inertial>
-        <pose>0.00860 -0.00021 -0.05551 0 -0 0</pose>
+        <pose>0.013 0.02 -0.06 0 -0 0</pose>
         <mass>8.87430</mass>
         <inertia>
           <ixx>0.11823</ixx>
@@ -1403,7 +1403,7 @@
     <link name='r_foot'>
       <pose>0.0 -0.146158 -0.884123 0 0 0</pose>
       <inertial>
-        <pose>0.07958 0.00001 -0.03190 0 -0 0</pose>
+        <pose>0.121 0.0 0.0 0 -0 0</pose>
         <mass>1.62221</mass>
         <inertia>
           <ixx>0.00344</ixx>
