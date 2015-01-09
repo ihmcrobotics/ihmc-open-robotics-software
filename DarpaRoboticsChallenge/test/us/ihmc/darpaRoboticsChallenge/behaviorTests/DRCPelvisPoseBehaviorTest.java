@@ -23,6 +23,7 @@ import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -44,15 +45,15 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterface
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = true || createMovie;
+   private static final boolean showGUI = false || createMovie;
 
    private final double MAX_ANGLE_TO_TEST_RAD = 15.0 * Math.PI / 180.0;
-   private final double MAX_TRANSLATION_TO_TEST_M = Double.NaN;
+   private final double MAX_TRANSLATION_TO_TEST_M = 0.15;
 
-   private final double POSITION_THRESHOLD = 0.1;
+   private final double POSITION_THRESHOLD = 0.05;
    private final double ORIENTATION_THRESHOLD = 0.007;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -75,6 +76,11 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    @Before
    public void setUp()
    {
+      if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
+      {
+         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
+      }
+      
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
@@ -125,7 +131,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+//   @Test(timeout = 300000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -142,7 +148,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+//   @Test(timeout = 300000)
    public void testPelvisRollRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -159,7 +165,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+//   @Test(timeout = 300000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -208,7 +214,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-      @Test(timeout = 300000)
+//      @Test(timeout = 300000)
    public void testPelvisZTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
