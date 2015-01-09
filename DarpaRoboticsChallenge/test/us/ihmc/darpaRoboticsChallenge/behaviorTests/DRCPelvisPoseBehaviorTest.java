@@ -40,7 +40,6 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterface
@@ -289,15 +288,12 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
       return ret;
    }
-
+   
    private FramePose getCurrentPelvisPose(FullRobotModel fullRobotModel)
    {
       FramePose ret = new FramePose();
-      fullRobotModel.updateFrames();
-      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-
-      RigidBodyTransform transformPelvisToWorld = pelvisFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      ret.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transformPelvisToWorld);
+      ret.setToZero(fullRobotModel.getPelvis().getBodyFixedFrame());
+      ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
    }
