@@ -34,11 +34,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestInterface
@@ -68,6 +68,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
+   private ReferenceFrames referenceFrames;
 
    @Before
    public void setUp()
@@ -92,6 +93,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      referenceFrames = robotDataReceiver.getReferenceFrames();
 
       PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
             "DRCComHeightBehaviorTestJunkyCommunicator");
@@ -201,11 +203,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    private FramePose getCurrentChestPose(FullRobotModel fullRobotModel)
    {
       FramePose ret = new FramePose();
-      fullRobotModel.updateFrames();
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-
-      RigidBodyTransform TransformChestToWorld = chestFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      ret.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), TransformChestToWorld);
+      ret.setToZero(fullRobotModel.getChest().getBodyFixedFrame());
+      ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
    }
