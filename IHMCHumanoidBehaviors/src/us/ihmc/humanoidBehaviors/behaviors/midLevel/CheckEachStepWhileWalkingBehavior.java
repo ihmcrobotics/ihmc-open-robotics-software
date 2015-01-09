@@ -19,6 +19,15 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
+/** 
+ * Use LookAtBehavior() to provide visual feedback about upcoming footsteps.
+ * Input is updated whenever a new FootStepList() [Packet] is received
+ * Ignore footsteps that are "too close" to the robot (inside the no_looky_radius).
+ * 
+ * @author Brandon McShrewsington Crunchberry
+ *
+ */
+
 public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
 {
    private static final double NO_LOOKY_RADIUS = 1.0;
