@@ -290,7 +290,7 @@ public class HumanoidJointPoseList
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_FORWARD_A_LOT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_LEFT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.LEAN_RIGHT, HumanoidLegPose.STAND_PREP_HIPS_OUT_A_LITTLE));
-      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_IN_A_LOT));
+//      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_IN_A_LOT));
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.HIPS_OUT_MORE_SLIGHTLY_BENT_KNEES));
       
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
