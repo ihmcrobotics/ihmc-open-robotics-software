@@ -2,28 +2,28 @@ package us.ihmc.valkyrie.simulation;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.dataStructure.registry.NameSpaceRenamer;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieDataFileNamespaceRenamer
 {
    public ValkyrieDataFileNamespaceRenamer()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("null"));
-      
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
       
-      ChangeNamespacesToMatchSimButton changeNamespacesToMatchSimButton = new ChangeNamespacesToMatchSimButton(rootRegistry);
+      NameSpaceRenamer valkyrieNameSpaceRenamer = new ValkyrieNameSpaceRenamer();
+      ChangeNamespacesToMatchSimButton changeNamespacesToMatchSimButton = new ChangeNamespacesToMatchSimButton("ChangeValkyrieNamespaces", rootRegistry, valkyrieNameSpaceRenamer);
       scs.addButton(changeNamespacesToMatchSimButton);
       
-      ThinBufferButton thinBufferButton = new ThinBufferButton(scs);
-      scs.addButton(thinBufferButton);
+      NameSpaceRenamer stepprNameSpaceRenamer = new StepprNameSpaceRenamer();
+      ChangeNamespacesToMatchSimButton changeStepprNamespacesToMatchSimButton = new ChangeNamespacesToMatchSimButton("ChangeStepprNamespaces", rootRegistry, stepprNameSpaceRenamer);
+      scs.addButton(changeStepprNamespacesToMatchSimButton);
       
       scs.startOnAThread();
    }
@@ -32,12 +32,14 @@ public class ValkyrieDataFileNamespaceRenamer
    {
       private static final long serialVersionUID = -6919907212022890245L;
       private final YoVariableRegistry rootRegistry;
+      private final NameSpaceRenamer nameSpaceRenamer;
       
-      public ChangeNamespacesToMatchSimButton(YoVariableRegistry rootRegistry)
+      public ChangeNamespacesToMatchSimButton(String name, YoVariableRegistry rootRegistry, NameSpaceRenamer nameSpaceRenamer)
       {
-         super("ChangeNamespaces");
+         super(name);
          
          this.rootRegistry = rootRegistry;
+         this.nameSpaceRenamer = nameSpaceRenamer;
          
          this.addActionListener(this);
       }
@@ -45,50 +47,34 @@ public class ValkyrieDataFileNamespaceRenamer
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         recursivelyPrintNamespaces(rootRegistry);
+         rootRegistry.recursivelyChangeNamespaces(nameSpaceRenamer);
       }
    }
    
-   
-   private void recursivelyPrintNamespaces(YoVariableRegistry registry)
+   private class StepprNameSpaceRenamer implements NameSpaceRenamer
    {
-      NameSpace nameSpace = registry.getNameSpace();
-      
-      String nameSpaceString = nameSpace.getName().replaceAll("loggedmain", "V1.DRCSimulation");
-      
-      if (nameSpaceString.startsWith("V1.")) nameSpaceString = "root." + nameSpaceString;
-      registry.changeNameSpace(nameSpaceString);
-      
-      System.out.println(nameSpaceString);
-      
-      ArrayList<YoVariableRegistry> children = registry.getChildren();
-      
-      for (YoVariableRegistry yoVariableRegistry : children)
-      {
-         recursivelyPrintNamespaces(yoVariableRegistry);
-      }
-   }
-   
-   private class ThinBufferButton extends JButton implements ActionListener
-   {
-      private static final long serialVersionUID = 4260526727108638954L;
-      private final SimulationConstructionSet simulationConstructionSet;
-      
-      public ThinBufferButton(SimulationConstructionSet simulationConstructionSet)
-      {
-         super("Thin Buffer");
-         
-         this.simulationConstructionSet = simulationConstructionSet;
-         this.addActionListener(this);
-      }
-
       @Override
-      public void actionPerformed(ActionEvent e)
+      public String changeNamespaceString(String nameSpaceString)
       {
-         simulationConstructionSet.thinBuffer(2);
-      }
+         String newNameSpaceString = nameSpaceString.replaceAll("loggedmain", "bono.DRCSimulation");
+         if (newNameSpaceString.startsWith("bono.")) newNameSpaceString = "root." + newNameSpaceString;
 
+         return newNameSpaceString;
+      }
    }
+   
+   private class ValkyrieNameSpaceRenamer implements NameSpaceRenamer
+   {
+      @Override
+      public String changeNamespaceString(String nameSpaceString)
+      {
+         String newNameSpaceString = nameSpaceString.replaceAll("loggedmain", "V1.DRCSimulation");
+         if (newNameSpaceString.startsWith("V1.")) newNameSpaceString = "root." + newNameSpaceString;
+
+         return newNameSpaceString;
+      }
+   }
+  
    
    public static void main(String[] args)
    {

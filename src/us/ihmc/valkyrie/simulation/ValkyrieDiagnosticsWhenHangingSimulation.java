@@ -30,7 +30,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {
    private final DiagnosticsWhenHangingController diagnosticsWhenHangingController;
-   
+   private static final boolean computeTorqueOffsetsBasedOnAverages = true;
+
    public ValkyrieDiagnosticsWhenHangingSimulation()
    {
       DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(false, false);
@@ -45,7 +46,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       humanoidJointPoseList.createPoseSettersTuneWaist();
       
       boolean robotIsHanging = true;
-      HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotIsHanging, robotModel, robotInitialSetup);
+      HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotIsHanging, robotModel, robotInitialSetup, computeTorqueOffsetsBasedOnAverages);
       humanoidDiagnosticsWhenHangingSimulation.rememberCorruptorVariableValues();
 
       
@@ -57,7 +58,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 //      loadLegDataAndDoSomeOptimizationTests(humanoidDiagnosticsWhenHangingSimulation);
       
       
-      humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages();
+      humanoidDiagnosticsWhenHangingSimulation.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
       
       PrintTorqueOffsetsButton printTorqueOffsetsButton = new PrintTorqueOffsetsButton();
       simulationConstructionSet.addButton(printTorqueOffsetsButton);
