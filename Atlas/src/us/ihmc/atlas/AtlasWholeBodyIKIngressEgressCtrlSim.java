@@ -12,9 +12,6 @@ import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIKPacketCreator;
-import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver;
-import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -27,6 +24,8 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -51,7 +50,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final YoGraphicShape yoGraphicsShape;
    private final DoubleYoVariable hik_x_des, hik_y_des, hik_z_des;
    private final boolean random = false;
-   private final double ERROR_DISTANCE_TOLERANCE = 0.25;
+   private final double ERROR_DISTANCE_TOLERANCE = 0.03;
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws IOException
    {
@@ -177,7 +176,6 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       ReferenceFrame actualFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
       tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       System.out.println("actual pelvis: \n" + tempTransform);
-      
      
       workingFrame = wholeBodyIKSolver.getDesiredBodyFrame("r_foot", ReferenceFrame.getWorldFrame());
       tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());

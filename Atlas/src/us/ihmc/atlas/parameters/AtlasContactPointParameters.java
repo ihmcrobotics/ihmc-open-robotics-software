@@ -486,10 +486,10 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       }
       else
       {
-         linearGroundContactModel.setZStiffness(2000.0);
-         linearGroundContactModel.setZDamping(1500.0);
-         linearGroundContactModel.setXYStiffness(50000.0);
-         linearGroundContactModel.setXYDamping(2000.0);
+         linearGroundContactModel.setZStiffness(2000.0 / AtlasPhysicalProperties.scale);
+         linearGroundContactModel.setZDamping(1500.0 / AtlasPhysicalProperties.scale);
+         linearGroundContactModel.setXYStiffness(50000.0 / AtlasPhysicalProperties.scale);
+         linearGroundContactModel.setXYDamping(2000.0 / AtlasPhysicalProperties.scale);
       }
    }
 }

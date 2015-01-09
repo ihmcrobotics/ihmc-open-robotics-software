@@ -81,7 +81,6 @@ public class AtlasWholeBodyIKSimulation
    public static void main(String[] args)
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
-
       new AtlasWholeBodyIKSimulation(atlasRobotModel);
    }
 }
