@@ -15,6 +15,11 @@ public class EntryBoxGroupList
       groups.add(group);
    }
 
+   public void removeEntryBoxGroup(EntryBoxGroup group)
+   {
+      groups.remove(group);
+   }
+   
    public String[] getEntryBoxGroupNames()
    {
       int n = groups.size();

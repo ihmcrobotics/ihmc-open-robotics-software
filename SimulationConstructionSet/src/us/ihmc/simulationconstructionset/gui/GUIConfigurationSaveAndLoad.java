@@ -491,7 +491,7 @@ public class GUIConfigurationSaveAndLoad
 
       myGUI.setupEntryBoxGroup(tabName, name);
       myGUI.updateGUI();
-      myGUI.createNewEntryBoxTabFromEntryGoxGroup(tabName);
+      myGUI.createNewEntryBoxTabFromEntryBoxGroup(tabName);
    }
 
    public void loadGraphConfigurationsInConfigurationMenu()
