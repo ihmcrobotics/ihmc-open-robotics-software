@@ -131,7 +131,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-//   @Test(timeout = 300000)
+   @Test(timeout = 300000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -165,7 +165,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-//   @Test(timeout = 300000)
+   @Test(timeout = 300000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -258,7 +258,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       final PelvisPoseBehavior pelvisPoseBehavior = new PelvisPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(pelvisPoseBehavior.getControllerGlobalPacketConsumer());
-
+      
       pelvisPoseBehavior.setInput(pelvisPosePacket);
 
       FramePose initialPelvisPose = getCurrentPelvisPose(fullRobotModel);
