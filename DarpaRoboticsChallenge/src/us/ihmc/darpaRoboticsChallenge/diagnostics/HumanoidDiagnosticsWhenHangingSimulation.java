@@ -36,9 +36,12 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    private final SimulationConstructionSet simulationConstructionSet;
    private final HumanoidDiagnosticsWhenHangingAnalyzer analyzer;
    private final DiagnosticsWhenHangingController controller;
+   private final boolean computeTorqueOffsetsBasedOnAverages;
    
-   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
    {
+      this.computeTorqueOffsetsBasedOnAverages = computeTorqueOffsetsBasedOnAverages;
+      
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, model.getSimulateDT());
@@ -87,9 +90,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       CutBufferToDiagnosticsStateButton cutBufferButton = new CutBufferToDiagnosticsStateButton(simulationConstructionSet);
       simulationConstructionSet.addButton(cutBufferButton);
       
-      ThinBufferButton thinBufferButton = new ThinBufferButton(simulationConstructionSet);
-      simulationConstructionSet.addButton(thinBufferButton);
-      
       CopyMeasuredTorqueToAppliedTorqueButton copyMeasuredTorqueToAppliedTorqueButton = new CopyMeasuredTorqueToAppliedTorqueButton(analyzer);
       simulationConstructionSet.addButton(copyMeasuredTorqueToAppliedTorqueButton);
 
@@ -107,9 +107,9 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       return controller;
    }
    
-   public void updateDataAndComputeTorqueOffsetsBasedOnAverages()
+   public void updateDataAndComputeTorqueOffsetsBasedOnAverages(boolean computeTorqueOffsetsBasedOnAverages)
    {
-      analyzer.updateDataAndComputeTorqueOffsetsBasedOnAverages();
+      analyzer.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
    }
    
    public void setVariablesToOptimize(String[] containsToOptimizeCoM, String[] containsToOptimizeTorqueScores)
@@ -131,28 +131,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    {
       analyzer.setCorruptorVariableValuesToOptimizeToZero();
    }
-   
-   private class ThinBufferButton extends JButton implements ActionListener
-   {
-      private static final long serialVersionUID = 4260526727108638954L;
-      private final SimulationConstructionSet simulationConstructionSet;
-      
-      public ThinBufferButton(SimulationConstructionSet simulationConstructionSet)
-      {
-         super("Thin Buffer");
-         
-         this.simulationConstructionSet = simulationConstructionSet;
-         this.addActionListener(this);
-      }
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-         simulationConstructionSet.thinBuffer(2);
-      }
-
-   }
-    
    
    private class CutBufferToDiagnosticsStateButton extends JButton implements ActionListener
    {
@@ -267,7 +245,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       public void actionPerformed(ActionEvent e)
       {
 //         analyzer.updateCorruptorAndAnalyzeDataInBuffer();
-         analyzer.updateDataAndComputeTorqueOffsetsBasedOnAverages();
+         analyzer.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
       }
    }
    
@@ -296,7 +274,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                @Override
                protected Object doInBackground() throws Exception
                {
-                  analyzer.optimizeCorruptorValues();
+                  analyzer.optimizeCorruptorValues(computeTorqueOffsetsBasedOnAverages);
                   setText("Optimize");
                   return null;
                }};

@@ -162,7 +162,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    
 
    
-   public void optimizeCorruptorValues()
+   public void optimizeCorruptorValues(boolean computeTorqueOffsetsBasedOnAverages)
    {
       updateCorruptorAndAnalyzeDataInBuffer();
       simulationConstructionSet.gotoOutPointNow();
@@ -199,7 +199,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
          moveCorruptorValuesRandomly(random, currentCorruptorVariableValues, comOffsetChangeDelta);
          setCorruptorValues(corruptorVariablesToOptimize, currentCorruptorVariableValues);
          
-         this.updateDataAndComputeTorqueOffsetsBasedOnAverages();
+         this.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
          
          
          simulationConstructionSet.gotoOutPointNow();
@@ -242,7 +242,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
             setCorruptorValues(corruptorVariablesToOptimize, currentCorruptorVariableValues);
             //          updateCorruptorAndAnalyzeDataInBuffer();
 
-            this.updateDataAndComputeTorqueOffsetsBasedOnAverages();
+            this.updateDataAndComputeTorqueOffsetsBasedOnAverages(computeTorqueOffsetsBasedOnAverages);
          }
       }
    }
@@ -379,11 +379,15 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       }
    }
    
-   public void updateDataAndComputeTorqueOffsetsBasedOnAverages()
+   public void updateDataAndComputeTorqueOffsetsBasedOnAverages(boolean computeTorqueOffsetsBasedOnAverages)
    {
       updateCorruptorAndAnalyzeDataInBuffer();
-      computeTorqueOffsetsBasedOnAverages();
-      updateCorruptorAndAnalyzeDataInBuffer();
+
+      if (computeTorqueOffsetsBasedOnAverages)
+      {
+         computeTorqueOffsetsBasedOnAverages();
+         updateCorruptorAndAnalyzeDataInBuffer();
+      }
    }
    
    public void computeTorqueOffsetsBasedOnAverages()
