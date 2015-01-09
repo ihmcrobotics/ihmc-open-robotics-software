@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 @SuppressWarnings("deprecation")
 public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = true;
+   private static final boolean ALWAYS_SHOW_GUI = false;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
