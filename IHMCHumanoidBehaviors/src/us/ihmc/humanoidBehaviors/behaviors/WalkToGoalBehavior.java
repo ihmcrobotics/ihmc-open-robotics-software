@@ -21,7 +21,12 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
+/**
+ * WalkToLocation with path-planning algorithm to avoid keepout regions
+ * 
+ * @author Alex Graber-Tilton
+ *
+ */
 public class WalkToGoalBehavior extends BehaviorInterface {
 
 	private final BooleanYoVariable DEBUG = new BooleanYoVariable("DEBUG", registry);
