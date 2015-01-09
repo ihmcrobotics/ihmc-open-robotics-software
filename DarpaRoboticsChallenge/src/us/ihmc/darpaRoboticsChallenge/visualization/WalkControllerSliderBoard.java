@@ -52,11 +52,9 @@ public class WalkControllerSliderBoard
 //      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
 //      sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
 
-//      sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.3, 0.3);
-//      sliderBoardConfigurationManager.setKnob(2, "desiredICPY", registry, -0.3, 0.3);
-      
-      sliderBoardConfigurationManager.setSlider(1, "icpStandOffsetX", registry, -0.3, 0.3);
-      sliderBoardConfigurationManager.setKnob(1, "icpStandOffsetY", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager","manualModeICPOffset"));
+      sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setKnob(1, "desiredICPOffsetY", registry, -0.3, 0.3);
       
       sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
       sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
