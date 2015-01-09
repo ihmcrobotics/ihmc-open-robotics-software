@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.WholeBodyIK.WholeBodyIkSolver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKSimController;
 import us.ihmc.utilities.Pair;
@@ -13,7 +12,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
-//import us.ihmc.wholeBodyController.*;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
 public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
 {
@@ -28,7 +27,6 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
    @Override
    public void setInitialJointAngles(SDFRobot scsRobot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel)
    {
-
       // Avoid singularities at startup
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -59,9 +57,7 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
          fullRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(robotSide.negateIfRightSide(0.498)); //arm_elx
          fullRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000); //arm_wry
          fullRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(robotSide.negateIfRightSide(-0.004)); //arm_wrx
-
       }
-
    }
 
    @Override
