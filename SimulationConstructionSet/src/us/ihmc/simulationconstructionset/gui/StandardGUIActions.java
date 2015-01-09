@@ -18,7 +18,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
 import us.ihmc.graphics3DAdapter.camera.CameraConfigurationList;
-
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
@@ -46,6 +45,7 @@ import us.ihmc.simulationconstructionset.gui.actions.SimulateAction;
 import us.ihmc.simulationconstructionset.gui.actions.StepBackwardAction;
 import us.ihmc.simulationconstructionset.gui.actions.StepForwardAction;
 import us.ihmc.simulationconstructionset.gui.actions.StopAction;
+import us.ihmc.simulationconstructionset.gui.actions.ThinBufferAction;
 import us.ihmc.simulationconstructionset.gui.actions.ToggleCameraKeyModeAction;
 import us.ihmc.simulationconstructionset.gui.actions.ToggleKeyPointModeAction;
 import us.ihmc.simulationconstructionset.gui.actions.ZoomInAction;
@@ -55,7 +55,6 @@ import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectGraphGr
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectVarGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectViewportAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AboutAction;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.OpenH264LicenseAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.CameraPropertiesAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.DataBufferPropertiesAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportDataAction;
@@ -65,6 +64,7 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ImportDataAct
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadConfigurationAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadGraphGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.MediaCaptureAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.OpenH264LicenseAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.PlaybackPropertiesAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.PrintGraphsAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ResizeViewportAction;
@@ -117,6 +117,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    private CropBufferAction cropBufferAction;
    private PackBufferAction packBufferAction;
    private CutBufferAction cutBufferAction;
+   private ThinBufferAction thinBufferAction;
    private DataBufferPropertiesAction dataBufferPropertiesAction;
    private DollyCheckBox dollyCheckBox;
    private JMenu entryBoxGroupsMenu;
@@ -263,6 +264,8 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       guiActions.add(packBufferAction);
       cutBufferAction = new CutBufferAction(allCommandsExecutor);
       guiActions.add(cutBufferAction);
+      thinBufferAction = new ThinBufferAction(allCommandsExecutor);
+      guiActions.add(thinBufferAction);
 
       DataBufferPropertiesDialogConstructor dataBufferPropertiesDialogConstructor = allDialogConstructorsHolder.getDataBufferPropertiesDialogConstructor();
       dataBufferPropertiesAction = new DataBufferPropertiesAction(dataBufferPropertiesDialogConstructor);
@@ -475,6 +478,8 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       guiActions.add(packBufferAction);
       cutBufferAction = actions.cutBufferAction;
       guiActions.add(cutBufferAction);
+      thinBufferAction = actions.thinBufferAction;
+      guiActions.add(thinBufferAction);
       dataBufferPropertiesAction = actions.dataBufferPropertiesAction;
       guiActions.add(dataBufferPropertiesAction);
 
@@ -650,6 +655,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       dataBufferMenu.add(cropBufferAction);
       dataBufferMenu.add(packBufferAction);
       dataBufferMenu.add(cutBufferAction);
+      dataBufferMenu.add(thinBufferAction);
       dataBufferMenu.add(dataBufferPropertiesAction);
 
       // Viewports and Camera Menu:
@@ -878,6 +884,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       dataBufferMenu.add(cropBufferAction);
       dataBufferMenu.add(packBufferAction);
       dataBufferMenu.add(cutBufferAction);
+      dataBufferMenu.add(thinBufferAction);
       dataBufferMenu.add(dataBufferPropertiesAction);
 
       // Window Menu:
@@ -1292,6 +1299,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       cropBufferAction = null;
       packBufferAction = null;
       cutBufferAction = null;
+      thinBufferAction = null;
       
       if (dataBufferPropertiesAction != null)
       {

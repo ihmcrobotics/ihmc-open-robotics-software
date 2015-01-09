@@ -4,7 +4,7 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDis
 
 public interface AllCommandsExecutor
         extends DataBufferCommandsExecutor, RunCommandsExecutor, AddCameraKeyCommandExecutor, AddKeyPointCommandExecutor, CreateNewGraphWindowCommandExecutor,
-                CreateNewViewportWindowCommandExecutor, CropBufferCommandExecutor, PackBufferCommandExecutor, CutBufferCommandExecutor,
+                CreateNewViewportWindowCommandExecutor, CropBufferCommandExecutor, PackBufferCommandExecutor, CutBufferCommandExecutor, ThinBufferCommandExecutor,
                 NextCameraKeyCommandExecutor, PreviousCameraKeyCommandExecutor, RemoveCameraKeyCommandExecutor,
                 SelectGUIConfigFromFileCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor, StepForwardCommandExecutor,
                 ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, ViewportSelectorCommandExecutor,
