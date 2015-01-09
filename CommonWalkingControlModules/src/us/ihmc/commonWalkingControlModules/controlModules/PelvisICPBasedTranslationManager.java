@@ -10,9 +10,11 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
@@ -88,6 +90,15 @@ public class PelvisICPBasedTranslationManager
       proportionalGain.set(0.5);
       integralGain.set(1.5);
       maximumIntegralError.set(0.15);
+      
+      manualMode.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            initialize();
+         }
+      });
 
       parentRegistry.addChild(registry);
    }
@@ -96,13 +107,22 @@ public class PelvisICPBasedTranslationManager
    {
       supportFrame = supportLeg == null ? midFeetZUpFrame : ankleZUpFrames.get(supportLeg);
 
-      if (!isEnabled.getBooleanValue() || manualMode.getBooleanValue())
+      if (!isEnabled.getBooleanValue())
+      {
+         desiredICPOffset.setToZero();
+         return;
+      }
+
+      if (manualMode.getBooleanValue())
          return;
 
       updateDesireds();
 
       if (!isRunning.getBooleanValue())
+      {
+         desiredICPOffset.setToZero();
          return;
+      }
 
       computeDesiredICPOffset();
    }
@@ -161,8 +181,27 @@ public class PelvisICPBasedTranslationManager
 
    public void addICPOffset(FramePoint2d desiredICPToModify)
    {
-      desiredICPOffset.getFrameTuple2dIncludingFrame(tempICPOffset);
-      tempICPOffset.changeFrame(supportFrame);
+      if (!isEnabled.getBooleanValue())
+      {
+         desiredICPOffset.setToZero();
+         return;
+      }
+
+      if (manualMode.getBooleanValue())
+      {
+         // Ignore the desiredICPOffset frame assuming the user wants to control the ICP in the supportFrame
+         tempICPOffset.setIncludingFrame(supportFrame, desiredICPOffset.getX(), desiredICPOffset.getY());
+      }
+      else if (!isRunning.getBooleanValue())
+      {
+         desiredICPOffset.setToZero();
+         return;
+      }
+      else
+      {
+         desiredICPOffset.getFrameTuple2dIncludingFrame(tempICPOffset);
+         tempICPOffset.changeFrame(supportFrame);
+      }
       desiredICPToModify.add(tempICPOffset);
    }
 
