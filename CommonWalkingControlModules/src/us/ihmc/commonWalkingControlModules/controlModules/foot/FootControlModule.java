@@ -120,8 +120,7 @@ public class FootControlModule
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       ReferenceFrame bodyFrame = contactableFoot.getFrameAfterParentJoint();
-      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, bodyFrame,
-            momentumBasedController.getControlDT(), registry);
+      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, bodyFrame, controlDT, registry);
       doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
       jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", registry);
