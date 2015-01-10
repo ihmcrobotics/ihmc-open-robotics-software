@@ -34,9 +34,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.math.trajectories.LeadInOutPositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.TwoViaPointTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
@@ -61,7 +61,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final DoubleProvider swingTimeProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
    
-   private final LeadInOutPositionTrajectoryGenerator leadInOutPositionTrajectoryGenerator;
+   private final TwoViaPointTrajectoryGenerator continuousTrajectory;
    private final DoubleYoVariable swingClearanceAngle, swingLandingAngle, defaultHeightClearance;
 
    public SwingState(DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
@@ -115,13 +115,13 @@ public class SwingState extends AbstractUnconstrainedState
          pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
                + "PushRecoveryTrajectoryGenerator", registry);
          
-         leadInOutPositionTrajectoryGenerator = null;
+         continuousTrajectory = null;
       }
       else
       {
-         leadInOutPositionTrajectoryGenerator = new LeadInOutPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, registry, visualizeSwingTrajectory,
+         continuousTrajectory = new TwoViaPointTrajectoryGenerator(namePrefix + "Swing", worldFrame, registry, visualizeSwingTrajectory,
                yoGraphicsListRegistry);
-         swingTrajectoryGenerator = leadInOutPositionTrajectoryGenerator;
+         swingTrajectoryGenerator = continuousTrajectory;
 
          // Needs to be implemented
          pushRecoveryPositionTrajectoryGenerator = null;
@@ -130,9 +130,9 @@ public class SwingState extends AbstractUnconstrainedState
       if (USE_NEW_CONTINUOUS_TRAJECTORY)
       {
          swingClearanceAngle = new DoubleYoVariable(namePrefix + "SwingClearanceAngle", registry);
-         swingClearanceAngle.set(0.1);
+         swingClearanceAngle.set(3.0*0.1);
          swingLandingAngle = new DoubleYoVariable(namePrefix + "SwingLandingAngle", registry);
-         swingLandingAngle.set(0.8);
+         swingLandingAngle.set(1.0);
          defaultHeightClearance = new DoubleYoVariable(namePrefix + "DefaultHeightClearance", registry);
          defaultHeightClearance.set(0.04);
       }
@@ -230,7 +230,7 @@ public class SwingState extends AbstractUnconstrainedState
       {
          footstep.getPositionIncludingFrame(finalSwingPosition);
          finalSwingPosition.changeFrame(worldFrame);
-         initialSwingPosition.setToZero(contactableBody.getFrameAfterParentJoint());
+         initialConfigurationProvider.get(initialSwingPosition);
          initialSwingPosition.changeFrame(worldFrame);
          
          swingTranslation.sub(finalSwingPosition, initialSwingPosition);
@@ -253,9 +253,10 @@ public class SwingState extends AbstractUnconstrainedState
          finalSwingDirection.setIncludingFrame(worldFrame, 0.0, 0.0, -1.0);
          rotationMatrix.transform(finalSwingDirection.getVector());
          
-         leadInOutPositionTrajectoryGenerator.setTrajectoryTime(swingTimeProvider.getValue());
-         leadInOutPositionTrajectoryGenerator.setInitialLeadOut(initialSwingPosition, initialSwingDirection, defaultHeightClearance.getDoubleValue());
-         leadInOutPositionTrajectoryGenerator.setFinalLeadIn(finalSwingPosition, finalSwingDirection, defaultHeightClearance.getDoubleValue());
+         continuousTrajectory.setTrajectoryTime(swingTimeProvider.getValue());
+         continuousTrajectory.setInitialLeadOut(initialSwingPosition, initialSwingDirection, defaultHeightClearance.getDoubleValue());
+         continuousTrajectory.setFinalVelocity(0.3);
+         continuousTrajectory.setFinalLeadIn(finalSwingPosition, finalSwingDirection, defaultHeightClearance.getDoubleValue());
       }
    }
 
@@ -270,7 +271,7 @@ public class SwingState extends AbstractUnconstrainedState
    public void doTransitionIntoAction()
    {
       if (USE_NEW_CONTINUOUS_TRAJECTORY)
-         leadInOutPositionTrajectoryGenerator.showVisualization();
+         continuousTrajectory.showVisualization();
       super.doTransitionIntoAction();
    }
 
