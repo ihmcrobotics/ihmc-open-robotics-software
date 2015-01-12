@@ -15,19 +15,19 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	@Override
 	public double getDoubleSupportInitialTransferDuration()
 	{
-		return runningOnRealRobot ? 2.0 : 1.0; 
+		return 1.0; 
 	}
 
 	@Override
 	public double getDoubleSupportDuration()
 	{
-		return runningOnRealRobot ? 1.5 : 0.25;
+		return runningOnRealRobot ? 0.5 : 0.25;
 	}
 
 	@Override
 	public double getSingleSupportDuration()
 	{
-		return runningOnRealRobot ? 1.5 : 0.7;
+		return runningOnRealRobot ? 1.0 : 0.7;
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	@Override
 	public double getCapturePointForwardFromFootCenterDistance()
 	{
-		return 0.0;
+		return 0.025;
 	}
 	
 	@Override

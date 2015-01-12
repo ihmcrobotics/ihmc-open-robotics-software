@@ -518,14 +518,14 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDefaultTransferTime()
    {
-      if(runningOnRealRobot) return 1.5;
+      if(runningOnRealRobot) return .5;
       return 0.25; // 1.5; //
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      if(runningOnRealRobot) return 1.5;
+      if(runningOnRealRobot) return 1.0;
       return 0.6; // 1.5; //
    }
 
