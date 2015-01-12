@@ -49,6 +49,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private final BooleanYoVariable hasNewPlan = new BooleanYoVariable("hasNewPlan", registry);
 	private final BooleanYoVariable stepCompleted = new BooleanYoVariable("stepCompleted", registry);
 	private final BooleanYoVariable allStepsCompleted = new BooleanYoVariable("allStepsCompleted", registry);
+   private final BooleanYoVariable requestQuickSearch = new BooleanYoVariable("requestQuickSearch", registry);
 	private final BooleanYoVariable waitingForValidPlan = new BooleanYoVariable("waitingForValidPlan", registry);
 	private final BooleanYoVariable executePlan = new BooleanYoVariable("executePlan", registry);
 	private final BooleanYoVariable executeUnknownFirstStep = new BooleanYoVariable("executeUnknownFirstStep", registry);
@@ -105,8 +106,17 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		if (executePlan.getBooleanValue() && hasNewPlan.getBooleanValue() && (!stepCompleted.getBooleanValue() || allStepsCompleted.getBooleanValue())){
 			if (planValid(currentPlan) && (!currentPlan.footstepUnknown.get(1) || executeUnknownFirstStep.getBooleanValue())){
 				processNextStep();
+            return;
 			}
 		}
+
+      if (currentPlan != null && currentPlan.footstepUnknown != null && (currentPlan.footstepUnknown.isEmpty() || currentPlan.footstepUnknown.get(1)) && requestQuickSearch.getBooleanValue()){
+         //no plan or next step unknown, need a new plan fast
+         debugPrintln("Quick Search Requested");
+         requestFootstepPlan();
+         requestQuickSearch.set(false);
+
+      }
 	}
 	
 	private boolean checkForNewPlan(){
@@ -188,6 +198,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 				if (newestPacket.footstepIndex == stepsRequested.size()-1){
 					debugPrintln("All steps complete");
 					allStepsCompleted.set(true);
+               requestQuickSearch.set(true);
 				}
 			}
 			return true;
@@ -309,6 +320,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
             debugPrintln("Requesting path");
          }else	if (newestPacket.action == WalkToGoalBehaviorPacket.WalkToGoalAction.EXECUTE){
 				debugPrintln("Executing path");
+            sendPacketToController(new PauseCommand(false));
 				executePlan.set(true);
 			}else if (newestPacket.action == WalkToGoalBehaviorPacket.WalkToGoalAction.EXECUTE_UNKNOWN){
             executeUnknownFirstStep.set(true);
@@ -370,6 +382,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		executePlan.set(false);
 		executeUnknownFirstStep.set(false);
 		allStepsCompleted.set(true);
+      requestQuickSearch.set(false);
 	}
 
 	@Override
@@ -432,6 +445,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		requestSearchStop();
 		hasInputBeenSet.set(false);
 		allStepsCompleted.set(true);
+      requestQuickSearch.set(false);
 	}
 
 	public boolean hasInputBeenSet()

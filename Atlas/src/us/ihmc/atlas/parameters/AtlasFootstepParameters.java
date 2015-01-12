@@ -13,7 +13,7 @@ public class AtlasFootstepParameters extends FootstepParameters {
 	public double maxStepUp = 0.20;
 	public double minStepDown = -0.17;
 	public double maxStepDistance = 0.6;
-	public double dangerDistance = 0.45;
+	public double dangerDistance = 0.75;
 	
 	private double yawCostGain = 1;
 	
@@ -24,11 +24,10 @@ public class AtlasFootstepParameters extends FootstepParameters {
 	private void initialize()
 	{
 		setOffsets();
-      double margin = 0.005;
 		footWidth = .14;
 		footLength = .26;
-		cropWidth = 0.085 - margin;
-		cropLength = 0.22 - margin;
+		cropWidth = 0.085;
+		cropLength = 0.22;
 		maxSupportPolygonArea = cropWidth*cropLength;
 		//minSupportPolygonArea = maxSupportPolygonArea/2;
       minSupportPolygonArea = maxSupportPolygonArea *.99;
@@ -39,9 +38,9 @@ public class AtlasFootstepParameters extends FootstepParameters {
       FootstepOffset sidestep = new FootstepOffset(0,.25,0);
       List<FootstepOffset> offsets = new ArrayList<FootstepOffset>();
       offsets.add(sidestep);
-      double[] xs = new double[]{0.0 , 0.0 , 0.0 , 0.0, 0.6 , 0.4, -0.3, 0.4};
-      double[] ys = new double[]{0.16 , 0.25 , 0.4, 0.6 , 0.25 , 0.25, 0.25, 0.4};
-      double[] thetas = new double[]{0.0 , 0.0 , 0.0, 0.0 , 0.0 , 0.0, 0.0, 0.0};
+      double[] xs = new double[]{0.0 , 0.0 , 0.0 , 0.0, 0.3, 0.4 , 0.6, -0.3, 0.4};
+      double[] ys = new double[]{0.16 , 0.6 , 0.4, 0.25 , 0.25, 0.25 , 0.25, 0.25, 0.4};
+      double[] thetas = new double[]{0.0 , 0.0 , 0.0, 0.0 , 0.0, 0.0 , 0.0, 0.0, 0.0};
       
       double[] thetaForwards = new double[]{0 , Math.PI/16 , Math.PI/8 , Math.PI/4 , 3*Math.PI/8};
       double[] thetaBackwards = new double[]{-(Math.PI/16) , 0 };
