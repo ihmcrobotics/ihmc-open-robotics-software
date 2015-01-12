@@ -1,0 +1,302 @@
+package us.ihmc.wholeBodyController;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+
+
+public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWriter
+{
+   private final boolean runningOnRealRobot;
+   private final DRCOutputWriter drcOutputWriter;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final DoubleYoVariable alphaDesiredVelocity =
+      new DoubleYoVariable("alphaDesiredVelocity",
+         "Filter for velocity control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking",
+         registry);
+   private final DoubleYoVariable alphaDesiredPosition =
+      new DoubleYoVariable("alphaDesiredPosition",
+         "Filter for position control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking",
+         registry);
+
+   private final DoubleYoVariable alphaArmDesiredVelocity =
+      new DoubleYoVariable("alphaArmDesiredVelocity",
+         "Filter for velocity control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking (Arms only)",
+         registry);
+   private final DoubleYoVariable alphaArmDesiredPosition =
+      new DoubleYoVariable("alphaArmDesiredPosition",
+         "Filter for position control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking (Arms only)",
+         registry);
+
+
+   private final DoubleYoVariable kVelJointTorque = new DoubleYoVariable("kVelJointTorque",
+                                                       "Gain for velocity control in order to achieve acceleration control using additional joint torque",
+                                                       registry);
+
+   private final DoubleYoVariable kPosJointTorque = new DoubleYoVariable("kPosJointTorque",
+                                                       "Gain for position control in order to achieve acceleration control using additional joint torque",
+                                                       registry);
+
+   private final DoubleYoVariable kVelArmJointTorque = new DoubleYoVariable("kVelArmJointTorque",
+                                                       "Gain for velocity control in order to achieve acceleration control using additional joint torque (Arms only)",
+                                                       registry);
+
+   private final DoubleYoVariable kPosArmJointTorque = new DoubleYoVariable("kPosArmJointTorque",
+                                                       "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)",
+                                                       registry);
+
+   private ArrayList<OneDoFJoint> oneDoFJoints;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredVelocityMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredPositionMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kVelJointTorqueMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kPosJointTorqueMap;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities;
+   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions;
+
+   private final double updateDT;
+
+   // List of the joints for which we do integrate the desired accelerations by default
+   private final LegJointName[] legJointsForIntegratingAcceleration = new LegJointName[]{LegJointName.HIP_PITCH, LegJointName.HIP_ROLL, LegJointName.HIP_YAW};
+   private final ArmJointName[] armJointsForIntegratingAcceleration = new ArmJointName[]{ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH};
+   private final SpineJointName[] spineJointsForIntegratingAcceleration = new SpineJointName[]{SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL,SpineJointName.SPINE_YAW};
+   
+   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double updateDT, boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+      this.drcOutputWriter = drcOutputWriter;
+      this.updateDT = updateDT;
+      registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+
+      alphaDesiredVelocity.set(0.0);
+      alphaDesiredPosition.set(0.0);
+      kVelJointTorque.set(0.0);
+      kPosJointTorque.set(0.0);
+
+      alphaArmDesiredVelocity.set(0.0);
+      alphaArmDesiredPosition.set(0.0);
+      kVelArmJointTorque.set(0.0);
+      kPosArmJointTorque.set(0.0);
+   }
+
+   public void setVelocityGains(double kVelJointTorque, double kVelArmJointTorque)
+   {
+      this.kVelJointTorque.set(kVelJointTorque);
+      this.kVelArmJointTorque.set(kVelArmJointTorque);
+   }
+
+   public void setPositionGains(double kPosJointTorque, double kPosArmJointTorque)
+   {
+      this.kPosJointTorque.set(kPosJointTorque);
+      this.kPosArmJointTorque.set(kPosArmJointTorque);
+   }
+
+   public void setAlphaDesiredVelocity(double alphaDesiredVelocity, double alphaArmDesiredVelocity)
+   {
+      this.alphaDesiredVelocity.set(alphaDesiredVelocity);
+      this.alphaArmDesiredVelocity.set(alphaArmDesiredVelocity);
+   }
+
+   public void setAlphaDesiredPosition(double alphaDesiredPosition, double alphaArmDesiredPosition)
+   {
+      this.alphaDesiredPosition.set(alphaDesiredPosition);
+      this.alphaArmDesiredPosition.set(alphaArmDesiredPosition);
+   }
+
+   @Override
+   public void initialize()
+   {
+      drcOutputWriter.initialize();
+   }
+
+   @Override
+   public YoVariableRegistry getControllerYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   @Override
+   public void writeAfterController(long timestamp)
+   {
+      for (int i = 0; i < oneDoFJoints.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
+         DoubleYoVariable qd_d_joint = desiredVelocities.get(oneDoFJoint);
+         DoubleYoVariable q_d_joint = desiredPositions.get(oneDoFJoint);
+
+         boolean integrateDesiredAccelerations = oneDoFJoint.getIntegrateDesiredAccelerations();
+         // Don't call the listener there, we want to be able to set those both from the controller and SCS.
+         doAccelerationIntegrationMap.get(oneDoFJoint).set(integrateDesiredAccelerations, false);
+         
+         if (integrateDesiredAccelerations)
+         {
+            integrateAccelerationsToGetDesiredVelocities(oneDoFJoint, qd_d_joint, q_d_joint);
+            oneDoFJoint.setQdDesired(qd_d_joint.getDoubleValue());
+            oneDoFJoint.setKd(0.0);
+            oneDoFJoint.setKp(0.0);
+
+            double kVel = kVelJointTorqueMap.get(oneDoFJoint).getDoubleValue();
+            double kPos = kPosJointTorqueMap.get(oneDoFJoint).getDoubleValue();
+            double velocityTorque = kVel * (qd_d_joint.getDoubleValue() - oneDoFJoint.getQd());
+            double positionTorque = kPos * (q_d_joint.getDoubleValue() - oneDoFJoint.getQ());
+
+            oneDoFJoint.setTau(oneDoFJoint.getTau() + velocityTorque + positionTorque);
+         }
+         else
+         {
+            qd_d_joint.set(oneDoFJoint.getQd());
+            q_d_joint.set(oneDoFJoint.getQ());
+         }
+      }
+
+
+      drcOutputWriter.writeAfterController(timestamp);
+   }
+
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint oneDoFJoint, DoubleYoVariable qd_d_joint, DoubleYoVariable q_d_joint)
+   {
+      double currentPosition = oneDoFJoint.getQ();
+      double currentVelocity = oneDoFJoint.getQd();
+      
+      if (oneDoFJoint.getResetDesiredAccelerationIntegrator())
+      {
+//       qd_d_joint.set(currentVelocity);
+         qd_d_joint.set(0.0);
+         q_d_joint.set(currentPosition);
+
+         return;
+      }
+
+      double previousDesiredVelocity = qd_d_joint.getDoubleValue();
+      double previousDesiredPosition = q_d_joint.getDoubleValue();
+      
+      double desiredAcceleration = oneDoFJoint.getQddDesired();
+      double alphaVel = alphaDesiredVelocityMap.get(oneDoFJoint).getDoubleValue();
+      double alphaPos = alphaDesiredPositionMap.get(oneDoFJoint).getDoubleValue();
+      double desiredVelocity = doCleverIntegration(previousDesiredVelocity, desiredAcceleration, currentVelocity, alphaVel);
+      double desiredPosition = doCleverIntegration(previousDesiredPosition, desiredVelocity, currentPosition, alphaPos);
+      
+      qd_d_joint.set(desiredVelocity);
+      q_d_joint.set(desiredPosition);
+   }
+
+   private double doCleverIntegration(double previousDesiredValue, double desiredValueRate, double currentValue, double alpha)
+   {
+      return alpha * (previousDesiredValue + desiredValueRate * updateDT) + (1.0 - alpha) * currentValue;
+   }
+
+   private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> doAccelerationIntegrationMap = new LinkedHashMap<>();
+   
+   @Override
+   public void setFullRobotModel(SDFFullRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   {
+      drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+
+      // These are for hacking torques. Should make into a new
+      // Output writer instead...
+//      waistLateralExtensorJoint = controllerModel.getSpineJoint(SpineJointName.SPINE_ROLL);
+//      waistRotatorJoint = controllerModel.getSpineJoint(SpineJointName.SPINE_YAW);
+//      leftKneeJoint = controllerModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE);
+//      rightKneeJoint = controllerModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE);
+//      leftAnklePitchJoint = controllerModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH);
+//      rightAnklePitchJoint = controllerModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
+
+      oneDoFJoints = new ArrayList<OneDoFJoint>();
+      controllerModel.getOneDoFJoints(oneDoFJoints);
+
+      ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(controllerModel.getChest(), controllerModel.getHand(robotSide));
+         OneDoFJoint[] filterArmJoints = ScrewTools.filterJoints(armJoints, OneDoFJoint.class);
+         for (OneDoFJoint armJoint : filterArmJoints)
+            armOneDoFJoints.add(armJoint);
+      }
+
+      desiredVelocities = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+      desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+      
+      alphaDesiredVelocityMap = new LinkedHashMap<>();
+      alphaDesiredPositionMap = new LinkedHashMap<>();
+      
+      kVelJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+      kPosJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+
+      for (int i = 0; i < oneDoFJoints.size(); i++)
+      {
+         final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
+         final BooleanYoVariable doAccelerationIntegration = new BooleanYoVariable("doAccelerationIntegration_" + oneDoFJoint.getName(), registry);
+         DoubleYoVariable desiredVelocity = new DoubleYoVariable("qd_d_" + oneDoFJoint.getName(), registry);
+         DoubleYoVariable desiredPosition = new DoubleYoVariable("q_d_" + oneDoFJoint.getName(), registry);
+
+         desiredVelocities.put(oneDoFJoint, desiredVelocity);
+         desiredPositions.put(oneDoFJoint, desiredPosition);
+         
+         if (armOneDoFJoints.contains(oneDoFJoint))
+         {
+            alphaDesiredVelocityMap.put(oneDoFJoint, alphaArmDesiredVelocity);
+            alphaDesiredPositionMap.put(oneDoFJoint, alphaArmDesiredPosition);
+            kVelJointTorqueMap.put(oneDoFJoint, kVelArmJointTorque);
+            kPosJointTorqueMap.put(oneDoFJoint, kPosArmJointTorque);
+         }
+         else
+         {
+            alphaDesiredVelocityMap.put(oneDoFJoint, alphaDesiredVelocity);
+            alphaDesiredPositionMap.put(oneDoFJoint, alphaDesiredPosition);
+            kVelJointTorqueMap.put(oneDoFJoint, kVelJointTorque);
+            kPosJointTorqueMap.put(oneDoFJoint, kPosJointTorque);
+         }
+
+         // We want to be able to set those both from the controller and SCS.
+         doAccelerationIntegration.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               oneDoFJoint.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
+            }
+         });
+         
+         doAccelerationIntegration.set(false);
+         doAccelerationIntegration.notifyVariableChangedListeners();
+         
+         doAccelerationIntegrationMap.put(oneDoFJoint, doAccelerationIntegration);
+      }
+      
+      if (runningOnRealRobot)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (LegJointName legJointName : legJointsForIntegratingAcceleration)
+               controllerModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
+
+            for (ArmJointName armJointName : armJointsForIntegratingAcceleration)
+               controllerModel.getArmJoint(robotSide, armJointName).setIntegrateDesiredAccelerations(true);
+         }
+
+         for (SpineJointName spineJointName : spineJointsForIntegratingAcceleration)
+            controllerModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
+      }
+   }
+
+   @Override
+   public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForEstimator)
+   {
+      drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForEstimator);
+   }
+}
