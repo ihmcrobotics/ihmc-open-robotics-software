@@ -39,6 +39,7 @@ import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.utilities.LogTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
@@ -90,7 +91,22 @@ public class StepprControllerFactory
        */
 
       DRCOutputWriter drcOutputWriter = new StepprOutputWriter(robotModel);
+      boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES=true;
+      if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
+      {         
+         DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration =
+               new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, robotModel.getControllerDT(), true);
 
+         stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
+         stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
+         stepprOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
+         stepprOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
+         
+         drcOutputWriter = stepprOutputWriterWithAccelerationIntegration;
+      }
+      /*
+       * Pelvis Pose Correction
+       */
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer.getObjectCommunicator());
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
 
