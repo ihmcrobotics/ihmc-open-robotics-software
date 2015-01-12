@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.controllers;
 
+import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 
 public enum StepprStandPrepSetpoints
@@ -31,13 +32,15 @@ public enum StepprStandPrepSetpoints
    private final double damping;
    private final double reflectRight;
    private final StepprJoint[] joints;
+   public double motorScalingConstantFromDiagnostics = StepprActuator.values[0].motorScalingConstantFromDiagnostics;
 
    private StepprStandPrepSetpoints(double q, double kp, double kd, double damping, double reflectRight, StepprJoint... joints)
    {
+      
       this.q = q;
-      this.kp = kp;
-      this.kd = kd;
-      this.damping = damping;
+      this.kp = kp / motorScalingConstantFromDiagnostics;
+      this.kd = kd / motorScalingConstantFromDiagnostics;
+      this.damping = damping / motorScalingConstantFromDiagnostics;
       this.reflectRight = reflectRight;
       this.joints = joints;
    }

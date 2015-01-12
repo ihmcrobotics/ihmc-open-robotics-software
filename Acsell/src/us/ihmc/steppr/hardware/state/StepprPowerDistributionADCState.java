@@ -2,6 +2,7 @@ package us.ihmc.steppr.hardware.state;
 
 import java.nio.ByteBuffer;
 
+import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -12,10 +13,12 @@ public class StepprPowerDistributionADCState
    private final IntegerYoVariable ADC[] = new IntegerYoVariable[8];
 
    private final DoubleYoVariable robotPower;
+   private final DoubleYoVariable robotWork;
    private final DoubleYoVariable busVoltage;
    private final DoubleYoVariable leftLimbCurrent;
    private final DoubleYoVariable rightLimbCurrent;
    private final DoubleYoVariable torsoLimbCurrent;
+   private final double dt;
 
    public StepprPowerDistributionADCState(String name, YoVariableRegistry parentRegistry)
    {
@@ -26,11 +29,12 @@ public class StepprPowerDistributionADCState
       }
 
       robotPower = new DoubleYoVariable("robotPower", registry);
+      robotWork = new DoubleYoVariable("robotWork", registry);
       busVoltage = new DoubleYoVariable("busVoltage", registry);
       leftLimbCurrent = new DoubleYoVariable("leftLimbCurrent", registry);
       rightLimbCurrent = new DoubleYoVariable("rightLimbCurrent", registry);
       torsoLimbCurrent = new DoubleYoVariable("torsoLimbCurrent", registry);
-
+      dt = (new BonoRobotModel(true, false)).getEstimatorDT();            
       parentRegistry.addChild(registry);
    }
 
@@ -47,5 +51,6 @@ public class StepprPowerDistributionADCState
       torsoLimbCurrent.set((ADC[3].getValueAsDouble() + 15.0) * 0.0061);
 
       robotPower.set(busVoltage.getDoubleValue() * (leftLimbCurrent.getDoubleValue() + rightLimbCurrent.getDoubleValue() + torsoLimbCurrent.getDoubleValue()));
+      robotWork.add(robotPower.getDoubleValue() *  dt);
    }
 }
