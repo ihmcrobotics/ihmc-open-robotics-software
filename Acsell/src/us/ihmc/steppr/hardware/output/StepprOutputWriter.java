@@ -40,7 +40,7 @@ public class StepprOutputWriter implements DRCOutputWriter
 
    private final UDPStepprOutputWriter outputWriter;
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauController = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoReflectedMotorInertia = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
 
    enum JointControlMode
    {
@@ -58,7 +58,15 @@ public class StepprOutputWriter implements DRCOutputWriter
 
       tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
       for (StepprJoint joint : StepprJoint.values)
+      {
          tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
+         if(joint.isLinear()) //ignore ankles now
+         {
+            DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
+            inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio());
+            yoReflectedMotorInertia.put(joint, inertia);
+         }
+      }
 
       yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
       yoTauSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
@@ -113,21 +121,35 @@ public class StepprOutputWriter implements DRCOutputWriter
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
-            double ratio = getControlRatioByJointControlMode(joint);
-            double tau = wholeBodyControlJoint.getTau() * ratio + standPrepJoint.getTau() * (1.0 - ratio);
-            double kd = wholeBodyControlJoint.getKd() * ratio + standPrepJoint.getKd() * (1.0 - ratio);
+            double controlRatio = getControlRatioByJointControlMode(joint);
+            
+            double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
+            double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
+            double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
+
+            double tau = (motorInertiaTorque + wholeBodyControlJoint.getTau()) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
+            double kd = wholeBodyControlJoint.getKd() * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
 
             StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
 
-            double tauSpring = 0;
-            if (yoTauSpring.get(joint) != null)
-            {
-               tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
-               yoTauSpring.get(joint).set(tauSpring);
-            }
+
 
             tauControllerOutput.get(joint).set(tau);
-            jointCommand.setTauDesired(tau - tauSpring, rawSensorData); //use when Springs are installed
+            boolean USE_SPRING = false;
+            if(USE_SPRING)
+            {
+               double tauSpring = 0;
+               if (yoTauSpring.get(joint) != null)
+               {
+                  tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
+                  yoTauSpring.get(joint).set(tauSpring);
+               }
+               jointCommand.setTauDesired(tau - tauSpring, rawSensorData); 
+            }
+            else
+            {
+               jointCommand.setTauDesired(tau, rawSensorData); 
+            }
             jointCommand.setDamping(kd);
 
          }
