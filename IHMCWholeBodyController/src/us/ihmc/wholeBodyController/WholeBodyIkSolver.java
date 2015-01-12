@@ -61,7 +61,7 @@ public class WholeBodyIkSolver
 
    static public enum ControlledDoF { DOF_NONE, DOF_3P, DOF_3P2R, DOF_3P3R }
    
-   static public enum ComputeOption { RESEED, USE_WORKING_MODEL_JOINTS, USE_JOINTS_CACHE };
+   static public enum ComputeOption { RESEED, USE_ACTUAL_MODEL_JOINTS, USE_JOINTS_CACHE };
 
    static public final int numDoFperArm = 6;
    static public final int numDoFperLeg = 6;
@@ -72,17 +72,17 @@ public class WholeBodyIkSolver
    final private static RobotSide LEFT = RobotSide.LEFT;
 
    ///--------------- Reference Frames and Transfoms --------------------------
-   private final ReferenceFrames working_ref_frames;
-   private final ReferenceFrames actual_ref_frames;
+   private final ReferenceFrames workingFrames;
+   private final ReferenceFrames actualFrames;
 
    private final ReferenceFrame     workingPelvisFrame;
+   private final ReferenceFrame  workingRootFrame;
 
    private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> workingSoleFrames = new SideDependentList<ReferenceFrame>();
 
    //---------- robot models in different contexts and different formats ----------
-   private final RobotModel        urdf_model;
-   private final WholeBodyControllerParameters     full_model;
+   private final RobotModel        urdfModel;
    private final SDFFullRobotModel actual_sdf_model;
    private final SDFFullRobotModel working_sdf_model;
    private final HierarchicalKinematicSolver wb_solver;
@@ -103,7 +103,7 @@ public class WholeBodyIkSolver
 
    // --------------------- Miscellaneous -------------------------------------
    private final HashMap<String, Integer> joint_names_map = new HashMap<String, Integer>();
-   private final OneDoFJoint[] sdf_desired_joints_in_urdf_order;
+   private final OneDoFJoint[] working_joints_in_urdf_order;
    private final SideDependentList<int[]> armJointIds = new SideDependentList<int[]>();
    private final SideDependentList<int[]> legJointIds = new SideDependentList<int[]>();
 
@@ -133,7 +133,7 @@ public class WholeBodyIkSolver
 
    public RobotModel getUrdfRobotModel()
    {
-      return urdf_model;
+      return urdfModel;
    }
    public RigidBodyTransform getLocalBodyTransform(String bodyname )
    {
@@ -156,11 +156,15 @@ public class WholeBodyIkSolver
       return out;
    }
    
+   public ReferenceFrame getRootFrame()
+   {
+      return workingRootFrame;
+   }
+   
    public ReferenceFrame getBodyReferenceFrame(String name)
    {
       RigidBodyTransform localTransform = getLocalBodyTransform( name );
-      ReferenceFrame actualRootAnkleFrame = actual_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
-      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", actualRootAnkleFrame, localTransform);
+      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", workingRootFrame, localTransform);
       
       System.out.println( localTransform );
       return bodyFrame;
@@ -174,23 +178,22 @@ public class WholeBodyIkSolver
 
    public int getNumberOfJoints()
    {
-      return urdf_model.getNrOfJoints();
+      return urdfModel.getNrOfJoints();
    }
    
 
-   public WholeBodyIkSolver(WholeBodyControllerParameters robot_model, SDFFullRobotModel sdf) throws IOException
+   public WholeBodyIkSolver(WholeBodyControllerParameters robot_model, SDFFullRobotModel actualRobotModel) throws IOException
    {
       // load external library
       NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
 
-      full_model         = robot_model;
-      actual_sdf_model   = sdf;
+      actual_sdf_model   = actualRobotModel;
       working_sdf_model  = robot_model.createFullRobotModel();
-      working_ref_frames = new ReferenceFrames(working_sdf_model);
-      actual_ref_frames  = new ReferenceFrames(actual_sdf_model);
+      workingFrames = new ReferenceFrames(working_sdf_model);
+      actualFrames  = new ReferenceFrames(actual_sdf_model);
 
-      workingPelvisFrame = working_ref_frames.getPelvisFrame();
+      workingPelvisFrame = workingFrames.getPelvisFrame();
       workingRootJoint = working_sdf_model.getRootJoint();
 
 
@@ -218,36 +221,37 @@ public class WholeBodyIkSolver
       }
 
       // create a RobotModel using a special URDF
-      urdf_model = new RobotModel();
-      urdf_model.loadURDF(modelLocationPathString, true);
+      urdfModel = new RobotModel();
+      urdfModel.loadURDF(modelLocationPathString, false);
 
-      numOfJoints = urdf_model.getNrOfJoints();
+      numOfJoints = urdfModel.getNrOfJoints();
 
-      sdf_desired_joints_in_urdf_order = new OneDoFJoint[numOfJoints];
+      working_joints_in_urdf_order = new OneDoFJoint[numOfJoints];
 
-      wb_solver = new HierarchicalKinematicSolver(urdf_model, 40, 0.0001);
+      wb_solver = new HierarchicalKinematicSolver(urdfModel, 40, 0.0001);
       wb_solver.setVerbose(false);
 
       q_init = new Vector64F(numOfJoints);
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         actualSoleFrames.set(robotSide, actual_ref_frames.getSoleFrame(robotSide));
-         workingSoleFrames.set(robotSide, working_ref_frames.getSoleFrame(robotSide));
+         actualSoleFrames.set(robotSide, actualFrames.getSoleFrame(robotSide));
+         workingSoleFrames.set(robotSide, workingFrames.getSoleFrame(robotSide));
          armJointIds.set(robotSide, new int[numDoFperArm]);
          legJointIds.set(robotSide, new int[numDoFperLeg]);
          disabledtHandRotationY.set(robotSide, new MutableBoolean(false));
          keepArmQuiet.set(robotSide, new MutableBoolean(true));
       }
+      workingRootFrame = actual_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameBeforeJoint();
 
       for (int i = 0; i < numOfJoints; i++)
       {
-         String joint_name_in_urdf = urdf_model.getActiveJointName(i);
+         String joint_name_in_urdf = urdfModel.getActiveJointName(i);
          joint_names_map.put(joint_name_in_urdf, i);
          OneDoFJoint joint = working_sdf_model.getOneDoFJointByName(joint_name_in_urdf);
          if (joint != null)
          {
-            sdf_desired_joints_in_urdf_order[i] = joint;
+            working_joints_in_urdf_order[i] = joint;
          }
          else
          {
@@ -263,17 +267,17 @@ public class WholeBodyIkSolver
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         int currentHandId = urdf_model.getBodyId(endEffectorLinkNames.get(robotSide));
+         int currentHandId = urdfModel.getBodyId(endEffectorLinkNames.get(robotSide));
 
          task_end_effector_translations.set(robotSide, new HierarchicalTask_BodyPosition(fk, currentHandId));
          task_end_effector_rotations.set(robotSide, new HierarchicalTask_BodyOrientation(fk, currentHandId));
-         urdf_model.getParentJoints(currentHandId, numDoFperArm, armJointIds.get(robotSide));
+         urdfModel.getParentJoints(currentHandId, numDoFperArm, armJointIds.get(robotSide));
       }     
 
-      int leftFootId = urdf_model.getBodyId(footLinkNames.get(LEFT));
+      int leftFootId = urdfModel.getBodyId(footLinkNames.get(LEFT));
       task_leg_pose = new HierarchicalTask_BodyPose(fk, leftFootId);
 
-      urdf_model.getParentJoints(leftFootId, numDoFperLeg, legJointIds.get(LEFT) );
+      urdfModel.getParentJoints(leftFootId, numDoFperLeg, legJointIds.get(LEFT) );
 
       for (int i = 0; i < numDoFperLeg; i++)
       {
@@ -531,8 +535,7 @@ public class WholeBodyIkSolver
       if (task_ee_trans.isEnabled() || task_ee_rot.isEnabled())
       {
          RigidBodyTransform ee_transform = new RigidBodyTransform();
-         ReferenceFrame actualRootAnkleFrame = actual_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
-         end_effector_pose.getTransformToDesiredFrame(ee_transform, actualRootAnkleFrame);
+         end_effector_pose.getTransformToDesiredFrame(ee_transform, workingRootFrame);
 
          keepArmQuiet.get(end_effector_side).setValue( false );
 
@@ -659,10 +662,10 @@ public class WholeBodyIkSolver
          q_init.set(joint_names_map.get("r_arm_elx"), -0.7);
          
          break;
-      case USE_WORKING_MODEL_JOINTS:
+      case USE_ACTUAL_MODEL_JOINTS:
          for (int i = 0; i < numOfJoints; i++)
          {
-            OneDoFJoint joint = working_sdf_model.getOneDoFJointByName(urdf_model.getActiveJointName(i));
+            OneDoFJoint joint = actual_sdf_model.getOneDoFJointByName(urdfModel.getActiveJointName(i));
             q_init.set(i, joint.getQ());
          }
          break;
@@ -685,7 +688,7 @@ public class WholeBodyIkSolver
    private int computeImpl(SDFFullRobotModel robotModelToPack)
    {
       updateDesiredSDFFullRobotModelToActual();
-      working_ref_frames.updateFrames();
+      workingFrames.updateFrames();
 
       Vector64F q_out = new Vector64F(numOfJoints);
 
@@ -707,11 +710,11 @@ public class WholeBodyIkSolver
 
       if (ret != -2)
       {
-         for (int i = 0; i < sdf_desired_joints_in_urdf_order.length; i++)
+         for (int i = 0; i < working_joints_in_urdf_order.length; i++)
          {
-            if (sdf_desired_joints_in_urdf_order[i] != null)
+            if (working_joints_in_urdf_order[i] != null)
             {
-               sdf_desired_joints_in_urdf_order[i].setQ(q_out.get(i));
+               working_joints_in_urdf_order[i].setQ(q_out.get(i));
             }
          }
 
@@ -727,28 +730,30 @@ public class WholeBodyIkSolver
    public double getDesiredJointAngle(String jointName)
    {
       int index = joint_names_map.get(jointName);
-      return sdf_desired_joints_in_urdf_order[index].getQ();
+      return working_joints_in_urdf_order[index].getQ();
    }
 
    private void adjustOtherFoot()
    {
       RigidBodyTransform foot_other_transform = new RigidBodyTransform();
+      // note before and after... it is not a typo.
+      ReferenceFrame leftAnkle = actual_sdf_model.getOneDoFJointByName("l_leg_akx").getFrameAfterJoint();
       //TODO. there might be something wrong here
-      actualSoleFrames.get(LEFT).getTransformToDesiredFrame(foot_other_transform, actualSoleFrames.get(RIGHT));
+      leftAnkle.getTransformToDesiredFrame(foot_other_transform, workingRootFrame);
 
       Quat4d quat = new Quat4d();
       Vector3d pos = new Vector3d();
 
       foot_other_transform.get(quat, pos);
-      task_leg_pose.setTarget(quat, pos, 0.001);
+      task_leg_pose.setTarget(quat, pos, 0.0005);
    }
    
    public ReferenceFrame getDesiredAfterJointFrame(String jointName, ReferenceFrame parentFrame)
    {
-      working_ref_frames.updateFrames();
+      workingFrames.updateFrames();
       
       ReferenceFrame workingJointFrame = working_sdf_model.getOneDoFJointByName(jointName).getFrameAfterJoint();
-      ReferenceFrame workingRootFrame  = working_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameBeforeJoint();
+      ReferenceFrame workingRootFrame  = getRootFrame();
       
       RigidBodyTransform rootToJoint = workingJointFrame.getTransformToDesiredFrame( workingRootFrame );
       RigidBodyTransform parentToRoot = workingRootFrame.getTransformToDesiredFrame( parentFrame );
@@ -771,12 +776,12 @@ public class WholeBodyIkSolver
    
    public ReferenceFrame getDesiredBodyFrame( String name, ReferenceFrame parentFrame)
    {
-      working_ref_frames.updateFrames();
+      workingFrames.updateFrames();
       
       RigidBodyTransform rootToBody = getLocalBodyTransform(name);
       RigidBodyTransform parentToRoot = new RigidBodyTransform();
 
-      ReferenceFrame workingRootFrame = working_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameBeforeJoint();
+      ReferenceFrame workingRootFrame = getRootFrame();
       
       workingRootFrame.getTransformToDesiredFrame(parentToRoot, parentFrame);
       
@@ -788,7 +793,7 @@ public class WholeBodyIkSolver
 
    private void moveDesiredFeetToActualFeet(RobotSide footToTrust)
    {
-      working_ref_frames.updateFrames();
+      workingFrames.updateFrames();
       
       ReferenceFrame actualSoleFrame = actualSoleFrames.get(footToTrust);
       ReferenceFrame workingSoleFrame = workingSoleFrames.get(footToTrust);
@@ -802,7 +807,7 @@ public class WholeBodyIkSolver
       pelvisTransform.multiply( soleWorldToActual, soleToPelvis );
       
       workingRootJoint.setPositionAndRotation(pelvisTransform);
-      working_ref_frames.updateFrames();
+      workingFrames.updateFrames();
    }
 
    private void updateDesiredSDFFullRobotModelToActual()
