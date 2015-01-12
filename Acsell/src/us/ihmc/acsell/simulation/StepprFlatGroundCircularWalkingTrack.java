@@ -38,7 +38,6 @@ public class StepprFlatGroundCircularWalkingTrack
       flatGroundWalkingTrack.getDrcSimulation().simulate();
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
       
-      scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk").setValueFromDouble(1.0);
       scs.getVariable("DesiredHeadingControlModule", "desiredHeadingDot").setValueFromDouble(0.1); // slightly left turn
       scs.getVariable("MomentumBasedControllerFactory","swingTime").setValueFromDouble(0.75); // slightly left turn
       scs.getVariable("MomentumBasedControllerFactory","transferTime").setValueFromDouble(0.25); // slightly left turn
