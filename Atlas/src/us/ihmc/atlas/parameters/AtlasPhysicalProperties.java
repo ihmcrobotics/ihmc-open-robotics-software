@@ -26,7 +26,7 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double thighLength = 0.422;
 
    public static final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
-   public static final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<RigidBodyTransform>();
+   public static final SideDependentList<RigidBodyTransform> handAttachmentPlateToWristTransforms = new SideDependentList<RigidBodyTransform>();
 
    static
    {
@@ -35,10 +35,10 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
          RigidBodyTransform soleToAnkleFrame = TransformTools.createTranslationTransform(footLengthForControl / 2.0 - footBackForControl, 0.0, -ankleHeight);
          soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
 
-         double y = robotSide.negateIfRightSide(0.1);
+         double y = robotSide.negateIfRightSide(0.10);
          double yaw = robotSide.negateIfRightSide(Math.PI / 2.0);
-         RigidBodyTransform handControlFrameToWristTransform = TransformTools.createTransformFromTranslationAndEulerAngles(0.0, y, 0.0, 0.0, 0.0, yaw);
-         handControlFrameToWristTransforms.put(robotSide, handControlFrameToWristTransform);
+         RigidBodyTransform handAttachmentPlateToWrist = TransformTools.createTransformFromTranslationAndEulerAngles(0.0, y, 0.0, 0.0, 0.0, yaw);
+         handAttachmentPlateToWristTransforms.put(robotSide, handAttachmentPlateToWrist);
       }
    }
 

@@ -2,6 +2,13 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCHandType;
@@ -18,7 +25,8 @@ public enum AtlasRobotVersion
    GAZEBO_ATLAS_NO_HANDS;
 
    private static String[] resourceDirectories;
-   private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
+   
+   private final SideDependentList<RigidBodyTransform> handToWristTransform = new SideDependentList<RigidBodyTransform>();
 
    public DRCHandType getHandModel()
    {
@@ -71,31 +79,38 @@ public enum AtlasRobotVersion
       return getClass().getClassLoader().getResourceAsStream(getSdfFile());
    }
 
-   public Transform getOffsetFromWrist(RobotSide side)
+   public RigidBodyTransform getHandToWristTransform(RobotSide side)
    {
-
-      if (offsetHandFromWrist.get(side) == null)
+      if (handToWristTransform.get(side) == null)
       {
          createTransforms();
       }
-      return offsetHandFromWrist.get(side);
+      return handToWristTransform.get(side);
    }
    
+   /* Note: the class AtlasPhysicalProperties contains the offset between 
+    * the last joint of the wrist and attachment plate where the gripper is bolted.
+   *  Add another offset if you have a gripper.
+   */
    private void createTransforms()
-   {
+   {  
       for (RobotSide robotSide : RobotSide.values)
-      {
-         Vector3f centerOfHandToWristTranslation = new Vector3f();
-         float[] angles = new float[3];
+      {    
+         RigidBodyTransform handToWrist = new RigidBodyTransform();
+         handToWrist.set( AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide) );
+         
          if (hasRobotiqHands())
-         {
-            centerOfHandToWristTranslation = new Vector3f(0.16f, robotSide.negateIfLeftSide(0f), 0f);
-            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-            angles[1] = 0.0f;
-            angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
+         {       
+            // the previous transform actually represents the plate, NOT the hand.
+            RigidBodyTransform handToPlate = new RigidBodyTransform( handToWrist );
+            RigidBodyTransform plateToWrist =  TransformTools.createTransformFromTranslationAndEulerAngles(
+                   
+                  0.16, 0, 0,
+                  0, 0, robotSide.negateIfRightSide(Math.toRadians(-90)) ); 
+            
+            handToWrist.multiply( handToPlate, plateToWrist);
          }
-         Quaternion centerOfHandToWristRotation = new Quaternion(angles);
-         offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
+         handToWristTransform.set(robotSide, handToWrist );
       }
    }
 

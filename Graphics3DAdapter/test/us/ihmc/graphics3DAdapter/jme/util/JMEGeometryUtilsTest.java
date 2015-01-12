@@ -30,36 +30,27 @@ public class JMEGeometryUtilsTest
    @Test(timeout=300000)
    public void testGetInverse()
    {
-      RigidBodyTransform identity = new RigidBodyTransform();
-      identity.setIdentity();
-
-      Transform transformIdentity = Transform.IDENTITY;
-      RigidBodyTransform transform3DIdentity = JMEDataTypeUtils.jmeTransformToTransform3D(transformIdentity);
-
-      // Making sure that JME concept of identity is the same as java vecmath
-      assertTrue(identity.epsilonEquals(transform3DIdentity, 1e-6));
-
       Random random = new Random(100L);
       for (int i = 0; i < 100; i++)
       {
          RigidBodyTransform transform3D = RandomTools.generateRandomTransform(random);
-         Transform transform = JMEDataTypeUtils.j3dTransform3DToJMETransform(transform3D);
+         
+         Transform transform = JMEGeometryUtils.transformFromZupToJMECoordinates(transform3D);
          Transform transformInverse = JMEGeometryUtils.getInverse(transform);
-         RigidBodyTransform transform3DInverse = JMEDataTypeUtils.jmeTransformToTransform3D(transformInverse);
+         
+         transform = transform.combineWithParent(transformInverse);
 
-         RigidBodyTransform shouldBeIdentity = new RigidBodyTransform();
-         shouldBeIdentity.multiply(transform3D, transform3DInverse);
-
-         assertTrue(shouldBeIdentity.epsilonEquals(identity, 1e-6));
+         assertTrue(JMEGeometryUtils.epsilonEquals(Transform.IDENTITY, transform , 1e-6));
+         
       }
    }
 
    @Test(timeout=300000)
    public void testTransformFromJMECoordinatesToZup()
    {
-      RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.setIdentity();
-      transform3D.setTranslationAndIdentityRotation(new Vector3d(1.0, 0.0, 0.0));
+      Transform transform3D = new Transform();
+      transform3D.set( Transform.IDENTITY );
+      transform3D.setTranslation( new Vector3f(1.0f, 0.0f, 0.0f));
 
       RigidBodyTransform transform = JMEGeometryUtils.transformFromJMECoordinatesToZup(transform3D);
 
@@ -98,8 +89,9 @@ public class JMEGeometryUtilsTest
       for (int i = 0; i < 100; i++)
       {
          RigidBodyTransform transform3Doriginal = RandomTools.generateRandomTransform(random);
-         RigidBodyTransform transformToZup = JMEGeometryUtils.transformFromJMECoordinatesToZup(transform3Doriginal);
-         RigidBodyTransform transform3backToOriginal = transformFromZupToJMECoordinates(transformToZup);
+
+         Transform transform3d = JMEGeometryUtils.transformFromZupToJMECoordinates(transform3Doriginal );
+         RigidBodyTransform transform3backToOriginal = JMEGeometryUtils.transformFromJMECoordinatesToZup(transform3d);
 
          assertTrue(transform3backToOriginal.epsilonEquals(transform3Doriginal, 1e-6));
       }
@@ -108,32 +100,34 @@ public class JMEGeometryUtilsTest
    @Test(timeout=300000)
    public void testTransformFromJMECoordinatesToZupWith90RotAboutX()
    {
+      Transform transform;
       RigidBodyTransform transform3D;
-      RigidBodyTransform transform;
       Vector3d originalVector;
 
       //*****
-      transform3D = new RigidBodyTransform();
-      transform3D.setIdentity();
+      transform = new Transform();
+      transform.set(Transform.IDENTITY);
 
       // 90 degree about JME x
-      AxisAngle4d axisAngle = new AxisAngle4d(1.0, 0.0, 0.0, Math.PI/2.0);
-      transform3D.setRotationAndZeroTranslation(axisAngle);
+
+      Quaternion quat = new Quaternion();
+      quat.fromAngleAxis( (float)(Math.PI/2.0), new Vector3f(1.0f, 0.0f, 0.0f) );
+      transform.setRotation( quat );
 
       // expected that this is
-      transform = JMEGeometryUtils.transformFromJMECoordinatesToZup(transform3D);
+      transform3D = JMEGeometryUtils.transformFromJMECoordinatesToZup(transform);
 
       AxisAngle4d axisAngleTransformed = new AxisAngle4d();
 
       Quat4d quat4d = new Quat4d();
-      transform.get(quat4d);
+      transform3D.get(quat4d);
       axisAngleTransformed.set(quat4d);
 
       // Unit vector in x
       originalVector = new Vector3d(1.0, 0.0, 0.0);
       Vector3d originalVectorTransformedToZup = new Vector3d();
 
-      transform.transform(originalVector, originalVectorTransformedToZup);
+      transform3D.transform(originalVector, originalVectorTransformedToZup);
 
       Vector3d expectedAnswer = new Vector3d(0.0, 1.0, 0.0);
 
@@ -143,7 +137,7 @@ public class JMEGeometryUtilsTest
       originalVector = new Vector3d(0.0, 1.0, 0.0);
       originalVectorTransformedToZup = new Vector3d();
 
-      transform.transform(originalVector, originalVectorTransformedToZup);
+      transform3D.transform(originalVector, originalVectorTransformedToZup);
 
       expectedAnswer = new Vector3d(1.0, 0.0, 0.0);
 
@@ -153,7 +147,7 @@ public class JMEGeometryUtilsTest
       originalVector = new Vector3d(0.0, 0.0, 1.0);
       originalVectorTransformedToZup = new Vector3d();
 
-      transform.transform(originalVector, originalVectorTransformedToZup);
+      transform3D.transform(originalVector, originalVectorTransformedToZup);
 
       expectedAnswer = new Vector3d(0.0, 0.0, -1.0);
 

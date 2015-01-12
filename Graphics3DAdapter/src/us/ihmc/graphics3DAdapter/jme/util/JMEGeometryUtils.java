@@ -83,21 +83,44 @@ public class JMEGeometryUtils
       return new Ray(origin, direction);
    }
 
-   public static RigidBodyTransform transformFromJMECoordinatesToZup(RigidBodyTransform transform)
+   public static RigidBodyTransform transformFromJMECoordinatesToZup(Transform transform)
    {
       RigidBodyTransform modifiedTransform = new RigidBodyTransform(yUpToZupTransform);
-      modifiedTransform.multiply(transform);
+      RigidBodyTransform temp = jmeTransformToTransform3D(transform);
+      modifiedTransform.multiply(temp);
 
       return modifiedTransform;
    }
 
-   public static RigidBodyTransform transformFromZupToJMECoordinates(RigidBodyTransform transform)
+   public static Transform transformFromZupToJMECoordinates(RigidBodyTransform transform)
    {
       RigidBodyTransform modifiedTransform = new RigidBodyTransform(zUpToYupTransform);
       modifiedTransform.multiply(transform);
 
-      return modifiedTransform;
+      return j3dTransform3DToJMETransform( modifiedTransform );
    }
+   
+  /*
+   * 
+   */
+   public static void multiply(Transform matrixToModify, Transform transformToApply)
+   {
+      matrixToModify.combineWithParent(transformToApply);
+   }
+   
+   public static void multiply(Transform matrix, Transform transformToApply, Transform result)
+   {
+      result.set(matrix);
+      result.combineWithParent(transformToApply);
+   }
+   
+/*   public static Transform multiply(Transform a, Transform b)
+   {
+      RigidBodyTransform A = jmeTransformToTransform3D(a);
+      RigidBodyTransform B = jmeTransformToTransform3D(b);
+      A.multiply(B);
+      return j3dTransform3DToJMETransform( A );
+   }*/
 
 // public static Vector2d projectOntoZupXY(Vector3f vector)
 // {
@@ -112,15 +135,52 @@ public class JMEGeometryUtils
 //    transformFromZupToJMECoordinates(vector3f);
 //    return vector3f;
 // }
+   
+   /// under no circumstances change this to public. This method is dangerous and misleading.
+   private static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)
+   {
+      javax.vecmath.Quat4f   quat   = new javax.vecmath.Quat4f();
+      javax.vecmath.Vector3f vector = new javax.vecmath.Vector3f();
+      transform3D.get(quat, vector);
+      Vector3f jmeVector = new Vector3f(vector.getX(), vector.getY(), vector.getZ());
+      Quaternion jmeQuat = new Quaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
+      Transform ret = new Transform(jmeVector, jmeQuat, new Vector3f(1.0f, 1.0f, 1.0f));
+
+      return ret;
+   }
+
+   /// under no circumstances change this to public. This method is dangerous and misleading.
+   private static RigidBodyTransform jmeTransformToTransform3D(Transform jmeTransform)
+   {
+      Quaternion jmeQuat = jmeTransform.getRotation();
+      Vector3f jmeVect = jmeTransform.getTranslation();
+      javax.vecmath.Quat4d quat = new  javax.vecmath.Quat4d(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
+      Vector3d vect = new Vector3d(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
+      RigidBodyTransform ret = new RigidBodyTransform(quat, vect);
+      return ret;
+   }
 
    public static Transform getInverse(Transform transform)
    {
-      RigidBodyTransform transform3D = JMEDataTypeUtils.jmeTransformToTransform3D(transform);
+      RigidBodyTransform transform3D = jmeTransformToTransform3D(transform);
       transform3D.invert();
-
-      Transform ret = JMEDataTypeUtils.j3dTransform3DToJMETransform(transform3D);
+      Transform ret = j3dTransform3DToJMETransform(transform3D);
 
       return ret;
+   }
+   
+   public static Transform invert(Transform transform)
+   {
+      RigidBodyTransform transform3D = jmeTransformToTransform3D(transform);
+      transform3D.invert();
+      return transform.set(  j3dTransform3DToJMETransform(transform3D ) );
+   }
+   
+   static public boolean epsilonEquals(Transform a, Transform b, double epsilon)
+   {
+      RigidBodyTransform A = jmeTransformToTransform3D(a);
+      RigidBodyTransform B = jmeTransformToTransform3D(b);
+      return A.epsilonEquals(B, epsilon);    
    }
 
    public static void main(String[] args)
