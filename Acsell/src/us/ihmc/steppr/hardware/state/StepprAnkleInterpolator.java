@@ -194,7 +194,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 
    
    @Override
-   public void calculateDesiredQd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY)
+   public void calculateActuatordQd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY)
    {
       JacobianInverseTranspose(Jit, motorAngleRight, motorAngleLeft);
       twobytwoInverseTranspose(J, Jit);

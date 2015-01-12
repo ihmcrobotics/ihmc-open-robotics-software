@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.command;
 
+import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class StepprLinearTransmissionActuatorCommand extends StepprActuatorCommand
@@ -7,9 +8,9 @@ public class StepprLinearTransmissionActuatorCommand extends StepprActuatorComma
    private final StepprJointCommand jointCommand;
    private final double ratio;
 
-   public StepprLinearTransmissionActuatorCommand(String name, double kt, double ratio, StepprJointCommand jointCommand, YoVariableRegistry parentRegistry)
+   public StepprLinearTransmissionActuatorCommand(String name, StepprActuator actuator, double ratio, StepprJointCommand jointCommand, YoVariableRegistry parentRegistry)
    {
-      super(name, kt, parentRegistry);
+      super(name, actuator, parentRegistry);
       this.ratio = ratio;
       this.jointCommand = jointCommand;
    }
