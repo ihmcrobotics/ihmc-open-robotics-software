@@ -76,7 +76,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.getHierarchicalSolver().setVerbose(false);
-      
+
       this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel);
       createDesiredFramesList();
       for (int i = 0; i < desiredReferenceFrameList.size(); i++)
@@ -112,9 +112,10 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       for (int i = 0; i < 4; i++)
       {
          FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), reachLength * Math.cos(-i * Math.PI / 4), reachLength * Math.sin(-i * Math.PI / 4),
-               0.3);
+               0.6);
          FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
          ReferenceFrame desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCareEither", point, zAxis);
+         desiredReferenceFrameList.add(desiredReferenceFrame);
          desiredReferenceFrameList.add(desiredReferenceFrame);
       }
    }
@@ -154,44 +155,93 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
 
    private void checkIfTargetWasReached(int index)
    {
-      ReferenceFrame rightHandPosition = fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
-      ReferenceFrame desiredReference = getNextDesiredReferenceFrame(index);
-      RigidBodyTransform rBT = rightHandPosition.getTransformToDesiredFrame(desiredReference);
       Vector3d vector = new Vector3d();
+      RigidBodyTransform rBT;
+      //--------------------------------------
+      System.out.println("-----------------\n");
+
+
+      ReferenceFrame desiredReference = getNextDesiredReferenceFrame(index);
+      rBT = desiredReference.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+
       rBT.getTranslation(vector);
-      System.out.println("error: \n" + vector);
+      System.out.format("Desired position : %.3f  %.3f  %.3f\n",  
+            vector.getX(), vector.getY(), vector.getZ());
+      //--------------------------------------
+
+      ReferenceFrame rightHandPosition =   fullRobotModel.getHandControlFrame(RobotSide.RIGHT);
+      //  fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
+      rBT = rightHandPosition.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+
+      rBT.getTranslation(vector);
+      System.out.format("Actual position : %.3f  %.3f  %.3f\n\n",  
+            vector.getX(), vector.getY(), vector.getZ());
+      //-------------------------------
+      rBT = fullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+
+      rBT.getTranslation(vector);
+      System.out.format("Position of the LEFT Sole [%.3f] : %.3f  %.3f  %.3f\n",  
+            vector.length(), vector.getX(), vector.getY(), vector.getZ());
       
-      /*ReferenceFrame workingHandFrame = wholeBodyIKSolver.getHandFrame(RobotSide.RIGHT, ReferenceFrame.getWorldFrame());
-      
-      RigidBodyTransform tempTransform =  workingHandFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      System.out.println("whole body: \n" + tempTransform);
-      
-      tempTransform =  desiredReference.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      System.out.println("desired: \n" + tempTransform);*/
-      
-      ReferenceFrame workingFrame = wholeBodyIKSolver.getDesiredPelvisFrame( ReferenceFrame.getWorldFrame());
-      RigidBodyTransform tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      System.out.println("whole body pelvis: \n" + tempTransform);
-      
-      ReferenceFrame actualFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
-      tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      System.out.println("actual pelvis: \n" + tempTransform);
-     
-      workingFrame = wholeBodyIKSolver.getDesiredBodyFrame("r_foot", ReferenceFrame.getWorldFrame());
-      tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      System.out.println("whole body akle: \n" + tempTransform);
-      
-      actualFrame = fullRobotModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
-      tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      System.out.println("actual akle: \n" + tempTransform);
-      
-      
+      rBT = fullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+
+      rBT.getTranslation(vector);
+      System.out.format("Position of the RIGHT Sole [%.3f] : %.3f  %.3f  %.3f\n",  
+            vector.length(), vector.getX(), vector.getY(), vector.getZ());
+
+      //-------------------------------
+      rBT = rightHandPosition.getTransformToDesiredFrame(desiredReference);
+
+      rBT.getTranslation(vector);
+      System.out.format("Error in final position [%.3f] : %.3f  %.3f  %.3f\n",  
+            vector.length(), vector.getX(), vector.getY(), vector.getZ());
+
+      //-------------------------------
+      String[] jointNames = { 
+            "r_leg_akx", "r_leg_aky",
+            "r_leg_kny",
+            "r_leg_hpy", "r_leg_hpx", "r_leg_hpz",    
+
+            "l_leg_akx", "l_leg_aky",
+            "l_leg_kny",
+            "l_leg_hpy", "l_leg_hpx", "l_leg_hpz",  
+
+            "back_bkz", "back_bky",  "back_bkx",           
+            "r_arm_shz", "r_arm_shx", "r_arm_ely",
+            "r_arm_elx",
+            "r_arm_wry", "r_arm_wrx" };
+
+      Vector3d A = new Vector3d(); 
+      Vector3d B = new Vector3d(); 
+
+      for(int i=0; i< jointNames.length; i++)
+      {    
+         System.out.print("-----------------\n" +  jointNames[i] );
+         ReferenceFrame workingFrame =  wholeBodyIKSolver.getDesiredAfterJointFrame( jointNames[i], ReferenceFrame.getWorldFrame());
+         RigidBodyTransform tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+
+         tempTransform.getTranslation(A);
+         System.out.format("\n ACTUAL:  %.3f   %.3f   %.3f\n" ,A.getX(), A.getY(), A.getZ() );
+
+         ReferenceFrame actualFrame = fullRobotModel.getOneDoFJointByName(jointNames[i]).getFrameAfterJoint();
+         tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+
+         tempTransform.getTranslation(B);
+         System.out.format(" DESIRED: %.3f   %.3f   %.3f\n" ,B.getX(), B.getY(), B.getZ() );
+
+         A.sub(B);
+         System.out.format(" angle error is %+.1f degrees\terror in location is  %.3f   %.3f   %.3f\n", 
+
+               (180.0/Math.PI)*(wholeBodyIKSolver.getDesiredJointAngle( jointNames[i] ) - 
+                     fullRobotModel.getOneDoFJointByName(jointNames[i]).getQ() ),
+                     A.getX(), A.getY(), A.getZ() );  
+      }
+
       if (vector.length() > ERROR_DISTANCE_TOLERANCE)
       {
-         System.out.println(this.getClass().getName() + ": FAILED TO REACH DESIRED POINT");
+         System.out.println(this.getClass().getName() + ": FAILED TO REACH DESIRED POINT " );
       }
-      else
-      {
+      else{
          System.out.println(this.getClass().getName() + ": SUCCESFULLY REACHED POINT");
       }
    };

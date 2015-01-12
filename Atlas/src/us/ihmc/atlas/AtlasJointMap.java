@@ -333,11 +333,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
-      RigidBodyTransform transA =  JMEDataTypeUtils.jmeTransformToTransform3D( atlasVersion.getOffsetFromWrist(robotSide) );
-      RigidBodyTransform transB = AtlasPhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
-      RigidBodyTransform transC = new RigidBodyTransform();
-      transC.multiply( transB, transA );
-      return transC;
+      return atlasVersion.getHandToWristTransform(robotSide);
    }
 
    @Override

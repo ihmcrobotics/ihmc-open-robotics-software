@@ -45,7 +45,6 @@ public class JMEDataTypeUtils
 
       yaw = yaw * -1;
 
-
       if (yaw < 0)
       {
          yaw = (float) (Math.PI * 2 + yaw);
@@ -132,7 +131,6 @@ public class JMEDataTypeUtils
       packFramePoseInJMEQuaternion(original, targetQuaternion);
    }
 
-
    public static ColorRGBA colorToColorRGBA(Color color)
    {
       return new ColorRGBA(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
@@ -218,7 +216,11 @@ public class JMEDataTypeUtils
 
       return ret;
    }
-
+   /*
+    * @deprecated
+    * You dont want to use this most of the time. Use JMEGeometryUtils instead.
+    */
+   @Deprecated
    public static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)
    {
       Quat4f quat = new Quat4f();
@@ -230,7 +232,12 @@ public class JMEDataTypeUtils
 
       return ret;
    }
-
+   
+   /*
+    * @deprecated
+    * You dont want to use this most of the time. Use JMEGeometryUtils instead.
+    */
+   @Deprecated
    public static RigidBodyTransform jmeTransformToTransform3D(Transform jmeTransform)
    {
       Quaternion jmeQuat = jmeTransform.getRotation();
@@ -241,13 +248,4 @@ public class JMEDataTypeUtils
 
       return ret;
    }
-
-   public static void jmeTransformToTransform3D(Transform jmeTransform, RigidBodyTransform rigidBodyTransformToPack) {
-	   Quaternion jmeQuat = jmeTransform.getRotation();
-	   Vector3f jmeVect = jmeTransform.getTranslation();
-	   Quat4d quat = new Quat4d(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
-	   Vector3d vect = new Vector3d(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
-	   rigidBodyTransformToPack.set(quat, vect);
-   }
-   
 }
