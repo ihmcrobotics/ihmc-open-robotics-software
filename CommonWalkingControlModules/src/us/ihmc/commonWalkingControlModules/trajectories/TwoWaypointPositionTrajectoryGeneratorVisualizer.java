@@ -128,6 +128,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
             scs.setInPoint();
             drawTrajectory.set(false);
             
+            trajectoryBagOfBalls.hideAll();
             trajectoryGenerator.initialize();
 
             for (int tick = 0; tick < numberOfTicks; tick++)
@@ -185,19 +186,19 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
       return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
               initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
-              arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, null);
+              arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, waypoints);
    }
    
    public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
    {
       private final ReferenceFrame referenceFrame;
-      private final List<FramePoint> waypoints;
+      private final List<YoFramePoint> waypoints;
       
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
             PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
             VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
             int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry,
-            WalkingControllerParameters walkingControllerParameters, boolean visualize, List<FramePoint> waypoints)
+            WalkingControllerParameters walkingControllerParameters, boolean visualize, List<YoFramePoint> waypoints)
       {
          super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
                trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, walkingControllerParameters,
@@ -215,7 +216,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
          
          for (int i = 0; i < 2; i++)
          {
-            wayFramePoints.add(waypoints.get(i));
+            wayFramePoints.add(waypoints.get(i).getFramePointCopy());
          }
          
          for (int i = 0; i < 2; i++)
