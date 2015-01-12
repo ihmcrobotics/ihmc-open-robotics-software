@@ -106,7 +106,7 @@ public enum AtlasRobotVersion
             RigidBodyTransform plateToWrist =  TransformTools.createTransformFromTranslationAndEulerAngles(
                    
                   0.16, 0, 0,
-                  0, 0, robotSide.negateIfRightSide(Math.toRadians(-90)) ); 
+                  robotSide.negateIfLeftSide(Math.toRadians(90)), 0, 0 ); 
             
             handToWrist.multiply( handToPlate, plateToWrist);
          }
