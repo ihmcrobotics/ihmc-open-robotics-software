@@ -12,11 +12,11 @@ public class StepprPDJointController implements StepprController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprPDJointController");
    
-   private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
+   protected final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    private final ArrayList<PDController> controllers = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> desiredPositions = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> desiredVelocities = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> tauFFs = new ArrayList<>();
+   protected final ArrayList<DoubleYoVariable> tauFFs = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> damping = new ArrayList<>();
    
 
