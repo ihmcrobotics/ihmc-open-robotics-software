@@ -103,9 +103,17 @@ public class JMEGeometryUtils
   /*
    * 
    */
-   public static void multiply(Transform matrixToModify, Transform transformToApply)
+   public static void transform(Transform matrixToModify, Transform transformToApply)
    {
       matrixToModify.combineWithParent(transformToApply);
+   }
+   
+   public static Transform multiply(Transform matrix, Transform transformToApply)
+   {
+      Transform temp = new Transform();
+      temp.set(matrix);
+      temp.combineWithParent(transformToApply);
+      return temp;
    }
    
    public static void multiply(Transform matrix, Transform transformToApply, Transform result)
