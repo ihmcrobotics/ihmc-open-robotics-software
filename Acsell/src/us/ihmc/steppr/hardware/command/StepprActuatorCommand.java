@@ -2,6 +2,7 @@ package us.ihmc.steppr.hardware.command;
 
 import java.nio.ByteBuffer;
 
+import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -14,17 +15,17 @@ public abstract class StepprActuatorCommand
    private final DoubleYoVariable currentDesired;
    private final DoubleYoVariable damping;
    
-   private final double kt;
+   StepprActuator actuator;
    
-   public StepprActuatorCommand(String name, double kt, YoVariableRegistry parentRegistry)
+   public StepprActuatorCommand(String name, StepprActuator actuator, YoVariableRegistry parentRegistry)
    {
+      this.actuator = actuator;
       this.registry = new YoVariableRegistry(name);
 
       this.enabled = new BooleanYoVariable(name + "Enabled", registry);
       this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
       this.damping = new DoubleYoVariable(name + "Damping", registry);
       this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
-      this.kt = kt;
       
       parentRegistry.addChild(registry);
    }
@@ -39,7 +40,7 @@ public abstract class StepprActuatorCommand
       {
          target.put((byte) 3);
          target.putFloat((float) (currentDesired.getDoubleValue()));
-         target.putFloat((float) (damping.getDoubleValue() / kt));
+         target.putFloat((float) (damping.getDoubleValue() / actuator.getKt()));
          target.putFloat(0f);
          target.putInt(controlID);
       }
@@ -71,7 +72,7 @@ public abstract class StepprActuatorCommand
    protected void setTauDesired(double tau)
    {
       tauDesired.set(tau);
-      this.currentDesired.set(tau/kt);
+      this.currentDesired.set(tau/actuator.getKt());
    }
    
    protected void setDamping(double damping)

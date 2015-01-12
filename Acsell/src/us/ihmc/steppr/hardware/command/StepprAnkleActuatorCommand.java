@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.command;
 
+import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.state.StepprAnkleAngleCalculator;
 import us.ihmc.steppr.hardware.state.StepprAnkleInterpolator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -16,15 +17,15 @@ public class StepprAnkleActuatorCommand
    private final StepprJointCommand ankleX;
    
 
-   public StepprAnkleActuatorCommand(String name, StepprJointCommand ankleY, StepprJointCommand ankleX, double rightKt, double leftKt, YoVariableRegistry parentRegistry)
+   public StepprAnkleActuatorCommand(String name, StepprJointCommand ankleY, StepprJointCommand ankleX, StepprActuator rightActuator, StepprActuator leftActuator, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.ankleY = ankleY;
       this.ankleX = ankleX;
       
       
-      this.rightActuatorCommand = new RightActuatorCommand(name + "RightActuator", rightKt, registry);
-      this.leftActuatorCommand = new LeftActuatorCommand(name + "LeftActuator", leftKt, registry);
+      this.rightActuatorCommand = new RightActuatorCommand(name + "RightActuator", rightActuator, registry);
+      this.leftActuatorCommand = new LeftActuatorCommand(name + "LeftActuator", leftActuator, registry);
       
       parentRegistry.addChild(registry);
    }
@@ -38,7 +39,7 @@ public class StepprAnkleActuatorCommand
       
       rightActuatorCommand.setTauDesired(ankleCalculator.getTauRightActuator());
       leftActuatorCommand.setTauDesired(ankleCalculator.getTauLeftActuator());
-      
+ 
       rightActuatorCommand.setDamping(ankleY.getDamping() / (ankleCalculator.getRatio() * ankleCalculator.getRatio()));
       leftActuatorCommand.setDamping(ankleY.getDamping() / (ankleCalculator.getRatio() * ankleCalculator.getRatio()));
       
@@ -57,9 +58,9 @@ public class StepprAnkleActuatorCommand
    private class RightActuatorCommand extends StepprActuatorCommand
    {
 
-      public RightActuatorCommand(String name, double kt, YoVariableRegistry parentRegistry)
+      public RightActuatorCommand(String name, StepprActuator actuator, YoVariableRegistry parentRegistry)
       {
-         super(name, kt, parentRegistry);
+         super(name, actuator, parentRegistry);
       }
 
       @Override
@@ -73,9 +74,9 @@ public class StepprAnkleActuatorCommand
    private class LeftActuatorCommand extends StepprActuatorCommand
    {
 
-      public LeftActuatorCommand(String name, double kt, YoVariableRegistry parentRegistry)
+      public LeftActuatorCommand(String name, StepprActuator actuator, YoVariableRegistry parentRegistry)
       {
-         super(name, kt, parentRegistry);
+         super(name, actuator, parentRegistry);
       }
 
       @Override

@@ -70,7 +70,7 @@ public class StepprActuatorState
       this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
 
       this.inphaseCompositeStatorCurrent = new DoubleYoVariable(name + "InphaseCompositeStatorCurrent", registry);
-      this.quadratureCompositeStatorCurrent = new DoubleYoVariable(name + "QuadtratureCompositeStatorCurrent", registry);
+      this.quadratureCompositeStatorCurrent = new DoubleYoVariable(name + "QuadratureCompositeStatorCurrent", registry);
       this.controlTarget = new DoubleYoVariable(name + "ControlTarget", registry);
 
       this.motorEncoderPosition = new DoubleYoVariable(name + "MotorEncoderPosition", registry);

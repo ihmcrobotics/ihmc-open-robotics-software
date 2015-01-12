@@ -60,12 +60,9 @@ public class StepprOutputWriter implements DRCOutputWriter
       for (StepprJoint joint : StepprJoint.values)
       {
          tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
-         if(joint.isLinear()) //ignore ankles now
-         {
-            DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
-            inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio());
-            yoReflectedMotorInertia.put(joint, inertia);
-         }
+         DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
+         inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
+         yoReflectedMotorInertia.put(joint, inertia);  
       }
 
       yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
@@ -103,6 +100,9 @@ public class StepprOutputWriter implements DRCOutputWriter
       else
       {
 
+         /*
+          * StandPrep
+          */
          for (StepprJoint joint : StepprJoint.values)
          {
             OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
@@ -115,6 +115,9 @@ public class StepprOutputWriter implements DRCOutputWriter
 
          standPrep.doControl(timestamp);
 
+         /*
+          * IHMC Control
+          */
          for (StepprJoint joint : StepprJoint.values)
          {
             OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
@@ -143,7 +146,7 @@ public class StepprOutputWriter implements DRCOutputWriter
                {
                   tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
                   yoTauSpring.get(joint).set(tauSpring);
-               }
+               } 
                jointCommand.setTauDesired(tau - tauSpring, rawSensorData); 
             }
             else

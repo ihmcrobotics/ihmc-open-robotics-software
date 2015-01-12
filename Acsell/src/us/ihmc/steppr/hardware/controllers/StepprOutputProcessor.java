@@ -96,7 +96,7 @@ public class StepprOutputProcessor implements OutputProcessor
       double qLeftMotor = ankleInterpolator.calculateLeftMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
 
       ankleInterpolator.calculateDesiredTau(qRightMotor, qLeftMotor, oneDofAnkleX.getTau(), oneDofAnkleY.getTau());
-      ankleInterpolator.calculateDesiredQd(qRightMotor, qLeftMotor, oneDofAnkleX.getQd(), oneDofAnkleY.getQd());
+      ankleInterpolator.calculateActuatordQd(qRightMotor, qLeftMotor, oneDofAnkleX.getQd(), oneDofAnkleY.getQd());
 
       predictedMotorPower.get(ankleRightActuator).set(
             calcPower(ankleInterpolator.getTauRightActuator(), ankleInterpolator.getMotorVelocityRight(), ankleRightActuator.getKm()));
