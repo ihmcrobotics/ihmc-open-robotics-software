@@ -987,10 +987,16 @@ public class MomentumBasedController
       return centerOfMassFrame;
    }
 
+   
    public void setDesiredSpatialAcceleration(int jacobianId, TaskspaceConstraintData taskspaceConstraintData)
    {
       GeometricJacobian jacobian = getJacobian(jacobianId);
-
+      setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
+   }
+   
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   {
+    
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);

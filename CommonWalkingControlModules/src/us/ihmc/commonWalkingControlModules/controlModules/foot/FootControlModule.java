@@ -38,6 +38,7 @@ import us.ihmc.yoUtilities.stateMachines.StateTransition;
 
 public class FootControlModule
 {
+   public static final boolean USE_HEURISTIC_SWING_STATE = false;
    public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
 
    private final YoVariableRegistry registry;
@@ -74,7 +75,7 @@ public class FootControlModule
    private final BooleanYoVariable doFancyOnToesControl;
 
    private final HoldPositionState holdPositionState;
-   private final SwingState swingState;
+   private final SwingStateInterface swingState;
    private final MoveStraightState moveStraightState;
    private final TouchdownState touchdownOnToesState;
    private final TouchdownState touchdownOnHeelState;
@@ -82,7 +83,7 @@ public class FootControlModule
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
-   
+
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
@@ -168,10 +169,21 @@ public class FootControlModule
             holdPositionFootControlGains, robotSide, registry);
       states.add(holdPositionState);
 
-      swingState = new SwingState(swingTimeProvider, touchdownVelocityProvider, accelerationControlModule, momentumBasedController, contactableFoot,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule,
-            swingFootControlGains, robotSide, registry, walkingControllerParameters);
-      states.add(swingState);
+      if (USE_HEURISTIC_SWING_STATE)
+      {
+         HeuristicSwingState swingState = new HeuristicSwingState(swingTimeProvider, accelerationControlModule, momentumBasedController, contactableFoot, jacobianId, nullspaceMultiplier,
+               jacobianDeterminantInRange, doSingularityEscape, swingFootControlGains, robotSide, registry);
+         states.add(swingState);
+         this.swingState = swingState;
+      }
+      else
+      {
+         SwingState swingState = new SwingState(swingTimeProvider, touchdownVelocityProvider, accelerationControlModule, momentumBasedController, contactableFoot,
+               jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule,
+               swingFootControlGains, robotSide, registry, walkingControllerParameters);
+         states.add(swingState);
+         this.swingState = swingState;
+      }
 
       moveStraightState = new MoveStraightState(accelerationControlModule, momentumBasedController, contactableFoot, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, robotSide,
