@@ -38,8 +38,10 @@ dependencies {
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output
     runtime project(':IHMCHumanoidOperatorInterface')
     testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
+    testCompile project(':IHMCWholeBodyController').sourceSets.test.output
     compile project(':Graphics3DAdapter')
     compile project(':IHMCROSTools')
+    compile project(':IHMCWholeBodyController')
     compile project(':ImageProcessing')
     compile project(':iRobotHardwareDrivers')
     compile project(':RobotDataCommunication')
