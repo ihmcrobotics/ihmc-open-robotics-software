@@ -27,7 +27,7 @@ public class BonoFlatGroundWalkingTrack
 
       double initialYaw = 0.3;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
-      boolean useVelocityAndHeadingScript = true;
+      boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
