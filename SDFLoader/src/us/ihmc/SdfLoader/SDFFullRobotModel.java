@@ -505,12 +505,8 @@ public class SDFFullRobotModel implements FullRobotModel
       return head;
    }
 
-   /** 
-    * @deprecated The reference frame returned by getEndEffector( side, ARM)
-    * is not consistent consistent with getEndEffectorFrame( side, ARM ).
-    * */
+   /** {@inheritDoc} */
    @Override
-   @Deprecated
    public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
    {
       switch (limbName)
@@ -524,18 +520,11 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
    {
-      switch (limbName)
-      {
-      case LEG:
-         return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
-      case ARM:
-         return handControlFrames.get(robotSide);
-      default:
-         throw new RuntimeException("Unkown end effector");
-      }
+      return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
    }
 
    /** {@inheritDoc} */
