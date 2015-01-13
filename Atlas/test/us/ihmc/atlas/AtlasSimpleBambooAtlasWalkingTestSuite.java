@@ -11,10 +11,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 	AtlasFlatGroundWalkingTest.class
 })
 
-public class AtlasBambooWalkingTestSuite
+public class AtlasSimpleBambooAtlasWalkingTestSuite
 {
 	public static void main(String[] args)
 	{
-	   JUnitTestSuiteConstructor.generateTestSuite(AtlasBambooWalkingTestSuite.class);
+	   JUnitTestSuiteConstructor.generateTestSuite(AtlasSimpleBambooAtlasWalkingTestSuite.class);
 	}
 }
