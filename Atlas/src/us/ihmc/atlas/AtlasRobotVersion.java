@@ -2,13 +2,6 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCHandType;
@@ -22,11 +15,10 @@ public enum AtlasRobotVersion
    ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS,
    DRC_NO_HANDS,
    ATLAS_DUAL_ROBOTIQ,
-   GAZEBO_ATLAS_NO_HANDS;
+ GAZEBO_ATLAS_NO_HANDS;
 
    private static String[] resourceDirectories;
-   
-   private final SideDependentList<RigidBodyTransform> handToWristTransform = new SideDependentList<RigidBodyTransform>();
+   private final SideDependentList<Transform> offsetHandFromAttachmentPlate = new SideDependentList<Transform>();
 
    public DRCHandType getHandModel()
    {
@@ -58,7 +50,7 @@ public enum AtlasRobotVersion
          case ATLAS_DUAL_ROBOTIQ:
             return "models/GFE/atlas_v4_robotiq_hands.sdf";
          case GAZEBO_ATLAS_NO_HANDS:
-            return "models/GFE/atlas_v4.sdf";
+            return "models/GFE/gazebo_atlas.sdf";
          default:
             throw new RuntimeException("AtlasRobotVersion: Unimplemented enumeration case : " + this);
       }
@@ -79,38 +71,30 @@ public enum AtlasRobotVersion
       return getClass().getClassLoader().getResourceAsStream(getSdfFile());
    }
 
-   public RigidBodyTransform getHandToWristTransform(RobotSide side)
+   public Transform getOffsetFromAttachmentPlate(RobotSide side)
    {
-      if (handToWristTransform.get(side) == null)
+      if (offsetHandFromAttachmentPlate.get(side) == null)
       {
          createTransforms();
       }
-      return handToWristTransform.get(side);
+      return offsetHandFromAttachmentPlate.get(side);
    }
-   
-   /* Note: the class AtlasPhysicalProperties contains the offset between 
-    * the last joint of the wrist and attachment plate where the gripper is bolted.
-   *  Add another offset if you have a gripper.
-   */
+
    private void createTransforms()
-   {  
+   {
       for (RobotSide robotSide : RobotSide.values)
-      {    
-         RigidBodyTransform handToWrist = new RigidBodyTransform();
-         handToWrist.set( AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide) );
-         
+      {
+         Vector3f centerOfHandToWristTranslation = new Vector3f();
+         float[] angles = new float[3];
          if (hasRobotiqHands())
-         {       
-            // the previous transform actually represents the plate, NOT the hand.
-            RigidBodyTransform handToPlate = new RigidBodyTransform( handToWrist );
-            RigidBodyTransform plateToWrist =  TransformTools.createTransformFromTranslationAndEulerAngles(
-                   
-                  0.16, 0, 0,
-                  robotSide.negateIfLeftSide(Math.toRadians(90)), 0, 0 ); 
-            
-            handToWrist.multiply( handToPlate, plateToWrist);
+         {
+            centerOfHandToWristTranslation = new Vector3f(0.16f, robotSide.negateIfLeftSide(0f), 0f);
+            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+            angles[1] = 0.0f;
+            angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
          }
-         handToWristTransform.set(robotSide, handToWrist );
+         Quaternion centerOfHandToWristRotation = new Quaternion(angles);
+         offsetHandFromAttachmentPlate.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
       }
    }
 
@@ -119,3 +103,4 @@ public enum AtlasRobotVersion
       return "atlas";
    }
 }
+
