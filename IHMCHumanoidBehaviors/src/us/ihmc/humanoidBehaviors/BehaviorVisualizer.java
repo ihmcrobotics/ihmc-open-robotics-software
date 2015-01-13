@@ -22,7 +22,7 @@ public class BehaviorVisualizer extends SCSVisualizer
       if (!onRealRobot)
          new BehaviorVisualizer("127.0.0.1", 1024*32);
       else
-         new BehaviorVisualizer("10.66.171.20", 1024*32);
+         new BehaviorVisualizer("192.168.130.112", 1024*32);
          
    }
 }
