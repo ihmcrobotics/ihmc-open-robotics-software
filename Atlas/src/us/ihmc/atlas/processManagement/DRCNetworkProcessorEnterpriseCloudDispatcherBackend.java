@@ -28,8 +28,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    private final byte[] buffer;
 
-   private static String scsMachineIPAddress = "http://10.66.171.20:11311";
-   private static String rosMasterURI = "http://10.66.171.44:11311";
+   private static String scsMachineIPAddress = "http://192.168.130.112:11311";
+   private static String rosMasterURI = "http://192.168.130.101:11311";
 
    private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
 

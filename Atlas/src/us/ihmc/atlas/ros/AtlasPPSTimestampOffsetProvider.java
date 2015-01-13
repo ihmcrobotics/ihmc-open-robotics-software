@@ -54,7 +54,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    {
       ZMQ.Context context = ZMQ.context(1);
       requester = context.socket(ZMQ.REQ);
-      requester.connect("tcp://10.66.171.20:" + ppsPort);
+      requester.connect("tcp://192.168.130.112:" + ppsPort);
    }
 
    @Override
