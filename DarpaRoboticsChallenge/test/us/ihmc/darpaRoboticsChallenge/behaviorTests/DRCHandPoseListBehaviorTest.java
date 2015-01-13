@@ -32,18 +32,18 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = true;
-   private static final boolean DEBUG = true;
+   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean DEBUG = false;
 
    private final double JOINT_POSITION_THRESHOLD = 0.007;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
@@ -141,10 +141,10 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       double[][] armPoses = createArmPosesInitializedToRobot(numberOfArmPoses, robotSide);
 
-      int randomInt = RandomTools.generateRandomInt(new Random(), 0, numberOfArmJoints - 1);
-      ArmJointName randomJoint = armJointNames[randomInt];
+      int randomArmJointIndex = RandomTools.generateRandomInt(new Random(), 0, numberOfArmJoints - 1);
+      ArmJointName randomArmJoint = armJointNames[randomArmJointIndex];
       int poseNumber = 1;
-      setSingleJoint(armPoses, poseNumber, robotSide, randomJoint, Math.PI / 2, true);
+      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, Math.PI / 2, true);
 
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.setInput(handPoseListPacket);
@@ -159,7 +159,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    }
 
    @Test(timeout = 300000)
-   public void testTwoPosesAtCurrentArmPose() throws SimulationExceededMaximumTimeException
+   public void testDoNothing() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -187,43 +187,40 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    }
 
    @Test(timeout = 300000)
-   public void testMoveBothArms() throws SimulationExceededMaximumTimeException
+   public void testWackyInflatableArmFlailingTubeManDance() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      final HandPoseListBehavior leftHandPoseListBehavior = new HandPoseListBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(leftHandPoseListBehavior.getControllerGlobalPacketConsumer());
-
-      final HandPoseListBehavior rightHandPoseListBehavior = new HandPoseListBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(rightHandPoseListBehavior.getControllerGlobalPacketConsumer());
-
-      double swingTrajectoryTime = 2.0;
-      int numberOfArmPoses = 2;
-
-      double[][] leftArmPoses = createRandomArmPoses(numberOfArmPoses, RobotSide.LEFT);
-      double[][] rightArmPoses = createRandomArmPoses(numberOfArmPoses, RobotSide.RIGHT);
-
-      HandPoseListPacket leftHandPoseListPacket = new HandPoseListPacket(RobotSide.LEFT, leftArmPoses, swingTrajectoryTime);
-      leftHandPoseListBehavior.setInput(leftHandPoseListPacket);
-
-      HandPoseListPacket rightHandPoseListPacket = new HandPoseListPacket(RobotSide.RIGHT, rightArmPoses, swingTrajectoryTime);
-      rightHandPoseListBehavior.setInput(rightHandPoseListPacket);
-
+      SideDependentList<double [][]> armPosesLeftAndRightSide = new SideDependentList<double[][]>();
       ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
-      behaviors.add(leftHandPoseListBehavior);
-      behaviors.add(rightHandPoseListBehavior);
+      double swingTrajectoryTime = 10.0;
+      int numberOfArmPoses = 10;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(communicationBridge, yoTime);
+         communicationBridge.attachGlobalListenerToController(handPoseListBehavior.getControllerGlobalPacketConsumer());
+         
+         double[][] armPoses = createRandomArmPoses(numberOfArmPoses, robotSide);
+         HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
+         handPoseListBehavior.setInput(handPoseListPacket);
+         
+         armPosesLeftAndRightSide.put(robotSide, armPoses);
+         behaviors.add(handPoseListBehavior);
+      }
 
       success &= executeBehaviors(behaviors, swingTrajectoryTime);
 
-      assertRobotAchievedFinalDesiredArmPose(leftArmPoses, RobotSide.LEFT);
-      assertRobotAchievedFinalDesiredArmPose(rightArmPoses, RobotSide.RIGHT);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         assertRobotAchievedFinalDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide);
+
+         assertTrue(behaviors.get(robotSide.ordinal()).isDone());
+      }
 
       assertTrue(success);
-
-      assertTrue(leftHandPoseListBehavior.isDone());
-      assertTrue(rightHandPoseListBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -305,11 +302,11 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    {
       double[][] armPoses = new double[numberOfArmJoints][numberOfPoses];
 
-      double[] desiredArmPose = createRandomArmPose(robotSide);
-
-      for (int i = 0; i < numberOfPoses; i++)
+      for (int poseNumber = 0; poseNumber < numberOfPoses; poseNumber++)
       {
-         setArmPose(armPoses, i, desiredArmPose);
+         double[] desiredArmPose = createRandomArmPose(robotSide);
+         
+         setArmPose(armPoses, poseNumber, desiredArmPose);
       }
 
       return armPoses;
