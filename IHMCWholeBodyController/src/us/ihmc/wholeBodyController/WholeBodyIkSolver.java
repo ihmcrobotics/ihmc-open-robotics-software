@@ -135,6 +135,18 @@ public class WholeBodyIkSolver
    {
       return urdfModel;
    }
+   
+   public int getIdOfBodyAfterJoint(String jointname)
+   {
+      int jointId = urdfModel.getJointIndexByName(jointname);
+      return  urdfModel.getChildBodyOfJoint(jointId);
+   }
+   
+   public int getIdOfBodyAfterJoint(int jointId)
+   {
+      return  urdfModel.getChildBodyOfJoint(jointId);
+   }
+   
    public RigidBodyTransform getLocalBodyTransform(String bodyname )
    {
       int bodyid = getUrdfRobotModel().getBodyId( bodyname );
@@ -161,15 +173,20 @@ public class WholeBodyIkSolver
       return workingRootFrame;
    }
    
-   public ReferenceFrame getBodyReferenceFrame(String name)
+   public ReferenceFrame getBodyReferenceFrame(String bodyname)
    {
-      RigidBodyTransform localTransform = getLocalBodyTransform( name );
+      RigidBodyTransform localTransform = getLocalBodyTransform( bodyname );
       ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", workingRootFrame, localTransform);
-      
       System.out.println( localTransform );
       return bodyFrame;
    }
    
+   public ReferenceFrame getBodyReferenceFrame(int bodyId)
+   {
+      RigidBodyTransform localTransform = getLocalBodyTransform( bodyId );
+      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", workingRootFrame, localTransform);
+      return bodyFrame;
+   }   
 
    public HierarchicalKinematicSolver getHierarchicalSolver()
    {
@@ -755,7 +772,7 @@ public class WholeBodyIkSolver
       ReferenceFrame workingJointFrame = working_sdf_model.getOneDoFJointByName(jointName).getFrameAfterJoint();
       ReferenceFrame workingRootFrame  = getRootFrame();
       
-      RigidBodyTransform rootToJoint = workingJointFrame.getTransformToDesiredFrame( workingRootFrame );
+      RigidBodyTransform rootToJoint  = workingJointFrame.getTransformToDesiredFrame( workingRootFrame );
       RigidBodyTransform parentToRoot = workingRootFrame.getTransformToDesiredFrame( parentFrame );
       
       RigidBodyTransform parentToBody = new RigidBodyTransform();
