@@ -11,10 +11,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 	ValkyrieFlatGroundWalkingTest.class,
 })
 
-public class ValkyrieBambooWalkingTestSuite
+public class ValkyrieSimpleBambooValkyrieWalkingTestSuite
 {
 	public static void main(String[] args)
 	{
-		JUnitTestSuiteConstructor.generateTestSuite(ValkyrieBambooWalkingTestSuite.class);
+		JUnitTestSuiteConstructor.generateTestSuite(ValkyrieSimpleBambooValkyrieWalkingTestSuite.class);
 	}
 }
