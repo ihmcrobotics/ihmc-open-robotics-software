@@ -41,7 +41,7 @@ import us.ihmc.yoUtilities.math.trajectories.WrapperForMultiplePositionTrajector
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-public class SwingState extends AbstractUnconstrainedState
+public class SwingState extends AbstractUnconstrainedState implements SwingStateInterface
 {
    private static final boolean USE_NEW_CONTINUOUS_TRAJECTORY = false;
    
@@ -199,6 +199,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final Vector3d tempVector = new Vector3d();
    private final Matrix3d rotationMatrix = new Matrix3d();
 
+   @Override
    public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters, boolean useLowHeightTrajectory)
    {
       footstep.getPose(newFootstepPose);
@@ -260,6 +261,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
    }
 
+   @Override
    public void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
    {
       setFootstep(footstep, trajectoryParametersProvider.getTrajectoryParameters(), useLowHeightTrajectory);
