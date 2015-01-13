@@ -65,7 +65,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private RigidBody head;
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
-   private final SideDependentList<RigidBody> wrist = new SideDependentList<RigidBody>();
+   private final SideDependentList<RigidBody> hands = new SideDependentList<RigidBody>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
@@ -75,7 +75,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final ArrayList<OneDoFJoint> lidarJoints = new ArrayList<>();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> handControlFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private final String[] sensorLinksToTrack;
 
@@ -111,40 +111,25 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
+         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", 
+        		 getEndEffectorFrame(robotSide, LimbName.LEG), 
+        		 soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame); 
 
-         RigidBodyTransform handControlFrameToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
-         if (handControlFrameToWristTransform != null)
+         RigidBodyTransform handAttachmentPlaeToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
+         System.out.println("handAttachmentPlaeToWristTransform\n" + handAttachmentPlaeToWristTransform);
+         
+         if (handAttachmentPlaeToWristTransform != null)
          {
-            ReferenceFrame handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(
-                  sidePrefix + "HandControlFrame", 
-                  wrist.get(robotSide).getParentJoint().getFrameAfterJoint(), 
-                  handControlFrameToWristTransform );
-            
-            handControlFrames.put(robotSide, handControlFrame);
+            ReferenceFrame attachmentPlateFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame",
+            		getEndEffectorFrame(robotSide, LimbName.ARM), 
+            		handAttachmentPlaeToWristTransform);
+            attachmentPlateFrames.put(robotSide, attachmentPlateFrame);
          }
          else
          {
-            handControlFrames.put(robotSide, null);
+            attachmentPlateFrames.put(robotSide, null);
          }
-      }
-   }
-   
-   public void displayJointPositions()
-   {
-      for (Map.Entry<String, OneDoFJoint> entry : oneDoFJoints.entrySet()  )
-      {
-         System.out.println("\n" + entry.getKey());
-         OneDoFJoint joint = entry.getValue();
-         
-         RigidBodyTransform abs_pose = new RigidBodyTransform();
-         ReferenceFrame frame = joint.getFrameAfterJoint() ;
-         Vector3d pos = new Vector3d();
-         frame.update();
-         frame.getTransformToDesiredFrame(abs_pose, this.getSoleFrame(RobotSide.RIGHT));
-         abs_pose.getTranslation(pos);
-         System.out.println( pos );
       }
    }
 
@@ -292,7 +277,7 @@ public class SDFFullRobotModel implements FullRobotModel
          switch (limbName)
          {
          case ARM:
-            wrist.put(limbSide, rigidBody);
+            hands.put(limbSide, rigidBody);
             break;
          case LEG:
             feet.put(limbSide, rigidBody);
@@ -512,7 +497,7 @@ public class SDFFullRobotModel implements FullRobotModel
       switch (limbName)
       {
       case ARM:
-         return wrist.get(robotSide);
+         return hands.get(robotSide);
       case LEG:
          return feet.get(robotSide);
       default:
@@ -613,7 +598,7 @@ public class SDFFullRobotModel implements FullRobotModel
    @Override
    public ReferenceFrame getHandControlFrame(RobotSide robotSide)
    {
-      return handControlFrames.get(robotSide);
+      return attachmentPlateFrames.get(robotSide);
    }
 
    public ReferenceFrame getHeadBaseFrame()
@@ -626,8 +611,7 @@ public class SDFFullRobotModel implements FullRobotModel
       for(int i = 0; i < sensorLinksToTrack.length; i++)
       {
          if(sensorLinksToTrack[i].equalsIgnoreCase(link.getName()));
-         {
-            
+         {  
             sensorFrames.put(link.getName(),joint.getFrameAfterJoint());
          }
       }

@@ -35,7 +35,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
@@ -162,22 +161,19 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion;
    }
 
+
    @Override
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
-      return JMEGeometryUtils.transformFromZupToJMECoordinates(  getTransform3dWristToHand(side) );
+	   return selectedVersion.getOffsetFromAttachmentPlate(side);
    }
    
    @Override
    public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
    {
-      RigidBodyTransform wristToHand = new RigidBodyTransform( ) ;
-     // wristToHand.invert( selectedVersion.getHandToWristTransform(side) );
-      wristToHand.set( selectedVersion.getHandToWristTransform(side) );
-      return wristToHand;
+	   return JMEGeometryUtils.transformFromJMECoordinatesToZup( getJmeTransformWristToHand(side) );
    }
-
-
+   
    @Override
    public String toString()
    {
@@ -375,4 +371,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return null;
    }
 
+
 }
+
