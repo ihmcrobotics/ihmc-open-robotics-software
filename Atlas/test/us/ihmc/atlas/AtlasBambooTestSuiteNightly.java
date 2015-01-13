@@ -24,6 +24,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class,
    us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class,
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
