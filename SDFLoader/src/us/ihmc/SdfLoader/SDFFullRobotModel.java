@@ -117,8 +117,7 @@ public class SDFFullRobotModel implements FullRobotModel
          soleFrames.put(robotSide, soleFrame); 
 
          RigidBodyTransform handAttachmentPlaeToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
-         System.out.println("handAttachmentPlaeToWristTransform\n" + handAttachmentPlaeToWristTransform);
-         
+
          if (handAttachmentPlaeToWristTransform != null)
          {
             ReferenceFrame attachmentPlateFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame",
