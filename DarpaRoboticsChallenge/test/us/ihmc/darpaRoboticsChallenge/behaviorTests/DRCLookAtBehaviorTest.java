@@ -122,8 +122,10 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
       Quat4d desiredHeadQuat = convertAxisAngleToQuat(axis, rotationAngle);
 
-      testLookAtBehavior(trajectoryTime, desiredHeadQuat);
+      LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
+      assertTrue(lookAtBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -137,8 +139,10 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
       Quat4d desiredHeadQuat = convertAxisAngleToQuat(axis, rotationAngle);
 
-      testLookAtBehavior(trajectoryTime, desiredHeadQuat);
+      LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
+      assertTrue(lookAtBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -152,8 +156,10 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
       Quat4d desiredHeadQuat = convertAxisAngleToQuat(axis, rotationAngle);
 
-      testLookAtBehavior(trajectoryTime, desiredHeadQuat);
+      LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
+      assertTrue(lookAtBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -165,25 +171,43 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       double trajectoryTime = 4.0;
       Quat4d desiredHeadQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
 
-      testLookAtBehavior(trajectoryTime, desiredHeadQuat);
+      LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
+      assertTrue(lookAtBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
-   private void testLookAtBehavior(double trajectoryTime, Quat4d desiredHeadQuat) throws SimulationExceededMaximumTimeException
+   private LookAtBehavior testLookAtBehavior(double trajectoryTime, Quat4d desiredHeadQuat) throws SimulationExceededMaximumTimeException
    {
       FramePose initialHeadPose = getCurrentHeadPose(fullRobotModel);
       Point3d desiredLookAtPoint = computeDesiredLookAtPoint(initialHeadPose, desiredHeadQuat);
 
-      boolean success = testLookAtBehavior(desiredLookAtPoint, trajectoryTime);
-
-      assertTrue(success);
+      LookAtBehavior lookAtBehavior = testLookAtBehavior(desiredLookAtPoint, trajectoryTime);
 
       FramePose finalHeadPose = getCurrentHeadPose(fullRobotModel);
       Quat4d finalHeadQuat = new Quat4d();
       finalHeadPose.getOrientation(finalHeadQuat);
 
       assertAxesParallel(desiredHeadQuat, finalHeadQuat);
+      
+      return lookAtBehavior;
+   }
+   
+   private LookAtBehavior testLookAtBehavior(Point3d pointToLookAt, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      final LookAtBehavior lookAtBehavior = new LookAtBehavior(communicationBridge);
+      communicationBridge.attachGlobalListenerToController(lookAtBehavior.getControllerGlobalPacketConsumer());
+
+      lookAtBehavior.setLookAtLocation(pointToLookAt);
+
+      success = success && executeBehavior(lookAtBehavior, trajectoryTime);
+
+      assertTrue(success);
+      
+      return lookAtBehavior;
    }
 
    private void assertAxesParallel(Quat4d desiredHeadQuat, Quat4d finalHeadQuat)
@@ -218,20 +242,6 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       desiredHeadQuat.set(desiredAxisAngle);
 
       return desiredHeadQuat;
-   }
-
-   private boolean testLookAtBehavior(Point3d pointToLookAt, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      final LookAtBehavior lookAtBehavior = new LookAtBehavior(communicationBridge);
-      communicationBridge.attachGlobalListenerToController(lookAtBehavior.getControllerGlobalPacketConsumer());
-
-      lookAtBehavior.setLookAtLocation(pointToLookAt);
-
-      success = success && executeBehavior(lookAtBehavior, trajectoryTime);
-
-      return success;
    }
 
    private FramePose getCurrentHeadPose(FullRobotModel fullRobotModel)

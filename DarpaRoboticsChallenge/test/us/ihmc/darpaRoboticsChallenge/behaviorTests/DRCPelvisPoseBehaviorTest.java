@@ -119,13 +119,14 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Quat4d desiredPelvisQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
       PelvisPosePacket pelvisPosePacket = new PelvisPosePacket(desiredPelvisQuat);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -135,14 +136,15 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Vector3d rotationAxis = new Vector3d(0, 1, 0);
       double rotationAngle = RandomTools.generateRandomDouble(new Random(), MAX_ANGLE_TO_TEST_RAD);
       PelvisPosePacket pelvisPosePacket = createRotationOnlyPelvisPosePacket(rotationAxis, rotationAngle);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -152,14 +154,15 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Vector3d rotationAxis = new Vector3d(1, 0, 0);
       double rotationAngle = RandomTools.generateRandomDouble(new Random(), MAX_ANGLE_TO_TEST_RAD);
       PelvisPosePacket pelvisPosePacket = createRotationOnlyPelvisPosePacket(rotationAxis, rotationAngle);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -169,14 +172,15 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Vector3d rotationAxis = new Vector3d(0, 0, 1);
       double rotationAngle = RandomTools.generateRandomDouble(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD);
       PelvisPosePacket pelvisPosePacket = createRotationOnlyPelvisPosePacket(rotationAxis, rotationAngle);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -186,13 +190,15 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Vector3d desiredDirection = new Vector3d(1, 0, 0);
-      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection);
+      FramePose currentPelvisPose = getCurrentPelvisPose(fullRobotModel);
+      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection, currentPelvisPose);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -202,13 +208,15 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Vector3d desiredDirection = new Vector3d(0, 1, 0);
-      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection);
+      FramePose currentPelvisPose = getCurrentPelvisPose(fullRobotModel);
+      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection, currentPelvisPose);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -218,13 +226,15 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       Vector3d desiredDirection = new Vector3d(0, 0, 1);
-      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection);
+      FramePose currentPelvisPose = getCurrentPelvisPose(fullRobotModel);
+      PelvisPosePacket pelvisPosePacket = createTranslationOnlyPelvisPosePacket(desiredDirection, currentPelvisPose);
 
-      success &= testPelvisPoseBehavior(pelvisPosePacket);
+      PelvisPoseBehavior pelvisPoseBehavior = testPelvisPoseBehavior(pelvisPosePacket);
 
-      assertTrue(success);
+      assertTrue(pelvisPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -239,10 +249,8 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       return pelvisPosePacket;
    }
 
-   private PelvisPosePacket createTranslationOnlyPelvisPosePacket(Vector3d desiredDirection)
+   private PelvisPosePacket createTranslationOnlyPelvisPosePacket(Vector3d desiredDirection, FramePose currentPelvisPose)
    {
-      FramePose currentPelvisPose = getCurrentPelvisPose(fullRobotModel);
-
       desiredDirection.normalize();
       double distanceToTranslate = RandomTools.generateRandomDouble(new Random(), MAX_TRANSLATION_TO_TEST_M);
       desiredDirection.scale(distanceToTranslate);
@@ -253,15 +261,16 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       return pelvisPosePacket;
    }
 
-   private boolean testPelvisPoseBehavior(PelvisPosePacket pelvisPosePacket) throws SimulationExceededMaximumTimeException
+   private PelvisPoseBehavior testPelvisPoseBehavior(PelvisPosePacket pelvisPosePacket) throws SimulationExceededMaximumTimeException
    {
       final PelvisPoseBehavior pelvisPoseBehavior = new PelvisPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(pelvisPoseBehavior.getControllerGlobalPacketConsumer());
       
+      pelvisPoseBehavior.initialize();
       pelvisPoseBehavior.setInput(pelvisPosePacket);
 
       FramePose initialPelvisPose = getCurrentPelvisPose(fullRobotModel);
-      boolean ret = executeBehavior(pelvisPoseBehavior, pelvisPosePacket.getTrajectoryTime());
+      boolean success = executeBehavior(pelvisPoseBehavior, pelvisPosePacket.getTrajectoryTime());
       FramePose finalPelvisPose = getCurrentPelvisPose(fullRobotModel);
 
       if (DEBUG)
@@ -286,7 +295,8 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
          assertPosesAreWithinThresholds(desiredPelvisPose, finalPelvisPose);
       }
 
-      return ret;
+      assertTrue(success);
+      return pelvisPoseBehavior;
    }
    
    private FramePose getCurrentPelvisPose(FullRobotModel fullRobotModel)

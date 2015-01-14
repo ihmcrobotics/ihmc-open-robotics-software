@@ -146,6 +146,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       double swingTrajectoryTime = 2.0;
 
+      handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
@@ -221,7 +222,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       handPoseTarget.getPose(pose);
 
       final double swingTrajectoryTime = 4.0;
-
+      
+      handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
       final double secondsToPauseEarly = 2.0;
@@ -425,6 +427,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       double swingTrajectoryTime = 4.0;
 
+      handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime - 2.0;

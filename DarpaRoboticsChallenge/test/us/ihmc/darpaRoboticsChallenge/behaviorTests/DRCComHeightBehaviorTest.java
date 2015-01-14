@@ -32,8 +32,8 @@ import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -115,27 +115,28 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(communicationBridge, yoTime);
-
       communicationBridge.attachGlobalListenerToController(comHeightBehavior.getControllerGlobalPacketConsumer());
 
       Point3d initialComPoint = new Point3d();
       robot.computeCenterOfMass(initialComPoint);
 
-      ComHeightPacket randomComHeightPacket = new ComHeightPacket(new Random());
+      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
+      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 1.05 * ComHeightPacket.MIN_COM_HEIGHT, 0.95 * ComHeightPacket.MAX_COM_HEIGHT);
+      ComHeightPacket randomComHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime); 
+      
+      comHeightBehavior.initialize();
       comHeightBehavior.setInput(randomComHeightPacket);
 
-      double trajectoryTime = randomComHeightPacket.getTrajectoryTime();
-      double desiredHeightOffset = randomComHeightPacket.getHeightOffset();
-
       success = success && executeBehavior(comHeightBehavior, trajectoryTime);
+      assertTrue(success);
 
       Point3d finalComPoint = new Point3d();
       robot.computeCenterOfMass(finalComPoint);
 
       assertProperComHeightChange(comHeightBehavior, initialComPoint, desiredHeightOffset, finalComPoint);
 
-      assertTrue(success);
-
+      assertTrue(comHeightBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -154,11 +155,14 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       robot.computeCenterOfMass(initialComPoint);
 
       ComHeightPacket randomComHeightPacket = new ComHeightPacket(new Random());
+      comHeightBehavior.initialize();
       comHeightBehavior.setInput(randomComHeightPacket);
 
       double trajectoryTime = randomComHeightPacket.getTrajectoryTime();
       double desiredHeightOffset = randomComHeightPacket.getHeightOffset();
 
+      assertTrue(comHeightBehavior.isDone());
+      
       success = success && executeBehavior(comHeightBehavior, trajectoryTime);
 
       Point3d finalComPoint = new Point3d();
@@ -181,6 +185,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       trajectoryTime = randomComHeightPacket2.getTrajectoryTime();
       desiredHeightOffset = randomComHeightPacket2.getHeightOffset();
 
+      assertTrue(comHeightBehavior.isDone());
+      
       success = success && executeBehavior(comHeightBehavior2, trajectoryTime);
 
       robot.computeCenterOfMass(finalComPoint);
