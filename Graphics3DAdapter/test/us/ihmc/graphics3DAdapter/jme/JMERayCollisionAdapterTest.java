@@ -5,19 +5,20 @@ import static org.junit.Assert.assertEquals;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.Ray3d;
 
 public class JMERayCollisionAdapterTest
 {
+   @Ignore
    @Test(timeout=300000)
    public void testObjectPicking()
    {
-      ThreadTools.sleep(10000); // Put this in to give me time to attach the debugger to this test.
+//      ThreadTools.sleep(10000); // Put this in to give me time to attach the debugger to this test.
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());
       
       double CUBE_SIDE = 2.0;
