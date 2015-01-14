@@ -14,10 +14,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.graphics3DAdapter.jme.JMERendererTest.class
 })
 
-public class JMEGraphics3dAdapterBambooJMETestSuite
+public class JMEGraphics3dAdapterBambooGraphicalTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(JMEGraphics3dAdapterBambooJMETestSuite.class);
+      JUnitTestSuiteConstructor.generateTestSuite(JMEGraphics3dAdapterBambooGraphicalTestSuite.class);
    }
 }

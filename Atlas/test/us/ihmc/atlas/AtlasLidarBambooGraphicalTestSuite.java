@@ -11,10 +11,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class,
 })
 
-public class AtlasLidarBambooJMETestSuite
+public class AtlasLidarBambooGraphicalTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(AtlasLidarBambooJMETestSuite.class);
+      JUnitTestSuiteConstructor.generateTestSuite(AtlasLidarBambooGraphicalTestSuite.class);
    }
 }
