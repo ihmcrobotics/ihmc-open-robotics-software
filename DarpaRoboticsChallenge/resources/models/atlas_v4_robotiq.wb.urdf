@@ -99,11 +99,11 @@
     <link name="pelvis">
         <inertial>
             <mass value="17.882" />
-            <origin xyz="0.0111 0 0.0271" rpy="0 -0 0" />
+            <origin xyz="0.0111 0.089 0.0271" rpy="0 -0 0" />
             <inertia ixx="0.1244" ixy="0.0008" ixz="-0.0007" iyy="0.0958" iyz="-0.0005" izz="0.1167" />
         </inertial>
         <visual>
-            <origin xyz="0 0 0" rpy="0 -0 0" />
+            <origin xyz="0 0.089 0" rpy="0 -0 0" />
             <geometry>
                 <mesh filename="package://atlas_description/meshes_v3/pelvis.dae" scale="1 1 1" />
             </geometry>
@@ -111,12 +111,12 @@
         
         <visual name="capsule_p1">
          <geometry>  <sphere radius="0.20"/> </geometry>
-         <origin  xyz="0.0  -0.0  0.10"/>
+         <origin  xyz="0.0  0.089  0.10"/>
        </visual>
        
        <visual name="capsule_p2">
          <geometry>  <sphere radius="0.20"/> </geometry>
-         <origin  xyz="0.0  -0.0  -0.05"/>
+         <origin  xyz="0.0  0.089  -0.05"/>
        </visual>
        
     </link>
@@ -426,7 +426,7 @@
     </joint> 
     
     <joint name="r_leg_hpz" type="revolute">
-        <origin xyz="0 0.089 0" rpy="0 -0 0" />
+        <origin xyz="0 0 0" rpy="0 -0 0" />
         <axis xyz="0 0 -1" />
         <parent link="r_uglut" />
         <child link="pelvis" />
@@ -434,7 +434,7 @@
     </joint> 
     
     <joint name="back_bkz" type="revolute">
-        <origin xyz="-0.0125 0 0" rpy="0 -0 0" />
+        <origin xyz="-0.0125 0.089 0" rpy="0 -0 0" />
         <axis xyz="0 0 1" />
         <parent link="pelvis" />
         <child link="ltorso" />
@@ -603,7 +603,7 @@
 
 
     <joint name="l_leg_hpz" type="revolute">
-        <origin xyz="0 0.089 0" rpy="0 -0 0" />
+        <origin xyz="0 0.178 0" rpy="0 -0 0" />
         <axis xyz="0 0 1" />
         <parent link="pelvis" />
         <child link="l_uglut" />
