@@ -216,11 +216,7 @@ public class JMEDataTypeUtils
 
       return ret;
    }
-   /*
-    * @deprecated
-    * You dont want to use this most of the time. Use JMEGeometryUtils instead.
-    */
-   @Deprecated
+
    public static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)
    {
       Quat4f quat = new Quat4f();
@@ -233,11 +229,6 @@ public class JMEDataTypeUtils
       return ret;
    }
    
-   /*
-    * @deprecated
-    * You dont want to use this most of the time. Use JMEGeometryUtils instead.
-    */
-   @Deprecated
    public static RigidBodyTransform jmeTransformToTransform3D(Transform jmeTransform)
    {
       Quaternion jmeQuat = jmeTransform.getRotation();
