@@ -11,10 +11,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.simulationconstructionset.SimulationConstructionSetTestFest.class
 })
 
-public class SimulationConstructionSetBambooFestTestSuite
+public class SimulationConstructionSetBambooFestTestSuiteNightly
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(SimulationConstructionSetBambooFestTestSuite.class);
+      JUnitTestSuiteConstructor.generateTestSuite(SimulationConstructionSetBambooFestTestSuiteNightly.class);
    }
 }
