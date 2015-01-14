@@ -111,7 +111,9 @@ public class LookAtBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return isDone.getBooleanValue();
+      // FIXME: LookAtStatus.isFinished() not yet implemented
+//      return isDone.getBooleanValue();
+      return true;
    }
 
    @Override
