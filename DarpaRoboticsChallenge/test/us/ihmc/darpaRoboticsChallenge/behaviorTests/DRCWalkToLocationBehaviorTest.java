@@ -128,35 +128,40 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
+      assertTrue(success);
+      
       double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
-      Vector2d walkDirection = new Vector2d(1,0);
+      Vector2d walkDirection = new Vector2d(1, 0);
       double trajectoryTime = walkDistance / ASSUMED_WALKING_SPEED_mPerSec;
 
-      success = success & testWalkToLocationBehavior(walkDistance, walkDirection, trajectoryTime);
+      WalkToLocationBehavior walkToLocationBehavior = testWalkToLocationBehavior(walkDistance, walkDirection, trajectoryTime);
 
-      assertTrue(success);
+      assertTrue(walkToLocationBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @Test(timeout = 300000)
    public void testTurn90WalkTurnNeg90() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
-      Vector2d walkDirection = new Vector2d(0,1);
+      Vector2d walkDirection = new Vector2d(0, 1);
       double trajectoryTime = walkDistance / ASSUMED_WALKING_SPEED_mPerSec;
-      trajectoryTime *= 2.5;  // increase sim time since we have to turn in place 90 degrees twice
+      trajectoryTime *= 2.5; // increase sim time since we have to turn in place 90 degrees twice
+
+      WalkToLocationBehavior walkToLocationBehavior = testWalkToLocationBehavior(walkDistance, walkDirection, trajectoryTime);
+
+      assertTrue(walkToLocationBehavior.isDone());
       
-      success = success & testWalkToLocationBehavior(walkDistance, walkDirection, trajectoryTime);
-     
-      assertTrue(success);
       BambooTools.reportTestFinishedMessage();
    }
 
-   private boolean testWalkToLocationBehavior(double walkDistance, Vector2d walkDirection, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   private WalkToLocationBehavior testWalkToLocationBehavior(double walkDistance, Vector2d walkDirection, double trajectoryTime)
+         throws SimulationExceededMaximumTimeException
    {
       FramePose2d initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       FramePose2d desiredMidFeetPose = new FramePose2d(initialMidFeetPose);
@@ -168,9 +173,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
       communicationBridge.attachGlobalListenerToController(walkToLocationBehavior.getControllerGlobalPacketConsumer());
+      
+      walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(desiredMidFeetPose);
 
-      
       boolean success = executeBehavior(walkToLocationBehavior, trajectoryTime);
       FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
@@ -179,10 +185,12 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
          SysoutTool.println(" initial Midfeet Pose :\n" + initialMidFeetPose + "\n");
       }
       assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
-      
-      return success;
+
+      assertTrue(success);
+
+      return walkToLocationBehavior;
    }
-   
+
    private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;

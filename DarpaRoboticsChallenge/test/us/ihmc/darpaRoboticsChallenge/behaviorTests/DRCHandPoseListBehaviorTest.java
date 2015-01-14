@@ -147,6 +147,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, Math.PI / 2, true);
 
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
+      handPoseListBehavior.initialize();
       handPoseListBehavior.setInput(handPoseListPacket);
 
       success &= executeBehavior(handPoseListBehavior, swingTrajectoryTime);
@@ -175,6 +176,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       double[][] armPoses = createArmPosesInitializedToRobot(numberOfArmPoses, robotSide);
 
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
+      handPoseListBehavior.initialize();
       handPoseListBehavior.setInput(handPoseListPacket);
 
       success &= executeBehavior(handPoseListBehavior, swingTrajectoryTime);
@@ -205,6 +207,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          
          double[][] armPoses = createRandomArmPoses(numberOfArmPoses, robotSide);
          HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
+         handPoseListBehavior.initialize();
          handPoseListBehavior.setInput(handPoseListPacket);
          
          armPosesLeftAndRightSide.put(robotSide, armPoses);

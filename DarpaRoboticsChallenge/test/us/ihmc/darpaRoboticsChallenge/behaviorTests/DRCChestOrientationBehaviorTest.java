@@ -77,7 +77,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       {
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
@@ -112,7 +112,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    @Test(timeout = 300000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -120,8 +120,11 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-      testChestOrientationBehavior(chestOrientationPacket);
+      
+      ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
 
+      assertTrue(chestOrientationBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -136,9 +139,11 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       desiredChestQuat.set(desiredAxisAngle);
 
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-     
-      testChestOrientationBehavior(chestOrientationPacket);
-      
+
+      ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
+
+      assertTrue(chestOrientationBehavior.isDone());
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -153,9 +158,11 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       desiredChestQuat.set(desiredAxisAngle);
 
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-     
-      testChestOrientationBehavior(chestOrientationPacket);
-      
+
+      ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
+
+      assertTrue(chestOrientationBehavior.isDone());
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -170,19 +177,22 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       desiredChestQuat.set(desiredAxisAngle);
 
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
-     
-      testChestOrientationBehavior(chestOrientationPacket);
-      
+
+      ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
+
+      assertTrue(chestOrientationBehavior.isDone());
+
       BambooTools.reportTestFinishedMessage();
    }
-   
-   private void testChestOrientationBehavior(ChestOrientationPacket chestOrientationPacket) throws SimulationExceededMaximumTimeException
+
+   private ChestOrientationBehavior testChestOrientationBehavior(ChestOrientationPacket chestOrientationPacket) throws SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(chestOrientBehavior.getControllerGlobalPacketConsumer());
 
+      chestOrientBehavior.initialize();
       chestOrientBehavior.setInput(chestOrientationPacket);
 
       FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
@@ -198,6 +208,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);
+
+      return chestOrientBehavior;
    }
 
    private FramePose getCurrentChestPose(FullRobotModel fullRobotModel)

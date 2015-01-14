@@ -43,10 +43,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestInterface
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = true || createMovie;
+   private static final boolean showGUI = false || createMovie;
 
    private final double MAX_ANGLE_TO_TEST_RAD = 15.0 * Math.PI / 180.0;
    private final double POSITION_THRESHOLD = Double.NaN;
@@ -124,7 +124,9 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle);
 
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+      HeadOrientationBehavior headOrientationBehavior = testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+
+      assertTrue(headOrientationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -140,7 +142,9 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle);
 
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+      HeadOrientationBehavior headOrientationBehavior = testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+
+      assertTrue(headOrientationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -156,7 +160,9 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle);
 
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+      HeadOrientationBehavior headOrientationBehavior = testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+
+      assertTrue(headOrientationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -170,8 +176,10 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Quat4d desiredHeadQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat);
 
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
+      HeadOrientationBehavior headOrientationBehavior = testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
 
+      assertTrue(headOrientationBehavior.isDone());
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -187,13 +195,14 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       return headOrientationPacket;
    }
 
-   private void testHeadOrientationBehavior(HeadOrientationPacket headOrientationPacket, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   private HeadOrientationBehavior testHeadOrientationBehavior(HeadOrientationPacket headOrientationPacket, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       final HeadOrientationBehavior headOrientBehavior = new HeadOrientationBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(headOrientBehavior.getControllerGlobalPacketConsumer());
 
+      headOrientBehavior.initialize();
       headOrientBehavior.setInput(headOrientationPacket);
 
       FramePose initialHeadPose = getCurrentHeadPose(fullRobotModel);
@@ -210,6 +219,8 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
 
       assertTrue(success);
+      
+      return headOrientBehavior;
    }
 
    private FramePose getCurrentHeadPose(FullRobotModel fullRobotModel)
