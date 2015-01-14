@@ -75,7 +75,7 @@ public class WholeBodyIkSolver
    private final ReferenceFrames workingFrames;
    private final ReferenceFrames actualFrames;
 
-   private final ReferenceFrame     workingPelvisFrame;
+   private final ReferenceFrame  workingPelvisFrame;
    private final ReferenceFrame  workingRootFrame;
 
    private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
@@ -90,9 +90,9 @@ public class WholeBodyIkSolver
    //---------------  tasks assigned to this solver --------------------------------
    public HierarchicalTask_COM        task_com_position;
    public HierarchicalTask_JointsPose task_joints_pose;
-   private final SideDependentList<HierarchicalTask_BodyOrientation> task_end_effector_rotations = new SideDependentList<HierarchicalTask_BodyOrientation>();
-   private final SideDependentList<HierarchicalTask_BodyPosition> task_end_effector_translations = new SideDependentList<HierarchicalTask_BodyPosition>();
-   private final HierarchicalTask_BodyPose task_leg_pose;
+   public final SideDependentList<HierarchicalTask_BodyOrientation> task_end_effector_rotations = new SideDependentList<HierarchicalTask_BodyOrientation>();
+   public final SideDependentList<HierarchicalTask_BodyPosition> task_end_effector_translations = new SideDependentList<HierarchicalTask_BodyPosition>();
+   public final HierarchicalTask_BodyPose task_leg_pose;
 
    // ------------- Parameters that change the overall behavior ----------------------
 
@@ -259,7 +259,8 @@ public class WholeBodyIkSolver
          disabledtHandRotationY.set(robotSide, new MutableBoolean(false));
          keepArmQuiet.set(robotSide, new MutableBoolean(true));
       }
-      workingRootFrame = actual_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameBeforeJoint();
+      // this is After and not before because the direction in URDF is inverted
+      workingRootFrame = actual_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
 
       for (int i = 0; i < numOfJoints; i++)
       {
@@ -386,11 +387,11 @@ public class WholeBodyIkSolver
       int larm_elx = joint_names_map.get("l_arm_elx");
       int rarm_elx = joint_names_map.get("r_arm_elx");
 
-      task_ee_pose_L_pos.setMaximumError(0.1);
-      task_ee_pose_L_rot.setMaximumError(0.3);
+      task_ee_pose_L_pos.setMaximumError(0.2);
+      task_ee_pose_L_rot.setMaximumError(0.4);
 
-      task_ee_pose_R_pos.setMaximumError(0.1);
-      task_ee_pose_R_rot.setMaximumError(0.3);
+      task_ee_pose_R_pos.setMaximumError(0.2);
+      task_ee_pose_R_rot.setMaximumError(0.4);
       task_joints_pose.setMaximumError(1.0);
 
       task_ee_pose_R_pos.setEnabled(false);
