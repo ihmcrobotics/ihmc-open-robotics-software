@@ -13,6 +13,7 @@ import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
 public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements HeightMap
@@ -32,6 +33,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    //================================================================================
    // Constructors
    //================================================================================
+
+   public GroundOnlyQuadTree(BoundingBox2d bounds, double resolution, double heightThreshold, int maxNodes)
+   {
+      this(toBounds(bounds), new ConstantResolutionProvider(resolution), heightThreshold, maxNodes);
+   }
 
    public GroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, int maxNodes)
    {
@@ -229,6 +235,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    private static OneDimensionalBounds[] toBounds(double xMin, double xMax, double yMin, double yMax)
    {
       return new OneDimensionalBounds[] { new OneDimensionalBounds(xMin, xMax), new OneDimensionalBounds(yMin, yMax) };
+   }
+   
+   private static OneDimensionalBounds[] toBounds(BoundingBox2d bounds)
+   {
+      return new OneDimensionalBounds[] { new OneDimensionalBounds(bounds.getMinPoint().getX(), bounds.getMaxPoint().getX()), new OneDimensionalBounds(bounds.getMinPoint().getY(), bounds.getMaxPoint().getY()) };
    }
 
    //================================================================================
