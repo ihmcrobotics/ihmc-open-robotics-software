@@ -15,10 +15,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.FootstepGeneratorVisualizer;
+import us.ihmc.ihmcPerception.footstepGenerator.SemiCircularStepValidityMetric;
 import us.ihmc.ihmcPerception.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.MemoryTools;
