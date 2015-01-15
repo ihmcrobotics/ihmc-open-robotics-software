@@ -36,7 +36,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    private final KryoLocalPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(), "HandPoseStatusTest");
    private final DRCDemo01NavigationEnvironment demo01NavEnvironmant = new DRCDemo01NavigationEnvironment();
 
-   private final boolean showGUI = true;
+   private final boolean showGUI = false;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
