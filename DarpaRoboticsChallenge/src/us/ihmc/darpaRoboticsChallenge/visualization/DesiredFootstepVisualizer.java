@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.footstepGenerator;
+package us.ihmc.darpaRoboticsChallenge.visualization;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.commonWalkingControlModules.referenceFrames.VisualizeFramesController;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.ihmcPerception.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;

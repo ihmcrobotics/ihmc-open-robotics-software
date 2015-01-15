@@ -15,26 +15,23 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.NonFlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation2d;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepPoseFinder;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepSnapper;
 
 public class SplineBasedCoMHeightTrajectoryGeneratorTest
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final FootstepSnapper poseFinder = new FootstepPoseFinder();
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -212,12 +209,15 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
 
    private Footstep getFootstep(Point3d contactFrameCenter)
    {
-      Footstep nextFootstep;
-      FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
-      FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
       ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, 0.0);
-      nextFootstep = poseFinder.generateFootstepWithoutHeightMap(footstepPose, foot.getRigidBody(), foot.getSoleFrame(), null, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
-
+      
+      Footstep nextFootstep = new Footstep(foot.getRigidBody(), RobotSide.LEFT, foot.getSoleFrame());
+      
+      FramePoint position = new FramePoint(worldFrame, contactFrameCenter);
+      FrameOrientation orientation = new FrameOrientation(worldFrame);
+      FramePose footstepPose = new FramePose(position, orientation);
+      nextFootstep.setPose(footstepPose );
+      
       return nextFootstep;
    }
 
