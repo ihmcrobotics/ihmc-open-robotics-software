@@ -136,12 +136,18 @@ public class WholeBodyIkSolver
       return urdfModel;
    }
    
+   /* Note. The after/before direction is reversed between the SDF and HIK models for the right leg.
+    * This method uses the direction specified by the WB (reversed).
+    */
    public int getIdOfBodyAfterJoint(String jointname)
    {
       int jointId = urdfModel.getJointIndexByName(jointname);
-      return  urdfModel.getChildBodyOfJoint(jointId);
+      return  getIdOfBodyAfterJoint(jointId);
    }
    
+   /* Note. The after/before direction is reversed between the SDF and HIK models for the right leg.
+    * This method uses the direction specified by the WB (reversed).
+    */
    public int getIdOfBodyAfterJoint(int jointId)
    {
       return  urdfModel.getChildBodyOfJoint(jointId);
@@ -716,7 +722,16 @@ public class WholeBodyIkSolver
 
       checkIfArmShallStayQuiet(q_init);
 
-      int ret = wb_solver.solve(q_init, q_out);
+      int ret = -1;
+      try
+      {
+         ret = wb_solver.solve(q_init, q_out);
+      }
+      catch (Exception e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
       if (ret < 0)
       {
          System.out.println("failed\n");
