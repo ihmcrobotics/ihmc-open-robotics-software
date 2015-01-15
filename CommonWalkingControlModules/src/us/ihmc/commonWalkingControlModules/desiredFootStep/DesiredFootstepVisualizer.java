@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.commonWalkingControlModules.referenceFrames.VisualizeFramesController;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.ihmcPerception.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -45,11 +46,9 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
