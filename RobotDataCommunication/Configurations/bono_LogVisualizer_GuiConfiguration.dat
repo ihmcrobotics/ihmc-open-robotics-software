@@ -165,11 +165,11 @@ Tab
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>7</Graph Array Window Size>
+<Graph Array Window Size>8</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>3838.0, -3.0</WindowLocation>
-<WindowSize>1924.0, 1207.0</WindowSize>
+<WindowLocation>4016.0, 61.0</WindowLocation>
+<WindowSize>1382.0, 1044.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -318,8 +318,8 @@ Tab
 	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
-<ScreenID>2</ScreenID>
-<WindowLocation>6720.0, 0.0</WindowLocation>
+<ScreenID>3</ScreenID>
+<WindowLocation>6722.0, 0.0</WindowLocation>
 <WindowSize>960.0, 600.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -469,8 +469,8 @@ Tab
 	</Graph>
 </GraphGroup>
 </Graph Array Window2><Graph Array Window3>
-<ScreenID>2</ScreenID>
-<WindowLocation>6720.0, 480.0</WindowLocation>
+<ScreenID>3</ScreenID>
+<WindowLocation>6730.0, 553.0</WindowLocation>
 <WindowSize>960.0, 600.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -620,7 +620,7 @@ Tab
 	</Graph>
 </GraphGroup>
 </Graph Array Window3><Graph Array Window4>
-<ScreenID>2</ScreenID>
+<ScreenID>3</ScreenID>
 <WindowLocation>5760.0, 563.0</WindowLocation>
 <WindowSize>960.0, 600.0</WindowSize>
 <GraphGroup>
@@ -771,7 +771,7 @@ Tab
 	</Graph>
 </GraphGroup>
 </Graph Array Window4><Graph Array Window5>
-<ScreenID>3</ScreenID>
+<ScreenID>2</ScreenID>
 <WindowLocation>2901.0, 190.0</WindowLocation>
 <WindowSize>804.0, 533.0</WindowSize>
 <GraphGroup>
@@ -874,8 +874,8 @@ Tab
 	</Graph>
 </GraphGroup>
 </Graph Array Window5><Graph Array Window6>
-<ScreenID>2</ScreenID>
-<WindowLocation>5760.0, 0.0</WindowLocation>
+<ScreenID>3</ScreenID>
+<WindowLocation>5753.0, 9.0</WindowLocation>
 <WindowSize>960.0, 540.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -930,8 +930,8 @@ Tab
 </GraphGroup>
 </Graph Array Window6><Graph Array Window7>
 <ScreenID>0</ScreenID>
-<WindowLocation>-2.0, -3.0</WindowLocation>
-<WindowSize>1924.0, 1207.0</WindowSize>
+<WindowLocation>-11.0, 95.0</WindowLocation>
+<WindowSize>1273.0, 946.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -959,18 +959,193 @@ Tab
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window7>
+</Graph Array Window7><Graph Array Window8>
+<ScreenID>0</ScreenID>
+<WindowLocation>89.0, 186.0</WindowLocation>
+<WindowSize>1666.0, 907.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config75</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config76</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config77</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config78</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ChestOrientationManager.controlledChestAngularAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config79</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.controlledpelvisAngularAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config80</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPX</Variables>
+		<GraphConfiguration>
+			<Name>config81</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCMPY</Variables>
+		<GraphConfiguration>
+			<Name>config82</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config83</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPAndMomentumBasedController.controlledCoMHeightAcceleration</Variables>
+		<GraphConfiguration>
+			<Name>config84</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config85</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config86</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ICPBasedLinearMomentumRateOfChangeControlModule.controlledCoMAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config87</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config88</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window8>
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>1.7250423332618892</Camera X>
+ <Camera Y>-0.3715590400826488</Camera Y>
+ <Camera Z>0.045091308118009765</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -994,8 +1169,8 @@ Tab
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>0.005091947450776235</Fix X>
+<Fix Y>-0.42433866043649227</Fix Y>
+<Fix Z>0.27641002950752075</Fix Z>
 </Fix Position>
 </Canvas 1>
