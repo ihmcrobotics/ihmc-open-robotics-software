@@ -17,4 +17,5 @@ dependencies {
 	compile project(':Planning')
 	compile project(':SensorProcessing')
 	compile project(':IHMCWholeBodyController')
+	compile project(':IHMCPerception')
 }

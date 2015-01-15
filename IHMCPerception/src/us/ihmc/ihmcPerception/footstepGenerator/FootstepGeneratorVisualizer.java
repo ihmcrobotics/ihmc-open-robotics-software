@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.desiredFootStep;
+package us.ihmc.ihmcPerception.footstepGenerator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,7 +12,8 @@ import javax.vecmath.Quat4d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.ihmcPerception.footstepGenerator.TurningThenStraightFootstepGenerator;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -35,8 +36,6 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class FootstepGeneratorVisualizer
 {
