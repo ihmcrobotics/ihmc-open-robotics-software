@@ -65,6 +65,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
       this.registrySelectedListener = nameSpaceSelectedListener;
       this.root = rootRegistry;
+      this.topOfTreeRegistry = root;
       this.frame = frame;
       this.writeDataCommandExecutor = writeDataCommandExecutor;
 
