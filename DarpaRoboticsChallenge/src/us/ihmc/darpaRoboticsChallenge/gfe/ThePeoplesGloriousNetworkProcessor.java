@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.ihmcPerception.footstepGenerator.TimestampedPoseFootStepGenerator;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -32,7 +33,6 @@ import us.ihmc.utilities.ros.publisher.IHMCPacketToMsgPublisher;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
-import us.ihmc.utilities.ros.subscriber.TimestampedPoseFootStepGenerator;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
