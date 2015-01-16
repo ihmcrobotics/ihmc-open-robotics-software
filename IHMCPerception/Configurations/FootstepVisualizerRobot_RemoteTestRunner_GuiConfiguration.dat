@@ -16,46 +16,10 @@
 <Entry Boxes Tab Pane>
 </Entry Boxes Tab Pane>
 
-<Number of ViewPorts>2</Number of ViewPorts>
+<Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
 <Visible> true</Visible>
 </Main Viewport>
-<Viewport1>
-<Visible>true</Visible>
-<Canvas Number>1</Canvas Number>
-<Canvas1>
-<Viewport Camera X>-2.840790004278842</Viewport Camera X>
-<Viewport Camera Y>2.4395581695459416</Viewport Camera Y>
-<Viewport Camera Z>1.6322023023640897</Viewport Camera Z>
- <Dolly data> 
- <Position X>2.0</Position X>
- <Position Y>12.0</Position Y>
- <Position Z>0.0</Position Z>
-<Dolly Booleans>
-<Dolly>false</Dolly>
-<Dolly X>true</Dolly X>
-<Dolly Y>true</Dolly Y>
-<Dolly Z>true</Dolly Z>
-</Dolly Booleans>
-</Dolly data>
- <Track data> 
- <Position X>0.0</Position X>
- <Position Y>0.0</Position Y>
- <Position Z>0.0</Position Z>
- <Track Booleans>
-<Track>false</Track>
-<Track X>true</Track X>
-<Track Y>true</Track Y>
-<Track Z>false</Track Z>
-</Track Booleans>
-</Track data>
-<Fix Position>
-<Fix X>-3.045446762593135</Fix X>
-<Fix Y>3.270184636398621</Fix Y>
-<Fix Z>0.7219714116989647</Fix Z>
-</Fix Position>
-</Canvas1>
-</Viewport1>
 
 <Graph Array Window Size>0</Graph Array Window Size>
 
@@ -63,17 +27,13 @@
 <Extra Panels>
 <Main Viewport>
 
-</Main Viewport>
-<Viewport1>
-
-</Viewport1>
-</Extra Panels>
+</Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-5.344879944551247</Camera X>
- <Camera Y>0.5999448692552027</Camera Y>
- <Camera Z>5.141777125332259</Camera Z>
+ <Camera X>-2.3002050015319084</Camera X>
+ <Camera Y>4.2894708441361935</Camera Y>
+ <Camera Z>0.5630673347649491</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -97,8 +57,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-3.500641123989466</Fix X>
-<Fix Y>3.500101962611148</Fix Y>
-<Fix Z>0.0</Fix Z>
+<Fix X>-3.7137769331547834</Fix X>
+<Fix Y>3.3634311036832383</Fix Y>
+<Fix Z>0.4922457434883525</Fix Z>
 </Fix Position>
 </Canvas 1>
