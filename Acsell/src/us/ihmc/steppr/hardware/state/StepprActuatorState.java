@@ -61,6 +61,10 @@ public class StepprActuatorState
 
    private final int STRAIN_SENSOR_BASE_15 = 15;
    private final int PRESSURE_SENSOR_BASE_11 = 11;
+   
+   private long lastmicroControllerTime;
+   private final LongYoVariable consecutivePacketDropCount;
+   private final LongYoVariable totalPacketDropCount;
 
    public StepprActuatorState(String name, double motorKt, int SensedCurrentToTorqueDirection, YoVariableRegistry parentRegistry)
    {
@@ -84,6 +88,9 @@ public class StepprActuatorState
       this.lastReceivedControlID = new LongYoVariable(name + "LastReceivedControlID", registry);
 
       this.motorAngleOffset = new DoubleYoVariable(name + "MotorAngleOffset", registry);
+      
+      this.consecutivePacketDropCount = new LongYoVariable(name + "ConsecutivePacketDropCount", registry);
+      this.totalPacketDropCount = new LongYoVariable(name + "TotalPacketDropCount", registry);
 
       this.checksumFailures = new LongYoVariable("checksumFailures", registry);
 
@@ -168,6 +175,7 @@ public class StepprActuatorState
 
    public void update(ByteBuffer buffer) throws IOException
    {
+      lastmicroControllerTime = microControllerTime.getLongValue();
       // Values are of no use to us
       @SuppressWarnings("unused")
       int frameFormat = buffer.get() & 0xFF;
@@ -191,6 +199,8 @@ public class StepprActuatorState
       if (calculatedChecksum != checksum)
       {
          checksumFailures.increment();
+         totalPacketDropCount.increment();
+         consecutivePacketDropCount.increment();
          return;
       }
       buffer.reset();
@@ -236,6 +246,8 @@ public class StepprActuatorState
 
       motorPower.set(3.0 / 4.0 * (quadratureCompositeStatorCurrent.getDoubleValue() * getQuadratureControlEffort() + inphaseCompositeStatorCurrent
             .getDoubleValue() * getInphaseControlEffort()));
+      
+      updatePacketDropStatistics();
 
    }
 
@@ -291,5 +303,29 @@ public class StepprActuatorState
    public double getMotorPower()
    {
       return motorPower.getDoubleValue();
+   }
+   
+   public long getConsecutivePacketDropCount()
+   {
+      return consecutivePacketDropCount.getValueAsLongBits();
+   }
+   
+   public boolean isLastPacketDropped()
+   {
+      return (lastmicroControllerTime==microControllerTime.getLongValue()) && lastmicroControllerTime!=0;
+   }
+   
+   private void updatePacketDropStatistics()
+   {
+      if(isLastPacketDropped())
+      {
+         totalPacketDropCount.increment();
+         consecutivePacketDropCount.increment();
+      }
+      else
+      {
+         consecutivePacketDropCount.set(0);
+      }
+            
    }
 }
