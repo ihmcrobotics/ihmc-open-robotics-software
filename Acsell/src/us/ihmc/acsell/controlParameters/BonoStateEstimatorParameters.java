@@ -36,7 +36,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
 
       this.estimatorDT = estimatorDT;
 
-      defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
+      defaultFilterBreakFrequency = runningOnRealRobot ? 67.0 : Double.POSITIVE_INFINITY;
       jointVelocitySlopTimeForBacklashCompensation = 0.06;
       
       doElasticityCompensation = runningOnRealRobot;
@@ -50,7 +50,12 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       
       jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Y.getSdfName(), 10000.0);
       jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Y.getSdfName(), 10000.0);
+      
+      jointSpecificStiffness.put(StepprJoint.LEFT_KNEE_Y.getSdfName(), 6000.0);
+      jointSpecificStiffness.put(StepprJoint.RIGHT_KNEE_Y.getSdfName(), 6000.0);
+
    }
+   
 
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
@@ -67,7 +72,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       if (doElasticityCompensation)
          sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
 
-      sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, false);
+      sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, true); //vizonly
       sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
 
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
