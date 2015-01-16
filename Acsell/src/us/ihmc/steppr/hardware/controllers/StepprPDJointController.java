@@ -3,6 +3,7 @@ package us.ihmc.steppr.hardware.controllers;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -10,7 +11,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class StepprPDJointController implements StepprController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("StepprPDJointController");
+   BonoRobotModel robotModel = new BonoRobotModel(true, true);
+   protected final YoVariableRegistry registry = new YoVariableRegistry("StepprPDJointController");
    
    protected final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    private final ArrayList<PDController> controllers = new ArrayList<>();
