@@ -219,7 +219,6 @@ public class WholeBodyIkSolver
       workingPelvisFrame = workingFrames.getPelvisFrame();
       workingRootJoint = working_sdf_model.getRootJoint();
 
-
       actualModelJointCopier = new InverseDynamicsJointStateCopier(actual_sdf_model.getElevator(), working_sdf_model.getElevator());
       desiredModelJointCopier = new InverseDynamicsJointStateCopier(working_sdf_model.getElevator(), working_sdf_model.getElevator());
 
@@ -671,9 +670,25 @@ public class WholeBodyIkSolver
       {
       case RESEED:
          Vector64F randQ = getHierarchicalSolver().getRandomQ();
+                  
          for (int i = 0; i < numOfJoints; i++)
          {
-            q_init.set(i, randQ.get(i));
+            boolean partOfQuietArm = false;
+            
+            for(RobotSide robotSide: RobotSide.values())
+            {
+               for(int j=0; j< numDoFperArm; j++){
+                  if ( armJointIds.get(robotSide)[j] == i){
+                     partOfQuietArm = true;
+                     break;
+                  }
+               }
+            }           
+            
+            if( !partOfQuietArm )
+            {
+               q_init.set(i, randQ.get(i));
+            }
          }
          
          q_init.set(joint_names_map.get("l_leg_aky"), -0.7);
@@ -682,11 +697,15 @@ public class WholeBodyIkSolver
          q_init.set(joint_names_map.get("r_leg_kny"), 1.4);
          q_init.set(joint_names_map.get("l_leg_hpy"), -0.7);
          q_init.set(joint_names_map.get("r_leg_hpy"), -0.7);
-         q_init.set(joint_names_map.get("l_arm_elx"), 0.7);
-         q_init.set(joint_names_map.get("r_arm_elx"), -0.7);
+         
+         if( keepArmQuiet.get(LEFT).isFalse())
+            q_init.set(joint_names_map.get("l_arm_elx"), 0.7);
+         if( keepArmQuiet.get(RIGHT).isFalse())
+            q_init.set(joint_names_map.get("r_arm_elx"), -0.7);
          
          break;
       case USE_ACTUAL_MODEL_JOINTS:
+         actual_sdf_model.updateFrames();
          for (int i = 0; i < numOfJoints; i++)
          {
             OneDoFJoint joint = actual_sdf_model.getOneDoFJointByName(urdfModel.getActiveJointName(i));
@@ -709,7 +728,7 @@ public class WholeBodyIkSolver
    }
 
    
-   private int computeImpl(SDFFullRobotModel robotModelToPack)
+   synchronized private int computeImpl(SDFFullRobotModel robotModelToPack)
    {
       updateDesiredSDFFullRobotModelToActual();
       workingFrames.updateFrames();
@@ -736,13 +755,11 @@ public class WholeBodyIkSolver
       {
          System.out.println("failed\n");
       }
-      else{
-         // use the last succesfull only.
-         q_init.set(q_out);
-      }
 
       if (ret != -2)
       {
+         q_init.set(q_out);
+         
          for (int i = 0; i < working_joints_in_urdf_order.length; i++)
          {
             if (working_joints_in_urdf_order[i] != null)
@@ -751,7 +768,7 @@ public class WholeBodyIkSolver
             }
          }
 
-         moveDesiredFeetToActualFeet(footRootSide);
+         moveDesiredFeetToActualFeet();
          if(robotModelToPack != null){
             updatePackModelToDesired(robotModelToPack);
          }
@@ -824,12 +841,12 @@ public class WholeBodyIkSolver
       return ReferenceFrame.constructBodyZUpFrameWithUnchangingTransformToParent(name, parentFrame, parentToBody);
    }
 
-   private void moveDesiredFeetToActualFeet(RobotSide footToTrust)
+   private void moveDesiredFeetToActualFeet()
    {
       workingFrames.updateFrames();
       
-      ReferenceFrame actualSoleFrame = actualSoleFrames.get(footToTrust);
-      ReferenceFrame workingSoleFrame = workingSoleFrames.get(footToTrust);
+      ReferenceFrame actualSoleFrame = actualSoleFrames.get(footRootSide);
+      ReferenceFrame workingSoleFrame = workingSoleFrames.get(footRootSide);
 
       RigidBodyTransform soleWorldToActual = new RigidBodyTransform();
       RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
