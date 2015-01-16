@@ -3,7 +3,7 @@
 	<Graph>
 		<Variables>root.FootstepVisualizerRobot.t</Variables>
 		<GraphConfiguration>
-			<Name>config1</Name>
+			<Name>config48</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -31,8 +31,8 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>1.5</Camera X>
- <Camera Y>-1.5</Camera Y>
+ <Camera X>0.19981089601010726</Camera X>
+ <Camera Y>-1.3650663928908426</Camera Y>
  <Camera Z>6.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
@@ -57,8 +57,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>1.5</Fix X>
-<Fix Y>0.0</Fix Y>
+<Fix X>0.19981089601010726</Fix X>
+<Fix Y>0.1349336071091573</Fix Y>
 <Fix Z>0.0</Fix Z>
 </Fix Position>
 </Canvas 1>
