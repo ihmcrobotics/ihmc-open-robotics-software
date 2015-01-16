@@ -308,7 +308,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
       double kp = 100;//600.0;
-      double zeta = 0.8;//0.8;
+      double zeta = 0.4;//0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = Double.POSITIVE_INFINITY;
@@ -408,10 +408,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
       double kpXY = 100.0;
-      double kpZ = 250.0; // 200.0 Trying to smash the ground there
+      double kpZ = 100.0; // 200.0 Trying to smash the ground there
       double zetaXYZ = 0.7;
-      double kpXYOrientation = 500.0; // 300 not working
-      double kpZOrientation = 200.0;
+      double kpXYOrientation = 100.0; // 300 not working
+      double kpZOrientation = 100.0;
       double zetaOrientation = 0.7;
       double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
@@ -619,7 +619,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDesiredTouchdownVelocity()
    {
-      return -0.2;
+      return -0.1;
    }
 
    @Override
@@ -675,5 +675,14 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;
+   }
+
+
+
+   @Override
+   public double getMaxICPErrorBeforeSingleSupport()
+   {
+      return 0.025;
+      
    }
 }
