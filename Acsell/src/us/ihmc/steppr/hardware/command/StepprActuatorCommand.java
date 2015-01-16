@@ -12,8 +12,10 @@ public abstract class StepprActuatorCommand
    private final YoVariableRegistry registry;
    private final BooleanYoVariable enabled;
    private final DoubleYoVariable tauDesired;
+   private final DoubleYoVariable tauInertia;
    private final DoubleYoVariable currentDesired;
    private final DoubleYoVariable damping;
+   private final DoubleYoVariable qddDesired;
    
    StepprActuator actuator;
    
@@ -24,6 +26,8 @@ public abstract class StepprActuatorCommand
 
       this.enabled = new BooleanYoVariable(name + "Enabled", registry);
       this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
+      this.tauInertia = new DoubleYoVariable(name + "TauInertia", registry);
+      this.qddDesired = new DoubleYoVariable(name + "qdd_d", registry);
       this.damping = new DoubleYoVariable(name + "Damping", registry);
       this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
       
@@ -66,7 +70,7 @@ public abstract class StepprActuatorCommand
    
    protected double getTauDesired()
    {
-	   return tauDesired.getDoubleValue();
+	   return tauDesired.getDoubleValue() ;
    }
    
    protected void setTauDesired(double tau)
@@ -78,5 +82,11 @@ public abstract class StepprActuatorCommand
    protected void setDamping(double damping)
    {
       this.damping.set(damping);
+   }
+   
+   protected void setQdd_d(double qdd_d)
+   {
+      this.qddDesired.set(qdd_d);
+      this.tauInertia.set(qdd_d*actuator.getMotorInertia());
    }
 }

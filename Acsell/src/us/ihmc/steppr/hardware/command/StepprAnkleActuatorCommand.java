@@ -35,6 +35,10 @@ public class StepprAnkleActuatorCommand
       double mRight = ankleX.getMotorAngle(0);
       double mLeft = ankleX.getMotorAngle(1);
       
+      ankleCalculator.calculateActuatordQdd(mRight, mLeft, ankleX.getQd(), ankleY.getQd(), ankleX.getQdd_d(), ankleY.getQdd_d());
+      rightActuatorCommand.setQdd_d(ankleCalculator.getActuatorQddRight());
+      leftActuatorCommand.setQdd_d(ankleCalculator.getActuatorQddLeft());
+      
       ankleCalculator.calculateDesiredTau(mRight, mLeft, ankleX.getTauDesired(), ankleY.getTauDesired());
       
       rightActuatorCommand.setTauDesired(ankleCalculator.getTauRightActuator());

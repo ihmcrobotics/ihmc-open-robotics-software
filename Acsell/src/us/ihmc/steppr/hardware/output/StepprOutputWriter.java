@@ -41,6 +41,8 @@ public class StepprOutputWriter implements DRCOutputWriter
    private final UDPStepprOutputWriter outputWriter;
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoReflectedMotorInertia = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauInertia = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
 
    enum JointControlMode
    {
@@ -60,9 +62,13 @@ public class StepprOutputWriter implements DRCOutputWriter
       for (StepprJoint joint : StepprJoint.values)
       {
          tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
+         yoMotorDamping.put(joint, new DoubleYoVariable(joint.getSdfName() + "motorDamping", registry));
+         
+         
          DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
          inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
          yoReflectedMotorInertia.put(joint, inertia);  
+         yoTauInertia.put(joint, new DoubleYoVariable(joint.getSdfName()+"TauInertia", registry));
       }
 
       yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
@@ -129,9 +135,10 @@ public class StepprOutputWriter implements DRCOutputWriter
             double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
             double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
             double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
+            yoTauInertia.get(joint).set(motorInertiaTorque);
 
-            double tau = (motorInertiaTorque + wholeBodyControlJoint.getTau()) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
-            double kd = wholeBodyControlJoint.getKd() * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
+            double kd = (wholeBodyControlJoint.getKd()+yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
+            double tau = (wholeBodyControlJoint.getTau()) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
 
             StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
 
@@ -147,11 +154,11 @@ public class StepprOutputWriter implements DRCOutputWriter
                   tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
                   yoTauSpring.get(joint).set(tauSpring);
                } 
-               jointCommand.setTauDesired(tau - tauSpring, rawSensorData); 
+               jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData); 
             }
             else
             {
-               jointCommand.setTauDesired(tau, rawSensorData); 
+               jointCommand.setTauDesired(tau, wholeBodyControlJoint.getQddDesired(), rawSensorData); 
             }
             jointCommand.setDamping(kd);
 

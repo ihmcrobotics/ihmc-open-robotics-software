@@ -14,7 +14,7 @@ public class StepprJointCommand
    private final int numberOfActuators;
    private final double[] motorAngles;
    
-   private double q, qd;
+   private double q, qd, qdd_d;
    
    
    public StepprJointCommand(String name, int numberOfActuators, YoVariableRegistry parentRegistry)
@@ -28,12 +28,13 @@ public class StepprJointCommand
       parentRegistry.addChild(registry);
    }
      
-   public void setTauDesired(double tau_d, RawJointSensorDataHolder rawSensorData)
+   public void setTauDesired(double tau_d, double qdd_d, RawJointSensorDataHolder rawSensorData)
    {
       this.tauDesired.set(tau_d);
       
       this.q = rawSensorData.getQ_raw();
       this.qd = rawSensorData.getQd_raw();
+      this.qdd_d = qdd_d;
       for(int i = 0; i < numberOfActuators; i++)
       {
          motorAngles[i] = rawSensorData.getMotorAngle(i);
@@ -48,6 +49,11 @@ public class StepprJointCommand
    public double getQd()
    {
       return qd;
+   }
+   
+   public double getQdd_d()
+   {
+      return qdd_d;
    }
    
    public double getTauDesired()
