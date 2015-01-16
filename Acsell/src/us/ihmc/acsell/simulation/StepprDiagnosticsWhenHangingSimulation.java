@@ -114,7 +114,8 @@ public class StepprDiagnosticsWhenHangingSimulation
    {
       SimulationConstructionSet simulationConstructionSet = humanoidDiagnosticsWhenHangingSimulation.getSimulationConstructionSet();
 //      simulationConstructionSet.readData("D:/RobotLogData/20150108_212041_StepprDiagAfterKtScaling_Processed.data.gz");
-      simulationConstructionSet.readData("D:/RobotLogData/20150109_120549_StepprDiagSplineTime10s_Processed.data.gz");
+//      simulationConstructionSet.readData("D:/RobotLogData/20150109_120549_StepprDiagSplineTime10s_Processed.data.gz");
+      simulationConstructionSet.readData("D:/RobotLogData/20150116_150646_Steppr_Diagnosis_Processed.data.gz");
 
       humanoidDiagnosticsWhenHangingSimulation.restoreCorruptorVariableValues();
 //      setInitialCorruptorValues(simulationConstructionSet);
