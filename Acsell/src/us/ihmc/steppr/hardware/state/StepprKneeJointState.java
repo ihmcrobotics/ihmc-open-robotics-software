@@ -65,13 +65,16 @@ public class StepprKneeJointState implements StepprJointState
    public void update()
    {
       
-      motorAngle = actuator.getMotorPosition();
+      final long toleranceWindowSize=1;
+      if(ankle.getConsecutivePacketDropCount()<=toleranceWindowSize && actuator.getConsecutivePacketDropCount()<=toleranceWindowSize)
+      {
+         double ankleAngle = ankle.getMotorPosition();
+         double ankleVelocity = ankle.getMotorVelocity();      
+         q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition() + ankleAngle));
+         qd.set(actuator.getJointVelocity() + ankleVelocity);
+      }
       
-      double ankleAngle = ankle.getMotorPosition();
-      double ankleVelocity = ankle.getMotorVelocity();
-      
-      q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition() + ankleAngle));
-      qd.set(actuator.getJointVelocity() + ankleVelocity);
+      motorAngle = actuator.getMotorPosition();      
       tau_current.set(actuator.getMotorTorque() * ratio);
       tau_strain.set(strainSensor.getCalibratedValue());
    }
