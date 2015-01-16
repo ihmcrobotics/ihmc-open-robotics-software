@@ -691,4 +691,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return FootSwitchType.WrenchBased;
    }
+   
+   @Override
+   public double getMaxICPErrorBeforeSingleSupport()
+   {
+      return 0.035;
+   }
+
 }
