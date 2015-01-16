@@ -190,7 +190,7 @@ public class StepprSingleThreadedController extends RealtimeThread
          RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
 
          StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
-         jointCommand.setTauDesired(oneDoFJoint.getTau(), rawSensor);
+         jointCommand.setTauDesired(oneDoFJoint.getTau(), 0.0, rawSensor);
          jointCommand.setDamping(oneDoFJoint.getKd());
       }
 
