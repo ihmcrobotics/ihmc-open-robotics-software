@@ -741,4 +741,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return FootSwitchType.WrenchBased;
    }
+
+   @Override
+   public double getMaxICPErrorBeforeSingleSupport()
+   {
+      return 0.035;
+   }
 }
