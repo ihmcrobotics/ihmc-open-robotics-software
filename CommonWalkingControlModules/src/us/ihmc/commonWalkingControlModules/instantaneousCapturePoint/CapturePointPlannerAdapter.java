@@ -43,15 +43,23 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		this.referenceFrames = referenceFrames;
 		this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerAdapterCurrentTransferToSide", registry, RobotSide.class);
 
-		SmoothICPComputer2D smoothICPComputer2D = new SmoothICPComputer2D(referenceFrames, controlDT,
-				this.capturePointPlannerParameters.getDoubleSupportSplitFraction(),
-				this.capturePointPlannerParameters.getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry);
-		smoothICPComputer2D.setICPInFromCenter(this.capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+		if(USE_OLD_HACKY_ICP_PLANNER)
+		{
+   		SmoothICPComputer2D smoothICPComputer2D = new SmoothICPComputer2D(referenceFrames, controlDT,
+   				this.capturePointPlannerParameters.getDoubleSupportSplitFraction(),
+   				this.capturePointPlannerParameters.getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry);
+   		smoothICPComputer2D.setICPInFromCenter(this.capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+   	    this.oldCapturePointPlanner = new InstantaneousCapturePointPlannerWithTimeFreezer(smoothICPComputer2D, registry);
+   	    this.newCapturePointPlanner=null;
+		}
+		else
+		{
+	      newCapturePointPlanner = new NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(
+	            this.capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+		   this.oldCapturePointPlanner=null;
+		}
 
-		this.oldCapturePointPlanner = new InstantaneousCapturePointPlannerWithTimeFreezer(smoothICPComputer2D, registry);
 
-		newCapturePointPlanner = new NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(
-				this.capturePointPlannerParameters, registry, yoGraphicsListRegistry);
 	}
 
 	@Override
