@@ -437,8 +437,8 @@ public class WholeBodyIkSolver
       task_com_position.setWeightsJointSpace(joint_weights);
 
       // TODO make this the center of the feet
-      Vector64F target_com = new Vector64F(3, 0, 0.11, 0);
-      task_com_position.setTarget(target_com, 0.005);
+      Vector64F target_com = new Vector64F(3, 0, 0.11, 0);    
+      task_com_position.setTarget(target_com, 0.01);
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
       Vector64F weights_ee_pos = new Vector64F(3, 1, 1, 1);
@@ -727,23 +727,32 @@ public class WholeBodyIkSolver
       return ret;
    }
 
+   private void adjustDesiredCOM()
+   {
+      ReferenceFrame leftSole = actual_sdf_model.getSoleFrame(LEFT);
+      ReferenceFrame rightSole = actual_sdf_model.getSoleFrame(RIGHT);
+      RigidBodyTransform rightToLeftFoot = leftSole.getTransformToDesiredFrame( rightSole );
+      Vector3d diff = new Vector3d();
+      rightToLeftFoot.getTranslation(diff); 
+      
+      task_com_position.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
+   }
    
    synchronized private int computeImpl(SDFFullRobotModel robotModelToPack)
    {
       updateDesiredSDFFullRobotModelToActual();
-      workingFrames.updateFrames();
-
-      Vector64F q_out = new Vector64F(numOfJoints);
-
-      checkIfLegsNeedToBeLocked();
-      setPreferedKneeAngle();
-      adjustOtherFoot();
-
-      checkIfArmShallStayQuiet(q_init);
-
       int ret = -1;
-      try
-      {
+      Vector64F q_out = new Vector64F(numOfJoints);
+       
+      try{
+         workingFrames.updateFrames();
+         
+         adjustDesiredCOM();
+         checkIfLegsNeedToBeLocked();
+         setPreferedKneeAngle();
+         adjustOtherFoot();
+   
+         checkIfArmShallStayQuiet(q_init);
          ret = wb_solver.solve(q_init, q_out);
       }
       catch (Exception e)
