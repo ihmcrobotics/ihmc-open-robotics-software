@@ -38,6 +38,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    
    private final YoFramePoint yoDesiredPosition;
    private final YoFrameVector yoDesiredLinearVelocity;
+   private final BooleanYoVariable yoSetDesiredAccelerationToZero;
+   private final BooleanYoVariable yoSetDesiredVelocityToZero;
+   
    protected final RigidBody pelvis;
 
    public AbstractUnconstrainedState(ConstraintType constraintType, RigidBodySpatialAccelerationControlModule accelerationControlModule,
@@ -63,6 +66,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
       yoDesiredPosition.setToNaN();
+      yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix+"SetDesiredAccelerationToZero", registry);
+      yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix+"SetDesiredVelocityToZero",registry);
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
    }
 
@@ -109,10 +114,16 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
-//      desiredLinearVelocity.setToZero();
-//      desiredAngularVelocity.setToZero();
-//      desiredLinearAcceleration.setToZero();
-//      desiredAngularAcceleration.setToZero();
+      if(yoSetDesiredVelocityToZero.getBooleanValue())
+      {
+         desiredLinearVelocity.setToZero();
+         desiredAngularVelocity.setToZero();
+      }
+      if(yoSetDesiredAccelerationToZero.getBooleanValue()){
+         desiredLinearAcceleration.setToZero();
+         desiredAngularAcceleration.setToZero();
+         
+      }
 
       RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
