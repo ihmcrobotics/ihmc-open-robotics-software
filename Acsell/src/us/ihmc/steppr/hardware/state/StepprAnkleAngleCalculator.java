@@ -35,4 +35,10 @@ public interface StepprAnkleAngleCalculator
 
    void calculateActuatordQd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY);
 
+   void calculateActuatordQdd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY, double qddAnkleX, double qddAnkleY);
+
+   double getActuatorQddLeft();
+
+   double getActuatorQddRight();
+
 }
