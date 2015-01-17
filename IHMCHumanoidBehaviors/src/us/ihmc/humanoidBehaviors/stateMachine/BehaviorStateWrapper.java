@@ -6,12 +6,19 @@ import us.ihmc.yoUtilities.stateMachines.State;
 public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
 {
    private final BehaviorInterface behavior;
+   private final Boolean initializeOnTransitionIntoAction;
 
    public BehaviorStateWrapper(E stateEnum, BehaviorInterface behavior)
+   {
+      this(stateEnum, behavior, true);
+   }
+   
+   public BehaviorStateWrapper(E stateEnum, BehaviorInterface behavior, boolean initializeOnTransitionIntoAction)
    {
       super(stateEnum);
 
       this.behavior = behavior;
+      this.initializeOnTransitionIntoAction = initializeOnTransitionIntoAction;
    }
 
    @Override
@@ -48,7 +55,10 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    @Override
    public void doTransitionIntoAction()
    {
-      behavior.initialize();
+      if (initializeOnTransitionIntoAction)
+      {
+         behavior.initialize();       
+      }
    }
 
    @Override
