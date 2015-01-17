@@ -131,7 +131,7 @@ public class LocalizationBehavior extends BehaviorInterface {
 		scriptBehavior.finalize();
 		scriptBehavior.initialize();
 		scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
-		scriptBehavior.setScriptInputs(scriptResourceStream,scriptObjectTransformToWorld);
+		scriptBehavior.importChildInputPackets(getClass().getSimpleName(), scriptResourceStream,scriptObjectTransformToWorld);
 		
 	}
 
