@@ -107,7 +107,7 @@ public class TurnValveBehavior extends BehaviorInterface
             System.out.println("TurnValveBehavior: Script " + scriptBehaviorInputPacket.getScriptName() + " loaded.");
          }
 
-         scriptBehavior.setScriptInputs(scriptResourceStream, worldToValveTransform);
+         scriptBehavior.importChildInputPackets(scriptName, scriptResourceStream, worldToValveTransform);
       }
 
       if (currentBehavior.isDone())

@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -39,6 +40,7 @@ public class FingerStateBehavior extends BehaviorInterface
    public void setInput(FingerStatePacket fingerStatePacket)
    {
       this.outgoingFingerStatePacket = fingerStatePacket;
+      hasInputBeenSet.set(true);
    }
 
    @Override
@@ -52,7 +54,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingFingerStatePacket.setDestination(PacketDestination.UI);
+         outgoingFingerStatePacket.setDestination(PacketDestination.CONTROLLER);
 
          sendPacketToController(outgoingFingerStatePacket);
          sendPacketToNetworkProcessor(outgoingFingerStatePacket);
@@ -127,6 +129,10 @@ public class FingerStateBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      if (hasInputBeenSet())
+      {
+         SysoutTool.println("Re-Initializing");
+      }
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);
       outgoingFingerStatePacket = null;

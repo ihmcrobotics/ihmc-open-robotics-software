@@ -95,13 +95,18 @@ public class BehaviorDisptacher implements Runnable
       }
    }
 
-   public void addHumanoidBehavior(HumanoidBehaviorType humanoidBehaviorType, BehaviorInterface newBehavior)
+   public void addHumanoidBehavior(HumanoidBehaviorType humanoidBehaviorType, BehaviorInterface behavior)
    {
-      BehaviorStateWrapper<HumanoidBehaviorType> newBehaviorState = new BehaviorStateWrapper<HumanoidBehaviorType>(humanoidBehaviorType, newBehavior);
+      BehaviorStateWrapper<HumanoidBehaviorType> behaviorState = new BehaviorStateWrapper<HumanoidBehaviorType>(humanoidBehaviorType, behavior);
 
-      this.stateMachine.addState(newBehaviorState);
-      this.registry.addChild(newBehavior.getYoVariableRegistry());
-      // Enable transition between every existing state of the state machine
+      this.stateMachine.addState(behaviorState);
+      this.registry.addChild(behavior.getYoVariableRegistry());
+      
+      addTransitionsToAndFromAllOtherBehaviors(behaviorState);
+   }
+
+   private void addTransitionsToAndFromAllOtherBehaviors(BehaviorStateWrapper<HumanoidBehaviorType> behaviorState)
+   {
       for (HumanoidBehaviorType stateEnum : HumanoidBehaviorType.values)
       {
          BehaviorStateWrapper<HumanoidBehaviorType> otherBehavior = stateMachine.getState(stateEnum);
@@ -109,8 +114,8 @@ public class BehaviorDisptacher implements Runnable
             continue;
 
          boolean waitUntilDone = false;
-         StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, new SetupBehaviorCommunication(otherBehavior, newBehaviorState), otherBehavior, newBehaviorState);
-         StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, new SetupBehaviorCommunication(newBehaviorState, otherBehavior), newBehaviorState, otherBehavior);
+         StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, new SetupBehaviorCommunication(otherBehavior, behaviorState), otherBehavior, behaviorState);
+         StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, new SetupBehaviorCommunication(behaviorState, otherBehavior), behaviorState, otherBehavior);
       }
    }
 
