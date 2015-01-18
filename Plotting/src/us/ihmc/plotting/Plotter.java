@@ -38,7 +38,7 @@ public class Plotter extends JPanel
    private boolean SHOW_SELECTION = false;
 
    private boolean drawHistory = false;
-   
+
    private long updateDelayInMillis = 0;
    private long lastUpdate = 0;
 
@@ -46,7 +46,7 @@ public class Plotter extends JPanel
 
    private Dimension preferredSize = new Dimension(275, 275);
    private final HashMap<String, Artifact> artifacts = new HashMap<String, Artifact>();
-   
+
    private int xCenter;
    private int yCenter;
    private double xOffset = 0.0;
@@ -58,7 +58,7 @@ public class Plotter extends JPanel
    private double ySelected = 0.0;
 
    private int _orientation;
-   
+
    // rectangle area selection
    private double _areaX1 = 0.0;
    private double _areaY1 = 0.0;
@@ -68,22 +68,22 @@ public class Plotter extends JPanel
    private double _areaY1TEMP = 0.0;
 
    // drag tracking
-   private  int buttonPressed;
-   private  int dragStartX;
-   private  int dragStartY;
-   private  double xOffsetStartOfDrag;
-   private  double yOffsetStartOfDrag;
+   private int buttonPressed;
+   private int dragStartX;
+   private int dragStartY;
+   private double xOffsetStartOfDrag;
+   private double yOffsetStartOfDrag;
 
    // double click listener
    private DoubleClickListener _listener;
 
    // polygon tracking
    private boolean MAKING_POLYGON = false;
-   private  PolygonArtifact polygonArtifact;
+   private PolygonArtifact polygonArtifact;
 
    private boolean overrideAutomaticInterval = false;
    private double manualOverideInterval = 1.0;
-   
+
    public Plotter()
    {
       // Initialize class variables
@@ -109,7 +109,7 @@ public class Plotter extends JPanel
    {
       this.drawHistory = drawHistory;
    }
-   
+
    public void paintComponent(Graphics gO)
    {
       long currentTime = System.currentTimeMillis();
@@ -119,8 +119,8 @@ public class Plotter extends JPanel
 
          // get current size and determine scaling factor
          Dimension d = this.getSize();
-         int height = (int)Math.round(d.getHeight());
-         int width = (int)Math.round(d.getWidth());
+         int height = (int) Math.round(d.getHeight());
+         int width = (int) Math.round(d.getWidth());
          xCenter = width / 2;    // 0;//w/2;
          yCenter = height / 2;    // h;//h/2;
          scaleFactor = height / scale;
@@ -128,8 +128,8 @@ public class Plotter extends JPanel
          double headingOffset = 0.0;
 
          // set current offset
-         xCenter = xCenter - (int)Math.round(xOffset * scaleFactor);
-         yCenter = yCenter + (int)Math.round(yOffset * scaleFactor);
+         xCenter = xCenter - (int) Math.round(xOffset * scaleFactor);
+         yCenter = yCenter + (int) Math.round(yOffset * scaleFactor);
 
          // paint background
          super.paintComponent(g);
@@ -179,7 +179,7 @@ public class Plotter extends JPanel
             {
                interval = 0.1;
             }
-            
+
             if (overrideAutomaticInterval)
             {
                interval = manualOverideInterval;
@@ -188,32 +188,56 @@ public class Plotter extends JPanel
             // paint grid lines
             Coordinate ulCoord = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
             Coordinate lrCoord = convertFromPixelsToMeters(new Coordinate(width, height, Coordinate.PIXEL));
+
             double minX = ulCoord.getX();
             double maxX = lrCoord.getX();
-            double diff = maxX - minX;
-            int count = (int)Math.round(Math.ceil(diff / interval));
-            
-            int countOffset = (int) Math.floor(minX/interval);
-            double minXforPlotting = countOffset * interval;
-            
-            for (int i = 0; i < count; i++)
+            double xDiff = maxX - minX;
+            int xCount = (int) Math.round(Math.ceil(xDiff / interval));
+            int xCountOffset = (int) Math.floor(minX / interval);
+            double minXforPlotting = xCountOffset * interval;
+
+            for (int i = 0; i < xCount; i++)
             {
                double distance = minXforPlotting + (i * interval);
 
-               if ((i + countOffset) % 10 == 0)
+               if ((i + xCountOffset) % 10 == 0)
                   g.setColor(new Color(180, 190, 210));
-               else if ((i + countOffset) % 5 == 0)
+               else if ((i + xCountOffset) % 5 == 0)
                   g.setColor(new Color(180, 210, 230));
                else
                   g.setColor(new Color(230, 240, 250));
 
                // get pixel from meter for positive
                Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
-               int x = (int)Math.round(coord.getX());
-               int y = (int)Math.round(coord.getY());
+               int x = (int) Math.round(coord.getX());
 
                // draw line
                g.drawLine(x, 0, x, height);
+            }
+
+            double minY = lrCoord.getY();
+            double maxY = ulCoord.getY();
+            double yDiff = maxY - minY;
+            int yCount = (int) Math.round(Math.ceil(yDiff / interval));
+            int yCountOffset = (int) Math.floor(minY / interval);
+            double minYforPlotting = yCountOffset * interval;
+
+            for (int i = 0; i < yCount; i++)
+            {
+               double distance = minYforPlotting + (i * interval);
+
+               if ((i + yCountOffset) % 10 == 0)
+                  g.setColor(new Color(180, 190, 210));
+               else if ((i + yCountOffset) % 5 == 0)
+                  g.setColor(new Color(180, 210, 230));
+               else
+                  g.setColor(new Color(230, 240, 250));
+
+               // get pixel from meter for positive
+               Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
+               int y = (int) Math.round(coord.getY());
+
+               // draw line
                g.drawLine(0, y, width, y);
             }
          }
@@ -223,14 +247,14 @@ public class Plotter extends JPanel
 
          // get pixel from meter for positive
          Coordinate coord = convertFromMetersToPixels(new Coordinate(0, 0, Coordinate.METER));
-         int x0 = (int)Math.round(coord.getX());
-         int y0 = (int)Math.round(coord.getY());
+         int x0 = (int) Math.round(coord.getX());
+         int y0 = (int) Math.round(coord.getY());
 
          // draw line
          g.drawLine(x0, 0, x0, height);
          g.drawLine(0, y0, width, y0);
 
-      // Paint all artifacts history by level
+         // Paint all artifacts history by level
          // (assumes 5 levels (0-4)
          if (drawHistory)
          {
@@ -257,7 +281,7 @@ public class Plotter extends JPanel
                }
             }
          }
-         
+
          // Paint all artifacts by level
          // (assumes 5 levels (0-4)
          synchronized (artifacts)
@@ -288,8 +312,8 @@ public class Plotter extends JPanel
          {
             g.setColor(Color.red);
             int xSize = 8;
-            int xX = xCenter + ((int)Math.round(xSelected * scaleFactor));
-            int yX = yCenter - ((int)Math.round(ySelected * scaleFactor));
+            int xX = xCenter + ((int) Math.round(xSelected * scaleFactor));
+            int yX = yCenter - ((int) Math.round(ySelected * scaleFactor));
             g.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
             g.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
          }
@@ -298,10 +322,10 @@ public class Plotter extends JPanel
          if (SHOW_SELECTION)
          {
             g.setColor(Color.red);
-            int areaX1 = xCenter + ((int)Math.round(_areaX1 * scaleFactor));
-            int areaY1 = yCenter - ((int)Math.round(_areaY1 * scaleFactor));
-            int areaX2 = xCenter + ((int)Math.round(_areaX2 * scaleFactor));
-            int areaY2 = yCenter - ((int)Math.round(_areaY2 * scaleFactor));
+            int areaX1 = xCenter + ((int) Math.round(_areaX1 * scaleFactor));
+            int areaY1 = yCenter - ((int) Math.round(_areaY1 * scaleFactor));
+            int areaX2 = xCenter + ((int) Math.round(_areaX2 * scaleFactor));
+            int areaY2 = yCenter - ((int) Math.round(_areaY2 * scaleFactor));
             int Xmin, Xmax, Ymin, Ymax;
             if (areaX1 > areaX2)
             {
@@ -364,13 +388,13 @@ public class Plotter extends JPanel
          repaint();
       }
    }
-   
+
    public void setManualGidInterval(double intervalInMeters)
    {
       this.manualOverideInterval = intervalInMeters;
       this.overrideAutomaticInterval = true;
    }
-   
+
    public void disableManualGridIntervalOverride()
    {
       this.overrideAutomaticInterval = false;
@@ -582,8 +606,8 @@ public class Plotter extends JPanel
    {
       // get current size and determine scaling factor
       Dimension d = this.getSize();
-      int h = (int)Math.round(d.getHeight());
-      int w = (int)Math.round(d.getWidth());
+      int h = (int) Math.round(d.getHeight());
+      int w = (int) Math.round(d.getWidth());
 
       // _Xcenter = w/2;
       // _Ycenter = h/2;
@@ -591,12 +615,12 @@ public class Plotter extends JPanel
 
       // detemine plot size
       Dimension plotD = plot.getSize();
-      int plotH = (int)Math.round(plotD.getHeight());
-      int plotW = (int)Math.round(plotD.getWidth());
+      int plotH = (int) Math.round(plotD.getHeight());
+      int plotW = (int) Math.round(plotD.getWidth());
 
       // place plot so bottom is cenetered at location
-      int xnew = (int)Math.round((pt.x * scaleFactor) - (plotW / 2));
-      int ynew = (int)Math.round((h - (pt.y * scaleFactor)) - (plotH));
+      int xnew = (int) Math.round((pt.x * scaleFactor) - (plotW / 2));
+      int ynew = (int) Math.round((h - (pt.y * scaleFactor)) - (plotH));
 
       return new Point(xnew, ynew);
 
@@ -624,10 +648,10 @@ public class Plotter extends JPanel
       double x = coordinate.getX();
       double y = coordinate.getY();
 
-      x = new Double(xCenter + ((int)Math.round(x * scaleFactor))).doubleValue();
+      x = new Double(xCenter + ((int) Math.round(x * scaleFactor))).doubleValue();
 
       // System.out.println("x(pixels)=" + x);
-      y = new Double(yCenter - ((int)Math.round(y * scaleFactor))).doubleValue();
+      y = new Double(yCenter - ((int) Math.round(y * scaleFactor))).doubleValue();
 
       // System.out.println("y(pixels)=" + y);
       return new Coordinate(x, y, Coordinate.PIXEL);
@@ -814,7 +838,7 @@ public class Plotter extends JPanel
       f.setVisible(true);
    }
 
-   // ////////////////////////////////////////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////
    private class PlotterMouseListener extends MouseInputAdapter
    {
       public void mouseClicked(MouseEvent e)
