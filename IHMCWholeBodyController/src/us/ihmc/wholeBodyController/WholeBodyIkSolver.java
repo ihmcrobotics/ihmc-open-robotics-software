@@ -397,7 +397,7 @@ public class WholeBodyIkSolver
 
       task_ee_pose_R_pos.setMaximumError(0.2);
       task_ee_pose_R_rot.setMaximumError(0.4);
-      task_joints_pose.setMaximumError(1.0);
+      task_joints_pose.setMaximumError(0.6);
 
       task_ee_pose_R_pos.setEnabled(false);
       task_ee_pose_R_rot.setEnabled(false);
@@ -659,13 +659,18 @@ public class WholeBodyIkSolver
    
    //ComputeOption { RESEED, USE_WORKING_MODEL_JOINTS, USE_JOINTS_CACHE };
    
-   public int compute(SDFFullRobotModel robotModelToPack)
+   public int compute(SDFFullRobotModel robotModelToPack) throws Exception
    {
       return compute( robotModelToPack, ComputeOption.USE_JOINTS_CACHE);
    }
    
-   public int compute(SDFFullRobotModel robotModelToPack, ComputeOption opt)
+   public int compute(SDFFullRobotModel robotModelToPack, ComputeOption opt) throws Exception
    {
+      if( robotModelToPack == actual_sdf_model)
+      {
+         throw new Exception(" the output of compute should not be a reference to actual_sdf_model");
+      }
+      
       switch(opt)
       {
       case RESEED:
@@ -685,8 +690,7 @@ public class WholeBodyIkSolver
                }
             }           
             
-            if( !partOfQuietArm )
-            {
+            if( !partOfQuietArm ) {
                q_init.set(i, randQ.get(i));
             }
          }
@@ -741,6 +745,7 @@ public class WholeBodyIkSolver
    synchronized private int computeImpl(SDFFullRobotModel robotModelToPack)
    {
       updateDesiredSDFFullRobotModelToActual();
+
       int ret = -1;
       Vector64F q_out = new Vector64F(numOfJoints);
        
@@ -777,10 +782,12 @@ public class WholeBodyIkSolver
             }
          }
 
-         moveDesiredFeetToActualFeet();
+         movePelvisToHaveOverlappingFeet( actual_sdf_model, working_sdf_model);
+         
          if(robotModelToPack != null){
             updatePackModelToDesired(robotModelToPack);
          }
+         robotModelToPack.updateFrames();
       }
 
       return ret;
@@ -837,7 +844,7 @@ public class WholeBodyIkSolver
    {
       workingFrames.updateFrames();
       
-      RigidBodyTransform rootToBody = getLocalBodyTransform(name);
+      RigidBodyTransform rootToBody   = getLocalBodyTransform(name);
       RigidBodyTransform parentToRoot = new RigidBodyTransform();
 
       ReferenceFrame workingRootFrame = getRootFrame();
@@ -850,23 +857,26 @@ public class WholeBodyIkSolver
       return ReferenceFrame.constructBodyZUpFrameWithUnchangingTransformToParent(name, parentFrame, parentToBody);
    }
 
-   private void moveDesiredFeetToActualFeet()
+   static private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
    {
-      workingFrames.updateFrames();
+      referenceModel.updateFrames();
+      followerModel.updateFrames();
       
-      ReferenceFrame actualSoleFrame = actualSoleFrames.get(footRootSide);
-      ReferenceFrame workingSoleFrame = workingSoleFrames.get(footRootSide);
+      ReferenceFrame referenceSoleFrame = referenceModel.getSoleFrame(footRootSide);
+      ReferenceFrame followerSoleFrame  = followerModel.getSoleFrame(footRootSide);
 
-      RigidBodyTransform soleWorldToActual = new RigidBodyTransform();
+      RigidBodyTransform soleWorldToFollow = new RigidBodyTransform();
       RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
       RigidBodyTransform pelvisTransform   = new RigidBodyTransform();
       
-      workingPelvisFrame.getTransformToDesiredFrame(soleToPelvis,  workingSoleFrame);
-      actualSoleFrame.getTransformToDesiredFrame(soleWorldToActual, ReferenceFrame.getWorldFrame() );
-      pelvisTransform.multiply( soleWorldToActual, soleToPelvis );
+      ReferenceFrame followerPelvisFrame = followerModel.getRootJoint().getFrameAfterJoint();
       
-      workingRootJoint.setPositionAndRotation(pelvisTransform);
-      workingFrames.updateFrames();
+      followerPelvisFrame.getTransformToDesiredFrame(soleToPelvis,  followerSoleFrame);
+      referenceSoleFrame.getTransformToDesiredFrame(soleWorldToFollow, ReferenceFrame.getWorldFrame() );
+      pelvisTransform.multiply( soleWorldToFollow, soleToPelvis );
+      
+      followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
+      followerModel.updateFrames();
    }
 
    private void updateDesiredSDFFullRobotModelToActual()
@@ -878,7 +888,7 @@ public class WholeBodyIkSolver
    }
 
    private void updatePackModelToDesired(SDFFullRobotModel sdfFullRobotModelToPack)
-   {
+   {  
       desiredModelJointCopier.setRigidBodies(working_sdf_model.getElevator(), sdfFullRobotModelToPack.getElevator());
       desiredModelJointCopier.copy();
    }
