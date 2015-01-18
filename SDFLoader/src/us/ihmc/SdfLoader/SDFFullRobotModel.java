@@ -379,7 +379,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public void updateFrames()
+   synchronized public void updateFrames()
    {
       elevator.updateFramesRecursively();
    }

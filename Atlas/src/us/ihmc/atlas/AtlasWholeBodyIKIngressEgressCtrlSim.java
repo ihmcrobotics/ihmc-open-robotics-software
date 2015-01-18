@@ -143,7 +143,15 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       ReferenceFrame desiredReferenceFrame = getNextDesiredReferenceFrame(index);
       yoGraphicsShape.setToReferenceFrame(desiredReferenceFrame);
       wholeBodyIKSolver.setHandTarget(RobotSide.RIGHT, desiredReferenceFrame);
-      wholeBodyIKSolver.compute(fullRobotModel);
+      try
+      {
+         wholeBodyIKSolver.compute(fullRobotModel);
+      }
+      catch (Exception e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
       wholeBodyIKPacketCreator.createPackets(fullRobotModel, 3.0, packetsToSend);
       System.out.println("AtlasWholeBodyIKIngressEgressCtrlSim: Sending packets");
       for (int i = 0; i < packetsToSend.size(); i++)
