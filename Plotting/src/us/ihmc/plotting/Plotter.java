@@ -193,23 +193,13 @@ public class Plotter extends JPanel
             double diff = maxX - minX;
             int count = (int)Math.round(Math.ceil(diff / interval));
             
-            
             int countOffset = (int) Math.floor(minX/interval);
             double minXforPlotting = countOffset * interval;
             
             for (int i = 0; i < count; i++)
             {
-//               double distance = Math.floor(minX) + (i * interval);
                double distance = minXforPlotting + (i * interval);
 
-//               if (distance / interval % 10 == 0)
-//                  g.setColor(new Color(180, 190, 210));
-//               else if (distance / interval % 5 == 0)
-//                  g.setColor(new Color(180, 210, 230));
-//               else
-//                  g.setColor(new Color(180, 230, 250));
-               
-               //The above code is wrong. Rewriting
                if ((i + countOffset) % 10 == 0)
                   g.setColor(new Color(180, 190, 210));
                else if ((i + countOffset) % 5 == 0)
