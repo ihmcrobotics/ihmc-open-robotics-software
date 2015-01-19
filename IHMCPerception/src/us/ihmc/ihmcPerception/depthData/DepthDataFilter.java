@@ -12,6 +12,8 @@ import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.SimplifiedGroundOnlyQuadTree;
 import us.ihmc.userInterface.util.DecayingResolutionFilter;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
@@ -24,11 +26,13 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class DepthDataFilter
 {
+	private static final boolean USE_SIMPLIFIED_QUAD_TREE = false;
+	
    public static final int OCTREE_MIN_BOXES = 20000;
    public static final int OCTREE_MAX_BOXES = 100000;
    public static final double QUAD_TREE_EXTENT = 200;
 
-   private final GroundOnlyQuadTree quadTree;
+   private final QuadTreeHeightMapInterface quadTree;
    private final Octree octree;
    private final DecayingResolutionFilter nearScan;
 
@@ -60,12 +64,18 @@ public class DepthDataFilter
       this.worldToCorrected.set(adjustment);
    }
 
-   public GroundOnlyQuadTree getGroundOnlyQuadTree(ReferenceFrame headFrame)
+   public QuadTreeHeightMapInterface getGroundOnlyQuadTree(ReferenceFrame headFrame)
    {
       // SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
       // DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION, DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS*3,
       // DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION);
+	   
+	   if (USE_SIMPLIFIED_QUAD_TREE)
+	   {
+		   return new SimplifiedGroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, DepthDataFilterParameters.GRID_RESOLUTION, parameters.quadtreeHeightThreshold);
+	   }
+	   
       return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, DepthDataFilterParameters.GRID_RESOLUTION,
             parameters.quadtreeHeightThreshold, 100000);
    }
@@ -294,12 +304,12 @@ public class DepthDataFilter
       nearScan.setCapacity(parameters.nearScanCapacity);
       nearScan.setDecay(parameters.nearScanDecayMillis);
 
-      quadTree.setHeighThreshold(parameters.quadtreeHeightThreshold);
+      quadTree.setHeightThreshold(parameters.quadtreeHeightThreshold);
 
       robotBoundingBoxes.setScale(parameters.boundingBoxScale);
    }
 
-   public GroundOnlyQuadTree getQuadTree()
+   public QuadTreeHeightMapInterface getQuadTree()
    {
       return quadTree;
    }
