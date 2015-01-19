@@ -14,10 +14,10 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.graphics3DAdapter.utils.GraphicsDemoToolsTest.class
 })
 
-public class Graphics3DAdapterBambooGraphicalTestSuite
+public class Graphics3DAdapterBambooJMETestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(Graphics3DAdapterBambooGraphicalTestSuite.class);
+      JUnitTestSuiteConstructor.generateTestSuite(Graphics3DAdapterBambooJMETestSuite.class);
    }
 }
