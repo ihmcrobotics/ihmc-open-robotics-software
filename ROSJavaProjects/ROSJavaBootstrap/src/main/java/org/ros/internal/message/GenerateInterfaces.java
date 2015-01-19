@@ -41,7 +41,7 @@ import java.util.List;
 public class GenerateInterfaces
 {
 
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private final TopicDefinitionFileProvider topicDefinitionFileProvider;
    private final ServiceDefinitionFileProvider serviceDefinitionFileProvider;
    private final MessageDefinitionProviderChain messageDefinitionProviderChain;

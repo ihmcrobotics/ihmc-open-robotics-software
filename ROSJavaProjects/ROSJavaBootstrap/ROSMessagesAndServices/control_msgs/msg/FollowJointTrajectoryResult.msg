@@ -7,3 +7,13 @@ int32 OLD_HEADER_TIMESTAMP = -3
 int32 PATH_TOLERANCE_VIOLATED = -4
 int32 GOAL_TOLERANCE_VIOLATED = -5
 
+# Human readable description of the error code. Contains complementary
+# information that is especially useful when execution fails, for instance:
+# - INVALID_GOAL: The reason for the invalid goal (e.g., the requested
+#   trajectory is in the past).
+# - INVALID_JOINTS: The mismatch between the expected controller joints
+#   and those provided in the goal.
+# - PATH_TOLERANCE_VIOLATED and GOAL_TOLERANCE_VIOLATED: Which joint
+#   violated which tolerance, and by how much.
+string error_string
+

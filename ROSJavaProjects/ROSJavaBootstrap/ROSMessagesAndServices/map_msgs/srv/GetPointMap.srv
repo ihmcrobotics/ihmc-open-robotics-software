@@ -1,0 +1,3 @@
+# Get the map as a sensor_msgs/PointCloud2 
+---
+sensor_msgs/PointCloud2 map
