@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.vecmath.Point3d;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
@@ -42,6 +43,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before: ");
    }
 
+   @Ignore
    @Test(timeout=300000) 
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect()
    {
