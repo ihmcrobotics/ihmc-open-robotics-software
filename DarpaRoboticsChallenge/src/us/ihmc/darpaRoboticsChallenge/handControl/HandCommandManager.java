@@ -8,8 +8,8 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
-
-public abstract class HandCommandManager
+//TODO: rename and create interface for sending hand command
+public abstract class HandCommandManager //implements HandCommandInterface
 {
 	private static final String TCP_PORT = "4270";
 	private static final String SERVER_ADDRESS = "localhost";
