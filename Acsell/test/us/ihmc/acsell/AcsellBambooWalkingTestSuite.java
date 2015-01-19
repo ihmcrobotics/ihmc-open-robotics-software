@@ -8,7 +8,6 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   BonoFlatGroundWalkingKinematicFootSwitchTest.class,
    BonoFlatGroundWalkingTest.class
 })
 
