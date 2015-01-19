@@ -1,0 +1,10 @@
+float32 frames_per_second
+float32 gain
+uint32  exposure_time
+uint32  frame_count
+time    time_stamp
+uint32  angle
+uint16  width
+uint16  height
+uint8[] gray_scale_image
+uint16[] disparity_image
