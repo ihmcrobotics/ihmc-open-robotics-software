@@ -1,21 +1,21 @@
 package us.ihmc.acsell;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.runner.*;
+import org.junit.runners.*;
 
 import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-	BonoFlatGroundWalkingTest.class,
+   BonoFlatGroundWalkingKinematicFootSwitchTest.class,
+   BonoFlatGroundWalkingTest.class
 })
 
 public class AcsellBambooWalkingTestSuite
 {
-	public static void main(String[] args)
-	{
+   public static void main(String[] args)
+   {
       JUnitTestSuiteConstructor.generateTestSuite(AcsellBambooWalkingTestSuite.class);
-      JUnitTestSuiteConstructor.generateTestSuite(BonoFlatGroundWalkingKinematicFootSwitchTest.class);
-	}
+   }
 }
