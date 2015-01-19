@@ -1,29 +1,41 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
+
+import org.fest.util.Files;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.packets.walking.ComHeightPacket;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -34,28 +46,42 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FrameOrientation2d;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 
 public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 {
-   private static final boolean DEBUG = true;
+   private final double POSITION_THRESHOLD = 0.007;
+   private final double ORIENTATION_THRESHOLD = 0.007;
+   private static final boolean DEBUG = false;
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = true || createMovie;
+   private static final boolean showGUI = false || createMovie;
+
+   private static final Vector3d PitchAxis = new Vector3d(0, 1, 0);
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -64,9 +90,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          "DRCHandPoseBehaviorTestControllerCommunicator");
 
    final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private ReferenceFrame currentScriptFrame = worldFrame;
    private ReferenceFrame recordFrame;
-   String fileName = "1_New_World_WORLD_FRAME";
+   String fileName = "1_ScriptBehaviorTest";
    TimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private static File file;
 
@@ -81,6 +106,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
+   private ReferenceFrames referenceFrames;
 
    @Before
    public void setUp()
@@ -106,6 +132,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
+      referenceFrames = robotDataReceiver.getReferenceFrames();
+
       PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
             "DRCComHeightBehaviorTestJunkyCommunicator");
 
@@ -126,40 +154,48 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+
+      Files.delete(file);
    }
 
    @Test(timeout = 300000)
-   public void testFingerStatePacketScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testSimpleComHeightScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
-      int robotSidePick = new Random().nextInt(RobotSide.values().length);
-      RobotSide robotside = RobotSide.values()[robotSidePick];
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
-      FingerStatePacket fingerStatePacket = new FingerStatePacket(robotside, FingerState.CLOSE);
+      Point3d initialComPoint = new Point3d();
+      robot.computeCenterOfMass(initialComPoint);
 
-      // Record Script
-      currentScriptFrame = worldFrame;
-      recordFrame = currentScriptFrame;
+      ComHeightPacket comHeightPacket0 = new ComHeightPacket(-0.15, 1.0);
+      ComHeightPacket comHeightPacket1 = new ComHeightPacket(0.0, 1.0);
 
       CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
-      commandRecorder.startRecording(fileName, recordFrame);
 
-      commandRecorder.recordObject(fingerStatePacket);
+      recordFrame = worldFrame;
+      commandRecorder.startRecording(fileName, worldFrame);
 
-      // Stop Recording - Save File
+      commandRecorder.recordObject(comHeightPacket0);
+      commandRecorder.recordObject(comHeightPacket1);
+
       commandRecorder.stopRecording();
 
-      ScriptBehavior scriptBehavior = testScriptBehavior(5.0);
-
+      ScriptBehavior scriptBehavior = testScriptBehavior(4.0);
       assertTrue(scriptBehavior.isDone());
+
+      Point3d finalComPoint = new Point3d();
+      robot.computeCenterOfMass(finalComPoint);
+
+      assertEquals(initialComPoint.getZ(), finalComPoint.getZ(), POSITION_THRESHOLD);
+
+      robotDataReceiver.updateRobotModel();
    }
 
    private ScriptBehavior testScriptBehavior(double trajectoryTime) throws SimulationExceededMaximumTimeException, FileNotFoundException
    {
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
       BooleanYoVariable doubleSupport = new BooleanYoVariable("doubleSupport", robot.getRobotsYoVariableRegistry());
       doubleSupport.set(true);
-      
+
       final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, doubleSupport);
       communicationBridge.attachGlobalListenerToController(scriptBehavior.getControllerGlobalPacketConsumer());
 
@@ -169,8 +205,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       scriptBehavior.initialize();
       scriptBehavior.importChildInputPackets(inputStream.toString(), inputStream, scriptTransformToWorld);
 
-      success &= executeBehavior(scriptBehavior, trajectoryTime);
-
+      boolean success = executeBehavior(scriptBehavior, trajectoryTime);
       assertTrue(success);
 
       return scriptBehavior;
@@ -180,11 +215,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
 
-      if (DEBUG)
-      {
-         System.out.println("\n");
-         SysoutTool.println("starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
+      SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
 
       Thread behaviorThread = new Thread()
       {
@@ -216,55 +247,155 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
-      if (DEBUG)
-      {
-         SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
+      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
 
       return ret;
    }
 
-   public void recordScript(Object objectToBeRecorded)
+   private Quat4d createQuat4d(Vector3d axis, double rotationAngle)
    {
-      currentScriptFrame = worldFrame;
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d();
+      desiredAxisAngle.set(axis, rotationAngle);
 
-      recordFrame = currentScriptFrame;
+      Quat4d ret = new Quat4d();
+      ret.set(desiredAxisAngle);
 
-      // System.out.println("WORLD - Record TRANS: " + recordTransform);
-
-      // Begin recording process
-      commandRecorder(objectToBeRecorded);
+      return ret;
    }
 
-   public void commandRecorder(Object object)
+   private HandPosePacket createHandPosePacket(RobotSide robotside)
    {
-      CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
-      commandRecorder.startRecording(fileName, recordFrame);
+      robotDataReceiver.updateRobotModel();
+      ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotside);
+      FramePose currentHandPose = new FramePose();
+      currentHandPose.setToZero(handFrame);
 
-      commandRecorder.recordObject(object);
+      currentHandPose.changeFrame(worldFrame);
 
-      // Stop Recording - Save File
-      commandRecorder.stopRecording();
+      Point3d desiredHandPosition = new Point3d();
+      currentHandPose.getPosition(desiredHandPosition);
+      desiredHandPosition.setZ(desiredHandPosition.getZ() + 0.1);
+      SysoutTool.println("desired Hand Position : " + desiredHandPosition, DEBUG);
 
-      // Visualize Script
+      Quat4d desiredHandOrientation = new Quat4d();
+      currentHandPose.getOrientation(desiredHandOrientation);
+
+      HandPosePacket ret = new HandPosePacket(robotside, Frame.WORLD, desiredHandPosition, desiredHandOrientation, 1.0);
+
+      return ret;
    }
 
-   public ArrayList<ScriptObject> getScriptObjects()
+   private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, ReferenceFrames referenceFrames)
    {
-      ScriptFileLoader loader;
-      try
+      FootstepDataList footsepDataList = new FootstepDataList();
+
+      SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         loader = new ScriptFileLoader(file.getAbsolutePath());
-         ArrayList<ScriptObject> scriptObjects = loader.readIntoList();
-         loader.close();
-
-         return scriptObjects;
+         feet.put(robotSide, fullRobotModel.getFoot(robotSide));
+         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
       }
-      catch (IOException e)
+
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+
+      SimplePathParameters pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(),
+            0.0, Math.toRadians(20.0), Math.toRadians(10.0), 0.4);
+
+      TurnStraightTurnFootstepGenerator footstepGenerator;
+
+      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+
+      footsteps.clear();
+      FramePose2d endPose = new FramePose2d(worldFrame);
+
+      referenceFrames.updateFrames();
+      ReferenceFrame midFeetFrame = referenceFrames.getMidFeetZUpFrame();
+
+      FramePose currentPose = new FramePose();
+      currentPose.setToZero(midFeetFrame);
+      currentPose.changeFrame(worldFrame);
+
+      Point2d targetLocation = new Point2d();
+      targetLocation.set(currentPose.getX(), currentPose.getY());
+      targetLocation.add(walkDeltaXY);
+
+      endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
+      endPose.setOrientation(new FrameOrientation2d(worldFrame, currentPose.getYaw()));
+
+      footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
+      footstepGenerator.initialize();
+      footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
+
+      for (int i = 0; i < footsteps.size(); i++)
       {
-         throw new RuntimeException(e);
+         Footstep footstep = footsteps.get(i);
+         Point3d location = new Point3d(footstep.getX(), footstep.getY(), footstep.getZ());
+         Quat4d orientation = new Quat4d();
+         footstep.getOrientation(orientation);
+
+         RobotSide footstepSide = footstep.getRobotSide();
+         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         footsepDataList.add(footstepData);
       }
 
+      return footsepDataList;
    }
 
+   private double getTotalFingerJointQ(RobotSide robotSide)
+   {
+      SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
+      Joint wristJoint = robot.getJoint(jointNameMap.getJointBeforeHandName(robotSide));
+
+      ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+      wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
+      double totalFingerJointQ = 0.0;
+
+      for (OneDegreeOfFreedomJoint fingerJoint : fingerJoints)
+      {
+         double q = fingerJoint.getQ().getDoubleValue();
+         totalFingerJointQ += q;
+         SysoutTool.println(fingerJoint.getName() + " q : " + q, DEBUG);
+      }
+
+      return totalFingerJointQ;
+   }
+
+   private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
+   {
+      fullRobotModel.updateFrames();
+      FramePose framePose = new FramePose();
+      framePose.setToZero(frameToCheck);
+      framePose.changeFrame(worldFrame);
+
+      Quat4d quatToCheck = new Quat4d();
+      framePose.getOrientation(quatToCheck);
+
+      assertOrientationsAreWithinThresholds(desiredQuat, quatToCheck);
+   }
+
+   private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, Quat4d actualQuat)
+   {
+      FramePose desiredPose = new FramePose(worldFrame, new Point3d(), desiredQuat);
+      FramePose actualPose = new FramePose(worldFrame, new Point3d(), actualQuat);
+
+      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
+
+      SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
+
+      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
+   {
+      double positionDistance = framePose1.getPositionDistance(framePose2);
+      double orientationDistance = framePose1.getOrientationDistance(framePose2);
+
+      SysoutTool.println("positionDistance=" + positionDistance, DEBUG);
+      SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
+
+      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
+      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+   }
 }

@@ -55,7 +55,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    private final double ASSUMED_WALKING_SPEED_mPerSec = 0.2;
 
-   private final double POSITION_THRESHOLD = 0.015;
+   private final double POSITION_THRESHOLD = 0.1;
    private final double ORIENTATION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -129,7 +129,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage();
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      
+
       double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
       Vector2d walkDirection = new Vector2d(1, 0);
       double trajectoryTime = walkDistance / ASSUMED_WALKING_SPEED_mPerSec;
@@ -137,7 +137,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = testWalkToLocationBehavior(walkDistance, walkDirection, trajectoryTime);
 
       assertTrue(walkToLocationBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -156,13 +156,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = testWalkToLocationBehavior(walkDistance, walkDirection, trajectoryTime);
 
       assertTrue(walkToLocationBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
    private WalkToLocationBehavior testWalkToLocationBehavior(double walkDistance, Vector2d walkDirection, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
+//      FramePose2d initialMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
       FramePose2d initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       FramePose2d desiredMidFeetPose = new FramePose2d(initialMidFeetPose);
 
@@ -173,17 +174,16 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
       communicationBridge.attachGlobalListenerToController(walkToLocationBehavior.getControllerGlobalPacketConsumer());
-      
+
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(desiredMidFeetPose);
 
       boolean success = executeBehavior(walkToLocationBehavior, trajectoryTime);
       FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+//      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
 
-      if (DEBUG)
-      {
-         SysoutTool.println(" initial Midfeet Pose :\n" + initialMidFeetPose + "\n");
-      }
+      SysoutTool.println(" initial Midfeet Pose :\n" + initialMidFeetPose + "\n", DEBUG);
+
       assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
 
       assertTrue(success);
@@ -221,6 +221,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
                   double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
                   simStillRunning = timeSpentSimulating < simulationRunTime;
 
+                  robotDataReceiver.updateRobotModel();
                   behavior.doControl();
                }
             }
@@ -231,16 +232,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
-      if (DEBUG)
-      {
-         SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
+      SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
 
       return ret;
    }
 
    private FramePose2d getCurrentMidFeetPose2d(ReferenceFrames referenceFrames)
    {
+      robotDataReceiver.updateRobotModel();
       referenceFrames.updateFrames();
       ReferenceFrame midFeetFrame = referenceFrames.getMidFeetZUpFrame();
 

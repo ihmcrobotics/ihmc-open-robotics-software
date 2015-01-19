@@ -185,7 +185,6 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
    private HeadOrientationPacket createHeadOrientationPacket(Vector3d axis, double rotationAngle)
    {
-
       AxisAngle4d desiredAxisAngle = new AxisAngle4d();
       desiredAxisAngle.set(axis, rotationAngle);
       Quat4d desiredHeadQuat = new Quat4d();
