@@ -12,11 +12,10 @@ import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
-public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements HeightMap
+public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements QuadTreeHeightMapInterface
 {
    private final ResolutionProvider constantResolution;
    private Octree octree;
@@ -459,7 +458,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       this.octree = octree;
    }
 
-   public void setHeighThreshold(float threshold)
+   public void setHeightThreshold(float threshold)
    {
       this.heightThreshold = threshold;
    }
