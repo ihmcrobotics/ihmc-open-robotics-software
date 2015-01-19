@@ -181,8 +181,7 @@ public class ScriptBehavior extends BehaviorInterface
             boolean isDone = behaviorState.isDone();
             if (isDone)
             {
-               if (DEBUG)
-                  SysoutTool.println(behaviorState.getBehavior().getName() + " is Done");
+               SysoutTool.println(behaviorState.getBehavior().getName() + " is Done", DEBUG);
             }
             return isDone;
          }
@@ -257,21 +256,30 @@ public class ScriptBehavior extends BehaviorInterface
    {
       if (scriptResourceStream != null && transformToWorld != null)
       {
-         if (DEBUG)
-            SysoutTool.println("Starting Importing " + scriptFileName);
+
+         SysoutTool.println("Starting Importing " + scriptFileName, DEBUG);
 
          this.childInputPackets = scriptEngine.getScriptObjects(scriptResourceStream);
 
+         int numberOfEndOfScriptCommands = 0;
          for (ScriptObject inputPacket : childInputPackets)
          {
-            if (DEBUG)
-               SysoutTool.println(" Importing child : " + inputPacket.toString() + " to script behavior");
+            SysoutTool.println(" Importing child : " + inputPacket.toString() + " to script behavior", DEBUG);
+            
+            if (inputPacket.getScriptObject() instanceof EndOfScriptCommand)
+            {
+               numberOfEndOfScriptCommands ++;
+            }
+         }
+         
+         if (numberOfEndOfScriptCommands != 1)
+         {
+            throw new RuntimeException("Number of EndOfScriptCommand() packets = " + numberOfEndOfScriptCommands + "!  Must equal one.");
          }
 
          this.behaviorOriginTransformToWorld = transformToWorld;
 
-         if (DEBUG)
-            SysoutTool.println("Finishing Importing " + scriptFileName);
+         SysoutTool.println("Finishing Importing " + scriptFileName, DEBUG);
 
          scriptIndex = 0;
          scriptStatus = ScriptBehaviorStatusEnum.SCRIPT_LOADED;
@@ -284,8 +292,8 @@ public class ScriptBehavior extends BehaviorInterface
       }
       else
       {
-         if (DEBUG)
-            SysoutTool.println("Script Resource Stream is null. Can't load script!");
+
+         SysoutTool.println("Script Resource Stream is null. Can't load script!", DEBUG);
          scriptImported.set(false);
       }
    }
@@ -315,8 +323,7 @@ public class ScriptBehavior extends BehaviorInterface
             scriptFinished.set(true);
             scriptStatus = ScriptBehaviorStatusEnum.FINISHED;
 
-            if (DEBUG)
-               System.out.println("End of script");
+            SysoutTool.println("End of script", DEBUG);
          }
          else
          {
@@ -326,8 +333,7 @@ public class ScriptBehavior extends BehaviorInterface
             PrimitiveBehaviorType behaviorType = getPrimitiveBehaviorType(inputPacket);
             requestedState.set(behaviorType);
 
-            if (DEBUG)
-               SysoutTool.println("Requesting Behavior State : " + behaviorType);
+            SysoutTool.println("Requesting Behavior State : " + behaviorType, DEBUG);
          }
       }
    }
@@ -479,8 +485,8 @@ public class ScriptBehavior extends BehaviorInterface
       }
       else
       {
-         if (DEBUG)
-            SysoutTool.println("FAILED TO SET BEHAVIOR INPUT");
+
+         SysoutTool.println("FAILED TO SET BEHAVIOR INPUT", DEBUG);
       }
    }
 

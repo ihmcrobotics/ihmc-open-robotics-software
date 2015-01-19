@@ -121,7 +121,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       robot.computeCenterOfMass(initialComPoint);
 
       double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
-      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 1.05 * ComHeightPacket.MIN_COM_HEIGHT, 0.95 * ComHeightPacket.MAX_COM_HEIGHT);
+      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 0.8 * ComHeightPacket.MIN_COM_HEIGHT, 0.8 * ComHeightPacket.MAX_COM_HEIGHT);
       ComHeightPacket randomComHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime); 
       
       comHeightBehavior.initialize();
