@@ -33,9 +33,11 @@ import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -47,6 +49,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -69,6 +72,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 
@@ -80,8 +84,6 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = false || createMovie;
-
-   private static final Vector3d PitchAxis = new Vector3d(0, 1, 0);
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -107,6 +109,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
    private ReferenceFrames referenceFrames;
+
+   private CapturePointUpdatable capturePointUpdatable;
+   private BooleanYoVariable yoDoubleSupport;
 
    @Before
    public void setUp()
@@ -141,6 +146,12 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       file = new File(ScriptEngineSettings.scriptSavingDirectory + fileName + ScriptEngineSettings.extension);
       System.out.println(file.getAbsolutePath());
+
+      CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
+      controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
+      capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(),
+            robot.getRobotsYoVariableRegistry());
+      yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
    }
 
    @After
@@ -193,10 +204,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private ScriptBehavior testScriptBehavior(double trajectoryTime) throws SimulationExceededMaximumTimeException, FileNotFoundException
    {
-      BooleanYoVariable doubleSupport = new BooleanYoVariable("doubleSupport", robot.getRobotsYoVariableRegistry());
-      doubleSupport.set(true);
-
-      final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, doubleSupport);
+      final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
       communicationBridge.attachGlobalListenerToController(scriptBehavior.getControllerGlobalPacketConsumer());
 
       InputStream inputStream = new FileInputStream(new File(file.getAbsolutePath()));
@@ -238,6 +246,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
                   simStillRunning = timeSpentSimulating < simulationRunTime;
 
                   behavior.doControl();
+                  
+                  capturePointUpdatable.update(yoTime.getDoubleValue());
                }
             }
          }
