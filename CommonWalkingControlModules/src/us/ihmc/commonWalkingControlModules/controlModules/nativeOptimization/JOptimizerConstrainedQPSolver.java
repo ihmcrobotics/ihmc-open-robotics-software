@@ -24,7 +24,7 @@ public class JOptimizerConstrainedQPSolver extends ConstrainedQPSolver
     *  Aeq x = beq,  
     */
    @Override
-   public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, 
+   public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, 
             DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F x, boolean initialize) throws NoConvergenceException
    {
       //forming problem
@@ -72,9 +72,10 @@ public class JOptimizerConstrainedQPSolver extends ConstrainedQPSolver
       }
       double[] xopt = opt.getOptimizationResponse().getSolution();
       System.arraycopy(xopt, 0, x0, 0, xopt.length);
+      return 0;
    }
    @Override
-   public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb,
+   public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb,
          DenseMatrix64F ub, DenseMatrix64F x, boolean initialize) throws NoConvergenceException
    {
       //TODO: automatically fold boxConstraints into inequality constraint

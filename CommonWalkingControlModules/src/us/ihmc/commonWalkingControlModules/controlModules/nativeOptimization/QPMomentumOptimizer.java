@@ -5,6 +5,17 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
+/*
+ *       [vd  ]'[ A' C A + Js' Ws Js + Lambda     0               ] [vd  ]  + 2 [vd  ]' [ -A' C b - Js' Ws ps          ]    +  b' C b + ps' Ws ps + Pprev' Wpsm Pprev + Ppavg' Wpcop Ppavg 
+ *       [rho ] [              0                Wp + Wpsm + Wpcop ] [rho ]      [rho ]  [-Wpsm Pprev - Wpcop Ppavg     ] 
+ *
+ *       min_x 0.5 x'Q x  + f'x  + g
+ *       st [-A QRho ] [vd  ] = [c ]
+ *          [Jp      ] [rho ] = [pp]
+ *        [0 -I] rho <= -rhoMin
+ */
+
+
 public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
 {
    static final int nPointsPerPlane = 4;

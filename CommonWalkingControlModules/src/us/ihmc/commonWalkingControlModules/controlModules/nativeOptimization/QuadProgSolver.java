@@ -57,14 +57,14 @@ public class QuadProgSolver extends ConstrainedQPSolver {
     }
 
     @Override
-    public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain,
+    public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain,
                       DenseMatrix64F bin, DenseMatrix64F x, boolean initialize)
             throws NoConvergenceException {
-        solve(Q, f, Aeq, beq, Ain, bin, null, null, x, initialize);
+        return solve(Q, f, Aeq, beq, Ain, bin, null, null, x, initialize);
     }
 
     @Override
-    public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain,
+    public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain,
                       DenseMatrix64F bin, DenseMatrix64F lb, DenseMatrix64F ub, DenseMatrix64F x, boolean initialize)
             throws NoConvergenceException {
 
@@ -74,6 +74,6 @@ public class QuadProgSolver extends ConstrainedQPSolver {
     	CommonOps.scale(-1, this.negAeq);
     	CommonOps.transpose(Ain, this.negAin);
     	CommonOps.scale(-1, this.negAin);
-    	qpWrapper.solve(Q, f, negAeq, beq, negAin, bin, x, initialize);
+    	return qpWrapper.solve(Q, f, negAeq, beq, negAin, bin, x, initialize);
     }
 }

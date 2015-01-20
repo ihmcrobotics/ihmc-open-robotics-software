@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
@@ -54,7 +56,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    public enum QPSolverFlavor
    {
       CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT, EIGEN_ACTIVESET_DIRECT_JNA, CQP_OASES_DIRECT, CQP_QUADPROG_DIRECT,
-      SIMPLE_ACTIVE_SET
+      SIMPLE_ACTIVE_SET, SIMPLE_ACTIVE_SET_NULL
    }
 
    ;
@@ -89,7 +91,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final IntegerYoVariable qpSolverIteration = new IntegerYoVariable("qpSolverInteration", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
-   private final DampedLeastSquaresSolver hardMotionConstraintSolver;
+   private final LinearSolver<DenseMatrix64F> hardMotionConstraintSolver;
 
    private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
    private final DenseMatrix64F bOriginal = new DenseMatrix64F(Momentum.SIZE, 1);
@@ -124,6 +126,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT_JNA, new ActiveSetQPMomentumOptimizer(nDoF, true));
       momentumOptimizers.put(QPSolverFlavor.CQP_OASES_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new OASESConstrainedQPSolver(registry)));
       momentumOptimizers.put(QPSolverFlavor.SIMPLE_ACTIVE_SET, new CQPMomentumBasedOptimizer(nDoF, new CompositeActiveSetQPSolver(registry)));
+      momentumOptimizers.put(QPSolverFlavor.SIMPLE_ACTIVE_SET_NULL, new CQPMomentumBasedOptimizer(nDoF, new CompositeActiveSetQPSolver(registry)));
       momentumOptimizers.put(QPSolverFlavor.CQP_QUADPROG_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new QuadProgSolver(registry)));
 
 //    momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
@@ -210,6 +213,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          case CVX_NULL :
          case EIGEN_ACTIVESET_NULL :
          case EIGEN_NULL :
+         case SIMPLE_ACTIVE_SET_NULL:
             return compute(contactStates, upcomingSupportLeg, true);
 
          default :
@@ -235,7 +239,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
 
-      hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
+//      hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizer.reset();
 
       primaryMotionConstraintHandler.compute();

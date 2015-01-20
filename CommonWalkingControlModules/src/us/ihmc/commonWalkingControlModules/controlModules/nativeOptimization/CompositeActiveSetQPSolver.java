@@ -14,6 +14,7 @@ public class CompositeActiveSetQPSolver extends ConstrainedQPSolver {
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver(10);
    ConstrainedQPSolver fullSolver = new QuadProgSolver(registry);
+//   ConstrainedQPSolver fullSolver = new OASESConstrainedQPSolver(registry);
    boolean[] linearInequalityActiveSet;
 
    LongYoVariable fullSolverCount = new LongYoVariable("fullSolverCount", registry);
@@ -21,12 +22,12 @@ public class CompositeActiveSetQPSolver extends ConstrainedQPSolver {
    
    public CompositeActiveSetQPSolver(YoVariableRegistry parentRegistry)
    {
-      parentRegistry.addChild(registry);
+      //parentRegistry.addChild(registry);
    }
    
    
 	@Override
-	public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq,
+	public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq,
 			DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin,
 			DenseMatrix64F x, boolean initialize) throws NoConvergenceException {
 	   
@@ -50,11 +51,13 @@ public class CompositeActiveSetQPSolver extends ConstrainedQPSolver {
 	      Arrays.fill(linearInequalityActiveSet, false);
 	      fullSolver.solve(Q, f, Aeq, beq, Ain, bin, x, initialize);
 	   }
+	   
+	   return iter;
 		
 	}
 
 	@Override
-	public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq,
+	public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq,
 			DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin,
 			DenseMatrix64F lb, DenseMatrix64F ub, DenseMatrix64F x,
 			boolean initialize) throws NoConvergenceException {

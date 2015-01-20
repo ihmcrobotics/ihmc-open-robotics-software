@@ -34,6 +34,7 @@ public class SimpleActiveSetQPStandaloneSolver
    {
       this.maxIterations = maxIterations;
    }
+   
 
    public int solve(DenseMatrix64F quadraticCostGMatrix, DenseMatrix64F quadraticCostFVector, DenseMatrix64F linearEqualityConstraintA,
                     DenseMatrix64F linearEqualityConstraintB, DenseMatrix64F linearInequalityConstraintA, DenseMatrix64F linearInequalityConstraintB,
@@ -43,16 +44,31 @@ public class SimpleActiveSetQPStandaloneSolver
       int iterations = 0;
 
       // precomputed constants over iterations
-      wInverse.reshape(quadraticCostGMatrix.numRows, quadraticCostGMatrix.numCols);
-      linearSolver.setA(quadraticCostGMatrix);
-      linearSolver.invert(wInverse);
-//      CommonOps.invert(quadraticCostGMatrix, wInverse);    // can be sped up as w is block-diagonal
+      if(quadraticCostGMatrix instanceof BlockDiagSquareMatrix)
+      {
+              if(!(wInverse instanceof BlockDiagSquareMatrix))
+              {
+                   wInverse = new BlockDiagSquareMatrix(((BlockDiagSquareMatrix) quadraticCostGMatrix).blockSizes);
+              }
+              ((BlockDiagSquareMatrix)quadraticCostGMatrix).packInverse(linearSolver, (BlockDiagSquareMatrix)wInverse);
+
+      }
+      else
+      {
+              //CommonOps.invert(quadraticCostGMatrix, wInverse);    //this is quite slow
+              wInverse.reshape(quadraticCostGMatrix.numRows, quadraticCostGMatrix.numCols);
+              linearSolver.setA(quadraticCostGMatrix);
+              linearSolver.invert(wInverse);
+      }
 
       gVector.reshape(quadraticCostFVector.numRows, quadraticCostFVector.numCols);
       gVector.set(quadraticCostFVector);
 
       minusWInverseG.reshape(wInverse.numRows, 1);
-      CommonOps.mult(-1, wInverse, gVector, minusWInverseG);
+      if(wInverse instanceof BlockDiagSquareMatrix)
+               ((BlockDiagSquareMatrix) wInverse).mult(-1, gVector, minusWInverseG);
+      else
+              CommonOps.mult(-1, wInverse, gVector, minusWInverseG);
 
       int linearEqualityConstraintsSize = 0;
       if (linearEqualityConstraintA != null)
@@ -89,11 +105,21 @@ public class SimpleActiveSetQPStandaloneSolver
 
             // wInverse * R'
             wInverseRTranspose.reshape(numberOfVariablesToSolve, activeConstraintSize);
-            CommonOps.multTransB(wInverse, rMatrix, wInverseRTranspose);
+            if(wInverse instanceof BlockDiagSquareMatrix)
+            {
+              ((BlockDiagSquareMatrix)wInverse).multTransB(rMatrix, wInverseRTranspose);
+            }
+            else
+            {
+               CommonOps.multTransB(wInverse, rMatrix, wInverseRTranspose);
+            }
 
             // LHS
             leftSide.reshape(activeConstraintSize, activeConstraintSize);
             CommonOps.mult(-1, rMatrix, wInverseRTranspose, leftSide);
+            
+            if(activeInequalityConstraintSize>0)
+               System.out.println(activeInequalityConstraintSize);;
 
             // RHS
             rightSide.reshape(activeConstraintSize, 1);
