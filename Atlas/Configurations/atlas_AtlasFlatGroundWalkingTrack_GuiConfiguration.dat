@@ -18,13 +18,7 @@
 <Title>
 Tab
 </Title>
-<Entry Boxes></Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-Tab
-</Title>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>walk</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -43,15 +37,15 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>7.036312811018086</Camera X>
- <Camera Y>-12.939889403082518</Camera Y>
- <Camera Z>2.1253167923642926</Camera Z>
+ <Camera X>-1.5725777297985788</Camera X>
+ <Camera Y>17.674085604859375</Camera Y>
+ <Camera Z>3.813327890385042</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
  <Position Z>0.0</Position Z>
 <Dolly Booleans>
-<Dolly>false</Dolly>
+<Dolly>true</Dolly>
 <Dolly X>true</Dolly X>
 <Dolly Y>true</Dolly Y>
 <Dolly Z>true</Dolly Z>
@@ -62,15 +56,15 @@ Plotter,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>false</Track>
+<Track>true</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>false</Track Z>
+<Track Z>true</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>-3.572577729798579</Fix X>
+<Fix Y>5.674085604859376</Fix Y>
+<Fix Z>1.1807478328615568</Fix Z>
 </Fix Position>
 </Canvas 1>
