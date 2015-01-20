@@ -8,7 +8,8 @@ public enum LogSettings
    SIMULATION(false),
    BEHAVIOR(false), 
    EXO_X1A(false),
-   EXO_HOPPER(false);
+   EXO_HOPPER(false), 
+   ETHERCAT(false);
 
    
    private final boolean log;
