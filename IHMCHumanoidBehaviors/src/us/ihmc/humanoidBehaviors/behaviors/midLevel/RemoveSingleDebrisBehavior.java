@@ -38,7 +38,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
    private final FullRobotModel fullRobotModel;
 
-   private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.75; //0.85
+   private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.65; //0.85
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, DoubleYoVariable yoTime,WalkingControllerParameters walkingControllerParameters)
