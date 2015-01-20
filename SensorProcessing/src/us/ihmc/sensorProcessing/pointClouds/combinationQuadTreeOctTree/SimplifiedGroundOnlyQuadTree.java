@@ -1,9 +1,12 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.quadTree.CleanQuadTreePutResult;
@@ -12,9 +15,12 @@ import us.ihmc.utilities.math.geometry.InclusionFunction;
 
 public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements QuadTreeHeightMapInterface
 {
-   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold)
+   private final Random random = new Random(1776L);
+   private final double noiseAmplitude = 0.0; //0.02;
+   
+   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise)
    {
-      super(minX, minY, maxX, maxY, resolution, heightThreshold);
+      super(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise);
    }
 
    @Override
@@ -26,8 +32,22 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    @Override
    public boolean addPoint(double x, double y, double z)
    {
-      CleanQuadTreePutResult result = put(x, y, z);
-
+      double noisyX = x + RandomTools.generateRandomDouble(random, noiseAmplitude);
+      double noisyY = y + RandomTools.generateRandomDouble(random, noiseAmplitude);
+      double noisyZ = z + RandomTools.generateRandomDouble(random, noiseAmplitude);
+      
+      CleanQuadTreePutResult result = put(noisyX, noisyY, noisyZ);
+      return result.treeChanged;
+   }
+   
+   @Override
+   public boolean addToQuadtree(double x, double y, double z)
+   {
+      double noisyX = x + RandomTools.generateRandomDouble(random, noiseAmplitude);
+      double noisyY = y + RandomTools.generateRandomDouble(random, noiseAmplitude);
+      double noisyZ = z + RandomTools.generateRandomDouble(random, noiseAmplitude);
+      
+      CleanQuadTreePutResult result = this.put(noisyX, noisyY, noisyZ);
       return result.treeChanged;
    }
 
@@ -44,14 +64,25 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    @Override
    public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
    {
-      return this.getAllPointsWithinArea(xCenter, yCenter, xExtent, yExtent);
+      return super.getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
    }
 
    @Override
    public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent,
            InclusionFunction<Point3d> maskFunctionAboutCenter)
    {
-      return this.getAllPointsWithinArea(xCenter, yCenter, xExtent, yExtent, maskFunctionAboutCenter);
+     ArrayList<Point3d> pointsAtGridResolution = super.getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
+     ArrayList<Point3d> filteredList = new ArrayList<Point3d>();
+     
+     for (Point3d point : pointsAtGridResolution)
+     {
+        if (maskFunctionAboutCenter.isIncluded(point))
+        {
+           filteredList.add(point);
+        }
+     }
+
+      return filteredList;
    }
 
    @Override
@@ -84,16 +115,9 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    @Override
    public void addListener(HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> jmeGroundONlyQuadTreeVisualizer)
    {
-      // TODO Auto-generated method stub
-
+//      this.listeners.add(jmeGroundONlyQuadTreeVisualizer);
    }
-
-   @Override
-   public boolean addToQuadtree(double x, double y, double z)
-   {
-	   CleanQuadTreePutResult result = this.put(x, y, z);
-	   return result.treeChanged;
-   }
+ 
 
   
    @Override
@@ -102,4 +126,5 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
 	   // TODO Auto-generated method stub
 
    }
+   
 }

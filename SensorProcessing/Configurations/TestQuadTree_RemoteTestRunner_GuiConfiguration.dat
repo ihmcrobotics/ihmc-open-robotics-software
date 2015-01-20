@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.FootstepVisualizerRobot.t</Variables>
+		<Variables>root.TestQuadTree.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -31,9 +31,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-3.500641123989466</Camera X>
- <Camera Y>2.000101962611148</Camera Y>
- <Camera Z>6.0</Camera Z>
+ <Camera X>-0.06732416588591543</Camera X>
+ <Camera Y>-3.4465589738400224</Camera Y>
+ <Camera Z>2.012298060708193</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -57,8 +57,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-3.500641123989466</Fix X>
-<Fix Y>3.500101962611148</Fix Y>
-<Fix Z>0.0</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>

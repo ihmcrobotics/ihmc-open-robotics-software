@@ -12,6 +12,7 @@ import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeListener;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
@@ -471,5 +472,10 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    public void setUpdateQuadtree(boolean updateQuadtree)
    {
       this.updateQuadtree = updateQuadtree;
+   }
+
+   @Override
+   public void addQuadTreeListener(QuadTreeListener jmeGroundONlyQuadTreeVisualizer)
+   {      
    }
 }

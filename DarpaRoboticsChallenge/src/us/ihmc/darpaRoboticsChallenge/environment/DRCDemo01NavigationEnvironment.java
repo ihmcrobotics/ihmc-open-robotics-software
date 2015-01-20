@@ -65,12 +65,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private static final boolean SHOW_FULL_TESTBED = false;
 
-   enum BLOCKTYPE {FLAT, FLATSKEW, UPRIGHTSKEW, ANGLED}
-
-   ;
+   enum BLOCKTYPE {FLAT, FLATSKEW, UPRIGHTSKEW, ANGLED};
 
    private boolean addLimboBar = false;
-
+   private boolean addCeiling = false;
+   
    // private static final double FLOOR_THICKNESS = 0.001;
 
    public DRCDemo01NavigationEnvironment()
@@ -98,6 +97,16 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       if (addLimboBar)
          addLimboBar(combinedTerrainObject3D);
 
+      
+      if (addCeiling)
+      {
+         Graphics3DObject ceilingGraphics = new Graphics3DObject();
+         ceilingGraphics.translate(new Vector3d(0.0, 0.0, 3.0));
+         ceilingGraphics.addCube(30.0, 30.0, 0.1);
+         combinedTerrainObject3D.addStaticLinkGraphics(ceilingGraphics);
+
+      }
+      
       // testRotatableRampsSetupForGraphicsAndCollision();
       // addFalseStair();
 
