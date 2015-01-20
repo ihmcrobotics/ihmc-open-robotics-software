@@ -15,7 +15,7 @@
  *    
  *    Written by Jesper Smith with assistance from IHMC team members
  */
-package us.ihmc.loaders.jme;
+package us.ihmc.graphics3DAdapter.jme.loaders;
 
 import static org.junit.Assert.*;
 
@@ -24,6 +24,12 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.junit.Test;
+
+import us.ihmc.loaders.jme.ASCIISTLReader;
+import us.ihmc.loaders.jme.BinarySTLReader;
+import us.ihmc.loaders.jme.STLReader;
+import us.ihmc.loaders.jme.STLReaderFactory;
+import us.ihmc.loaders.jme.Triangle;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.
