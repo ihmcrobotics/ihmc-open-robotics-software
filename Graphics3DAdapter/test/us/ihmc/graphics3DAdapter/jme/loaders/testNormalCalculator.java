@@ -15,7 +15,7 @@
  *    
  *    Written by Jesper Smith with assistance from IHMC team members
  */
-package us.ihmc.loaders.jme;
+package us.ihmc.graphics3DAdapter.jme.loaders;
 
 import static org.junit.Assert.assertTrue;
 
@@ -23,6 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
+
+import us.ihmc.loaders.jme.NormalCalculator;
+import us.ihmc.loaders.jme.STLReader;
+import us.ihmc.loaders.jme.STLReaderFactory;
+import us.ihmc.loaders.jme.Triangle;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
