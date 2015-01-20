@@ -35,7 +35,7 @@ import us.ihmc.loaders.jme.Triangle;
  * @author Jesper Smith
  *
  */
-public class testNormalCalculator
+public class NormalCalculatorTest
 {
    @Test(timeout=300000)
    public void testNormalsBasedOnTeapot() throws IOException

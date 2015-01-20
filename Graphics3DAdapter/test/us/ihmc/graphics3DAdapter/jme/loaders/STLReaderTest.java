@@ -40,7 +40,7 @@ import us.ihmc.loaders.jme.Triangle;
  * @author Jesper Smith
  *
  */
-public class testSTLReader
+public class STLReaderTest
 {
    @Test(timeout=300000)
    public void testASCIILoad() throws IOException
