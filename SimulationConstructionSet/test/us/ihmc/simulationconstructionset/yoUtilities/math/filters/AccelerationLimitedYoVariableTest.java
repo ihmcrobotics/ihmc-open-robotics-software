@@ -1,4 +1,4 @@
-package us.ihmc.yoUtilities.math.filters;
+package us.ihmc.simulationconstructionset.yoUtilities.math.filters;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
