@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
@@ -21,6 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 

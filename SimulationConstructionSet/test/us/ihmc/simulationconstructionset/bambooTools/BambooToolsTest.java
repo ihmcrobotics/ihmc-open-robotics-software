@@ -1,4 +1,4 @@
-package us.ihmc.bambooTools;
+package us.ihmc.simulationconstructionset.bambooTools;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.junit.Test;
+
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class BambooToolsTest
 {

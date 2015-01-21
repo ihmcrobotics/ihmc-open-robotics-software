@@ -4,10 +4,9 @@ import org.junit.Assume;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 
-import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest

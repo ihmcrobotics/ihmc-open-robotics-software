@@ -3,9 +3,9 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCWallWorldTest;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasWallWorldTest extends DRCWallWorldTest
 {

@@ -1,4 +1,4 @@
-package us.ihmc.bambooTools;
+package us.ihmc.simulationconstructionset.bambooTools;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -23,9 +23,9 @@ import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
-import us.ihmc.bambooTools.youtube.YouTubeCredentials;
-import us.ihmc.bambooTools.youtube.YouTubeUploader;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.youtube.YouTubeCredentials;
+import us.ihmc.simulationconstructionset.bambooTools.youtube.YouTubeUploader;
 import us.ihmc.utilities.DateTools;
 import us.ihmc.utilities.gui.GUIMessageFrame;
 import us.ihmc.utilities.operatingSystem.OperatingSystemTools;

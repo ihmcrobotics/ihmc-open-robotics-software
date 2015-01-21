@@ -2,9 +2,9 @@ package us.ihmc.atlas.controllers;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotBasedFootstepGeneratorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasFootstepGeneratorTest extends DRCRobotBasedFootstepGeneratorTest
 {
