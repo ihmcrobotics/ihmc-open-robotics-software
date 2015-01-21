@@ -3,9 +3,9 @@ package us.ihmc.atlas.roughTerrainWalking;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.DRCFootExplorationTest;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasFootExplorationTest extends DRCFootExplorationTest
 {
