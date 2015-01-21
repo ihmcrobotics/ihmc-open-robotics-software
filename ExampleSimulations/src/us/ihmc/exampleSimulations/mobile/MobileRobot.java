@@ -13,7 +13,7 @@ import javax.vecmath.Vector3d;
 
 
 /**
- * MobileRobot is a representation of a child�s mobile toy that uses a tree structure of 21 gimbal
+ * MobileRobot is a representation of a child's mobile toy that uses a tree structure of 21 gimbal
  * joints (63 degrees of freedom total).
  */
 public class MobileRobot extends Robot
