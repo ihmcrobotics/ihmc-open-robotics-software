@@ -3,6 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -14,6 +17,8 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableSelectable
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -23,20 +28,41 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 
    private final String debrisName = "Debris";
 
-   private final double debrisLength = 0.1016;
-   private final double debrisWidth = 0.0508;
-   private final double debrisHeight = 0.9144;
+   private final double debrisDepth = 0.0508;
+   private final double debrisWidth = 0.1016;
+   private final double debrisLength = 0.9144;
    private final double debrisMass = 1.0;
 
    public DRCDebrisEnvironment()
    {
+      double forceVectorScale = 1.0 / 50.0;
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
 
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+      
+      combinedTerrainObject.addTerrainObject(createSupports(forceVectorScale));
 
-      double forceVectorScale = 1.0 / 50.0;
       createBoxes(forceVectorScale, combinedTerrainObject);
+      
+   }
 
+   private CombinedTerrainObject3D createSupports(double forceVectorScale)
+   {
+      CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D("Supports");
+
+//      debrisRobots.add(createDebris(2.0, 0.1, 0.5, Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(10.0)));
+      combinedTerrainObject3D.addBox(1.8, 0.6, 2.2, 0.4 , 0.47, YoAppearance.Chocolate());
+      combinedTerrainObject3D.addBox(1.8, -0.4, 2.2, -0.6 , 0.47, YoAppearance.Yellow());
+      
+      Quat4d quat = new Quat4d();
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(quat, Math.toRadians(12), 0.0, 0.0);
+      Vector3d vector = new Vector3d(3.29,0.3,0.6);
+      
+      RigidBodyTransform configuration = new RigidBodyTransform(quat, vector);
+      combinedTerrainObject3D.addRotatableBox(configuration , 0.2, 0.6, 1.2, YoAppearance.Brown());
+      
+      
+      return combinedTerrainObject3D;
    }
 
    private CombinedTerrainObject3D setUpGround(String name)
@@ -44,23 +70,16 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, YoAppearance.DarkBlue());
-
+      
       return combinedTerrainObject;
    }
 
-//   ContactableSelectableBoxRobot table;
    private void createBoxes(double forceVectorScale, GroundProfile3D groundProfile)
    {
-      debrisRobots.add(createDebris(1.0, -0.5, debrisHeight /2.0, 0.0, 0.0, 0.0));
-      debrisRobots.add(createDebris(1.0, 0.5, debrisHeight / 2.0, 0.0, 0.0, 0.0));
-      debrisRobots.add(createDebris(1.5, -0.5, debrisHeight / 2.0, 0.0, 0.0, 0.0));
-      debrisRobots.add(createDebris(1.5, 0.5, debrisHeight / 2.0, 0.0, 0.0, 0.0));
+      debrisRobots.add(createDebris(1.0, -0.4, debrisLength / 2.0, 0.0, 0.0, 0.0));
+      debrisRobots.add(createDebris(2.0, 0.0, 0.5, Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(10.0)));
+      debrisRobots.add(createDebris(3.0, 0.3, debrisLength / 2.0 - 0.02, Math.toRadians(12.0), Math.toRadians(20.0), 0.0));
 
-//      table = ContactableSelectableBoxRobot.createContactable2By4Robot("Table", 0.55, 1.05, 0.05, 3.0);
-//      table.setPosition(1.25, 0.0, debrisHeight + 0.025);
-//      table.setYawPitchRoll(0.0, 0.0, 0.0);
-//      debrisRobots.add(table);
-    
       for (int i = 0; i < debrisRobots.size(); i++)
       {
          ContactableSelectableBoxRobot debrisRobot = debrisRobots.get(i);
@@ -74,7 +93,8 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 
    public ContactableSelectableBoxRobot createDebris(double x, double y, double z, double yaw, double pitch, double roll)
    {
-      ContactableSelectableBoxRobot debris = ContactableSelectableBoxRobot.createContactable2By4Robot(debrisName + String.valueOf(id++), debrisLength, debrisWidth, debrisHeight, debrisMass);
+      ContactableSelectableBoxRobot debris = ContactableSelectableBoxRobot.createContactable2By4Robot(debrisName + String.valueOf(id++), debrisDepth,
+            debrisWidth, debrisLength, debrisMass);
       debris.setPosition(x, y, z);
       debris.setYawPitchRoll(yaw, pitch, roll);
 
@@ -120,11 +140,11 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       debrisRobots.get(0).setController(contactController);
 
       // add contact controller to any robot so it gets called
-//      ContactController contactController2 = new ContactController("2");
-//      contactController2.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
-//      contactController2.addContactPoints(table.getAllGroundContactPoints());
-//      contactController2.addContactables(debrisRobots.subList(0, debrisRobots.size()-1));
-//      table.setController(contactController2);
+      //      ContactController contactController2 = new ContactController("2");
+      //      contactController2.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
+      //      contactController2.addContactPoints(table.getAllGroundContactPoints());
+      //      contactController2.addContactables(debrisRobots.subList(0, debrisRobots.size()-1));
+      //      table.setController(contactController2);
    }
 
    @Override
