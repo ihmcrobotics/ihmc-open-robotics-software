@@ -1,4 +1,4 @@
-package us.ihmc.TestSimulations;
+package us.ihmc.simulationconstructionset.testSimulations;
 
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
