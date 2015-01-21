@@ -1,8 +1,7 @@
-package us.ihmc.simulationDispatcher.client;
-
-import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationDescription;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
 import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationDescription;
 
 public class TestDescription implements RemoteSimulationDescription
 {

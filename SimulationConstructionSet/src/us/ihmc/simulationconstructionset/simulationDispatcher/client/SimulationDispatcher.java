@@ -1,4 +1,4 @@
-package us.ihmc.simulationDispatcher.client;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -9,8 +9,8 @@ import java.rmi.registry.LocateRegistry;
 import java.security.Permission;
 import java.util.ArrayList;
 
-import us.ihmc.simulationDispatcher.client.gui.SimulationDispatcherGUI;
-import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.gui.SimulationDispatcherGUI;
+import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 public class SimulationDispatcher implements Runnable
 {

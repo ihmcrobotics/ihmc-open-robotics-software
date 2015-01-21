@@ -1,4 +1,4 @@
-package us.ihmc.simulationDispatcher.client.gui;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
 
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -9,9 +9,9 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-import us.ihmc.simulationDispatcher.client.DispatchHost;
-import us.ihmc.simulationDispatcher.client.DispatchHostList;
-import us.ihmc.simulationDispatcher.client.HostsChangedListener;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHost;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.HostsChangedListener;
 
 
 public abstract class DispatchHostPanel extends JPanel implements KeyListener, MouseListener, HostsChangedListener, Runnable
