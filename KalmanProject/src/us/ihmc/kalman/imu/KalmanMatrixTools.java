@@ -1,4 +1,4 @@
-package us.ihmc.IMUKalmanFilter;
+package us.ihmc.kalman.imu;
 
 /**
  * <p>Title: </p>
