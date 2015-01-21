@@ -1,4 +1,4 @@
-package us.ihmc.kalman;
+package us.ihmc.kalman.imu;
 
 import java.util.Random;
 

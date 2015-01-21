@@ -1,4 +1,4 @@
-package us.ihmc.kalman.imu.TestCases;
+package us.ihmc.kalman.imu.testCases;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
