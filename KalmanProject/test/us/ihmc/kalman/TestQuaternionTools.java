@@ -2,8 +2,8 @@ package us.ihmc.kalman;
 
 import java.util.Random;
 
-import us.ihmc.IMUKalmanFilter.FullIMUKalmanFilter;
-import us.ihmc.IMUKalmanFilter.QuaternionTools;
+import us.ihmc.kalman.imu.FullIMUKalmanFilter;
+import us.ihmc.kalman.imu.QuaternionTools;
 import junit.framework.TestCase;
 import Jama.Matrix;
 

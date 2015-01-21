@@ -1,8 +1,8 @@
 package us.ihmc.kalman;
 
 import junit.framework.TestCase;
-import us.ihmc.IMUKalmanFilter.QuaternionBasedArrayFullIMUKalmanFilter;
-import us.ihmc.IMUKalmanFilter.QuaternionBasedJamaFullIMUKalmanFilter;
+import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
+import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
 
 public class KalmanFilterComparison extends TestCase
 {
