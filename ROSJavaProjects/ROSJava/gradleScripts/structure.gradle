@@ -1,28 +1,30 @@
 String baseDir = getProjectDir()
-new File(baseDir + File.separator + 'src').mkdir()
+
+new File(baseDir + File.separator + 'src/main/java').mkdir()
+new File(baseDir + File.separator + 'src/test/java').mkdir()
 new File(baseDir + File.separator + 'test').mkdir()
-new File(baseDir + File.separator + 'src/main/resources').mkdir()
 new File(baseDir + File.separator + 'gradleScripts').mkdir()
 new File(baseDir + File.separator + 'gradleScripts' + File.separator + 'dependencies.gradle').createNewFile()
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java']
+sourceSets
+{
+    main
+    {
+        java
+        {
+            srcDirs = ['src/main/java', 'test']
         }
 
-        resources {
-            srcDirs = ['src/main/resources']
+        resources
+        {
         }
     }
 
-    test {
-        java {
+    test
+    {
+        java
+        {
             srcDirs = ['src/test/java']
-        }
-        
-        resources {
-            srcDirs = ['test']
         }
     }
 }
