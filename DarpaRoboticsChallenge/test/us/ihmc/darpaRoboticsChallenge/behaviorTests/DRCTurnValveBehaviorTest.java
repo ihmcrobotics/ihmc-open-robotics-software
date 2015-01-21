@@ -52,6 +52,7 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -146,7 +147,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    @After
    public void destroySimulationAndRecycleMemory()
    {
-
+      ThreadTools.sleepForever();
       if (drcSimulationTestHelper != null)
       {
          drcSimulationTestHelper.destroySimulation();
