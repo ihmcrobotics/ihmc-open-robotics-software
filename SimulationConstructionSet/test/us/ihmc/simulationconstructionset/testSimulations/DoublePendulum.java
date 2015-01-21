@@ -1,4 +1,4 @@
-package us.ihmc.TestSimulations;
+package us.ihmc.simulationconstructionset.testSimulations;
 
 import javax.vecmath.Vector3d;
 

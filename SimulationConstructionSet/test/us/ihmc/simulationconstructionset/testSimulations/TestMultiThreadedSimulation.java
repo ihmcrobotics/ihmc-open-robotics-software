@@ -1,4 +1,4 @@
-package us.ihmc.TestSimulations;
+package us.ihmc.simulationconstructionset.testSimulations;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
