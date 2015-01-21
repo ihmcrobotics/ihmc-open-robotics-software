@@ -64,7 +64,7 @@ public class Graphics3DNode
 
    public synchronized void setTransform(RigidBodyTransform transform)
    {
-      assert(!RotationFunctions.isNaNorInf(transform));
+//      assert(!RotationFunctions.isNaNorInf(transform));
       this.transform.set(transform);
    }
 
