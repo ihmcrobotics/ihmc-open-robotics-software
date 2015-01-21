@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie;
 
-import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 {
