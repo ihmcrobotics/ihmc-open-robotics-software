@@ -37,8 +37,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
       this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray);
    }
    
-   
-   /*
+   /**
    @Test
    public void testRightHandIn3P2RMode()
    {
@@ -52,7 +51,20 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.LEFT);
       this.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray);
    }
-**/
+   
+   @Test
+   public void testRightHandIn3P3RMode(){
+      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.RIGHT);
+      this.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray);
+   }
+   
+   @Test
+   public void testLeftHandIn3P3RMode(){
+      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.LEFT);
+      this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray);
+   }
+
+   **/
    public void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize)
    {
       for (RobotSide robotSide : RobotSide.values)
