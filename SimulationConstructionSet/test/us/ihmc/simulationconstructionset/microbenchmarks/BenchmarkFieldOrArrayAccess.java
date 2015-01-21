@@ -1,4 +1,4 @@
-package us.ihmc.microbenchmarks;
+package us.ihmc.simulationconstructionset.microbenchmarks;
 
 import java.util.ArrayList;
 import java.util.Collections;
