@@ -2,7 +2,6 @@ evaluationDependsOn(':Planning')
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
-    compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.26.+'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     
     //ejml core, complex, and equation
