@@ -38,6 +38,8 @@ dependencies {
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
 	
+	runtime project(':IHMCHumanoidOperatorInterface')
+	
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
 }
