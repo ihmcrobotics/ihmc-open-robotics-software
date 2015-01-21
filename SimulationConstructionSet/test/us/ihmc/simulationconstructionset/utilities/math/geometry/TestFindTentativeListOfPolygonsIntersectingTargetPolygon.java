@@ -1,4 +1,4 @@
-package us.ihmc.utilities.math.geometry;
+package us.ihmc.simulationconstructionset.utilities.math.geometry;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,8 +15,12 @@ import org.junit.Test;
 
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PolygonArtifact;
-
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.utilities.math.geometry.BoundingBoxKDTree2D;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2dIntersectionSetCalculator;
+import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 
 /**
  * <p>Title: </p>
