@@ -27,12 +27,17 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
 
    public DRCValveEnvironment()
    {
+      this(0.5, 0.0, 1.0);
+   }
+   
+   public DRCValveEnvironment(double valveX, double valveY, double valveZ)
+   {
       double forceVectorScale = 1.0 / 50.0;
 
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
-      valveRobot.add(createValve());
+      valveRobot.add(createValve(valveX, valveY, valveZ));
 
       for (int i = 0; i < valveRobot.size(); i++)
       {
@@ -41,11 +46,11 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
          valve.createAvailableContactPoints(1, 30, forceVectorScale, true);
       }
    }
-
-   private ContactableValveRobot createValve()
+   
+   private ContactableValveRobot createValve(double x, double y, double z)
    {
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
-      Point3d position = new Point3d(0.5, 0.0, 1.0);
+      Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(0), Math.toRadians(0), Math.toRadians(0));
