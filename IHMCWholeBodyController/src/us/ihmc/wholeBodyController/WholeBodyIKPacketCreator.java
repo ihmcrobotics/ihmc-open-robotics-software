@@ -76,10 +76,10 @@ public class WholeBodyIKPacketCreator
    {
       RigidBodyTransform pelvisPose = pelvisReferenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Quat4d rotation = new Quat4d();
-      pelvisPose.getRotation(rotation);
-      Point3d translation = new Point3d();
-      pelvisPose.transform(translation);
-      return new PelvisPosePacket(translation, rotation, trajectoryTime);
+      Vector3d translation = new Vector3d();
+      pelvisPose.get (rotation, translation );
+
+      return new PelvisPosePacket(new Point3d(translation), rotation, trajectoryTime);
    }
 
    private HandPosePacket createHandPosePackets(RobotSide robotSide, double trajectoryTime)
