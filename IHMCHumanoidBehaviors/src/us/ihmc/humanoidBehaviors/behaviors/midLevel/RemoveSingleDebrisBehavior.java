@@ -23,7 +23,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 {
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
 
-   private final GraspObjectBehavior graspPieceOfDebris;
+   private final GraspPieceOfDebrisBehavior graspPieceOfDebris;
    private final DropDebrisBehavior dropPieceOfDebris;
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable haveInputsBeenSet;
@@ -47,7 +47,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
 
-      graspPieceOfDebris = new GraspObjectBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       walkCloseToObject = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, walkingControllerParameters);
 
