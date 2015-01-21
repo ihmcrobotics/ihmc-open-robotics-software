@@ -1,4 +1,4 @@
-package us.ihmc.kalman.imu.TestCases;
+package us.ihmc.kalman.imu.testCases;
 
 import java.util.Random;
 
