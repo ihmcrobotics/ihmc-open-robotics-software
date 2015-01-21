@@ -256,7 +256,6 @@ public class ScriptBehavior extends BehaviorInterface
    {
       if (scriptResourceStream != null && transformToWorld != null)
       {
-
          SysoutTool.println("Starting Importing " + scriptFileName, DEBUG);
 
          this.childInputPackets = scriptEngine.getScriptObjects(scriptResourceStream);
@@ -403,7 +402,7 @@ public class ScriptBehavior extends BehaviorInterface
       return ret;
    }
 
-   public void setChildBehaviorInput(ScriptObject inputPacket)
+   private void setChildBehaviorInput(ScriptObject inputPacket)
    {
       inputPacket.applyTransform(behaviorOriginTransformToWorld);
 
