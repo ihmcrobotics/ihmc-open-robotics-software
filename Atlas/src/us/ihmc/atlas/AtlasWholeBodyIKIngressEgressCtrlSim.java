@@ -38,7 +38,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
 {
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullRobotModel actualFullRobotModel;
    private final KryoLocalPacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<ReferenceFrame> desiredReferenceFrameList = new ArrayList<ReferenceFrame>();
@@ -48,21 +48,23 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
    private final YoGraphicShape yoGraphicsShape;
-   private final DoubleYoVariable hik_x_des, hik_y_des, hik_z_des;
+//   private final DoubleYoVariable hik_x_des, hik_y_des, hik_z_des;
    private final boolean random = false;
    private final double ERROR_DISTANCE_TOLERANCE = 0.03;
+   private SDFFullRobotModel desiredFullRobotModel;
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws IOException
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
       this.registry = hikIngEgCtrlSim.getControllerFactory().getRegistry();
-      hik_x_des = new DoubleYoVariable("hik_x_des", registry);
-      hik_y_des = new DoubleYoVariable("hik_y_des", registry);
-      hik_z_des = new DoubleYoVariable("hik_z_des", registry);
-      hik_x_des.set(0.3908);
-      hik_y_des.set(-0.3445);
-      hik_z_des.set(0.6438);
+//      hik_x_des = new DoubleYoVariable("hik_x_des", registry);
+//      hik_y_des = new DoubleYoVariable("hik_y_des", registry);
+//      hik_z_des = new DoubleYoVariable("hik_z_des", registry);
+//      hik_x_des.set(0.3908);
+//      hik_y_des.set(-0.3445);
+//      hik_z_des.set(0.6438);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addSphere(0.05, YoAppearance.Blue());
       framePoint = new YoFramePoint("dontCarePoint", ReferenceFrame.getWorldFrame(), registry);
@@ -70,9 +72,9 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       yoGraphicsShape = new YoGraphicShape("dontCareMarker", linkGraphics, framePoint, frameOrientation, 1.0);
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShape);
       hikIngEgCtrlSim.getDRCSimulation().start();
-      this.fullRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
+      this.actualFullRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
-      this.wholeBodyIKSolver = new WholeBodyIkSolver( robotModel, fullRobotModel );
+      this.wholeBodyIKSolver = new WholeBodyIkSolver( robotModel, actualFullRobotModel );
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.getHierarchicalSolver().setVerbose(false);
@@ -145,14 +147,14 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       wholeBodyIKSolver.setHandTarget(RobotSide.RIGHT, desiredReferenceFrame);
       try
       {
-         wholeBodyIKSolver.compute(fullRobotModel);
+         wholeBodyIKSolver.compute(desiredFullRobotModel);
       }
       catch (Exception e)
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      wholeBodyIKPacketCreator.createPackets(fullRobotModel, 3.0, packetsToSend);
+      wholeBodyIKPacketCreator.createPackets(desiredFullRobotModel, 3.0, packetsToSend);
       System.out.println("AtlasWholeBodyIKIngressEgressCtrlSim: Sending packets");
       for (int i = 0; i < packetsToSend.size(); i++)
       {
@@ -177,7 +179,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
             vector.getX(), vector.getY(), vector.getZ());
       //--------------------------------------
 
-      ReferenceFrame rightHandPosition =   fullRobotModel.getHandControlFrame(RobotSide.RIGHT);
+      ReferenceFrame rightHandPosition =   actualFullRobotModel.getHandControlFrame(RobotSide.RIGHT);
       //  fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
       rBT = rightHandPosition.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
@@ -185,13 +187,13 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       System.out.format("Actual position : %.3f  %.3f  %.3f\n\n",  
             vector.getX(), vector.getY(), vector.getZ());
       //-------------------------------
-      rBT = fullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+      rBT = desiredFullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       rBT.getTranslation(vector);
       System.out.format("Position of the LEFT Sole [%.3f] : %.3f  %.3f  %.3f\n",  
             vector.length(), vector.getX(), vector.getY(), vector.getZ());
       
-      rBT = fullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+      rBT = desiredFullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       rBT.getTranslation(vector);
       System.out.format("Position of the RIGHT Sole [%.3f] : %.3f  %.3f  %.3f\n",  
@@ -205,7 +207,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
             vector.length(), vector.getX(), vector.getY(), vector.getZ());
 
       //-------------------------------
-      String[] jointNames = { 
+      String[] jointNames = {
             "r_leg_akx", "r_leg_aky",
             "r_leg_kny",
             "r_leg_hpy", "r_leg_hpx", "r_leg_hpz",    
@@ -231,7 +233,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
          tempTransform.getTranslation(A);
          System.out.format("\n ACTUAL:  %.3f   %.3f   %.3f\n" ,A.getX(), A.getY(), A.getZ() );
 
-         ReferenceFrame actualFrame = fullRobotModel.getOneDoFJointByName(jointNames[i]).getFrameAfterJoint();
+         ReferenceFrame actualFrame = actualFullRobotModel.getOneDoFJointByName(jointNames[i]).getFrameAfterJoint();
          tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
 
          tempTransform.getTranslation(B);
@@ -241,7 +243,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
          System.out.format(" angle error is %+.1f degrees\terror in location is  %.3f   %.3f   %.3f\n", 
 
                (180.0/Math.PI)*(wholeBodyIKSolver.getDesiredJointAngle( jointNames[i] ) - 
-                     fullRobotModel.getOneDoFJointByName(jointNames[i]).getQ() ),
+                     actualFullRobotModel.getOneDoFJointByName(jointNames[i]).getQ() ),
                      A.getX(), A.getY(), A.getZ() );  
       }
 
