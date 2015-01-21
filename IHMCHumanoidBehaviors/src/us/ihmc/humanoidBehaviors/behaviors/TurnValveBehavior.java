@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspObjectBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -44,6 +45,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final FramePose valvePose = new FramePose();
 
    private final WalkToLocationBehavior walkToLocationBehavior;
+   private final GraspObjectBehavior graspObjectBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final ScriptBehavior scriptBehavior;
 
@@ -68,8 +70,9 @@ public class TurnValveBehavior extends BehaviorInterface
       super(outgoingCommunicationBridge);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
-      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
+      graspObjectBehavior = new GraspObjectBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
 
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
 
@@ -149,6 +152,10 @@ public class TurnValveBehavior extends BehaviorInterface
       walkToLocationBehavior.setTarget(manipulationMidFeetPose);
       SysoutTool.println("Target Walk to Location Updated:" + manipulationMidFeetPose, DEBUG);
 
+      Vector3d finalToMidGraspVec = new Vector3d(-1,0,0);
+      graspObjectBehavior.setGraspPose(valveTransformToWorld, finalToMidGraspVec);
+      
+      
       //      double trajectoryTime = 2.0;
       //      double handPitchAngle = -90.0 * Math.PI / 180.0;
       //      HandPosePacket bumpValveHandPosePacket = createHandPosePacketToBumpTheValveToVerifyItsPosition(valvePose, handPitchAngle, trajectoryTime);
@@ -303,8 +310,9 @@ public class TurnValveBehavior extends BehaviorInterface
 
       behaviorQueue.clear();
       behaviorQueue.add(walkToLocationBehavior);
+      behaviorQueue.add(graspObjectBehavior);
       //      behaviorQueue.add(handPoseBehavior);
-      behaviorQueue.add(scriptBehavior);
+//      behaviorQueue.add(scriptBehavior);
       currentBehavior = behaviorQueue.remove(0);
    }
 
