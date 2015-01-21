@@ -1,4 +1,4 @@
-package us.ihmc.utilities;
+package us.ihmc.simulationconstructionset.utilities;
 
 import org.junit.runner.*;
 import org.junit.runners.*;
