@@ -6,6 +6,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -14,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspObjectBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -45,8 +46,10 @@ public class TurnValveBehavior extends BehaviorInterface
    private final FramePose valvePose = new FramePose();
 
    private final WalkToLocationBehavior walkToLocationBehavior;
-   private final GraspObjectBehavior graspObjectBehavior;
+   private final GraspValveBehavior graspObjectBehavior;
    private final HandPoseBehavior handPoseBehavior;
+   private final HandPoseBehavior handPoseBehavior2;
+
    private final ScriptBehavior scriptBehavior;
 
    private InputStream scriptResourceStream;
@@ -70,8 +73,10 @@ public class TurnValveBehavior extends BehaviorInterface
       super(outgoingCommunicationBridge);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
-      graspObjectBehavior = new GraspObjectBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      graspObjectBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      handPoseBehavior2 = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
 
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
@@ -152,14 +157,19 @@ public class TurnValveBehavior extends BehaviorInterface
       walkToLocationBehavior.setTarget(manipulationMidFeetPose);
       SysoutTool.println("Target Walk to Location Updated:" + manipulationMidFeetPose, DEBUG);
 
-      Vector3d finalToMidGraspVec = new Vector3d(-1,0,0);
+      Vector3d finalToMidGraspVec = new Vector3d(-1, 0, 0);
       graspObjectBehavior.setGraspPose(valveTransformToWorld, finalToMidGraspVec);
-      
-      
-      //      double trajectoryTime = 2.0;
-      //      double handPitchAngle = -90.0 * Math.PI / 180.0;
-      //      HandPosePacket bumpValveHandPosePacket = createHandPosePacketToBumpTheValveToVerifyItsPosition(valvePose, handPitchAngle, trajectoryTime);
-      //      handPoseBehavior.setInput(bumpValveHandPosePacket);
+
+      FramePose graspPose = new FramePose();
+      graspObjectBehavior.getFinalGraspPose(graspPose);
+
+      double trajectoryTime = 2.0;
+      double turnValveAngle = -10.0 * Math.PI / 180.0;
+      HandPosePacket turnValveHandPosePacket = createHandPosePacketToTurnValve(graspPose, turnValveAngle, trajectoryTime);
+      handPoseBehavior.setInput(turnValveHandPosePacket);
+
+      HandPosePacket turnValveHandPosePacket2 = createHandPosePacketToTurnValve(graspPose, turnValveAngle * 2, trajectoryTime);
+      handPoseBehavior2.setInput(turnValveHandPosePacket2);
 
       hasInputBeenSet.set(true);
 
@@ -191,15 +201,10 @@ public class TurnValveBehavior extends BehaviorInterface
 
       RigidBodyTransform yawTransform = new RigidBodyTransform();
       TransformTools.rotate(yawTransform, valvePose.getYaw(), Axis.Z);
-      
+
       double valveYaw = valvePose.getYaw();
       SysoutTool.println("Valve Pose Yaw : " + valveYaw);
-      
-//      TransformTools.rotate(yawTransform, -valveYaw, Axis.Z);  // Make x-axis point outwards from valve (coaxial with valve pinJoint axis)
 
-
-      
-//      Vector3d desiredRobotPosFromValve = new Vector3d(howFarToStandToTheRightOfValve, -howFarToStandBackFromValve, 0.0);
       Vector3d desiredRobotPosFromValve = new Vector3d(-howFarToStandBackFromValve, -howFarToStandToTheRightOfValve, 0.0);
 
       Vector3d desiredRobotPosFromValveInWorld = TransformTools.getTransformedVector(desiredRobotPosFromValve, yawTransform);
@@ -212,24 +217,31 @@ public class TurnValveBehavior extends BehaviorInterface
       return ret;
    }
 
-   private final FramePose handPose = new FramePose();
-
-   private HandPosePacket createHandPosePacketToBumpTheValveToVerifyItsPosition(FramePose valvePose, double pitchAngle, double trajectoryTime)
+   private HandPosePacket createHandPosePacketToTurnValve(FramePose handPoseBeforeTurn, double turnAngle, double trajectoryTime)
    {
-      handPose.setPose(valvePose);
+      AxisAngle4d handAxisAngleBeforeTurn = new AxisAngle4d();
+      handPoseBeforeTurn.getOrientation(handAxisAngleBeforeTurn);
 
-      double[] yawPitchRoll = new double[3];
-      handPose.getOrientation(yawPitchRoll);
-      handPose.setOrientation(yawPitchRoll[0], pitchAngle, yawPitchRoll[2]);
+      AxisAngle4d handAxisAngleAfterTurn = new AxisAngle4d();
+      handAxisAngleAfterTurn.setAngle(handAxisAngleBeforeTurn.angle + turnAngle);
 
-      Point3d handBumpPositionPt = new Point3d();
+      FramePose handPoseAfterTurn = new FramePose(handPoseBeforeTurn);
+      handPoseAfterTurn.setOrientation(handAxisAngleAfterTurn);
+
+      HandPosePacket ret = createHandPosePacket(trajectoryTime, handPoseAfterTurn);
+
+      return ret;
+   }
+
+   private HandPosePacket createHandPosePacket(double trajectoryTime, FramePose desiredHandPose)
+   {
+      Point3d position = new Point3d();
       Quat4d orientation = new Quat4d();
 
-      handPose.getPosition(handBumpPositionPt);
-      handPose.getOrientation(orientation);
+      desiredHandPose.getPosition(position);
+      desiredHandPose.getOrientation(orientation);
 
-      HandPosePacket ret = new HandPosePacket(RobotSide.RIGHT, Frame.WORLD, handBumpPositionPt, orientation, trajectoryTime);
-
+      HandPosePacket ret = new HandPosePacket(RobotSide.RIGHT, Frame.WORLD, position, orientation, trajectoryTime);
       return ret;
    }
 
@@ -311,8 +323,11 @@ public class TurnValveBehavior extends BehaviorInterface
       behaviorQueue.clear();
       behaviorQueue.add(walkToLocationBehavior);
       behaviorQueue.add(graspObjectBehavior);
+      behaviorQueue.add(handPoseBehavior);
+      behaviorQueue.add(handPoseBehavior2);
+
       //      behaviorQueue.add(handPoseBehavior);
-//      behaviorQueue.add(scriptBehavior);
+      //      behaviorQueue.add(scriptBehavior);
       currentBehavior = behaviorQueue.remove(0);
    }
 

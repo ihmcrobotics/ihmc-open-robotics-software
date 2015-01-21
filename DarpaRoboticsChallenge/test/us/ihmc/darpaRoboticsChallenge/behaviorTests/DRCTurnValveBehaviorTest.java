@@ -82,7 +82,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final CommonAvatarEnvironmentInterface testEnvironment = new DRCValveEnvironment(2.0 * TurnValveBehavior.howFarToStandBackFromValve, TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0);
+   private final DRCValveEnvironment testEnvironment = new DRCValveEnvironment(2.0 * TurnValveBehavior.howFarToStandBackFromValve, TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0);
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
          "DRCHandPoseBehaviorTestControllerCommunicator");
 
@@ -123,7 +123,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       robot = drcSimulationTestHelper.getRobot();
       fullRobotModel = getRobotModel().createFullRobotModel();
-
+     
       forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
 
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
