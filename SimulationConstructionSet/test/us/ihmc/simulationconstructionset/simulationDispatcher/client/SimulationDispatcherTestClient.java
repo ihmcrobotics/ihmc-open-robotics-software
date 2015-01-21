@@ -1,11 +1,11 @@
-package us.ihmc.simulationDispatcher.client;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import org.junit.Test;
 
-import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 public class SimulationDispatcherTestClient
 {

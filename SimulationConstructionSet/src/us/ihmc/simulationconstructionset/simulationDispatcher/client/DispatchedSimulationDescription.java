@@ -1,10 +1,10 @@
-package us.ihmc.simulationDispatcher.client;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
-import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationDescription;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationDescription;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 

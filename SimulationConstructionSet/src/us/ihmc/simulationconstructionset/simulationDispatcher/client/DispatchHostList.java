@@ -1,4 +1,4 @@
-package us.ihmc.simulationDispatcher.client;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
 import java.util.ArrayList;
 

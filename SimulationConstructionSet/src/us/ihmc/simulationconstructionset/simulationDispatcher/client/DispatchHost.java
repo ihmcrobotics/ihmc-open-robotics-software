@@ -1,8 +1,8 @@
-package us.ihmc.simulationDispatcher.client;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
 import java.rmi.Naming;
 
-import us.ihmc.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 public class DispatchHost
 {

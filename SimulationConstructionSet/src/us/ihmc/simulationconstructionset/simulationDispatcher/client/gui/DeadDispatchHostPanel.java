@@ -1,21 +1,19 @@
-package us.ihmc.simulationDispatcher.client.gui;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
-import us.ihmc.simulationDispatcher.client.DispatchHost;
-import us.ihmc.simulationDispatcher.client.DispatchHostList;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHost;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
 
-public class AliveDispatchHostPanel extends DispatchHostPanel
+public class DeadDispatchHostPanel extends DispatchHostPanel
 {
-   private static final long serialVersionUID = -3781923043775451428L;
    private static final int NAME_WIDTH = 12;
    private static final int DESCRIPTION_WIDTH = 12;
    private static final int NUMBER_WIDTH = 5;
 
-   private static final int DESCRIPTION_START = NAME_WIDTH;
-   private static final int ELAPSED_TIME_START = DESCRIPTION_START + DESCRIPTION_WIDTH;
+   private static final int ELAPSED_TIME_START = NAME_WIDTH;
    private static final int NUMBER_SIMS_START = ELAPSED_TIME_START + NUMBER_WIDTH;
 
    private static final int APPROX_TIME_START = NUMBER_SIMS_START + NUMBER_WIDTH;
@@ -25,8 +23,7 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
 
    protected Dimension sz = new Dimension(TOTAL_WIDTH, FONT_SIZE);
 
-
-   public AliveDispatchHostPanel(DispatchHostList dispatchHostList)
+   public DeadDispatchHostPanel(DispatchHostList dispatchHostList)
    {
       super(dispatchHostList);
       setPanelSize(1);
@@ -37,7 +34,7 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
    {
       dispatchHosts.clear();
 
-      DispatchHost[] aliveHosts = dispatchHostList.getAllAliveHosts();
+      DispatchHost[] aliveHosts = dispatchHostList.getAllDeadHosts();
       for (int i = 0; i < aliveHosts.length; i++)
       {
          dispatchHosts.add(aliveHosts[i]);
@@ -68,6 +65,7 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
       this.updateUI();
    }
 
+
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);
@@ -75,7 +73,6 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
       g.setColor(Color.black);
 
       g.drawString("Host Name", 2, 10);
-      g.drawString("Description", 12 * (DESCRIPTION_START), 10);
       g.drawString("Elapsed", 12 * (ELAPSED_TIME_START), 10);
       g.drawString("Number", 12 * (NUMBER_SIMS_START), 10);
       g.drawString("Estimate", 12 * (APPROX_TIME_START), 10);
@@ -88,9 +85,6 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
          String hostName = dispatchHost.getHostName();
          String hostProcess = dispatchHost.getHostProcess();
 
-         String description = null;
-         if (dispatchHost.getDispatchedSim() != null)
-            description = dispatchHost.getDispatchedSim().getDescription();
          String elapsedTime = String.valueOf(((int) dispatchHost.getTimeSinceLastSimulationStarted()));
 
          String numberSims = String.valueOf(dispatchHost.getNumberOfSimulationsRun());
@@ -107,8 +101,6 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
             g.setColor(Color.blue);
 
          g.drawString(hostName + ": " + hostProcess, 2, i * FONT_SIZE + 22);
-         if (description != null)
-            g.drawString(description, 12 * DESCRIPTION_START, i * FONT_SIZE + 22);
          g.drawString(elapsedTime, 12 * ELAPSED_TIME_START, i * FONT_SIZE + 22);
          g.drawString(numberSims, 12 * NUMBER_SIMS_START, i * FONT_SIZE + 22);
          g.drawString(approxTime, 12 * APPROX_TIME_START, i * FONT_SIZE + 22);

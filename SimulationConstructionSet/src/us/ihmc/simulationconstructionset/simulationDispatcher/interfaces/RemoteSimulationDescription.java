@@ -1,4 +1,4 @@
-package us.ihmc.simulationDispatcher.interfaces;
+package us.ihmc.simulationconstructionset.simulationDispatcher.interfaces;
 
 public interface RemoteSimulationDescription extends java.io.Serializable
 {

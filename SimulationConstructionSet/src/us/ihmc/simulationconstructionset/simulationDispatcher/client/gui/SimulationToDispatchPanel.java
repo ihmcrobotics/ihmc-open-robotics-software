@@ -1,4 +1,4 @@
-package us.ihmc.simulationDispatcher.client.gui;
+package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -10,9 +10,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JPanel;
 
-import us.ihmc.simulationDispatcher.client.SimulationDispatcher;
-import us.ihmc.simulationDispatcher.client.SimulationToDispatch;
-import us.ihmc.simulationDispatcher.client.SimulationsChangedListener;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcher;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
+import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationsChangedListener;
 
 
 public abstract class SimulationToDispatchPanel extends JPanel implements KeyListener, MouseListener, SimulationsChangedListener, Runnable

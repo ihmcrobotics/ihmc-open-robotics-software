@@ -1,4 +1,4 @@
-package us.ihmc.simulationDispatcher.interfaces;
+package us.ihmc.simulationconstructionset.simulationDispatcher.interfaces;
 
 import java.rmi.*;
 
