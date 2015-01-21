@@ -58,6 +58,16 @@ public class PolygonArtifact extends Artifact
       setPoints(convexPolygon2d);
    }
 
+   public PolygonArtifact(String id, boolean fill, Color color, int level, ConvexPolygon2d convexPolygon2d)
+   {
+      super(id);
+      setLevel(level);
+      FILL_POLYGON = fill;
+      this.color = color;
+
+      setPoints(convexPolygon2d);
+   }
+
    public PolygonArtifact(String id, boolean fill, Color color, BoundingBox2d boundingBox2d)
    {
       super(id);
