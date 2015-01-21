@@ -153,7 +153,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
 
-      this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1);
+      this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1,momentumOptimizationSettings.getDampedLeastSquaresFactor());
       this.equalityConstraintEnforcer = new EqualityConstraintEnforcer(hardMotionConstraintSolver);
 
       parentRegistry.addChild(registry);
@@ -239,7 +239,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
 
-//      hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
       momentumOptimizer.reset();
 
       primaryMotionConstraintHandler.compute();
