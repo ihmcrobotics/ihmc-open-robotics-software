@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 /**
  * @author Peter Abeles
  */
-public class TestImageToGroundMap
+public class ImageToGroundMapTest
 {
 
    @Test(timeout=300000)
