@@ -7,9 +7,11 @@ import static org.junit.Assert.fail;
 /**
  * @author Peter Abeles
  */
-public class TestGaussianColorClassifier {
-   @Test(timeout=300000)
-   public void stuff() {
+public class GaussianColorClassifierTest
+{
+   @Test(timeout = 300000)
+   public void stuff()
+   {
       fail("implement");
    }
 }

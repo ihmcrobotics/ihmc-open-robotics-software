@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 /**
  * @author Peter Abeles
  */
-public class TestGaussian3D_F64
+public class Gaussian3D_F64Test
 {
 
    @Test(timeout=300000)
