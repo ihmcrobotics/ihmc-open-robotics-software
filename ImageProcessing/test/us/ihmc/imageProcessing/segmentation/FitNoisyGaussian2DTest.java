@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Peter Abeles
  */
-public class TestFitNoisyGaussian2D {
+public class FitNoisyGaussian2DTest {
 
    Random rand = new Random(234);
 
