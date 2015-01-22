@@ -8,7 +8,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.simulationconstructionset.SimulationConstructionSetTestFest.class
+   us.ihmc.simulationconstructionset.SimulationConstructionSetFestTest.class
 })
 
 public class SimulationConstructionSetBambooFestTestSuiteNightly
