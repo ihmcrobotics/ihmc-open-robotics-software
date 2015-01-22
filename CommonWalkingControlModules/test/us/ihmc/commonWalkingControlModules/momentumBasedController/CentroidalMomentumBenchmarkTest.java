@@ -27,7 +27,7 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
-public class CentroidalMomentumBenchmark
+public class CentroidalMomentumBenchmarkTest
 {
    private static final int iters = 50000;
 
