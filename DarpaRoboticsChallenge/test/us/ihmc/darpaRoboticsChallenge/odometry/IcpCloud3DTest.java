@@ -20,7 +20,7 @@ import org.junit.Test;
 /**
  * @author Peter Abeles
  */
-public class TestIcpCloud3D {
+public class IcpCloud3DTest {
 
    Random rand = new Random(234);
 
