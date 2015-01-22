@@ -37,7 +37,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 
-public class PelvisPoseHistoryCorrectionUsingSimpleRobot
+public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {
    private static final boolean showGUI = false;
 
