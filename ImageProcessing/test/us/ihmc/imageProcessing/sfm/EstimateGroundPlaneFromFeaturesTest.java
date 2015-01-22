@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Peter Abeles
  */
-public class TestEstimateGroundPlaneFromFeatures
+public class EstimateGroundPlaneFromFeaturesTest
 {
 
    /**
