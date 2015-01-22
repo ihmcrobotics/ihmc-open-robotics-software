@@ -28,7 +28,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizer
+public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
