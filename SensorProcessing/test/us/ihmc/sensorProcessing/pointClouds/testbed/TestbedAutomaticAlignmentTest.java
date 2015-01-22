@@ -2,9 +2,7 @@ package us.ihmc.sensorProcessing.pointClouds.testbed;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
-
 import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
@@ -16,8 +14,6 @@ import java.util.List;
 
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
-
-import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 
 import com.thoughtworks.xstream.XStream;
 
