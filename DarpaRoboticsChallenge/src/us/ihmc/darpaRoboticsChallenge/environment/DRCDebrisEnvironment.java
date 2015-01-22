@@ -51,8 +51,8 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D("Supports");
 
 //      debrisRobots.add(createDebris(2.0, 0.1, 0.5, Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(10.0)));
-      combinedTerrainObject3D.addBox(1.8, 0.6, 2.2, 0.4 , 0.47, YoAppearance.Chocolate());
-      combinedTerrainObject3D.addBox(1.8, -0.4, 2.2, -0.6 , 0.47, YoAppearance.Yellow());
+      combinedTerrainObject3D.addBox(2.0, 0.6, 2.2, 0.41 , 0.67, YoAppearance.Chocolate());
+      combinedTerrainObject3D.addBox(1.8, -0.44, 2.2, -0.6 , 0.67, YoAppearance.Yellow());
       
       Quat4d quat = new Quat4d();
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(quat, Math.toRadians(12), 0.0, 0.0);
@@ -77,7 +77,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
    private void createBoxes(double forceVectorScale, GroundProfile3D groundProfile)
    {
       debrisRobots.add(createDebris(1.0, -0.4, debrisLength / 2.0, 0.0, 0.0, 0.0));
-      debrisRobots.add(createDebris(2.0, 0.0, 0.5, Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(10.0)));
+      debrisRobots.add(createDebris(2.0, 0.0, 0.7, Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(10.0)));
       debrisRobots.add(createDebris(3.0, 0.3, debrisLength / 2.0 - 0.02, Math.toRadians(12.0), Math.toRadians(20.0), 0.0));
 
       for (int i = 0; i < debrisRobots.size(); i++)
