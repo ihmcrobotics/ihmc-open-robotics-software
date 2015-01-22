@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.vecmath.Matrix3d;
@@ -47,16 +48,21 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+
+
 
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 {
-
+   
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
@@ -781,6 +787,30 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    public FloatingJoint getPelvisJoint()
    {
       return getRootJoint();
+   }
+   
+   public void copyWholeBodyStateFromFullRobotModel( FullRobotModel modelToCopyFrom, boolean copyRootJointToo)
+   {
+      OneDoFJoint[] oneDoFJoints = modelToCopyFrom.getOneDoFJoints();
+      for (OneDoFJoint otherJoint: oneDoFJoints)
+      {
+         OneDegreeOfFreedomJoint thisJoint = this.getOneDegreeOfFreedomJoint( otherJoint.getName() );
+         if( thisJoint != null)
+         {
+            thisJoint.setQ( otherJoint.getQ() );
+            thisJoint.setQd( otherJoint.getQd() );
+            thisJoint.setQdd( otherJoint.getQdd() );
+         }
+      }
+
+      if( copyRootJointToo )
+      {
+         Vector3d position = new Vector3d();
+         Quat4d rotation = new Quat4d();
+         modelToCopyFrom.getRootJoint().getFrameAfterJoint().getTransformToWorldFrame().get(rotation, position);
+         this.setPositionInWorld( position );
+         this.setOrientation(rotation);
+      }
    }
 
 }
