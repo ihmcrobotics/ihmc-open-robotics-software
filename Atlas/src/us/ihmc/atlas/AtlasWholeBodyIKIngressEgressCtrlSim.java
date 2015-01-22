@@ -47,11 +47,15 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final YoVariableRegistry registry;
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
-   private final YoGraphicShape yoGraphicsShape;
-//   private final DoubleYoVariable hik_x_des, hik_y_des, hik_z_des;
+   private final YoGraphicShape yoGraphicsShapeDesired;
    private final boolean random = false;
    private final double ERROR_DISTANCE_TOLERANCE = 0.03;
    private SDFFullRobotModel desiredFullRobotModel;
+   private YoGraphicShape yoGraphicsShapeActual;
+   private YoFramePoint framePoint2;
+   private YoFrameOrientation frameOrientation2;
+   private final double trajectoryTime = 3.0;
+   private int successInt;
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws IOException
    {
@@ -59,47 +63,53 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
       this.registry = hikIngEgCtrlSim.getControllerFactory().getRegistry();
-//      hik_x_des = new DoubleYoVariable("hik_x_des", registry);
-//      hik_y_des = new DoubleYoVariable("hik_y_des", registry);
-//      hik_z_des = new DoubleYoVariable("hik_z_des", registry);
-//      hik_x_des.set(0.3908);
-//      hik_y_des.set(-0.3445);
-//      hik_z_des.set(0.6438);
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addSphere(0.05, YoAppearance.Blue());
+      Graphics3DObject linkGraphicsDesired= new Graphics3DObject();
+      Graphics3DObject linkGraphicsActual = new Graphics3DObject();
+      linkGraphicsDesired.addSphere(0.05, YoAppearance.Blue());
+      linkGraphicsActual.addSphere(0.05, YoAppearance.Magenta());
       framePoint = new YoFramePoint("dontCarePoint", ReferenceFrame.getWorldFrame(), registry);
       frameOrientation = new YoFrameOrientation("orientiation", ReferenceFrame.getWorldFrame(), registry);
-      yoGraphicsShape = new YoGraphicShape("dontCareMarker", linkGraphics, framePoint, frameOrientation, 1.0);
-      hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShape);
+      framePoint2 = new YoFramePoint("dontCarePoint2", ReferenceFrame.getWorldFrame(), registry);
+      frameOrientation2 = new YoFrameOrientation("orientiation2", ReferenceFrame.getWorldFrame(), registry);
+      yoGraphicsShapeDesired = new YoGraphicShape("desiredBall", linkGraphicsDesired, framePoint, frameOrientation, 1.0);
+      yoGraphicsShapeActual = new YoGraphicShape("actualBall", linkGraphicsActual, framePoint2, frameOrientation2, 1.0);
+      hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeDesired);
+      hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeActual);
       hikIngEgCtrlSim.getDRCSimulation().start();
       this.actualFullRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
-      this.wholeBodyIKSolver = new WholeBodyIkSolver( robotModel, actualFullRobotModel );
+      this.wholeBodyIKSolver = new WholeBodyIkSolver(robotModel, actualFullRobotModel);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.getHierarchicalSolver().setVerbose(false);
 
       this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel);
       createDesiredFramesList();
+      System.out.println(getClass().getSimpleName() + ": Starting sleep for 10 secs.");
+      ThreadTools.sleep(10000);
+      System.out.println(getClass().getSimpleName() + ": Attempting to start test.");
+      
+      boolean testNotStarted = true;
+      while(testNotStarted){
+         if(USE_INGRESS_ONLY){
+            if(ingressEgressModeActivated()){
+               executeTest();
+               testNotStarted = false;
+            }
+         }else{
+            executeTest();
+            testNotStarted = false;
+         }
+      }
+   }
+   
+   private void executeTest(){
       for (int i = 0; i < desiredReferenceFrameList.size(); i++)
       {
-         if (USE_INGRESS_ONLY)
-         {
-            if (ingressEgressModeActivated())
-            {
-               ThreadTools.sleep(7000);
-               doControl(i);
-               ThreadTools.sleep(10000);
-               checkIfTargetWasReached(i);
-            }
-         }
-         else
-         {
-            ThreadTools.sleep(7000);
-            doControl(i);
-            ThreadTools.sleep(10000);
-            checkIfTargetWasReached(i);
-         }
+         ThreadTools.sleep(1000);
+         doControl(i);
+         ThreadTools.sleep((long) (2*trajectoryTime*1000.0));
+         checkIfTargetWasReached(i);
       }
    }
 
@@ -113,11 +123,9 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       final double reachLength = 0.5;
       for (int i = 0; i < 4; i++)
       {
-         FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), reachLength * Math.cos(-i * Math.PI / 4), reachLength * Math.sin(-i * Math.PI / 4),
-               0.6);
+         FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), reachLength * Math.cos(-i * Math.PI / 4), reachLength * Math.sin(-i * Math.PI / 4), 0.6);
          FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
          ReferenceFrame desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCareEither", point, zAxis);
-         desiredReferenceFrameList.add(desiredReferenceFrame);
          desiredReferenceFrameList.add(desiredReferenceFrame);
       }
    }
@@ -143,24 +151,26 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private void doControl(int index)
    {
       ReferenceFrame desiredReferenceFrame = getNextDesiredReferenceFrame(index);
-      yoGraphicsShape.setToReferenceFrame(desiredReferenceFrame);
       wholeBodyIKSolver.setHandTarget(RobotSide.RIGHT, desiredReferenceFrame);
       try
       {
-         wholeBodyIKSolver.compute(desiredFullRobotModel);
+        successInt = wholeBodyIKSolver.compute(desiredFullRobotModel);
       }
       catch (Exception e)
       {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      wholeBodyIKPacketCreator.createPackets(desiredFullRobotModel, 3.0, packetsToSend);
+      wholeBodyIKPacketCreator.createPackets(desiredFullRobotModel, trajectoryTime, packetsToSend);
       System.out.println("AtlasWholeBodyIKIngressEgressCtrlSim: Sending packets");
       for (int i = 0; i < packetsToSend.size(); i++)
       {
          fieldObjectCommunicator.send(packetsToSend.get(i));
       }
       packetsToSend.clear();
+      //Visualize where wrist should be going
+     ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredBodyFrame("r_hand", ReferenceFrame.getWorldFrame());
+  //     ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredHandFrame(RobotSide.RIGHT, ReferenceFrame.getWorldFrame());
+      yoGraphicsShapeDesired.setToReferenceFrame(desiredWristReference);
    }
 
    private void checkIfTargetWasReached(int index)
@@ -171,18 +181,21 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       System.out.println("-----------------\n");
 
 
-      ReferenceFrame desiredReference = getNextDesiredReferenceFrame(index);
-      rBT = desiredReference.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
+      ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredBodyFrame("r_hand", ReferenceFrame.getWorldFrame());
+//      ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredHandFrame(RobotSide.RIGHT, ReferenceFrame.getWorldFrame());
+      rBT = desiredWristReference.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       rBT.getTranslation(vector);
       System.out.format("Desired position : %.3f  %.3f  %.3f\n",  
             vector.getX(), vector.getY(), vector.getZ());
       //--------------------------------------
 
-      ReferenceFrame rightHandPosition =   actualFullRobotModel.getHandControlFrame(RobotSide.RIGHT);
-      //  fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
+//      ReferenceFrame rightHandPosition = actualFullRobotModel.getHandControlFrame(RobotSide.RIGHT);
+      ReferenceFrame rightHandPosition = actualFullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
       rBT = rightHandPosition.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
+      yoGraphicsShapeActual.setToReferenceFrame(rightHandPosition);
+      
       rBT.getTranslation(vector);
       System.out.format("Actual position : %.3f  %.3f  %.3f\n\n",  
             vector.getX(), vector.getY(), vector.getZ());
@@ -200,7 +213,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
             vector.length(), vector.getX(), vector.getY(), vector.getZ());
 
       //-------------------------------
-      rBT = rightHandPosition.getTransformToDesiredFrame(desiredReference);
+      rBT = rightHandPosition.getTransformToDesiredFrame(desiredWristReference);
 
       rBT.getTranslation(vector);
       System.out.format("Error in final position [%.3f] : %.3f  %.3f  %.3f\n",  
@@ -224,32 +237,32 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       Vector3d A = new Vector3d(); 
       Vector3d B = new Vector3d(); 
 
-      for(int i=0; i< jointNames.length; i++)
-      {    
-         System.out.print("-----------------\n" +  jointNames[i] );
-         ReferenceFrame workingFrame =  wholeBodyIKSolver.getDesiredAfterJointFrame( jointNames[i], ReferenceFrame.getWorldFrame());
-         RigidBodyTransform tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-
-         tempTransform.getTranslation(A);
-         System.out.format("\n ACTUAL:  %.3f   %.3f   %.3f\n" ,A.getX(), A.getY(), A.getZ() );
-
-         ReferenceFrame actualFrame = actualFullRobotModel.getOneDoFJointByName(jointNames[i]).getFrameAfterJoint();
-         tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-
-         tempTransform.getTranslation(B);
-         System.out.format(" DESIRED: %.3f   %.3f   %.3f\n" ,B.getX(), B.getY(), B.getZ() );
-
-         A.sub(B);
-         System.out.format(" angle error is %+.1f degrees\terror in location is  %.3f   %.3f   %.3f\n", 
-
-               (180.0/Math.PI)*(wholeBodyIKSolver.getDesiredJointAngle( jointNames[i] ) - 
-                     actualFullRobotModel.getOneDoFJointByName(jointNames[i]).getQ() ),
-                     A.getX(), A.getY(), A.getZ() );  
-      }
+//      for(int i=0; i< jointNames.length; i++)
+//      {    
+//         System.out.print("-----------------\n" +  jointNames[i] );
+//         ReferenceFrame workingFrame =  wholeBodyIKSolver.getDesiredAfterJointFrame( jointNames[i], ReferenceFrame.getWorldFrame());
+//         RigidBodyTransform tempTransform =  workingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+//
+//         tempTransform.getTranslation(A);
+//         System.out.format("\n ACTUAL:  %.3f   %.3f   %.3f\n" ,A.getX(), A.getY(), A.getZ() );
+//
+//         ReferenceFrame actualFrame = actualFullRobotModel.getOneDoFJointByName(jointNames[i]).getFrameAfterJoint();
+//         tempTransform =  actualFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+//
+//         tempTransform.getTranslation(B);
+//         System.out.format(" DESIRED: %.3f   %.3f   %.3f\n" ,B.getX(), B.getY(), B.getZ() );
+//
+//         A.sub(B);
+//         System.out.format(" angle error is %+.1f degrees\terror in location is  %.3f   %.3f   %.3f\n", 
+//
+//               (180.0/Math.PI)*(wholeBodyIKSolver.getDesiredJointAngle( jointNames[i] ) - 
+//                     actualFullRobotModel.getOneDoFJointByName(jointNames[i]).getQ() ),
+//                     A.getX(), A.getY(), A.getZ() );  
+//      }
 
       if (vector.length() > ERROR_DISTANCE_TOLERANCE)
       {
-         System.out.println(this.getClass().getName() + ": FAILED TO REACH DESIRED POINT " );
+         System.out.println(this.getClass().getName() + ": " + (successInt>0 ? "HIK REPORTS POSSIBLE BUT" : "HIK REPORTS IMPOSSIBLE THUS") + " FAILED TO REACH DESIRED POINT " );
       }
       else{
          System.out.println(this.getClass().getName() + ": SUCCESFULLY REACHED POINT");
