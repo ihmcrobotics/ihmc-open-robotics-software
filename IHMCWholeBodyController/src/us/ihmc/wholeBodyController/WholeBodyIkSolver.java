@@ -872,8 +872,8 @@ public class WholeBodyIkSolver
       ReferenceFrame followerPelvisFrame = followerModel.getRootJoint().getFrameAfterJoint();
       
       followerPelvisFrame.getTransformToDesiredFrame(soleToPelvis,  followerSoleFrame);
-      referenceSoleFrame.getTransformToDesiredFrame(soleWorldToFollow, ReferenceFrame.getWorldFrame() );
-      pelvisTransform.multiply( soleWorldToFollow, soleToPelvis );
+      referenceSoleFrame.getTransformToDesiredFrame(soleWorldToFollow, ReferenceFrame.getWorldFrame());
+      pelvisTransform.multiply( soleWorldToFollow, soleToPelvis);
       
       followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
       followerModel.updateFrames();
