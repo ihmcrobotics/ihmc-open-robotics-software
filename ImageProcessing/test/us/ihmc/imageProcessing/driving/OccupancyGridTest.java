@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 /**
  * @author Peter Abeles
  */
-public class TestDrcColorPixelDrivingClassifier
+public class OccupancyGridTest
 {
 
    @Test(timeout=300000)
