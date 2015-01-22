@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.simulationDispatcher.client;
 
-import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationDescription;
 
+@SuppressWarnings("serial")
 public class TestDescription implements RemoteSimulationDescription
 {
 // YoVariable var;
