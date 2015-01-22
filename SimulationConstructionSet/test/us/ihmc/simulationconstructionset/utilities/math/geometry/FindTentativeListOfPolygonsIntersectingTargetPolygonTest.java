@@ -34,7 +34,7 @@ import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
  * @author not attributable
  * @version 1.0
  */
-public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
+public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 {
    private static final boolean VERBOSE = false;
    private static final boolean SHOW_PLOTTER = false;
