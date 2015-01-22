@@ -30,7 +30,14 @@ public class SegmentedDatagramServer
    {
       this.sessionID = sessionID;
       System.out.println(iface);
-      maximumPacketSize = iface.getMTU() - 32; // IP header(20 bytes) + UDP Header (8 bytes) + wiggle room (4 bytes)
+      if(iface.isLoopback())
+      {
+         maximumPacketSize = 65536 - 32;
+      }
+      else
+      {
+         maximumPacketSize = iface.getMTU() - 32; // IP header(20 bytes) + UDP Header (8 bytes) + wiggle room (4 bytes)
+      }
       payloadSize = maximumPacketSize - SegmentHeader.HEADER_SIZE;
       address = new InetSocketAddress(group, port);
 
