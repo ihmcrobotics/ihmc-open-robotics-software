@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
-public class SimulationDispatcherTestClient
+public class SimulationDispatcherClientTest
 {
    private static final String pwd = "***REMOVED***";
 
