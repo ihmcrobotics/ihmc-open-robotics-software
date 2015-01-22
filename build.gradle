@@ -37,7 +37,10 @@ remotes
 jar {
 	List depend = []
 	configurations.runtime.each {
-		depend.add('lib/' + it.name)
+		if(!it.name.contains("IHMCHumanoidOperatorInterface"))
+		{
+			depend.add('lib/' + it.name)
+		}
 	}
 	manifest {		
 		attributes('Created-By': 'IHMC Gradle Build Script', 'Implementation-Vendor': 'IHMC', 'Class-Path': depend.join(' '))
@@ -61,7 +64,10 @@ task deploy(dependsOn: assemble) {
 				
 				configurations.runtime.each 
 				{
-					put it, directory + '/lib'
+					if(!it.name.contains("IHMCHumanoidOperatorInterface"))
+					{
+						put it, directory + '/lib'
+					}
 				}
 				
 				put jar.archivePath, directory + '/ValkyrieController.jar'
