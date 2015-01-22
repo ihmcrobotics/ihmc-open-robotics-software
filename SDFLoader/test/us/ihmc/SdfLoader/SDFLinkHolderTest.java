@@ -12,7 +12,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 
 
-public class TestSDFLinkHolder
+public class SDFLinkHolderTest
 {
    @Test(timeout=300000)
    public void noInertialPose()
