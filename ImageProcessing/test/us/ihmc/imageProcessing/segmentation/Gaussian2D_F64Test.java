@@ -11,7 +11,7 @@ import static org.junit.Assert.fail;
 /**
  * @author Peter Abeles
  */
-public class TestGaussian2D_F64 {
+public class Gaussian2D_F64Test {
    @Test(timeout=300000)
    public void chisq() {
       Gaussian2D_F64 g = new Gaussian2D_F64();
