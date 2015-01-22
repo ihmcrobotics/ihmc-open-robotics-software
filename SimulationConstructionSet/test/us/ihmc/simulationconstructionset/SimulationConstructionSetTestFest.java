@@ -8,18 +8,16 @@ import java.awt.AWTException;
 
 import org.fest.swing.exception.ActionFailedException;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
+import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-
-import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
-import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 
 public class SimulationConstructionSetTestFest
 {
