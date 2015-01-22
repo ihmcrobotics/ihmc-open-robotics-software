@@ -19,7 +19,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-public class SimulationConstructionSetTestFest
+public class SimulationConstructionSetFestTest
 {
    private boolean isGradleBuild()
    {
