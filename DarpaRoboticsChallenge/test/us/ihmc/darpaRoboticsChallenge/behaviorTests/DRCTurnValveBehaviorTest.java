@@ -36,7 +36,6 @@ import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCValveEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -82,7 +81,12 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final DRCValveEnvironment testEnvironment = new DRCValveEnvironment(2.0 * TurnValveBehavior.howFarToStandBackFromValve, TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0);
+   private final double valveX = 2.0 * TurnValveBehavior.howFarToStandBackFromValve;
+   private final double valveY = TurnValveBehavior.howFarToStandToTheRightOfValve;
+   private final double valveZ = 1.0;
+   private final double valveYaw_degrees = 45.0;
+   
+   private final DRCValveEnvironment testEnvironment = new DRCValveEnvironment(valveX, valveY, valveZ, valveYaw_degrees);
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
          "DRCHandPoseBehaviorTestControllerCommunicator");
 
@@ -179,7 +183,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       communicationBridge.attachGlobalListenerToController(turnValveBehavior.getControllerGlobalPacketConsumer());
 
 
-      ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(new String("wasGoingToTurnTheValveButIGotHigh"), valveTransformToWorld);
+      ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(new String("testTurnValveNoScript"), valveTransformToWorld);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
 

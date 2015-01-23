@@ -27,17 +27,17 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
 
    public DRCValveEnvironment()
    {
-      this(0.5, 0.0, 1.0);
+      this(0.5, 0.0, 1.0, 0.0);
    }
    
-   public DRCValveEnvironment(double valveX, double valveY, double valveZ)
+   public DRCValveEnvironment(double valveX, double valveY, double valveZ, double valveYaw_degrees)
    {
       double forceVectorScale = 1.0 / 50.0;
 
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
-      valveRobot.add(createValve(valveX, valveY, valveZ));
+      valveRobot.add(createValve(valveX, valveY, valveZ, valveYaw_degrees));
 
       for (int i = 0; i < valveRobot.size(); i++)
       {
@@ -47,13 +47,13 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       }
    }
    
-   private ContactableValveRobot createValve(double x, double y, double z)
+   private ContactableValveRobot createValve(double x, double y, double z, double yaw_degrees)
    {
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
       Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(0), Math.toRadians(0), Math.toRadians(0));
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
       ContactableValveRobot valve = new ContactableValveRobot("valveRobot",ValveType.BIG_VALVE,0.5,valvePose);
