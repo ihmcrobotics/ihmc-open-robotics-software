@@ -89,7 +89,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    }
    
    
-//   @Ignore
+   @Ignore
    @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
