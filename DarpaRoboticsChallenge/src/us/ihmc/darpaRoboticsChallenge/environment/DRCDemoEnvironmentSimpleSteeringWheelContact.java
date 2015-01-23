@@ -146,7 +146,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       TerrainObject3D terrainObject = env.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject.getLinkGraphics());
 
-      scs.addDynamicGraphicObjectListRegistries(yoGraphicsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setGroundVisible(false);
 
       scs.startOnAThread();
