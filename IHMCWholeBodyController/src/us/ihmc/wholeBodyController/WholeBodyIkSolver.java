@@ -108,7 +108,7 @@ public class WholeBodyIkSolver
    private final Vector64F      prefered_joint_pose;
 
    private final InverseDynamicsJointStateCopier actualModelJointCopier;
-   private final InverseDynamicsJointStateCopier desiredModelJointCopier;
+
 
    private final Vector64F q_init;
 
@@ -213,7 +213,6 @@ public class WholeBodyIkSolver
       actualFrames  = new ReferenceFrames(actual_sdf_model);
 
       actualModelJointCopier = new InverseDynamicsJointStateCopier(actual_sdf_model.getElevator(), working_sdf_model.getElevator());
-      desiredModelJointCopier = new InverseDynamicsJointStateCopier(working_sdf_model.getElevator(), working_sdf_model.getElevator());
 
       //----------- STEP A: find, copy and load the urdf file --------------------------------
 
@@ -650,9 +649,9 @@ public class WholeBodyIkSolver
    }
 
 
-   public int compute(SDFFullRobotModel robotModelToPack) throws Exception
+   public int compute(SDFFullRobotModel desiredRobotModelToPack) throws Exception
    {
-      return compute( robotModelToPack, ComputeOption.USE_JOINTS_CACHE);
+      return compute( desiredRobotModelToPack, ComputeOption.USE_JOINTS_CACHE);
    }
 
    public int compute( Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
@@ -675,9 +674,9 @@ public class WholeBodyIkSolver
       return ret;
    }
 
-   public int compute(SDFFullRobotModel robotModelToPack, ComputeOption opt) throws Exception
+   public int compute(SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
    {
-      if( robotModelToPack == actual_sdf_model)
+      if( desiredRobotModelToPack == actual_sdf_model)
       {
          throw new Exception(" the output of compute should not be a reference to actual_sdf_model");
       }
@@ -732,7 +731,7 @@ public class WholeBodyIkSolver
          //do nothing, the cache is used by default.
       }
 
-      int ret = computeImpl(robotModelToPack);
+      int ret = computeImpl(desiredRobotModelToPack);
 
       if(opt != ComputeOption.RESEED)
       {
@@ -753,7 +752,7 @@ public class WholeBodyIkSolver
       task_com_position.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
    }
 
-   synchronized private int computeImpl(SDFFullRobotModel robotModelToPack)
+   synchronized private int computeImpl(SDFFullRobotModel desiredRobotModelToPack)
    {
       updateDesiredSDFFullRobotModelToActual();
 
@@ -795,9 +794,9 @@ public class WholeBodyIkSolver
 
          movePelvisToHaveOverlappingFeet( actual_sdf_model, working_sdf_model);
 
-         if(robotModelToPack != null){
-            updatePackModelToDesired(robotModelToPack);
-            robotModelToPack.updateFrames();
+         if(desiredRobotModelToPack != null){
+            updatePackModelToDesired(desiredRobotModelToPack);
+            desiredRobotModelToPack.updateFrames();
          }
 
       }
@@ -839,7 +838,7 @@ public class WholeBodyIkSolver
       RigidBodyTransform parentToBody = new RigidBodyTransform();
       parentToBody.multiply(parentToRoot, rootToJoint);
 
-      return ReferenceFrame.constructBodyZUpFrameWithUnchangingTransformToParent(jointName, parentFrame, parentToBody);
+      return ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(jointName, parentFrame, parentToBody);
    }
 
    public ReferenceFrame getDesiredPelvisFrame(ReferenceFrame parentFrame)
@@ -901,10 +900,32 @@ public class WholeBodyIkSolver
 
    private void updatePackModelToDesired(SDFFullRobotModel sdfFullRobotModelToPack)
    {  
-      desiredModelJointCopier.setRigidBodies(working_sdf_model.getElevator(), sdfFullRobotModelToPack.getElevator());
+      InverseDynamicsJointStateCopier desiredModelJointCopier = new InverseDynamicsJointStateCopier(
+            working_sdf_model.getElevator(), 
+            sdfFullRobotModelToPack.getElevator());
       desiredModelJointCopier.copy();
    }
 
+   public ControlledDoF getNumberOfControlledDoF(RobotSide side)
+   {
+         if( task_end_effector_translations.get(side).isEnabled() )
+         {
+            if( task_end_effector_rotations.get(side).isEnabled() )
+            {
+               if( disabledtHandRotationY.get(side).isTrue() ){
+                  return ControlledDoF.DOF_3P2R;
+               }
+               else{
+                  return ControlledDoF.DOF_3P3R;
+               }
+            }
+            else{
+               return ControlledDoF.DOF_3P;
+            }
+         }
+         return ControlledDoF.DOF_NONE;
+   }
+   
    public void setNumberOfControlledDoF(RobotSide side, ControlledDoF dof)
    {
       switch( dof )
