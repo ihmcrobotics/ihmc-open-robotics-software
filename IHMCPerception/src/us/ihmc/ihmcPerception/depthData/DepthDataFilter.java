@@ -26,7 +26,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class DepthDataFilter
 {
-	private static final boolean USE_SIMPLIFIED_QUAD_TREE = false;
+	private static final boolean USE_SIMPLIFIED_QUAD_TREE = true;
 	
    public static final int OCTREE_MIN_BOXES = 20000;
    public static final int OCTREE_MAX_BOXES = 100000;
