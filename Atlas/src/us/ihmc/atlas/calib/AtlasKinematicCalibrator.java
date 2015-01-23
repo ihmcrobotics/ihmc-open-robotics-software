@@ -8,7 +8,7 @@ import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelVisualizer;
+import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -25,7 +25,7 @@ public class AtlasKinematicCalibrator
    protected final OneDoFJoint[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();
    protected final ArrayList<Map<String, Double>> qout = new ArrayList<>();
-   private SDFFullRobotModelVisualizer visualizer = null;
+   private FullRobotModelVisualizer visualizer = null;
    final static int RESIDUAL_DOF = 6;
    final static boolean DEBUG = false;
 
@@ -41,7 +41,6 @@ public class AtlasKinematicCalibrator
       registry = robot.getRobotsYoVariableRegistry();
       fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();
-      yoIndex = new IntegerYoVariable("index", registry);
 
    }
 
@@ -55,16 +54,16 @@ public class AtlasKinematicCalibrator
 
    protected void createDisplay(int bufferSize)
    {
-      visualizer = new SDFFullRobotModelVisualizer(robot, 1, 0.01); //100hz sample rate
-      visualizer.setMainRegistry(registry, fullRobotModel, null);
-
       scs = new SimulationConstructionSet(robot, bufferSize);
+      visualizer = new FullRobotModelVisualizer(scs, fullRobotModel, 0.01); //100hz sample rate
+      
       scs.setGroundVisible(false);
-      visualizer.registerSCS(scs);
       setupDynamicGraphicObjects();
 
       scs.startOnAThread();
       scs.maximizeMainWindow();
+      
+      yoIndex = new IntegerYoVariable("index", visualizer.getRobotRegistry());
    }
 
 
@@ -78,7 +77,7 @@ public class AtlasKinematicCalibrator
     */
    protected void displayUpdate(int index)
    {
-      yoIndex.set(index);
+      yoIndex.set(index);    
       updateDynamicGraphicsObjects(index);
       visualizer.update(1);
    }

@@ -18,30 +18,45 @@ import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class SDFFullRobotModelVisualizer implements RobotVisualizer
+/*
+ * Simple class that makes simpler to visualize a FullRobotModel inside the SimulationConstructionSet.
+ * Basically it keeps in synch the whole body state of the FullRobotModel and the SDFRobot.
+ * The user shall call the method update(...) when he wants the data to refreshed on the SDF side.
+ * The main registry is added automatically by the constructor and can be accessed using getRobotRegistry().  
+ */
+
+public class FullRobotModelVisualizer implements RobotVisualizer
 {
    private final String name;
    private final SDFRobot robot;
-   private final double estimatorDT;
+   private final double updateDT;
+
 
    private SimulationConstructionSet scs;
-   
+   private YoVariableRegistry robotRegistry;
    private SixDoFJoint rootJoint;
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
   
-   public SDFFullRobotModelVisualizer(SDFRobot robot, int estimatorTicksPerSCSTickAndUpdate, double estimatorDT)
-   {
-	   
-      this.name = robot.getName() + "SimulatedSensorReader";
-      
-      this.robot = robot;
-      this.estimatorDT = estimatorDT;
+   public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
+   {   
+      this.scs = scs;
+      this.robot = (SDFRobot) scs.getRobots()[0];
+      this.name = robot.getName() + "Simulated";    
+      this.updateDT = updateDT;
+      this.robotRegistry = robot.getRobotsYoVariableRegistry();
+      this.setMainRegistry(robotRegistry, fullRobotModel, null);
    }
 
-   public void registerSCS(SimulationConstructionSet scs)
+   public SDFRobot getSDFRobot()
    {
-      this.scs = scs;
+      return robot;
    }
+   
+   public YoVariableRegistry getRobotRegistry()
+   {
+      return robotRegistry;
+   }
+
    
    public void initialize()
    {
@@ -52,6 +67,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
       return null;
    }
    
+   @Override
    public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.rootJoint = fullRobotModel.getRootJoint();
@@ -68,8 +84,10 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
          this.revoluteJoints.add(jointPair);
       }
       
-      robot.addYoVariableRegistry(registry);
-      
+      if( robot.getRobotsYoVariableRegistry() != registry)
+      {
+         robot.addYoVariableRegistry(registry); 
+      }
    }
 
    public String getName()
@@ -85,6 +103,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    
    private final Vector3d tempPosition = new Vector3d();
    private final Quat4d tempOrientation = new Quat4d();
+   
    public void update(long timestamp)
    {
       if(rootJoint != null)
@@ -104,7 +123,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
          pinJoint.setQd(revoluteJoint.getQd());
          pinJoint.setTau(revoluteJoint.getTau());
       }
-      robot.setTime(robot.getTime() + estimatorDT);
+      robot.setTime(robot.getTime() + updateDT);
       if (scs != null)
       {
          scs.tickAndUpdate();
@@ -127,4 +146,5 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    {
       robot.addYoVariableRegistry(registry);
    }
+
 }

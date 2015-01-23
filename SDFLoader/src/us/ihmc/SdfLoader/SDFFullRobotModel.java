@@ -344,6 +344,25 @@ public class SDFFullRobotModel implements FullRobotModel
 			}
 		}
 	}
+   
+   public void getJointAngles(RobotSide side, LimbName limb, double[] q) 
+   {
+      int i = 0;
+      if( limb == LimbName.ARM){
+         for ( OneDoFJoint jnt : armJointIDsList.get( side ) )
+         {
+            q[i] = jnt.getQ( );
+            i++;
+         }
+      }
+      else if( limb == LimbName.LEG){
+         for ( OneDoFJoint jnt : legJointIDsList.get( side ) )
+         {
+            q[i] = jnt.getQ( );
+            i++;
+         }
+      }
+   }
 
    public void copyJointAnglesAcrossSide(RobotSide sourceSide, LimbName limb)
    {
@@ -629,6 +648,49 @@ public class SDFFullRobotModel implements FullRobotModel
          System.err.println("SDFFullRobotModel getSensorReferenceFrameByLink: got null for linkName: " + linkName);
       }
       return sensorFrames.get(linkName);
+   }
+   
+   public void copyAllJointsButMaintainOneFootFixed( OneDoFJoint[] joints, RobotSide sideOfSole )
+   {
+      int numJoints = getOneDoFJoints().length;
+      double [] angles = new double[numJoints];
+
+      for (int i=0; i<numJoints; i++)
+      {
+         angles[i] = joints[i].getQ();  
+      }
+      copyAllJointsButMaintainOneFootFixed( angles, sideOfSole);
+   }
+
+   
+   public void copyAllJointsButMaintainOneFootFixed (double[] jointsAngles, RobotSide sideOfSole )
+   {
+      int numJoints = getOneDoFJoints().length;
+      
+      // to be done BEFORE modifying the model
+      RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
+      
+      for (int i=0; i<numJoints; i++)
+      {
+         getOneDoFJoints()[i].setQ( jointsAngles[i] );
+      }
+
+      this.updateFrames();
+      
+      ReferenceFrame footFrame   = getSoleFrame(sideOfSole);
+      ReferenceFrame pelvisFrame = getRootJoint().getFrameAfterJoint();
+      
+      RigidBodyTransform footToPelvis = pelvisFrame.getTransformToDesiredFrame( footFrame );
+
+      RigidBodyTransform worldToPelvis = new RigidBodyTransform();
+      worldToPelvis.multiply( worldToFoot, footToPelvis );
+
+      getRootJoint().setPositionAndRotation(worldToPelvis);
+      
+      this.updateFrames();
+      RigidBodyTransform worldToFoot2  = getSoleFrame(sideOfSole).getTransformToWorldFrame();  
+      
+      System.out.println("\nfootA:\n"+ worldToFoot + "footB:\n"+ worldToFoot2 );
    }
    
 }
