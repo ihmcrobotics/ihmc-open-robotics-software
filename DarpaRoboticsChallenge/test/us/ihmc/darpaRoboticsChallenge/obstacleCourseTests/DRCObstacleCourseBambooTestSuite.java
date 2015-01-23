@@ -21,6 +21,6 @@ public class DRCObstacleCourseBambooTestSuite
    public static void main(String[] args)
    {
       String packageName = "us.ihmc.darpaRoboticsChallenge.obstacleCourseTests";
-      System.out.println(JUnitTestSuiteGenerator.createTestSuite("DRCObstacleCourseBambooTestSuite", packageName));
+      System.out.println(JUnitTestSuiteGenerator.createTestSuite("DRCObstacleCourseBambooTestSuite", packageName, "test/"));
    }
 }

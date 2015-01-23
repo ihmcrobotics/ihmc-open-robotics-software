@@ -16,6 +16,6 @@ public class AtlasObstacleCourseBambooTestSuite
    public static void main(String[] args)
    {
       String packageName = "us.ihmc.atlas.ObstacleCourseTests";
-      System.out.println(JUnitTestSuiteGenerator.createTestSuite("AtlasObstacleCourseBambooTestSuite", packageName));
+      System.out.println(JUnitTestSuiteGenerator.createTestSuite("AtlasObstacleCourseBambooTestSuite", packageName, "test/"));
    }
 }
