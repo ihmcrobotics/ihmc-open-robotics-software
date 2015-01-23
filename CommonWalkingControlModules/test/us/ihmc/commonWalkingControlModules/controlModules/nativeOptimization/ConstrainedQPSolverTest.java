@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

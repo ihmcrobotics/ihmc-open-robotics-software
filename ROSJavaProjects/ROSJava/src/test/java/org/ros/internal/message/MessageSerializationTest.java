@@ -18,7 +18,7 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Before;
@@ -27,7 +27,7 @@ import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

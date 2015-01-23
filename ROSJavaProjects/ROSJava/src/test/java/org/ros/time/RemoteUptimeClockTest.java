@@ -18,11 +18,11 @@ package org.ros.time;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.Callable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.time.RemoteUptimeClock.LocalUptimeProvider;
-
-import java.util.concurrent.Callable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

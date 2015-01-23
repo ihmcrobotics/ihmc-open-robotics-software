@@ -22,7 +22,6 @@ import javax.swing.JTextField;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-
 import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;

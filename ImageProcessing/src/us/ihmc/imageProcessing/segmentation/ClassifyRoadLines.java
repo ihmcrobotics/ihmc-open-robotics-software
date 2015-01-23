@@ -1,10 +1,5 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.alg.feature.shapes.ShapeFittingOps;
-import boofcv.alg.feature.shapes.SplitMergeLineFitLoop;
-import boofcv.alg.filter.binary.Contour;
-import boofcv.struct.PointIndex_I32;
-import boofcv.struct.image.ImageSInt32;
 import georegression.geometry.UtilLine2D_F64;
 import georegression.metric.UtilAngle;
 import georegression.struct.line.LineParametric2D_F64;
@@ -12,11 +7,18 @@ import georegression.struct.line.LinePolar2D_F64;
 import georegression.struct.line.LineSegment2D_F64;
 import georegression.struct.line.LineSegment2D_I32;
 import georegression.struct.point.Point2D_I32;
-import org.ddogleg.sorting.QuickSelect;
-import org.ddogleg.struct.FastQueue;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ddogleg.sorting.QuickSelect;
+import org.ddogleg.struct.FastQueue;
+
+import boofcv.alg.feature.shapes.ShapeFittingOps;
+import boofcv.alg.feature.shapes.SplitMergeLineFitLoop;
+import boofcv.alg.filter.binary.Contour;
+import boofcv.struct.PointIndex_I32;
+import boofcv.struct.image.ImageSInt32;
 
 /**
  * @author Peter Abeles

@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.topic;
 
+import java.util.List;
+
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
-
-import java.util.List;
 
 /**
  * Base definition of a {@link TopicSystemState}.

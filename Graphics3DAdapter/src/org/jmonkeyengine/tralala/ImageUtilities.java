@@ -1,12 +1,4 @@
 package org.jmonkeyengine.tralala;
-import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetKey;
-import com.jme3.asset.AssetManager;
-import com.jme3.material.RenderState.BlendMode;
-import com.jme3.math.FastMath;
-import com.jme3.texture.Texture;
-import com.jme3.texture.Texture2D;
-import com.jme3.texture.plugins.AWTLoader;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -18,7 +10,17 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.imageio.ImageIO;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetKey;
+import com.jme3.asset.AssetManager;
+import com.jme3.material.RenderState.BlendMode;
+import com.jme3.math.FastMath;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
+import com.jme3.texture.plugins.AWTLoader;
 
 public class ImageUtilities
 {

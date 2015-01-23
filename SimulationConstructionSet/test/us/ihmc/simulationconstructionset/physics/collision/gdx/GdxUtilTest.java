@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.physics.collision.gdx;
 
 import static org.junit.Assert.assertEquals;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import org.junit.Test;
+
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.badlogic.gdx.math.Matrix4;
 

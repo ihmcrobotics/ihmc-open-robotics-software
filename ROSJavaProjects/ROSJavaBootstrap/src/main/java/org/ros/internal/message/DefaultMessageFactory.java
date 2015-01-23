@@ -16,11 +16,11 @@
 
 package org.ros.internal.message;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageFactory;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -16,7 +16,7 @@
 
 package org.ros.internal.transport.queue;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +32,7 @@ import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
 
-import java.util.concurrent.ExecutorService;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

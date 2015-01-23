@@ -5,10 +5,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
-import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 
 public class MultiThreadedRobotControllerExecutor implements RobotControllerExecutor
 {

@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.Sets;
+import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +18,7 @@ import org.mockito.Mockito;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.Subscriber;
 
-import java.net.URI;
+import com.google.common.collect.Sets;
 
 /**
  * Tests for the {@link MasterRegistrationManagerImpl}.

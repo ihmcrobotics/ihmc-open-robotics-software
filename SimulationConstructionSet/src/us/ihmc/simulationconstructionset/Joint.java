@@ -2,18 +2,17 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
-import us.ihmc.utilities.kinematics.CommonJoint;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.utilities.kinematics.CommonJoint;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 

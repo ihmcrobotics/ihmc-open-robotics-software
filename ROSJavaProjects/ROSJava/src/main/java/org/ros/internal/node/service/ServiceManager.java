@@ -16,15 +16,15 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 /**
  * Manages a collection of {@link ServiceServer}s and {@link ServiceClient}s.

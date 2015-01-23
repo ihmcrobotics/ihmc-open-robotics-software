@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import org.ros.internal.node.server.ParameterServer;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.ros.internal.node.server.ParameterServer;
 
 /**
  * XML-RPC endpoint for a parameter server.

@@ -19,6 +19,13 @@ package org.ros.internal.transport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -51,13 +58,6 @@ import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.MessageListener;
-
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

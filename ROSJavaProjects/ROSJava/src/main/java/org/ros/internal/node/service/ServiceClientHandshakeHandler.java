@@ -16,6 +16,9 @@
 
 package org.ros.internal.node.service;
 
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -27,9 +30,6 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.service.ServiceServer;
-
-import java.util.Queue;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Performs a handshake with the connected {@link ServiceServer}.

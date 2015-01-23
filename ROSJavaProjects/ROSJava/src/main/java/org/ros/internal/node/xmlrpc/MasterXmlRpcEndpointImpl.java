@@ -16,7 +16,12 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
@@ -25,12 +30,7 @@ import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 /**
  * A combined XML-RPC endpoint for the master and parameter servers.

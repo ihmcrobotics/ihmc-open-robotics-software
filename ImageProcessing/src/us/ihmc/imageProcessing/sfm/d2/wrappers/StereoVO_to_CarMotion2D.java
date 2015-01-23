@@ -1,14 +1,14 @@
 package us.ihmc.imageProcessing.sfm.d2.wrappers;
 
+import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.se.Se2_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.imageProcessing.sfm.d2.EstimateCarMotion2D;
 import boofcv.abst.sfm.d3.StereoVisualOdometry;
 import boofcv.alg.sfm.overhead.OverheadView;
 import boofcv.struct.calib.StereoParameters;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.MultiSpectral;
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.se.Se2_F64;
-import georegression.struct.se.Se3_F64;
-import us.ihmc.imageProcessing.sfm.d2.EstimateCarMotion2D;
 
 /**
  * @author Peter Abeles

@@ -16,10 +16,10 @@
 
 package org.ros.node.topic;
 
+import java.util.concurrent.TimeUnit;
+
 import org.ros.internal.node.topic.TopicParticipant;
 import org.ros.message.MessageListener;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Subscribes to messages of a given type on a given ROS topic.

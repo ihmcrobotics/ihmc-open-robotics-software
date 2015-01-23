@@ -16,15 +16,15 @@
 
 package org.ros.internal.message;
 
-import com.google.common.base.Preconditions;
+import java.lang.reflect.Proxy;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ros.internal.message.context.MessageContext;
 import org.ros.internal.message.context.MessageContextProvider;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
-import java.lang.reflect.Proxy;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

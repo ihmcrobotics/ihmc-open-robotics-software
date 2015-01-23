@@ -1,9 +1,9 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.io.UtilIO;
-
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import boofcv.io.UtilIO;
 
 /**
  * @author Peter Abeles

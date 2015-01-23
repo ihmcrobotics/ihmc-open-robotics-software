@@ -28,7 +28,6 @@ import javax.swing.border.TitledBorder;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
@@ -39,6 +38,7 @@ import us.ihmc.simulationconstructionset.gui.ViewportPanel;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcher;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class SimulationDispatcherGUI
 {

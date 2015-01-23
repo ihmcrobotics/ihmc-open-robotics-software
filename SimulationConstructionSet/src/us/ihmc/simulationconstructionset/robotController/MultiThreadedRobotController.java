@@ -1,10 +1,9 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 import us.ihmc.simulationconstructionset.PlayCycleListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class MultiThreadedRobotController extends AbstractThreadedRobotController implements RewoundListener, PlayCycleListener
 {

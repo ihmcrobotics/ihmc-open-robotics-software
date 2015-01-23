@@ -2,7 +2,6 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -17,6 +16,7 @@ import us.ihmc.graphics3DAdapter.input.MouseButton;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class ClassicCameraController implements TrackingDollyCameraController, KeyListener, MouseListener, SelectedListener
 {

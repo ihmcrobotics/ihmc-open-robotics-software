@@ -16,16 +16,16 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.internal.message.topic.TopicDescription;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 /**
  * A topic in a ROS graph.

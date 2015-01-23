@@ -1,15 +1,21 @@
 package us.ihmc.imageProcessing.driving;
 
-import us.ihmc.imageProcessing.utilities.PostProcessor;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.Line2d;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
+import us.ihmc.imageProcessing.utilities.PostProcessor;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.utilities.math.geometry.Line2d;
 
 /**
  * User: Matt

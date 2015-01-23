@@ -1,5 +1,11 @@
 package us.ihmc.graphics3DAdapter.jme;
 
+import java.io.File;
+
+import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.MaterialExtension;
+import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.MaterialExtensionSet;
+import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.OgreMaterialKey;
+
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.ClasspathLocator;
 import com.jme3.asset.plugins.FileLocator;
@@ -7,11 +13,6 @@ import com.jme3.material.Material;
 import com.jme3.material.MaterialList;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.MaterialExtension;
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.MaterialExtensionSet;
-import org.jmonkeyengine.scene.plugins.ihmc.ogre.matext.OgreMaterialKey;
-
-import java.io.File;
 
 public class JMEAssetLocator
 {

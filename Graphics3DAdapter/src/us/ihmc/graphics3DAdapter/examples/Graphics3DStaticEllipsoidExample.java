@@ -3,7 +3,6 @@ package us.ihmc.graphics3DAdapter.examples;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -14,6 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.math.geometry.Ellipsoid3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class Graphics3DStaticEllipsoidExample
 {

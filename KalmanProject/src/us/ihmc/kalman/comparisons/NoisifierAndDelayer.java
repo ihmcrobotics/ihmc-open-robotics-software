@@ -2,12 +2,11 @@ package us.ihmc.kalman.comparisons;
 
 import java.util.Random;
 
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class NoisifierAndDelayer implements RobotController, ExampleFunctionController
 {

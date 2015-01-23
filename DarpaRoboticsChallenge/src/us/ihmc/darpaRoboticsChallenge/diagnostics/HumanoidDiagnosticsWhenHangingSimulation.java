@@ -25,10 +25,10 @@ import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController.DiagnosticsWhenHangingState;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidDiagnosticsWhenHangingAnalyzer;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController.DiagnosticsWhenHangingState;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class HumanoidDiagnosticsWhenHangingSimulation

@@ -16,14 +16,14 @@
 
 package org.ros.master.uri;
 
-import com.google.common.collect.Lists;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.collect.Lists;
 
 /**
  * A proxying {@link MasterUriProvider} which can be switched between providers.

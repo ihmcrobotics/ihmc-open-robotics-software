@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver;
 
 public class CompositeActiveSetQPSolver extends ConstrainedQPSolver {
    

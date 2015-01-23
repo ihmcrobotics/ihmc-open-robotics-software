@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,8 +39,7 @@ import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
-import java.net.URI;
-import java.util.concurrent.ScheduledExecutorService;
+import com.google.common.base.Preconditions;
 
 /**
  * Default implementation of a {@link ServiceServer}.

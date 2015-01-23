@@ -18,14 +18,14 @@ package org.ros;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is a base class for tests that sets up and tears down a {@link RosCore}

@@ -1,13 +1,12 @@
 package us.ihmc.imageProcessing.driving;
 
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.Line2d;
+import java.awt.Dimension;
+import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+
+import us.ihmc.utilities.math.geometry.Line2d;
 
 /**
  * User: Matt

@@ -16,13 +16,13 @@
 
 package org.ros.internal.node;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.Topics;
 import org.ros.node.topic.Publisher;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.

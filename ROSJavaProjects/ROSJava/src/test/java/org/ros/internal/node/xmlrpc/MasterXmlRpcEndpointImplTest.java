@@ -21,7 +21,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.List;
 
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -29,8 +30,7 @@ import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for the {@link MasterXmlRpcEndpointImpl}.

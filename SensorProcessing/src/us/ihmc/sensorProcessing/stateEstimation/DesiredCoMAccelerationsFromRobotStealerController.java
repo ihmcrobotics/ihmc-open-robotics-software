@@ -4,6 +4,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -17,9 +19,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class DesiredCoMAccelerationsFromRobotStealerController implements RobotController
 {

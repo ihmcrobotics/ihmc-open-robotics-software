@@ -1,5 +1,9 @@
 package us.ihmc.imageProcessing.segmentation;
 
+import java.awt.image.BufferedImage;
+
+import javax.swing.JPanel;
+
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.UtilIO;
@@ -7,9 +11,6 @@ import boofcv.io.image.UtilImageIO;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
-
-import javax.swing.*;
-import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles

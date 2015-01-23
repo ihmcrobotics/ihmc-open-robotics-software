@@ -1,9 +1,9 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
+import java.util.ArrayList;
+
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.utilities.Pair;
-
-import java.util.ArrayList;
 
 public class HeightBasedTerrainBlend extends YoAppearanceTransparent
 {

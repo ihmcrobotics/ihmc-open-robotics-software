@@ -16,14 +16,14 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.node.topic.Publisher;
 
-import java.util.concurrent.ScheduledExecutorService;
+import com.google.common.base.Preconditions;
 
 /**
  * Repeatedly send a message out on a given {@link Publisher}.

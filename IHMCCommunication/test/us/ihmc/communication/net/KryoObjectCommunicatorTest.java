@@ -15,11 +15,6 @@ import javax.vecmath.Vector3d;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.communication.net.KryoObjectClient;
-import us.ihmc.communication.net.KryoObjectServer;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.utilities.ThreadTools;
 
 import com.esotericsoftware.minlog.Log;

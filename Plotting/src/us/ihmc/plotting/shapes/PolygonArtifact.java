@@ -1,13 +1,15 @@
 package us.ihmc.plotting.shapes;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point2d;
+
 import us.ihmc.plotting.Artifact;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-
-import javax.vecmath.Point2d;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PolygonArtifact extends Artifact
 {

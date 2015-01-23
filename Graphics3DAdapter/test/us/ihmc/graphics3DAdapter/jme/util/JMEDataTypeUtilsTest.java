@@ -2,14 +2,10 @@ package us.ihmc.graphics3DAdapter.jme.util;
 
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.test.JUnitTools;
-
-import com.jme3.math.Transform;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class JMEDataTypeUtilsTest
 {

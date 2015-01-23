@@ -16,6 +16,8 @@
 
 package org.ros.internal.message;
 
+import java.util.List;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.context.MessageContext;
@@ -25,8 +27,6 @@ import org.ros.internal.message.field.MessageFields;
 import org.ros.message.Duration;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
-
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -4,7 +4,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 
 public class ResizeViewportDialogGenerator implements ResizeViewportDialogConstructor

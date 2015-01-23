@@ -16,14 +16,14 @@
 
 package org.ros.internal.message.definition;
 
-import com.google.common.base.Preconditions;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.field.PrimitiveFieldType;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
+import com.google.common.base.Preconditions;
 
 /**
  * Parses message definitions and invokes a {@link MessageDefinitionVisitor} for

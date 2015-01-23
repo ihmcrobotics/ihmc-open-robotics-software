@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 /**
  * Factory for creating collision shapes

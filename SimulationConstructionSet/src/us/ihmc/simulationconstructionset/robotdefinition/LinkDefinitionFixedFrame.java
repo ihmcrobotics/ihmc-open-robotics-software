@@ -5,7 +5,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
-
 import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 
 public class LinkDefinitionFixedFrame

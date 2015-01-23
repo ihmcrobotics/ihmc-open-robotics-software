@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -39,8 +40,6 @@ import us.ihmc.yoUtilities.stateMachines.StateMachinesJPanel;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public abstract class RegularWalkingGaitAbstractController implements RobotController
 {

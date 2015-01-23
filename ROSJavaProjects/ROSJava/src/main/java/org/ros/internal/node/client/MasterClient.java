@@ -16,6 +16,9 @@
 
 package org.ros.internal.node.client;
 
+import java.net.URI;
+import java.util.List;
+
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.SystemStateResultFactory;
@@ -38,9 +41,6 @@ import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-
-import java.net.URI;
-import java.util.List;
 
 /**
  * Provides access to the XML-RPC API exposed by a {@link MasterServer}.

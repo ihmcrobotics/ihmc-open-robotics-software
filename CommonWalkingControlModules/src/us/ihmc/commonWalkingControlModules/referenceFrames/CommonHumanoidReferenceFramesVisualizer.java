@@ -3,13 +3,12 @@ package us.ihmc.commonWalkingControlModules.referenceFrames;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class CommonHumanoidReferenceFramesVisualizer implements Updatable, RobotController
 {

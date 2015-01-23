@@ -16,13 +16,13 @@
 
 package org.ros.internal.node.server.master;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import java.net.URI;
+import java.util.Set;
 
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 /**
  * Information a master needs about a node.

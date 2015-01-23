@@ -16,17 +16,17 @@
 
 package org.ros.internal.node.response;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import org.ros.master.client.SystemState;
-import org.ros.master.client.TopicSystemState;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.ros.master.client.SystemState;
+import org.ros.master.client.TopicSystemState;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * A {@link ResultFactory} to take an object and turn it into a

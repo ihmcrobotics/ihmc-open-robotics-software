@@ -16,10 +16,10 @@
 
 package org.ros.internal.transport.queue;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.MessageDeserializer;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Lazily deserializes a message on the first call to {@link #get()} and caches

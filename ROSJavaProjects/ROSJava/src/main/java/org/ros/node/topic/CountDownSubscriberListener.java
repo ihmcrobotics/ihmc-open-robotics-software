@@ -16,12 +16,11 @@
 
 package org.ros.node.topic;
 
-import org.ros.internal.node.topic.PublisherIdentifier;
-
-import org.ros.internal.node.CountDownRegistrantListener;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.ros.internal.node.CountDownRegistrantListener;
+import org.ros.internal.node.topic.PublisherIdentifier;
 
 /**
  * A {@link SubscriberListener} which uses separate {@link CountDownLatch}

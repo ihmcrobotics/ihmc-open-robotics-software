@@ -16,17 +16,17 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import java.util.Collection;
+import java.util.Map;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.util.Collection;
-import java.util.Map;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 /**
  * Manages a collection of {@link Publisher}s and {@link Subscriber}s.

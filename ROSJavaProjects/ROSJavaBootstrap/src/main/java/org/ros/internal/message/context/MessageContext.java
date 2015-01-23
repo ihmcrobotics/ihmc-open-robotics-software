@@ -16,17 +16,17 @@
 
 package org.ros.internal.message.context;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.internal.message.field.FieldFactory;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Encapsulates the immutable metadata that describes a message type.

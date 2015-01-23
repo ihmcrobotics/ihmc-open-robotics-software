@@ -16,15 +16,15 @@
 
 package org.ros.internal.node.parameter;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.namespace.GraphName;
 import org.ros.node.parameter.ParameterListener;
 
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

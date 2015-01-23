@@ -16,14 +16,14 @@
 
 package org.ros.internal.node.topic;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
-
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A factory for {@link Publisher} instances.

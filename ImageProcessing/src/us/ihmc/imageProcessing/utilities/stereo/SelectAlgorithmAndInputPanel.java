@@ -18,13 +18,9 @@
 
 package us.ihmc.imageProcessing.utilities.stereo;
 
-import boofcv.gui.image.ImagePanel;
-import boofcv.io.MediaManager;
-import boofcv.io.PathLabel;
-import boofcv.io.wrapper.DefaultMediaManager;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -34,6 +30,19 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.Box;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
+
+import boofcv.gui.image.ImagePanel;
+import boofcv.io.MediaManager;
+import boofcv.io.PathLabel;
+import boofcv.io.wrapper.DefaultMediaManager;
 
 
 /**

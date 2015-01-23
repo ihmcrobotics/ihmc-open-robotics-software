@@ -10,23 +10,15 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.zip.GZIPOutputStream;
 
-import javax.xml.stream.events.Namespace;
-
-import org.tmatesoft.sqljet.core.internal.lang.SqlParser.numeric_literal_value_return;
+import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.jmatio.io.MatFileIncrementalWriter;
-import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLStructure;
-
-import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileWriter
 {

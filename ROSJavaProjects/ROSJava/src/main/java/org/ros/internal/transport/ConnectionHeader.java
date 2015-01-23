@@ -16,8 +16,10 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +27,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.MessageBuffers;
 
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

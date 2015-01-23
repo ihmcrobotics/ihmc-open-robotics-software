@@ -16,17 +16,17 @@
 
 package org.ros.node;
 
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.ros.internal.node.parameter.DefaultParameterTree;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
-
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

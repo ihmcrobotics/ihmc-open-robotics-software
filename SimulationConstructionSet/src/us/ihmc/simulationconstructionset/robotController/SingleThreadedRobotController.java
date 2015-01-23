@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class SingleThreadedRobotController extends AbstractThreadedRobotController
 {

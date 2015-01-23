@@ -6,12 +6,12 @@ import georegression.struct.se.Se3_F64;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 
 import us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3D;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.GeoregressionConversionTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class WheelRotationEstimator extends IcpCloud3D
 {

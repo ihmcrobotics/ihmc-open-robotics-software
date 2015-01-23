@@ -1,14 +1,9 @@
 package us.ihmc.atlas.physics;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.utilities.math.geometry.TransformTools;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -17,6 +12,10 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TransformTools;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
  * @author Peter Abeles

@@ -1,6 +1,7 @@
 package us.ihmc.imageProcessing.segmentation;
 
 import georegression.struct.point.Point2D_F64;
+
 import org.ddogleg.sorting.QuickSelect;
 import org.ddogleg.struct.FastQueue;
 import org.ddogleg.struct.GrowQueue_F64;

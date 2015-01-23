@@ -16,10 +16,10 @@
 
 package org.ros.internal.message.definition;
 
+import java.util.List;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
-import java.util.List;
 
 /**
  * Splits message definitions tuples (e.g. service definitions) into separate

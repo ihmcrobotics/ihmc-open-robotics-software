@@ -1,9 +1,11 @@
 package us.ihmc.utilities.ros.publisher;
 
+import java.util.List;
+
 import org.ros.message.Time;
+
 import sensor_msgs.JointState;
 import std_msgs.Header;
-import java.util.List;
 
 public class RosJointStatePublisher extends RosTopicPublisher<JointState>
 {

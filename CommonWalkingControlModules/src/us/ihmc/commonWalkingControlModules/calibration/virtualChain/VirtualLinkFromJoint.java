@@ -4,10 +4,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import us.ihmc.simulationconstructionset.Joint;
 
 public abstract class VirtualLinkFromJoint
 {

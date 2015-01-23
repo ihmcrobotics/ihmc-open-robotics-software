@@ -6,10 +6,10 @@ import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class HandJointAngleCommunicator implements RawOutputWriter

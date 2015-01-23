@@ -16,8 +16,6 @@
 
 package org.ros.concurrent;
 
-import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -31,6 +29,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import com.google.common.collect.Lists;
 
 /**
  * This wraps a {@link Executors#newCachedThreadPool()} and a

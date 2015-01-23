@@ -4,14 +4,11 @@ package us.ihmc.exampleSimulations.exampleContact;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.RandomTools;
-
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -21,6 +18,8 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCyli
 import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class ExampleContactSimulationWithMultipleObjects
 {

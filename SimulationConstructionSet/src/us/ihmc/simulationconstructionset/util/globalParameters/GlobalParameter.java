@@ -2,10 +2,9 @@ package us.ihmc.simulationconstructionset.util.globalParameters;
 
 import java.util.ArrayList;
 
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 
 public abstract class GlobalParameter

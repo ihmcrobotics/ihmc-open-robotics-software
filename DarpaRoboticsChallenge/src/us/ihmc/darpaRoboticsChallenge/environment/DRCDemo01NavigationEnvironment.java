@@ -11,11 +11,6 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
-import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.math.geometry.Box3d;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
@@ -26,6 +21,10 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrain
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
+import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.math.geometry.Box3d;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
 {

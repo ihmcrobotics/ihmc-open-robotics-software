@@ -16,8 +16,9 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Set;
 
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
@@ -25,9 +26,8 @@ import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 /**
  * All information needed to identify a publisher.

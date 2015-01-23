@@ -1,16 +1,18 @@
 package us.ihmc.imageProcessing.sfm;
 
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.struct.calib.IntrinsicParameters;
 import georegression.geometry.GeometryMath_F64;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.ejml.data.DenseMatrix64F;
 
 import java.awt.image.BufferedImage;
+
+import org.ejml.data.DenseMatrix64F;
+
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  * Uses a transform from ground to left camera to transform the image view into an overhead view.

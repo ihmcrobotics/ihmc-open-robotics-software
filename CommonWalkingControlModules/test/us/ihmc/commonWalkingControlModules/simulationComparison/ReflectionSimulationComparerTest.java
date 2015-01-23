@@ -14,11 +14,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.MemoryTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -28,6 +23,10 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
+import us.ihmc.utilities.MemoryTools;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class ReflectionSimulationComparerTest
 {

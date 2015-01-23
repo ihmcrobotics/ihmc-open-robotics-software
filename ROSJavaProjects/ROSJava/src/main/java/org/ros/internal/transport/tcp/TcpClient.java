@@ -16,8 +16,11 @@
 
 package org.ros.internal.transport.tcp;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,11 +36,8 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.exception.RosRuntimeException;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

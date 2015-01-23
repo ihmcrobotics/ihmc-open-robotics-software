@@ -8,7 +8,6 @@ import geometry_msgs.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -19,6 +18,7 @@ import org.ros.message.Time;
 
 import std_msgs.Header;
 import tf2_msgs.TFMessage;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage> implements RosTfPublisherInterface
 {

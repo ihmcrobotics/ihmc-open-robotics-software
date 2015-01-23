@@ -16,8 +16,6 @@
 
 package org.ros.internal.message.context;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.internal.message.definition.MessageDefinitionParser.MessageDefinitionVisitor;
 import org.ros.internal.message.field.Field;
 import org.ros.internal.message.field.FieldFactory;
@@ -25,6 +23,8 @@ import org.ros.internal.message.field.FieldType;
 import org.ros.internal.message.field.MessageFieldType;
 import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageIdentifier;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

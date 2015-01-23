@@ -2,8 +2,6 @@ package us.ihmc.communication.streamingData;
 
 import java.util.ArrayList;
 
-import us.ihmc.communication.streamingData.StreamingDataConsumer;
-import us.ihmc.communication.streamingData.StreamingDataProducer;
 import us.ihmc.utilities.ThreadTools;
 
 

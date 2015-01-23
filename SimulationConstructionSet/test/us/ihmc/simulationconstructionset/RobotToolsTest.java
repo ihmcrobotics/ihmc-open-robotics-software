@@ -8,10 +8,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
-
-import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 
 public class RobotToolsTest
 {

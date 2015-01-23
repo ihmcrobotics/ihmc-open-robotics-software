@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.DoEver
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SwingSubController;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -12,8 +13,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
-
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SuspendedSwingTestController implements RobotController
 {

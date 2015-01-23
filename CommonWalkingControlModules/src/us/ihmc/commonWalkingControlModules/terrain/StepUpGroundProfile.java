@@ -4,9 +4,8 @@ package us.ihmc.commonWalkingControlModules.terrain;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
-
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 
 public class StepUpGroundProfile extends GroundProfileFromHeightMap

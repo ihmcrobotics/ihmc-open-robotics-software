@@ -9,8 +9,6 @@ import org.openh264.EUsageType;
 
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.utilities.MemoryTools;
-
 import us.ihmc.simulationconstructionset.TimeHolder;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
@@ -20,6 +18,7 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
+import us.ihmc.utilities.MemoryTools;
 
 public class ExportMovie implements ExportMovieCommandExecutor
 {

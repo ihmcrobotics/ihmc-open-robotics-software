@@ -16,12 +16,11 @@
 
 package org.ros.internal.message.service;
 
-import org.ros.internal.message.definition.MessageDefinitionTupleParser;
+import java.util.List;
 
+import org.ros.internal.message.definition.MessageDefinitionTupleParser;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageIdentifier;
-
-import java.util.List;
 
 /**
  * The description of a ROS service.

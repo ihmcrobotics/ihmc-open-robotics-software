@@ -16,10 +16,10 @@
 
 package org.ros.internal.message;
 
+import java.nio.ByteOrder;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-
-import java.nio.ByteOrder;
 
 /**
  * Provides {@link ChannelBuffer}s for serializing and deserializing messages.

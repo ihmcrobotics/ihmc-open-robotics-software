@@ -1,7 +1,6 @@
 package us.ihmc.imageProcessing.segmentation;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceOps;
 
 /**

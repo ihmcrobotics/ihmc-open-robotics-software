@@ -7,10 +7,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.communication.remote.DataObjectClient;
-import us.ihmc.communication.remote.DataObjectServer;
-import us.ihmc.communication.remote.DataObjectTransponder;
-import us.ihmc.communication.remote.IntegerPacket;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.test.JUnitTools;
 

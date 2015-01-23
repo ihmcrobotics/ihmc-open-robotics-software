@@ -16,9 +16,9 @@
 
 package org.ros.rosjava_geometry;
 
-import com.google.common.collect.Lists;
-
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 /**
  * A three dimensional vector.

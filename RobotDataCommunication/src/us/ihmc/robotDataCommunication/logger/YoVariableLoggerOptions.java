@@ -1,8 +1,5 @@
 package us.ihmc.robotDataCommunication.logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
@@ -10,7 +7,6 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.Switch;
-import com.martiansoftware.jsap.UnflaggedOption;
 
 public class YoVariableLoggerOptions
 {

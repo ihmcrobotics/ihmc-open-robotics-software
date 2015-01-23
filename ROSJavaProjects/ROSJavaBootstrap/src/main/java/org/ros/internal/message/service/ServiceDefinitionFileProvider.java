@@ -16,14 +16,13 @@
 
 package org.ros.internal.message.service;
 
-import org.ros.internal.message.definition.MessageDefinitionFileProvider;
+import java.io.File;
+import java.io.FileFilter;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.ros.internal.message.StringFileProvider;
-
-import java.io.File;
-import java.io.FileFilter;
+import org.ros.internal.message.definition.MessageDefinitionFileProvider;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

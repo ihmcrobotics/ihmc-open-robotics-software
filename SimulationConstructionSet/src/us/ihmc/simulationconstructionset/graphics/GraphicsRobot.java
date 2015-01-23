@@ -7,13 +7,13 @@ import java.util.List;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 import us.ihmc.utilities.GraphicsUpdatable;
 import us.ihmc.utilities.kinematics.CommonJoint;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 
 public class GraphicsRobot implements GraphicsUpdatable
 {

@@ -16,9 +16,9 @@
 
 package org.ros.node.topic;
 
-import org.ros.internal.node.topic.TopicParticipant;
-
 import java.util.concurrent.TimeUnit;
+
+import org.ros.internal.node.topic.TopicParticipant;
 
 /**
  * Publishes messages of a given type on a given ROS topic.

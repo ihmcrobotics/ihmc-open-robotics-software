@@ -1,5 +1,10 @@
 package us.ihmc.exampleSimulations.m2;
 
+import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
+import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
+import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
+import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -9,12 +14,6 @@ import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-
-import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
-import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
-import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
-import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class M2ProcessedSensorsControllerWithStateTransitions implements SimulationDoneCriterion, RobotController
 {

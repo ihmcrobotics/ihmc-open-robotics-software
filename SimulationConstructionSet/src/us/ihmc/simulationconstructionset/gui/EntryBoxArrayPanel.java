@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;

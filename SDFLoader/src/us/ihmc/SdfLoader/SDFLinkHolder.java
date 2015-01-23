@@ -3,7 +3,6 @@ package us.ihmc.SdfLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -12,6 +11,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFLinkHolder
 {

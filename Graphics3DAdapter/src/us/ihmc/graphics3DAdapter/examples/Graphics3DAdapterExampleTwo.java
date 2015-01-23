@@ -5,7 +5,6 @@ import java.awt.Canvas;
 import java.awt.Container;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point3d;
@@ -23,6 +22,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class Graphics3DAdapterExampleTwo
 {

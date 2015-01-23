@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import org.apache.commons.lang.mutable.MutableDouble;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedOneDoFJointVelocitySensor extends SimulatedSensor<MutableDouble>

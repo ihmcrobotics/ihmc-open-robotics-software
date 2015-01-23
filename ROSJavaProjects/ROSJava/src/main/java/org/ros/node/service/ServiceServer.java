@@ -16,9 +16,9 @@
 
 package org.ros.node.service;
 
-import org.ros.namespace.GraphName;
-
 import java.net.URI;
+
+import org.ros.namespace.GraphName;
 
 /**
  * Provides a ROS service.

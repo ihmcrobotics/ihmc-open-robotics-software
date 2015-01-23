@@ -16,14 +16,14 @@
 
 package org.ros.node.parameter;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.server.ParameterServer;
 import org.ros.namespace.GraphName;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides access to a {@link ParameterServer}.

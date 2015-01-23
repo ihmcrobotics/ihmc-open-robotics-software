@@ -2,11 +2,10 @@ package us.ihmc.simulationconstructionset.externalcontroller;
 
 import java.util.StringTokenizer;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class ExternalControlServer implements RobotController
 {

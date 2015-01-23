@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.utilities.reflect.RecursiveObjectComparer;
 import us.ihmc.utilities.reflect.StringFieldMatcher;
 import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
@@ -16,10 +19,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
-
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
 /**
  * SimulationComparer wrapper around RecursiveObjectComparer

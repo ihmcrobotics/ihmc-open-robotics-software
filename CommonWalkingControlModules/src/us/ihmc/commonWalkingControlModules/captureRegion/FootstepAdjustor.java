@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.util.List;
 
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -12,8 +13,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
-
-import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * Provides the function adjustFootstep which takes a footstep and a capture region

@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util.simulationRunner;
 
 import java.util.ArrayList;
 
-import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.ThreadTools;
 
 /**
  * <p>Title: </p>

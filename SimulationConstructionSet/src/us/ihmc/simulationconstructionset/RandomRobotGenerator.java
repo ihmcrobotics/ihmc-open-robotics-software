@@ -3,7 +3,6 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
@@ -12,6 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class RandomRobotGenerator
 {

@@ -16,8 +16,14 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,14 +36,8 @@ import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

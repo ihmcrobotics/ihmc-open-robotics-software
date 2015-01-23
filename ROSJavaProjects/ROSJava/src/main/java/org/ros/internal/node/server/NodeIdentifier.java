@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeader;
@@ -24,8 +25,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.google.common.base.Preconditions;
 
 /**
  * A node slave identifier which combines the node name of a node with the URI

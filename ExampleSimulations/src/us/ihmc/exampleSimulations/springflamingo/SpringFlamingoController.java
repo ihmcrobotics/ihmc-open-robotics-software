@@ -5,6 +5,7 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -15,8 +16,6 @@ import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateMachinesJPanel;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * <p>Title: SpringFlamingoController</p>

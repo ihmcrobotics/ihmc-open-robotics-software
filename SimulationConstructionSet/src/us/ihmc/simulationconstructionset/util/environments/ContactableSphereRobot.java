@@ -1,16 +1,15 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
-import us.ihmc.utilities.math.geometry.Sphere3d;
-
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.Sphere3d;
 
 
 public class ContactableSphereRobot extends ContactableRobot

@@ -3,11 +3,10 @@ package us.ihmc.exampleSimulations.recursivePendulum;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.Axis;
-
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.utilities.Axis;
 
 public class RecursivePendulumRobot extends Robot
 {

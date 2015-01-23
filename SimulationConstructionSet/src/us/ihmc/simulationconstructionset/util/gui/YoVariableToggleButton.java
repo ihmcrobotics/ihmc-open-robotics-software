@@ -5,11 +5,10 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
+import us.ihmc.simulationconstructionset.NewDataListener;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-
-import us.ihmc.simulationconstructionset.NewDataListener;
 
 public class YoVariableToggleButton extends JButton implements YoVariableToggleContainer
 {

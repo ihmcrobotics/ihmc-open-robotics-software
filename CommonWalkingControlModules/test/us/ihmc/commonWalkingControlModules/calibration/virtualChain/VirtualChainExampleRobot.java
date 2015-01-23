@@ -5,14 +5,13 @@ import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Axis;
-
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.utilities.Axis;
 
 public abstract class VirtualChainExampleRobot extends Robot implements RobotRandomPositionMover
 {

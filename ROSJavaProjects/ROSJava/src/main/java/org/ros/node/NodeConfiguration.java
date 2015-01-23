@@ -16,7 +16,11 @@
 
 package org.ros.node;
 
-import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
@@ -26,6 +30,7 @@ import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.DefaultMessageFactory;
 import org.ros.internal.message.DefaultMessageSerializationFactory;
+import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.service.ServiceDescriptionFactory;
 import org.ros.internal.message.service.ServiceRequestMessageFactory;
 import org.ros.internal.message.service.ServiceResponseMessageFactory;
@@ -37,12 +42,6 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.time.TimeProvider;
 import org.ros.time.WallTimeProvider;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.

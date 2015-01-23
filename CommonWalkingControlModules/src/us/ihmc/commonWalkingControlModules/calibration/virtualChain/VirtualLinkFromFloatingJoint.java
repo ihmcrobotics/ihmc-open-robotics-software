@@ -3,9 +3,8 @@ package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
-
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 
 public class VirtualLinkFromFloatingJoint extends VirtualLinkFromJoint
 {

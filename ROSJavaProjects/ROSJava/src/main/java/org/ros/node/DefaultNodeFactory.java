@@ -16,12 +16,11 @@
 
 package org.ros.node;
 
-import org.ros.internal.node.DefaultNode;
-
-import org.ros.concurrent.SharedScheduledExecutorService;
-
 import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
+
+import org.ros.concurrent.SharedScheduledExecutorService;
+import org.ros.internal.node.DefaultNode;
 
 /**
  * Constructs {@link DefaultNode}s.

@@ -7,20 +7,19 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.test.JUnitTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class LinearStickSlipGroundContactModelTest
 {

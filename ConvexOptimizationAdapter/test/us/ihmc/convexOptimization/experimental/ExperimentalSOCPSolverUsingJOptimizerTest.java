@@ -8,8 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
-import us.ihmc.convexOptimization.experimental.ExperimentalSOCPSolverUsingJOptimizer;
-
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 

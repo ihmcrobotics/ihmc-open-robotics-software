@@ -3,8 +3,6 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
-
 
 public class CameraMountList implements java.io.Serializable
 {

@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 import java.util.List;
 
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;

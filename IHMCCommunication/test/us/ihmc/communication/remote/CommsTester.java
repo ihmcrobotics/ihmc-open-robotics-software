@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.Serializable;
 
-import us.ihmc.communication.remote.DataObjectTransponder;
-
 abstract class CommsTester<T extends Serializable>
 {
    protected class CommsTesterRunnable implements Runnable

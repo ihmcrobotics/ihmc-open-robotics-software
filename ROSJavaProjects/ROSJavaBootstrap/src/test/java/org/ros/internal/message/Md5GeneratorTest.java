@@ -18,10 +18,9 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
-import org.ros.internal.message.definition.MessageDefinitionProviderChain;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.message.definition.MessageDefinitionProviderChain;
 import org.ros.internal.message.service.ServiceDefinitionResourceProvider;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.message.service.ServiceDescriptionFactory;

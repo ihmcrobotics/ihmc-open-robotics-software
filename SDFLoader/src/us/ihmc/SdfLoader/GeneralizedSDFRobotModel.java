@@ -7,14 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-
 import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {

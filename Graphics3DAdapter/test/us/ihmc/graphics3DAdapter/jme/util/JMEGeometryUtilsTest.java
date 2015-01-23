@@ -1,22 +1,22 @@
 package us.ihmc.graphics3DAdapter.jme.util;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-import org.junit.Test;
-import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import static junit.framework.Assert.assertTrue;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import java.util.Random;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils.transformFromZupToJMECoordinates;
+import org.junit.Test;
+
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 
 /**
  * Created with IntelliJ IDEA.

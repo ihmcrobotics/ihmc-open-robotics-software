@@ -18,8 +18,6 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Lists;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +25,8 @@ import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
 import org.ros.message.Duration;
 import org.ros.message.MessageFactory;
 import org.ros.message.Time;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

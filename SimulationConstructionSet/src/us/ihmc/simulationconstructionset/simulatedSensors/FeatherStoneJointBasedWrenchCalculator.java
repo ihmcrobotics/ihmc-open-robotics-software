@@ -4,10 +4,9 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.screwTheory.Wrench;
-
 import us.ihmc.simulationconstructionset.JointWrenchSensor;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorInterface
 {

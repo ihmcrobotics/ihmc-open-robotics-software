@@ -16,15 +16,15 @@
 
 package org.ros.master.client;
 
+import java.net.URI;
+import java.util.List;
+
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.node.Node;
 import org.ros.node.service.ServiceServer;
-
-import java.net.URI;
-import java.util.List;
 
 /**
  * A remote client for obtaining system information from a master.

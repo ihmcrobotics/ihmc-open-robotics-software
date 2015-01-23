@@ -4,12 +4,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.google.common.util.concurrent.AtomicDouble;
 
 public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrientationPacket>, ChestOrientationProvider
 {

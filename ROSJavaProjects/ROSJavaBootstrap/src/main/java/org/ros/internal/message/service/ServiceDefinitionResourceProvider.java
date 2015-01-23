@@ -16,13 +16,13 @@
 
 package org.ros.internal.message.service;
 
-import com.google.common.base.Preconditions;
+import java.util.Collection;
 
 import org.ros.internal.message.StringResourceProvider;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
-import java.util.Collection;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrameHolder;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 /**
  * Object to hold pressure Point3d and Force Vector3d

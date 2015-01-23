@@ -6,13 +6,12 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
+import us.ihmc.utilities.ThreadTools;
 
 public class NothingChangedVerifier
 {

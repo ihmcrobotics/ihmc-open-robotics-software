@@ -13,11 +13,10 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.Plane3d;
 import us.ihmc.utilities.test.JUnitTools;
-
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class RotatableConvexPolygonTerrainObjectTest
 {

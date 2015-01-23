@@ -10,8 +10,6 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-
 public class BambooToolsTest
 {
    @Test(timeout=300000)

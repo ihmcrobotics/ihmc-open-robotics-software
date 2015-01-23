@@ -16,14 +16,14 @@
 
 package org.ros.address;
 
-import com.google.common.base.Preconditions;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.Callable;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.base.Preconditions;
 
 /**
  * A wrapper for {@link InetSocketAddress} that emphasizes the difference

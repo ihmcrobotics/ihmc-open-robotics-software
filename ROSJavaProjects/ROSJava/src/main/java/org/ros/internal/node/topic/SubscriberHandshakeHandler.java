@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import java.util.concurrent.ExecutorService;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -28,8 +30,6 @@ import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-
-import java.util.concurrent.ExecutorService;
 
 /**
  * Performs a handshake with the connected {@link Publisher} and connects the

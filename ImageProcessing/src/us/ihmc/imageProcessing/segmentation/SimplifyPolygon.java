@@ -1,8 +1,10 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.struct.PointIndex_I32;
 import georegression.struct.point.Point2D_I32;
+
 import org.ddogleg.struct.FastQueue;
+
+import boofcv.struct.PointIndex_I32;
 
 /**
  * @author Peter Abeles

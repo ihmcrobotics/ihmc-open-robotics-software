@@ -1,15 +1,16 @@
 package us.ihmc.utilities.ros.publisher;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferFactory;
-import org.jboss.netty.buffer.HeapChannelBufferFactory;
-import sensor_msgs.Image;
-import org.ros.message.Time;
-import std_msgs.Header;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.nio.ByteOrder;
+
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBufferFactory;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
+import org.ros.message.Time;
+
+import sensor_msgs.Image;
+import std_msgs.Header;
 
 
 public class RosImagePublisher extends RosTopicPublisher<Image>

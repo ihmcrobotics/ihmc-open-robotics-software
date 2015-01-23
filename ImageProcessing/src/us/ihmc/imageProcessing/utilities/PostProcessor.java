@@ -1,6 +1,6 @@
 package us.ihmc.imageProcessing.utilities;
 
-import java.awt.*;
+import java.awt.Graphics;
 
 /**
  * User: Matt

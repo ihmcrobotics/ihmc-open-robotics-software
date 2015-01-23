@@ -6,13 +6,12 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.NewDataListener;
 import us.ihmc.simulationconstructionset.gui.VarPanel;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class RobotSocketConnection implements RobotConnection, VariableChangedListener, DoDisconnectListener, RegistrySettingsChangedListener
 {

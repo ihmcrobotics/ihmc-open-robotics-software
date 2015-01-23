@@ -1,8 +1,13 @@
 package us.ihmc.imageProcessing.driving;
 
-import us.ihmc.imageProcessing.utilities.PostProcessor;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 
-import java.awt.*;
+import us.ihmc.imageProcessing.utilities.PostProcessor;
 
 /**
  * User: Matt

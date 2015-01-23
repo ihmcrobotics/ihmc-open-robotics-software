@@ -1,8 +1,6 @@
 package us.ihmc.wholeBodyController;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
@@ -13,12 +11,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.trajectory.TrajectoryND;
-import us.ihmc.utilities.trajectory.TrajectoryND.TrajectoryImplementation;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
-import us.ihmc.utilities.trajectory.Waypoint1D;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
 
 public class WholeBodyTrajectory

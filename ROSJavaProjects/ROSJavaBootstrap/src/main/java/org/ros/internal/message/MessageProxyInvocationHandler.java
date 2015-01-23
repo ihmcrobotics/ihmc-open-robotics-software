@@ -16,11 +16,11 @@
 
 package org.ros.internal.message;
 
-import org.ros.internal.message.field.Field;
-import org.ros.internal.message.field.MessageFields;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+
+import org.ros.internal.message.field.Field;
+import org.ros.internal.message.field.MessageFields;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

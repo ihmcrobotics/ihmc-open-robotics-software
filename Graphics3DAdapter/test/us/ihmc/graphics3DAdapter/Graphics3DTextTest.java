@@ -2,8 +2,6 @@ package us.ihmc.graphics3DAdapter;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.Graphics3DFrameListener;
-import us.ihmc.graphics3DAdapter.Graphics3DWorld;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionInstruction;

@@ -3,6 +3,8 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
+import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -15,9 +17,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.corruptors.NoisyDoubleYoVariable;
 import us.ihmc.yoUtilities.math.corruptors.NoisyYoRotationMatrix;
-
-import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
-import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 
 public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 {

@@ -1,6 +1,5 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-import java.net.URL;
 
 public enum ModelFileType
 {
