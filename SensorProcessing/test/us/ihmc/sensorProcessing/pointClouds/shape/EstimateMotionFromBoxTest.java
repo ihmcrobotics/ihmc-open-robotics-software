@@ -3,22 +3,38 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 import static junit.framework.Assert.assertEquals;
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
+import bubo.clouds.FactoryPointCloudShape;
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.clouds.detect.PointCloudShapeFinder.Shape;
+import bubo.clouds.detect.alg.ConfigSchnabel2007;
+import bubo.clouds.detect.wrapper.ConfigRemoveFalseShapes;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 
 /**
  * @author Peter Abeles
  */
 public class EstimateMotionFromBoxTest
 {
-
-   Random rand = new Random(324234);
+   private static Random rand = new Random(154213l);
+   private static ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(30, .25);
 
    // planes in canonical frame
    PlaneNormal3D_F64 left = new PlaneNormal3D_F64(0,0,0,1,0,0);
@@ -125,6 +141,170 @@ public class EstimateMotionFromBoxTest
       RotationMatrixGenerator.eulerXYZ(rand.nextDouble(),rand.nextDouble(),rand.nextDouble(),a.R);
 
       return a;
+   }
+   
+   @Test(timeout=300000)
+   public void testMovingBox()
+   {
+      EstimateMotionFromBox boxMotion = new EstimateMotionFromBox();
+      
+      List<Point3D_F64> cloud = PointCloudTools.boundSphere(PointCloudTools.readPointCloud("../SensorProcessing/box_5s.txt", 1000000), new Point3D_F64(4.1, -0.55, -0.75), 1);
+      List<PlaneNormal3D_F64> cube = emFitCube(cloud);
+
+      boxMotion.setSrc(cube.get(0), cube.get(1), cube.get(2));
+      
+      Se3_F64 transform = new Se3_F64(new DenseMatrix64F(new double[][]{{1,0,0}, {0,1,0}, {0,0,1}}), new Vector3D_F64(0,0,1));
+      PointCloudTools.transformCloud(cloud, transform);
+      cube = emFitCube(cloud);
+
+      boxMotion.computeMotion(cube.get(0), cube.get(1), cube.get(2));
+
+      System.out.println(boxMotion.centerA);
+      System.out.println(boxMotion.centerB);
+   }
+   
+   
+
+
+   private static List<PlaneNormal3D_F64> emFitCube(final List<Point3D_F64> cloud)
+   {
+      PointCloudShapeFinder shapeFinder = applyRansac(cloud);
+      List<Shape> found = new ArrayList<Shape>(shapeFinder.getFound());
+      filter(found, .25, 4);
+
+      List<PlaneGeneral3D_F64> planes = new ArrayList<PlaneGeneral3D_F64>();
+      for (Shape s : found)
+         planes.add((PlaneGeneral3D_F64) s.parameters);
+
+      List<Point3D_F64> allPoints = new ArrayList<Point3D_F64>();
+      for (Shape s : found)
+         allPoints.addAll(s.points);
+      
+      ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer = ExpectationMaximizationFitter.getGaussianSqauresMixedError(.01 / 2);
+      List<Shape> emFitShapes = getEMFitShapes(planes, cloud, scorer, 50, .9999);
+      //List<Shape> emFitShapes = getEMFitShapes(planes, allPoints, scorer, 50, .9999);
+
+      List<PlaneNormal3D_F64> normalPlanes = new ArrayList<PlaneNormal3D_F64>();
+      for (Shape s : emFitShapes)
+         normalPlanes.add(IhmcPointCloudOps.convert((PlaneGeneral3D_F64) s.parameters, s.points, null));
+
+      List<PlaneNormal3D_F64> cubePlanes = new ArrayList<PlaneNormal3D_F64>();
+      cubePlanes.add(selectMax(normalPlanes, new Vector3D_F64(0, -1, 0)));
+      cubePlanes.add(selectMax(normalPlanes, new Vector3D_F64(0, 1, 0)));
+      cubePlanes.add(selectMax(normalPlanes, new Vector3D_F64(0, 0, 1)));
+
+      IhmcPointCloudOps.adjustBoxNormals(cubePlanes.get(0), cubePlanes.get(1), cubePlanes.get(1));
+
+      return cubePlanes;
+   }
+   
+
+   
+   public static PlaneNormal3D_F64 selectMax(List<PlaneNormal3D_F64> planes, Vector3D_F64 direction)
+   {
+      double max = Double.NEGATIVE_INFINITY;
+      double dot = 0;
+      PlaneNormal3D_F64 maxPlane = null;
+      for (PlaneNormal3D_F64 p : planes)
+      {
+         if ((dot = direction.dot(new Vector3D_F64(p.p.x, p.p.y, p.p.z))) > max)
+         {
+            maxPlane = p;
+            max = dot;
+         }
+      }
+
+      return maxPlane;
+   }
+   
+
+
+   private static List<Shape> getEMFitShapes(List<PlaneGeneral3D_F64> startPlanes, List<Point3D_F64> cloud,
+         ScoringFunction<PlaneGeneral3D_F64, Point3D_F64> scorer, int rounds, double filter)
+   {
+      List<PlaneGeneral3D_F64> planes = ExpectationMaximizationFitter.fit(startPlanes, cloud, scorer, rounds);
+      double[][] weights = ExpectationMaximizationFitter.getWeights(null, planes, cloud, scorer);
+
+      List<Shape> emFitShapes = new ArrayList<Shape>();
+
+      for (int i = 0; i < planes.size(); i++)
+      {
+         Shape s = new Shape();
+         s.type = CloudShapeTypes.PLANE;
+         s.points = new ArrayList<Point3D_F64>();
+         s.parameters = planes.get(i);
+         emFitShapes.add(s);
+         for (int j = 0; j < cloud.size(); j++)
+         {
+            if (weights[i][j] > filter)
+               s.points.add(cloud.get(j));
+         }
+      }
+
+      return emFitShapes;
+   }
+
+   private static void filter(List<Shape> shapes, double alpha, double max)
+   {
+      Collections.sort(shapes, new Comparator<Shape>()
+      {
+         public int compare(Shape o1, Shape o2)
+         {
+            return o1.points.size() - o2.points.size();
+         }
+      });
+
+      double eps = 3e-2;
+      for (int i = 0; i < shapes.size(); i++)
+      {
+         List<Point3D_F64> s1 = shapes.get(i).points;
+         for (int j = i + 1; j < shapes.size(); j++)
+         {
+            List<Point3D_F64> s2 = shapes.get(j).points;
+            int overlap = 0;
+            for (int k = 0; k < s2.size(); k++)
+            {
+               for (int l = 0; l < s1.size(); l++)
+               {
+                  if (s1.get(l).distance(s2.get(k)) < eps)
+                     overlap++;
+               }
+            }
+
+            System.out.println("overlap: " + overlap + " of " + s2.size() + " with limit:" + s2.size() * alpha);
+            if (overlap > s2.size() * alpha)
+            {
+               shapes.remove(j);
+               j--;
+            }
+         }
+
+         while (shapes.size() > max)
+         {
+            shapes.remove(0);
+         }
+      }
+   }
+
+   private static PointCloudShapeFinder applyRansac(List<Point3D_F64> cloud)
+   {
+      CloudShapeTypes shapeTypes[] = new CloudShapeTypes[] { CloudShapeTypes.PLANE };//, CloudShapeTypes.CYLINDER, CloudShapeTypes.SPHERE};
+
+      ConfigSchnabel2007 configRansac = ConfigSchnabel2007.createDefault(20, 0.8, 0.02, shapeTypes);
+      configRansac.randomSeed = rand.nextLong();
+
+      configRansac.minModelAccept = 50;
+      configRansac.octreeSplit = 25;
+
+      configRansac.maximumAllowedIterations = 1000;
+      configRansac.ransacExtension = 25;
+
+      ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
+
+      PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configNormal, configRansac, configMerge);
+
+      shapeFinder.process(cloud, null);
+      return shapeFinder;
    }
 
 }
