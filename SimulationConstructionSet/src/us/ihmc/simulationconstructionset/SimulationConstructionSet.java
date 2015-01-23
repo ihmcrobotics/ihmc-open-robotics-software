@@ -4107,11 +4107,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
 
-   public void addDynamicGraphicObjectListRegistries(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      yoGraphicListRegistries.add(yoGraphicsListRegistry);
-   }
-
    public void hideAllDynamicGraphicObjects()
    {
       int numberOfElements = yoGraphicListRegistries.size();
