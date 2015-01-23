@@ -26,7 +26,6 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.dataStructures.AbstractHeightMapTest;
-import us.ihmc.utilities.dataStructures.quadTree.CleanQuadTree;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Box3d;
