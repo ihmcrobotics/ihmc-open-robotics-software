@@ -81,8 +81,8 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       FramePose midGrabPose = new FramePose();
       
       computeDesiredGraspOrientation(debrisTransform, fullRobotModel.getHandControlFrame(robotSide), rotationToBePerformedInWorldFrame, graspVector);
-      computeDesiredPoses(midGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, offsetToThePointOfGrabbing.getDoubleValue());
-      computeDesiredPoses(desiredGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
+      computeDesiredHandPosesWithOffsetAlongGraspVector(midGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, offsetToThePointOfGrabbing.getDoubleValue());
+      computeDesiredHandPosesWithOffsetAlongGraspVector(desiredGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
       
       midGrabPose.getPose(tempPose);
       taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
@@ -95,7 +95,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
    }
 
-   private void computeDesiredPoses(FramePose desiredPoseToPack, Quat4d rotationToBePerformedInWorldFrame, Point3d graspPosition, Vector3d graspVector,
+   private void computeDesiredHandPosesWithOffsetAlongGraspVector(FramePose desiredPoseToPack, Quat4d rotationToBePerformedInWorldFrame, Point3d graspPosition, Vector3d graspVector,
          double wristOffset)
    {
       Vector3d translation = new Vector3d(graspPosition);
