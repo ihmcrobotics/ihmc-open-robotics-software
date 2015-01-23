@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.taskExecutor.Task;
@@ -30,10 +30,9 @@ public class PelvisPoseTask implements Task
       this.pelvisPoseBehavior = pelvisPoseBehavior;
       this.yoTime = yoTime;
       this.sleepTime = sleepTime;
-      Point3d pelvisPosition = new Point3d();
       Quat4d pelvisOrientation = new Quat4d();
       desiredPelvisOrientation.getQuaternion(pelvisOrientation);
-      pelvisPosePacket = new PelvisPosePacket(pelvisPosition, pelvisOrientation, trajectoryTime);
+      pelvisPosePacket = PacketControllerTools.createPelvisPosePacketForOrientationOnly(pelvisOrientation, trajectoryTime);
    }
 
    @Override

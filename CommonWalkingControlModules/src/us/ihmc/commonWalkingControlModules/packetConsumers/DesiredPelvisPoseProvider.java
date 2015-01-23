@@ -16,8 +16,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint(ReferenceFrame.getWorldFrame()));
-   private AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(ReferenceFrame.getWorldFrame()));
+   private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint(ReferenceFrame.getWorldFrame()));
+   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(ReferenceFrame.getWorldFrame()));
    private double trajectoryTime = Double.NaN;
 
    public DesiredPelvisPoseProvider()
@@ -68,9 +68,16 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 
       if (object.getPoint() != null)
          desiredPelvisPosition.set(new FramePoint(worldFrame, object.getPoint()));
+      else
+         desiredPelvisPosition.set(null);
+
       if (object.getQuaternion() != null)
          desiredPelvisOrientation.set(new FrameOrientation(worldFrame, object.getQuaternion()));
+      else
+         desiredPelvisOrientation.set(null);
 
+      
+      
       trajectoryTime = object.getTrajectoryTime();
    }
 }
