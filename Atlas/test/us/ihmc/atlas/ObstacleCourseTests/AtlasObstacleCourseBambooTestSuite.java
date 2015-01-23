@@ -3,7 +3,7 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteConstructor;
+import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
@@ -16,6 +16,6 @@ public class AtlasObstacleCourseBambooTestSuite
    public static void main(String[] args)
    {
       String packageName = "us.ihmc.atlas.ObstacleCourseTests";
-      System.out.println(JUnitTestSuiteConstructor.createTestSuite("AtlasObstacleCourseBambooTestSuite", packageName));
+      System.out.println(JUnitTestSuiteGenerator.createTestSuite("AtlasObstacleCourseBambooTestSuite", packageName));
    }
 }

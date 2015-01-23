@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter.jme;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteConstructor;
+import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses
@@ -18,6 +18,6 @@ public class JMEGraphics3dAdapterBambooGraphicalTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(JMEGraphics3dAdapterBambooGraphicalTestSuite.class);
+      JUnitTestSuiteGenerator.generateTestSuite(JMEGraphics3dAdapterBambooGraphicalTestSuite.class);
    }
 }

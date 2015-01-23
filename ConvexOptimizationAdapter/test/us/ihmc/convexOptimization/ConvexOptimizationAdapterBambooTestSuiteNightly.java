@@ -3,7 +3,7 @@ package us.ihmc.convexOptimization;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteConstructor;
+import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses
@@ -20,7 +20,7 @@ public class ConvexOptimizationAdapterBambooTestSuiteNightly
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(ConvexOptimizationAdapterBambooTestSuiteNightly.class);
+      JUnitTestSuiteGenerator.generateTestSuite(ConvexOptimizationAdapterBambooTestSuiteNightly.class);
    }
 }
 
