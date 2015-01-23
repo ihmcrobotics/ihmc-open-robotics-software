@@ -782,8 +782,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @Test
-   public void testThreePointsOnALine()
+   @Test(timeout = 150000)   public void testThreePointsOnALine()
    {
       float minX = -0.04f;
       float minY = -0.04f;
@@ -812,8 +811,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @Test
-   public void testOnALineOfPoints()
+   @Test(timeout = 150000)   public void testOnALineOfPoints()
    {
       ArrayList<Point3d> points = new ArrayList<Point3d>();
       points.add(new Point3d(0.0, 0.0, 0.0));
@@ -831,8 +829,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @Test
-   public void testOnSomeSlopes()
+   @Test(timeout = 150000)   public void testOnSomeSlopes()
    {
       double halfWidth = 0.5;
       double resolution = 0.1;
@@ -853,8 +850,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
 // @Ignore
-   @Test
-   public void testOnSomeStairCases()
+   @Test(timeout = 150000)   public void testOnSomeStairCases()
    {
       double halfWidth = 0.6;
       double resolution = 0.02;
@@ -879,8 +875,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @Test
-   public void testUsingStairGroundProfile()
+   @Test(timeout = 150000)   public void testUsingStairGroundProfile()
    {
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
 
