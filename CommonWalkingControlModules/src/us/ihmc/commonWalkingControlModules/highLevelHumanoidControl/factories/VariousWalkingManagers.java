@@ -80,17 +80,13 @@ public class VariousWalkingManagers
       {
          RigidBody chest = fullRobotModel.getChest();
          desiredChestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
-         ReferenceFrame chestOrientationExpressedInFrame;
-         if (desiredChestOrientationProvider != null)
-            chestOrientationExpressedInFrame = desiredChestOrientationProvider.getChestOrientationExpressedInFrame();
-         else
-            chestOrientationExpressedInFrame = momentumBasedController.getReferenceFrames().getPelvisZUpFrame(); // ReferenceFrame.getWorldFrame(); //
+         ReferenceFrame chestOrientationExpressedInFrame = momentumBasedController.getReferenceFrames().getPelvisZUpFrame();
          YoOrientationPIDGains chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
          chestOrientationControlModule = new ChestOrientationControlModule(chestOrientationExpressedInFrame, chest, twistCalculator, controlDT, chestControlGains, registry);
 
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule,
-               variousWalkingProviders.getDesiredChestOrientationProvider(), walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, desiredChestOrientationProvider,
+               walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
       }
 
       ManipulationControlModule manipulationControlModule = null;
