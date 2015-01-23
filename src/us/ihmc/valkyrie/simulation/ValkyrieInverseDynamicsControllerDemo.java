@@ -7,9 +7,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieInverseDynamicsControllerDemo
 {

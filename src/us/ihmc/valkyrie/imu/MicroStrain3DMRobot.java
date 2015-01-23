@@ -8,17 +8,16 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 @SuppressWarnings("serial")
 public class MicroStrain3DMRobot extends Robot
