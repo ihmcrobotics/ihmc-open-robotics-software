@@ -9,15 +9,19 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class ChestOrientationControlModule extends DegenerateOrientationControlModule
 {
-   private final YoFrameQuaternion desiredOrientation;
+   private final YoFrameQuaternion desiredQuaternion;
    private final YoFrameVector desiredAngularVelocity;
    private final YoFrameVector feedForwardAngularAcceleration;
    private final RigidBody chest;
+
+   private final YoFrameOrientation desiredOrientationInWorldViz;
+   private final YoFrameQuaternion desiredQuaternionInWorldViz;
 
    public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody chest, TwistCalculator twistCalculator, double controlDT,
          YoVariableRegistry parentRegistry)
@@ -31,7 +35,9 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
       super("chest", new RigidBody[] {}, chest, new GeometricJacobian[] {}, twistCalculator, controlDT, gains, parentRegistry);
 
       this.chest = chest;
-      this.desiredOrientation = new YoFrameQuaternion("desiredChestOrientation", chestOrientationExpressedInFrame, registry);
+      this.desiredQuaternion = new YoFrameQuaternion("desiredChestOrientation", chestOrientationExpressedInFrame, registry);
+      this.desiredOrientationInWorldViz = new YoFrameOrientation("desiredChestInWorld", ReferenceFrame.getWorldFrame(), registry);
+      this.desiredQuaternionInWorldViz = new YoFrameQuaternion("desiredChestInWorld", ReferenceFrame.getWorldFrame(), registry);
       this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", chestOrientationExpressedInFrame, registry);
       this.feedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", chestOrientationExpressedInFrame, registry);
    }
@@ -44,8 +50,8 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    @Override
    protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
-      orientationToPack.setToZero(desiredOrientation.getReferenceFrame());
-      desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setToZero(desiredQuaternion.getReferenceFrame());
+      desiredQuaternion.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
    @Override
@@ -62,8 +68,12 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
 
    public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
-      desiredOrientation.changeFrame(this.desiredOrientation.getReferenceFrame());
-      this.desiredOrientation.set(desiredOrientation);
+      desiredOrientation.changeFrame(this.desiredOrientationInWorldViz.getReferenceFrame());
+      this.desiredOrientationInWorldViz.set(desiredOrientation);
+      this.desiredQuaternionInWorldViz.set(desiredOrientation);
+
+      desiredOrientation.changeFrame(this.desiredQuaternion.getReferenceFrame());
+      this.desiredQuaternion.set(desiredOrientation);
 
       desiredAngularVelocity.changeFrame(this.desiredAngularVelocity.getReferenceFrame());
       this.desiredAngularVelocity.set(desiredAngularVelocity);
