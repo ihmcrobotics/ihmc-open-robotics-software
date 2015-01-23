@@ -688,9 +688,8 @@ public class SDFFullRobotModel implements FullRobotModel
       getRootJoint().setPositionAndRotation(worldToPelvis);
       
       this.updateFrames();
-      RigidBodyTransform worldToFoot2  = getSoleFrame(sideOfSole).getTransformToWorldFrame();  
-      
-      System.out.println("\nfootA:\n"+ worldToFoot + "footB:\n"+ worldToFoot2 );
+   //   RigidBodyTransform worldToFoot2  = getSoleFrame(sideOfSole).getTransformToWorldFrame();  
+   //   System.out.println("\nfootA:\n"+ worldToFoot + "footB:\n"+ worldToFoot2 );
    }
    
 }
