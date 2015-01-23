@@ -3,7 +3,7 @@ package us.ihmc.kalman;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteConstructor;
+import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses
@@ -15,6 +15,6 @@ public class KalmanProjectBambooTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteConstructor.generateTestSuite(KalmanProjectBambooTestSuite.class);
+      JUnitTestSuiteGenerator.generateTestSuite(KalmanProjectBambooTestSuite.class);
    }
 }
