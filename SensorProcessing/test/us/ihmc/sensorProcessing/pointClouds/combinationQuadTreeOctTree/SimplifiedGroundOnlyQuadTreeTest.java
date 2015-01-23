@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTree;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Box3d;
@@ -39,6 +41,48 @@ public class SimplifiedGroundOnlyQuadTreeTest
 {
    private static final boolean DO_ASSERTS = false;
 
+   
+   @Test
+   public void testSimpleCaseOne()
+   {
+      float minX = -10.0f;
+      float minY = -10.0f;
+      float maxX = 10.0f;
+      float maxY = 10.0f;
+      float resolution = 0.49f;
+      float heightThreshold = 0.001f;
+      double maxMultiLevelZChangeToFilterNoise = 0.2;
+      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise );
+
+      Double returnNullObject = quadTree.get(0.0f, 0.0f);
+      assertNull(returnNullObject);
+
+      // Put a single point at zero
+
+      Double valueAtZero = new Double(1.5);
+      quadTree.put(0.0f, 0.0f, valueAtZero);
+
+      Double returnValueAtZero = quadTree.get(0.0f, 0.0f);
+      assertEquals(valueAtZero, returnValueAtZero, 1e-7);
+
+      Double returnValueOutOfBounds = quadTree.get(100.0f, -720.0f);
+      assertNull(returnValueOutOfBounds);
+
+      Double returnValueAwayFromZero = quadTree.get(3.0f, -7.2f);
+      assertEquals(valueAtZero, returnValueAwayFromZero, 1e-7);
+
+      // Put a point away from zero
+      Double valueAtOneOne = new Double(2.7);
+      quadTree.put(1.0f, 1.0f, valueAtOneOne);
+
+      returnValueAtZero = quadTree.get(0.0f, 0.0f);
+      assertEquals(valueAtZero, returnValueAtZero, 1e-7);
+
+      Double returnValueAtOneOne = quadTree.get(1.0f, 1.0f);
+      assertEquals(valueAtOneOne, returnValueAtOneOne, 1e-7);
+   }
+   
+   
    @Ignore
    @Test
    public void testPointsFromAFile() throws NumberFormatException, IOException

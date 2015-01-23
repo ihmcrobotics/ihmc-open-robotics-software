@@ -781,34 +781,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-   @Ignore
-   @Test(timeout = 150000)   public void testThreePointsOnALine()
-   {
-      float minX = -0.04f;
-      float minY = -0.04f;
-      float maxX = 1.0f;
-      float maxY = 0.06f;
-      float resolution = 0.02f;
-      float heightThreshold = 0.002f;
-
-      CleanQuadTree cleanQuadTree = new CleanQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold);
-
-      float height0 = 0.0f;
-      float height1 = 0.0f;
-      float height2 = 0.2f;
-
-      cleanQuadTree.put(0.0f, 0.0f, height0);
-      cleanQuadTree.put(0.1f, 0.0f, height1);
-      cleanQuadTree.put(0.2f, 0.0f, height2);
-
-      float returnHeight0 = cleanQuadTree.get(0.0f, 0.0f);
-      float returnHeight1 = cleanQuadTree.get(0.1f, 0.0f);
-      float returnHeight2 = cleanQuadTree.get(0.2f, 0.0f);
-
-      assertEquals(height0, returnHeight0, 1e-7);
-      assertEquals(height1, returnHeight1, 1e-7);
-      assertEquals(height2, returnHeight2, 1e-7);
-   }
+  
 
    @Ignore
    @Test(timeout = 150000)   public void testOnALineOfPoints()
