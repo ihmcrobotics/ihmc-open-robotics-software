@@ -16,13 +16,13 @@
 
 package org.ros.internal.node.topic;
 
+import java.net.URI;
+import java.util.Map;
+
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
-
-import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

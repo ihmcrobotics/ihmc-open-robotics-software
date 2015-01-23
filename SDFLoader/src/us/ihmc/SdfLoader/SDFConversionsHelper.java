@@ -1,13 +1,12 @@
 package us.ihmc.SdfLoader;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFConversionsHelper
 {

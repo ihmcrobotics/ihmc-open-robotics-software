@@ -6,8 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
@@ -28,6 +26,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.utilities.math.geometry.GeometryTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 
 public class SDFGraphics3DObject extends Graphics3DObject

@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
-
 import us.ihmc.simulationconstructionset.physics.engine.jerry.NullJointPhysics;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
 public class NullJoint extends Joint
 {

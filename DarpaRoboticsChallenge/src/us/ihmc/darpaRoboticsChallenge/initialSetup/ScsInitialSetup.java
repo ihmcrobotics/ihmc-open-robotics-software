@@ -1,14 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
-import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /*
  * SCS Initial Setup

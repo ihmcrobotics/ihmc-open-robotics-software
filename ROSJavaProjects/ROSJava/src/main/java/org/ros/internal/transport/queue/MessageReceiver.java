@@ -16,13 +16,12 @@
 
 package org.ros.internal.transport.queue;
 
-import org.ros.concurrent.CircularBlockingDeque;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
+import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 

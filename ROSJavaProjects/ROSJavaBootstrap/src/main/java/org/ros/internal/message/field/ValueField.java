@@ -16,9 +16,9 @@
 
 package org.ros.internal.message.field;
 
-import com.google.common.base.Preconditions;
-
 import org.jboss.netty.buffer.ChannelBuffer;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

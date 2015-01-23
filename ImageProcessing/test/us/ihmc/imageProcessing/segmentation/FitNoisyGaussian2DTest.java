@@ -1,13 +1,13 @@
 package us.ihmc.imageProcessing.segmentation;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceRandomDraw;
 import org.junit.Test;
-
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Peter Abeles

@@ -16,6 +16,9 @@
 
 package org.ros.internal.node.client;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
@@ -23,9 +26,6 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.XmlRpcServer;
 import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
-
-import java.net.MalformedURLException;
-import java.net.URI;
 
 /**
  * Base class for XML-RPC clients (e.g. MasterClient and SlaveClient).

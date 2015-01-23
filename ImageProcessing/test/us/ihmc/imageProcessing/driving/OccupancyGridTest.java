@@ -1,8 +1,8 @@
 package us.ihmc.imageProcessing.driving;
 
-import org.junit.Test;
-
 import static org.junit.Assert.fail;
+
+import org.junit.Test;
 
 /**
  * @author Peter Abeles

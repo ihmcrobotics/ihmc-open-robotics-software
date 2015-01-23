@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
+
+import com.google.common.base.Preconditions;
 
 /**
  * The identifier for a topic in a ROS graph.

@@ -16,9 +16,9 @@
 
 package org.ros.concurrent;
 
-import com.google.common.base.Preconditions;
-
 import java.util.concurrent.ExecutorService;
+
+import com.google.common.base.Preconditions;
 
 /**
  * An interruptable loop that can be run by an {@link ExecutorService}.

@@ -16,19 +16,18 @@
 
 package org.ros.internal.message.definition;
 
-import com.google.common.collect.Maps;
-
-import org.ros.internal.message.StringFileProvider;
-
-import org.apache.commons.io.FilenameUtils;
-import org.ros.message.MessageDefinitionProvider;
-import org.ros.message.MessageIdentifier;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.commons.io.FilenameUtils;
+import org.ros.internal.message.StringFileProvider;
+import org.ros.message.MessageDefinitionProvider;
+import org.ros.message.MessageIdentifier;
+
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

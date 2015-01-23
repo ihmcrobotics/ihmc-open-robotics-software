@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
-import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import georegression.struct.se.Se3_F64;
+import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 
 /**
  * Interface for sending commands to the polaris vehicle in the Darpa Robotics Challenge.  Designed to work in cheat mode and as a high level action

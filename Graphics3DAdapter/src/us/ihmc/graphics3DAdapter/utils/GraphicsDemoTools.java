@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.Transform3d;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
@@ -36,6 +33,7 @@ import us.ihmc.utilities.BlinkingDaemon;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.VectorTuple;
 import us.ihmc.utilities.math.geometry.Sphere3d;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public class GraphicsDemoTools
 {

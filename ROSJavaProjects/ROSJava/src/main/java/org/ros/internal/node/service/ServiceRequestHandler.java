@@ -16,6 +16,10 @@
 
 package org.ros.internal.node.service;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.concurrent.ExecutorService;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -27,10 +31,6 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.node.service.ServiceResponseBuilder;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

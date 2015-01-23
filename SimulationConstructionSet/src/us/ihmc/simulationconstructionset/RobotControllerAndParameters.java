@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class RobotControllerAndParameters
 {

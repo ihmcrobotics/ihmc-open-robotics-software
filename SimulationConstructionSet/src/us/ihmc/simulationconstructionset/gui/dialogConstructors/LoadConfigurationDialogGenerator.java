@@ -17,8 +17,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-
-import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GUIConfigurationSaveAndLoad;
 import us.ihmc.simulationconstructionset.gui.MyFileFilter;

@@ -3,7 +3,6 @@ package us.ihmc.simulationconstructionset.physics.collision;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import org.junit.Before;
@@ -17,6 +16,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 
 /**

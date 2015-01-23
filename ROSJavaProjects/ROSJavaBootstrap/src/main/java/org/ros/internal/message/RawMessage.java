@@ -16,13 +16,13 @@
 
 package org.ros.internal.message;
 
+import java.util.List;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.field.Field;
 import org.ros.message.Duration;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
-
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

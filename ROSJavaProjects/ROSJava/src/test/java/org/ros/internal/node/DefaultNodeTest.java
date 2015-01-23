@@ -21,8 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.ros.Assert.assertGraphNameEquals;
 
-import com.google.common.collect.Lists;
-import com.google.common.net.InetAddresses;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.ros.RosCore;
@@ -44,11 +47,8 @@ import org.ros.node.topic.CountDownSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
+import com.google.common.net.InetAddresses;
 
 /**
  * Tests for the {@link DefaultNode}.

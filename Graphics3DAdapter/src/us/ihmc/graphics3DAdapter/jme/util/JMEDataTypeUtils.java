@@ -3,7 +3,6 @@ package us.ihmc.graphics3DAdapter.jme.util;
 import java.awt.Color;
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -15,6 +14,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.Ray3d;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;

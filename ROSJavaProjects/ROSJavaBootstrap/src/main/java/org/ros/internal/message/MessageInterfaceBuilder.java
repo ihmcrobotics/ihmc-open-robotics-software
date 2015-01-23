@@ -16,8 +16,7 @@
 
 package org.ros.internal.message;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
@@ -30,7 +29,8 @@ import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

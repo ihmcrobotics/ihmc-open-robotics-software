@@ -1,15 +1,13 @@
 package us.ihmc.communication.net;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.junit.Test;
-
-import us.ihmc.communication.net.KryoStreamDeSerializer;
-import us.ihmc.communication.net.KryoStreamSerializer;
 
 public class KryoStreamSerializerTest
 {

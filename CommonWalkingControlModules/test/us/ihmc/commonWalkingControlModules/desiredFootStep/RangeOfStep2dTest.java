@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import javax.vecmath.Vector3d;
 
@@ -14,6 +13,7 @@ import org.junit.Test;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 

@@ -16,6 +16,8 @@
 
 package org.ros.node;
 
+import java.net.URI;
+
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
@@ -26,8 +28,6 @@ import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-
-import java.net.URI;
 
 /**
  * A node in the ROS graph that has successfully contacted the master.

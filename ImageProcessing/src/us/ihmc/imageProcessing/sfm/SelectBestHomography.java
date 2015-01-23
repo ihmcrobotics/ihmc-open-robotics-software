@@ -1,17 +1,19 @@
 package us.ihmc.imageProcessing.sfm;
 
-import boofcv.alg.geo.MultiViewOps;
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.struct.Tuple2;
-import boofcv.struct.calib.StereoParameters;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
+
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
 
-import java.util.List;
+import boofcv.alg.geo.MultiViewOps;
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.struct.Tuple2;
+import boofcv.struct.calib.StereoParameters;
 
 /**
  * Given a homography, it selects the best candidate motion from the decomposed homography.  Also computes

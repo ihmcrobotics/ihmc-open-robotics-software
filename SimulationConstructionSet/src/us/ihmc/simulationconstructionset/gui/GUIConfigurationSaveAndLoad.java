@@ -15,7 +15,6 @@ import java.util.StringTokenizer;
 import javax.swing.JFileChooser;
 
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 

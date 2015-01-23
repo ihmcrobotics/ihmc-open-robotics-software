@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.robotDataCommunication.jointState.JointState;
-
 import us.ihmc.simulationconstructionset.Joint;
 
 @SuppressWarnings("rawtypes") 

@@ -16,12 +16,12 @@
 
 package org.ros.concurrent;
 
-import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.collect.Lists;
 
 /**
  * A group of listeners.

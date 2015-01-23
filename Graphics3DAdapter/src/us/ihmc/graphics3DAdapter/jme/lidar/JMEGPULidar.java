@@ -1,6 +1,5 @@
 package us.ihmc.graphics3DAdapter.jme.lidar;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -9,6 +8,7 @@ import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.jme.JMERenderer;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;

@@ -16,10 +16,10 @@
 
 package org.ros.rosjava_geometry;
 
+import java.util.List;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
-import java.util.List;
 
 /**
  * A quaternion.

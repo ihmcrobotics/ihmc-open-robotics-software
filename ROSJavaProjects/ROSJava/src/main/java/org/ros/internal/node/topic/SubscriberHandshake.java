@@ -16,13 +16,13 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Handshake logic from the subscriber side of a topic connection.

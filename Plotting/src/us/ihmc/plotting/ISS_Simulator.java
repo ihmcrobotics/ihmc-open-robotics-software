@@ -1,16 +1,20 @@
 package us.ihmc.plotting;
 
-import us.ihmc.plotting.shapes.PointArtifact;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.vecmath.Point2d;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.shapes.PointArtifact;
 
 public class ISS_Simulator
 {

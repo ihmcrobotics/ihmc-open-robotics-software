@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class DataBufferEntry implements DataEntry
 {

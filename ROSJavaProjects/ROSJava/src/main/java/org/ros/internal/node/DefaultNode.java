@@ -16,7 +16,12 @@
 
 package org.ros.internal.node;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.ros.Parameters;
@@ -68,12 +73,7 @@ import org.ros.node.topic.Subscriber;
 import org.ros.time.ClockTopicTimeProvider;
 import org.ros.time.TimeProvider;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.Collection;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * The default implementation of a {@link Node}.

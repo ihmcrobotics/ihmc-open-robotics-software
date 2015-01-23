@@ -16,10 +16,10 @@
 
 package org.ros.master.uri;
 
-import org.ros.exception.RosRuntimeException;
-
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+
+import org.ros.exception.RosRuntimeException;
 
 /**
  * Provides URLs for a ROS master.

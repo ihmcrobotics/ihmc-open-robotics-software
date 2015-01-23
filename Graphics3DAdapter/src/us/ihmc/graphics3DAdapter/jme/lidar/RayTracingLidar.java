@@ -3,14 +3,13 @@ package us.ihmc.graphics3DAdapter.jme.lidar;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.graphics3DAdapter.Graphics3DWorld;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;

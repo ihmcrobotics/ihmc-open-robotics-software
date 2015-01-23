@@ -2,8 +2,6 @@ package us.ihmc.graphics3DAdapter.jme;
 
 import java.util.concurrent.Callable;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GPULidarListener;
@@ -19,6 +17,7 @@ import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 import us.ihmc.utilities.math.geometry.TransformTools;
 

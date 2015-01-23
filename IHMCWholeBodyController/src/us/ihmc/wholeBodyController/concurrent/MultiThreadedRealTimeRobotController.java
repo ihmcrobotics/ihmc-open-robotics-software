@@ -6,9 +6,8 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.utilities.Tuple;
-
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.utilities.Tuple;
 
 public class MultiThreadedRealTimeRobotController
 {

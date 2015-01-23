@@ -13,8 +13,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.communication.streamingData.EstablishedAConnectionListener;
-import us.ihmc.communication.streamingData.PersistentTCPServer;
 import us.ihmc.utilities.ThreadTools;
 
 public class PersistentTCPServerTest

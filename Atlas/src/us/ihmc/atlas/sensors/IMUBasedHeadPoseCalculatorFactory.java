@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import multisense_ros.RawImuData;

@@ -11,12 +11,11 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 
 public class YoKalmanFilterTest
 {

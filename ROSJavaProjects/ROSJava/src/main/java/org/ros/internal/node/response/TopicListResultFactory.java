@@ -16,16 +16,14 @@
 
 package org.ros.internal.node.response;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
 
 import org.ros.internal.message.topic.TopicDescription;
-
-
 import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.namespace.GraphName;
 
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * A {@link ResultFactory} to take an object and turn it into a list of

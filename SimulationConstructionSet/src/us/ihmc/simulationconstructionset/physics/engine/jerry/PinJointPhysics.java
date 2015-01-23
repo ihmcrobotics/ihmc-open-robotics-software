@@ -3,10 +3,9 @@ package us.ihmc.simulationconstructionset.physics.engine.jerry;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.MathTools;
-
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.utilities.math.MathTools;
 
 /**
  * @author Peter Abeles

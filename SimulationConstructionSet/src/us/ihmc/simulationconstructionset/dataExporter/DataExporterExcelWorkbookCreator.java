@@ -22,10 +22,6 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Direction;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -34,6 +30,9 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 public class DataExporterExcelWorkbookCreator
 {

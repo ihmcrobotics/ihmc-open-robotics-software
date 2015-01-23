@@ -12,11 +12,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 import com.martiansoftware.jsap.JSAPException;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasPushRecoveryTrack
 {

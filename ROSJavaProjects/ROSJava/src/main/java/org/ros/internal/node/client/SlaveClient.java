@@ -16,7 +16,10 @@
 
 package org.ros.internal.node.client;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
@@ -29,10 +32,7 @@ import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpoint;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

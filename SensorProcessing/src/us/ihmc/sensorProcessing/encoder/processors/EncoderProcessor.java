@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 import us.ihmc.sensorProcessing.ProcessedPositionSensor;
 import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
-
 import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
 
 /**

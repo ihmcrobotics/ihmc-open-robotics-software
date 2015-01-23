@@ -18,9 +18,18 @@
 
 package us.ihmc.imageProcessing.utilities.stereo;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
-import java.awt.*;
 
 /**
  * Common base class for panels used for configuring the algorithms.

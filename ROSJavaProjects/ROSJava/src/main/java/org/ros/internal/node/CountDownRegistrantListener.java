@@ -16,10 +16,10 @@
 
 package org.ros.internal.node;
 
-import org.ros.node.topic.CountDownPublisherListener;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.ros.node.topic.CountDownPublisherListener;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -2,12 +2,12 @@ package us.ihmc.SdfLoader;
 
 import java.util.Random;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorReader
 {

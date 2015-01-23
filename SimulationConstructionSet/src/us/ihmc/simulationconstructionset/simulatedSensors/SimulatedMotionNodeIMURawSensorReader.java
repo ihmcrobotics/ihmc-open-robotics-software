@@ -2,14 +2,13 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import javax.vecmath.Matrix3d;
 
+import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.math.corruptors.NoisyDoubleYoVariable;
 import us.ihmc.yoUtilities.math.corruptors.NoisyYoRotationMatrix;
-
-import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
 public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensorReader
 {

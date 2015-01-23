@@ -4,7 +4,6 @@ import java.nio.LongBuffer;
 import java.util.List;
 
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
-
 import us.ihmc.simulationconstructionset.Joint;
 
 public abstract class JointState<U extends Joint>

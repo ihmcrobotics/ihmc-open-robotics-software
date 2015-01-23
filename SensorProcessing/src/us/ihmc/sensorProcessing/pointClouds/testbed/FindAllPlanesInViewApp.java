@@ -1,15 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import boofcv.gui.image.ShowImages;
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
-import bubo.clouds.filter.UniformDensityCloudOctree;
-import bubo.gui.FactoryVisualization3D;
-import bubo.gui.UtilDisplayBubo;
-import bubo.gui.d3.PointCloudPanel;
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
+import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.geometry.UtilPoint2D_F64;
@@ -29,9 +21,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadCloud;
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
-import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
+import boofcv.gui.image.ShowImages;
+import bubo.clouds.FactoryPointCloudShape;
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import bubo.clouds.filter.UniformDensityCloudOctree;
+import bubo.gui.FactoryVisualization3D;
+import bubo.gui.UtilDisplayBubo;
+import bubo.gui.d3.PointCloudPanel;
 
 /**
  * @author Peter Abeles

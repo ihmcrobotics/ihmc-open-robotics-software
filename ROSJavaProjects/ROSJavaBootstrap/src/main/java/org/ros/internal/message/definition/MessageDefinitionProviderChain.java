@@ -16,15 +16,15 @@
 
 package org.ros.internal.message.definition;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

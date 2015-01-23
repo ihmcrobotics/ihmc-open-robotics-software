@@ -16,7 +16,10 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
@@ -37,10 +40,7 @@ import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

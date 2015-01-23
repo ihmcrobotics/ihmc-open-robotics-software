@@ -1,10 +1,10 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageUInt8;
 
 /**
  * @author Peter Abeles

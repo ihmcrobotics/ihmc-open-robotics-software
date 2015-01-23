@@ -1,10 +1,14 @@
 package us.ihmc.imageProcessing.utilities;
 
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 
 /**
  * User: Matt

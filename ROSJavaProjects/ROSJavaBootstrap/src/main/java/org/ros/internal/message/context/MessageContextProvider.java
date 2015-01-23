@@ -16,15 +16,15 @@
 
 package org.ros.internal.message.context;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 import org.ros.internal.message.definition.MessageDefinitionParser;
 import org.ros.internal.message.definition.MessageDefinitionParser.MessageDefinitionVisitor;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

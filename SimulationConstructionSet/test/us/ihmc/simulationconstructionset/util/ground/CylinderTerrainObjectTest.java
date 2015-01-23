@@ -3,7 +3,6 @@ package us.ihmc.simulationconstructionset.util.ground;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -11,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.test.JUnitTools;
 
 public class CylinderTerrainObjectTest

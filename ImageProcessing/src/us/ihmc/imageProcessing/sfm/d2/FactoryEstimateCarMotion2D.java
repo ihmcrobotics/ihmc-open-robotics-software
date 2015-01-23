@@ -1,5 +1,9 @@
 package us.ihmc.imageProcessing.sfm.d2;
 
+import georegression.struct.se.Se2_F64;
+import us.ihmc.imageProcessing.sfm.d2.wrappers.MonoOverhead_to_CarMotion2D;
+import us.ihmc.imageProcessing.sfm.d2.wrappers.Mono_to_CarMotion2D;
+import us.ihmc.imageProcessing.sfm.d2.wrappers.StereoVO_to_CarMotion2D;
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
 import boofcv.abst.feature.disparity.StereoDisparitySparse;
 import boofcv.abst.feature.tracker.PointTracker;
@@ -17,10 +21,6 @@ import boofcv.factory.sfm.FactoryMotion2D;
 import boofcv.factory.sfm.FactoryVisualOdometry;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageType;
-import georegression.struct.se.Se2_F64;
-import us.ihmc.imageProcessing.sfm.d2.wrappers.MonoOverhead_to_CarMotion2D;
-import us.ihmc.imageProcessing.sfm.d2.wrappers.Mono_to_CarMotion2D;
-import us.ihmc.imageProcessing.sfm.d2.wrappers.StereoVO_to_CarMotion2D;
 
 /**
  * @author Peter Abeles

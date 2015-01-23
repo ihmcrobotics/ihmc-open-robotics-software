@@ -1,7 +1,6 @@
 package us.ihmc.convexOptimization;
 
 import static org.junit.Assert.assertEquals;
-import us.ihmc.utilities.math.MatrixTools;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +12,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
+
+import us.ihmc.utilities.math.MatrixTools;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;

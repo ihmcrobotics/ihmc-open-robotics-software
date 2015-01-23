@@ -1,13 +1,14 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
-import java.util.ArrayList;
-import java.util.List;
+
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 public class MeshDataGenerator
 {

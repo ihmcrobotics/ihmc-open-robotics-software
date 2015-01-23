@@ -1,6 +1,5 @@
 package us.ihmc.graphics3DAdapter.jme;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
@@ -10,6 +9,7 @@ import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraController;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;

@@ -16,12 +16,12 @@
 
 package org.ros.internal.transport.queue;
 
+import java.util.concurrent.ExecutorService;
+
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
-
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-
 import us.ihmc.simulationconstructionset.GroundContactModel;
 
 public class TrackGroundContactModel implements GroundContactModel

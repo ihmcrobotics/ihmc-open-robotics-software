@@ -10,8 +10,14 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
-import us.ihmc.communication.packets.walking.*;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.packets.walking.FootstepPathPlanPacket;
+import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
+import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.FootstepStatus.Status;
+import us.ihmc.communication.packets.walking.PauseCommand;
+import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

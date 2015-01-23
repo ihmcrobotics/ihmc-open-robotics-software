@@ -19,7 +19,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class WholeBodyIKPacketCreator
 {

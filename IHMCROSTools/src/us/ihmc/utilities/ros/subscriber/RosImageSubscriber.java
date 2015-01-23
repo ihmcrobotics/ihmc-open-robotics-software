@@ -6,10 +6,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
-import java.net.URI;
-import java.net.URISyntaxException;
 
-import us.ihmc.graphics3DAdapter.camera.JPanelCameraStreamer;
 import us.ihmc.utilities.ros.RosTools;
 
 public abstract class RosImageSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>

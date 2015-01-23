@@ -9,12 +9,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.InertiaTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.LinkPhysics;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
+import us.ihmc.utilities.InertiaTools;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**
  * Describes physical properties of a rigid body. Can attach graphics to it.<p>

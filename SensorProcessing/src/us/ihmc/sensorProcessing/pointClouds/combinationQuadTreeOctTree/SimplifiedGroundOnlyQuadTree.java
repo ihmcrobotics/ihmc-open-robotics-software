@@ -17,8 +17,8 @@ import javax.vecmath.Point3d;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreePutResult;
 import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTree;
+import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreePutResult;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
 public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements QuadTreeHeightMapInterface

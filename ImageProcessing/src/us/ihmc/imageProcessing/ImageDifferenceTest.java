@@ -1,5 +1,9 @@
 package us.ihmc.imageProcessing;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+
 import boofcv.alg.misc.PixelMath;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.binary.VisualizeBinaryData;
@@ -10,10 +14,6 @@ import boofcv.io.wrapper.xuggler.XugglerSimplified;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.ImageUInt8;
-
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles

@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
 public final class DoNothingController implements RobotController

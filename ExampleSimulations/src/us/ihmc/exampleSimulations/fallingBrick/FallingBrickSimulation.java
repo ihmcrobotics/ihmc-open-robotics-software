@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.fallingBrick;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 

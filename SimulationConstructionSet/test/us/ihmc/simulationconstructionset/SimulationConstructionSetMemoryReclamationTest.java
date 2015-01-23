@@ -7,11 +7,10 @@ import java.io.File;
 
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
-import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 
 public class SimulationConstructionSetMemoryReclamationTest
 {

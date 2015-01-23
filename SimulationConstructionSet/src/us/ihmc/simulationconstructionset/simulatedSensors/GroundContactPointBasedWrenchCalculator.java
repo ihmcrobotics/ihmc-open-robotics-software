@@ -2,16 +2,15 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import java.util.List;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.utilities.screwTheory.Wrench;
-
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 public class GroundContactPointBasedWrenchCalculator implements WrenchCalculatorInterface
 {

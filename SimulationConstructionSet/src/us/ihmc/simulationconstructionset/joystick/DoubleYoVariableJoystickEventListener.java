@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.joystick;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import net.java.games.input.Component;
 import net.java.games.input.Event;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class DoubleYoVariableJoystickEventListener implements JoystickEventListener

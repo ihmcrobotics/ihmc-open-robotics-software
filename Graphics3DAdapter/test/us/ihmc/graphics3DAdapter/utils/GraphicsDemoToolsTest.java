@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools;
 
 public class GraphicsDemoToolsTest
 {

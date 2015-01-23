@@ -1,11 +1,16 @@
 package us.ihmc.imageProcessing.utilities;
 
-import us.ihmc.utilities.math.geometry.Line2d;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
-import java.awt.*;
-import java.util.ArrayList;
+
+import us.ihmc.utilities.math.geometry.Line2d;
 
 /**
  * User: Matt

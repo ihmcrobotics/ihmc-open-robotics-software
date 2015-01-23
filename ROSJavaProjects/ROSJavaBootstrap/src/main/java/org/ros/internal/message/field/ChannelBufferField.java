@@ -16,12 +16,12 @@
 
 package org.ros.internal.message.field;
 
-import com.google.common.base.Preconditions;
+import java.nio.ByteOrder;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.MessageBuffers;
 
-import java.nio.ByteOrder;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

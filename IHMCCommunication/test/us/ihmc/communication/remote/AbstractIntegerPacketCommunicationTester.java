@@ -1,6 +1,5 @@
 package us.ihmc.communication.remote;
 
-import us.ihmc.communication.remote.IntegerPacket;
 
 
 abstract class AbstractIntegerPacketCommunicationTester extends CommsTester<IntegerPacket>

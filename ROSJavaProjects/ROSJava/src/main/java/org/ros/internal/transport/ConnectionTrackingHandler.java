@@ -16,6 +16,9 @@
 
 package org.ros.internal.transport;
 
+import java.io.IOException;
+import java.nio.channels.Channels;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -24,9 +27,6 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.ros.exception.RosRuntimeException;
-
-import java.io.IOException;
-import java.nio.channels.Channels;
 
 /**
  * Adds new {@link Channels} to the provided {@link ChannelGroup}.

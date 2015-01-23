@@ -1,14 +1,12 @@
 package us.ihmc.communication.streamingData;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.communication.streamingData.StreamingDataTCPClient;
-import us.ihmc.communication.streamingData.StreamingDataTCPServer;
 import us.ihmc.utilities.ThreadTools;
 
 public class StreamingDataTCPServerTest

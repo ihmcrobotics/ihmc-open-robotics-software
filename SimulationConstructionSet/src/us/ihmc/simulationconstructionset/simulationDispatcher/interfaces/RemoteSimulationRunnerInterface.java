@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.simulationDispatcher.interfaces;
 
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 
 public interface RemoteSimulationRunnerInterface extends Remote

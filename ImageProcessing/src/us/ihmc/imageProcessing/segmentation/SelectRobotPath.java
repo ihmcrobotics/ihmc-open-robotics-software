@@ -1,15 +1,17 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.struct.PointIndex_I32;
 import georegression.metric.Intersection2D_F64;
 import georegression.struct.line.LineSegment2D_F64;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.shapes.Polygon2D_F64;
-import org.ddogleg.struct.FastQueue;
-import org.ddogleg.struct.GrowQueue_I32;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.GrowQueue_I32;
+
+import boofcv.struct.PointIndex_I32;
 
 /**
  * @author Peter Abeles

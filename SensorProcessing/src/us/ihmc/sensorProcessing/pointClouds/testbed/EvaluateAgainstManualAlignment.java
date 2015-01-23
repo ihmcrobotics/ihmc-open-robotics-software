@@ -1,19 +1,17 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import com.thoughtworks.xstream.XStream;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Rodrigues_F64;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

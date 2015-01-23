@@ -1,6 +1,5 @@
 package us.ihmc.communication.streamingData;
 
-import us.ihmc.communication.streamingData.StreamingDataConsumer;
 
 
 

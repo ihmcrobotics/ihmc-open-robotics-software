@@ -19,9 +19,9 @@ package org.ros.rosjava_geometry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import java.util.Random;
+
+import org.junit.Test;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

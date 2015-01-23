@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros.publisher;
 import org.ros.message.Time;
+
 import rosgraph_msgs.Clock;
 
 public class RosClockPublisher extends RosTopicPublisher<Clock>

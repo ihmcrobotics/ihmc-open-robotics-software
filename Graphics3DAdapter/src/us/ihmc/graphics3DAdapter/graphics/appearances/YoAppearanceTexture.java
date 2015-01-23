@@ -1,7 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import java.awt.image.BufferedImage;
-import java.net.URL;
 
 import javax.vecmath.Color3f;
 

@@ -16,16 +16,16 @@
 
 package org.ros.internal.message;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

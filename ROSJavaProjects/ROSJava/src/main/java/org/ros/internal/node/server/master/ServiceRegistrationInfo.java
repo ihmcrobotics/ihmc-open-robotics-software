@@ -16,9 +16,9 @@
 
 package org.ros.internal.node.server.master;
 
-import org.ros.namespace.GraphName;
-
 import java.net.URI;
+
+import org.ros.namespace.GraphName;
 
 /**
  * Information a master needs about a service.

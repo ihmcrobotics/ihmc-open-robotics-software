@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;

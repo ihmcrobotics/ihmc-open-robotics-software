@@ -16,15 +16,15 @@
 
 package org.ros.internal.message.definition;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.Map;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
-import java.util.Collection;
-import java.util.Map;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 
 /**
  * A {@link MessageDefinitionProvider} that uses reflection to load the message

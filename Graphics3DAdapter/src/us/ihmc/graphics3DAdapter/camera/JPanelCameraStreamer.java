@@ -1,15 +1,17 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.utilities.VideoStreamer;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
+import boofcv.struct.calib.IntrinsicParameters;
 
 
 public class JPanelCameraStreamer extends JPanel implements VideoStreamer, CameraStreamer

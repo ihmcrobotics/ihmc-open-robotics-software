@@ -2,10 +2,9 @@ package us.ihmc.simulationconstructionset.robotcommprotocol;
 
 import java.util.ArrayList;
 
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
-
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class RobotConnectionGUIUpdater implements CreatedNewVariablesListener, ReceivedDataListener
 {

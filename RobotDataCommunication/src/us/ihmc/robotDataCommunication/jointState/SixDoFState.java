@@ -6,9 +6,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.screwTheory.Twist;
-
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.utilities.screwTheory.Twist;
 
 public class SixDoFState extends JointState<FloatingJoint>
 {

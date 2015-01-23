@@ -16,8 +16,12 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
@@ -34,12 +38,8 @@ import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.Queue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 /**
  * Default implementation of a {@link ServiceClient}.

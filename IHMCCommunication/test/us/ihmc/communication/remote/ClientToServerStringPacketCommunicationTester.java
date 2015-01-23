@@ -1,6 +1,5 @@
 package us.ihmc.communication.remote;
 
-import us.ihmc.communication.remote.DataObjectTransponder;
 import us.ihmc.utilities.ThreadTools;
 
 class ClientToServerStringPacketCommunicationTester extends AbstractStringPacketCommunicationTester

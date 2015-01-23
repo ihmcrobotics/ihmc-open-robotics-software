@@ -16,13 +16,13 @@
 
 package org.ros.internal.node.topic;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageDeserializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Subscriber;
-
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A factory for {@link Subscriber} instances.

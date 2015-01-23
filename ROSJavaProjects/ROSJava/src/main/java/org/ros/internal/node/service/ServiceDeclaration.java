@@ -16,14 +16,14 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
 
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

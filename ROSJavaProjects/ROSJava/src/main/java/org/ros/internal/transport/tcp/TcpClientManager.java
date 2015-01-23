@@ -16,16 +16,16 @@
 
 package org.ros.internal.transport.tcp;
 
-import com.google.common.collect.Lists;
+import java.net.SocketAddress;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 
-import java.net.SocketAddress;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Executor;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

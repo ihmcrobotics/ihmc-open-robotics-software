@@ -16,10 +16,10 @@
 
 package org.ros.rosjava_geometry;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A transformation in terms of translation, rotation, and scale.

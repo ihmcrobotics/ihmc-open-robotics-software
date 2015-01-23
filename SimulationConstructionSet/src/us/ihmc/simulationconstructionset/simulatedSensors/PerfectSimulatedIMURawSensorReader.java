@@ -1,11 +1,10 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
+import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.math.corruptors.NoisyDoubleYoVariable;
-
-import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
 public class PerfectSimulatedIMURawSensorReader extends SimulatedIMURawSensorReader
 {

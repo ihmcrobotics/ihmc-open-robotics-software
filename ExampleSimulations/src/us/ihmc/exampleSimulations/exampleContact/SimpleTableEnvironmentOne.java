@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.exampleContact;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SimpleTableEnvironmentOne extends CombinedTerrainObject3D
 {

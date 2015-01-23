@@ -1,14 +1,19 @@
 package us.ihmc.imageProcessing.driving;
 
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 
 /**
  * User: Matt

@@ -8,12 +8,12 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.utilities.robotSide.RobotSide;
-
-import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.utilities.robotSide.RobotSide;
+
+import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasFlatGroundWalkingTrack
 {

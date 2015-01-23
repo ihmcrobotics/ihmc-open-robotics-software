@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public interface SimulatedSensor {
 	public void updateTransform(RigidBodyTransform transformToHere, double time);

@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
-
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 
 public class StepDownsGroundprofile extends GroundProfileFromHeightMap

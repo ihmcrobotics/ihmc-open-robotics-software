@@ -16,14 +16,14 @@
 
 package org.ros;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.server.master.MasterServer;
 
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
+import com.google.common.annotations.VisibleForTesting;
 
 // TODO(damonkohler): Add /rosout node.
 /**

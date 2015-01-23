@@ -16,15 +16,15 @@
 
 package org.ros.internal.message.field;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

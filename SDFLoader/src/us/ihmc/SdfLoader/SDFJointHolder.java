@@ -3,11 +3,11 @@ package us.ihmc.SdfLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFJointHolder
 {

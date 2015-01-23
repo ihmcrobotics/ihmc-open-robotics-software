@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -9,6 +8,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class ContactableStaticRobot extends Robot implements Contactable
 {

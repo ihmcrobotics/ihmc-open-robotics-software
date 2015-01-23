@@ -16,14 +16,15 @@
 
 package org.ros.time;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.Topics;
 import org.ros.internal.node.DefaultNode;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
 import org.ros.node.topic.Subscriber;
+
 import rosgraph_msgs.Clock;
+
+import com.google.common.base.Preconditions;
 
 /**
  * A {@link TimeProvider} for use when the ROS graph is configured for

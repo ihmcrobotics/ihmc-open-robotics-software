@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport.queue;
 
+import java.util.concurrent.ExecutorService;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
@@ -24,8 +26,6 @@ import org.ros.concurrent.EventDispatcher;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.message.MessageListener;
-
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

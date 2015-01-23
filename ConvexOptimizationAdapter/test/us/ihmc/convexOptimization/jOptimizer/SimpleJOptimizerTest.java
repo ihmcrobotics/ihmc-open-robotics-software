@@ -4,15 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.Test;
-
-import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.PSDQuadraticMultivariateRealFunction;
-import com.joptimizer.functions.QuadraticMultivariateRealFunction;
 import com.joptimizer.functions.SOCPLogarithmicBarrier;
 import com.joptimizer.functions.SOCPLogarithmicBarrier.SOCPConstraintParameters;
 import com.joptimizer.optimizers.BarrierMethod;

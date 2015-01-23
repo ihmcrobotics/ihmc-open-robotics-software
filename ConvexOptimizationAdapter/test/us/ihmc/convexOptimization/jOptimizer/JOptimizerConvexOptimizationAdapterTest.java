@@ -2,7 +2,6 @@ package us.ihmc.convexOptimization.jOptimizer;
 
 import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 import us.ihmc.convexOptimization.ConvexOptimizationAdapterTest;
-import us.ihmc.convexOptimization.jOptimizer.JOptimizerConvexOptimizationAdapter;
 
 
 

@@ -16,8 +16,6 @@
 
 package org.ros.internal.transport.tcp;
 
-import com.google.common.base.Preconditions;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -38,6 +36,8 @@ import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
+
+import com.google.common.base.Preconditions;
 
 /**
  * A {@link ChannelHandler} which will process the TCP server handshake.

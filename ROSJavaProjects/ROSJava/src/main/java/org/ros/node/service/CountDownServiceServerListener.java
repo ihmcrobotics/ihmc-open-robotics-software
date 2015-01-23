@@ -16,10 +16,10 @@
 
 package org.ros.node.service;
 
-import org.ros.internal.node.CountDownRegistrantListener;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.ros.internal.node.CountDownRegistrantListener;
 
 /**
  * A {@link ServiceServerListener} which uses {@link CountDownLatch} to track

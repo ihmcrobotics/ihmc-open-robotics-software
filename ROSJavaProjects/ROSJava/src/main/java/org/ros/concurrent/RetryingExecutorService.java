@@ -16,12 +16,6 @@
 
 package org.ros.concurrent;
 
-import com.google.common.collect.Maps;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ros.exception.RosRuntimeException;
-
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -33,6 +27,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.collect.Maps;
 
 /**
  * Wraps an {@link ScheduledExecutorService} to execute {@link Callable}s with

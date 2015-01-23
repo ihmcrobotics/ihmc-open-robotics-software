@@ -15,13 +15,13 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_wry;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {

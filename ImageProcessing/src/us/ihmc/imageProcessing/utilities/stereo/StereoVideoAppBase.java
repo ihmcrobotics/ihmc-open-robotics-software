@@ -18,15 +18,6 @@
 
 package us.ihmc.imageProcessing.utilities.stereo;
 
-import boofcv.io.UtilIO;
-import boofcv.io.image.SimpleImageSequence;
-import boofcv.struct.calib.StereoParameters;
-import boofcv.struct.image.ImageSingleBand;
-import boofcv.struct.image.ImageType;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -34,6 +25,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import boofcv.io.UtilIO;
+import boofcv.io.image.SimpleImageSequence;
+import boofcv.struct.calib.StereoParameters;
+import boofcv.struct.image.ImageSingleBand;
+import boofcv.struct.image.ImageType;
 
 /**
  * Base class for processing sequences of stereo images.

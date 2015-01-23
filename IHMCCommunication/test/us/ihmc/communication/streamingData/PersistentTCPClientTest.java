@@ -12,8 +12,6 @@ import java.net.Socket;
 
 import org.junit.Test;
 
-import us.ihmc.communication.streamingData.EstablishedAConnectionListener;
-import us.ihmc.communication.streamingData.PersistentTCPClient;
 import us.ihmc.utilities.ThreadTools;
 
 public class PersistentTCPClientTest

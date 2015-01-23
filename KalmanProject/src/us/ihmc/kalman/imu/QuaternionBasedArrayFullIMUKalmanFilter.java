@@ -2,7 +2,6 @@ package us.ihmc.kalman.imu;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 import Jama.Matrix;
 
 /**

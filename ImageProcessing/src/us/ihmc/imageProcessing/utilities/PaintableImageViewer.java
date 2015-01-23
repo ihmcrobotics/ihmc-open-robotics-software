@@ -1,9 +1,9 @@
 package us.ihmc.imageProcessing.utilities;
 
-import us.ihmc.utilities.camera.ImageViewer;
-
-import java.awt.*;
+import java.awt.Graphics;
 import java.util.ArrayList;
+
+import us.ihmc.utilities.camera.ImageViewer;
 
 /**
  * User: Matt

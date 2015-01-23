@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.doublePendulum;
 
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class DoublePendulumController implements RobotController
 {

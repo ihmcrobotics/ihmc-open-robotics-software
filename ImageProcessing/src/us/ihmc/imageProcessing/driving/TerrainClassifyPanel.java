@@ -1,9 +1,12 @@
 package us.ihmc.imageProcessing.driving;
 
-import boofcv.struct.image.ImageUInt8;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+
+import boofcv.struct.image.ImageUInt8;
 
 /**
  * Displays a classified image from {@link DrcColorTerrainClassifier}.

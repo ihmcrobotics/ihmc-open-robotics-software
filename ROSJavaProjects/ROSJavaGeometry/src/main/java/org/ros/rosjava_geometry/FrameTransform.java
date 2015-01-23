@@ -16,10 +16,10 @@
 
 package org.ros.rosjava_geometry;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Describes a {@link Transform} from data in the source frame to data in the

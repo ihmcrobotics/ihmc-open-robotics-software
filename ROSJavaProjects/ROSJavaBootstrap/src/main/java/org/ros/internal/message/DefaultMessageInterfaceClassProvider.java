@@ -16,10 +16,10 @@
 
 package org.ros.internal.message;
 
+import java.util.Map;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
-
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -2,10 +2,10 @@ package us.ihmc.graphics3DAdapter.jme;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.jme3.scene.Node;
-
 import us.ihmc.graphics3DAdapter.Graphics3DFrameListener;
 import us.ihmc.graphics3DAdapter.Graphics3DWorld;
+
+import com.jme3.scene.Node;
 
 public class JMEGraphics3DWorld extends Graphics3DWorld implements Graphics3DFrameListener
 {

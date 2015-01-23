@@ -7,7 +7,6 @@ import javax.vecmath.Point3f;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.jme.util.JMEPointCloudVisualizer;
 import us.ihmc.utilities.RandomTools;
 
 public class JMEPointCloudVisualizerTest

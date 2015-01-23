@@ -16,6 +16,9 @@
 
 package org.ros.node;
 
+import java.net.URI;
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
@@ -23,9 +26,6 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NodeNameResolver;
-
-import java.net.URI;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A node in the ROS graph.

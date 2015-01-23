@@ -16,17 +16,18 @@
 
 package org.ros.rosjava_geometry;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-
 import geometry_msgs.TransformStamped;
+
+import java.util.Map;
+
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
-import java.util.Map;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 /**
  * A tree of {@link FrameTransform}s.

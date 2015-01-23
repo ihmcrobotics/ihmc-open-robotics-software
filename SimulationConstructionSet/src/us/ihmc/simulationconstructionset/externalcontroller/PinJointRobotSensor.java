@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.externalcontroller;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 class PinJointRobotSensor implements SensorInterface
 {

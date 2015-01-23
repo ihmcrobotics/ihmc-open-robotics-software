@@ -3,9 +3,6 @@ package us.ihmc.SdfLoader;
 import java.util.List;
 import java.util.Set;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.Pair;
@@ -15,6 +12,8 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public interface SDFJointNameMap extends RobotSpecificJointNames
 {

@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.ros.exception.DuplicateServiceException;
 import org.ros.internal.message.service.ServiceDescription;
@@ -29,7 +29,7 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 
-import java.util.concurrent.ScheduledExecutorService;
+import com.google.common.base.Preconditions;
 
 /**
  * A factory for {@link ServiceServer}s and {@link ServiceClient}s.

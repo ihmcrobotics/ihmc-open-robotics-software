@@ -1,8 +1,5 @@
 package us.ihmc.graphics3DAdapter.utils.lidar;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.Transform3d;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,7 +12,9 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Sphere3d;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public class Graphics3DLidarScan
 {

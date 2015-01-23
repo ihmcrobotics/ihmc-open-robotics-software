@@ -3,6 +3,45 @@
 
 package us.ihmc.imageProcessing;
 
+import georegression.struct.line.LineParametric2D_F32;
+import georegression.struct.point.Point2D_F32;
+import georegression.struct.point.Point2D_I32;
+
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.vecmath.Point2d;
+
+import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.driving.LanePositionEstimator;
+import us.ihmc.imageProcessing.driving.LanePositionIndicatorPanel;
+import us.ihmc.imageProcessing.driving.ObstaclePositionEstimator;
+import us.ihmc.imageProcessing.driving.SteeringInputEstimator;
+import us.ihmc.imageProcessing.driving.VanishingPointDetector;
+import us.ihmc.imageProcessing.utilities.BoundsPainter;
+import us.ihmc.imageProcessing.utilities.LinePainter;
+import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
+import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.VideoListener;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.Line2d;
 import boofcv.abst.feature.detect.interest.ConfigFastHessian;
 import boofcv.abst.feature.detect.interest.InterestPointDetector;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
@@ -16,34 +55,11 @@ import boofcv.factory.feature.detect.line.ConfigHoughPolar;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.struct.ConnectRule;
-import boofcv.struct.image.*;
-import georegression.struct.line.LineParametric2D_F32;
-import georegression.struct.point.Point2D_F32;
-import georegression.struct.point.Point2D_I32;
-import jxl.format.RGB;
-import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
-import us.ihmc.imageProcessing.driving.*;
-import us.ihmc.imageProcessing.utilities.BoundsPainter;
-import us.ihmc.imageProcessing.utilities.LinePainter;
-import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
-import us.ihmc.imageProcessing.utilities.VideoPlayer;
-import us.ihmc.utilities.camera.VideoListener;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.Line2d;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.vecmath.Point2d;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
-import java.util.ArrayList;
-import java.util.List;
+import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageSInt16;
+import boofcv.struct.image.ImageSInt32;
+import boofcv.struct.image.ImageSingleBand;
+import boofcv.struct.image.ImageUInt8;
 
 public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
