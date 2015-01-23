@@ -2,6 +2,8 @@ package us.ihmc.valkyrie.kinematics;
 
 //~--- non-JDK imports --------------------------------------------------------
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -9,8 +11,6 @@ import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJ
 import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
-
-import static org.junit.Assert.assertEquals;
 
 public class ClosedFormJacobianTest 
 {

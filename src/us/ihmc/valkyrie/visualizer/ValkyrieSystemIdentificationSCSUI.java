@@ -9,9 +9,8 @@ import javax.swing.JButton;
 import us.ihmc.CoM.LinkComIDActionListener;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieSystemIdentificationSCSUI
 {

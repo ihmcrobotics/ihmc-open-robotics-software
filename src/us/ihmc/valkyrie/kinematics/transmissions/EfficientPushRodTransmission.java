@@ -6,7 +6,6 @@ import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class EfficientPushRodTransmission implements PushRodTransmissionInterface
