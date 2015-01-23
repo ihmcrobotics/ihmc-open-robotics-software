@@ -110,63 +110,31 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, ReferenceFrame handFrame, Quat4d desiredGraspOrientationToPack,
          Vector3d graspVector)
    {
-      Vector3d normalVector = new Vector3d(graspVector);
-      normalVector.negate();
-
-      AxisAngle4d rotationToPack = new AxisAngle4d();
-      GeometryTools.getRotationBasedOnNormal(rotationToPack, normalVector,new Vector3d(1.0, 0.0, 0.0));
-
-      FramePose handPoseBeforeRotation = new FramePose(worldFrame, new Point3d(0.0, 0.0, 0.0), rotationToPack);
-      PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", handPoseBeforeRotation);
-
-      FramePose debrisPoseInHandBeforeRotationFrame = new FramePose(worldFrame, debrisTransform);
-      debrisPoseInHandBeforeRotationFrame.changeFrame(handFrameBeforeRotation);
-
-      FramePose debrisPoseInHandBeforeRotationFrameWithPiRoll = new FramePose(worldFrame, debrisTransform);
-      debrisPoseInHandBeforeRotationFrameWithPiRoll.changeFrame(handFrameBeforeRotation);
-
-      Matrix3d piRollHandOrientation = new Matrix3d();
-      debrisPoseInHandBeforeRotationFrameWithPiRoll.getOrientation(piRollHandOrientation);
-
-      Matrix3d piRoll = new Matrix3d();
-      piRoll.rotX(Math.PI);
-
-      Matrix3d finalHandRotation = new Matrix3d();
-      finalHandRotation.mul(piRoll,piRollHandOrientation);
+      PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", worldFrame);
+      handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
       
-      Quat4d quatToPack = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnMatrix3d(quatToPack, finalHandRotation);
-      debrisPoseInHandBeforeRotationFrameWithPiRoll.setOrientation(quatToPack);
+      FramePose handPoseSolution1 = new FramePose(handFrameBeforeRotation);
+      handPoseSolution1.changeFrame(handFrame);
 
-      double debrisPoseInHandBeforeRotationRoll = debrisPoseInHandBeforeRotationFrame.getRoll();
-      double debrisPoseInHandBeforeRotationWithPiRollRoll = debrisPoseInHandBeforeRotationFrameWithPiRoll.getRoll();
-      
-      Matrix3d rotationToBePerformedAroundX = new Matrix3d(); 
-      Matrix3d debrisPose = new Matrix3d();
-      debrisPoseInHandBeforeRotationFrame.getOrientation(debrisPose);
-      
-      if (Math.abs(debrisPoseInHandBeforeRotationRoll)<=Math.abs(debrisPoseInHandBeforeRotationWithPiRollRoll))
+      FramePose handPoseSolution2 = new FramePose(handFrameBeforeRotation);
+      handPoseSolution2.setOrientation(0.0, 0.0, Math.PI);
+      handPoseSolution2.changeFrame(handFrame);
+
+      double rollOfSolution1 = handPoseSolution1.getRoll();
+      double rollOfSolution2 = handPoseSolution2.getRoll();
+
+      FramePose handPose = new FramePose(handFrameBeforeRotation);
+      if (Math.abs(rollOfSolution1) <= Math.abs(rollOfSolution2))
       {
-         rotationToBePerformedAroundX.rotX(debrisPoseInHandBeforeRotationRoll);
+         handPose.setPoseIncludingFrame(handPoseSolution1);
       }
       else
       {
-         rotationToBePerformedAroundX.rotX(debrisPoseInHandBeforeRotationWithPiRollRoll);
+         handPose.setPoseIncludingFrame(handPoseSolution2);
       }
       
-      Matrix3d actualHandRotation = new Matrix3d();
-      
-      actualHandRotation.mul(rotationToBePerformedAroundX, debrisPose);
-      Quat4d actualHandRotationQuat = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnMatrix3d(actualHandRotationQuat , actualHandRotation);
-      
-      FramePose handPose = new FramePose(handFrameBeforeRotation);
-      handPose.setOrientation(actualHandRotationQuat);
       handPose.changeFrame(worldFrame);
-      
       handPose.getOrientation(desiredGraspOrientationToPack);
-      
-      System.out.println(desiredGraspOrientationToPack);
    }
 
    private void getGraspLocation(Quat4d rotationToBePerformed, Point3d graspPosition, Vector3d graspVector)
