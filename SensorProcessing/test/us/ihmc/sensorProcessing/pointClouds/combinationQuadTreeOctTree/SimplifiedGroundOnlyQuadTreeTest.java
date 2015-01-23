@@ -42,7 +42,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    private static final boolean DO_ASSERTS = false;
 
    
-   @Test
+   @Test(timeout = 300000)
    public void testSimpleCaseOne()
    {
       float minX = -10.0f;
@@ -85,7 +85,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    
    
    @Ignore
-   @Test
+   @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
       double minX = -5.0f;
@@ -131,7 +131,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    
    
  @Ignore
-   @Test
+   @Test(timeout = 300000)
    public void testThreePointsOnALine()
    {
       float minX = -0.04f;
@@ -164,7 +164,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout = 300000)
    public void testOnALineOfPoints()
    {
       ArrayList<Point3d> points = new ArrayList<Point3d>();
@@ -183,7 +183,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout = 300000)
    public void testOnSomeSlopes()
    {
       double halfWidth = 0.5;
@@ -205,7 +205,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout = 300000)
    public void testOnSomeStairCases()
    {
       double halfWidth = 0.6;
@@ -231,7 +231,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    }
 
    @Ignore
-   @Test
+   @Test(timeout = 300000)
    public void testUsingStairGroundProfile()
    {
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
