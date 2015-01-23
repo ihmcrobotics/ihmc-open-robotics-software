@@ -48,12 +48,12 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final YoFrameOrientation frameOrientation;
    private final YoGraphicShape yoGraphicsShapeDesired;
    private final boolean random = false;
-   private final double ERROR_DISTANCE_TOLERANCE = 0.03;
+   private final double ERROR_DISTANCE_TOLERANCE = 0.005;
    private SDFFullRobotModel desiredFullRobotModel;
    private YoGraphicShape yoGraphicsShapeActual;
    private YoFramePoint framePoint2;
    private YoFrameOrientation frameOrientation2;
-   private final double trajectoryTime = 3.0;
+   private final double trajectoryTime = 2.0;
    private int successInt;
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws IOException
@@ -107,7 +107,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       {
          ThreadTools.sleep(1000);
          doControl(i);
-         ThreadTools.sleep((long) (2*trajectoryTime*1000.0));
+         ThreadTools.sleep((long) (3*trajectoryTime*1000.0));
          checkIfTargetWasReached(i);
       }
    }
