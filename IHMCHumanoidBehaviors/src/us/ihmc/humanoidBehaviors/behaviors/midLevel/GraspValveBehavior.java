@@ -13,6 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
+import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.GeometryTools;
@@ -20,6 +21,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.TaskExecutor;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -39,7 +41,7 @@ public class GraspValveBehavior extends BehaviorInterface
 
    private final ReferenceFrame pelvisFrame;
 
-   private RobotSide robotSide = RobotSide.LEFT;
+   private RobotSide robotSideOfGraspingHand = null;
    private double trajectoryTime = 1.0;//2.0;
 
    private FullRobotModel fullRobotModel;
@@ -70,21 +72,31 @@ public class GraspValveBehavior extends BehaviorInterface
       midPoseOffsetFromFinalPose = new DoubleYoVariable("offsetToThePointOfGrabbing", registry);
    }
 
-   public void setGraspPose(RigidBodyTransform debrisTransformToWorld, Vector3d finalToMidGraspVec)
+   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Vector3d approachDirection, boolean graspValveRim)
    {
-      Vector3d worldToDebrisVec = new Vector3d();
-      debrisTransformToWorld.getTranslation(worldToDebrisVec);
-      Point3d finalGraspPosInWorld = new Point3d(worldToDebrisVec);
+      Vector3d worldToValveVec = new Vector3d();
+      valveTransformToWorld.getTranslation(worldToValveVec);
 
-      setGraspPose(debrisTransformToWorld, finalGraspPosInWorld, finalToMidGraspVec);
+      Point3d finalGraspPosInWorld = new Point3d(worldToValveVec);
+
+      if (graspValveRim)
+      {
+         double valveRadius = valveType.getValveRadius();
+         Vector3d valveCenterToRimVecInValveFrame = new Vector3d(0, -valveRadius, 0);
+         Vector3d valveCenterToRimVecInWorldFrame = TransformTools.getTransformedVector(valveCenterToRimVecInValveFrame, valveTransformToWorld);
+
+         finalGraspPosInWorld.add(valveCenterToRimVecInWorldFrame);
+      }
+
+      setGraspPose(valveType, valveTransformToWorld, finalGraspPosInWorld, approachDirection);
    }
 
-   public void setGraspPose(RigidBodyTransform debrisTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec)
+   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec)
    {
-      setGraspPose(debrisTransformToWorld, finalGraspPosInWorld, finalToMidGraspVec, MIDPOSE_OFFSET_FROM_FINALPOSE);
+      setGraspPose(valveType, valveTransformToWorld, finalGraspPosInWorld, finalToMidGraspVec, MIDPOSE_OFFSET_FROM_FINALPOSE);
    }
 
-   public void setGraspPose(RigidBodyTransform debrisTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec,
+   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec,
          double midPoseOffsetFromFinalPose)
    {
       this.midPoseOffsetFromFinalPose.set(midPoseOffsetFromFinalPose);
@@ -93,43 +105,57 @@ public class GraspValveBehavior extends BehaviorInterface
       {
          throw new RuntimeException("finalToMidGraspVec has not been set!");
       }
-      robotSide = determineSideToUse(finalGraspPosInWorld);
+      robotSideOfGraspingHand = determineSideToUse(finalGraspPosInWorld);
 
-      setTasks(debrisTransformToWorld, finalGraspPosInWorld, finalToMidGraspVec);
+      setTasks(valveTransformToWorld, finalGraspPosInWorld, finalToMidGraspVec);
+   }
 
-      haveInputsBeenSet.set(true);
+   public RobotSide getRobotSideOfGraspingHand()
+   {
+      if (!haveInputsBeenSet.getBooleanValue())
+      {
+         throw new RuntimeException("Must set behavior inputs first!");
+      }
+      return robotSideOfGraspingHand;
    }
 
    public void getFinalGraspPose(FramePose poseToPack)
    {
+      if (!haveInputsBeenSet.getBooleanValue())
+      {
+         throw new RuntimeException("Must set behavior inputs first!");
+      }
       poseToPack.setPose(finalGrabPose);
    }
 
    private final FramePose finalGrabPose = new FramePose();
 
-   private void setTasks(RigidBodyTransform debrisTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec)
+   private void setTasks(RigidBodyTransform valveTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec)
    {
-      Quat4d graspOrientation = computeDesiredGraspOrientation(debrisTransformToWorld, fullRobotModel.getHandControlFrame(robotSide), finalToMidGraspVec);
+      Quat4d graspOrientation = computeDesiredGraspOrientation(valveTransformToWorld, fullRobotModel.getHandControlFrame(robotSideOfGraspingHand),
+            finalToMidGraspVec);
 
       FramePose midGrabPose = new FramePose();
-      setHandPose(midGrabPose, graspOrientation, finalGraspPosInWorld, finalToMidGraspVec, midPoseOffsetFromFinalPose.getDoubleValue());
+      setHandPose(midGrabPose, graspOrientation, finalGraspPosInWorld, finalToMidGraspVec, -midPoseOffsetFromFinalPose.getDoubleValue());
       RigidBodyTransform midGrabTransform = new RigidBodyTransform();
       midGrabPose.getPose(midGrabTransform);
-      taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, midGrabTransform, trajectoryTime));
+      taskExecutor.submit(new HandPoseTask(robotSideOfGraspingHand, yoTime, handPoseBehavior, Frame.WORLD, midGrabTransform, trajectoryTime));
 
-      taskExecutor.submit(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
+      taskExecutor.submit(new FingerStateTask(robotSideOfGraspingHand, FingerState.OPEN, fingerStateBehavior));
 
-      setHandPose(finalGrabPose, graspOrientation, finalGraspPosInWorld, finalToMidGraspVec, WRIST_OFFSET_FROM_HAND);
+      setHandPose(finalGrabPose, graspOrientation, finalGraspPosInWorld, finalToMidGraspVec, -WRIST_OFFSET_FROM_HAND);
       RigidBodyTransform finalGraspTransform = new RigidBodyTransform();
       finalGrabPose.getPose(finalGraspTransform);
-      taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, finalGraspTransform, trajectoryTime));
+      taskExecutor.submit(new HandPoseTask(robotSideOfGraspingHand, yoTime, handPoseBehavior, Frame.WORLD, finalGraspTransform, trajectoryTime));
 
-      taskExecutor.submit(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
+      taskExecutor.submit(new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior));
+      
+      haveInputsBeenSet.set(true);
    }
 
    private void setHandPose(FramePose poseToPack, Quat4d rotationToBePerformed, Point3d initialPosition, Vector3d positionOffset, double offsetDistance)
    {
-      poseToPack.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+      poseToPack.setToZero(fullRobotModel.getHandControlFrame(robotSideOfGraspingHand));
       poseToPack.changeFrame(ReferenceFrame.getWorldFrame());
       poseToPack.setOrientation(rotationToBePerformed);
 
@@ -149,7 +175,7 @@ public class GraspValveBehavior extends BehaviorInterface
       piRoll.rotX(Math.PI);
 
       Vector3d midToFinalGraspVec = new Vector3d(finalToMidGraspVec);
-      midToFinalGraspVec.negate();
+      //      midToFinalGraspVec.negate();
 
       AxisAngle4d rotationFromXAxis = new AxisAngle4d();
       GeometryTools.getRotationBasedOnNormal(rotationFromXAxis, midToFinalGraspVec, xAxis);
@@ -239,7 +265,7 @@ public class GraspValveBehavior extends BehaviorInterface
 
    public RobotSide getSideToUse()
    {
-      return robotSide;
+      return robotSideOfGraspingHand;
    }
 
    @Override
