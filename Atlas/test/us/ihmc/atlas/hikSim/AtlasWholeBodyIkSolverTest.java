@@ -25,8 +25,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 { 
    static private final AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
    static private SDFFullRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
-
-   
+ 
    static private SimulationConstructionSet scs;
    static private boolean VISUALIZE_GUI = true && !BambooTools.isRunningOnBamboo();   
    static FullRobotModelVisualizer modelVisualizer;

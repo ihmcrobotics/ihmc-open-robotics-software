@@ -10,32 +10,31 @@ import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket.WholeBo
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 
 public class WholeBodyTrajectory
 {
-   static public TrajectoryND createWholeBodyTrajectory(
+   static public TrajectoryND createJointSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
-         final SDFFullRobotModel initialState, 
-         final SDFFullRobotModel finalState ) throws Exception
+         final OneDoFJoint[] initialState, 
+         final OneDoFJoint[] finalState ) throws Exception
    {
-      int N = initialState.getOneDoFJoints().length;
+      int N = initialState.length;
 
       double[] deltaQ = new double[N];
       double[] wpQ = new double[N];
 
       double max = -1e10;
-
-      HashMap<String, Double> anglesToUseAsInitialState = new HashMap<String, Double> ();
-      HashMap<String, Double> outputAngles = new HashMap<String, Double> ();
-
+ 
       for (int j=0; j<N; j++)
       {
-         OneDoFJoint jointI = initialState.getOneDoFJoints()[j];
-         OneDoFJoint jointF = finalState.getOneDoFJoints()[j];
+         OneDoFJoint jointI = initialState[j];
+         OneDoFJoint jointF = finalState[j];
          deltaQ[j] = jointF.getQ() - jointI.getQ();
 
          if(max < Math.abs(deltaQ[j])) {
@@ -43,7 +42,7 @@ public class WholeBodyTrajectory
          }
       }
 
-      double maxDeltaQ = 0.3;
+      double maxDeltaQ = 0.2;
 
       int segments = (int) Math.round(max/maxDeltaQ);
 
@@ -53,47 +52,95 @@ public class WholeBodyTrajectory
       {
          for (int j=0; j<N; j++)
          {
-            OneDoFJoint jointI = initialState.getOneDoFJoints()[j];
+            OneDoFJoint jointI = initialState[j];
             wpQ[j] = jointI.getQ() + s*( deltaQ[j] / segments);
          }
+         wb_trajectory.addWaypoint(wpQ);
+      }
 
-         if( s > 0 && s < segments )
+      wb_trajectory.buildTrajectory();
+      return wb_trajectory;
+   }
+
+   
+   static public TrajectoryND createTaskSpaceTrajectory(
+         final WholeBodyIkSolver wbSolver,  
+         final SDFFullRobotModel actualRobotModel,
+         final SideDependentList<ReferenceFrame> initialTarget,
+         final SideDependentList<ReferenceFrame> finalTarget ) throws Exception
+   {
+      int N = actualRobotModel.getOneDoFJoints().length;
+
+      double[] wpQ = new double[N];
+
+      HashMap<String, Double> anglesToUseAsInitialState = new HashMap<String, Double> ();
+      HashMap<String, Double> outputAngles = new HashMap<String, Double> ();
+    
+      for (int j=0; j<N; j++)
+      {
+         OneDoFJoint joint = actualRobotModel.getOneDoFJoints()[j];    
+         anglesToUseAsInitialState.put(joint.getName() , joint.getQ() );
+      }
+
+      int segmentsPos = 1;
+      int segmentsRot = 1;
+      
+      double maxDeltaPos = 0.2;
+      double maxDeltaRot = 0.3;
+      
+      for (RobotSide side: RobotSide.values)
+      {
+         ControlledDoF numberOfDoF = wbSolver.getNumberOfControlledDoF(side);
+         
+         if( numberOfDoF != ControlledDoF.DOF_NONE )
          {
-            for (int j=0; j<N; j++)
-            {
-               String jointName = initialState.getOneDoFJoints()[j].getName();
-               anglesToUseAsInitialState.put( jointName, new Double( wpQ[j] ) );
-            }
-
-            boolean jointPoseEnabled     = wbSolver.task_joints_pose.isEnabled();
-            boolean leftPositionEnabled  = wbSolver.task_end_effector_translations.get(RobotSide.LEFT).isEnabled();
-            boolean leftRotationEnabled  = wbSolver.task_end_effector_rotations.get(RobotSide.LEFT).isEnabled();
-            boolean rightPositionEnabled = wbSolver.task_end_effector_translations.get(RobotSide.RIGHT).isEnabled();
-            boolean rightRotationEnabled = wbSolver.task_end_effector_rotations.get(RobotSide.RIGHT).isEnabled();
-
-            wbSolver.task_joints_pose.setEnabled(false);
-            wbSolver.task_end_effector_translations.get(RobotSide.LEFT).setEnabled(false);
-            wbSolver.task_end_effector_rotations.get(RobotSide.LEFT).setEnabled(false);
-            wbSolver.task_end_effector_translations.get(RobotSide.RIGHT).setEnabled(false);
-            wbSolver.task_end_effector_rotations.get(RobotSide.RIGHT).setEnabled(false);
-
-            wbSolver.compute(anglesToUseAsInitialState, outputAngles);
-
-            wbSolver.task_joints_pose.setEnabled(jointPoseEnabled);
-            wbSolver.task_end_effector_translations.get(RobotSide.LEFT).setEnabled(leftPositionEnabled);
-            wbSolver.task_end_effector_rotations.get(RobotSide.LEFT).setEnabled(leftRotationEnabled);
-            wbSolver.task_end_effector_translations.get(RobotSide.RIGHT).setEnabled(rightPositionEnabled);
-            wbSolver.task_end_effector_rotations.get(RobotSide.RIGHT).setEnabled(rightRotationEnabled);
-
-            for (int j=0; j<N; j++)
-            {
-               String jointName = initialState.getOneDoFJoints()[j].getName();
-               Double value = outputAngles.get( jointName);
-               if( value != null) {
-                  wpQ[j] = value.doubleValue();
-               }
-            }
+            double distance = RigidBodyTransform.getRotationDifference(
+                  initialTarget.get(side).getTransformToWorldFrame(), 
+                  finalTarget.get(side).getTransformToWorldFrame() ).length();
+                  
+            segmentsPos = (int) Math.max(segmentsPos, Math.round( distance / maxDeltaPos) );
          }
+         if( numberOfDoF == ControlledDoF.DOF_3P2R || numberOfDoF ==  ControlledDoF.DOF_3P2R )
+         {
+            double distance = RigidBodyTransform.getTranslationDifference(
+                  initialTarget.get(side).getTransformToWorldFrame(), 
+                  finalTarget.get(side).getTransformToWorldFrame() ).length();
+            
+            segmentsRot = (int)  Math.max(segmentsPos, Math.round( distance/ maxDeltaRot) );
+         }
+      }
+
+      int numSegments = Math.max(segmentsRot, segmentsPos);
+
+      TrajectoryND wb_trajectory = new TrajectoryND(N, 0.5, 10 );
+      
+      for (int s=0; s <= numSegments; s++ )
+      {
+         for (RobotSide side: RobotSide.values)
+         {
+            RigidBodyTransform initialTransform =  initialTarget.get(side).getTransformToWorldFrame();
+            RigidBodyTransform finalTransform   =  finalTarget.get(side).getTransformToWorldFrame();
+            
+            RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
+            
+            interpolatedTransform.interpolate(initialTransform, finalTransform, ((double)s)/numSegments);
+                  
+            ReferenceFrame target =  ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("interpolatedTarget",
+                  ReferenceFrame.getWorldFrame(), interpolatedTransform );
+            
+            wbSolver.setHandTarget( side,target );
+         }
+         
+         wbSolver.compute(anglesToUseAsInitialState, outputAngles);
+         
+         for (int j=0; j<N; j++)
+         {
+            OneDoFJoint joint = actualRobotModel.getOneDoFJoints()[j];
+            wpQ[j] = outputAngles.get( joint.getName() );
+            // this solution is used in the next loop
+            anglesToUseAsInitialState.put(joint.getName(), wpQ[j]);
+         }
+
          wb_trajectory.addWaypoint(wpQ);
       }
 
@@ -202,7 +249,7 @@ public class WholeBodyTrajectory
 
          worldToPelvis[0].get( packetWaypoint.pelvisOrientation,  packetWaypoint.pelvisPosition);
          worldToChest[0].get( packetWaypoint.chestOrientation );
- 
+
       }
       return null;
    }
