@@ -52,7 +52,8 @@ public class SimplifiedGroundOnlyQuadTreeTest
       float resolution = 0.49f;
       float heightThreshold = 0.001f;
       double maxMultiLevelZChangeToFilterNoise = 0.2;
-      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise );
+      int maxSameHeightPointsPerNode = 20;
+      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
 
       Double returnNullObject = quadTree.get(0.0f, 0.0f);
       assertNull(returnNullObject);
@@ -143,9 +144,10 @@ public class SimplifiedGroundOnlyQuadTreeTest
       float resolution = 0.02f;
       float heightThreshold = 0.002f;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
+      int maxSameHeightPointsPerNode = 20;
 
       //      CleanQuadTree quadTree = new CleanQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold);
-      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise );
+      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
 
       float height0 = 0.0f;
       float height1 = 0.0f;
@@ -369,6 +371,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
       private double resolution = 0.1;
       private double heightThreshold = 0.002;
       private double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
+      private int maxSameHeightPointsPerNode = 20;
       private int maxNodes = 1000000;
 
       
@@ -554,7 +557,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
          double maxY = rangeOfPointsToTest.getMaxPoint().getY();
 
        
-         heightMap = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise);
+         heightMap = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
          
 //      CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise);
 //         CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX - resolution, minY - resolution, maxX + resolution, maxY + resolution, resolution,

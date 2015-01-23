@@ -32,9 +32,9 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    private File pointListFile;
    private BufferedWriter bufferedWriter;
    
-   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise)
+   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode)
    {
-      super(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise);
+      super(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
 
       if (CREATE_FILE)
       {
