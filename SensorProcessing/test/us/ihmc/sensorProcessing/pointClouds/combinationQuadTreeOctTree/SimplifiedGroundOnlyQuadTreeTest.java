@@ -92,8 +92,8 @@ public class SimplifiedGroundOnlyQuadTreeTest
       double minY = -5.0f;
       double maxX = 5.0f;
       double maxY = 5.0f;
-      float resolution = 0.02f;
-      float heightThreshold = 0.002f;
+      float resolution = 0.025f;
+      float heightThreshold = 0.005f;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       int maxNodes = 1000000;
 
