@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.debrisHandPoseForGrasping;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -10,10 +9,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
@@ -33,6 +32,9 @@ public class DebrisHandPoseGrasping
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", worldFrame);
+   private final YoGraphicReferenceFrame handFrameBeforeRotViz;
+
    public DebrisHandPoseGrasping()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
@@ -43,11 +45,11 @@ public class DebrisHandPoseGrasping
       final YoFramePose initialHandPose = new YoFramePose("initialHand", worldFrame, registry);
       final YoFramePose graspingPose = new YoFramePose("grasping", worldFrame, registry);
 
-      debrisPose.setXYZ(0.2, 0.0, 0.5);
-      debrisPose.setYawPitchRoll(0.0, 0.0, 0.0);
+      debrisPose.setXYZ(0.5, 0.1, 0.5);
+      debrisPose.setYawPitchRoll(0.2, 0.2, 0.2);
 
-      initialHandPose.setXYZ(0.0, 0.0, 0.5);
-      initialHandPose.setYawPitchRoll(0.0, 0.0, 0.0);
+      initialHandPose.setXYZ(0.34, -0.34, 0.72);
+      initialHandPose.setYawPitchRoll(0.13, 0.59, -0.29);
 
       final ReferenceFrame handFrame = new ReferenceFrame("handFrame", worldFrame)
       {
@@ -92,18 +94,18 @@ public class DebrisHandPoseGrasping
             localFramePose.getPose(transformToParent);
          }
       };
-      
-      
 
       final YoGraphicReferenceFrame handFrameViz = new YoGraphicReferenceFrame(handFrame, registry, 0.3, YoAppearance.Black());
       final YoGraphicReferenceFrame debrisFrameViz = new YoGraphicReferenceFrame(debrisFrame, registry, 0.3, YoAppearance.Blue());
       final YoGraphicReferenceFrame desiredGraspFrameViz = new YoGraphicReferenceFrame(desiredGraspFrame, registry, 0.4, YoAppearance.Yellow());
+      handFrameBeforeRotViz = new YoGraphicReferenceFrame(handFrameBeforeRotation, registry, 0.3, YoAppearance.Red());
       final YoGraphicVector graspVectorViz = new YoGraphicVector("graspVectorViz", graspVectorStartPointInWorldFrame, graspVectorInWorldFrame, 0.3, YoAppearance.Darkorange());
 
       graphicsListRegistry.registerYoGraphic("Frames", handFrameViz);
       graphicsListRegistry.registerYoGraphic("Frames", debrisFrameViz);
       graphicsListRegistry.registerYoGraphic("Frames", desiredGraspFrameViz);
       graphicsListRegistry.registerYoGraphic("Frames", graspVectorViz);
+      graphicsListRegistry.registerYoGraphic("ComputedFrames", handFrameBeforeRotViz);
 
       setupListener(debrisPose, debrisFrame, debrisFrameViz);
  
@@ -162,8 +164,6 @@ public class DebrisHandPoseGrasping
          }
       });
 
-
-      
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
 
@@ -179,12 +179,12 @@ public class DebrisHandPoseGrasping
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
       int i = 1;
-      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getPosition().getYoX(), -0.5, 0.5);
-      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getPosition().getYoY(), -0.5, 0.5);
-      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getPosition().getYoZ(), -0.5, 0.5);
-      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getOrientation().getYaw(), -0.5, 0.5);
-      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getOrientation().getPitch(), -0.5, 0.5);
-      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getOrientation().getRoll(), -0.5, 0.5);
+      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getOrientation().getYaw(), -Math.PI, Math.PI);
+      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getOrientation().getPitch(),-Math.PI, Math.PI);
+      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getOrientation().getRoll(), -Math.PI, Math.PI);
+      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getPosition().getYoX(), 0.0, 3.0);
+      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getPosition().getYoY(), -1.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(i++, debrisPose.getPosition().getYoZ(), 0.0, 1.0);
       
       sliderBoardConfigurationManager.setButton(1, computeDesiredGraspPose);
    }
@@ -208,29 +208,31 @@ public class DebrisHandPoseGrasping
    private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, ReferenceFrame handFrame, Quat4d desiredGraspOrientationToPack,
          Vector3d graspVector)
    {
-      FramePose debrisPoseInHandControlFrame = new FramePose(ReferenceFrame.getWorldFrame(), debrisTransform);
-      debrisPoseInHandControlFrame.changeFrame(handFrame);
+      handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
+      handFrameBeforeRotViz.update();
+      
+      FramePose handPoseSolution1 = new FramePose(handFrameBeforeRotation);
+      handPoseSolution1.changeFrame(handFrame);
 
-      FramePose debrisPoseInHandControlFramePiRoll = new FramePose(ReferenceFrame.getWorldFrame(), debrisTransform);
-      debrisPoseInHandControlFramePiRoll.changeFrame(handFrame);
-      double piRollRoll = debrisPoseInHandControlFramePiRoll.getRoll();
-      piRollRoll += Math.PI;
-      AngleTools.trimAngleMinusPiToPi(piRollRoll);
+      FramePose handPoseSolution2 = new FramePose(handFrameBeforeRotation);
+      handPoseSolution2.setOrientation(0.0, 0.0, Math.PI);
+      handPoseSolution2.changeFrame(handFrame);
 
-      //matrix3d
+      double rollOfSolution1 = handPoseSolution1.getRoll();
+      double rollOfSolution2 = handPoseSolution2.getRoll();
 
-      AxisAngle4d axisAngle = new AxisAngle4d();
-      AxisAngle4d axisAnglePiRoll = new AxisAngle4d();
-      debrisPoseInHandControlFrame.getOrientation(axisAngle);
-      debrisPoseInHandControlFramePiRoll.getOrientation(axisAnglePiRoll);
-
-      System.out.println(debrisPoseInHandControlFrame);
-      System.out.println(debrisPoseInHandControlFramePiRoll);
-
-      if (axisAngle.getAngle() > axisAnglePiRoll.getAngle())
-         debrisPoseInHandControlFrame.getOrientation(desiredGraspOrientationToPack);
+      FramePose handPose = new FramePose(handFrameBeforeRotation);
+      if (Math.abs(rollOfSolution1) <= Math.abs(rollOfSolution2))
+      {
+         handPose.setPoseIncludingFrame(handPoseSolution1);
+      }
       else
-         debrisPoseInHandControlFramePiRoll.getOrientation(desiredGraspOrientationToPack);
+      {
+         handPose.setPoseIncludingFrame(handPoseSolution2);
+      }
+      
+      handPose.changeFrame(worldFrame);
+      handPose.getOrientation(desiredGraspOrientationToPack);
    }
 
    public static void main(String[] args)
