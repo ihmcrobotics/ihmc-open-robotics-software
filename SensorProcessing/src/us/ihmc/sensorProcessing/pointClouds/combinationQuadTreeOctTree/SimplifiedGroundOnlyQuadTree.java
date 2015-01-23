@@ -17,7 +17,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
-import us.ihmc.utilities.dataStructures.quadTree.CleanQuadTreePutResult;
+import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreePutResult;
 import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTree;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
@@ -68,7 +68,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
       
       writeToFile(noisyX, noisyY, noisyZ);
       
-      CleanQuadTreePutResult result = put(noisyX, noisyY, noisyZ);
+      SimplifiedQuadTreePutResult result = put(noisyX, noisyY, noisyZ);
       return result.treeChanged;
    }
    
@@ -97,7 +97,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
       
       writeToFile(noisyX, noisyY, noisyZ);
 
-      CleanQuadTreePutResult result = this.put(noisyX, noisyY, noisyZ);
+      SimplifiedQuadTreePutResult result = this.put(noisyX, noisyY, noisyZ);
       return result.treeChanged;
    }
 
