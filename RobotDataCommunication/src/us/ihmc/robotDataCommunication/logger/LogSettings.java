@@ -9,7 +9,8 @@ public enum LogSettings
    BEHAVIOR(false), 
    EXO_X1A(false),
    EXO_HOPPER(false), 
-   ETHERCAT(false);
+   ETHERCAT(false), 
+   HAND(false);
 
    
    private final boolean log;
