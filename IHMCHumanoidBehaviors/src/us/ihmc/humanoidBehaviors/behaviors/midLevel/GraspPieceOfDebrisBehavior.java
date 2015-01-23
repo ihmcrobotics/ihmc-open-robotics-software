@@ -23,53 +23,46 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 {
-
    private final TaskExecutor taskExecutor = new TaskExecutor();
 
    private final HandPoseBehavior handPoseBehavior;
    private final FingerStateBehavior fingerStateBehavior;
 
-   //   private final BooleanYoVariable isDone;
    private final BooleanYoVariable haveInputsBeenSet;
-   private final BooleanYoVariable reachedMidPoint;
    private final DoubleYoVariable offsetToThePointOfGrabbing;
 
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame pelvisFrame;
 
-   private RobotSide robotSide = RobotSide.LEFT;
-   private double trajectoryTime = 2.5;//2.0;
+   private RobotSide robotSide;
+   private double trajectoryTime = 2.5;
 
    private final FramePose desiredGrabPose = new FramePose();
    private final FramePose midGrabPose = new FramePose();
-   private FullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
 
-   private static final double WRIST_OFFSET = 0.14; // 0.11 , wrist to hand 0.11
+   private static final double WRIST_OFFSET = 0.14;
 
    private DoubleYoVariable yoTime;
 
-   private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private Quat4d rotationToBePerformedInWorldFrame = new Quat4d();
-
-   private static final double MAXIMUM_Z_BEFORE_KNEEL = 0.41;
 
    public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
-      this.fullRobotModel = fullRobotModel;
 
+      this.fullRobotModel = fullRobotModel;
       this.yoTime = yoTime;
+
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
 
       pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
-      reachedMidPoint = new BooleanYoVariable("reachedMidPoint", registry);
 
       offsetToThePointOfGrabbing = new DoubleYoVariable("offsetToThePointOfGrabbing", registry);
       offsetToThePointOfGrabbing.set(0.3);
-
    }
 
    public void setGraspPose(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector)
@@ -100,7 +93,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
-
    }
 
    private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, ReferenceFrame handFrame, Quat4d desiredGraspOrientationToPack,
@@ -108,7 +100,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    {
       PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", worldFrame);
       handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
-      
+
       FramePose handPoseSolution1 = new FramePose(handFrameBeforeRotation);
       handPoseSolution1.changeFrame(handFrame);
 
@@ -128,26 +120,9 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       {
          handPose.setPoseIncludingFrame(handPoseSolution2);
       }
-      
+
       handPose.changeFrame(worldFrame);
       handPose.getOrientation(desiredGraspOrientationToPack);
-   }
-
-   private void getGraspLocation(Quat4d rotationToBePerformed, Point3d graspPosition, Vector3d graspVector)
-   {
-      Vector3d translation = new Vector3d(graspPosition);
-      Vector3d tempGraspVector = new Vector3d(graspVector);
-      desiredGrabPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-      desiredGrabPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      desiredGrabPose.setOrientation(rotationToBePerformed);
-
-      
-      tempGraspVector.normalize();
-      tempGraspVector.scale(WRIST_OFFSET);
-      translation.add(tempGraspVector);
-      
-      desiredGrabPose.setPosition(translation);
    }
 
    private void getMidPose(Quat4d rotationToBePerformed, Point3d graspPosition, Vector3d graspVector)
@@ -155,19 +130,36 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       Vector3d translation = new Vector3d(graspPosition);
       Vector3d tempGraspVector = new Vector3d(graspVector);
       midGrabPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-      midGrabPose.changeFrame(ReferenceFrame.getWorldFrame());
+      midGrabPose.changeFrame(worldFrame);
 
       midGrabPose.setOrientation(rotationToBePerformed);
-      
+
       tempGraspVector.normalize();
       tempGraspVector.scale(offsetToThePointOfGrabbing.getDoubleValue());
       translation.add(tempGraspVector);
+      
       midGrabPose.setPosition(translation);
+   }
+
+   private void getGraspLocation(Quat4d rotationToBePerformed, Point3d graspPosition, Vector3d graspVector)
+   {
+      Vector3d translation = new Vector3d(graspPosition);
+      Vector3d tempGraspVector = new Vector3d(graspVector);
+      desiredGrabPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+      desiredGrabPose.changeFrame(worldFrame);
+
+      desiredGrabPose.setOrientation(rotationToBePerformed);
+
+      tempGraspVector.normalize();
+      tempGraspVector.scale(WRIST_OFFSET);
+      translation.add(tempGraspVector);
+
+      desiredGrabPose.setPosition(translation);
    }
 
    private RobotSide determineSideToUse(Point3d position)
    {
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose pose = new FramePose(worldFrame);
       pose.setPose(position, new Quat4d(0, 0, 0, 1));
       pose.changeFrame(pelvisFrame);
       if (pose.getY() <= 0.0)
@@ -239,7 +231,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    public void initialize()
    {
       haveInputsBeenSet.set(false);
-      reachedMidPoint.set(false);
 
    }
 
