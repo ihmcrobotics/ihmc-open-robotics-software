@@ -101,7 +101,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
          @Override
          public double heightAt(double x, double y, double z)
          {
-            return heightMapWithPoints.heightAtPoint(x, y);
+            return heightMapWithPoints.getHeightAtPoint(x, y);
          }
 
          @Override
@@ -114,7 +114,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
          public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
          {
             normalToPack.set(0.0, 0.0, 1.0);
-            return heightMapWithPoints.heightAtPoint(x, y);
+            return heightMapWithPoints.getHeightAtPoint(x, y);
          }
       };
 

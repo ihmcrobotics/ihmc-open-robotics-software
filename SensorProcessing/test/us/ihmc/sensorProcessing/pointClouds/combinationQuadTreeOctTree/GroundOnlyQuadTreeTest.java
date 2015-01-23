@@ -1030,7 +1030,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
          for (Point3d point : points)
          {
-            double z = heightMap.heightAtPoint(point.getX(), point.getY());
+            double z = heightMap.getHeightAtPoint(point.getX(), point.getY());
 
             Graphics3DObject staticLinkGraphics = new Graphics3DObject();
             staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), z + 0.001));
@@ -1050,7 +1050,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          {
             for (Point3d point : points)
             {
-               double heightMapZ = heightMap.heightAtPoint(point.getX(), point.getY());
+               double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
                assertEquals(point.getZ(), heightMapZ, 1e-7);
             }
          }
@@ -1120,7 +1120,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
                for (Point3d checkPoint : points)
                {
-                  double z2 = heightMap.heightAtPoint(checkPoint.getX(), checkPoint.getY());
+                  double z2 = heightMap.getHeightAtPoint(checkPoint.getX(), checkPoint.getY());
                   bagOfBalls.setBall(checkPoint.getX(), checkPoint.getY(), z2);
                }
 

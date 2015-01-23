@@ -32,9 +32,9 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    private File pointListFile;
    private BufferedWriter bufferedWriter;
    
-   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode)
+   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose)
    {
-      super(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
+      super(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
 
       if (CREATE_FILE)
       {
@@ -50,15 +50,8 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
          }
       }
    }
-
-   @Override
-   public double heightAtPoint(double x, double y)
-   {
-      Double doubleValue = get(x, y);
-      if (doubleValue == null) return Double.NaN;
-      return doubleValue;
-   }
-
+   
+   
    @Override
    public boolean addPoint(double x, double y, double z)
    {
@@ -104,7 +97,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    @Override
    public boolean containsPoint(double x, double y)
    {
-      Double zValue = get(x, y);
+      Double zValue = getHeightAtPoint(x, y);
       if ((zValue != null) && (Double.isNaN(zValue)))
          return true;
 
@@ -179,6 +172,11 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    
    public static ArrayList<Point3d> readPointsFromFile(String filename, int maxNumberOfPoints) throws IOException
    {
+      return readPointsFromFile(filename, 0, maxNumberOfPoints, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   }
+   
+   public static ArrayList<Point3d> readPointsFromFile(String filename, int skipPoints, int maxNumberOfPoints, double minX, double minY, double maxX, double maxY, double maxZ) throws IOException
+   {
       File file = new File(filename);
       FileInputStream fileInputStream = new FileInputStream(file);
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
@@ -190,7 +188,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
       while(((inputString = bufferedReader.readLine()) != null) && (numPoints < maxNumberOfPoints))
       {
          Point3d point = parsePoint3d(inputString);
-         if (point != null) 
+         if ((point != null) && (point.getX() > minX) && (point.getY() > minY) && (point.getX() < maxX) && (point.getY() < maxY)&& (point.getZ() < maxZ)) 
          {
             points.add(point);
             numPoints++;
@@ -203,11 +201,28 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    
    private static Point3d parsePoint3d(String inputString)
    {
-      StringTokenizer tokenizer = new StringTokenizer(inputString, "(,)");
-      String tokenX = tokenizer.nextToken();
-      String tokenY = tokenizer.nextToken();
-      String tokenZ = tokenizer.nextToken();
+//      System.out.println(inputString);
       
+//      StringTokenizer tokenizer = new StringTokenizer(inputString, "(,)");
+      StringTokenizer tokenizer = new StringTokenizer(inputString, " ");
+      
+      String index = tokenizer.nextToken();
+//      System.out.println(index);
+
+      String tokenX = tokenizer.nextToken();
+//      System.out.println(tokenX);
+
+      String tokenY = tokenizer.nextToken();
+//      System.out.println(tokenY);
+
+      String tokenZ = tokenizer.nextToken();
+//      System.out.println(tokenZ);
+
+      
+      String intensity = tokenizer.nextToken();
+//      System.out.println(intensity);
+
+
       double x = Double.parseDouble(tokenX);
       double y = Double.parseDouble(tokenY);
       double z = Double.parseDouble(tokenZ);
