@@ -38,6 +38,14 @@ public class YoAppearance
       return Texture("images/stone.jpg");
    }
 
+   public static AppearanceDefinition[] getStandardRoyGBivRainbow()
+   {
+      AppearanceDefinition[] rainbow = new AppearanceDefinition[] { YoAppearance.Red(), YoAppearance.OrangeRed(), YoAppearance.Yellow(),
+            YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Indigo(), YoAppearance.Purple()};
+      
+      return rainbow;
+   }
+   
    public static AppearanceDefinition PlaneMaterial()
    {
       YoAppearanceMaterial mat = new YoAppearanceMaterial();
