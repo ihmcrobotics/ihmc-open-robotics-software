@@ -617,7 +617,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test(timeout=300000)
    public void test3DGraphicsMethods()
    {
-      scs.addDynamicGraphicObjectListRegistries(yoGraphicsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
       Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
       assertNotNull(graphics3DNodeFromSCS);
