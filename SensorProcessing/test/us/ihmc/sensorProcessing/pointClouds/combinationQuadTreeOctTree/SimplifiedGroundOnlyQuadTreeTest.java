@@ -1,11 +1,11 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -23,6 +23,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTree;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
@@ -42,6 +43,8 @@ public class SimplifiedGroundOnlyQuadTreeTest
    private static final boolean DO_ASSERTS = false;
 
    
+   
+   @Ignore
    @Test(timeout = 300000)
    public void testSimpleCaseOne()
    {
@@ -53,9 +56,11 @@ public class SimplifiedGroundOnlyQuadTreeTest
       float heightThreshold = 0.001f;
       double maxMultiLevelZChangeToFilterNoise = 0.2;
       int maxSameHeightPointsPerNode = 20;
-      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
+      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
+      
+      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
 
-      Double returnNullObject = quadTree.get(0.0f, 0.0f);
+      Double returnNullObject = quadTree.getHeightAtPoint(0.0f, 0.0f);
       assertNull(returnNullObject);
 
       // Put a single point at zero
@@ -63,38 +68,38 @@ public class SimplifiedGroundOnlyQuadTreeTest
       Double valueAtZero = new Double(1.5);
       quadTree.put(0.0f, 0.0f, valueAtZero);
 
-      Double returnValueAtZero = quadTree.get(0.0f, 0.0f);
+      Double returnValueAtZero = quadTree.getHeightAtPoint(0.0f, 0.0f);
       assertEquals(valueAtZero, returnValueAtZero, 1e-7);
 
-      Double returnValueOutOfBounds = quadTree.get(100.0f, -720.0f);
+      Double returnValueOutOfBounds = quadTree.getHeightAtPoint(100.0f, -720.0f);
       assertNull(returnValueOutOfBounds);
 
-      Double returnValueAwayFromZero = quadTree.get(3.0f, -7.2f);
+      Double returnValueAwayFromZero = quadTree.getHeightAtPoint(3.0f, -7.2f);
       assertEquals(valueAtZero, returnValueAwayFromZero, 1e-7);
 
       // Put a point away from zero
       Double valueAtOneOne = new Double(2.7);
       quadTree.put(1.0f, 1.0f, valueAtOneOne);
 
-      returnValueAtZero = quadTree.get(0.0f, 0.0f);
+      returnValueAtZero = quadTree.getHeightAtPoint(0.0f, 0.0f);
       assertEquals(valueAtZero, returnValueAtZero, 1e-7);
 
-      Double returnValueAtOneOne = quadTree.get(1.0f, 1.0f);
+      Double returnValueAtOneOne = quadTree.getHeightAtPoint(1.0f, 1.0f);
       assertEquals(valueAtOneOne, returnValueAtOneOne, 1e-7);
    }
    
    
-   @Ignore
+//   @Ignore
    @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
-      double minX = -5.0f;
-      double minY = -5.0f;
-      double maxX = 5.0f;
-      double maxY = 5.0f;
+      double minX = -1.0; //5.0f;
+      double minY = -3.0; //5.0f;
+      double maxX = 1.0; //5.0f;
+      double maxY = 4.0; //5.0f;
       float resolution = 0.025f;
       float heightThreshold = 0.005f;
-      double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
+      double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.02;
       int maxNodes = 1000000;
 
 //      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise );
@@ -103,22 +108,24 @@ public class SimplifiedGroundOnlyQuadTreeTest
       QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2d(minX, minY, maxX, maxY), maxBalls);
       testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
 
-      String filename = "resources/pointListsForTesting/pointList150122_DRCObstacleCourse.pointList";
-     
+//      String filename = "resources/pointListsForTesting/pointList150122_DRCObstacleCourse.pointList";
+      String filename = "resources/pointListsForTesting/firstMinuteCinderBlockScans.fullPointList";
+     double maxZ = 0.6;
 
-      int maxNumberOfPoints = 400000;
-      ArrayList<Point3d> points = SimplifiedGroundOnlyQuadTree.readPointsFromFile(filename, maxNumberOfPoints);
+     int skipPoints = 0;
+     int maxNumberOfPoints = 20000;
+      ArrayList<Point3d> points = SimplifiedGroundOnlyQuadTree.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
 
       
       int pointsPerBallUpdate = 10000;
-      boolean drawPointsInBlue = false;
+      boolean drawPointsInBlue = true;
       testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue , pointsPerBallUpdate);
       
 //      testHelper.drawHeightOfOriginalPointsInPurple(points, 1);
-      Graphics3DNode handle = testHelper.drawNodeBoundingBoxes(-0.1);
+//      Graphics3DNode handle = testHelper.drawNodeBoundingBoxes(-0.1);
       
       
-//      testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution * 4.0);
+      testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
       
       testHelper.displaySimulationConstructionSet();
 
@@ -142,9 +149,10 @@ public class SimplifiedGroundOnlyQuadTreeTest
       float heightThreshold = 0.002f;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       int maxSameHeightPointsPerNode = 20;
+      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
 
       //      CleanQuadTree quadTree = new CleanQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold);
-      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
+      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
 
       float height0 = 0.0f;
       float height1 = 0.0f;
@@ -154,9 +162,9 @@ public class SimplifiedGroundOnlyQuadTreeTest
       quadTree.put(0.1f, 0.0f, height1);
       quadTree.put(0.2f, 0.0f, height2);
 
-      double returnHeight0 = quadTree.get(0.0f, 0.0f);
-      double returnHeight1 = quadTree.get(0.1f, 0.0f);
-      double returnHeight2 = quadTree.get(0.2f, 0.0f);
+      double returnHeight0 = quadTree.getHeightAtPoint(0.0f, 0.0f);
+      double returnHeight1 = quadTree.getHeightAtPoint(0.1f, 0.0f);
+      double returnHeight2 = quadTree.getHeightAtPoint(0.2f, 0.0f);
 
       assertEquals(height0, returnHeight0, 1e-7);
       assertEquals(height1, returnHeight1, 1e-7);
@@ -265,6 +273,65 @@ public class SimplifiedGroundOnlyQuadTreeTest
       ThreadTools.sleepForever();
    }
 
+   
+   @Test
+   public void testGetClosestPoint()
+   {
+      Random random = new Random(1776L);
+      
+      double minX = -10.0;
+      double minY = -10.0;
+      double maxX = 10.0;
+      double maxY = 10.0;
+      
+      double minZ = -5.0;
+      double maxZ = 5.0;
+      
+      double resolution = 0.02;
+      double heightThreshold = 0.002;
+      double maxMultiLevelZChangeToFilterNoise = 0.2;
+      int maxSameHeightPointsPerNode = 20;
+      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
+      
+      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+      
+      int numberOfPoints = 10000;
+      
+      for (int i=0; i<numberOfPoints; i++)
+      {
+         Point3d point = RandomTools.generateRandomPoint(random, minX, minY, minZ, maxX, maxY, maxZ);         
+         quadTree.put(point.getX(), point.getY(), point.getZ());
+      }
+      
+      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      quadTree.getAllPoints(points);
+//      System.out.println("The quad tree has " + points.size() + " points.");
+      int numberOfTests = 100;
+      
+      for (int i=0; i<numberOfTests; i++)
+      {
+         double xQuery = RandomTools.generateRandomDouble(random, minX, maxX);
+         double yQuery = RandomTools.generateRandomDouble(random, minY, maxY);
+         
+         Point3d closestPoint = quadTree.getClosesPoint(xQuery, yQuery);
+         
+         double distanceSquared = distanceXYSquared(xQuery, yQuery, closestPoint);
+         
+         for (Point3d point : points)
+         {
+            if ((point != closestPoint) && (distanceXYSquared(xQuery, yQuery, point) < distanceSquared))
+            {
+               fail("Not closest point! Query = " + xQuery + ", " + yQuery + " thinks closest point is " + closestPoint + " but a closer point is " + point);
+            }
+         }
+      }
+   }
+   
+   private double distanceXYSquared(double x, double y, Point3d point)
+   {
+      if (point == null) return Double.POSITIVE_INFINITY;
+      return ((x - point.getX()) * (x - point.getX()) + (y - point.getY()) * (y - point.getY()));
+   }
 
    private void testOnAStaircase(Point3d center, Vector3d normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight)
    {
@@ -369,6 +436,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
       private double heightThreshold = 0.002;
       private double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       private int maxSameHeightPointsPerNode = 20;
+      private double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
       private int maxNodes = 1000000;
 
       
@@ -432,15 +500,19 @@ public class SimplifiedGroundOnlyQuadTreeTest
          {
             for (double y = minY; y<maxY; y = y + resolution)
             {
-               double z = heightMap.heightAtPoint(x, y);
+               double z = heightMap.getHeightAtPoint(x, y);
 
                if (!Double.isNaN(z))
                {
-                  AppearanceDefinition appearance = rainbow[((int) (z / resolution)) % rainbow.length];
+                  int index = (int) (z / resolution);
+                  index = index % rainbow.length;
+                  if (index < 0) index = index + rainbow.length;
+                  
+                  AppearanceDefinition appearance = rainbow[index];
 
                   heightMapGraphic.identity();
                   heightMapGraphic.translate(x, y, z);
-                  heightMapGraphic.addCube(resolution, resolution, resolution, appearance);
+                  heightMapGraphic.addCube(resolution, resolution, resolution/4.0, appearance);
                }
             }
          }
@@ -469,7 +541,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
             {
                count = 0;
 
-               double z = heightMap.heightAtPoint(point.getX(), point.getY());
+               double z = heightMap.getHeightAtPoint(point.getX(), point.getY());
 
                staticLinkGraphics.identity();
                staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), z + 0.001));
@@ -513,7 +585,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
          {
             for (Point3d point : points)
             {
-               double heightMapZ = heightMap.heightAtPoint(point.getX(), point.getY());
+               double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
                assertEquals(point.getZ(), heightMapZ, 1e-7);
             }
          }
@@ -554,7 +626,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
          double maxY = rangeOfPointsToTest.getMaxPoint().getY();
 
        
-         heightMap = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode);
+         heightMap = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
          
 //      CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise);
 //         CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX - resolution, minY - resolution, maxX + resolution, maxY + resolution, resolution,
@@ -592,7 +664,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
 
                   for (Point3d checkPoint : points)
                   {
-                     double z2 = heightMap.heightAtPoint(checkPoint.getX(), checkPoint.getY());
+                     double z2 = heightMap.getHeightAtPoint(checkPoint.getX(), checkPoint.getY());
                      bagOfBalls.setBall(checkPoint.getX(), checkPoint.getY(), z2);
                   }
 

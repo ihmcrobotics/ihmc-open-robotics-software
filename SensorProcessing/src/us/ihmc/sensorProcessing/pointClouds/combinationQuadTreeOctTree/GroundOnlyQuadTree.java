@@ -253,10 +253,10 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    public boolean containsPoint(double x, double y)
    {
-      return !Double.isNaN(heightAtPoint(x, y));
+      return !Double.isNaN(getHeightAtPoint(x, y));
    }
 
-   public double heightAtPoint(double x, double y)
+   public double getHeightAtPoint(double x, double y)
    {
       HyperCubeLeaf<GroundAirDescriptor> hyperCubeLeaf = this.get(new double[] { x, y });
       RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node = this.getLeafNodeAtLocation(new double[] { x, y });
@@ -315,7 +315,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       {
          for (double y = yCenter - yExtent * 0.5; y <= yCenter + yExtent * 0.5; y += constantResolution.getMinResolution())
          {
-            double height = this.heightAtPoint(x, y);
+            double height = this.getHeightAtPoint(x, y);
             if (!Double.isNaN(height))
             {
                Point3d point3d = new Point3d(x, y, height);
