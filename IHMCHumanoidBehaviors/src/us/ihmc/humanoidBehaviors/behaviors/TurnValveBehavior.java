@@ -6,7 +6,6 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -20,6 +19,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -37,10 +37,14 @@ public class TurnValveBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = true;
 
-   public static final RobotSide handToTurnValveWith = RobotSide.RIGHT;
-   public static final double howFarToStandToTheRightOfValve = handToTurnValveWith.negateIfRightSide(0.13);
+   private static final boolean graspValveRim = true;
+   private static final ValveType valveType = ValveType.BIG_VALVE;
+   private static final Vector3d valvePinJointAxisInValveFrame = new Vector3d(1,0,0);
+   public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
+   public static final double howFarToStandToTheRightOfValve = robotSideOfHandToUse.negateIfRightSide(0.13);
    public static final double howFarToStandBackFromValve = 0.64;
-
+   
+   
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
    private final FramePose valvePose = new FramePose();
@@ -157,18 +161,21 @@ public class TurnValveBehavior extends BehaviorInterface
       walkToLocationBehavior.setTarget(manipulationMidFeetPose);
       SysoutTool.println("Target Walk to Location Updated:" + manipulationMidFeetPose, DEBUG);
 
-      Vector3d finalToMidGraspVec = new Vector3d(-1, 0, 0);
-      graspObjectBehavior.setGraspPose(valveTransformToWorld, finalToMidGraspVec);
+      Vector3d valvePinJointAxisInWorld = new Vector3d(valvePinJointAxisInValveFrame);
+      valveTransformToWorld.transform(valvePinJointAxisInWorld);
+            
+      graspObjectBehavior.setGraspPose(valveType, valveTransformToWorld, valvePinJointAxisInWorld, graspValveRim);
 
       FramePose graspPose = new FramePose();
       graspObjectBehavior.getFinalGraspPose(graspPose);
+      SysoutTool.println(" hand grasp pose: " + graspPose);
 
       double trajectoryTime = 2.0;
       double turnValveAngle = -10.0 * Math.PI / 180.0;
-      HandPosePacket turnValveHandPosePacket = createHandPosePacketToTurnValve(graspPose, turnValveAngle, trajectoryTime);
+      HandPosePacket turnValveHandPosePacket = createHandPosePacketToTurnValve(valveType, graspPose, valveTransformToWorld, turnValveAngle, trajectoryTime);
       handPoseBehavior.setInput(turnValveHandPosePacket);
 
-      HandPosePacket turnValveHandPosePacket2 = createHandPosePacketToTurnValve(graspPose, turnValveAngle * 2, trajectoryTime);
+      HandPosePacket turnValveHandPosePacket2 = createHandPosePacketToTurnValve(valveType, graspPose, valveTransformToWorld, turnValveAngle * 2, trajectoryTime);
       handPoseBehavior2.setInput(turnValveHandPosePacket2);
 
       hasInputBeenSet.set(true);
@@ -217,31 +224,51 @@ public class TurnValveBehavior extends BehaviorInterface
       return ret;
    }
 
-   private HandPosePacket createHandPosePacketToTurnValve(FramePose handPoseBeforeTurn, double turnAngle, double trajectoryTime)
+   
+   private HandPosePacket createHandPosePacketToTurnValve(ValveType valveType, FramePose handPoseBeforeTurn, RigidBodyTransform valveTransformToWorld, double turnAngle,
+         double trajectoryTime)
    {
-      AxisAngle4d handAxisAngleBeforeTurn = new AxisAngle4d();
-      handPoseBeforeTurn.getOrientation(handAxisAngleBeforeTurn);
+      ReferenceFrame valveFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("valve", world, valveTransformToWorld);
+      
+      
+      RigidBodyTransform handTransformToWorld = new RigidBodyTransform();
+      handPoseBeforeTurn.getPose(handTransformToWorld);
+      
+      ReferenceFrame handFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("hand", world, handTransformToWorld);
+      
 
-      AxisAngle4d handAxisAngleAfterTurn = new AxisAngle4d();
-      handAxisAngleAfterTurn.setAngle(handAxisAngleBeforeTurn.angle + turnAngle);
+      Point3d desiredHandPositionInValve = new Point3d(0,0,-valveType.getValveRadius());
+      valveTransformToWorld.transform(desiredHandPositionInValve);
 
       FramePose handPoseAfterTurn = new FramePose(handPoseBeforeTurn);
-      handPoseAfterTurn.setOrientation(handAxisAngleAfterTurn);
+      handPoseAfterTurn.setPosition(desiredHandPositionInValve);
+      
 
       HandPosePacket ret = createHandPosePacket(trajectoryTime, handPoseAfterTurn);
 
       return ret;
    }
-
-   private HandPosePacket createHandPosePacket(double trajectoryTime, FramePose desiredHandPose)
+   
+   private HandPosePacket createHandPosePacket(double trajectoryTime, FramePose desiredHandPoseInWorld)
    {
       Point3d position = new Point3d();
       Quat4d orientation = new Quat4d();
 
-      desiredHandPose.getPosition(position);
-      desiredHandPose.getOrientation(orientation);
+      desiredHandPoseInWorld.getPosition(position);
+      desiredHandPoseInWorld.getOrientation(orientation);
 
-      HandPosePacket ret = new HandPosePacket(RobotSide.RIGHT, Frame.WORLD, position, orientation, trajectoryTime);
+      Frame packetFrame;
+      ReferenceFrame referenceFrame = desiredHandPoseInWorld.getReferenceFrame();
+      if (referenceFrame.isWorldFrame())
+      {
+         packetFrame = Frame.WORLD;
+      }
+      else
+      {
+         throw new RuntimeException("Hand Pose must be defined in World reference frame.");
+      }
+
+      HandPosePacket ret = new HandPosePacket(robotSideOfHandToUse, packetFrame, position, orientation, trajectoryTime);
       return ret;
    }
 
