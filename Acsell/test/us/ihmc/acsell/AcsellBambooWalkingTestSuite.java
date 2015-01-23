@@ -1,9 +1,9 @@
 package us.ihmc.acsell;
 
-import org.junit.runner.*;
-import org.junit.runners.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
+import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteConstructor;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses

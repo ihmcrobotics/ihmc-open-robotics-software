@@ -8,8 +8,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;

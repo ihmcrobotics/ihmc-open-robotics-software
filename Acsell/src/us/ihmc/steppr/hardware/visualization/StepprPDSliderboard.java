@@ -3,7 +3,6 @@ package us.ihmc.steppr.hardware.visualization;
 import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.IndexChangedListener;
