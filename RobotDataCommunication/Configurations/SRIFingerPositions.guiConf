@@ -180,61 +180,13 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0Current</Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1Current</Variables>
-		<GraphConfiguration>
-			<Name>config17</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2Current</Variables>
-		<GraphConfiguration>
-			<Name>config18</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightNumberOfCycles</Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 <EntryBoxTab>
 <Title>
 Tab0
 </Title>
-<Entry Boxes>rightdesiredMode,rightFinger0DesiredCurrent,rightFinger1DesiredCurrent,rightFinger2DesiredCurrent,fingerVelocityAlpha,rightCommandClose,rightCommandOpen,rightCloseForce,rightDoStressTest</Entry Boxes>
+<Entry Boxes>rightdesiredMode,rightFinger0DesiredCurrent,rightFinger1DesiredCurrent,rightFinger2DesiredCurrent</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -260,8 +212,8 @@ Tab1
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera Y>-15.12549104348279</Camera Y>
+ <Camera Z>1.6083660695655193</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
