@@ -23,43 +23,37 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
       super(atlasRobotModel);
    }
 
-   @Test
-   public void testRightHandIn3PMode()
+   @Test(timeout = 150000)   public void testRightHandIn3PMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
       executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray);      
    }
 
-   @Test
-   public void testLeftHandIn3PMode()
+   @Test(timeout = 150000)   public void testLeftHandIn3PMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.LEFT);
       this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray);
    }
    
    /**
-   @Test
-   public void testRightHandIn3P2RMode()
+   @Test(timeout = 150000)   public void testRightHandIn3P2RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.RIGHT);
       this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray);
    }
 
-   @Test
-   public void testLeftHandIn3P2RMode()
+   @Test(timeout = 150000)   public void testLeftHandIn3P2RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.LEFT);
       this.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray);
    }
    
-   @Test
-   public void testRightHandIn3P3RMode(){
+   @Test(timeout = 150000)   public void testRightHandIn3P3RMode(){
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.RIGHT);
       this.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray);
    }
    
-   @Test
-   public void testLeftHandIn3P3RMode(){
+   @Test(timeout = 150000)   public void testLeftHandIn3P3RMode(){
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.LEFT);
       this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray);
    }
