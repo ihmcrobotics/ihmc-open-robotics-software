@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -9,6 +8,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class ContactablePinJointRobot extends Robot implements Contactable
 {
@@ -22,6 +22,8 @@ public abstract class ContactablePinJointRobot extends Robot implements Contacta
    }
    
    public abstract PinJoint getPinJoint();
+   
+   public abstract void getBodyTransformToWorld(RigidBodyTransform transformToWorld);
 
    public abstract void setMass(double mass);
 
@@ -99,11 +101,6 @@ public abstract class ContactablePinJointRobot extends Robot implements Contacta
    {
       setPosition(angle);
       setVelocity(angleDerivative);
-   }
-
-   public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
-   {
-      getPinJoint().getTransformToWorld(transformToWorld);
    }
 
    public double getVelocity()

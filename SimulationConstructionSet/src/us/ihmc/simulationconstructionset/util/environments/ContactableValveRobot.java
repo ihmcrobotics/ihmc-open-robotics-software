@@ -116,13 +116,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveFrame.getTransformToDesiredFrame(valveTransformToWorld, ReferenceFrame.getWorldFrame());
       valveTransformToWorld.transform(jointAxisVector);
-
+            
       Vector3d valvePositionInWorld = new Vector3d();
       valvePoseInWorld.getPosition(valvePositionInWorld);
       valvePinJoint = new PinJoint("valvePinJoint", valvePositionInWorld, this, jointAxisVector);
       valvePinJoint.setLimitStops(0.0, valveNumberOfPossibleTurns * 2 * Math.PI, 1000, 100);
       valvePinJoint.setDamping(valveDamping.getDoubleValue());
-
+      
       //put the graphics frame in the proper orientation
       Matrix3d rotationMatrix = new Matrix3d();
       valvePoseInWorld.getOrientation(rotationMatrix);
@@ -139,7 +139,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       valveLink.setMomentOfInertia(inertiaMatrix);
       valvePinJoint.setLink(valveLink);
       this.addRootJoint(valvePinJoint);
-
+      
       //torus and offsetCylinder
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform invertTransform = new RigidBodyTransform();
@@ -273,6 +273,12 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    public PinJoint getPinJoint()
    {
       return valvePinJoint;
+   }
+   
+   @Override
+   public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
+   {
+      transformToWorld.set(originalValvePose);
    }
 
    public double getClosePercentage()

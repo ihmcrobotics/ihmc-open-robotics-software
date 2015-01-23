@@ -40,6 +40,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    public static final double DEFAULT_THICKNESS = 0.05;
    private static final double DEFAULT_MASS = 1.0;
 
+   private final RigidBodyTransform pinJointTransformToWorld;
    private final FrameTorus3d wheelTorus;
    
    private final PinJoint pinJoint;
@@ -61,16 +62,17 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       this(name, pinJointTransformFromWorld, DEFAULT_RADIUS, DEFAULT_THICKNESS, DEFAULT_MASS);
    }
 
-   public ContactableToroidRobot(String name, RigidBodyTransform pintJointTransform, double steeringWheelRadius,
+   public ContactableToroidRobot(String name, RigidBodyTransform pinJointTransform, double steeringWheelRadius,
            double steeringWheelThickness, double mass)
    {
       super(name);
-      wheelTorus = new FrameTorus3d(ReferenceFrame.getWorldFrame(), pintJointTransform, steeringWheelRadius, steeringWheelThickness);
+      pinJointTransformToWorld = pinJointTransform;
+      wheelTorus = new FrameTorus3d(ReferenceFrame.getWorldFrame(), pinJointTransform, steeringWheelRadius, steeringWheelThickness);
       
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
-      pintJointTransform.get(offset);
-      pintJointTransform.get(rotation);
+      pinJointTransform.get(offset);
+      pinJointTransform.get(rotation);
       
       Vector3d axis = new Vector3d(0.0, 0.0, 1.0);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
@@ -87,7 +89,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(mass, wheelTorus.getRadius(), wheelTorus.getThickness());
       
       RigidBodyInertia rigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), inertia, mass);
-      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), pintJointTransform);
+      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), pinJointTransform);
       rigidBodyInertia.changeFrame(jointFrame);
       wheelLink.setMomentOfInertia(rigidBodyInertia.getMassMomentOfInertiaPartCopy());
 
@@ -216,5 +218,11 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    public void setDamping(double desiredDamping)
    {
       pinJoint.setDamping(desiredDamping);
+   }
+
+   @Override
+   public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
+   {
+      transformToWorld.set(pinJointTransformToWorld);
    }
 }

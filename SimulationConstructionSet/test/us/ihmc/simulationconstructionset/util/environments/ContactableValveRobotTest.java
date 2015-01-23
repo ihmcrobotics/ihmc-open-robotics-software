@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.util.environments;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -14,6 +15,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SliderJoint;
@@ -22,8 +24,12 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ContactableValveRobotTest
@@ -72,6 +78,30 @@ public class ContactableValveRobotTest
          isValveClosed = true;
       
       assertTrue(isValveClosed);
+   }
+   
+   @Test(timeout=300000)
+   public void testGetValveTransformToWorld()
+   {
+      Random random = new Random(1235125L);
+      
+      double valveX = RandomTools.generateRandomDouble(random, -2.0, 2.0);
+      double valveY = RandomTools.generateRandomDouble(random, -2.0, 2.0);
+      double valveZ = RandomTools.generateRandomDouble(random, 0.1, 2.0);
+      double valveYaw_degrees = RandomTools.generateRandomDouble(random, -100, 100);
+            
+      ContactableValveRobot valveRobot = createValveRobot(valveX, valveY, valveZ, valveYaw_degrees);
+      
+      RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
+      valveRobot.getBodyTransformToWorld(valveTransformToWorld);
+      
+      FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
+      
+      assertEquals(valveX, valvePose.getX(), 1e-7);
+      assertEquals(valveY, valvePose.getY(), 1e-7);
+      assertEquals(valveZ, valvePose.getZ(), 1e-7);
+
+      assertEquals(valveYaw_degrees, Math.toDegrees(valvePose.getYaw()), 1e-7);
    }
 
    private void createFloatingRobot()
@@ -188,17 +218,36 @@ public class ContactableValveRobotTest
          }
       };
    }
-
+   
    private void createValveRobot()
    {
+      ContactableValveRobot valveRobot = createValveRobot(0.0, 0.0, 1.0, 0.0);
+      robots[1] = valveRobot;
+   }
+   
+   private ContactableValveRobot createValveRobot(double x, double y, double z, double yaw_degrees)
+   {
       double forceVectorScale = 1.0 / 50.0;
-      FramePose valvePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame());
-      valvePoseInWorld.setPose(new Point3d(0.0, 0.0, 1.0), new Quat4d(0.0, 0.0, 0.0, 1.0));
+      
+      FramePose valvePoseInWorld = createFramePose(x, y, z, yaw_degrees);
      
       ContactableValveRobot valveRobot = new ContactableValveRobot("valveRobot", ValveType.SMALL_VALVE, 0.125, valvePoseInWorld);
       valveRobot.createValveRobot();
       valveRobot.createAvailableContactPoints(1, 30, forceVectorScale, true);
+
+      return valveRobot;
+   }
+   
+   private FramePose createFramePose(double x, double y, double z, double yaw_degrees)
+   {
+      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
+
+      Point3d position = new Point3d(x, y, z);
+      Quat4d orientation = new Quat4d();
+
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
+      framePose.setPose(position, orientation);
       
-      robots[1] = valveRobot;
+      return framePose;
    }
 }
