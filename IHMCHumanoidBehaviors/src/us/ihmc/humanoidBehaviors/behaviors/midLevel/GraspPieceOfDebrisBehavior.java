@@ -37,8 +37,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private RobotSide robotSide;
    private double trajectoryTime = 2.5;
 
-   private final FramePose desiredGrabPose = new FramePose();
-   private final FramePose midGrabPose = new FramePose();
    private final FullRobotModel fullRobotModel;
 
    private static final double WRIST_OFFSET = 0.14;
@@ -79,20 +77,40 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private void setTasks(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector)
    {
       RigidBodyTransform tempPose = new RigidBodyTransform();
-
+      FramePose desiredGrabPose = new FramePose();
+      FramePose midGrabPose = new FramePose();
+      
       computeDesiredGraspOrientation(debrisTransform, fullRobotModel.getHandControlFrame(robotSide), rotationToBePerformedInWorldFrame, graspVector);
-
-      getMidPose(rotationToBePerformedInWorldFrame, graspPosition, graspVector);
+      computeDesiredPoses(midGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, offsetToThePointOfGrabbing.getDoubleValue());
+      computeDesiredPoses(desiredGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
+      
       midGrabPose.getPose(tempPose);
       taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
 
-      getGraspLocation(rotationToBePerformedInWorldFrame, graspPosition, graspVector);
       desiredGrabPose.getPose(tempPose);
       taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
+   }
+
+   private void computeDesiredPoses(FramePose desiredPoseToPack, Quat4d rotationToBePerformedInWorldFrame, Point3d graspPosition, Vector3d graspVector,
+         double wristOffset)
+   {
+      Vector3d translation = new Vector3d(graspPosition);
+      Vector3d tempGraspVector = new Vector3d(graspVector);
+      
+      desiredPoseToPack.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+      desiredPoseToPack.changeFrame(worldFrame);
+
+      desiredPoseToPack.setOrientation(rotationToBePerformedInWorldFrame);
+
+      tempGraspVector.normalize();
+      tempGraspVector.scale(wristOffset);
+      translation.add(tempGraspVector);
+      
+      desiredPoseToPack.setPosition(translation);
    }
 
    private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, ReferenceFrame handFrame, Quat4d desiredGraspOrientationToPack,
@@ -123,38 +141,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 
       handPose.changeFrame(worldFrame);
       handPose.getOrientation(desiredGraspOrientationToPack);
-   }
-
-   private void getMidPose(Quat4d rotationToBePerformed, Point3d graspPosition, Vector3d graspVector)
-   {
-      Vector3d translation = new Vector3d(graspPosition);
-      Vector3d tempGraspVector = new Vector3d(graspVector);
-      midGrabPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-      midGrabPose.changeFrame(worldFrame);
-
-      midGrabPose.setOrientation(rotationToBePerformed);
-
-      tempGraspVector.normalize();
-      tempGraspVector.scale(offsetToThePointOfGrabbing.getDoubleValue());
-      translation.add(tempGraspVector);
-      
-      midGrabPose.setPosition(translation);
-   }
-
-   private void getGraspLocation(Quat4d rotationToBePerformed, Point3d graspPosition, Vector3d graspVector)
-   {
-      Vector3d translation = new Vector3d(graspPosition);
-      Vector3d tempGraspVector = new Vector3d(graspVector);
-      desiredGrabPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-      desiredGrabPose.changeFrame(worldFrame);
-
-      desiredGrabPose.setOrientation(rotationToBePerformed);
-
-      tempGraspVector.normalize();
-      tempGraspVector.scale(WRIST_OFFSET);
-      translation.add(tempGraspVector);
-
-      desiredGrabPose.setPosition(translation);
    }
 
    private RobotSide determineSideToUse(Point3d position)
