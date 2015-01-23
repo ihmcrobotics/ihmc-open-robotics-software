@@ -55,7 +55,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
       return scs;
    }
 
-   @Test
+   @Test(timeout = 300000)
    public void test()
    {
     
