@@ -13,7 +13,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrientationPacket>, ChestOrientationProvider
 {
-
    private final AtomicReference<Quat4d> desiredOrientation = new AtomicReference<>();
    private final AtomicDouble trajectoryTime = new AtomicDouble();
    private final ReferenceFrame chestOrientationFrame;

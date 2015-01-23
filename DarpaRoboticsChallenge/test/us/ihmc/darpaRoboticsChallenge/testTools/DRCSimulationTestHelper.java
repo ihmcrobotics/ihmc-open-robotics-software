@@ -15,6 +15,7 @@ import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
+import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -196,6 +197,12 @@ public class DRCSimulationTestHelper
    {
       if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
          ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendComHeightPacketToListeners(comHeightPacket);
+   }
+
+   public void sendChestOrientationPacketToListeners(ChestOrientationPacket chestOrientationPacket)
+   {
+      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendChestOrientation(chestOrientationPacket);
    }
 
    public SDFRobot getRobot()
