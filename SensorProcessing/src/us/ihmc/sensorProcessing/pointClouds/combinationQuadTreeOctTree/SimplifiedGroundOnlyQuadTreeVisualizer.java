@@ -2,6 +2,8 @@ package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -45,7 +47,8 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
          {
             if (leaf.containsPoints())
             {
-               nodeBoundsGraphic.translate(bounds.centreX, bounds.centreY, leaf.getZ());
+               Point3d averagePoint = leaf.getAveragePoint();
+               nodeBoundsGraphic.translate(bounds.centreX, bounds.centreY, averagePoint.getZ());
                nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, YoAppearance.Black());
 
                // nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, rainbow[depth % rainbow.length]);

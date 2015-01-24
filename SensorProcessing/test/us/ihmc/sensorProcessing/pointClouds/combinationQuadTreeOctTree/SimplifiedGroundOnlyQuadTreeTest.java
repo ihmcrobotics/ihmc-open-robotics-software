@@ -89,7 +89,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
    }
    
    
-   @Ignore
+//   @Ignore
    @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
@@ -113,12 +113,12 @@ public class SimplifiedGroundOnlyQuadTreeTest
      double maxZ = 0.6;
 
      int skipPoints = 0;
-     int maxNumberOfPoints = 20000;
+     int maxNumberOfPoints = 2000000;
       ArrayList<Point3d> points = SimplifiedGroundOnlyQuadTree.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
 
       
       int pointsPerBallUpdate = 10000;
-      boolean drawPointsInBlue = true;
+      boolean drawPointsInBlue = false;
       testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue , pointsPerBallUpdate);
       
 //      testHelper.drawHeightOfOriginalPointsInPurple(points, 1);
@@ -126,6 +126,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
       
       
       testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
+//      testHelper.drawAllPointsInQuadTree(YoAppearance.Purple());
       
       testHelper.displaySimulationConstructionSet();
 
@@ -313,7 +314,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
          double xQuery = RandomTools.generateRandomDouble(random, minX, maxX);
          double yQuery = RandomTools.generateRandomDouble(random, minY, maxY);
          
-         Point3d closestPoint = quadTree.getClosesPoint(xQuery, yQuery);
+         Point3d closestPoint = quadTree.getClosestPoint(xQuery, yQuery);
          
          double distanceSquared = distanceXYSquared(xQuery, yQuery, closestPoint);
          
@@ -435,7 +436,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
       private double resolution = 0.1;
       private double heightThreshold = 0.002;
       private double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
-      private int maxSameHeightPointsPerNode = 20;
+      private int maxSameHeightPointsPerNode = 10;
       private double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
       private int maxNodes = 1000000;
 
@@ -460,6 +461,8 @@ public class SimplifiedGroundOnlyQuadTreeTest
          yoGraphicsListRegistry.registerYoGraphic("Query", queryViz);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       }
+
+
 
       public void setResolutionParameters(double resolution, double heightThreshold, double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxNodes)
       {
@@ -517,6 +520,31 @@ public class SimplifiedGroundOnlyQuadTreeTest
             }
          }
          scs.addStaticLinkGraphics(heightMapGraphic);
+      }
+      
+      public Graphics3DNode drawAllPointsInQuadTree(AppearanceDefinition appearance)
+      {
+         if (heightMap instanceof SimplifiedGroundOnlyQuadTree)
+         {
+            Graphics3DObject pointsInQuadTreeGraphic = new Graphics3DObject();
+
+
+            ArrayList<Point3d> points = new ArrayList<Point3d>();
+            ((SimplifiedGroundOnlyQuadTree) heightMap).getAllPoints(points);
+
+            for (Point3d point : points)
+            {
+               pointsInQuadTreeGraphic.identity();
+               pointsInQuadTreeGraphic.translate(point);
+               pointsInQuadTreeGraphic.addCube(resolution, resolution, resolution/4.0, appearance);
+            }
+
+            Graphics3DNode graphics3DNodeHandle = scs.addStaticLinkGraphics(pointsInQuadTreeGraphic);
+            return graphics3DNodeHandle;
+         }
+
+         return null;
+
       }
       
       private Graphics3DNode drawNodeBoundingBoxes(double heightToDrawAt)

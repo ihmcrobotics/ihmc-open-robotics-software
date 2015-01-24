@@ -10,6 +10,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -178,9 +179,9 @@ public class Graphics3DObject
     * has its coordinates reset to the parent joint's origin.  {@link #identity Identity}
     * resets back to the joint origin.
     *
-    * @param translation Vector3d representing the translation.
+    * @param translation Tuple3d representing the translation.
     */
-   public void translate(Vector3d translation)
+   public void translate(Tuple3d translation)
    {
       graphics3DInstructions.add(new Graphics3DTranslateInstruction(translation));
    }

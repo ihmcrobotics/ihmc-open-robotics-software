@@ -111,8 +111,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    }
 
    @Override
-   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent,
-           InclusionFunction<Point3d> maskFunctionAboutCenter)
+   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent, InclusionFunction<Point3d> maskFunctionAboutCenter)
    {
      ArrayList<Point3d> pointsAtGridResolution = super.getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
      ArrayList<Point3d> filteredList = new ArrayList<Point3d>();
