@@ -46,51 +46,6 @@ public class SimplifiedGroundOnlyQuadTreeTest
    
    @Ignore
    @Test(timeout = 300000)
-   public void testSimpleCaseOne()
-   {
-      float minX = -10.0f;
-      float minY = -10.0f;
-      float maxX = 10.0f;
-      float maxY = 10.0f;
-      float resolution = 0.49f;
-      float heightThreshold = 0.001f;
-      double maxMultiLevelZChangeToFilterNoise = 0.2;
-      int maxSameHeightPointsPerNode = 20;
-      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
-      
-      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
-
-      Double returnNullObject = quadTree.getHeightAtPoint(0.0f, 0.0f);
-      assertNull(returnNullObject);
-
-      // Put a single point at zero
-
-      Double valueAtZero = new Double(1.5);
-      quadTree.put(0.0f, 0.0f, valueAtZero);
-
-      Double returnValueAtZero = quadTree.getHeightAtPoint(0.0f, 0.0f);
-      assertEquals(valueAtZero, returnValueAtZero, 1e-7);
-
-      Double returnValueOutOfBounds = quadTree.getHeightAtPoint(100.0f, -720.0f);
-      assertNull(returnValueOutOfBounds);
-
-      Double returnValueAwayFromZero = quadTree.getHeightAtPoint(3.0f, -7.2f);
-      assertEquals(valueAtZero, returnValueAwayFromZero, 1e-7);
-
-      // Put a point away from zero
-      Double valueAtOneOne = new Double(2.7);
-      quadTree.put(1.0f, 1.0f, valueAtOneOne);
-
-      returnValueAtZero = quadTree.getHeightAtPoint(0.0f, 0.0f);
-      assertEquals(valueAtZero, returnValueAtZero, 1e-7);
-
-      Double returnValueAtOneOne = quadTree.getHeightAtPoint(1.0f, 1.0f);
-      assertEquals(valueAtOneOne, returnValueAtOneOne, 1e-7);
-   }
-   
-   
-//   @Ignore
-   @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
       double minX = -1.0; //5.0f;
@@ -273,66 +228,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
 
       ThreadTools.sleepForever();
    }
-
-   
-   @Test
-   public void testGetClosestPoint()
-   {
-      Random random = new Random(1776L);
-      
-      double minX = -10.0;
-      double minY = -10.0;
-      double maxX = 10.0;
-      double maxY = 10.0;
-      
-      double minZ = -5.0;
-      double maxZ = 5.0;
-      
-      double resolution = 0.02;
-      double heightThreshold = 0.002;
-      double maxMultiLevelZChangeToFilterNoise = 0.2;
-      int maxSameHeightPointsPerNode = 20;
-      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
-      
-      SimplifiedQuadTree quadTree = new SimplifiedQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
-      
-      int numberOfPoints = 10000;
-      
-      for (int i=0; i<numberOfPoints; i++)
-      {
-         Point3d point = RandomTools.generateRandomPoint(random, minX, minY, minZ, maxX, maxY, maxZ);         
-         quadTree.put(point.getX(), point.getY(), point.getZ());
-      }
-      
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
-      quadTree.getAllPoints(points);
-//      System.out.println("The quad tree has " + points.size() + " points.");
-      int numberOfTests = 100;
-      
-      for (int i=0; i<numberOfTests; i++)
-      {
-         double xQuery = RandomTools.generateRandomDouble(random, minX, maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, minY, maxY);
-         
-         Point3d closestPoint = quadTree.getClosestPoint(xQuery, yQuery);
-         
-         double distanceSquared = distanceXYSquared(xQuery, yQuery, closestPoint);
-         
-         for (Point3d point : points)
-         {
-            if ((point != closestPoint) && (distanceXYSquared(xQuery, yQuery, point) < distanceSquared))
-            {
-               fail("Not closest point! Query = " + xQuery + ", " + yQuery + " thinks closest point is " + closestPoint + " but a closer point is " + point);
-            }
-         }
-      }
-   }
-   
-   private double distanceXYSquared(double x, double y, Point3d point)
-   {
-      if (point == null) return Double.POSITIVE_INFINITY;
-      return ((x - point.getX()) * (x - point.getX()) + (y - point.getY()) * (y - point.getY()));
-   }
+  
 
    private void testOnAStaircase(Point3d center, Vector3d normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight)
    {
