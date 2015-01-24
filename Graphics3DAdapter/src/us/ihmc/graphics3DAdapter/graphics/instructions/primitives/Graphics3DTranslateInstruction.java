@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions.primitives;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
@@ -8,7 +9,7 @@ public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstru
 {
    private Vector3d translation = new Vector3d();
 
-   public Graphics3DTranslateInstruction(Vector3d translation)
+   public Graphics3DTranslateInstruction(Tuple3d translation)
    {
       this.translation.set(translation);
    }

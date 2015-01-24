@@ -24,5 +24,4 @@ public interface QuadTreeHeightMapInterface extends HeightMap
 	public abstract boolean addToQuadtree(double x, double y, double z);
 
 	public abstract void setUpdateQuadtree(boolean update);
-
 }
