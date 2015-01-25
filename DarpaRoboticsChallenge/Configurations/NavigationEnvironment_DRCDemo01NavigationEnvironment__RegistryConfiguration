@@ -1,0 +1,4 @@
+root*false*false
+root.NavigationEnvironment*false*false
+root.NavigationEnvironment.TestRobotController*false*false
+root.NavigationEnvironment.TestRobotController.BagOfBallsBalls*false*false
