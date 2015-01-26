@@ -30,5 +30,7 @@ public interface WholeBodyControllerParameters
 	public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
 	
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
+	
+	public abstract WholeBodyIkSolver createWholeBodyIkSolver();
 
 }

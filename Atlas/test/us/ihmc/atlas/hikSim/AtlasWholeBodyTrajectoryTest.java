@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.ThreadTools;
@@ -16,14 +17,15 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
 {
    static private final AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
    static private SDFFullRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
-
+   static private AtlasWholeBodyIK wbSolver = new AtlasWholeBodyIK( atlasRobotModel );
+   
    static private SimulationConstructionSet scs;
    static private boolean VISUALIZE_GUI = true && !BambooTools.isRunningOnBamboo();   
    static FullRobotModelVisualizer modelVisualizer;
    
    public AtlasWholeBodyTrajectoryTest() throws InterruptedException
    {
-      super(actualRobotModel);
+      super(actualRobotModel, wbSolver);
       
       if( scs == null && VISUALIZE_GUI )
       {

@@ -128,10 +128,10 @@ public class WholeBodyTrajectory
             ReferenceFrame target =  ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("interpolatedTarget",
                   ReferenceFrame.getWorldFrame(), interpolatedTransform );
             
-            wbSolver.setHandTarget( side,target );
+            wbSolver.setHandTarget(actualRobotModel,  side,target );
          }
          
-         wbSolver.compute(anglesToUseAsInitialState, outputAngles);
+         wbSolver.compute(actualRobotModel,  anglesToUseAsInitialState, outputAngles);
          
          for (int j=0; j<N; j++)
          {

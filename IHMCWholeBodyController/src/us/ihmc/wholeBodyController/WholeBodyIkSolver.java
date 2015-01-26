@@ -40,31 +40,16 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class WholeBodyIkSolver
+abstract public class WholeBodyIkSolver
 {
 
    ///--------------- Constants -----------------------------------------
    static public final double IGNORE = -66666.666;
 
-   static public final SideDependentList<String> endEffectorLinkNames = new SideDependentList<String>();
-   {
-      endEffectorLinkNames.put(LEFT, "l_ee_link");
-      endEffectorLinkNames.put(RIGHT, "r_ee_link");
-   }
-
-   static public final SideDependentList<String> footLinkNames = new SideDependentList<String>();
-   {
-      footLinkNames.put(LEFT, "l_foot");
-      footLinkNames.put(RIGHT, "r_foot");
-   }
 
    static public enum ControlledDoF { DOF_NONE, DOF_3P, DOF_3P2R, DOF_3P3R }
 
    static public enum ComputeOption { RESEED, USE_ACTUAL_MODEL_JOINTS, USE_JOINTS_CACHE };
-
-   static public final int numDoFperArm = 6;
-   static public final int numDoFperLeg = 6;
-   static public final RobotSide footRootSide = RobotSide.RIGHT;
 
    // I just like shorter names :/
    final private static RobotSide RIGHT = RobotSide.RIGHT;
@@ -72,17 +57,15 @@ public class WholeBodyIkSolver
 
    ///--------------- Reference Frames and Transfoms --------------------------
    private final ReferenceFrames workingFrames;
-   private final ReferenceFrames actualFrames;
-   private final ReferenceFrame  workingRootFrame;
 
-   private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
+
+ //  private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> workingSoleFrames = new SideDependentList<ReferenceFrame>();
 
    //---------- robot models in different contexts and different formats ----------
    private final RobotModel        urdfModel;
-   private final SDFFullRobotModel actual_sdf_model;
-   private final SDFFullRobotModel working_sdf_model;
-   private final HierarchicalKinematicSolver wb_solver;
+   private final SDFFullRobotModel workingSdfModel;
+   protected final HierarchicalKinematicSolver hierarchicalSolver;
 
    //---------------  tasks assigned to this solver --------------------------------
    public HierarchicalTask_COM        task_com_position;
@@ -99,21 +82,32 @@ public class WholeBodyIkSolver
    private boolean suggestKneeAngle = true;
 
    // --------------------- Miscellaneous -------------------------------------
-   private final HashMap<String, Integer> joint_names_map = new HashMap<String, Integer>();
-   private final OneDoFJoint[] working_joints_in_urdf_order;
-   private final SideDependentList<int[]> armJointIds = new SideDependentList<int[]>();
-   private final SideDependentList<int[]> legJointIds = new SideDependentList<int[]>();
+   protected final HashMap<String, Integer> jointNamesMap = new HashMap<String, Integer>();
+   protected final OneDoFJoint[] workingJointsInUrdfOrder;
+   protected final SideDependentList<int[]> armJointIds = new SideDependentList<int[]>();
+   protected final SideDependentList<int[]> legJointIds = new SideDependentList<int[]>();
 
-   private final DenseMatrix64F couple_j_weights;
-   private final Vector64F      prefered_joint_pose;
-
-   private final InverseDynamicsJointStateCopier actualModelJointCopier;
-
+   protected final DenseMatrix64F coupledJointWeights;
+   protected final Vector64F      preferedJointPose;
 
    private final Vector64F q_init;
 
    final private int numOfJoints;
-   final private HashSet<String> listOfVisibleAndEnableColliders = new HashSet<String>();
+   private HashSet<String> listOfVisibleAndEnableColliders;
+
+   //------- Abstract method that provide robot-specific information and configuration  -------------
+
+   abstract public String getEndEffectorLinkName(RobotSide side);
+   abstract public String getFootLinkName(RobotSide side);
+
+   abstract public int getNumberDoFperArm();
+   abstract public int getNumberDoFperLeg();
+   abstract public RobotSide getSideOfTheFootRoot();
+   abstract public String getURDFConfigurationFileName()  throws IOException ;
+   abstract protected HashSet<String> configureCollisionAvoidance(String urdfFileName )  throws Exception;
+   abstract protected void configureTasks();
+   
+   abstract public ReferenceFrame  getRootFrame( SDFFullRobotModel model);
 
    //---------------------------------------------------------------------------------
 
@@ -122,9 +116,13 @@ public class WholeBodyIkSolver
       suggestKneeAngle = enable;
    }
 
+   public ReferenceFrame getRootFrame(){
+      return getRootFrame(workingSdfModel);
+   }
+   
    public void setVerbose(boolean verbose)
    {
-      wb_solver.setVerbose(verbose);
+      hierarchicalSolver.setVerbose(verbose);
    }
 
    public RobotModel getUrdfRobotModel()
@@ -169,16 +167,13 @@ public class WholeBodyIkSolver
       out.setTranslation( new Vector3d( body_pos.get(0), body_pos.get(1), body_pos.get(2) ) ); 
       return out;
    }
-
-   public ReferenceFrame getRootFrame()
-   {
-      return workingRootFrame;
-   }
+   
 
    public ReferenceFrame getBodyReferenceFrame(String bodyname)
    {
       RigidBodyTransform localTransform = getLocalBodyTransform( bodyname );
-      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", workingRootFrame, localTransform);
+      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", 
+            getRootFrame(workingSdfModel), localTransform);
       System.out.println( localTransform );
       return bodyFrame;
    }
@@ -186,13 +181,15 @@ public class WholeBodyIkSolver
    public ReferenceFrame getBodyReferenceFrame(int bodyId)
    {
       RigidBodyTransform localTransform = getLocalBodyTransform( bodyId );
-      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", workingRootFrame, localTransform);
+      ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", 
+            getRootFrame(workingSdfModel), localTransform);
       return bodyFrame;
    }   
 
+   
    public HierarchicalKinematicSolver getHierarchicalSolver()
    {
-      return wb_solver;
+      return hierarchicalSolver;
    }
 
    public int getNumberOfJoints()
@@ -201,72 +198,62 @@ public class WholeBodyIkSolver
    }
 
 
-   public WholeBodyIkSolver(WholeBodyControllerParameters robot_model, SDFFullRobotModel actualRobotModel) throws IOException
+   public WholeBodyIkSolver( WholeBodyControllerParameters robotControllerParameters ) 
    {
       // load external library
       NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
 
-      actual_sdf_model   = actualRobotModel;
-      working_sdf_model  = robot_model.createFullRobotModel();
-      workingFrames = new ReferenceFrames(working_sdf_model);
-      actualFrames  = new ReferenceFrames(actual_sdf_model);
+    //  actualSdfModel   = actualRobotModel;
+      workingSdfModel  = robotControllerParameters.createFullRobotModel();
+      workingFrames = new ReferenceFrames(workingSdfModel);
+   //   actualFrames  = new ReferenceFrames(actualSdfModel);
 
-      actualModelJointCopier = new InverseDynamicsJointStateCopier(actual_sdf_model.getElevator(), working_sdf_model.getElevator());
+    //  actualModelJointCopier = new InverseDynamicsJointStateCopier(actualSdfModel.getElevator(), workingSdfModel.getElevator());
 
-      //----------- STEP A: find, copy and load the urdf file --------------------------------
-
-      String urdf_filename = "models/atlas_v4_robotiq.wb.urdf";
-
-      /// load the file. But first copy it on $HOME/.ihmc
-      InputStream resource = getClass().getClassLoader().getResourceAsStream(urdf_filename);
-      Files.createDirectories(Paths.get(System.getProperty("user.home"), ".ihmc", "models"));
-      String[] string_parts = urdf_filename.split("/");
-      Path modelLocationPath = Paths.get(System.getProperty("user.home"), ".ihmc", "models", string_parts[string_parts.length - 1]);
-      String modelLocationPathString = modelLocationPath.toAbsolutePath().toString();
-
-      if (resource != null)
-      {
-         Files.copy(resource, modelLocationPath, StandardCopyOption.REPLACE_EXISTING);
-      }
-      else
-      {
-         throw new IOException("urdf not found in resources/" + urdf_filename);
-      }
+      //----------- STEP A: find, copy and load the urdf file -------------------------------- 
 
       // create a RobotModel using a special URDF
       urdfModel = new RobotModel();
-      urdfModel.loadURDF(modelLocationPathString, false);
+      
+      try{
+         urdfModel.loadURDF( getURDFConfigurationFileName() , false);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
 
       numOfJoints = urdfModel.getNrOfJoints();
 
-      working_joints_in_urdf_order = new OneDoFJoint[numOfJoints];
+      workingJointsInUrdfOrder = new OneDoFJoint[numOfJoints];
 
-      wb_solver = new HierarchicalKinematicSolver(urdfModel, 40, 0.0001);
-      wb_solver.setVerbose(false);
+      double EpsilonInRadiansForVerySmallAngles = 0.0001;
+      int NumberOfIterations = 40;
+
+      hierarchicalSolver = new HierarchicalKinematicSolver(urdfModel, NumberOfIterations, EpsilonInRadiansForVerySmallAngles);
+      hierarchicalSolver.setVerbose(false);
 
       q_init = new Vector64F(numOfJoints);
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         actualSoleFrames.set(robotSide, actualFrames.getSoleFrame(robotSide));
+   //      actualSoleFrames.set(robotSide, actualFrames.getSoleFrame(robotSide));
          workingSoleFrames.set(robotSide, workingFrames.getSoleFrame(robotSide));
-         armJointIds.set(robotSide, new int[numDoFperArm]);
-         legJointIds.set(robotSide, new int[numDoFperLeg]);
+         armJointIds.set(robotSide, new int[ getNumberDoFperArm() ]);
+         legJointIds.set(robotSide, new int[ getNumberDoFperLeg() ]);
          disabledtHandRotationY.set(robotSide, new MutableBoolean(false));
          keepArmQuiet.set(robotSide, new MutableBoolean(true));
       }
-      // this is After and not before because the direction in URDF is inverted
-      workingRootFrame = actual_sdf_model.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
-
+      
       for (int i = 0; i < numOfJoints; i++)
       {
          String joint_name_in_urdf = urdfModel.getActiveJointName(i);
-         joint_names_map.put(joint_name_in_urdf, i);
-         OneDoFJoint joint = working_sdf_model.getOneDoFJointByName(joint_name_in_urdf);
+         jointNamesMap.put(joint_name_in_urdf, i);
+         OneDoFJoint joint = workingSdfModel.getOneDoFJointByName(joint_name_in_urdf);
          if (joint != null)
          {
-            working_joints_in_urdf_order[i] = joint;
+            workingJointsInUrdfOrder[i] = joint;
          }
          else
          {
@@ -276,53 +263,51 @@ public class WholeBodyIkSolver
 
       ///----- Step B: allocate all the tasks and add them to the solver --------------
 
-      ForwardKinematicSolver fk = wb_solver.getForwardSolver();
+      ForwardKinematicSolver fk = hierarchicalSolver.getForwardSolver();
 
       task_com_position = new HierarchicalTask_COM(fk);
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         int currentHandId = urdfModel.getBodyId(endEffectorLinkNames.get(robotSide));
+         int currentHandId = urdfModel.getBodyId(getEndEffectorLinkName(robotSide));
 
          task_end_effector_translations.set(robotSide, new HierarchicalTask_BodyPosition(fk, currentHandId));
          task_end_effector_rotations.set(robotSide, new HierarchicalTask_BodyOrientation(fk, currentHandId));
-         urdfModel.getParentJoints(currentHandId, numDoFperArm, armJointIds.get(robotSide));
+         urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , armJointIds.get(robotSide));
       }     
 
-      int leftFootId = urdfModel.getBodyId(footLinkNames.get(LEFT));
+      RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
+      int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
       task_leg_pose = new HierarchicalTask_BodyPose(fk, leftFootId);
 
-      urdfModel.getParentJoints(leftFootId, numDoFperLeg, legJointIds.get(LEFT) );
+      urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), legJointIds.get( otherFootSide ) );
 
-      for (int i = 0; i < numDoFperLeg; i++)
+      for (int i = 0; i < getNumberDoFperLeg(); i++)
       {
-         legJointIds.get(RIGHT)[i] = i;
+         legJointIds.get( getSideOfTheFootRoot() )[i] = i;
       }
 
       task_joints_pose = new HierarchicalTask_JointsPose(fk);
 
       // the order is important!! first to be added have higher priority
-      wb_solver.addTask(task_leg_pose);
-      wb_solver.addTask(task_com_position);
-      wb_solver.addTask(task_end_effector_translations.get(RIGHT));
-      wb_solver.addTask(task_end_effector_rotations.get(RIGHT));
-      wb_solver.addTask(task_end_effector_translations.get(LEFT));
-      wb_solver.addTask(task_end_effector_rotations.get(LEFT));
-      wb_solver.addTask(task_joints_pose);
+      hierarchicalSolver.addTask(task_leg_pose);
+      hierarchicalSolver.addTask(task_com_position);
+      hierarchicalSolver.addTask(task_end_effector_translations.get(RIGHT));
+      hierarchicalSolver.addTask(task_end_effector_rotations.get(RIGHT));
+      hierarchicalSolver.addTask(task_end_effector_translations.get(LEFT));
+      hierarchicalSolver.addTask(task_end_effector_rotations.get(LEFT));
+      hierarchicalSolver.addTask(task_joints_pose);
 
-      prefered_joint_pose = new Vector64F(numOfJoints);
-      prefered_joint_pose.zero();
-      couple_j_weights = new DenseMatrix64F(numOfJoints, numOfJoints);
+      preferedJointPose = new Vector64F(numOfJoints);
+      preferedJointPose.zero();
+      coupledJointWeights = new DenseMatrix64F(numOfJoints, numOfJoints);
 
       //code moved there for esthetic reasons :|
       configureTasks();
-
-      try
-      {
-         wb_solver.collisionAvoidance.loadURDF(new File( modelLocationPathString ));
-         configureCollisionAvoidance();
+      try{
+         listOfVisibleAndEnableColliders = configureCollisionAvoidance( getURDFConfigurationFileName() );
       }
-      catch (ParserConfigurationException | SAXException e)
+      catch(Exception e)
       {
          e.printStackTrace();
       }
@@ -333,177 +318,7 @@ public class WholeBodyIkSolver
       return listOfVisibleAndEnableColliders.contains(bodyName);
    }
 
-   private void configureCollisionAvoidance()
-   {
-      listOfVisibleAndEnableColliders.add("pelvis");
-      listOfVisibleAndEnableColliders.add("utorso");
 
-      listOfVisibleAndEnableColliders.add("r_larm");
-      listOfVisibleAndEnableColliders.add("r_uleg");
-      listOfVisibleAndEnableColliders.add("l_larm");
-      listOfVisibleAndEnableColliders.add("l_uleg");
-
-      wb_solver.collisionAvoidance.addBodyPair("r_larm", "l_larm");
-
-      wb_solver.collisionAvoidance.addBodyPair("r_larm", "r_uleg" );
-      wb_solver.collisionAvoidance.addBodyPair("r_larm", "l_uleg" );
-      wb_solver.collisionAvoidance.addBodyPair("r_larm", "pelvis");
-      wb_solver.collisionAvoidance.addBodyPair("r_larm", "utorso" );
-
-      wb_solver.collisionAvoidance.addBodyPair("r_larm", "r_uleg" );
-      wb_solver.collisionAvoidance.addBodyPair("l_larm", "l_uleg" );
-      wb_solver.collisionAvoidance.addBodyPair("l_larm", "pelvis");
-      wb_solver.collisionAvoidance.addBodyPair("l_larm", "utorso" );
-   }
-
-   private void configureTasks()
-   {
-      HierarchicalTask_BodyPosition task_ee_pose_R_pos = task_end_effector_translations.get(RIGHT);
-      HierarchicalTask_BodyPosition task_ee_pose_L_pos = task_end_effector_translations.get(LEFT);
-      HierarchicalTask_BodyOrientation task_ee_pose_R_rot = task_end_effector_rotations.get(RIGHT);
-      HierarchicalTask_BodyOrientation task_ee_pose_L_rot = task_end_effector_rotations.get(LEFT);
-
-      int rleg_akx = joint_names_map.get("r_leg_akx");
-      int rleg_aky = joint_names_map.get("r_leg_aky");
-      int rleg_kny = joint_names_map.get("r_leg_kny");
-      int rleg_hpy = joint_names_map.get("r_leg_hpy");
-      int rleg_hpx = joint_names_map.get("r_leg_hpx");
-      int rleg_hpz = joint_names_map.get("r_leg_hpz");
-
-      int lleg_akx = joint_names_map.get("l_leg_akx");
-      int lleg_aky = joint_names_map.get("l_leg_aky");
-      int lleg_kny = joint_names_map.get("l_leg_kny");
-      int lleg_hpy = joint_names_map.get("l_leg_hpy");
-      int lleg_hpx = joint_names_map.get("l_leg_hpx");
-      int lleg_hpz = joint_names_map.get("l_leg_hpz");
-
-      int back_bkz = joint_names_map.get("back_bkz");
-      int back_bky = joint_names_map.get("back_bky");
-      int back_bkx = joint_names_map.get("back_bkx");
-
-      int larm_elx = joint_names_map.get("l_arm_elx");
-      int rarm_elx = joint_names_map.get("r_arm_elx");
-
-      task_ee_pose_L_pos.setMaximumError(0.2);
-      task_ee_pose_L_rot.setMaximumError(0.4);
-
-      task_ee_pose_R_pos.setMaximumError(0.2);
-      task_ee_pose_R_rot.setMaximumError(0.4);
-      task_joints_pose.setMaximumError(0.6);
-
-      task_ee_pose_R_pos.setEnabled(false);
-      task_ee_pose_R_rot.setEnabled(false);
-      task_ee_pose_L_pos.setEnabled(false);
-      task_ee_pose_L_rot.setEnabled(false);
-
-      //--------------------------------------------------
-      // Important: you can't activate a joint in higher priorities and disable it later
-      // use this vector for any setWeightJointSpace
-      Vector64F joint_weights = new Vector64F(numOfJoints);
-      joint_weights.zero();
-
-      // use only the joints of legs to achieve this task. Ignore torso and arms
-      for (int i = 0; i < numDoFperLeg; i++)
-      {
-         joint_weights.set(legJointIds.get(LEFT)[i], 1);
-         joint_weights.set(legJointIds.get(RIGHT)[i], 1);
-      }
-
-      task_leg_pose.setWeightsJointSpace(joint_weights);
-
-      //TODO
-      Vector64F target_left_foot = new Vector64F(7, 0, 2 * 0.11, 0, 0, 0, 0, 1);
-      task_leg_pose.setTarget(target_left_foot, 0.001);
-
-      //--------------------------------------------------
-      // control only the X and Y directions of the COM
-      //TODO this might not work when the footroot is not flat on the ground
-      task_com_position.setWeightsTaskSpace(new Vector64F(3, 1, 1, 0));
-
-      // Don't move the arm to keep the balance. But torso need to be activated
-      joint_weights.set(back_bkz, 1);
-      joint_weights.set(back_bky, 1);
-      joint_weights.set(back_bkx, 1);
-
-      task_com_position.setWeightsJointSpace(joint_weights);
-
-      // TODO make this the center of the feet
-      Vector64F target_com = new Vector64F(3, 0, 0.11, 0);    
-      task_com_position.setTarget(target_com, 0.01);
-      //--------------------------------------------------
-      // control position and rotation (6 DoF) of the end effector
-      Vector64F weights_ee_pos = new Vector64F(3, 1, 1, 1);
-      Vector64F weights_ee_rot = new Vector64F(3, 1, 1, 1);
-
-      task_ee_pose_L_pos.setWeightsTaskSpace(weights_ee_pos);
-      task_ee_pose_L_rot.setWeightsTaskSpace(weights_ee_rot);
-      task_ee_pose_R_pos.setWeightsTaskSpace(weights_ee_pos);
-      task_ee_pose_R_rot.setWeightsTaskSpace(weights_ee_rot);
-
-      for (int i = 0; i < numDoFperArm; i++)
-      {
-         int index = armJointIds.get(RobotSide.LEFT)[i];
-         joint_weights.set(index, 1);
-      }
-      task_ee_pose_L_pos.setWeightsJointSpace(joint_weights);
-      task_ee_pose_L_rot.setWeightsJointSpace(joint_weights);
-
-      for (int i = 0; i < numDoFperArm; i++)
-      {
-         int index = armJointIds.get(RobotSide.LEFT)[i];
-         joint_weights.set(index, 0);
-         index = armJointIds.get(RobotSide.RIGHT)[i];
-         joint_weights.set(index, 1);
-      }
-      task_ee_pose_R_pos.setWeightsJointSpace(joint_weights);
-      task_ee_pose_R_rot.setWeightsJointSpace(joint_weights);
-
-      //--------------------------------------------------
-      // control position and rotation (6 DoF) of the end effector
-      Vector64F weights_jointpose = new Vector64F(numOfJoints);
-      weights_jointpose.zero();
-      couple_j_weights.zero();
-
-      // these are the joints to be knees
-      weights_jointpose.set(rleg_kny, 0.5);
-      weights_jointpose.set(lleg_kny, 0.5);
-
-      // this is used to keep the pelvis straight
-      // what you want is:
-      //  q(r_leg_hpy) = - q(leg_aky) - q(leg_kny);
-      weights_jointpose.set(rleg_hpy, 2);
-      couple_j_weights.set(rleg_hpy, rleg_aky, -1);
-      couple_j_weights.set(rleg_hpy, rleg_kny, -1);
-
-      // back
-      weights_jointpose.set(back_bkz, 1);
-      weights_jointpose.set(back_bky, 1);
-      weights_jointpose.set(back_bkx, 1);
-
-      // try keep hpx mirrored 
-      weights_jointpose.set(rleg_hpx, 1);
-      weights_jointpose.set(lleg_hpx, 1);
-      couple_j_weights.set(rleg_hpx, lleg_hpx, -1);
-      couple_j_weights.set(lleg_hpx, rleg_hpx, -1);
-
-      // keep this to zero if you can
-      weights_jointpose.set(rleg_hpz, 0.2);
-      weights_jointpose.set(lleg_hpz, 0.2);
-
-      //elbows
-      weights_jointpose.set(larm_elx, 1.0);
-      weights_jointpose.set(rarm_elx, 1.0);
-
-      prefered_joint_pose.set(larm_elx, 1.0);
-      prefered_joint_pose.set(rarm_elx, -1.0);
-
-      task_joints_pose.setWeightsTaskSpace(weights_jointpose);
-      task_joints_pose.setWeightsJointSpace(joint_weights);
-      task_joints_pose.setCoupledJointWeights(couple_j_weights);
-
-      task_joints_pose.setTarget(prefered_joint_pose, 35);
-
-   }
 
    private void setPreferedKneeAngle()
    {
@@ -528,12 +343,13 @@ public class WholeBodyIkSolver
          zR = 1;
       }
 
+      // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
       double preferedKneeAngle = 2.4 - (zL +  zR)*0.5;
       if( preferedKneeAngle < 0.4) preferedKneeAngle = 0.4;
 
-      prefered_joint_pose.set(joint_names_map.get("l_leg_kny"), preferedKneeAngle);
-      prefered_joint_pose.set(joint_names_map.get("r_leg_kny"), preferedKneeAngle);
-      task_joints_pose.setTarget(prefered_joint_pose, 3);
+      preferedJointPose.set(jointNamesMap.get("l_leg_kny"), preferedKneeAngle);
+      preferedJointPose.set(jointNamesMap.get("r_leg_kny"), preferedKneeAngle);
+      task_joints_pose.setTarget(preferedJointPose, 3);
    }
 
    public void disableHandRotationMainAxis(RobotSide side, boolean disable)
@@ -541,22 +357,24 @@ public class WholeBodyIkSolver
       disabledtHandRotationY.get(side).setValue(disable);
    }
 
-   public void setHandTarget(RobotSide end_effector_side, ReferenceFrame end_effector_pose)
+   public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, ReferenceFrame end_effector_pose)
    {
+      movePelvisToHaveOverlappingFeet( actualRobotModel, workingSdfModel );
+      
       final HierarchicalTask_BodyPosition task_ee_trans = task_end_effector_translations.get(end_effector_side);
       final HierarchicalTask_BodyOrientation task_ee_rot = task_end_effector_rotations.get(end_effector_side);
 
       if (task_ee_trans.isEnabled() || task_ee_rot.isEnabled())
       {
          RigidBodyTransform ee_transform = new RigidBodyTransform();
-         end_effector_pose.getTransformToDesiredFrame(ee_transform, workingRootFrame);
+         end_effector_pose.getTransformToDesiredFrame(ee_transform, getRootFrame( actualRobotModel ));
 
          keepArmQuiet.get(end_effector_side).setValue( false );
 
          RobotSide steadySide = end_effector_side.getOppositeSide();
 
-         wb_solver.prioritizeTasks(task_end_effector_translations.get(steadySide), task_ee_trans);
-         wb_solver.prioritizeTasks(task_end_effector_rotations.get(steadySide), task_ee_rot);
+         hierarchicalSolver.prioritizeTasks(task_end_effector_translations.get(steadySide), task_ee_trans);
+         hierarchicalSolver.prioritizeTasks(task_end_effector_rotations.get(steadySide), task_ee_rot);
 
          Vector64F target_ee = new Vector64F(7);
          Quat4d quat = new Quat4d();
@@ -592,9 +410,9 @@ public class WholeBodyIkSolver
 
    public void setPreferedJointPose(String joint_name, double q)
    {
-      int index = joint_names_map.get(joint_name);
-      prefered_joint_pose.set(index, q);
-      task_joints_pose.setTarget(prefered_joint_pose, 3);
+      int index = jointNamesMap.get(joint_name);
+      preferedJointPose.set(index, q);
+      task_joints_pose.setTarget(preferedJointPose, 3);
    }
 
    private void checkIfArmShallStayQuiet(Vector64F q_init)
@@ -612,17 +430,17 @@ public class WholeBodyIkSolver
                   weights_joint.set(jointId, 0.4);
                else
                   weights_joint.set(jointId, 0.3);
-               prefered_joint_pose.set(jointId, q_init.get(jointId));
+               preferedJointPose.set(jointId, q_init.get(jointId));
             }
             else
             {
                weights_joint.set(jointId, 0.1);
-               prefered_joint_pose.set(jointId, q_init.get(jointId));
+               preferedJointPose.set(jointId, q_init.get(jointId));
             }
          }
       }
       task_joints_pose.setWeightsTaskSpace(weights_joint);
-      task_joints_pose.setTarget(prefered_joint_pose, 3);
+      task_joints_pose.setTarget(preferedJointPose, 3);
    }
 
    private void checkIfLegsNeedToBeLocked()
@@ -638,7 +456,7 @@ public class WholeBodyIkSolver
 
          double val = lockLegs ? 0 : 1;
 
-         for (int i = 0; i < numDoFperLeg; i++)
+         for (int i = 0; i < getNumberDoFperLeg(); i++)
          {
             weightsRot.set(legJointIds.get(side)[i], val);
             weightsPos.set(legJointIds.get(side)[i], val);
@@ -649,12 +467,12 @@ public class WholeBodyIkSolver
    }
 
 
-   public int compute(SDFFullRobotModel desiredRobotModelToPack) throws Exception
+   public int compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack) throws Exception
    {
-      return compute( desiredRobotModelToPack, ComputeOption.USE_JOINTS_CACHE);
+      return compute(actualSdfModel, desiredRobotModelToPack, ComputeOption.USE_JOINTS_CACHE);
    }
 
-   public int compute( Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
+   public int compute(SDFFullRobotModel actualSdfModel,  Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
    {
       for (int i = 0; i < numOfJoints; i++)
       {
@@ -662,7 +480,7 @@ public class WholeBodyIkSolver
          q_init.set(i, new_value);
       }
 
-      int ret = compute( null,  ComputeOption.USE_JOINTS_CACHE);
+      int ret = compute(actualSdfModel, null,  ComputeOption.USE_JOINTS_CACHE);
 
       for (int i = 0; i < numOfJoints; i++)
       {
@@ -674,9 +492,9 @@ public class WholeBodyIkSolver
       return ret;
    }
 
-   public int compute(SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
+   public int compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
    {
-      if( desiredRobotModelToPack == actual_sdf_model)
+      if( desiredRobotModelToPack == actualSdfModel)
       {
          throw new Exception(" the output of compute should not be a reference to actual_sdf_model");
       }
@@ -692,7 +510,7 @@ public class WholeBodyIkSolver
 
             for(RobotSide robotSide: RobotSide.values())
             {
-               for(int j=0; j< numDoFperArm; j++){
+               for(int j=0; j< getNumberDoFperArm(); j++){
                   if ( armJointIds.get(robotSide)[j] == i){
                      partOfQuietArm = true;
                      break;
@@ -704,25 +522,26 @@ public class WholeBodyIkSolver
                q_init.set(i, randQ.get(i));
             }
          }
-
-         q_init.set(joint_names_map.get("l_leg_aky"), -0.7);
-         q_init.set(joint_names_map.get("r_leg_aky"), -0.7);
-         q_init.set(joint_names_map.get("l_leg_kny"), 1.4);
-         q_init.set(joint_names_map.get("r_leg_kny"), 1.4);
-         q_init.set(joint_names_map.get("l_leg_hpy"), -0.7);
-         q_init.set(joint_names_map.get("r_leg_hpy"), -0.7);
+         
+         // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
+         q_init.set(jointNamesMap.get("l_leg_aky"), -0.7);
+         q_init.set(jointNamesMap.get("r_leg_aky"), -0.7);
+         q_init.set(jointNamesMap.get("l_leg_kny"), 1.4);
+         q_init.set(jointNamesMap.get("r_leg_kny"), 1.4);
+         q_init.set(jointNamesMap.get("l_leg_hpy"), -0.7);
+         q_init.set(jointNamesMap.get("r_leg_hpy"), -0.7);
 
          if( keepArmQuiet.get(LEFT).isFalse())
-            q_init.set(joint_names_map.get("l_arm_elx"), 0.7);
+            q_init.set(jointNamesMap.get("l_arm_elx"), 0.7);
          if( keepArmQuiet.get(RIGHT).isFalse())
-            q_init.set(joint_names_map.get("r_arm_elx"), -0.7);
+            q_init.set(jointNamesMap.get("r_arm_elx"), -0.7);
 
          break;
       case USE_ACTUAL_MODEL_JOINTS:
-         actual_sdf_model.updateFrames();
+         actualSdfModel.updateFrames();
          for (int i = 0; i < numOfJoints; i++)
          {
-            OneDoFJoint joint = actual_sdf_model.getOneDoFJointByName(urdfModel.getActiveJointName(i));
+            OneDoFJoint joint = actualSdfModel.getOneDoFJointByName(urdfModel.getActiveJointName(i));
             q_init.set(i, joint.getQ());
          }
          break;
@@ -731,7 +550,7 @@ public class WholeBodyIkSolver
          //do nothing, the cache is used by default.
       }
 
-      int ret = computeImpl(desiredRobotModelToPack);
+      int ret = computeImpl(actualSdfModel, desiredRobotModelToPack);
 
       if(opt != ComputeOption.RESEED)
       {
@@ -741,34 +560,55 @@ public class WholeBodyIkSolver
       return ret;
    }
 
-   private void adjustDesiredCOM()
+   private void adjustDesiredCOM(SDFFullRobotModel actualSdfModel )
    {
-      ReferenceFrame leftSole = actual_sdf_model.getSoleFrame(LEFT);
-      ReferenceFrame rightSole = actual_sdf_model.getSoleFrame(RIGHT);
+      ReferenceFrame leftSole = actualSdfModel.getSoleFrame(LEFT);
+      ReferenceFrame rightSole = actualSdfModel.getSoleFrame(RIGHT);
       RigidBodyTransform rightToLeftFoot = leftSole.getTransformToDesiredFrame( rightSole );
       Vector3d diff = new Vector3d();
       rightToLeftFoot.getTranslation(diff); 
 
       task_com_position.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
    }
-
-   synchronized private int computeImpl(SDFFullRobotModel desiredRobotModelToPack)
+   
+   private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
    {
-      updateDesiredSDFFullRobotModelToActual();
+      referenceModel.updateFrames();
+      followerModel.updateFrames();
+  
+      ReferenceFrame referenceSoleFrame = referenceModel.getSoleFrame( getSideOfTheFootRoot() );
+      ReferenceFrame followerSoleFrame  = followerModel.getSoleFrame( getSideOfTheFootRoot() );
+  
+      RigidBodyTransform soleWorldToFollow = new RigidBodyTransform();
+      RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
+      RigidBodyTransform pelvisTransform   = new RigidBodyTransform();
+  
+      ReferenceFrame followerPelvisFrame = followerModel.getRootJoint().getFrameAfterJoint();
+  
+      followerPelvisFrame.getTransformToDesiredFrame(soleToPelvis,  followerSoleFrame);
+      referenceSoleFrame.getTransformToDesiredFrame(soleWorldToFollow, ReferenceFrame.getWorldFrame());
+      pelvisTransform.multiply( soleWorldToFollow, soleToPelvis);
+  
+      followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
+      followerModel.updateFrames();
+   }
+   
 
+   synchronized private int computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack)
+   {    
+      movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
+      
       int ret = -1;
       Vector64F q_out = new Vector64F(numOfJoints);
 
       try{
-         workingFrames.updateFrames();
-
-         adjustDesiredCOM();
+         adjustDesiredCOM(actualSdfModel);
          checkIfLegsNeedToBeLocked();
          setPreferedKneeAngle();
-         adjustOtherFoot();
+         adjustOtherFoot(actualSdfModel);
 
          checkIfArmShallStayQuiet(q_init);
-         ret = wb_solver.solve(q_init, q_out);
+         ret = hierarchicalSolver.solve(q_init, q_out);
       }
       catch (Exception e)
       {
@@ -784,39 +624,53 @@ public class WholeBodyIkSolver
       {
          q_init.set(q_out);
 
-         for (int i = 0; i < working_joints_in_urdf_order.length; i++)
+         HashMap<String, Double> listOfNewJointAngles = new HashMap<String, Double>();
+
+         for (int i = 0; i < workingJointsInUrdfOrder.length; i++)
          {
-            if (working_joints_in_urdf_order[i] != null)
+            if (workingJointsInUrdfOrder[i] != null)
             {
-               working_joints_in_urdf_order[i].setQ(q_out.get(i));
+               String jointName =  workingJointsInUrdfOrder[i].getName();
+               double Q = q_out.get(i);
+               workingJointsInUrdfOrder[i].setQ( Q );
+               listOfNewJointAngles.put( jointName, Q );
             }
          }
 
-         movePelvisToHaveOverlappingFeet( actual_sdf_model, working_sdf_model);
+         movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
 
-         if(desiredRobotModelToPack != null){
-            updatePackModelToDesired(desiredRobotModelToPack);
+         if(desiredRobotModelToPack != null)
+         {
+            InverseDynamicsJointStateCopier desiredModelJointCopier = new InverseDynamicsJointStateCopier(
+                  workingSdfModel.getElevator(), 
+                  desiredRobotModelToPack.getElevator());
+
+            desiredModelJointCopier.copy();
             desiredRobotModelToPack.updateFrames();
          }
-
       }
-
+      
+      if(desiredRobotModelToPack != null)
+      {
+         movePelvisToHaveOverlappingFeet( actualSdfModel, desiredRobotModelToPack );
+      }
+      
       return ret;
    }
 
    public double getDesiredJointAngle(String jointName)
    {
-      int index = joint_names_map.get(jointName);
-      return working_joints_in_urdf_order[index].getQ();
+      int index = jointNamesMap.get(jointName);
+      return workingJointsInUrdfOrder[index].getQ();
    }
 
-   private void adjustOtherFoot()
+   private void adjustOtherFoot(SDFFullRobotModel actualSdfModel )
    {
       RigidBodyTransform foot_other_transform = new RigidBodyTransform();
       // note before and after... it is not a typo.
-      ReferenceFrame leftAnkle = actual_sdf_model.getOneDoFJointByName("l_leg_akx").getFrameAfterJoint();
+      ReferenceFrame leftAnkle = actualSdfModel.getOneDoFJointByName("l_leg_akx").getFrameAfterJoint();
       //TODO. there might be something wrong here
-      leftAnkle.getTransformToDesiredFrame(foot_other_transform, workingRootFrame);
+      leftAnkle.getTransformToDesiredFrame(foot_other_transform, getRootFrame(actualSdfModel) );
 
       Quat4d quat = new Quat4d();
       Vector3d pos = new Vector3d();
@@ -825,11 +679,12 @@ public class WholeBodyIkSolver
       task_leg_pose.setTarget(quat, pos, 0.0005);
    }
 
+   
    public ReferenceFrame getDesiredAfterJointFrame(String jointName, ReferenceFrame parentFrame)
    {
       workingFrames.updateFrames();
 
-      ReferenceFrame workingJointFrame = working_sdf_model.getOneDoFJointByName(jointName).getFrameAfterJoint();
+      ReferenceFrame workingJointFrame = workingSdfModel.getOneDoFJointByName(jointName).getFrameAfterJoint();
       ReferenceFrame workingRootFrame  = getRootFrame();
 
       RigidBodyTransform rootToJoint  = workingJointFrame.getTransformToDesiredFrame( workingRootFrame );
@@ -841,91 +696,46 @@ public class WholeBodyIkSolver
       return ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(jointName, parentFrame, parentToBody);
    }
 
-   public ReferenceFrame getDesiredPelvisFrame(ReferenceFrame parentFrame)
-   {
-      return getDesiredBodyFrame("pelvis", parentFrame);
-   }
 
    public ReferenceFrame getDesiredHandFrame(RobotSide handSide, ReferenceFrame parentFrame)
    {
-      return getDesiredBodyFrame( this.endEffectorLinkNames.get(handSide), parentFrame);
+      return getDesiredBodyFrame(getEndEffectorLinkName(handSide), parentFrame);
    }
 
-   public ReferenceFrame getDesiredBodyFrame( String name, ReferenceFrame parentFrame)
+   public ReferenceFrame getDesiredBodyFrame(String name, ReferenceFrame parentFrame)
    {
       workingFrames.updateFrames();
 
       RigidBodyTransform rootToBody   = getLocalBodyTransform(name);
-      RigidBodyTransform parentToRoot = new RigidBodyTransform();
-
-      ReferenceFrame workingRootFrame = getRootFrame();
-
-      workingRootFrame.getTransformToDesiredFrame(parentToRoot, parentFrame);
+      RigidBodyTransform parentToRoot =  getRootFrame().getTransformToDesiredFrame(parentFrame);
 
       RigidBodyTransform parentToBody = new RigidBodyTransform();
       parentToBody.multiply(parentToRoot, rootToBody);
 
-      return ReferenceFrame.constructBodyZUpFrameWithUnchangingTransformToParent(name, parentFrame, parentToBody);
+      return ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name, parentFrame, parentToBody);
    }
 
-   static private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
-   {
-      referenceModel.updateFrames();
-      followerModel.updateFrames();
-
-      ReferenceFrame referenceSoleFrame = referenceModel.getSoleFrame(footRootSide);
-      ReferenceFrame followerSoleFrame  = followerModel.getSoleFrame(footRootSide);
-
-      RigidBodyTransform soleWorldToFollow = new RigidBodyTransform();
-      RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
-      RigidBodyTransform pelvisTransform   = new RigidBodyTransform();
-
-      ReferenceFrame followerPelvisFrame = followerModel.getRootJoint().getFrameAfterJoint();
-
-      followerPelvisFrame.getTransformToDesiredFrame(soleToPelvis,  followerSoleFrame);
-      referenceSoleFrame.getTransformToDesiredFrame(soleWorldToFollow, ReferenceFrame.getWorldFrame());
-      pelvisTransform.multiply( soleWorldToFollow, soleToPelvis);
-
-      followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
-      followerModel.updateFrames();
-   }
-
-   private void updateDesiredSDFFullRobotModelToActual()
-   {
-      synchronized (actual_sdf_model)
-      {
-         actualModelJointCopier.copy();
-      }
-   }
-
-   private void updatePackModelToDesired(SDFFullRobotModel sdfFullRobotModelToPack)
-   {  
-      InverseDynamicsJointStateCopier desiredModelJointCopier = new InverseDynamicsJointStateCopier(
-            working_sdf_model.getElevator(), 
-            sdfFullRobotModelToPack.getElevator());
-      desiredModelJointCopier.copy();
-   }
 
    public ControlledDoF getNumberOfControlledDoF(RobotSide side)
    {
-         if( task_end_effector_translations.get(side).isEnabled() )
+      if( task_end_effector_translations.get(side).isEnabled() )
+      {
+         if( task_end_effector_rotations.get(side).isEnabled() )
          {
-            if( task_end_effector_rotations.get(side).isEnabled() )
-            {
-               if( disabledtHandRotationY.get(side).isTrue() ){
-                  return ControlledDoF.DOF_3P2R;
-               }
-               else{
-                  return ControlledDoF.DOF_3P3R;
-               }
+            if( disabledtHandRotationY.get(side).isTrue() ){
+               return ControlledDoF.DOF_3P2R;
             }
             else{
-               return ControlledDoF.DOF_3P;
+               return ControlledDoF.DOF_3P3R;
             }
          }
-         return ControlledDoF.DOF_NONE;
+         else{
+            return ControlledDoF.DOF_3P;
+         }
+      }
+      return ControlledDoF.DOF_NONE;
    }
-   
+
    public void setNumberOfControlledDoF(RobotSide side, ControlledDoF dof)
    {
       switch( dof )

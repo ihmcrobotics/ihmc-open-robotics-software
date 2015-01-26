@@ -9,6 +9,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.Pair;
@@ -18,6 +19,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolverTestFactory;
 
@@ -25,6 +27,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 { 
    static private final AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
    static private SDFFullRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
+   static private WholeBodyIkSolver wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
  
    static private SimulationConstructionSet scs;
    static private boolean VISUALIZE_GUI = true && !BambooTools.isRunningOnBamboo();   
@@ -32,7 +35,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
    
    public AtlasWholeBodyIkSolverTest() throws InterruptedException
    {
-      super(actualRobotModel);
+      super(actualRobotModel, wholeBodySolver);
       
       if( scs == null && VISUALIZE_GUI )
       {
@@ -83,7 +86,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
       this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray);
    }
    
-   /**
+  /** 
    @Test(timeout = 150000)   public void testRightHandIn3P2RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createWallOfTargetPoints(RobotSide.RIGHT);

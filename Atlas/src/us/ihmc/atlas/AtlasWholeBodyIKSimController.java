@@ -19,7 +19,7 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
 
    protected final ArrayList<Pair<RobotSide, RigidBodyTransform>> queuedTargets =  new ArrayList<Pair<RobotSide, RigidBodyTransform>>();
 
-   public AtlasWholeBodyIKSimController(SDFRobot robot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel)
+   public AtlasWholeBodyIKSimController(SDFRobot robot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel) throws Exception
    {
       super(robot, fullRobotModel, atlasRobotModel);
    }
@@ -60,11 +60,7 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
       }
    }
 
-   @Override
-   public WholeBodyIkSolver initializeAndReturnIkSolver(DRCRobotModel drcRobotModel, SDFFullRobotModel sdfFullRobotModel) throws IOException
-   {
-      return new WholeBodyIkSolver(drcRobotModel, sdfFullRobotModel);
-   }
+
 
    @Override
    public ArrayList<Pair<RobotSide, RigidBodyTransform>> getTargetsQueue()
