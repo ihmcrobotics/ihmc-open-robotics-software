@@ -95,27 +95,36 @@ public class BehaviorDisptacher implements Runnable
       }
    }
 
-   public void addHumanoidBehavior(HumanoidBehaviorType humanoidBehaviorType, BehaviorInterface behavior)
+   public void addHumanoidBehavior(HumanoidBehaviorType humanoidBehaviorType, BehaviorInterface behaviorToAdd)
    {
-      BehaviorStateWrapper<HumanoidBehaviorType> behaviorState = new BehaviorStateWrapper<HumanoidBehaviorType>(humanoidBehaviorType, behavior);
+      BehaviorStateWrapper<HumanoidBehaviorType> behaviorStateToAdd = new BehaviorStateWrapper<HumanoidBehaviorType>(humanoidBehaviorType, behaviorToAdd);
 
-      this.stateMachine.addState(behaviorState);
-      this.registry.addChild(behavior.getYoVariableRegistry());
-      
-      addTransitionsToAndFromAllOtherBehaviors(behaviorState);
-   }
+      this.stateMachine.addState(behaviorStateToAdd);
+      this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
 
-   private void addTransitionsToAndFromAllOtherBehaviors(BehaviorStateWrapper<HumanoidBehaviorType> behaviorState)
-   {
-      for (HumanoidBehaviorType stateEnum : HumanoidBehaviorType.values)
+      ArrayList<BehaviorStateWrapper<HumanoidBehaviorType>> allOtherBehaviorStates = new ArrayList<BehaviorStateWrapper<HumanoidBehaviorType>>();
+
+      for (HumanoidBehaviorType otherBehaviorType : HumanoidBehaviorType.values)
       {
-         BehaviorStateWrapper<HumanoidBehaviorType> otherBehavior = stateMachine.getState(stateEnum);
-         if (otherBehavior == null)
-            continue;
+         BehaviorStateWrapper<HumanoidBehaviorType> otherBehaviorState = stateMachine.getState(otherBehaviorType);
 
-         boolean waitUntilDone = false;
-         StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, new SetupBehaviorCommunication(otherBehavior, behaviorState), otherBehavior, behaviorState);
-         StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, new SetupBehaviorCommunication(behaviorState, otherBehavior), behaviorState, otherBehavior);
+         if (otherBehaviorState == null)
+         {
+            continue;
+         }
+         else
+         {
+            allOtherBehaviorStates.add(otherBehaviorState);
+
+            boolean waitUntilDone = false;
+
+            SwitchGlobalListenersAction switchToOtherBehaviorState = new SwitchGlobalListenersAction(behaviorStateToAdd, otherBehaviorState);
+            StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, switchToOtherBehaviorState, behaviorStateToAdd, otherBehaviorState);
+
+            SwitchGlobalListenersAction switchFromOtherBehaviorState = new SwitchGlobalListenersAction(otherBehaviorState, behaviorStateToAdd);
+            StateMachineTools.addRequestedStateTransition(requestedBehavior, waitUntilDone, switchFromOtherBehaviorState, otherBehaviorState,
+                  behaviorStateToAdd);
+         }
       }
    }
 
@@ -181,28 +190,28 @@ public class BehaviorDisptacher implements Runnable
       {
          switch (desiredBehaviorControlSubscriber.getRequestedBehaviorControl())
          {
-            case STOP:
-               stateMachine.stop();
-               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.STOP));
-               break;
-            case PAUSE:
-               stateMachine.pause();
-               communicationBridge.setPacketPassThrough(true);
-               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.PAUSE));
-               break;
-            case RESUME:
-               stateMachine.resume();
-               communicationBridge.setPacketPassThrough(false);
-               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.RESUME));
-               break;
-            case ENABLE_ACTIONS:
-               stateMachine.enableActions();
-               communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS));
-               break;
-            default:
-               throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
+         case STOP:
+            stateMachine.stop();
+            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.STOP));
+            break;
+         case PAUSE:
+            stateMachine.pause();
+            communicationBridge.setPacketPassThrough(true);
+            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.PAUSE));
+            break;
+         case RESUME:
+            stateMachine.resume();
+            communicationBridge.setPacketPassThrough(false);
+            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.RESUME));
+            break;
+         case ENABLE_ACTIONS:
+            stateMachine.enableActions();
+            communicationBridge.sendPacketToNetworkProcessor(new HumanoidBehaviorControlModeResponsePacket(HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS));
+            break;
+         default:
+            throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
          }
-         
+
       }
    }
 
@@ -219,7 +228,7 @@ public class BehaviorDisptacher implements Runnable
 
          doControl();
 
-         if(yoVaribleServer != null)
+         if (yoVaribleServer != null)
          {
             yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
          }
@@ -233,12 +242,13 @@ public class BehaviorDisptacher implements Runnable
       return registry;
    }
 
-   private class SetupBehaviorCommunication implements StateTransitionAction
+   private class SwitchGlobalListenersAction implements StateTransitionAction
    {
       private final BehaviorStateWrapper<HumanoidBehaviorType> fromBehaviorState;
       private final BehaviorStateWrapper<HumanoidBehaviorType> toBehaviorState;
 
-      public SetupBehaviorCommunication(BehaviorStateWrapper<HumanoidBehaviorType> fromBehaviorState, BehaviorStateWrapper<HumanoidBehaviorType> toBehaviorState)
+      public SwitchGlobalListenersAction(BehaviorStateWrapper<HumanoidBehaviorType> fromBehaviorState,
+            BehaviorStateWrapper<HumanoidBehaviorType> toBehaviorState)
       {
          this.fromBehaviorState = fromBehaviorState;
          this.toBehaviorState = toBehaviorState;
