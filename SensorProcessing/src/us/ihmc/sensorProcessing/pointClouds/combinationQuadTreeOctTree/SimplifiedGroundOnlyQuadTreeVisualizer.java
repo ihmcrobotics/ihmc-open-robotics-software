@@ -17,6 +17,65 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
 {
 // private static final AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
 
+   
+   public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, double minX, double minY, double maxX, double maxY, double resolution)
+   {
+      AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
+
+      Graphics3DObject heightMapGraphic = new Graphics3DObject();
+
+      for (double x = minX; x<maxX; x = x + resolution)
+      {
+         for (double y = minY; y<maxY; y = y + resolution)
+         {
+            double z = heightMap.getHeightAtPoint(x, y);
+
+            if (!Double.isNaN(z))
+            {
+               int index = (int) (z / resolution);
+               index = index % rainbow.length;
+               if (index < 0) index = index + rainbow.length;
+               
+               AppearanceDefinition appearance = rainbow[index];
+
+               heightMapGraphic.identity();
+               heightMapGraphic.translate(x, y, z);
+               heightMapGraphic.addCube(resolution, resolution, resolution/4.0, appearance);
+            }
+         }
+      }
+      return scs.addStaticLinkGraphics(heightMapGraphic);
+   }
+
+
+   public static Graphics3DNode drawAllPointsInQuadTree(QuadTreeHeightMapInterface heightMap, double resolution, SimulationConstructionSet scs, AppearanceDefinition appearance)
+   {
+      if (heightMap instanceof SimplifiedGroundOnlyQuadTree)
+      {
+         ArrayList<Point3d> points = new ArrayList<Point3d>();
+         ((SimplifiedGroundOnlyQuadTree) heightMap).getAllPoints(points);
+
+         return drawPoints(scs, points, resolution, appearance);
+      }
+      return null;
+   }
+
+   public static Graphics3DNode drawPoints(SimulationConstructionSet scs, ArrayList<Point3d> points, double resolution, AppearanceDefinition appearance)
+   {
+      Graphics3DObject pointsInQuadTreeGraphic = new Graphics3DObject();
+
+      for (Point3d point : points)
+      {
+         pointsInQuadTreeGraphic.identity();
+         pointsInQuadTreeGraphic.translate(point);
+         pointsInQuadTreeGraphic.addCube(resolution, resolution, resolution/4.0, appearance);
+      }
+
+      Graphics3DNode graphics3DNodeHandle = scs.addStaticLinkGraphics(pointsInQuadTreeGraphic);
+      return graphics3DNodeHandle;
+   }
+
+
    public static Graphics3DNode drawNodeBoundingBoxes(SimplifiedGroundOnlyQuadTree heightMap, SimulationConstructionSet scs, double heightToDrawAt)
    {
       SimplifiedQuadNode rootNode = heightMap.getRootNode();
@@ -76,5 +135,6 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
       }
 
    }
+
 
 }
