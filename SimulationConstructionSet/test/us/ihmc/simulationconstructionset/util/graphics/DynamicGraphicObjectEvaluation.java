@@ -6,6 +6,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
@@ -27,13 +28,13 @@ public class DynamicGraphicObjectEvaluation
 {
    public static void main(String[] args)
    {
-      debugPolygonStuff();
+//      debugPolygonStuff();
       
-//      Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3dAdapter();
+      Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3DAdapter();
 
 //    Graphics3DAdapter java3DGraphicsAdapter = new Java3DGraphicsAdapter();
 
-//      evaluate(jmeGraphics3dAdapter);
+      evaluate(jmeGraphics3dAdapter);
 
 //    evaluate(java3DGraphicsAdapter);
    }
@@ -173,24 +174,29 @@ public class DynamicGraphicObjectEvaluation
 
                ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
+               dynamicGraphicYoFramePolygon.update();
+               
                Vector3d eulerAngles = new Vector3d();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
                eulerAngles.setY(eulerAngles.getY() + 0.1);
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);
                
                dynamicGraphicText.setText("Hello");
-
+               dynamicGraphicText.update();
+               
                scs.tickAndUpdate();
 
                quickPause();
                newPolygon = new ConvexPolygon2d(pointList);
                yoPolygon.setConvexPolygon2d(newPolygon);
+               dynamicGraphicYoFramePolygon.update();
 
                newYoPolygon = new ConvexPolygon2d(secondPointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
 
                dynamicGraphicText.setText("GoodBye");
-
+               dynamicGraphicText.update();
+               
                scs.tickAndUpdate();
 
             }
