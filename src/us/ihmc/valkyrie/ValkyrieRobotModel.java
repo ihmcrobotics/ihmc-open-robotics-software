@@ -47,6 +47,7 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import com.jme3.math.Quaternion;
@@ -71,6 +72,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final RobotNetworkParameters networkParameters;
+   
+   @Override
+   public WholeBodyIkSolver createWholeBodyIkSolver()  {
+      return null;
+   }
 
    private final String[] resourceDirectories = {
          "models/gazebo/",
