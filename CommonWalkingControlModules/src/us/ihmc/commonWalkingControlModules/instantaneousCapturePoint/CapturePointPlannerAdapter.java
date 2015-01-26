@@ -15,11 +15,16 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlanner
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final DoubleYoVariable capturePointInFromFootCenter = new DoubleYoVariable("icpInFromCenter", registry);
+   private final DoubleYoVariable capturePointForwardFromFootCenter = new DoubleYoVariable("icpForwardFromCenter", registry);
+   
 	ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	boolean USE_OLD_HACKY_ICP_PLANNER = false;
 	private final ArrayList<ReferenceFrame> soleFrameList = new ArrayList<ReferenceFrame>();
@@ -59,7 +64,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		   this.oldCapturePointPlanner=null;
 		}
 
-
+		registry.addChild(this.registry);
+		capturePointInFromFootCenter.set(capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+		capturePointForwardFromFootCenter.set(capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance());
 	}
 
 	@Override
@@ -75,8 +82,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
          soleFrameList.clear();
          
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+			      capturePointForwardFromFootCenter.getDoubleValue(),
+					capturePointInFromFootCenter.getDoubleValue());
 
 
          newCapturePointPlanner.setDoubleSupportTime(transferToAndNextFootstepsData.getDoubleSupportDuration());
@@ -113,8 +120,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		   soleFrameList.clear();
 		   
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+			      capturePointForwardFromFootCenter.getDoubleValue(),
+					capturePointInFromFootCenter.getDoubleValue());
 
 			currentTransferToSide.set(transferToAndNextFootstepsData.getTransferToSide());
 
@@ -143,8 +150,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		   soleFrameList.clear();
 		   
 			transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-					capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-					capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+			      capturePointForwardFromFootCenter.getDoubleValue(),
+					capturePointInFromFootCenter.getDoubleValue());
 			
 			currentTransferToSide.set(transferToAndNextFootstepsData.getTransferToSide());
 
@@ -336,8 +343,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
          soleFrameList.clear();
          
          transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-               capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-               capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+               capturePointForwardFromFootCenter.getDoubleValue(),
+               capturePointInFromFootCenter.getDoubleValue());
 
          newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
          newCapturePointPlanner.initializeSingleSupport(time, footstepList);
@@ -360,8 +367,8 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
          soleFrameList.clear();
          
          transferToAndNextFootstepsData.getFootLocationList(footstepList, soleFrameList,
-               capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance(),
-               capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
+               capturePointForwardFromFootCenter.getDoubleValue(),
+               capturePointInFromFootCenter.getDoubleValue());
 
          newCapturePointPlanner.setOmega0(transferToAndNextFootstepsData.getW0());
          newCapturePointPlanner.initializeSingleSupport(time, footstepList);
