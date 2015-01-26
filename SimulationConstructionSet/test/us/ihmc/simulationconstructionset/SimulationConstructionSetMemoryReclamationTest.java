@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Frame;
 import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
@@ -44,7 +45,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
- 
+   @Ignore // TODO https://jira.ihmc.us/browse/DRC-2208
    @Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndMovie()
    {
