@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -48,7 +49,6 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    private final double POSITION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
          "DRCHandPoseBehaviorTestControllerCommunicator");
@@ -64,6 +64,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
 
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
+   private double nominalComHeightAboveGround;
 
    @Before
    public void setUp()
@@ -72,7 +73,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       {
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
@@ -93,6 +94,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
             "DRCComHeightBehaviorTestJunkyCommunicator");
 
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      
+      WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
    }
 
    @After
@@ -113,97 +116,96 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestStartedMessage();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
+      
+      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
+      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 0.8 * ComHeightPacket.MIN_COM_HEIGHT, 0.8 * ComHeightPacket.MAX_COM_HEIGHT);
 
       final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(comHeightBehavior.getControllerGlobalPacketConsumer());
-
-      Point3d initialComPoint = new Point3d();
-      robot.computeCenterOfMass(initialComPoint);
-
-      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
-      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 0.8 * ComHeightPacket.MIN_COM_HEIGHT, 0.8 * ComHeightPacket.MAX_COM_HEIGHT);
-      ComHeightPacket randomComHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime); 
       
-      comHeightBehavior.initialize();
-      comHeightBehavior.setInput(randomComHeightPacket);
+      testComHeightBehavior(comHeightBehavior, desiredHeightOffset, trajectoryTime);
 
-      success = success && executeBehavior(comHeightBehavior, trajectoryTime);
-      assertTrue(success);
-
-      Point3d finalComPoint = new Point3d();
-      robot.computeCenterOfMass(finalComPoint);
-
-      assertProperComHeightChange(comHeightBehavior, initialComPoint, desiredHeightOffset, finalComPoint);
-
-      assertTrue(comHeightBehavior.isDone());
-      
       BambooTools.reportTestFinishedMessage();
    }
 
-   //   @Test(timeout = 300000)
-   public void testMultipleComHeightMoves() throws SimulationExceededMaximumTimeException
+   @Test(timeout = 300000)
+   public void testTwoComHeightMovesUsingOneBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
+      
+      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
+      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 0.8 * ComHeightPacket.MIN_COM_HEIGHT, 0.8 * ComHeightPacket.MAX_COM_HEIGHT);
 
-      // First CoM Move
       final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(comHeightBehavior.getControllerGlobalPacketConsumer());
-
-      Point3d initialComPoint = new Point3d();
-      robot.computeCenterOfMass(initialComPoint);
-
-      ComHeightPacket randomComHeightPacket = new ComHeightPacket(new Random());
-      comHeightBehavior.initialize();
-      comHeightBehavior.setInput(randomComHeightPacket);
-
-      double trajectoryTime = randomComHeightPacket.getTrajectoryTime();
-      double desiredHeightOffset = randomComHeightPacket.getHeightOffset();
-
-      assertTrue(comHeightBehavior.isDone());
       
-      success = success && executeBehavior(comHeightBehavior, trajectoryTime);
+      testComHeightBehavior(comHeightBehavior, desiredHeightOffset, trajectoryTime);
+      
+      testComHeightBehavior(comHeightBehavior, desiredHeightOffset, trajectoryTime);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test(timeout = 300000)
+   public void testTwoComHeightMovesUsingTwoBehaviors() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
 
-      Point3d finalComPoint = new Point3d();
-      robot.computeCenterOfMass(finalComPoint);
-
-      assertProperComHeightChange(comHeightBehavior, initialComPoint, desiredHeightOffset, finalComPoint);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
+      
+      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
+      double desiredHeightOffset = RandomTools.generateRandomDouble(new Random(), 0.8 * ComHeightPacket.MIN_COM_HEIGHT, 0.8 * ComHeightPacket.MAX_COM_HEIGHT);
 
-      // Second CoM Move
-      communicationBridge.detachGlobalListenerFromController(comHeightBehavior.getControllerGlobalPacketConsumer());
-
+      final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(communicationBridge, yoTime);
+      communicationBridge.attachGlobalListenerToController(comHeightBehavior.getControllerGlobalPacketConsumer());
+      
+      testComHeightBehavior(comHeightBehavior, desiredHeightOffset, trajectoryTime);
+      
+      
       final ComHeightBehavior comHeightBehavior2 = new ComHeightBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(comHeightBehavior2.getControllerGlobalPacketConsumer());
-
-      robot.computeCenterOfMass(initialComPoint);
-
-      ComHeightPacket randomComHeightPacket2 = new ComHeightPacket(new Random());
-      comHeightBehavior.setInput(randomComHeightPacket2);
-
-      trajectoryTime = randomComHeightPacket2.getTrajectoryTime();
-      desiredHeightOffset = randomComHeightPacket2.getHeightOffset();
-
-      assertTrue(comHeightBehavior.isDone());
       
-      success = success && executeBehavior(comHeightBehavior2, trajectoryTime);
-
-      robot.computeCenterOfMass(finalComPoint);
-
-      assertProperComHeightChange(comHeightBehavior2, initialComPoint, desiredHeightOffset, finalComPoint);
-      assertTrue(success);
-
+      testComHeightBehavior(comHeightBehavior2, desiredHeightOffset, trajectoryTime);
+      
       BambooTools.reportTestFinishedMessage();
    }
 
-   private void assertProperComHeightChange(final BehaviorInterface comHeightBehavior, Point3d initialComPoint, double desiredHeightOffset,
+   private void testComHeightBehavior(final ComHeightBehavior comHeightBehavior, double desiredHeightOffset, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      Point3d initialComPoint = new Point3d();
+      robot.computeCenterOfMass(initialComPoint);
+   
+      ComHeightPacket comHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime);
+      comHeightBehavior.setInput(comHeightPacket);
+   
+      boolean success = executeBehavior(comHeightBehavior, trajectoryTime);
+      assertTrue(success);
+   
+      Point3d finalComPoint = new Point3d();
+      robot.computeCenterOfMass(finalComPoint);
+   
+      assertProperComHeightOffsetFromGround(comHeightBehavior, desiredHeightOffset, finalComPoint);
+      assertTrue(comHeightBehavior.isDone());
+   }
+
+   private void assertProperComHeightOffsetFromGround(final BehaviorInterface comHeightBehavior, double desiredHeightOffset,
          Point3d finalComPoint)
    {
-      Vector3d comTranslation = new Vector3d();
-      comTranslation.sub(finalComPoint, initialComPoint);
-
-      double actualHeightOffset = comTranslation.getZ();
+      double actualHeightOffset = finalComPoint.getZ() - nominalComHeightAboveGround;
 
       if (DEBUG)
       {
@@ -212,8 +214,6 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       }
 
       assertEquals(desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);
-
-      assertTrue(comHeightBehavior.isDone());
    }
 
    private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
