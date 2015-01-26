@@ -37,7 +37,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
 {
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
-   private final SDFFullRobotModel actualFullRobotModel;
+   private final SDFFullRobotModel actualRobotModel;
    private final KryoLocalPacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<ReferenceFrame> desiredReferenceFrameList = new ArrayList<ReferenceFrame>();
@@ -56,7 +56,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final double trajectoryTime = 2.0;
    private int successInt;
 
-   public AtlasWholeBodyIKIngressEgressCtrlSim() throws IOException
+   public AtlasWholeBodyIKIngressEgressCtrlSim() throws Exception
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
@@ -75,9 +75,9 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeDesired);
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeActual);
       hikIngEgCtrlSim.getDRCSimulation().start();
-      this.actualFullRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
+      this.actualRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
       this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
-      this.wholeBodyIKSolver = new WholeBodyIkSolver(robotModel, actualFullRobotModel);
+      this.wholeBodyIKSolver = robotModel.createWholeBodyIkSolver();
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.getHierarchicalSolver().setVerbose(false);
@@ -112,7 +112,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       }
    }
 
-   public static void main(String[] args) throws IOException
+   public static void main(String[] args) throws Exception
    {
       new AtlasWholeBodyIKIngressEgressCtrlSim();
    }
@@ -150,10 +150,10 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private void doControl(int index)
    {
       ReferenceFrame desiredReferenceFrame = getNextDesiredReferenceFrame(index);
-      wholeBodyIKSolver.setHandTarget(RobotSide.RIGHT, desiredReferenceFrame);
+      wholeBodyIKSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT, desiredReferenceFrame);
       try
       {
-        successInt = wholeBodyIKSolver.compute(desiredFullRobotModel);
+        successInt = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel);
       }
       catch (Exception e)
       {
@@ -167,7 +167,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       }
       packetsToSend.clear();
       //Visualize where wrist should be going
-     ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredBodyFrame("r_hand", ReferenceFrame.getWorldFrame());
+      ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredBodyFrame("r_hand", ReferenceFrame.getWorldFrame());
   //     ReferenceFrame desiredWristReference = wholeBodyIKSolver.getDesiredHandFrame(RobotSide.RIGHT, ReferenceFrame.getWorldFrame());
       yoGraphicsShapeDesired.setToReferenceFrame(desiredWristReference);
    }
@@ -190,7 +190,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       //--------------------------------------
 
 //      ReferenceFrame rightHandPosition = actualFullRobotModel.getHandControlFrame(RobotSide.RIGHT);
-      ReferenceFrame rightHandPosition = actualFullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
+      ReferenceFrame rightHandPosition = actualRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM);
       rBT = rightHandPosition.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       yoGraphicsShapeActual.setToReferenceFrame(rightHandPosition);

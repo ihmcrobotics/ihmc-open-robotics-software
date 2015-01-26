@@ -650,29 +650,40 @@ public class SDFFullRobotModel implements FullRobotModel
       return sensorFrames.get(linkName);
    }
    
-   public void copyAllJointsButMaintainOneFootFixed( OneDoFJoint[] joints, RobotSide sideOfSole )
+   public void copyAllJointsButKeepOneFootFixed( double[] newQ, RobotSide sideOfSole )
    {
+      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();    
       int numJoints = getOneDoFJoints().length;
-      double [] angles = new double[numJoints];
 
-      for (int i=0; i<numJoints; i++)
-      {
-         angles[i] = joints[i].getQ();  
+      for (int i=0; i<numJoints; i++)  {
+         newJointAngles.put( getOneDoFJoints()[i].getName() ,  newQ[i] ); 
       }
-      copyAllJointsButMaintainOneFootFixed( angles, sideOfSole);
+      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
+   }
+   
+   public void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
+   {
+      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();     
+      int numJoints = getOneDoFJoints().length;
+
+      for (int i=0; i<numJoints; i++)  {
+         newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() ); 
+      }
+      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
    }
 
    
-   public void copyAllJointsButMaintainOneFootFixed (double[] jointsAngles, RobotSide sideOfSole )
-   {
-      int numJoints = getOneDoFJoints().length;
-      
-      // to be done BEFORE modifying the model
+   public void updateJointsAngleButKeepOneFootFixed( Map<String, Double> jointsAngles, RobotSide sideOfSole )
+   {   
+      // next line of code must be executed BEFORE modifying the model
       RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
       
-      for (int i=0; i<numJoints; i++)
+      if( jointsAngles != null)
       {
-         getOneDoFJoints()[i].setQ( jointsAngles[i] );
+         for ( Map.Entry<String, Double> entry: jointsAngles.entrySet() )
+         {
+             getOneDoFJointByName( entry.getKey() ).setQ( entry.getValue() );
+         }
       }
 
       this.updateFrames();
@@ -688,8 +699,7 @@ public class SDFFullRobotModel implements FullRobotModel
       getRootJoint().setPositionAndRotation(worldToPelvis);
       
       this.updateFrames();
-   //   RigidBodyTransform worldToFoot2  = getSoleFrame(sideOfSole).getTransformToWorldFrame();  
-   //   System.out.println("\nfootA:\n"+ worldToFoot + "footB:\n"+ worldToFoot2 );
+
    }
    
 }

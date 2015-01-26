@@ -33,7 +33,7 @@ public class AtlasWholeBodyIKSimulation
    private final SDFRobot scsRobot;
 //   private final AtlasRobotModel atlasRobotModel;
 
-   public AtlasWholeBodyIKSimulation(AtlasRobotModel atlasRobotModel)
+   public AtlasWholeBodyIKSimulation(AtlasRobotModel atlasRobotModel) throws Exception
    {
       scsRobot = atlasRobotModel.createSdfRobot(false);
       fullRobotModel = atlasRobotModel.createFullRobotModel();
@@ -78,7 +78,7 @@ public class AtlasWholeBodyIKSimulation
       }
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       new AtlasWholeBodyIKSimulation(atlasRobotModel);

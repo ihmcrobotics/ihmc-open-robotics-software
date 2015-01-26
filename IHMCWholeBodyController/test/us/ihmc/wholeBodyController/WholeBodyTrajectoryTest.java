@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.trajectory.TrajectoryND;
@@ -27,7 +26,7 @@ public abstract class WholeBodyTrajectoryTest
 {
    private SDFFullRobotModel actualRobotModel;
    private SDFFullRobotModel desiredRobotModel;
-   private WholeBodyIkSolver hikSolver;
+   private WholeBodyIkSolver wbSolver;
 
    static private final  YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIkSolverTestFactory_Registry"); 
 
@@ -41,17 +40,11 @@ public abstract class WholeBodyTrajectoryTest
    public abstract SimulationConstructionSet getSimulationConstructionSet();
 
 
-   public WholeBodyTrajectoryTest(SDFFullRobotModel actualRobotModel)
+   public WholeBodyTrajectoryTest(SDFFullRobotModel actualRobotModel, WholeBodyIkSolver solver)
    {
       this.actualRobotModel = actualRobotModel;
       desiredRobotModel = getRobotModel().createFullRobotModel();
-
-      try{
-         hikSolver = new WholeBodyIkSolver(getRobotModel(), actualRobotModel);
-      }
-      catch (IOException e) {
-         e.printStackTrace();
-      }   
+      this.wbSolver = solver; 
 
       Vector3d rootPosition = new Vector3d(0,0, 0.93);
       actualRobotModel.getRootJoint().setPosition( rootPosition );   
@@ -60,10 +53,10 @@ public abstract class WholeBodyTrajectoryTest
    @Test
    public void testTrajectory() throws Exception
    {
-      hikSolver.setVerbose(false);
+      wbSolver.setVerbose(false);
      
-      hikSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
-      hikSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
+      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
+      wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
       
       ReferenceFrame soleFrame = actualRobotModel.getSoleFrame(RobotSide.RIGHT);
       
@@ -73,17 +66,17 @@ public abstract class WholeBodyTrajectoryTest
       ReferenceFrame targetR = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(
             "targetR", soleFrame, new Vector3d( 0.4, 0.35, 1.0 ) );
       
-      hikSolver.setHandTarget(RobotSide.LEFT,  targetL );
-      hikSolver.setHandTarget(RobotSide.RIGHT,  targetR );
+      wbSolver.setHandTarget(actualRobotModel, RobotSide.LEFT,  targetL );
+      wbSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
       
-      int ret = hikSolver.compute(desiredRobotModel, ComputeOption.RESEED );
-      ret = hikSolver.compute(desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
+      int ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.RESEED );
+      ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
       
       if( ret >=0 )
       {
          TrajectoryND trajectory;
          
-         trajectory = WholeBodyTrajectory.createJointSpaceTrajectory(hikSolver, 
+         trajectory = WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
                actualRobotModel.getOneDoFJoints(), 
                desiredRobotModel.getOneDoFJoints());
          
@@ -91,7 +84,7 @@ public abstract class WholeBodyTrajectoryTest
          
          while( result.first().booleanValue() == false)
          {
-            actualRobotModel.copyAllJointsButMaintainOneFootFixed( result.second().position, RobotSide.RIGHT );
+            actualRobotModel.copyAllJointsButKeepOneFootFixed( result.second().position, RobotSide.RIGHT );
             result = trajectory.getNextInterpolatedPoints(0.01);
             Thread.sleep(10);
             getFullRobotModelVisualizer().update(0);
@@ -106,27 +99,27 @@ public abstract class WholeBodyTrajectoryTest
       targetL = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(
             "targetL", soleFrame, new Vector3d( 0.4, -0.15, 0.7 ) );
       
-      hikSolver.setHandTarget(RobotSide.LEFT,  targetL );
-      hikSolver.setHandTarget(RobotSide.RIGHT,  targetR );
+      wbSolver.setHandTarget(actualRobotModel, RobotSide.LEFT,  targetL );
+      wbSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
       
-      ret = hikSolver.compute(desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
+      ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
       
       if( ret >=0 )
       {
          TrajectoryND trajectory;
          
-         hikSolver.setVerbose(true);
-         trajectory = WholeBodyTrajectory.createJointSpaceTrajectory(hikSolver, 
+         wbSolver.setVerbose(true);
+         trajectory = WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
                actualRobotModel.getOneDoFJoints(), 
                desiredRobotModel.getOneDoFJoints());
          
-         hikSolver.setVerbose(false);
+         wbSolver.setVerbose(false);
          
          Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
          
          while( result.first().booleanValue() == false)
          {
-            actualRobotModel.copyAllJointsButMaintainOneFootFixed( result.second().position, RobotSide.RIGHT );
+            actualRobotModel.copyAllJointsButKeepOneFootFixed( result.second().position, RobotSide.RIGHT );
             result = trajectory.getNextInterpolatedPoints(0.01);
             Thread.sleep(10);
             getFullRobotModelVisualizer().update(0);

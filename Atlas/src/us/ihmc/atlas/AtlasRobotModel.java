@@ -54,6 +54,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
 import com.jme3.math.Transform;
@@ -89,6 +90,13 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final RobotNetworkParameters networkParameters;
+   
+   
+   @Override
+   public WholeBodyIkSolver createWholeBodyIkSolver()
+   {
+      return new AtlasWholeBodyIK(this);
+   }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
    {
@@ -119,6 +127,8 @@ public class AtlasRobotModel implements DRCRobotModel
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
       drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
       networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
+      
+      
    }
 
    @Override
