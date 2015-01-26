@@ -459,7 +459,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       this.octree = octree;
    }
 
-   public void setHeightThreshold(float threshold)
+   public void setHeightThreshold(double threshold)
    {
       this.heightThreshold = threshold;
    }

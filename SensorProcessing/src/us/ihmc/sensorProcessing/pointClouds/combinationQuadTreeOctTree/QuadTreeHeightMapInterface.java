@@ -16,7 +16,7 @@ public interface QuadTreeHeightMapInterface extends HeightMap
 
 	public abstract void clearTree();
 
-	public abstract void setHeightThreshold(float quadtreeHeightThreshold);
+	public abstract void setHeightThreshold(double quadtreeHeightThreshold);
 
    public abstract void addListener(HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> jmeGroundONlyQuadTreeVisualizer);
    public abstract void addQuadTreeListener(QuadTreeListener jmeGroundONlyQuadTreeVisualizer);

@@ -17,7 +17,9 @@ import javax.vecmath.Point3d;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
+import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTree;
+import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreeParameters;
 import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreePutResult;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
@@ -31,11 +33,11 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    private final boolean CREATE_FILE = false;
    private File pointListFile;
    private BufferedWriter bufferedWriter;
-   
-   public SimplifiedGroundOnlyQuadTree(double minX, double minY, double maxX, double maxY, double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose)
+      
+   public SimplifiedGroundOnlyQuadTree(Box bounds, SimplifiedQuadTreeParameters quadTreeParameters)
    {
-      super(minX, minY, maxX, maxY, resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
-
+      super(bounds, quadTreeParameters);
+      
       if (CREATE_FILE)
       {
          System.out.println("Creating file to save points in");
@@ -50,7 +52,6 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
          }
       }
    }
-   
    
    @Override
    public boolean addPoint(double x, double y, double z)
@@ -107,26 +108,83 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    @Override
    public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
    {
-      return super.getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
+      return getAllPointsWithinArea(xCenter, yCenter, xExtent, yExtent, null);
    }
 
+//   @Override
+//   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent, InclusionFunction<Point3d> maskFunctionAboutCenter)
+//   {
+//     ArrayList<Point3d> pointsAtGridResolution = super.getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
+//     ArrayList<Point3d> filteredList = new ArrayList<Point3d>();
+//     
+//     for (Point3d point : pointsAtGridResolution)
+//     {
+//        if (maskFunctionAboutCenter.isIncluded(point))
+//        {
+//           filteredList.add(point);
+//        }
+//     }
+//
+//      return filteredList;
+//   }
+   
+   
    @Override
    public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent, InclusionFunction<Point3d> maskFunctionAboutCenter)
    {
-     ArrayList<Point3d> pointsAtGridResolution = super.getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
-     ArrayList<Point3d> filteredList = new ArrayList<Point3d>();
-     
-     for (Point3d point : pointsAtGridResolution)
-     {
-        if (maskFunctionAboutCenter.isIncluded(point))
-        {
-           filteredList.add(point);
-        }
-     }
+//      System.out.println("\nxCenter = " + xCenter + " yCenter = " + yCenter + ", xExtent = " + xExtent + ", yExtent = " + yExtent);
+      ArrayList<Point3d> pointsWithinBoundsToPack = new ArrayList<Point3d>();
+      ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();
 
-      return filteredList;
+      Box bounds = new Box(xCenter-xExtent, yCenter-yExtent, xCenter+xExtent, yCenter+yExtent);
+      super.getAllPointsWithinBounds(bounds, pointsWithinBoundsToPack);
+      maskList(pointsWithinBoundsToPack, maskFunctionAboutCenter, filteredPoints);
+
+      //TODO: Magic number 10. Get rid of it somehow...
+      if (filteredPoints.size() > 10) return filteredPoints;
+      
+      // If not enough raw points, then use the heightAt function to do the best you can
+      filteredPoints.clear();
+      ArrayList<Point3d> pointsAtGridResolution = getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
+      maskList(pointsAtGridResolution, maskFunctionAboutCenter, filteredPoints);
+
+      return filteredPoints;
+   }
+   
+   private ArrayList<Point3d> getPointsAtGridResolution(double centerX, double centerY, double extentX, double extentY)
+   {
+      ArrayList<Point3d> points = new ArrayList<Point3d>();
+
+      for (double x = centerX - extentX; x <= centerX + extentX; x += getQuadTreeParameters().getResolution())
+      {
+         for (double y = centerY - extentY; y <= centerY + extentY; y += getQuadTreeParameters().getResolution())
+         {
+            double height = getHeightAtPoint(x, y);
+            if (!Double.isNaN(height))
+            {
+               points.add(new Point3d(x, y, height));
+            }
+         }
+      }
+      return points;
    }
 
+   private void maskList(ArrayList<Point3d> originalPoints, InclusionFunction<Point3d> maskFunctionAboutCenter, ArrayList<Point3d> maskedPointsToPack)
+   {
+      if (maskFunctionAboutCenter == null)
+      {
+         maskedPointsToPack.addAll(originalPoints);
+      }
+      
+      for (Point3d point : originalPoints)
+      {
+         if (maskFunctionAboutCenter.isIncluded(point))
+         {
+            maskedPointsToPack.add(point);
+         }
+      }
+   }
+   
    @Override
    public void setOctree(Octree octree)
    {
@@ -202,10 +260,10 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    {
 //      System.out.println(inputString);
       
-//      StringTokenizer tokenizer = new StringTokenizer(inputString, "(,)");
-      StringTokenizer tokenizer = new StringTokenizer(inputString, " ");
+      StringTokenizer tokenizer = new StringTokenizer(inputString, "(,)");
+//      StringTokenizer tokenizer = new StringTokenizer(inputString, " ");
       
-      String index = tokenizer.nextToken();
+//      String index = tokenizer.nextToken();
 //      System.out.println(index);
 
       String tokenX = tokenizer.nextToken();
@@ -218,7 +276,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
 //      System.out.println(tokenZ);
 
       
-      String intensity = tokenizer.nextToken();
+//      String intensity = tokenizer.nextToken();
 //      System.out.println(intensity);
 
 

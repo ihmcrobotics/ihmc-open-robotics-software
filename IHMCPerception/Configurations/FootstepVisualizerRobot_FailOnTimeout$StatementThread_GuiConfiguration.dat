@@ -31,9 +31,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>13.741851911302529</Camera X>
- <Camera Y>-0.20866203807161027</Camera Y>
- <Camera Z>20.561648049043217</Camera Z>
+ <Camera X>4.9</Camera X>
+ <Camera Y>-1.6</Camera Y>
+ <Camera Z>6.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -57,8 +57,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.005088750809515652</Fix X>
-<Fix Y>-0.5424899985975652</Fix Y>
-<Fix Z>-1.763021473327477</Fix Z>
+<Fix X>4.9</Fix X>
+<Fix Y>-0.09999999999999998</Fix Y>
+<Fix Z>0.0</Fix Z>
 </Fix Position>
 </Canvas 1>
