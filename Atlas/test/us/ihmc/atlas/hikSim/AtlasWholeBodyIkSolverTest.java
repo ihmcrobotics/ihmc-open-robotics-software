@@ -30,7 +30,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
    static private WholeBodyIkSolver wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
  
    static private SimulationConstructionSet scs;
-   static private boolean VISUALIZE_GUI = true && !BambooTools.isRunningOnBamboo();   
+   static private boolean VISUALIZE_GUI = false;   
    static FullRobotModelVisualizer modelVisualizer;
    
    public AtlasWholeBodyIkSolverTest() throws InterruptedException
