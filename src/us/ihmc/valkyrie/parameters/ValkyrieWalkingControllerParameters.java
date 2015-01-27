@@ -704,4 +704,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return 0.035;
    }
 
+   @Override
+   public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return false;
+   }
 }
