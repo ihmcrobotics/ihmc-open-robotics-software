@@ -205,7 +205,7 @@
 <!-- without dummy mass -->
       <inertial>
         <pose>-0.02033 0.00039 0.35741 0 -0 0</pose>
-        <mass>10.20327</mass> <!-- <mass>7.00027</mass> -->
+        <mass>9.20327</mass> <!-- <mass>7.00027</mass> -->
         <inertia>
           <ixx>0.18685</ixx>
           <ixy>-0.00078</ixy>
