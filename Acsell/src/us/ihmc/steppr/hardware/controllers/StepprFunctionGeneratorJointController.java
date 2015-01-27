@@ -5,6 +5,7 @@ import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionG
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprFunctionGeneratorJointController extends StepprPDJointController
@@ -23,11 +24,38 @@ public class StepprFunctionGeneratorJointController extends StepprPDJointControl
       funcGenJoint.set(StepprJoint.LEFT_KNEE_Y);
    }
    
+   @Override
+   public void initialize(long timestamp)
+   {
+      
+      //Initialize controller gains in super-class from StandPrep
+      for(StepprStandPrepSetpoints jointPair: StepprStandPrepSetpoints.values)
+      {
+         for(StepprJoint stepprJoint:jointPair.getJoints())
+         {                       
+            for(int i=0;i<joints.size();i++)
+            {
+               if(joints.get(i).getName().equals(stepprJoint.getSdfName()))
+               {
+                  PDController controller = controllers.get(i);
+                  controller.setDerivativeGain(jointPair.getKd());
+                  controller.setProportionalGain(jointPair.getKp());                  
+                  damping.get(i).set(jointPair.getDamping());
+                  break;
+               }
+            }
+         }
+      }
+         
+   }
+
    
    @Override
    public void doControl(long timestamp)
    {
       super.doControl(timestamp);
+      
+      //add additional tau
       for(int i = 0; i < joints.size(); i++)
       {
          OneDoFJoint joint = joints.get(i);
