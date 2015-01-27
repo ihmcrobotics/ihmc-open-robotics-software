@@ -45,8 +45,8 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_X.getSdfName(), 6000.0);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_X.getSdfName(), 6000.0);
+      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_X.getSdfName(), 4500.0); //6000
+      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_X.getSdfName(), 4500.0); //6000
       
       jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Y.getSdfName(), 10000.0);
       jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Y.getSdfName(), 10000.0);
@@ -62,7 +62,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    {
 //      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", defaultFilterBreakFrequency);
       Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
-      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", 16.0);
+      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", 25.0); //16
 
 //      DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", 16.0);
