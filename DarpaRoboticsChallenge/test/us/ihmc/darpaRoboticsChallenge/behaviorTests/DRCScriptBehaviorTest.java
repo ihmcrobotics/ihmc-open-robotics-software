@@ -113,6 +113,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private CapturePointUpdatable capturePointUpdatable;
    private BooleanYoVariable yoDoubleSupport;
 
+   private double nominalComHeightAboveGround;
+
    @Before
    public void setUp()
    {
@@ -149,8 +151,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
-      capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(),
-            robot.getRobotsYoVariableRegistry());
+      capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(), robot.getRobotsYoVariableRegistry());
       yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
    }
 
@@ -170,16 +171,18 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    }
 
    @Test(timeout = 300000)
-   public void testSimpleComHeightScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testComHeightScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
 
-      Point3d initialComPoint = new Point3d();
-      robot.computeCenterOfMass(initialComPoint);
+      double desiredFinalHeightOffset = 0.8 * ComHeightPacket.MAX_COM_HEIGHT;
 
-      ComHeightPacket comHeightPacket0 = new ComHeightPacket(-0.15, 1.0);
-      ComHeightPacket comHeightPacket1 = new ComHeightPacket(0.0, 1.0);
+      ComHeightPacket comHeightPacket0 = new ComHeightPacket(0.8 * ComHeightPacket.MIN_COM_HEIGHT, 1.0);
+      ComHeightPacket comHeightPacket1 = new ComHeightPacket(desiredFinalHeightOffset, 1.0);
 
       CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
 
@@ -196,10 +199,69 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       Point3d finalComPoint = new Point3d();
       robot.computeCenterOfMass(finalComPoint);
-
-      assertEquals(initialComPoint.getZ(), finalComPoint.getZ(), POSITION_THRESHOLD);
+      
+      assertProperComHeightOffsetFromGround(desiredFinalHeightOffset, finalComPoint);
 
       robotDataReceiver.updateRobotModel();
+   }
+
+   @Test(timeout = 300000)
+   public void testHandPosePacketScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      RobotSide robotSide = RobotSide.RIGHT;
+      double trajectoryTime = 2.0;
+
+      FramePose desiredHandPose1 = getCurrentHandPose(fullRobotModel, robotSide);
+      desiredHandPose1.setZ(desiredHandPose1.getZ() + 0.05);
+      HandPosePacket handPosePacket1 = createHandPosePacket(desiredHandPose1, robotSide, trajectoryTime);
+
+      FramePose desiredHandPose2 = new FramePose(desiredHandPose1);
+      desiredHandPose2.setX(desiredHandPose1.getX() - 0.1);
+      HandPosePacket handPosePacket2 = createHandPosePacket(desiredHandPose2, robotSide, trajectoryTime);
+
+      CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
+
+      recordFrame = worldFrame;
+      commandRecorder.startRecording(fileName, worldFrame);
+
+      commandRecorder.recordObject(handPosePacket1);
+      commandRecorder.recordObject(handPosePacket2);
+
+      commandRecorder.stopRecording();
+
+      ScriptBehavior scriptBehavior = testScriptBehavior(4.0);
+      assertTrue(scriptBehavior.isDone());
+
+      FramePose finalHandPose = getCurrentHandPose(fullRobotModel, robotSide);
+      assertPosesAreWithinThresholds(desiredHandPose2, finalHandPose);
+   }
+
+   private FramePose getCurrentHandPose(FullRobotModel fullRobotModel, RobotSide robotSide)
+   {
+      robotDataReceiver.updateRobotModel();
+
+      ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSide);
+      FramePose ret = new FramePose();
+      ret.setToZero(handFrame);
+      ret.changeFrame(worldFrame);
+
+      return ret;
+   }
+
+   private HandPosePacket createHandPosePacket(FramePose desiredHandPose, RobotSide robotSide, double trajectoryTime)
+   {
+      Point3d desiredHandPostion = new Point3d();
+      desiredHandPose.getPosition(desiredHandPostion);
+
+      Quat4d desiredHandOrientation = new Quat4d();
+      desiredHandPose.getOrientation(desiredHandOrientation);
+
+      HandPosePacket ret = new HandPosePacket(robotSide, Frame.WORLD, desiredHandPostion, desiredHandOrientation, trajectoryTime);
+
+      return ret;
    }
 
    private ScriptBehavior testScriptBehavior(double trajectoryTime) throws SimulationExceededMaximumTimeException, FileNotFoundException
@@ -246,7 +308,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
                   simStillRunning = timeSpentSimulating < simulationRunTime;
 
                   behavior.doControl();
-                  
+
                   capturePointUpdatable.update(yoTime.getDoubleValue());
                }
             }
@@ -370,6 +432,19 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       }
 
       return totalFingerJointQ;
+   }
+
+   private void assertProperComHeightOffsetFromGround(double desiredHeightOffset, Point3d finalComPoint)
+   {
+      double actualHeightOffset = finalComPoint.getZ() - nominalComHeightAboveGround;
+
+      if (DEBUG)
+      {
+         SysoutTool.println("desiredHeightOffset: " + desiredHeightOffset);
+         SysoutTool.println("actualHeightOffset: " + actualHeightOffset);
+      }
+
+      assertEquals(desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);
    }
 
    private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
