@@ -1,12 +1,6 @@
 package us.ihmc.wholeBodyController;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,11 +8,9 @@ import java.util.Map;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
-import org.xml.sax.SAXException;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.ForwardKinematicSolver;
@@ -32,6 +24,8 @@ import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.Vector64F;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
@@ -402,7 +396,13 @@ abstract public class WholeBodyIkSolver
          }
       }
    }
-
+   
+   public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, FramePose end_effector_pose)
+   {
+      PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", end_effector_pose);
+      setHandTarget(actualRobotModel, end_effector_side, endEffectorPoseReferenceFrame);
+   }
+   
    public void setPreferedJointPose(String joint_name, double q)
    {
       int index = jointNamesMap.get(joint_name);
