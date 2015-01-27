@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
+import javax.vecmath.AxisAngle4d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,7 +131,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.2);
-      handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
+//      handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
 
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseTarget.getPose(handPoseTargetTransform);
@@ -152,6 +154,48 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   
+   @Test(timeout = 300000)
+   public void testHandPoseRotationOnly() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
+      communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
+
+      double swingTrajectoryTime = 2.0;
+
+      FramePose handPoseTarget = getCurrentHandPose(robotSideToTest);
+      
+      AxisAngle4d targetAxisAngle4d = new AxisAngle4d();
+      handPoseTarget.getOrientation(targetAxisAngle4d);
+      targetAxisAngle4d.setAngle( targetAxisAngle4d.getAngle() + Math.toRadians(15.0));
+      
+      handPoseTarget.setOrientation(targetAxisAngle4d);
+      
+      RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
+      handPoseTarget.getPose(handPoseTargetTransform);
+      
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSideToTest, swingTrajectoryTime);
+
+      final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
+      createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+
+      FramePose handPoseEnd = getCurrentHandPose(robotSideToTest);
+
+      assertPosesAreWithinThresholds(handPoseEnd, handPoseTarget);
+
+      assertTrue(success);
+      assertTrue(handPoseBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
 
    @Test(timeout = 300000)
    public void testUnreachableHandPoseMove() throws SimulationExceededMaximumTimeException
@@ -367,7 +411,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
 
    @Test(timeout = 300000)
-   public void testHandPoseMoveStop() throws SimulationExceededMaximumTimeException
+   public void testHandPoseMoveStopMidTrajectory() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -389,14 +433,14 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
 
-      final double simulationRunTime = swingTrajectoryTime - 2.0;
+      final double simulationRunTime = swingTrajectoryTime / 2.0;
 
       createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
       handPoseBehavior.stop();
 
-      FramePose handPoseEnd = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseJustAfterStop = getCurrentHandPose(robotSideToTest);
 
       final double simulationRunTime2 = 2.0;
 
@@ -408,7 +452,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       assertTrue(status.equals(HandPoseStatus.Status.COMPLETED));
 
       FramePose handPoseAfterResting = getCurrentHandPose(robotSideToTest);
-      assertPosesAreWithinThresholds(handPoseEnd, handPoseAfterResting);
+      assertPosesAreWithinThresholds(handPoseJustAfterStop, handPoseAfterResting);
 
       assertTrue(success);
       assertTrue(handPoseBehavior.isDone());
