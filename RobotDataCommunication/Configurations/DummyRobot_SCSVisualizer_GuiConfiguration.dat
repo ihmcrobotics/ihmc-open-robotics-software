@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1CompoundVelocity</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightFinger1CompoundVelocity,root.remotemain.rightSRIHand.rightFinger1DistalVelocity</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,7 +145,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0Force</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightFinger0Force,root.remotemain.rightSRIHand.rightFinger0DesiredForce</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -157,7 +157,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1Force</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightFinger1Force,root.remotemain.rightSRIHand.rightFinger1DesiredForce</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -169,7 +169,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2Force</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightFinger2Force,root.remotemain.rightSRIHand.rightFinger2DesiredForce</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -181,7 +181,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0Current</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightStateMachine</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -193,7 +193,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1Current</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightFinger0Current</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -217,7 +217,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightNumberOfCycles</Variables>
+		<Variables>root.remotemain.rightSRIHand.rightTime</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -234,13 +234,19 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>rightdesiredMode,rightFinger0DesiredCurrent,rightFinger1DesiredCurrent,rightFinger2DesiredCurrent,fingerVelocityAlpha,rightCommandClose,rightCommandOpen,rightCloseForce,rightDoStressTest</Entry Boxes>
+<Entry Boxes>rightdesiredMode,rightFinger0DesiredCurrent,rightFinger1DesiredCurrent,rightFinger2DesiredCurrent,fingerVelocityAlpha,rightCommandClose,rightCommandOpen,rightCloseForce</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Tab1
 </Title>
 <Entry Boxes>rightFinger0DesiredForce,rightFinger1DesiredForce,rightFinger2DesiredForce</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab2
+</Title>
+<Entry Boxes>rightFinger0ForceKp,rightFinger1ForceKp,rightFinger2ForceKp,rightFinger0ForceKi,rightFinger1ForceKi,rightFinger2ForceKi</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
