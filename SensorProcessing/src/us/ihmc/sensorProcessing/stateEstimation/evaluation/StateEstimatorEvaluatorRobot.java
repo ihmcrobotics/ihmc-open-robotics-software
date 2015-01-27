@@ -112,7 +112,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          armLink2.setComOffset(new Vector3d(0.2, 0.0, 0.0));
 
          Graphics3DObject armLink2Graphics = new Graphics3DObject();
-         armLink2Graphics.rotate(Math.PI / 2.0, Graphics3DObject.Y);
+         armLink2Graphics.rotate(Math.PI / 2.0, Axis.Y);
          armLink2Graphics.addCylinder(1.0, 0.02, YoAppearance.Blue());
          armLink2.setLinkGraphics(armLink2Graphics);
          pinJoint2.setLink(armLink2);
