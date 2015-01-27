@@ -64,6 +64,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return !runningOnRealRobot;
    }
 
+   @Override
+   public double getMinStepLengthForToeOff()
+   {
+      return getFootLength();
+   }
+
    /**
     * To enable that feature, doToeOffIfPossible() return true is required.
     */
