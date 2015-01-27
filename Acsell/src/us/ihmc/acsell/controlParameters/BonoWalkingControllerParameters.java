@@ -2,7 +2,6 @@ package us.ihmc.acsell.controlParameters;
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -49,6 +48,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public boolean doToeOffIfPossible()
    {
       return true;
+   }
+
+   @Override
+   public double getMinStepLengthForToeOff()
+   {
+      return 0.20;
    }
 
    /**
