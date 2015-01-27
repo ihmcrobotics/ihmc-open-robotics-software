@@ -79,7 +79,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 {
    private boolean VISUALIZE = true;
 
-   private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = false;
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
@@ -296,7 +295,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
 
-      dwellInSingleSupportDuration.set(0.2);
+      dwellInSingleSupportDuration.set(0.0); //0.2);
 
       walkingControllerParameters.getMaxICPErrorBeforeSingleSupport();
       maxICPErrorBeforeSingleSupport.set(0.035); // 0.03); // Don't transition to single support until ICP is within 1.5 cm of desired.
@@ -1239,7 +1238,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                return true;
          }
 
-         if (DO_TRANSITION_WHEN_TIME_IS_UP)
+         if (walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone())
          {
             if (!footExplorationControlModule.isControllingSwingFoot())
             {
