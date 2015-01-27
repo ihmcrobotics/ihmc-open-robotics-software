@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.DebrisData;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
@@ -11,10 +12,10 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -25,7 +26,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    private final ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket> inputListeningQueue = new ConcurrentListeningQueue<HumanoidBehaviorDebrisPacket>();
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable haveInputsBeenSet;
-   private final FullRobotModel fullRobotModel;
+   private final SDFFullRobotModel fullRobotModel;
 
    private final ArrayList<DebrisData> debrisDataList = new ArrayList<>();
    private final ArrayList<DebrisData> sortedDebrisDataList = new ArrayList<>();
@@ -33,14 +34,16 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
    private double currentDistanceToObject;
    private final FramePoint currentObjectPosition = new FramePoint();
-   
+
    private final SideDependentList<WristForceSensorFilteredUpdatable> wristSensors;
 
-   public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrame,
-         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime, WalkingControllerParameters walkingControllerParameters)
+   public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+         ReferenceFrames referenceFrame, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime,
+         WholeBodyControllerParameters wholeBodyControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
-      removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime, walkingControllerParameters);
+      removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime,
+            wholeBodyControllerParameters, walkingControllerParameters);
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
 
@@ -65,7 +68,8 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
             return;
          }
          removePieceOfDebrisBehavior.initialize();
-         removePieceOfDebrisBehavior.setInputs(sortedDebrisDataList.get(0).getTransform(), sortedDebrisDataList.get(0).getPosition(), sortedDebrisDataList.get(0).getVector());
+         removePieceOfDebrisBehavior.setInputs(sortedDebrisDataList.get(0).getTransform(), sortedDebrisDataList.get(0).getPosition(),
+               sortedDebrisDataList.get(0).getVector());
       }
       removePieceOfDebrisBehavior.doControl();
    }
@@ -78,7 +82,8 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
          debrisDataList.addAll(newestPacket.getDebrisDataList());
          sortDebrisFromCloserToFarther();
          removePieceOfDebrisBehavior.initialize();
-         removePieceOfDebrisBehavior.setInputs(sortedDebrisDataList.get(0).getTransform(), sortedDebrisDataList.get(0).getPosition(), sortedDebrisDataList.get(0).getVector());
+         removePieceOfDebrisBehavior.setInputs(sortedDebrisDataList.get(0).getTransform(), sortedDebrisDataList.get(0).getPosition(),
+               sortedDebrisDataList.get(0).getVector());
          haveInputsBeenSet.set(true);
       }
    }

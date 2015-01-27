@@ -5,16 +5,17 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
@@ -36,25 +37,26 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    private final Point3d targetLocation;
    private final YoFrameOrientation targetOrientation;
 
-   private final FullRobotModel fullRobotModel;
+   private final SDFFullRobotModel fullRobotModel;
 
    private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.65; //0.85
 
-   public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrame, DoubleYoVariable yoTime,WalkingControllerParameters walkingControllerParameters)
+   public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+         ReferenceFrames referenceFrame, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+         WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
 
       this.fullRobotModel = fullRobotModel;
 
-      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       walkCloseToObject = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, walkingControllerParameters);
 
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
       isObjectTooFar = new BooleanYoVariable("isObjectTooFar", registry);
-      
+
       targetLocation = new Point3d();
       targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", ReferenceFrame.getWorldFrame(), registry);
 
