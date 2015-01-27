@@ -1296,27 +1296,27 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void stepBackward()
    {
-      myGraphArrayPanel.tickLater(-1);
+      if (myGraphArrayPanel != null) myGraphArrayPanel.tickLater(-1);
    }
 
    public void stepBackward(int ticks)
    {
-      myGraphArrayPanel.tickLater(-ticks);
+      if (myGraphArrayPanel != null) myGraphArrayPanel.tickLater(-ticks);
    }
 
    public void stepForward()
    {
-      myGraphArrayPanel.tickLater(1);
+      if (myGraphArrayPanel != null) myGraphArrayPanel.tickLater(1);
    }
 
    public void stepForward(int ticks)
    {
-      myGraphArrayPanel.tickLater(ticks);
+      if (myGraphArrayPanel != null) myGraphArrayPanel.tickLater(ticks);
    }
 
    public void stepForwardNow(int ticks)
    {
-      myGraphArrayPanel.tick(ticks);
+      if (myGraphArrayPanel != null) myGraphArrayPanel.tick(ticks);
    }
 
    // public void zoomIn(){myGraphArrayPanel.zoomIn(2);}
@@ -1327,7 +1327,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          public void run()
          {
-            myGraphArrayPanel.zoomFullView();
+            if (myGraphArrayPanel != null) myGraphArrayPanel.zoomFullView();
 
             for (int i = 0; i < graphArrayWindows.size(); i++)
             {
@@ -1341,7 +1341,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void repaintWindows()
    {
-      myGraphArrayPanel.repaint();
+      if (myGraphArrayPanel != null) myGraphArrayPanel.repaint();
 
       for (int i = 0; i < graphArrayWindows.size(); i++)
       {
