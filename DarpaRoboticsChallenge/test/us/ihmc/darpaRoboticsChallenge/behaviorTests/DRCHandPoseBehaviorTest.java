@@ -29,6 +29,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -131,7 +132,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.2);
-//      handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
+      handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
 
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseTarget.getPose(handPoseTargetTransform);
@@ -154,8 +155,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
-   
-   
+
    @Test(timeout = 300000)
    public void testHandPoseRotationOnly() throws SimulationExceededMaximumTimeException
    {
@@ -168,17 +168,21 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       double swingTrajectoryTime = 2.0;
 
-      FramePose handPoseTarget = getCurrentHandPose(robotSideToTest);
-      
+      FramePose handPoseInitial = getCurrentHandPose(robotSideToTest);
+      SysoutTool.println("Initial hand pose: " + handPoseInitial + "\n", DEBUG);
+
+      FramePose handPoseTarget = new FramePose(handPoseInitial);
+
       AxisAngle4d targetAxisAngle4d = new AxisAngle4d();
       handPoseTarget.getOrientation(targetAxisAngle4d);
-      targetAxisAngle4d.setAngle( targetAxisAngle4d.getAngle() + Math.toRadians(15.0));
-      
+      targetAxisAngle4d.setAngle(targetAxisAngle4d.getAngle() + Math.toRadians(-15.0));
+
       handPoseTarget.setOrientation(targetAxisAngle4d);
-      
+      SysoutTool.println("Desired hand pose: " + handPoseTarget + "\n", DEBUG);
+
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseTarget.getPose(handPoseTargetTransform);
-      
+
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSideToTest, swingTrajectoryTime);
 
@@ -188,6 +192,9 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       FramePose handPoseEnd = getCurrentHandPose(robotSideToTest);
 
+      double changeInOrientation = handPoseInitial.getOrientationDistance(handPoseEnd);
+      SysoutTool.println("Change in hand orientation: " + changeInOrientation + "\n", DEBUG);
+
       assertPosesAreWithinThresholds(handPoseEnd, handPoseTarget);
 
       assertTrue(success);
@@ -195,7 +202,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
-
 
    @Test(timeout = 300000)
    public void testUnreachableHandPoseMove() throws SimulationExceededMaximumTimeException
@@ -224,9 +230,15 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
       createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-
       assertTrue(success);
-      assertTrue(handPoseBehavior.isDone());  // hand pose should be done if elapsedTime > swingTrajectoryTime
+
+      double positionDistance = handPoseStart.getPositionDistance(handPoseTarget);
+      double orientationDistance = handPoseStart.getOrientationDistance(handPoseTarget);
+
+      boolean desiredHandPoseWasNotReached = positionDistance > POSITION_THRESHOLD || orientationDistance > ORIENTATION_THRESHOLD;
+
+      assertTrue(desiredHandPoseWasNotReached);
+      assertTrue(handPoseBehavior.isDone()); // hand pose should be done if elapsedTime > swingTrajectoryTime, even if desired pose was not reached
 
       BambooTools.reportTestFinishedMessage();
    }
