@@ -62,6 +62,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       YoVariable<?> userDesiredLateralFeetForce = registry.getVariable("MomentumBasedController","userLateralFeetForce");
       YoVariable<?> userDesiredForwardFeetForce = registry.getVariable("MomentumBasedController","userForwardFeetForce");
       YoVariable<?> userYawFeetTorque = registry.getVariable("MomentumBasedController","userYawFeetTorque");
+      YoVariable<?> masterMotorDamping = registry.getVariable("StepprOutputWriter","masterMotorDamping");
 
       
       final YoVariable<?> motorPowerStateRequest = registry.getVariable("StepprSetup", "motorPowerStateRequest");
@@ -96,6 +97,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          sliderBoardConfigurationManager.setKnob(5, userDesiredLateralFeetForce, -100,100);
          sliderBoardConfigurationManager.setKnob(6, userDesiredForwardFeetForce, -100,100);
          sliderBoardConfigurationManager.setKnob(7, userYawFeetTorque, -25, 25);
+         sliderBoardConfigurationManager.setKnob(8, masterMotorDamping, 0, 2);
          
          sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager","manualModeICPOffset"));
 
