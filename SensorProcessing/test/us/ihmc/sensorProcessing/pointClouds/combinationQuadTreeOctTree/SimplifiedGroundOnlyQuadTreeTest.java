@@ -42,58 +42,6 @@ public class SimplifiedGroundOnlyQuadTreeTest
    private static final boolean DO_ASSERTS = true;
 
    
-   
-// @Ignore
- @Test(timeout = 300000)
- public void testPointsFromObstacleCourseFile() throws NumberFormatException, IOException
- {
-    double minX = -5.0f;
-    double minY = -5.0f;
-    double maxX = 5.0f;
-    double maxY = 5.0f;
-    float resolution = 0.025f;
-    float heightThreshold = 0.005f;
-    double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.02;
-    int maxNodes = 1000000;
-
-//    SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise );
-
-    int maxBalls = 200;
-    QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2d(minX, minY, maxX, maxY), maxBalls);
-    testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
-
-    String filename = "resources/pointListsForTesting/drcDemoByRocks.pointList";
-//    String filename = "resources/pointListsForTesting/pointList150122_DRCObstacleCourse.pointList";
-//    String filename = "resources/pointListsForTesting/firstMinuteCinderBlockScans.fullPointList";
-//    String filename = "resources/pointListsForTesting/pointList_ObstacleCourseStart_150125.pointList";
-    
-    
-   double maxZ = 0.6;
-
-   int skipPoints = 0;
-   int maxNumberOfPoints = 2000000;
-    ArrayList<Point3d> points = SimplifiedGroundOnlyQuadTree.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
-
-    
-    int pointsPerBallUpdate = 10000;
-    boolean drawPointsInBlue = false;
-    testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue , pointsPerBallUpdate);
-    
-//    testHelper.drawHeightOfOriginalPointsInPurple(points, 1);
-//    Graphics3DNode handle = testHelper.drawNodeBoundingBoxes(-0.1);
-    
-    
-//    testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
-    testHelper.drawAllPointsInQuadTree(YoAppearance.Purple());
-    
-    testHelper.displaySimulationConstructionSet();
-
-    
-    
-//    testHelper.doATest(points, pointsPerBallUpdate);
-    ThreadTools.sleepForever();
- }
-   
    @Ignore
    @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
