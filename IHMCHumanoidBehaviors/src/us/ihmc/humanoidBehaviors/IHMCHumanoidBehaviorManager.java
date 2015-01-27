@@ -34,7 +34,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -102,7 +101,7 @@ public class IHMCHumanoidBehaviorManager
       }
               
       createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime,
-            communicationBridge, yoGraphicsListRegistry, capturePointUpdatable, walkingControllerParameters,wholeBodyControllerParameters);
+            communicationBridge, yoGraphicsListRegistry, capturePointUpdatable, walkingControllerParameters);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
@@ -126,14 +125,12 @@ public class IHMCHumanoidBehaviorManager
     * @param yoTime Holds the controller time. It is updated in the dispatcher and can be shared with the behaviors.
     * @param outgoingCommunicationBridge used to send packets to the controller.
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
-    * @param wholeBodyControllerParameters 
-   * @param ankleHeight 
+    * @param ankleHeight 
     */
-   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, FullRobotModel fullRobotModel,
+   private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
-         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters,
-         WholeBodyControllerParameters wholeBodyControllerParameters)
+         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters)
    {
       BooleanYoVariable tippingDetectedBoolean = capturePointUpdatable.getTippingDetectedBoolean();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -158,8 +155,5 @@ public class IHMCHumanoidBehaviorManager
       
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, walkingControllerParameters.getAnkleHeight());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
-      
-//      WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters);
-//      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WHOLE_BODY_IK, wholeBodyInverseKinematicBehavior);
    }
 }
