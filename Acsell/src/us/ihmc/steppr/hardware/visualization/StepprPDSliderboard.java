@@ -247,7 +247,12 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
       if (started)
       {
          StepprJoint joint = selectedJoint.getEnumValue();
-         allJointVariables.get(joint).initialize();
+         
+         for(StepprJoint stepprJoint:StepprJoint.values)
+         {
+            allJointVariables.get(stepprJoint).initialize();
+         }
+         
          allJointVariables.get(joint).update();
       }
    }
