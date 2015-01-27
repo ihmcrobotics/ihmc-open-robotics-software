@@ -64,8 +64,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final DoubleYoVariable remainingTime = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
    private final IntegerYoVariable footstepsToStop = new IntegerYoVariable(namePrefix + "NumberFootstepsToStop", registry);
-   private final YoFramePoint singleSupportInitialDesiredCapturePointPosition = new YoFramePoint("icpFinalDesiredCapturePointPosition", worldFrame, registry);
-   private final YoFrameVector singleSupportInitialDesiredCapturePointVelocity = new YoFrameVector("icpFinalDesiredCapturePointVelocity", worldFrame, registry);
+   private final YoFramePoint singleSupportInitialDesiredCapturePointPosition = new YoFramePoint(namePrefix + "FinalDesiredCapturePointPosition", worldFrame, registry);
+   private final YoFrameVector singleSupportInitialDesiredCapturePointVelocity = new YoFrameVector(namePrefix + "FinalDesiredCapturePointVelocity", worldFrame, registry);
    private final YoFramePoint nextSingleSupportInitialCapturePointPosition = new YoFramePoint(namePrefix + "NextSingleSupportInitialCapturePointPosition", worldFrame, registry);
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    private final YoFramePoint desiredCapturePointPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
