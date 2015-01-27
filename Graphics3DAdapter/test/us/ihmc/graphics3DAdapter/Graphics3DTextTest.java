@@ -7,6 +7,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.Axis;
 
 public class Graphics3DTextTest implements Graphics3DFrameListener
 {
@@ -22,7 +23,7 @@ public class Graphics3DTextTest implements Graphics3DFrameListener
 
       Graphics3DObject textObject = new Graphics3DObject();
       textObject.setChangeable(true);
-      textObject.rotate(-Math.PI / 2.0, Graphics3DObject.Y);
+      textObject.rotate(-Math.PI / 2.0, Axis.Y);
       instruction = textObject.addText(text, 20, YoAppearance.Blue());
       Graphics3DNode textNode = new Graphics3DNode("textNode", textObject);
       
