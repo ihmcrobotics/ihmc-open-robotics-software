@@ -2,6 +2,7 @@ package us.ihmc.acsell.controlParameters;
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -214,7 +215,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMaxStepLength()
    {
-      return 0.4; //0.6; //0.5; //0.35;
+      return 0.5; //0.6; //0.5; //0.35;
    }
 
    @Override
@@ -412,7 +413,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double zetaXYZ = 0.7;
       double kpXYOrientation = 100.0; // 300 not working
       double kpZOrientation = 100.0;
-      double zetaOrientation = 0.7;
+      double zetaXYOrientation = 0.7;
+      double zetaZOrientation = runningOnRealRobot ? 0.3 : 0.7;
       double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
@@ -422,7 +424,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationDampingRatios(zetaXYOrientation, zetaZOrientation);
       gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
 
@@ -491,7 +493,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
       
-      gains.setOrientationDerivativeGains(20.0, 0.0, 0.0);
+      gains.setOrientationDerivativeGains(5.0, 0.0, 0.0);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
 
       return gains;
@@ -518,14 +520,14 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDefaultTransferTime()
    {
-      if(runningOnRealRobot) return .5;
+      if(runningOnRealRobot) return 0.3;////1.0; //.5;
       return 0.25; // 1.5; //
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      if(runningOnRealRobot) return 1.0;
+      if(runningOnRealRobot) return 0.7; //1.0
       return 0.6; // 1.5; //
    }
 
