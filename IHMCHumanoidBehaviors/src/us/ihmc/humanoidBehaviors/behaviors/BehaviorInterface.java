@@ -34,6 +34,7 @@ public abstract class BehaviorInterface implements RobotController
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
     */
    protected final YoVariableRegistry registry;
+   protected final BooleanYoVariable hasBeenInitialized;
    protected final BooleanYoVariable isPaused;
    protected final BooleanYoVariable isStopped;
 
@@ -50,6 +51,7 @@ public abstract class BehaviorInterface implements RobotController
       
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
+      hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
    }
