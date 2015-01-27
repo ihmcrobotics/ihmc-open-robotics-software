@@ -6,12 +6,14 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 {
@@ -26,13 +28,27 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final SDFFullRobotModel desiredFullRobotModel;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
 
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
+   private final BooleanYoVariable trajectoryTimeElapsed;
+
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel)
+         WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       wholeBodyNetworkModule = new WholeBodyIKPacketCreator(wholeBodyControllerParameters);
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();
 
+      this.yoTime = yoTime;
+      
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      
       this.actualFullRobotModel = actualFullRobotModel;
       this.desiredFullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
    }
@@ -45,6 +61,18 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       hasInputBeenSet.set(true);
    }
 
+   
+   @Override
+   public void doControl()
+   {
+      //TODO check all the status
+      if (!packetHasBeenSent.getBooleanValue())
+      {
+         sendSolutionToController(trajectoryDuration);
+         packetHasBeenSent.set(true);
+      }
+   }
+
    private void sendSolutionToController(double trajectoryDuration)
    {
       packetsToSend.clear();
@@ -55,23 +83,6 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       }
    }
    
-   
-   @Override
-   public void doControl()
-   {
-
-      //TODO check all the status
-      
-      if (!packetHasBeenSent.getBooleanValue())
-      {
-         sendSolutionToController(trajectoryDuration);
-         //TODO send packets to controller
-         packetHasBeenSent.set(true);
-      }
-  
-      
-   }
-
    @Override
    public void initialize()
    {
@@ -93,6 +104,9 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
       isPaused.set(false);
       isStopped.set(false);
+      
+      startTime.set(Double.NaN);
+      trajectoryTime.set(Double.NaN);
    }
 
    @Override
@@ -116,7 +130,12 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return false;
+      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+         trajectoryTimeElapsed.set(false);
+      else
+         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
+
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -137,6 +156,6 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      return false;
+      return hasInputBeenSet.getBooleanValue();
    }
 }
