@@ -15,14 +15,15 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-
 
 public class UserDesiredFootstepProvider implements FootstepProvider
 {
@@ -43,22 +44,35 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
    private final DoubleYoVariable userStepHeelPercentage = new DoubleYoVariable("userStepHeelPercentage", registry);
    private final DoubleYoVariable userStepToePercentage = new DoubleYoVariable("userStepToePercentage", registry);
-   
+
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
-   
+
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+         final WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.bipedFeet = bipedFeet;
       this.ankleZUpReferenceFrames = ankleZUpReferenceFrames;
 
-      userStepWidth.set((walkingControllerParameters.getMaxStepWidth()+walkingControllerParameters.getMinStepWidth())/2);
+      userStepWidth.set((walkingControllerParameters.getMaxStepWidth() + walkingControllerParameters.getMinStepWidth()) / 2);
       userStepMinWidth.set(walkingControllerParameters.getMinStepWidth());
       userStepFirstSide.set(RobotSide.LEFT);
-      
+
       userStepHeelPercentage.set(1.0);
       userStepToePercentage.set(1.0);
+
+      userStepLength.addVariableChangedListener(new VariableChangedListener()
+      {
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (v.getValueAsDouble() > walkingControllerParameters.getMaxStepLength())
+            {
+               v.setValueFromDouble(walkingControllerParameters.getMaxStepLength());
+            }
+         }
+      });
    }
 
    @Override
@@ -157,8 +171,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
       boolean trustHeight = false;
       Footstep desiredFootstep = new Footstep(foot.getRigidBody(), swingLegSide, foot.getSoleFrame(), footstepPoseFrame, trustHeight);
-      
-      
+
       List<FramePoint2d> contactFramePoints = foot.getContactPoints2d();
       ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
 
