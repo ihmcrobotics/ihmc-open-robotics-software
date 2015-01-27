@@ -104,20 +104,9 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
          SimplifiedQuadLeaf leaf = node.getLeaf();
          if (leaf != null)
          {
-            if (leaf.containsPoints())
-            {
-               Point3d averagePoint = leaf.getAveragePoint();
-               nodeBoundsGraphic.translate(bounds.centreX, bounds.centreY, averagePoint.getZ());
-               nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, YoAppearance.Black());
-
-               // nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, rainbow[depth % rainbow.length]);
-            }
-            else
-            {
-               throw new RuntimeException("All leafs should have points in them!!!");
-
-               // nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, YoAppearance.Black());
-            }
+            Point3d averagePoint = leaf.getAveragePoint();
+            nodeBoundsGraphic.translate(bounds.centreX, bounds.centreY, averagePoint.getZ());
+            nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, YoAppearance.Black());
          }
          else
          {
