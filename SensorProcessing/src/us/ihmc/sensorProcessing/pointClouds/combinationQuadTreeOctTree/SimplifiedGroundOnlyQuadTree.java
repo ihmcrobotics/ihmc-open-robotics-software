@@ -1,12 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -253,6 +247,28 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
       }
       bufferedReader.close();
       
+      return points;
+   }
+
+   public static ArrayList<Point3d> readPointsFromResource(InputStream resourceName, int skipPoints, int maxNumberOfPoints, double minX, double minY, double maxX, double maxY, double maxZ) throws IOException
+   {
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceName));
+
+      ArrayList<Point3d> points = new ArrayList<Point3d>();
+
+      String inputString;
+      int numPoints = 0;
+      while(((inputString = bufferedReader.readLine()) != null) && (numPoints < maxNumberOfPoints))
+      {
+         Point3d point = parsePoint3d(inputString);
+         if ((point != null) && (point.getX() > minX) && (point.getY() > minY) && (point.getX() < maxX) && (point.getY() < maxY)&& (point.getZ() < maxZ))
+         {
+            points.add(point);
+            numPoints++;
+         }
+      }
+      bufferedReader.close();
+
       return points;
    }
    
