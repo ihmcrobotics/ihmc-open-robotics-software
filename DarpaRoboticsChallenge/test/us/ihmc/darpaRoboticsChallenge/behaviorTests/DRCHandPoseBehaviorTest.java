@@ -58,8 +58,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private final RobotSide robotSideToTest = RobotSide.LEFT;
-
    private DoubleYoVariable yoTime;
 
    private RobotDataReceiver robotDataReceiver;
@@ -128,7 +126,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
-      FramePose handPoseStart = getCurrentHandPose(robotSideToTest);
+      RobotSide robotSide = RobotSide.LEFT;
+      FramePose handPoseStart = getCurrentHandPose(robotSide);
 
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.2);
@@ -140,13 +139,13 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double swingTrajectoryTime = 2.0;
 
       handPoseBehavior.initialize();
-      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSideToTest, swingTrajectoryTime);
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
       createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
-      FramePose handPoseEnd = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseEnd = getCurrentHandPose(robotSide);
 
       assertPosesAreWithinThresholds(handPoseEnd, handPoseTarget);
 
@@ -166,9 +165,10 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
+      RobotSide robotSide = RobotSide.LEFT;
       double swingTrajectoryTime = 2.0;
 
-      FramePose handPoseInitial = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseInitial = getCurrentHandPose(robotSide);
       SysoutTool.println("Initial hand pose: " + handPoseInitial + "\n", DEBUG);
 
       FramePose handPoseTarget = new FramePose(handPoseInitial);
@@ -184,13 +184,13 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       handPoseTarget.getPose(handPoseTargetTransform);
 
       handPoseBehavior.initialize();
-      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSideToTest, swingTrajectoryTime);
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
       createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
-      FramePose handPoseEnd = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseEnd = getCurrentHandPose(robotSide);
 
       double changeInOrientation = handPoseInitial.getOrientationDistance(handPoseEnd);
       SysoutTool.println("Change in hand orientation: " + changeInOrientation + "\n", DEBUG);
@@ -213,7 +213,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
-      FramePose handPoseStart = getCurrentHandPose(robotSideToTest);
+      RobotSide robotSide = RobotSide.LEFT;
+      FramePose handPoseStart = getCurrentHandPose(robotSide);
 
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setX(handPoseTarget.getX() + 1.5);
@@ -225,7 +226,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double swingTrajectoryTime = 2.0;
 
       handPoseBehavior.initialize();
-      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSideToTest, swingTrajectoryTime);
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
       createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
@@ -252,7 +253,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
-      FramePose handPoseStart = getCurrentHandPose(robotSideToTest);
+      RobotSide robotSide = RobotSide.LEFT;
+      FramePose handPoseStart = getCurrentHandPose(robotSide);
 
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.3);
@@ -264,7 +266,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final double swingTrajectoryTime = 4.0;
 
       handPoseBehavior.initialize();
-      handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
+      handPoseBehavior.setInput(Frame.WORLD, pose, robotSide, swingTrajectoryTime);
 
       final double secondsToPauseEarly = 2.0;
       final double simulationRunTime = swingTrajectoryTime - secondsToPauseEarly;
@@ -329,7 +331,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       assertTrue(returnValue);
 
-      FramePose handPoseAtPauseStart = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseAtPauseStart = getCurrentHandPose(robotSide);
 
       double timeToPause = 2.0;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToPause);
@@ -337,7 +339,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       handPoseBehavior.doControl();
       assertTrue(handPoseBehavior.isDone());
 
-      FramePose handPoseAtPauseEnd = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseAtPauseEnd = getCurrentHandPose(robotSide);
 
       if (DEBUG)
          System.out.println("testSimpleHandPoseMove: checking start and end of pause");
@@ -409,7 +411,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       HandPoseStatus.Status status = handPoseBehavior.getStatus();
       assertTrue(status.equals(HandPoseStatus.Status.COMPLETED));
 
-      FramePose handPoseAtEnd = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseAtEnd = getCurrentHandPose(robotSide);
 
       if (DEBUG)
          System.out.println("testSimpleHandPoseMove: checking start and end");
@@ -431,7 +433,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(communicationBridge, yoTime);
       communicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
 
-      FramePose handPoseStart = getCurrentHandPose(robotSideToTest);
+      RobotSide robotSide = RobotSide.LEFT;
+      FramePose handPoseStart = getCurrentHandPose(robotSide);
 
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.3);
@@ -443,7 +446,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double swingTrajectoryTime = 4.0;
 
       handPoseBehavior.initialize();
-      handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
+      handPoseBehavior.setInput(Frame.WORLD, pose, robotSide, swingTrajectoryTime);
 
       final double simulationRunTime = swingTrajectoryTime / 2.0;
 
@@ -452,7 +455,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       handPoseBehavior.stop();
 
-      FramePose handPoseJustAfterStop = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseJustAfterStop = getCurrentHandPose(robotSide);
 
       final double simulationRunTime2 = 2.0;
 
@@ -463,7 +466,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       HandPoseStatus.Status status = handPoseBehavior.getStatus();
       assertTrue(status.equals(HandPoseStatus.Status.COMPLETED));
 
-      FramePose handPoseAfterResting = getCurrentHandPose(robotSideToTest);
+      FramePose handPoseAfterResting = getCurrentHandPose(robotSide);
       assertPosesAreWithinThresholds(handPoseJustAfterStop, handPoseAfterResting);
 
       assertTrue(success);
