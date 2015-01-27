@@ -41,15 +41,26 @@ public class Graphics3DObject
 {
    private static final int RESOLUTION = 25;
 
-   public static final Axis X = Axis.X;
-   public static final Axis Y = Axis.Y;
-   public static final Axis Z = Axis.Z;
-
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
-
-   private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
+   private ArrayList<SelectedListener> selectedListeners;
+   private MeshDataHolderSharpener sharpener = null;
 
    private boolean changeable = false;
+
+   public Graphics3DObject(Shape3d shape, AppearanceDefinition appearance)
+   {
+      this(shape, appearance, null);
+   }
+
+   public Graphics3DObject(Shape3d shape)
+   {
+      this(shape, null, null);
+   }
+
+   public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
+   {
+      this(null, null, graphics3DInstructions);
+   }
 
    private Graphics3DObject(Shape3d shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
@@ -74,22 +85,7 @@ public class Graphics3DObject
          }
       }
    }
-
-   public Graphics3DObject(Shape3d shape, AppearanceDefinition appearance)
-   {
-      this(shape, appearance, null);
-   }
-
-   public Graphics3DObject(Shape3d shape)
-   {
-      this(shape, null, null);
-   }
-
-   public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
-   {
-      this(null, null, graphics3DInstructions);
-   }
-
+   
    /**
     * Default no-arg constructor.  This creates a new empty Graphics3DObject component.
     */
@@ -120,6 +116,17 @@ public class Graphics3DObject
       this.graphics3DInstructions.addAll(graphics3DObject.getGraphics3DInstructions());
    }
 
+   private MeshDataHolder sharpenMeshData(MeshDataHolder meshDataToSharpen)
+   {
+      if (sharpener == null) 
+      {
+         sharpener = new MeshDataHolderSharpener();
+      }
+      
+//      return meshDataToSharpen;
+      return sharpener.sharpenMeshData(meshDataToSharpen);
+   }
+   
    public void combine(Graphics3DObject Graphics3DObject, Vector3d offset)
    {
       this.identity();
@@ -408,12 +415,12 @@ public class Graphics3DObject
    public void addCoordinateSystem(double length, AppearanceDefinition xAxisAppearance, AppearanceDefinition yAxisAppearance,
                                    AppearanceDefinition zAxisAppearance, AppearanceDefinition arrowAppearance)
    {
-      rotate(Math.PI / 2.0, Y);
+      rotate(Math.PI / 2.0, Axis.Y);
       addArrow(length, YoAppearance.Red(), arrowAppearance);
-      rotate(-Math.PI / 2.0, Y);
-      rotate(-Math.PI / 2.0, X);
+      rotate(-Math.PI / 2.0, Axis.Y);
+      rotate(-Math.PI / 2.0, Axis.X);
       addArrow(length, YoAppearance.White(), arrowAppearance);
-      rotate(Math.PI / 2.0, X);
+      rotate(Math.PI / 2.0, Axis.X);
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
 
@@ -497,10 +504,10 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false);
-
-      return addMeshData(meshData, cubeApp);
+      boolean sharpenMeshData = true;
+      return addMeshData(meshData, sharpenMeshData, cubeApp);
    }
-
+   
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered);
@@ -550,8 +557,8 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addWedge(double lx, double ly, double lz, AppearanceDefinition wedgeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Wedge(lx, ly, lz);
-
-      return addMeshData(meshData, wedgeApp);
+      boolean sharpenMeshData = true;
+      return addMeshData(meshData, sharpenMeshData, wedgeApp);
    }
 
    /**
@@ -595,6 +602,16 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
+      return addMeshData(meshData, false, meshAppearance);
+   }
+   
+   public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, boolean sharpenMeshData, AppearanceDefinition meshAppearance)
+   {
+      if (sharpenMeshData)
+      {
+         meshData = sharpenMeshData(meshData);
+      }
+      
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
       graphics3DInstructions.add(instruction);
 
@@ -924,7 +941,7 @@ public class Graphics3DObject
     * <br /><br /><img src="doc-files/LinkGraphics.addPyramidCube2.jpg">
     *
     * @param lx Length in meters of the cube. (x direction)
-    * @param ly Width in meters of the cube. (y direction)
+    * @param ly Width in meters of the cube. (y direction)O
     * @param lz Height of the cube in meters. (z direction)
     * @param lh Height of the pyramids in meters.
     * @param cubeApp Appearance to be used with the new pyramid cube.  See {@link YoAppearance YoAppearance} for implementations.
@@ -932,8 +949,8 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addPyramidCube(double lx, double ly, double lz, double lh, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.PyramidCube(lx, ly, lz, lh);
-
-      return addMeshData(meshData, cubeApp);
+      boolean sharpenMeshData = true;
+      return addMeshData(meshData, sharpenMeshData, cubeApp);
    }
 
    public Graphics3DAddMeshDataInstruction addPolygon(ArrayList<Point3d> polygonPoints)
@@ -1022,8 +1039,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
    {
       MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
-
-      return addMeshData(meshData, appearance);
+      return addMeshData(meshData, true, appearance);
    }
 
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
@@ -1034,8 +1050,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
    {
       MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(polygonPoints, height);
-
-      return addMeshData(meshData, appearance);
+      return addMeshData(meshData, true, appearance);
    }
 
    /**
@@ -1089,14 +1104,22 @@ public class Graphics3DObject
    public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraPosition,
            Quat4d cameraRotation)
    {
-      for (SelectedListener selectedListener : selectedListeners)
+      if (selectedListeners != null)
       {
-         selectedListener.selected(graphics3dNode, modifierKeyHolder, location, cameraPosition, cameraRotation);
+         for (SelectedListener selectedListener : selectedListeners)
+         {
+            selectedListener.selected(graphics3dNode, modifierKeyHolder, location, cameraPosition, cameraRotation);
+         }
       }
    }
 
    public void registerSelectedListener(SelectedListener selectedListener)
    {
+      if (selectedListeners == null)
+      {
+         selectedListeners = new ArrayList<SelectedListener>();
+      }
+      
       selectedListeners.add(selectedListener);
    }
 
