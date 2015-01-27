@@ -106,9 +106,9 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       double simulateDT = 0.005;
       
       SimulationConstructionSet scs = null;
+      scs = new SimulationConstructionSet(sdfRobot);
       if (SHOW_GUI)
       {
-         scs = new SimulationConstructionSet(sdfRobot);
          int recordFrequency = 1;
          scs.setDT(simulateDT, recordFrequency);
          scs.addYoVariableRegistry(registry);
