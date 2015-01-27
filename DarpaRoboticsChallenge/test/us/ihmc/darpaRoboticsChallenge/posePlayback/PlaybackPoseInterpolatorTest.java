@@ -18,6 +18,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
+
+//TODO: update this test class to access poses via resource directory and undelete old pose files from svn
 public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInterface
 {
    private static final boolean SHOW_GUI = false;
