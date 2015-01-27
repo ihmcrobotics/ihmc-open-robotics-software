@@ -80,6 +80,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return true; 
    }
 
+   @Override
+   public double getMinStepLengthForToeOff()
+   {
+      return getFootLength();
+   }
+
    /**
     * To enable that feature, doToeOffIfPossible() return true is required. John parameter
     */

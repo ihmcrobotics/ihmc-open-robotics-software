@@ -127,7 +127,7 @@ public class WalkOnTheEdgesManager
 
       extraCoMMaxHeightWithToes.set(0.08);
 
-      minStepLengthForToeOff.set(Math.max(0.10, footLength));
+      minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
       minStepHeightForToeOff.set(0.10);
       jacobianDeterminantThresholdForToeOff.set(0.10);
 
@@ -151,7 +151,7 @@ public class WalkOnTheEdgesManager
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-      isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+      isDesiredECMPOKForToeOff.set(true); //onToesSupportPolygon.isPointInside(desiredECMP));
 
       FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
