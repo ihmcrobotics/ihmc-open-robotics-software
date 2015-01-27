@@ -189,7 +189,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getLegLength()
    {
-      return BonoPhysicalProperties.legLength;
+      return 1.01 * BonoPhysicalProperties.legLength;
    }
 
    @Override
