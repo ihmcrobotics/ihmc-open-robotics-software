@@ -55,13 +55,15 @@ public class IHMCHumanoidBehaviorManager
 
    private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
-   public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, DRCRobotSensorInformation sensorInfo, PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator)
+   public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
+         DRCRobotSensorInformation sensorInfo, PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator)
    {
       System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
 
-      if(ENABLE_BEHAVIOR_VISUALIZATION)
+      if (ENABLE_BEHAVIOR_VISUALIZATION)
       {
-         yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, LogUtils.getMyIP(BEHAVIOR_YO_VARIABLE_SERVER_HOST), BEHAVIOR_YO_VARIABLE_SERVER_DT);
+         yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, LogUtils.getMyIP(BEHAVIOR_YO_VARIABLE_SERVER_HOST),
+               BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
       SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
@@ -79,34 +81,35 @@ public class IHMCHumanoidBehaviorManager
 
       HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      
-      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
-            desiredBehaviorSubscriber, communicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
+
+      BehaviorDisptacher dispatcher = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+            communicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
-      
+
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
 
-//      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
-//      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
-      
+      //      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
+      //      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
+
       SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = new SideDependentList<WristForceSensorFilteredUpdatable>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo, forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
+         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo,
+               forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
          wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
          dispatcher.addUpdatable(wristSensorUpdatable);
       }
-              
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime,
-            communicationBridge, yoGraphicsListRegistry, capturePointUpdatable, walkingControllerParameters);
+
+      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
+            capturePointUpdatable,wholeBodyControllerParameters ,walkingControllerParameters);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
-      if(ENABLE_BEHAVIOR_VISUALIZATION)
+      if (ENABLE_BEHAVIOR_VISUALIZATION)
       {
          yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
          yoVariableServer.start();
@@ -120,17 +123,19 @@ public class IHMCHumanoidBehaviorManager
     * Create the different behaviors and register them in the dispatcher.
     * When creating a new behavior, that's where you need to add it.
     * @param fullRobotModel Holds the robot data (like joint angles). The data is updated in the dispatcher and can be shared with the behaviors.
-    * @param forceSensorDataHolder Holds the force sensor data
     * @param referenceFrames Give access to useful references related to the robot. They're automatically updated.
     * @param yoTime Holds the controller time. It is updated in the dispatcher and can be shared with the behaviors.
     * @param outgoingCommunicationBridge used to send packets to the controller.
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
+    * @param wholeBodyControllerParameters 
+    * @param forceSensorDataHolder Holds the force sensor data
     * @param ankleHeight 
     */
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
-         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters)
+         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters,
+         WalkingControllerParameters walkingControllerParameters)
    {
       BooleanYoVariable tippingDetectedBoolean = capturePointUpdatable.getTippingDetectedBoolean();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -140,20 +145,24 @@ public class IHMCHumanoidBehaviorManager
 
       ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
-      
-      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport, outgoingCommunicationBridge, walkingControllerParameters);
+
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
+            outgoingCommunicationBridge, walkingControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
-     
+
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
-      
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime, tippingDetectedBoolean, yoDoubleSupport,walkingControllerParameters);
+
+      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
+            tippingDetectedBoolean, yoDoubleSupport, walkingControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
-      
-      RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, wristSensors, yoTime, walkingControllerParameters);
+
+      RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
+            wristSensors, yoTime, wholeBodyControllerParameters, walkingControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
-      
-      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, walkingControllerParameters.getAnkleHeight());
+
+      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime,
+            walkingControllerParameters.getAnkleHeight());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
    }
 }

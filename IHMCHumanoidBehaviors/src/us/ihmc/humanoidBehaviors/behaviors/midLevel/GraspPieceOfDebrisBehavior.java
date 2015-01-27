@@ -4,10 +4,12 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
@@ -18,6 +20,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.TaskExecutor;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -26,6 +29,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final TaskExecutor taskExecutor = new TaskExecutor();
 
    private final HandPoseBehavior handPoseBehavior;
+   private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
    private final FingerStateBehavior fingerStateBehavior;
 
    private final BooleanYoVariable haveInputsBeenSet;
@@ -45,7 +49,8 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 
    private Quat4d rotationToBePerformedInWorldFrame = new Quat4d();
 
-   public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+   public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+         WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
@@ -53,6 +58,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       this.yoTime = yoTime;
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
 
       pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
@@ -79,11 +85,12 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       RigidBodyTransform tempPose = new RigidBodyTransform();
       FramePose desiredGrabPose = new FramePose();
       FramePose midGrabPose = new FramePose();
-      
+
       computeDesiredGraspOrientation(debrisTransform, fullRobotModel.getHandControlFrame(robotSide), rotationToBePerformedInWorldFrame, graspVector);
-      computeDesiredHandPosesWithOffsetAlongGraspVector(midGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, offsetToThePointOfGrabbing.getDoubleValue());
-      computeDesiredHandPosesWithOffsetAlongGraspVector(desiredGrabPose,rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
-      
+      computeDesiredHandPosesWithOffsetAlongGraspVector(midGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector,
+            offsetToThePointOfGrabbing.getDoubleValue());
+      computeDesiredHandPosesWithOffsetAlongGraspVector(desiredGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
+
       midGrabPose.getPose(tempPose);
       taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
@@ -95,12 +102,12 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
    }
 
-   private void computeDesiredHandPosesWithOffsetAlongGraspVector(FramePose desiredPoseToPack, Quat4d rotationToBePerformedInWorldFrame, Point3d graspPosition, Vector3d graspVector,
-         double wristOffset)
+   private void computeDesiredHandPosesWithOffsetAlongGraspVector(FramePose desiredPoseToPack, Quat4d rotationToBePerformedInWorldFrame, Point3d graspPosition,
+         Vector3d graspVector, double wristOffset)
    {
       Vector3d translation = new Vector3d(graspPosition);
       Vector3d tempGraspVector = new Vector3d(graspVector);
-      
+
       desiredPoseToPack.setToZero(fullRobotModel.getHandControlFrame(robotSide));
       desiredPoseToPack.changeFrame(worldFrame);
 
@@ -109,7 +116,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       tempGraspVector.normalize();
       tempGraspVector.scale(wristOffset);
       translation.add(tempGraspVector);
-      
+
       desiredPoseToPack.setPosition(translation);
    }
 
