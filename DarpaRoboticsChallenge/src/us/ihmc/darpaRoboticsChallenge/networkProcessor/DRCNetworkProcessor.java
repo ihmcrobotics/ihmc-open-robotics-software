@@ -66,8 +66,8 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
             KryoLocalPacketCommunicator behaviorModuleToNetworkProcessorLocalObjectCommunicator = new KryoLocalPacketCommunicator(
                   new IHMCCommunicationKryoNetClassList(), PacketDestination.BEHAVIOR_MODULE.ordinal(), "BehaviorCommunicator");
             
-            new IHMCHumanoidBehaviorManager(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), robotModel.getSensorInformation(),
-                  behaviorModuleToNetworkProcessorLocalObjectCommunicator, controllerCommunicator, robotModel.getWalkingControllerParameters());
+            new IHMCHumanoidBehaviorManager(robotModel, robotModel.getLogModelProvider(), robotModel.getSensorInformation(),
+                  behaviorModuleToNetworkProcessorLocalObjectCommunicator, controllerCommunicator);
 
             try
             {
