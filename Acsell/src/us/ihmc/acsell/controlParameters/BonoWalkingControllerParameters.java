@@ -35,8 +35,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
          handPosesWithRespectToChestFrame.put(robotSide, new RigidBodyTransform());
       }
    }
-   
-   
 
    @Override
    public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
@@ -62,7 +60,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
-      return false; 
+      return false;
    }
 
    @Override
@@ -101,24 +99,21 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return new String[0];
    }
 
-	@Override
-	public String[] getDefaultChestOrientationControlJointNames()
-	{
-		if (runningOnRealRobot)
-			return new String[] {};
+   @Override
+   public String[] getDefaultChestOrientationControlJointNames()
+   {
+      if (runningOnRealRobot)
+         return new String[] {};
 
-		String[] defaultChestOrientationControlJointNames = new String[] {
-				jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-				jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
-				jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
-	   };
+      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
 
-		return defaultChestOrientationControlJointNames;
-	}
+      return defaultChestOrientationControlJointNames;
+   }
 
    private final double minimumHeightAboveGround = 0.595;
    private double nominalHeightAboveGround = 0.670;
-   private final double maximumHeightAboveGround = 0.735 ;
+   private final double maximumHeightAboveGround = 0.735;
    private final double additionalOffsetHeightBono = 0.15;
 
    @Override
@@ -298,7 +293,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       gains.setMaximumAcceleration(maxAcceleration);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-      
+
       return gains;
    }
 
@@ -381,7 +376,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       gains.setMaximumAcceleration(maxAcceleration);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-      
+
       return gains;
    }
 
@@ -451,7 +446,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -478,7 +473,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -497,7 +492,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
 
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setOrientationDerivativeGains(5.0, 0.0, 0.0);
       gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
 
@@ -525,14 +520,16 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDefaultTransferTime()
    {
-      if(runningOnRealRobot) return 0.3;////1.0; //.5;
+      if (runningOnRealRobot)
+         return 0.3;////1.0; //.5;
       return 0.25; // 1.5; //
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      if(runningOnRealRobot) return 0.7; //1.0
+      if (runningOnRealRobot)
+         return 0.7; //1.0
       return 0.6; // 1.5; //
    }
 
@@ -590,7 +587,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
    }
-   
+
    @Override
    public double getActualFootWidth()
    {
@@ -634,7 +631,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 30.0;
    }
-   
+
    @Override
    public double getCoPThresholdFraction()
    {
@@ -646,11 +643,9 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       if (!runningOnRealRobot)
          return null;
-      
-      String[] defaultChestOrientationControlJointNames = new String[] {
-            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
-            jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
+
+      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
 
       return defaultChestOrientationControlJointNames;
    }
@@ -671,7 +666,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return true;
    }
-   
+
    @Override
    public double getContactThresholdHeight()
    {
@@ -684,12 +679,16 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return FootSwitchType.WrenchBased;
    }
 
-
-
    @Override
    public double getMaxICPErrorBeforeSingleSupport()
    {
       return 0.025;
-      
+
+   }
+
+   @Override
+   public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return true;
    }
 }
