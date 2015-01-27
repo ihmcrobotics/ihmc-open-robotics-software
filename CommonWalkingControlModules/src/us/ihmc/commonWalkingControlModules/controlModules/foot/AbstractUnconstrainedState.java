@@ -114,15 +114,14 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
-      if(yoSetDesiredVelocityToZero.getBooleanValue())
+      if (yoSetDesiredVelocityToZero.getBooleanValue())
       {
          desiredLinearVelocity.setToZero();
-         desiredAngularVelocity.setToZero();
       }
-      if(yoSetDesiredAccelerationToZero.getBooleanValue()){
+
+      if (yoSetDesiredAccelerationToZero.getBooleanValue())
+      {
          desiredLinearAcceleration.setToZero();
-         desiredAngularAcceleration.setToZero();
-         
       }
 
       RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
