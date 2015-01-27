@@ -27,47 +27,12 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public class DynamicGraphicObjectEvaluation
 {
    public static void main(String[] args)
-   {
-//      debugPolygonStuff();
-      
+   {      
       Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3DAdapter();
-
-//    Graphics3DAdapter java3DGraphicsAdapter = new Java3DGraphicsAdapter();
-
       evaluate(jmeGraphics3dAdapter);
-
-//    evaluate(java3DGraphicsAdapter);
    }
    
-   public static void debugPolygonStuff()
-   {
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Debug"));
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      int maxNumberOfVertices = 6;
-      YoVariableRegistry registry = new YoVariableRegistry("Debug");
 
-      YoFrameConvexPolygon2d transferToPolygon = new YoFrameConvexPolygon2d("transferToPolygon", "", worldFrame, maxNumberOfVertices , registry);
-      
-      double[][] pointList = new double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
-      transferToPolygon.setConvexPolygon2d(convexPolygon);
-      
-      double polygonVizScale = 1.0;
-      YoGraphicPolygon transferToPolygonViz = new YoGraphicPolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale, YoAppearance.Bisque());
-      transferToPolygonViz.setPosition(0.0, 0.0, 0.1);
-      
-      YoGraphicsList yoGraphicsList = new YoGraphicsList("FinalDesiredICPCalculator");
-
-      yoGraphicsList.add(transferToPolygonViz);
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-      
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      
-      scs.startOnAThread();
-
-   }
 
    public static void evaluate(Graphics3DAdapter graphicsAdapter)
    {
@@ -143,6 +108,9 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicsList.add(dynamicGraphicBoxGhost);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      
+      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicPolygon);
+      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicYoFramePolygon);
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoVariableRegistry(registry);
