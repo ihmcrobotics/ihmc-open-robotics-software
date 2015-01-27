@@ -151,7 +151,7 @@ public class WalkOnTheEdgesManager
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-      isDesiredECMPOKForToeOff.set(true); //onToesSupportPolygon.isPointInside(desiredECMP));
+      isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
 
       FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
