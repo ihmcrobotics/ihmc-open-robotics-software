@@ -88,7 +88,7 @@ public class CapturePointTools
     * 
     * @param constantCMPs
     * @param cornerPointsToPack
-    * @param stepTime
+    * @param stepTime equals to the single plus double support durations
     * @param omega0
     */
    public static void computeDesiredCornerPoints(ArrayList<YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs, boolean skipFirstCornerPoint, double stepTime, double omega0)
