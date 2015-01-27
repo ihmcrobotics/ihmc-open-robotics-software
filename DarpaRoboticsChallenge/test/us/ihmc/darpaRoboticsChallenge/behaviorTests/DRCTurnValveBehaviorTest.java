@@ -84,8 +84,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    private final double valveX = 2.0 * TurnValveBehavior.howFarToStandBackFromValve;
    private final double valveY = TurnValveBehavior.howFarToStandToTheRightOfValve;
    private final double valveZ = 1.0;
-   private final double valveYaw_degrees = 45.0;
-   
+   private final double valveYaw_degrees = 45.0 * 0.0;
+
    private final DRCValveEnvironment testEnvironment = new DRCValveEnvironment(valveX, valveY, valveZ, valveYaw_degrees);
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
          "DRCHandPoseBehaviorTestControllerCommunicator");
@@ -127,7 +127,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       robot = drcSimulationTestHelper.getRobot();
       fullRobotModel = getRobotModel().createFullRobotModel();
-     
+
       forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
 
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
@@ -161,7 +161,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout = 300000)
+      @Test(timeout = 300000)
    public void testWalkAndTurnValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -181,7 +181,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
             yoTippingDetected, getRobotModel().getWalkingControllerParameters());
       communicationBridge.attachGlobalListenerToController(turnValveBehavior.getControllerGlobalPacketConsumer());
-
 
       ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(new String("testTurnValveNoScript"), valveTransformToWorld);
       turnValveBehavior.initialize();
@@ -247,152 +246,5 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
 
       return ret;
-   }
-
-   private Quat4d createQuat4d(Vector3d axis, double rotationAngle)
-   {
-      AxisAngle4d desiredAxisAngle = new AxisAngle4d();
-      desiredAxisAngle.set(axis, rotationAngle);
-
-      Quat4d ret = new Quat4d();
-      ret.set(desiredAxisAngle);
-
-      return ret;
-   }
-
-   private HandPosePacket createHandPosePacket(RobotSide robotside)
-   {
-      robotDataReceiver.updateRobotModel();
-      ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotside);
-      FramePose currentHandPose = new FramePose();
-      currentHandPose.setToZero(handFrame);
-
-      currentHandPose.changeFrame(worldFrame);
-
-      Point3d desiredHandPosition = new Point3d();
-      currentHandPose.getPosition(desiredHandPosition);
-      desiredHandPosition.setZ(desiredHandPosition.getZ() + 0.1);
-      SysoutTool.println("desired Hand Position : " + desiredHandPosition, DEBUG);
-
-      Quat4d desiredHandOrientation = new Quat4d();
-      currentHandPose.getOrientation(desiredHandOrientation);
-
-      HandPosePacket ret = new HandPosePacket(robotside, Frame.WORLD, desiredHandPosition, desiredHandOrientation, 1.0);
-
-      return ret;
-   }
-
-   private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, ReferenceFrames referenceFrames)
-   {
-      FootstepDataList footsepDataList = new FootstepDataList();
-
-      SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
-      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         feet.put(robotSide, fullRobotModel.getFoot(robotSide));
-         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
-      }
-
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-
-      SimplePathParameters pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(),
-            0.0, Math.toRadians(20.0), Math.toRadians(10.0), 0.4);
-
-      TurnStraightTurnFootstepGenerator footstepGenerator;
-
-      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-
-      footsteps.clear();
-      FramePose2d endPose = new FramePose2d(worldFrame);
-
-      referenceFrames.updateFrames();
-      ReferenceFrame midFeetFrame = referenceFrames.getMidFeetZUpFrame();
-
-      FramePose currentPose = new FramePose();
-      currentPose.setToZero(midFeetFrame);
-      currentPose.changeFrame(worldFrame);
-
-      Point2d targetLocation = new Point2d();
-      targetLocation.set(currentPose.getX(), currentPose.getY());
-      targetLocation.add(walkDeltaXY);
-
-      endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
-      endPose.setOrientation(new FrameOrientation2d(worldFrame, currentPose.getYaw()));
-
-      footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
-      footstepGenerator.initialize();
-      footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
-
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         Footstep footstep = footsteps.get(i);
-         Point3d location = new Point3d(footstep.getX(), footstep.getY(), footstep.getZ());
-         Quat4d orientation = new Quat4d();
-         footstep.getOrientation(orientation);
-
-         RobotSide footstepSide = footstep.getRobotSide();
-         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
-         footsepDataList.add(footstepData);
-      }
-
-      return footsepDataList;
-   }
-
-   private double getTotalFingerJointQ(RobotSide robotSide)
-   {
-      SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
-      Joint wristJoint = robot.getJoint(jointNameMap.getJointBeforeHandName(robotSide));
-
-      ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
-      double totalFingerJointQ = 0.0;
-
-      for (OneDegreeOfFreedomJoint fingerJoint : fingerJoints)
-      {
-         double q = fingerJoint.getQ().getDoubleValue();
-         totalFingerJointQ += q;
-         SysoutTool.println(fingerJoint.getName() + " q : " + q, DEBUG);
-      }
-
-      return totalFingerJointQ;
-   }
-
-   private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
-   {
-      fullRobotModel.updateFrames();
-      FramePose framePose = new FramePose();
-      framePose.setToZero(frameToCheck);
-      framePose.changeFrame(worldFrame);
-
-      Quat4d quatToCheck = new Quat4d();
-      framePose.getOrientation(quatToCheck);
-
-      assertOrientationsAreWithinThresholds(desiredQuat, quatToCheck);
-   }
-
-   private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, Quat4d actualQuat)
-   {
-      FramePose desiredPose = new FramePose(worldFrame, new Point3d(), desiredQuat);
-      FramePose actualPose = new FramePose(worldFrame, new Point3d(), actualQuat);
-
-      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
-
-      SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
-
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
-   }
-
-   private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
-   {
-      double positionDistance = framePose1.getPositionDistance(framePose2);
-      double orientationDistance = framePose1.getOrientationDistance(framePose2);
-
-      SysoutTool.println("positionDistance=" + positionDistance, DEBUG);
-      SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
-
-      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
 }
