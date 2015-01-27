@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -1411,8 +1412,16 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
    {
-      AppearanceDefinition color = YoAppearance.DarkGray();
-
+//      AppearanceDefinition rockAppearance = YoAppearance.DarkGray();
+      YoAppearanceMaterial rockAppearance = new YoAppearanceMaterial();
+      rockAppearance.setSpecularColor(0.5f, 0.5f, 0.5f);
+      
+      
+      rockAppearance.setDiffuseColor(0.4f, 0.4f, 0.4f);
+//      rockAppearance.setDiffuseColor(0.2f, 0.4f, 0.5f);
+      rockAppearance.setShininess(6.0f);
+      rockAppearance.setAmbientColor(0.16f, 0.18f, 0.2f);   
+      
       ArrayList<Point2d> vertexPoints = new ArrayList<Point2d>();
 
       for (double[] point : vertices)
@@ -1422,7 +1431,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
 
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
+      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, rockAppearance);
       combinedTerrainObject.addTerrainObject(rock);
    }
 
