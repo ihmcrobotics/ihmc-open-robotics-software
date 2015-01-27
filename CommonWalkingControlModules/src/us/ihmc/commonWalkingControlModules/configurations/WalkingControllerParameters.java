@@ -155,4 +155,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getMaxICPErrorBeforeSingleSupport();
 
+   public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
+
 }

@@ -753,4 +753,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return 0.035;
    }
+
+   @Override
+   public boolean finishSingleSupportWhenICPPlannerIsDone()
+   {
+      return false;
+   }
 }
