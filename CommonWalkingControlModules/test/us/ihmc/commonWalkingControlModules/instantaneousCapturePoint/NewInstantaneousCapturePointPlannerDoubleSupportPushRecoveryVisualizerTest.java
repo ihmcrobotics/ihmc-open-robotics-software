@@ -31,7 +31,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private boolean visualize = true;
+   private boolean visualize = false; //commit false or it will break bamboo!!!
    private final Random random = new Random();
 
    private PointAndLinePlotter pointAndLinePlotter = new PointAndLinePlotter(registry);
@@ -39,12 +39,12 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
    private final ArrayList<ArrayList<YoFrameLineSegment2d>> listOfFootPolygons = new ArrayList<ArrayList<YoFrameLineSegment2d>>();
    private SimulationConstructionSet scs = null;
    private DoubleYoVariable timeYoVariable = null;
-   private double sineAmplitude = 0.04;
-   private double sineFrequency = 5;
+   private final double sineAmplitude = 0.04;
+   private final double sineFrequency = 5;
    private double initialTime = 0;
 
-   private double footLength = 0.2;
-   private double footWidth = 0.1;
+   private final double footLength = 0.2;
+   private final double footWidth = 0.1;
 
    YoFramePoint tmpPreviousICPPosition = new YoFramePoint("PreviousICPPosition", ReferenceFrame.getWorldFrame(), registry);
 
@@ -54,8 +54,8 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
    private YoFramePoint singleSupportFinalICPPosition = null;
    private YoFramePoint icpVelocityYoFramePoint = null;
    private YoFramePoint cmpPositionYoFramePoint = null;
-   private ArrayList<YoFrameLineSegment2d> footLineSegments1 = new ArrayList<YoFrameLineSegment2d>();
-   private ArrayList<YoFrameLineSegment2d> footLineSegments2 = new ArrayList<YoFrameLineSegment2d>();
+   private final ArrayList<YoFrameLineSegment2d> footLineSegments1 = new ArrayList<YoFrameLineSegment2d>();
+   private final ArrayList<YoFrameLineSegment2d> footLineSegments2 = new ArrayList<YoFrameLineSegment2d>();
 
    FramePoint actualICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
 
@@ -171,19 +171,19 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
    };
 
-   private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
+   private final double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
    private double doubleSupportDuration = testICPPlannerParams.getDoubleSupportDuration();
-   private double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
-   private int numberOfStepsInStepList = 7;
-   private int maxNumberOfConsideredFootsteps = testICPPlannerParams.getNumberOfFootstepsToConsider();
+   private final double doubleSupportInitialTransferDuration = testICPPlannerParams.getDoubleSupportInitialTransferDuration();
+   private final int numberOfStepsInStepList = 7;
+   private final int maxNumberOfConsideredFootsteps = testICPPlannerParams.getNumberOfFootstepsToConsider();
    private final RobotSide robotSide = RobotSide.RIGHT;
    private NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner;
 
    private YoFrameLineSegment2d icpVelocityLineSegment = null;
 
-   private double scsPlaybackRate = 0.5;
+   private final double scsPlaybackRate = 0.5;
 
-   private double scsPlaybackDesiredFrameRate = 0.001;
+   private final double scsPlaybackDesiredFrameRate = 0.001;
 
    @After
    public void removeVisualizersAfterTest()
