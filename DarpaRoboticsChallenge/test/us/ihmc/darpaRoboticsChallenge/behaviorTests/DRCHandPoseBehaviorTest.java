@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 
@@ -16,6 +18,7 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
@@ -30,14 +33,18 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
@@ -47,7 +54,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private final double POSITION_THRESHOLD = 0.007;
    private final double ORIENTATION_THRESHOLD = 0.007;
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
+   private final double JOINT_POSITION_THRESHOLD = 0.05;
+   private final double EXTRA_SIM_TIME_FOR_SETTLING = 0.5;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -67,6 +75,10 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    private BehaviorCommunicationBridge communicationBridge;
 
    private FullRobotModel fullRobotModel;
+
+   private ArmJointName[] armJointNames;
+   private int numberOfArmJoints;
+   private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
 
    private boolean returnValue = true;
 
@@ -98,6 +110,13 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
 
+      armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+      numberOfArmJoints = armJointNames.length;
+
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         armJointIndices.put(armJointNames[i], i);
+      }
    }
 
    @After
@@ -118,31 +137,59 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
 
    @Test(timeout = 300000)
-   public void testSimpleHandPoseMove() throws SimulationExceededMaximumTimeException
+   public void testJointSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
-      double swingTrajectoryTime = 2.0;
       RobotSide robotSide = RobotSide.LEFT;
-      FramePose handPoseStart = getCurrentHandPose(robotSide);
+      double swingTrajectoryTime = 2.0;
 
-      FramePose handPoseTarget = new FramePose(handPoseStart);
-      handPoseTarget.setZ(handPoseTarget.getZ() + 0.2);
-      handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
+      double[] desiredArmPose = createRandomArmPose(robotSide);
 
-      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, desiredArmPose);
 
       final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
       createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+      assertTrue(success);
+
+      double[] finalArmPose = getCurrentArmPose(robotSide);
+      assertRobotAchievedFinalDesiredArmPose(desiredArmPose, finalArmPose, robotSide);
+      assertTrue(handPoseBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test(timeout = 300000)
+   public void testTaskSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      double swingTrajectoryTime = 2.0;
+      RobotSide robotSide = RobotSide.LEFT;
+
+      FramePose desiredHandPose = getCurrentHandPose(robotSide);     
+      desiredHandPose.setZ(desiredHandPose.getZ() + 0.2);
+      desiredHandPose.setOrientation(new double[] { 0.0, 0.0, 0.6 });
+
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, desiredHandPose);
+
+      final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
+      createAndStartBehaviorThread(handPoseBehavior, simulationRunTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+      assertTrue(success);
 
       FramePose handPoseEnd = getCurrentHandPose(robotSide);
 
-      assertPosesAreWithinThresholds(handPoseEnd, handPoseTarget);
+      assertPosesAreWithinThresholds(handPoseEnd, desiredHandPose);
 
-      assertTrue(success);
       assertTrue(handPoseBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
@@ -232,25 +279,35 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       double trajectoryTime = 2.0;
 
-      FramePose handPoseDesiredLeft = offsetCurrentHandPose(RobotSide.LEFT, 0.0, 0.0, 0.1);
-      FramePose handPoseDesiredRight = offsetCurrentHandPose(RobotSide.RIGHT, 0.0, 0.0, 0.1);
+      SideDependentList<double[]> desiredArmPoses = new SideDependentList<double[]>();
+      SideDependentList<HandPoseBehavior> handPoseBehaviors = new SideDependentList<HandPoseBehavior>();
 
-      HandPoseBehavior handPoseBehaviorLeft = createNewHandPoseBehavior(RobotSide.LEFT, trajectoryTime, handPoseDesiredLeft);
-      HandPoseBehavior handPoseBehaviorRight = createNewHandPoseBehavior(RobotSide.RIGHT, trajectoryTime, handPoseDesiredRight);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         double[] desiredArmPose = createRandomArmPose(robotSide);
+         desiredArmPoses.put(robotSide, desiredArmPose);
+
+         HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredArmPose);
+         handPoseBehaviors.put(robotSide, handPoseBehavior);
+      }
 
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-      createAndStartBehaviorThread(handPoseBehaviorLeft, simulationRunTime);
+      createAndStartBehaviorThread(handPoseBehaviors, simulationRunTime);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
       assertTrue(success);
 
-      FramePose LeftHandPoseEnd = getCurrentHandPose(RobotSide.LEFT);
-      FramePose RightHandPoseEnd = getCurrentHandPose(RobotSide.RIGHT);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         double[] desiredArmPose = desiredArmPoses.get(robotSide);
+         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
 
-      assertTrue(handPoseBehaviorLeft.isDone());
-      assertTrue(handPoseBehaviorRight.isDone());
+         assertTrue(handPoseBehavior.isDone());
 
-      assertPosesAreWithinThresholds(LeftHandPoseEnd, handPoseDesiredLeft);
-      assertPosesAreWithinThresholds(RightHandPoseEnd, handPoseDesiredRight);
+         double[] finalLeftArmPose = getCurrentArmPose(robotSide);
+
+         assertRobotAchievedFinalDesiredArmPose(desiredArmPose, finalLeftArmPose, robotSide);
+         assertTrue(handPoseBehavior.isDone());
+      }
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -474,6 +531,50 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
+   private double[] getCurrentArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         ArmJointName jointName = armJointNames[jointNum];
+         double currentAngle = fullRobotModel.getArmJoint(robotSide, jointName).getQ();
+         armPose[jointNum] = currentAngle;
+      }
+
+      return armPose;
+   }
+
+   private double[] createRandomArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         double qDesired = clipDesiredJointQToJointLimits(robotSide, armJointNames[jointNum], RandomTools.generateRandomDouble(new Random(), 1.5));
+         armPose[jointNum] = qDesired;
+      }
+
+      return armPose;
+   }
+
+   private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
+   {
+      double q;
+      double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
+      double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
+
+      if (qMin > qMax)
+      {
+         double temp = qMax;
+         qMax = qMin;
+         qMin = temp;
+      }
+
+      q = MathTools.clipToMinMax(desiredJointAngle, qMin, qMax);
+      return q;
+   }
+
    private HandPoseBehavior createNewHandPoseBehavior(RobotSide robotSide, double trajectoryTime, FramePose handPoseTarget)
    {
       HandPoseBehavior ret = new HandPoseBehavior(communicationBridge, yoTime);
@@ -484,6 +585,17 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       ret.initialize();
       ret.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
+
+      return ret;
+   }
+
+   private HandPoseBehavior createNewHandPoseBehavior(RobotSide robotSide, double trajectoryTime, double[] desiredArmJointAngles)
+   {
+      final HandPoseBehavior ret = new HandPoseBehavior(communicationBridge, yoTime);
+      communicationBridge.attachGlobalListenerToController(ret.getControllerGlobalPacketConsumer());
+
+      HandPosePacket desiredHandPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredArmJointAngles);
+      ret.setInput(desiredHandPosePacket);
 
       return ret;
    }
@@ -507,6 +619,27 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       ret.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
       ret.changeFrame(ReferenceFrame.getWorldFrame());
       return ret;
+   }
+
+   private void createAndStartBehaviorThread(final HandPoseBehavior handPoseBehavior, final double simulationRunTime)
+   {
+      ArrayList<HandPoseBehavior> handPoseBehaviors = new ArrayList<HandPoseBehavior>();
+      handPoseBehaviors.add(handPoseBehavior);
+
+      createAndStartBehaviorThread(handPoseBehaviors, simulationRunTime);
+   }
+
+   private void createAndStartBehaviorThread(final SideDependentList<HandPoseBehavior> handPoseBehaviorsSideDependentList, final double simulationRunTime)
+   {
+      ArrayList<HandPoseBehavior> handPoseBehaviors = new ArrayList<HandPoseBehavior>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         HandPoseBehavior handPoseBehavior = handPoseBehaviorsSideDependentList.get(robotSide);
+         handPoseBehaviors.add(handPoseBehavior);
+      }
+
+      createAndStartBehaviorThread(handPoseBehaviors, simulationRunTime);
    }
 
    private void createAndStartBehaviorThread(final ArrayList<HandPoseBehavior> handPoseBehaviors, final double simulationRunTime)
@@ -543,14 +676,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       behaviorThread.start();
    }
 
-   private void createAndStartBehaviorThread(final HandPoseBehavior handPoseBehavior, final double simulationRunTime)
-   {
-      ArrayList<HandPoseBehavior> handPoseBehaviors = new ArrayList<HandPoseBehavior>();
-      handPoseBehaviors.add(handPoseBehavior);
-
-      createAndStartBehaviorThread(handPoseBehaviors, simulationRunTime);
-   }
-
    private void setReturnValue(boolean value)
    {
       returnValue = value;
@@ -569,6 +694,24 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
       assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+   }
+
+   private void assertRobotAchievedFinalDesiredArmPose(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide)
+   {
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         ArmJointName armJointName = armJointNames[i];
+
+         double q_desired = desiredArmPose[i];
+         double q_actual = actualArmPose[i];
+
+         if (DEBUG)
+         {
+            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
+         }
+
+         assertEquals(q_desired, q_actual, JOINT_POSITION_THRESHOLD);
+      }
    }
 
 }
