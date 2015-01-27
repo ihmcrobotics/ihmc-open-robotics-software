@@ -75,8 +75,14 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public boolean getDoTimeFreezing()
    {
-      return true;
+      return false;
    }
+	
+	@Override
+	public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+	{
+		return 0.03;
+	}
 
    @Override
    public boolean getDoFootSlipCompensation()
@@ -93,18 +99,12 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	@Override
 	public double getCapturePointInFromFootCenterDistance()
 	{
-		return 0.015;
+		return 0.01;
 	}
 	
 	@Override
 	public double getCapturePointForwardFromFootCenterDistance()
 	{
 		return 0.02;
-	}
-	
-	@Override
-	public double getMaxAllowedErrorWithoutPartialTimeFreeze()
-	{
-		return 0.03;
 	}
 }
