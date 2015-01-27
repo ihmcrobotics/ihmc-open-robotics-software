@@ -204,12 +204,8 @@ abstract public class WholeBodyIkSolver
       NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
 
-    //  actualSdfModel   = actualRobotModel;
       workingSdfModel  = robotControllerParameters.createFullRobotModel();
       workingFrames = new ReferenceFrames(workingSdfModel);
-   //   actualFrames  = new ReferenceFrames(actualSdfModel);
-
-    //  actualModelJointCopier = new InverseDynamicsJointStateCopier(actualSdfModel.getElevator(), workingSdfModel.getElevator());
 
       //----------- STEP A: find, copy and load the urdf file -------------------------------- 
 
@@ -238,7 +234,6 @@ abstract public class WholeBodyIkSolver
 
       for (RobotSide robotSide : RobotSide.values())
       {
-   //      actualSoleFrames.set(robotSide, actualFrames.getSoleFrame(robotSide));
          workingSoleFrames.set(robotSide, workingFrames.getSoleFrame(robotSide));
          armJointIds.set(robotSide, new int[ getNumberDoFperArm() ]);
          legJointIds.set(robotSide, new int[ getNumberDoFperLeg() ]);
@@ -320,6 +315,7 @@ abstract public class WholeBodyIkSolver
 
 
 
+   // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
    private void setPreferedKneeAngle()
    {
       if( suggestKneeAngle == false)
@@ -343,7 +339,6 @@ abstract public class WholeBodyIkSolver
          zR = 1;
       }
 
-      // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
       double preferedKneeAngle = 2.4 - (zL +  zR)*0.5;
       if( preferedKneeAngle < 0.4) preferedKneeAngle = 0.4;
 
@@ -696,6 +691,11 @@ abstract public class WholeBodyIkSolver
       return ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(jointName, parentFrame, parentToBody);
    }
 
+   public void updateWorkingModel( SDFFullRobotModel sdfModel)
+   {
+      workingSdfModel.copyAllJointsButKeepOneFootFixed(sdfModel.getOneDoFJoints(), getSideOfTheFootRoot());
+      movePelvisToHaveOverlappingFeet( sdfModel, workingSdfModel );
+   }
 
    public ReferenceFrame getDesiredHandFrame(RobotSide handSide, ReferenceFrame parentFrame)
    {

@@ -523,9 +523,8 @@
     <joint name="r_ee_fixed_joint" type="fixed">
         <parent link="r_hand"/>
         <child  link="r_ee_link"/>
-        <!-- origin rpy="1.5708 0 -1.5708" xyz="-0.0 -0.26  -0.00"/ -->
-        
-        <origin rpy="1.5708 0 -1.5708" xyz="0 -0.26  0"/>
+ 
+        <origin rpy="0 0 -1.5708" xyz="0 -0.10  0"/>
         
     </joint>    
     <link name="r_ee_link"/>
@@ -595,7 +594,7 @@
 	<joint name="l_ee_fixed_joint" type="fixed">
         <parent link="l_hand"/>
         <child  link="l_ee_link"/>
-        <origin rpy="-1.5708 0 1.5708" xyz="0  0.26  0"/>
+        <origin rpy="0 0 1.5708" xyz="0  0.10  0"/>
         
     </joint>    
     <link name="l_ee_link"/>

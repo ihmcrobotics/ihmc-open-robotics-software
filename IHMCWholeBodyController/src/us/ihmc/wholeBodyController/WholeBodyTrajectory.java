@@ -66,12 +66,18 @@ public class WholeBodyTrajectory
    static public TrajectoryND createTaskSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
          final SDFFullRobotModel actualRobotModel,
-         final SideDependentList<ReferenceFrame> initialTarget,
          final SideDependentList<ReferenceFrame> finalTarget ) throws Exception
    {
       int N = actualRobotModel.getOneDoFJoints().length;
 
       double[] wpQ = new double[N];
+      
+      final SideDependentList<ReferenceFrame> initialTarget = new SideDependentList<ReferenceFrame>();
+      
+      wbSolver.updateWorkingModel( actualRobotModel );
+      
+      initialTarget.set(RobotSide.LEFT,  wbSolver.getDesiredHandFrame( RobotSide.LEFT, ReferenceFrame.getWorldFrame() ));
+      initialTarget.set(RobotSide.RIGHT, wbSolver.getDesiredHandFrame( RobotSide.RIGHT, ReferenceFrame.getWorldFrame() ));
 
       HashMap<String, Double> anglesToUseAsInitialState = new HashMap<String, Double> ();
       HashMap<String, Double> outputAngles = new HashMap<String, Double> ();
@@ -128,7 +134,7 @@ public class WholeBodyTrajectory
             ReferenceFrame target =  ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("interpolatedTarget",
                   ReferenceFrame.getWorldFrame(), interpolatedTransform );
             
-            wbSolver.setHandTarget(actualRobotModel,  side,target );
+            wbSolver.setHandTarget(actualRobotModel,  side, target );
          }
          
          wbSolver.compute(actualRobotModel,  anglesToUseAsInitialState, outputAngles);
