@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors;
 
 import java.util.Arrays;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -65,7 +65,7 @@ public class IHMCHumanoidBehaviorManager
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, LogUtils.getMyIP(BEHAVIOR_YO_VARIABLE_SERVER_HOST), BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
-      FullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
+      SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(networkProcessorCommunicator, controllerCommunicator, registry);
