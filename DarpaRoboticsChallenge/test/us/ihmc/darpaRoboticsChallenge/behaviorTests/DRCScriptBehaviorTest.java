@@ -199,7 +199,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       Point3d finalComPoint = new Point3d();
       robot.computeCenterOfMass(finalComPoint);
-      
+
       assertProperComHeightOffsetFromGround(desiredFinalHeightOffset, finalComPoint);
 
       robotDataReceiver.updateRobotModel();
@@ -211,15 +211,18 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      RobotSide robotSide = RobotSide.RIGHT;
+      RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
 
-      FramePose desiredHandPose1 = getCurrentHandPose(fullRobotModel, robotSide);
+      FramePose initialHandPose = getCurrentHandPose(fullRobotModel, robotSide);
+
+      FramePose desiredHandPose1 = new FramePose(initialHandPose);
       desiredHandPose1.setZ(desiredHandPose1.getZ() + 0.05);
       HandPosePacket handPosePacket1 = createHandPosePacket(desiredHandPose1, robotSide, trajectoryTime);
 
-      FramePose desiredHandPose2 = new FramePose(desiredHandPose1);
-      desiredHandPose2.setX(desiredHandPose1.getX() - 0.1);
+      FramePose desiredHandPose2 = new FramePose(initialHandPose);
+      desiredHandPose2.setZ(initialHandPose.getZ() + 0.2);
+      desiredHandPose2.setOrientation(new double[] { 0.0, 0.0, 0.6 });
       HandPosePacket handPosePacket2 = createHandPosePacket(desiredHandPose2, robotSide, trajectoryTime);
 
       CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
@@ -232,7 +235,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       commandRecorder.stopRecording();
 
-      ScriptBehavior scriptBehavior = testScriptBehavior(4.0);
+      ScriptBehavior scriptBehavior = testScriptBehavior(2.0 * trajectoryTime);
       assertTrue(scriptBehavior.isDone());
 
       FramePose finalHandPose = getCurrentHandPose(fullRobotModel, robotSide);
@@ -242,7 +245,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private FramePose getCurrentHandPose(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
       robotDataReceiver.updateRobotModel();
-
+      fullRobotModel.updateFrames();
+      
       ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSide);
       FramePose ret = new FramePose();
       ret.setToZero(handFrame);
