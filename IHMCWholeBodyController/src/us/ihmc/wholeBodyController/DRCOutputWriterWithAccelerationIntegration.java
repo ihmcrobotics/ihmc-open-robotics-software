@@ -67,13 +67,12 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private final double updateDT;
 
    // List of the joints for which we do integrate the desired accelerations by default
-   private final LegJointName[] legJointsForIntegratingAcceleration = new LegJointName[] { LegJointName.HIP_PITCH, LegJointName.HIP_ROLL, LegJointName.HIP_YAW };
-   private final ArmJointName[] armJointsForIntegratingAcceleration = new ArmJointName[] { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL,
-         ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH };
-   private final SpineJointName[] spineJointsForIntegratingAcceleration = new SpineJointName[] { SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL,
-         SpineJointName.SPINE_YAW };
+   private final LegJointName[] legJointsForIntegratingAcceleration;
+   private final ArmJointName[] armJointsForIntegratingAcceleration;
+   private final SpineJointName[] spineJointsForIntegratingAcceleration;
 
-   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double updateDT, boolean runningOnRealRobot)
+   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
+         ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       this.drcOutputWriter = drcOutputWriter;
@@ -89,6 +88,31 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       alphaArmDesiredPosition.set(0.0);
       kVelArmJointTorque.set(0.0);
       kPosArmJointTorque.set(0.0);
+
+      if (legJointToIntegrate == null)
+         legJointsForIntegratingAcceleration = new LegJointName[0];
+      else
+         legJointsForIntegratingAcceleration = legJointToIntegrate;
+
+      if (armJointToIntegrate == null)
+         armJointsForIntegratingAcceleration = new ArmJointName[0];
+      else
+         armJointsForIntegratingAcceleration = armJointToIntegrate;
+
+      if (spineJointToIntegrate == null)
+         spineJointsForIntegratingAcceleration = new SpineJointName[0];
+      else
+         spineJointsForIntegratingAcceleration = spineJointToIntegrate;
+
+   }
+
+   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double updateDT, boolean runningOnRealRobot)
+   {
+      this(drcOutputWriter,
+            new LegJointName[] { LegJointName.HIP_PITCH, LegJointName.HIP_ROLL, LegJointName.HIP_YAW },
+            new ArmJointName[] { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH },
+            new SpineJointName[] { SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL, SpineJointName.SPINE_YAW },
+            updateDT, runningOnRealRobot);
    }
 
    public void setVelocityGains(double kVelJointTorque, double kVelArmJointTorque)
