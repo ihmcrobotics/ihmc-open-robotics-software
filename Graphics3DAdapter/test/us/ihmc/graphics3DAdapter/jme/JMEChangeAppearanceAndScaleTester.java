@@ -4,6 +4,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
+import us.ihmc.utilities.Axis;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;
@@ -24,7 +25,7 @@ public class JMEChangeAppearanceAndScaleTester extends SimpleApplication
       
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.setChangeable(true);
-      graphics.rotate(Math.PI/2.0, Graphics3DObject.Z);
+      graphics.rotate(Math.PI/2.0, Axis.Z);
       scale = graphics.scale(1.0);
       instruction = graphics.addEllipsoid(1.0, 1.0, 1.0, YoAppearance.Red());
       JMEGraphicsObject graphicsObject = new JMEGraphicsObject(this, new JMEAssetLocator(assetManager), graphics);
