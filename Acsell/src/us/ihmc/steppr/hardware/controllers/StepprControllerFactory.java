@@ -37,6 +37,7 @@ import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.utilities.LogTools;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
@@ -91,12 +92,11 @@ public class StepprControllerFactory
        */
 
       DRCOutputWriter drcOutputWriter = new StepprOutputWriter(robotModel);
-      boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES=true;
+      boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-      {         
-         DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration =
-               new DRCOutputWriterWithAccelerationIntegration(drcOutputWriter, robotModel.getControllerDT(), true);
-
+      {
+         DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
+               drcOutputWriter, new LegJointName[] { LegJointName.KNEE, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
