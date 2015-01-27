@@ -43,7 +43,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
 
    
    
- @Ignore
+// @Ignore
  @Test(timeout = 300000)
  public void testPointsFromObstacleCourseFile() throws NumberFormatException, IOException
  {
@@ -62,9 +62,10 @@ public class SimplifiedGroundOnlyQuadTreeTest
     QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2d(minX, minY, maxX, maxY), maxBalls);
     testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
 
+    String filename = "resources/pointListsForTesting/drcDemoByRocks.pointList";
 //    String filename = "resources/pointListsForTesting/pointList150122_DRCObstacleCourse.pointList";
 //    String filename = "resources/pointListsForTesting/firstMinuteCinderBlockScans.fullPointList";
-    String filename = "resources/pointListsForTesting/pointList_ObstacleCourseStart_150125.pointList";
+//    String filename = "resources/pointListsForTesting/pointList_ObstacleCourseStart_150125.pointList";
     
     
    double maxZ = 0.6;
@@ -82,7 +83,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
 //    Graphics3DNode handle = testHelper.drawNodeBoundingBoxes(-0.1);
     
     
-    testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
+//    testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
     testHelper.drawAllPointsInQuadTree(YoAppearance.Purple());
     
     testHelper.displaySimulationConstructionSet();
