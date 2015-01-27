@@ -375,25 +375,34 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       renderManager.removeMainView(guiViewPort);
    }
 
-   private AmbientLight al;
+   private AmbientLight ambientLight;
 
    public void setAmbientLightBrightness(float brightness)
    {
-      al.setColor(ColorRGBA.White.mult(brightness));
-
+      ambientLight.setColor(ColorRGBA.White.mult(brightness));
    }
 
    private void setupLighting()
    {
       primaryLight = new DirectionalLight();
-      primaryLight.setColor(ColorRGBA.White);
-      primaryLight.setDirection(new Vector3f(-0.5f, -8, -2).normalizeLocal());
+      primaryLight.setColor(ColorRGBA.White.mult(0.5f));
+      primaryLight.setDirection(new Vector3f(-0.7f, -0.5f, 1.0f).normalizeLocal());
       rootNode.addLight(primaryLight);
-
-      al = new AmbientLight();
-      al.setColor(ColorRGBA.White.mult(1.3f));
-      rootNode.addLight(al);
-
+      
+      ambientLight = new AmbientLight();
+      ambientLight.setColor(ColorRGBA.White.mult(0.7f)); //1.3f));
+      rootNode.addLight(ambientLight);
+      
+      DirectionalLight primaryLight2 = new DirectionalLight();
+      primaryLight2.setColor(ColorRGBA.White.mult(0.1f));
+      primaryLight2.setDirection(new Vector3f(1.0f, -0.0f, -0.5f).normalizeLocal());
+      rootNode.addLight(primaryLight2);
+      
+      DirectionalLight primaryLight3 = new DirectionalLight();
+      primaryLight3.setColor(ColorRGBA.White.mult(0.4f));
+      primaryLight3.setDirection(new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
+      rootNode.addLight(primaryLight3);
+      
       rootNode.setShadowMode(ShadowMode.CastAndReceive);
       zUpNode.setShadowMode(ShadowMode.CastAndReceive);
    }
