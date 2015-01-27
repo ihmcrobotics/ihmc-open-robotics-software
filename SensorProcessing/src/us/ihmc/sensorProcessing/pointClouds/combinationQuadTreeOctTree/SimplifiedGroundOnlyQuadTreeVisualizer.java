@@ -39,7 +39,7 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
                AppearanceDefinition appearance = rainbow[index];
 
                heightMapGraphic.identity();
-               heightMapGraphic.translate(x, y, z);
+               heightMapGraphic.translate(x, y, z - resolution/4.0);
                heightMapGraphic.addCube(resolution, resolution, resolution/4.0, appearance);
             }
          }
