@@ -215,7 +215,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMaxStepLength()
    {
-      return 0.5; //0.6; //0.5; //0.35;
+      return runningOnRealRobot ? 0.5 : 0.4;
    }
 
    @Override
