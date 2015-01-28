@@ -26,7 +26,7 @@ public class ComHeightBehavior extends BehaviorInterface
       startTime = new DoubleYoVariable(getName() + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(getName() + "TrajectoryTime", registry);
-      trajectoryTime.set(2.0);
+      trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
    }
 
@@ -38,13 +38,13 @@ public class ComHeightBehavior extends BehaviorInterface
 
    public void kneelDown()
    {
-      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.15, 1.0);
+      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.15);
       setInput(packet);
    }
 
    public void goToHomeHeight()
    {
-      ComHeightPacket packet = new ComHeightPacket(0.0, 1.0);
+      ComHeightPacket packet = new ComHeightPacket(0.0);
       setInput(packet);
    }
 
@@ -66,6 +66,7 @@ public class ComHeightBehavior extends BehaviorInterface
          sendPacketToNetworkProcessor(outgoingComHeightPacket);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
+         trajectoryTime.set(outgoingComHeightPacket.getTrajectoryTime());
       }
    }
 
@@ -86,6 +87,7 @@ public class ComHeightBehavior extends BehaviorInterface
       outgoingComHeightPacket = null;
 
       startTime.set(Double.NaN);
+      trajectoryTime.set(Double.NaN);
       
       isPaused.set(false);
       isStopped.set(false);
