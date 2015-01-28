@@ -187,7 +187,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
 
       recordFrame = worldFrame;
-      commandRecorder.startRecording(fileName, worldFrame);
+      boolean overwriteExistingFile = true;
+      commandRecorder.startRecording(fileName, worldFrame, overwriteExistingFile);
 
       commandRecorder.recordObject(comHeightPacket0);
       commandRecorder.recordObject(comHeightPacket1);
@@ -228,7 +229,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
 
       recordFrame = worldFrame;
-      commandRecorder.startRecording(fileName, worldFrame);
+      boolean overwriteExistingFile = true;
+      commandRecorder.startRecording(fileName, worldFrame, overwriteExistingFile);
 
       commandRecorder.recordObject(handPosePacket1);
       commandRecorder.recordObject(handPosePacket2);
