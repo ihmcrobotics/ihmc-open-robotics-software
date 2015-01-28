@@ -2,6 +2,7 @@ package us.ihmc.imageProcessing.driving;
 
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -10,6 +11,7 @@ import org.junit.Test;
 public class DrcColorPixelDrivingClassifierTest
 {
 
+   @Ignore
    @Test(timeout=300000)
    public void stuff()
    {
