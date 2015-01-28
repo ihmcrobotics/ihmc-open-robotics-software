@@ -11,6 +11,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -105,6 +106,10 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      if (hasInputBeenSet())
+      {
+         SysoutTool.println("WARNING:  INITIALIZING BEHAVIOR *AFTER* INPUT HAS BEEN SET!");
+      }
       status = null;
       trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
@@ -187,8 +192,7 @@ public class HandPoseBehavior extends BehaviorInterface
       HandPoseStatus newestPacket = inputListeningQueue.getNewestPacket();
       if ((newestPacket != null) && (newestPacket.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
       {
-         if (DEBUG)
-            System.out.println("Received a hand pose status: " + newestPacket.getStatus() + ", " + newestPacket.getRobotSide());
+         SysoutTool.println("Received a hand pose status: " + newestPacket.getStatus() + ", " + newestPacket.getRobotSide(), DEBUG);
          status = newestPacket.getStatus();
          hasStatusBeenReceived.set(true);
       }

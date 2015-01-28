@@ -14,9 +14,12 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.packets.manipulation.HandPoseStatus;
+import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
@@ -39,22 +42,23 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private static final boolean graspValveRim = true;
    private static final ValveType valveType = ValveType.BIG_VALVE;
-   private static final Vector3d valvePinJointAxisInValveFrame = new Vector3d(1,0,0);
+   private static final Vector3d valvePinJointAxisInValveFrame = new Vector3d(1, 0, 0);
    public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
-   public static final double howFarToStandToTheRightOfValve = robotSideOfHandToUse.negateIfRightSide(0.13);
-   public static final double howFarToStandBackFromValve = 0.64;
-   
-   
+   public static final double howFarToStandToTheRightOfValve = robotSideOfHandToUse.negateIfRightSide(0.13);  //0.13
+   public static final double howFarToStandBackFromValve = 0.64; //0.64
+
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
+   private final FullRobotModel fullRobotModel;
+
+   private final double stepLength;
    private final FramePose valvePose = new FramePose();
 
    private final WalkToLocationBehavior walkToLocationBehavior;
-   private final GraspValveBehavior graspObjectBehavior;
+   private final ComHeightBehavior comHeightBehavior;
+   private final GraspValveBehavior graspValveBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final HandPoseBehavior handPoseBehavior2;
-
-   private final ScriptBehavior scriptBehavior;
 
    private InputStream scriptResourceStream;
    private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
@@ -76,14 +80,16 @@ public class TurnValveBehavior extends BehaviorInterface
    {
       super(outgoingCommunicationBridge);
 
+      this.fullRobotModel = fullRobotModel;
+      stepLength = walkingControllerParameters.getMaxStepLength();
+
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
-      graspObjectBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       handPoseBehavior2 = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
 
-      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
-
-      scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
+      scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<ScriptBehaviorInputPacket>();
 
       this.tippingDetected = tippingDetectedBoolean;
       this.yoTime = yoTime;
@@ -91,6 +97,10 @@ public class TurnValveBehavior extends BehaviorInterface
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
 
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
+
+      BehaviorCommunicationBridge behaviorCommunicationBridge = (BehaviorCommunicationBridge) outgoingCommunicationBridge;
+      //      behaviorCommunicationBridge.attachGlobalListenerToController(handPoseBehavior.getControllerGlobalPacketConsumer());
+      //      behaviorCommunicationBridge.attachGlobalListenerToController(handPoseBehavior2.getControllerGlobalPacketConsumer());
    }
 
    @Override
@@ -103,6 +113,13 @@ public class TurnValveBehavior extends BehaviorInterface
       else
       {
          checkForNewInputs();
+         //
+         //         taskExecutor.doControl();
+         //         
+         //         if (taskExecutor.isDone())
+         //         {
+         //            isDone.set(true);
+         //         }
 
          //      if (!currentBehavior.equals(walkToLocationBehavior))
          //      {
@@ -116,22 +133,11 @@ public class TurnValveBehavior extends BehaviorInterface
             if (!behaviorQueue.isEmpty())
             {
                currentBehavior = behaviorQueue.remove(0);
-               currentBehavior.initialize();
                SysoutTool.println(currentBehavior.getName() + " is starting.", DEBUG);
             }
             else
             {
-               //               handPitchAngle += 10.0 * Math.PI / 180.0;
-               //               HandPosePacket handPosePacket = createHandPosePacketToBumpTheValveToVerifyItsPosition(valvePose, handPitchAngle, 2.0);
-               //               handPoseBehavior.initialize();
-               //               handPoseBehavior.setInput(handPosePacket);
-               //
-               //               SysoutTool.println("hand pitch angle :" + handPitchAngle);
-               //
-               //               currentBehavior = handPoseBehavior;
-
                isDone.set(true);
-
             }
          }
          currentBehavior.doControl();
@@ -149,7 +155,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
    public void setInput(ScriptBehaviorInputPacket scriptBehaviorInputPacket)
    {
-      scriptBehavior.importScriptInputPacket(scriptBehaviorInputPacket);
+      //      scriptBehavior.importScriptInputPacket(scriptBehaviorInputPacket);
       SysoutTool.println("New Script Behavior Input Packet Received.  Script File : " + scriptBehaviorInputPacket.getScriptName(), DEBUG);
 
       RigidBodyTransform valveTransformToWorld = scriptBehaviorInputPacket.getReferenceTransform();
@@ -161,22 +167,30 @@ public class TurnValveBehavior extends BehaviorInterface
       walkToLocationBehavior.setTarget(manipulationMidFeetPose);
       SysoutTool.println("Target Walk to Location Updated:" + manipulationMidFeetPose, DEBUG);
 
-      Vector3d valvePinJointAxisInWorld = new Vector3d(valvePinJointAxisInValveFrame);
-      valveTransformToWorld.transform(valvePinJointAxisInWorld);
-            
-      graspObjectBehavior.setGraspPose(valveType, valveTransformToWorld, valvePinJointAxisInWorld, graspValveRim);
+      comHeightBehavior.setInput(new ComHeightPacket(0.5 * ComHeightPacket.MIN_COM_HEIGHT, 1.0));
+      
+      Vector3d graspApproachDirectionInValveFrame = new Vector3d(valvePinJointAxisInValveFrame);
+
+      graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, graspApproachDirectionInValveFrame, graspValveRim);
 
       FramePose graspPose = new FramePose();
-      graspObjectBehavior.getFinalGraspPose(graspPose);
+      graspPose.setToZero(fullRobotModel.getHandControlFrame(robotSideOfHandToUse));
+      graspPose.changeFrame(world);
+
+      graspValveBehavior.getFinalGraspPose(graspPose);
       SysoutTool.println(" hand grasp pose: " + graspPose);
 
       double trajectoryTime = 2.0;
-      double turnValveAngle = -10.0 * Math.PI / 180.0;
-      HandPosePacket turnValveHandPosePacket = createHandPosePacketToTurnValve(valveType, graspPose, valveTransformToWorld, turnValveAngle, trajectoryTime);
-      handPoseBehavior.setInput(turnValveHandPosePacket);
+      double turnValveAngle = Math.toRadians(30.0);
 
-      HandPosePacket turnValveHandPosePacket2 = createHandPosePacketToTurnValve(valveType, graspPose, valveTransformToWorld, turnValveAngle * 2, trajectoryTime);
-      handPoseBehavior2.setInput(turnValveHandPosePacket2);
+      FramePose desiredHandPoseAfterFirstTurn = createHandPosePacketToTurnValve(valveType, graspPose, valveTransformToWorld, turnValveAngle, trajectoryTime);
+      HandPosePacket firstTurnValveHandPosePacket = createHandPosePacket(trajectoryTime, desiredHandPoseAfterFirstTurn);
+      handPoseBehavior.setInput(firstTurnValveHandPosePacket);
+
+      FramePose desiredHandPoseAfterSecondTurn = createHandPosePacketToTurnValve(valveType, desiredHandPoseAfterFirstTurn, valveTransformToWorld,
+            turnValveAngle, trajectoryTime);
+      HandPosePacket secondTurnValveHandPosePacket = createHandPosePacket(trajectoryTime, desiredHandPoseAfterSecondTurn);
+      handPoseBehavior2.setInput(secondTurnValveHandPosePacket);
 
       hasInputBeenSet.set(true);
 
@@ -184,7 +198,7 @@ public class TurnValveBehavior extends BehaviorInterface
       {
          if (!behavior.hasInputBeenSet())
          {
-            hasInputBeenSet.set(false);
+            hasInputBeenSet.set(true);
          }
       }
    }
@@ -224,31 +238,40 @@ public class TurnValveBehavior extends BehaviorInterface
       return ret;
    }
 
-   
-   private HandPosePacket createHandPosePacketToTurnValve(ValveType valveType, FramePose handPoseBeforeTurn, RigidBodyTransform valveTransformToWorld, double turnAngle,
-         double trajectoryTime)
+   private FramePose createHandPosePacketToTurnValve(ValveType valveType, FramePose handPoseBeforeTurn, RigidBodyTransform valveTransformToWorld,
+         double turnAngle, double trajectoryTime)
    {
+      SysoutTool.println("Hand Pose before valve turn in world frame: " + handPoseBeforeTurn);
+
+      FramePose handPoseInValveFrame = new FramePose(handPoseBeforeTurn);
       ReferenceFrame valveFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("valve", world, valveTransformToWorld);
-      
-      
-      RigidBodyTransform handTransformToWorld = new RigidBodyTransform();
-      handPoseBeforeTurn.getPose(handTransformToWorld);
-      
-      ReferenceFrame handFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("hand", world, handTransformToWorld);
-      
+      handPoseInValveFrame.changeFrame(valveFrame);
+      SysoutTool.println("Hand Pose before valve turn in valve frame: " + handPoseInValveFrame);
 
-      Point3d desiredHandPositionInValve = new Point3d(0,0,-valveType.getValveRadius());
-      valveTransformToWorld.transform(desiredHandPositionInValve);
+      RigidBodyTransform handTransformToValve = new RigidBodyTransform();
+      handPoseInValveFrame.getPose(handTransformToValve);
+      SysoutTool.println("Hand transform to valve before valve turn: " + handTransformToValve);
 
-      FramePose handPoseAfterTurn = new FramePose(handPoseBeforeTurn);
-      handPoseAfterTurn.setPosition(desiredHandPositionInValve);
-      
+      RigidBodyTransform xRotation = new RigidBodyTransform();
+      xRotation.rotX(turnAngle);
 
-      HandPosePacket ret = createHandPosePacket(trajectoryTime, handPoseAfterTurn);
+      handTransformToValve.multiply(xRotation);
+      SysoutTool.println("Hand transform to valve after valve turn: " + handTransformToValve);
 
-      return ret;
+      Point3d handInValve = new Point3d();
+      handPoseInValveFrame.getPosition(handInValve);
+      xRotation.transform(handInValve);
+
+      FramePose desiredHandPoseAfterTurn = new FramePose(valveFrame, handTransformToValve);
+      desiredHandPoseAfterTurn.setPosition(handInValve);
+      SysoutTool.println("Hand Pose after valve turn in valve frame: " + desiredHandPoseAfterTurn);
+
+      desiredHandPoseAfterTurn.changeFrame(world);
+      SysoutTool.println("Hand Pose after turn in world frame: " + desiredHandPoseAfterTurn + "\n");
+
+      return desiredHandPoseAfterTurn;
    }
-   
+
    private HandPosePacket createHandPosePacket(double trajectoryTime, FramePose desiredHandPoseInWorld)
    {
       Point3d position = new Point3d();
@@ -281,7 +304,22 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      currentBehavior.passReceivedControllerObjectToChildBehaviors(object);
+      if (object instanceof HandPoseStatus && currentBehavior.equals(handPoseBehavior))
+      {
+         SysoutTool.println(" Received object from controller: " + object.toString() + ".  Sending to: " + currentBehavior, DEBUG);
+         currentBehavior.consumeObjectFromController(object);
+         currentBehavior.passReceivedControllerObjectToChildBehaviors(object);
+      }
+      else if (object instanceof HandPoseStatus && currentBehavior.equals(handPoseBehavior2))
+      {
+         SysoutTool.println(" Received object from controller: " + object.toString() + ".  Sending to: " + currentBehavior, DEBUG);
+         currentBehavior.consumeObjectFromController(object);
+         currentBehavior.passReceivedControllerObjectToChildBehaviors(object);
+      }
+      else
+      {
+         currentBehavior.passReceivedControllerObjectToChildBehaviors(object);
+      }
    }
 
    @Override
@@ -334,27 +372,19 @@ public class TurnValveBehavior extends BehaviorInterface
    {
       isDone.set(false);
       hasInputBeenSet.set(false);
-      if (scriptBehavior != null)
-      {
-         scriptBehavior.initialize();
-      }
-      if (walkToLocationBehavior != null)
-      {
-         walkToLocationBehavior.initialize();
-      }
-      if (handPoseBehavior != null)
-      {
-         handPoseBehavior.initialize();
-      }
 
       behaviorQueue.clear();
       behaviorQueue.add(walkToLocationBehavior);
-      behaviorQueue.add(graspObjectBehavior);
+      behaviorQueue.add(comHeightBehavior);
+      behaviorQueue.add(graspValveBehavior);
       behaviorQueue.add(handPoseBehavior);
       behaviorQueue.add(handPoseBehavior2);
 
-      //      behaviorQueue.add(handPoseBehavior);
-      //      behaviorQueue.add(scriptBehavior);
+      for (BehaviorInterface behavior : behaviorQueue)
+      {
+         behavior.initialize();
+      }
+
       currentBehavior = behaviorQueue.remove(0);
    }
 
