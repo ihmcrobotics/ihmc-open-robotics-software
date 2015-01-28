@@ -25,7 +25,6 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.Plane3d;
@@ -46,6 +45,8 @@ public class QuadTreeForGroundHeightMapTest
    @Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
+      boolean visualizeAndKeepUp = false;
+      
       double minX = -1.0; //5.0f;
       double minY = -3.0; //5.0f;
       double maxX = 1.0; //5.0f;
@@ -61,7 +62,7 @@ public class QuadTreeForGroundHeightMapTest
 //      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise );
 
       int maxBalls = 200;
-      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2d(minX, minY, maxX, maxY), maxBalls);
+      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2d(minX, minY, maxX, maxY), maxBalls, visualizeAndKeepUp);
       testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
 
 //      String filename = "resources/pointListsForTesting/pointList150122_DRCObstacleCourse.pointList";
@@ -80,104 +81,54 @@ public class QuadTreeForGroundHeightMapTest
       boolean drawPointsInBlue = false;
       testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue , pointsPerBallUpdate);
       
+//      helper.createHeightMap(points, rangeOfPointsToTest, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, maxNodes);
+
+      if (visualizeAndKeepUp)
+      {
+//         testHelper.drawPoints(points, resolution/2.0, YoAppearance.Blue());
+      
 //      testHelper.drawHeightOfOriginalPointsInPurple(points, 1);
 //      Graphics3DNode handle = testHelper.drawNodeBoundingBoxes(-0.1);
-      
-      
-      testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
-//      testHelper.drawAllPointsInQuadTree(YoAppearance.Purple());
+//      testHelper.drawHeightMap(minX, minY, maxX, maxY, resolution);
+      testHelper.drawAllPointsInQuadTree(resolution/2.0, YoAppearance.Purple());
       
       testHelper.displaySimulationConstructionSet();
-
+      }
       
       
 //      testHelper.doATest(points, pointsPerBallUpdate);
-      ThreadTools.sleepForever();
-   }
-   
-   
-   
- @Ignore
-   @Test(timeout = 300000)
-   public void testThreePointsOnALine()
-   {
-      float minX = -0.04f;
-      float minY = -0.04f;
-      float maxX = 1.0f;
-      float maxY = 0.06f;
-      float resolution = 0.02f;
-      float heightThreshold = 0.002f;
-      double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
-      int maxSameHeightPointsPerNode = 20;
-      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
-
-      //      CleanQuadTree quadTree = new CleanQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold);
-      Box bounds = new Box(minX, minY, maxX, maxY);
-      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
-      QuadTreeForGroundHeightMap quadTree = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
-
-      float height0 = 0.0f;
-      float height1 = 0.0f;
-      float height2 = 0.2f;
-
-      quadTree.put(0.0f, 0.0f, height0);
-      quadTree.put(0.1f, 0.0f, height1);
-      quadTree.put(0.2f, 0.0f, height2);
-
-      double returnHeight0 = quadTree.getHeightAtPoint(0.0f, 0.0f);
-      double returnHeight1 = quadTree.getHeightAtPoint(0.1f, 0.0f);
-      double returnHeight2 = quadTree.getHeightAtPoint(0.2f, 0.0f);
-
-      assertEquals(height0, returnHeight0, 1e-7);
-      assertEquals(height1, returnHeight1, 1e-7);
-      assertEquals(height2, returnHeight2, 1e-7);
+      if (visualizeAndKeepUp)
+         ThreadTools.sleepForever();
    }
 
-   @Ignore
-   @Test(timeout = 300000)
-   public void testOnALineOfPoints()
-   {
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
-      points.add(new Point3d(0.0, 0.0, 0.0));
-      points.add(new Point3d(0.1, 0.0, 0.0));
-      points.add(new Point3d(0.2, 0.0, 0.2));
-//      points.add(new Point3d(0.3, 0.0, 0.2));
-
-      double resolution = 0.02;
-
-      BoundingBox2d boundingBox = new BoundingBox2d(-0.04, -0.04, 1.0, 0.06);
-      int pointsPerBallUpdate = 1;
-      testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution);
-
-      ThreadTools.sleepForever();
-   }
-
-   @Ignore
    @Test(timeout = 300000)
    public void testOnSomeSlopes()
    {
+      boolean visualizeAndKeepUp = false;
+
       double halfWidth = 0.5;
       double resolution = 0.1;
 
       Point3d center = new Point3d(0.0, 0.0, 0.3);
       Vector3d normal = new Vector3d(0.1, 0.2, 0.8);
-      testOnASlope(center, normal, halfWidth, resolution);
+      testOnASlope(center, normal, halfWidth, resolution, visualizeAndKeepUp);
 
       center = new Point3d(0.0, 0.0, 0.3);
       normal = new Vector3d(1.0, 1.0, 1.0);
-      testOnASlope(center, normal, halfWidth, resolution);
+      testOnASlope(center, normal, halfWidth, resolution, visualizeAndKeepUp);
 
       center = new Point3d(0.0, 0.0, 0.3);
       normal = new Vector3d(-1.0, 1.0, 1.0);
-      testOnASlope(center, normal, halfWidth, resolution);
+      testOnASlope(center, normal, halfWidth, resolution, visualizeAndKeepUp);
 
-//    ThreadTools.sleepForever();
+      if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-   @Ignore
    @Test(timeout = 300000)
    public void testOnSomeStairCases()
    {
+      boolean visualizeAndKeepUp = false;
+
       double halfWidth = 0.6;
       double resolution = 0.02;
 
@@ -186,7 +137,7 @@ public class QuadTreeForGroundHeightMapTest
       double oneStairLandingHeight = 0.0;
 
       Vector3d normal = new Vector3d(0.3, -0.3, 1.0);
-      testOnAStaircase(center, normal, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
+      testOnAStaircase(center, normal, halfWidth, resolution, stairSeparation, oneStairLandingHeight, visualizeAndKeepUp);
 
 //    normal = new Vector3d(0.3, 0.3, 1.0);
 //    testOnAStaircase(center, normal, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
@@ -197,13 +148,14 @@ public class QuadTreeForGroundHeightMapTest
 //    normal = new Vector3d(-0.3, -0.3, 1.0);
 //    testOnAStaircase(center, normal, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
-      ThreadTools.sleepForever();
+      if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-   @Ignore
    @Test(timeout = 300000)
    public void testUsingStairGroundProfile()
    {
+      boolean visualizeAndKeepUp = false;
+      
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
 
       double centerX = -3.5;
@@ -216,27 +168,33 @@ public class QuadTreeForGroundHeightMapTest
       double maxY = centerY + halfWidth;
 
       BoundingBox2d boundingBox = new BoundingBox2d(minX, minY, maxX, maxY);
-
+ 
       double resolution = 0.02;
       double heightThreshold = 0.002;
-      double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
+      double maxMultiLevelZChangeToFilterNoise = 0.2;
+      int maxSameHeightPointsPerNode = 10;
+      double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
       int maxNodes = 1000000;
 
-      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(boundingBox, (int) ((halfWidth/resolution) * (halfWidth/resolution)));      
-      testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
+      QuadTreeForGroundParameters parameters = new QuadTreeForGroundParameters(resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+
+      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(boundingBox, (int) ((halfWidth/resolution) * (halfWidth/resolution)), visualizeAndKeepUp);      
+      testHelper.setResolutionParameters(resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxNodes);
 
       ArrayList<Point3d> points = testHelper.createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
       int pointsPerBallUpdate = 1;
-      testHelper.doATest(points, pointsPerBallUpdate);
+      
+      boolean drawPointsInBlue = false;
+      testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue, pointsPerBallUpdate);
 
       // TODO: Get this to pass!
       testHelper.assertPointsLieOnHeightMap(points);
 
-      ThreadTools.sleepForever();
+      if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
   
 
-   private void testOnAStaircase(Point3d center, Vector3d normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight)
+   private QuadTreeTestHelper testOnAStaircase(Point3d center, Vector3d normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight, boolean visualize)
    {
       normal.normalize();
 
@@ -247,10 +205,24 @@ public class QuadTreeForGroundHeightMapTest
 //      Collections.shuffle(points);
       
       int pointsPerBallUpdate = 1;
-      testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution);
+      QuadTreeTestHelper testHelper = testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution, visualize);
+      
+      if (visualize)
+      {
+         testHelper.drawPoints(points, resolution/2.0, YoAppearance.Blue());
+
+         ArrayList<Point3d> allPointsInQuadTree = testHelper.getAllPointsInQuadTree();
+         testHelper. drawPoints(allPointsInQuadTree, resolution*0.6, YoAppearance.Chartreuse());
+      }
+
+//      testHelper. drawPointsWithinAreaInSCS(pointsPerBallUpdate, YoAppearance.Chartreuse());
+//      testHelper.drawHeightOfOriginalPointsInPurple(points, pointsPerBallUpdate);
+//      testHelper.drawHeightMap(boundingBox, resolution);
+      
+      return testHelper;
    }
 
-   private void testOnASlope(Point3d center, Vector3d normal, double halfWidth, double resolution)
+   private QuadTreeTestHelper testOnASlope(Point3d center, Vector3d normal, double halfWidth, double resolution, boolean visualize)
    {
       normal.normalize();
 
@@ -259,20 +231,24 @@ public class QuadTreeForGroundHeightMapTest
       ArrayList<Point3d> points = generatePointsForSlope(plane3d, halfWidth, resolution);
       
       int pointsPerBallUpdate = 1;
-      testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution);
+      return testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution, visualize);
    }
 
-   private void testOnAListOfPoints(ArrayList<Point3d> points, int pointsPerBallUpdate, BoundingBox2d rangeOfPoints, double resolution)
+   private QuadTreeTestHelper testOnAListOfPoints(ArrayList<Point3d> points, int pointsPerBallUpdate, BoundingBox2d rangeOfPoints, double resolution, boolean visualize)
    {
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       int maxNodes = 1000000;
 
-      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(rangeOfPoints, points.size());
+      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(rangeOfPoints, points.size(), visualize);
       testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
 
-      testHelper.doATest(points, pointsPerBallUpdate);
+      boolean drawPointsInBlue = false;
+      testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue, pointsPerBallUpdate);
+      
       testHelper.assertPointsLieOnHeightMap(points);
+      
+      return testHelper;
    }
 
 
@@ -322,9 +298,11 @@ public class QuadTreeForGroundHeightMapTest
 
    private static class QuadTreeTestHelper
    {
-      private Robot robot = new Robot("TestQuadTree");
-      private SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      private YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      private final boolean visualize;
+      private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+      private final Robot robot;
+      private final SimulationConstructionSet scs;
       
       private final BagOfBalls bagOfBalls;
       private final YoFramePoint queryPoint;
@@ -343,25 +321,47 @@ public class QuadTreeForGroundHeightMapTest
       private int maxNodes = 1000000;
 
       
-      public QuadTreeTestHelper(BoundingBox2d rangeOfPointsToTest, int maxNumberOfBallsInBag)
+      public QuadTreeTestHelper(BoundingBox2d rangeOfPointsToTest, int maxNumberOfBallsInBag, boolean visualize)
       {
-         //         int maxBagOfBallsSize = 500;
-         //         int numberOfBalls = Integer.min(points.size(), maxBagOfBallsSize);
-
-         scs.setGroundVisible(false);
-         this.rangeOfPointsToTest = rangeOfPointsToTest;
-
-         YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-
-         double ballSize = resolution * 0.35;
-
-         bagOfBalls = new BagOfBalls(maxNumberOfBallsInBag, ballSize, registry, yoGraphicsListRegistry);
+         this.visualize = visualize;
+         
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          queryPoint = new YoFramePoint("queryPoint", worldFrame, registry);
+         this.rangeOfPointsToTest = rangeOfPointsToTest;
 
-         YoGraphicPosition queryViz = new YoGraphicPosition("Query", queryPoint, 1.1 * ballSize, YoAppearance.Red());
-         yoGraphicsListRegistry.registerYoGraphic("Query", queryViz);
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+         if (visualize)
+         {
+            robot = new Robot("TestQuadTree");
+            robot.getRobotsYoVariableRegistry().addChild(registry);
+            scs = new SimulationConstructionSet(robot);
+            
+            scs.setGroundVisible(false);
+            
+            YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+            double ballSize = resolution * 0.35;
+
+            bagOfBalls = new BagOfBalls(maxNumberOfBallsInBag, ballSize, registry, yoGraphicsListRegistry);
+            
+            YoGraphicPosition queryViz = new YoGraphicPosition("Query", queryPoint, 1.1 * ballSize, YoAppearance.Red());
+            yoGraphicsListRegistry.registerYoGraphic("Query", queryViz);
+            scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+         }
+         else
+         {
+            robot = null;
+            scs = null;
+            bagOfBalls = null;
+         }
+         
+      }
+
+      public ArrayList<Point3d> getAllPointsInQuadTree()
+      {
+         ArrayList<Point3d> pointsToReturn = new ArrayList<Point3d>();
+         ((QuadTreeForGroundHeightMap) heightMap).getAllPoints(pointsToReturn);
+         return pointsToReturn;
+         
       }
 
       public void setResolutionParameters(double resolution, double heightThreshold, double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxNodes)
@@ -372,35 +372,38 @@ public class QuadTreeForGroundHeightMapTest
          this.maxNodes = maxNodes;
       }
 
-      public HeightMap getHeightMap()
+      public QuadTreeHeightMapInterface getHeightMap()
       {
          return heightMap;
       }
 
-      public void doATest(ArrayList<Point3d> points, int pointsPerBallUpdate)
-      {
-         boolean drawPointsInBlue = true;
-         createHeightMapFromAListOfPoints(points, drawPointsInBlue , pointsPerBallUpdate);
-         drawPointsWithinAreaInSCS(pointsPerBallUpdate);
-         drawHeightOfOriginalPointsInPurple(points, pointsPerBallUpdate);
-         displaySimulationConstructionSet();
-      }
-      
       private void displaySimulationConstructionSet()
       {
-         scs.startOnAThread();
+         if (visualize) scs.startOnAThread();
       } 
         
+      
+      public Graphics3DNode drawPoints(ArrayList<Point3d> points, double resolution, AppearanceDefinition appearance)
+      {
+         return QuadTreeHeightMapVisualizer.drawPoints(scs, points, resolution, appearance);       
+      }
+      
+      public Graphics3DNode drawHeightMap(BoundingBox2d rangeOfPoints, double resolution2)
+      {
+         return QuadTreeHeightMapVisualizer.drawHeightMap(heightMap, scs, rangeOfPoints, resolution);  
+         
+      }
+      
       private Graphics3DNode drawHeightMap(double minX, double minY, double maxX, double maxY, float resolution)
       {
          return QuadTreeHeightMapVisualizer.drawHeightMap(heightMap, scs, minX, minY, maxX, maxY, resolution);  
       }
 
-      private Graphics3DNode drawAllPointsInQuadTree(AppearanceDefinition appearance)
+      private Graphics3DNode drawAllPointsInQuadTree(double sizeToDrawCubes, AppearanceDefinition appearance)
       {
-         return QuadTreeHeightMapVisualizer.drawAllPointsInQuadTree(heightMap, resolution, scs, appearance);
+         return QuadTreeHeightMapVisualizer.drawAllPointsInQuadTree(heightMap, sizeToDrawCubes, scs, appearance);
       }
-
+      
       private Graphics3DNode drawNodeBoundingBoxes(double heightToDrawAt)
       {
          if (heightMap instanceof QuadTreeForGroundHeightMap)
@@ -408,12 +411,14 @@ public class QuadTreeForGroundHeightMapTest
             Graphics3DNode handle = QuadTreeHeightMapVisualizer.drawNodeBoundingBoxes((QuadTreeForGroundHeightMap) heightMap, scs, heightToDrawAt);
             return handle;
          }
-         
-         return null;
+
+         return null;     
       }
       
       private void drawHeightOfOriginalPointsInPurple(ArrayList<Point3d> points, int pointsPerBallUpdate)
       {
+         if (!visualize) return;
+         
          int count = 0;
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
          for (Point3d point : points)
@@ -435,8 +440,10 @@ public class QuadTreeForGroundHeightMapTest
          scs.addStaticLinkGraphics(staticLinkGraphics);
       }
 
-      private void drawPointsWithinAreaInSCS(int pointsPerBallUpdate)
+      private Graphics3DNode drawPointsWithinAreaInSCS(int pointsPerBallUpdate, AppearanceDefinition appearance)
       {
+         if (!visualize) return null;
+         
          Point2d centerPoint = new Point2d();
          rangeOfPointsToTest.getCenterPointCopy(centerPoint);
          List<Point3d> allPointsWithinArea = heightMap.getAllPointsWithinArea(centerPoint.getX(), centerPoint.getY(), 10.0, 10.0);
@@ -450,14 +457,13 @@ public class QuadTreeForGroundHeightMapTest
             {
                count = 0;
 
-               //            Graphics3DObject staticLinkGraphics = new Graphics3DObject();
                staticLinkGraphics.identity();
                double cubeSize = resolution * 0.5;
                staticLinkGraphics.translate(new Vector3d(point3d.getX(), point3d.getY(), point3d.getZ() -cubeSize / 2.0 + 0.001));
-               staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize, YoAppearance.Chartreuse());
+               staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize, appearance);
             }
          }
-         scs.addStaticLinkGraphics(staticLinkGraphics);
+         return scs.addStaticLinkGraphics(staticLinkGraphics);
       }
 
 
@@ -511,14 +517,6 @@ public class QuadTreeForGroundHeightMapTest
          QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
          heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
          
-//      CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise);
-//         CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX - resolution, minY - resolution, maxX + resolution, maxY + resolution, resolution,
-//                                               heightThreshold);
-
-//         heightMap.checkRepInvarients();
-//       heightMap = new QuadTreeHeightMap(minX, minY, maxX, maxY, resolution, heightThreshold);
-//       heightMap = new GroundOnlyQuadTree(rangeOfPointsToTest, resolution, heightThreshold, maxNodes);
-
          int pointsPerBall = 0;
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
 
@@ -526,37 +524,46 @@ public class QuadTreeForGroundHeightMapTest
          {
             queryPoint.set(point);
 
-            heightMap.addPoint(point.getX(), point.getY(), point.getZ());
+            boolean pointWasAdded = heightMap.addPoint(point.getX(), point.getY(), point.getZ());
 
-            if (drawPointsInBlue)
+            if (visualize)
             {
-               staticLinkGraphics.identity();
-               staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), point.getZ() + 0.001));
-               double cubeSize = resolution * 0.35;
-               staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Blue());
-            }
-            
-            pointsPerBall++;
-            if (pointsPerBall >= pointsPerBallUpdate)
-            {
-               pointsPerBall = 0;
-
-               if (scs != null)
+               if (drawPointsInBlue)
                {
-                  bagOfBalls.reset();
+                  staticLinkGraphics.identity();
+                  staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), point.getZ() + 0.001));
+                  double cubeSize = resolution * 0.35;
+                  if (pointWasAdded) staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Blue());
+                  else staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Red());
+               }
 
-                  for (Point3d checkPoint : points)
+               pointsPerBall++;
+               if (pointsPerBall >= pointsPerBallUpdate)
+               {
+                  pointsPerBall = 0;
+
+                  if (scs != null)
                   {
-                     double z2 = heightMap.getHeightAtPoint(checkPoint.getX(), checkPoint.getY());
-                     bagOfBalls.setBall(checkPoint.getX(), checkPoint.getY(), z2);
-                  }
+                     bagOfBalls.reset();
 
-                  scs.tickAndUpdate();
+                     for (Point3d checkPoint : points)
+                     {
+                        double z2 = heightMap.getHeightAtPoint(checkPoint.getX(), checkPoint.getY());
+                        bagOfBalls.setBall(checkPoint.getX(), checkPoint.getY(), z2);
+                     }
+
+                     scs.tickAndUpdate();
+                  }
                }
             }
          }
-         
-         scs.addStaticLinkGraphics(staticLinkGraphics);
+
+         if (visualize)
+         {
+            scs.addStaticLinkGraphics(staticLinkGraphics);
+            displaySimulationConstructionSet();
+         }
+
       }
    }
 

@@ -110,11 +110,14 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
          maskedPointsToPack.addAll(originalPoints);
       }
 
-      for (Point3d point : originalPoints)
+      else
       {
-         if (maskFunctionAboutCenter.isIncluded(point))
+         for (Point3d point : originalPoints)
          {
-            maskedPointsToPack.add(point);
+            if (maskFunctionAboutCenter.isIncluded(point))
+            {
+               maskedPointsToPack.add(point);
+            }
          }
       }
    }
