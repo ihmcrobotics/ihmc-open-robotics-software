@@ -20,6 +20,8 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.providers.ConstantVectorProvider;
+import us.ihmc.utilities.math.trajectories.providers.CurrentAngularVelocityProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentLinearVelocityProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
@@ -27,6 +29,8 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -34,9 +38,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.TwoViaPointTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
@@ -54,7 +58,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final YoVariableDoubleProvider swingTimeRemaining;
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
-   private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
+   private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
    private final CurrentConfigurationProvider initialConfigurationProvider;
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
@@ -86,8 +90,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
-      VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, momentumBasedController.getFullRobotModel().getFoot(robotSide),
-            momentumBasedController.getTwistCalculator());
+      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      RigidBody rigidBody = contactableBody.getRigidBody();
+      VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
@@ -148,8 +153,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       positionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, registry);
 
-      orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
-            initialConfigurationProvider, finalConfigurationProvider, registry);
+      VectorProvider initialAngularVelocityProvider = new CurrentAngularVelocityProvider(footFrame, rigidBody, twistCalculator);
+      VectorProvider finalAngularVelocityProvider = new ConstantVectorProvider(new FrameVector(footFrame));
+      orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
+            initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
    }
 
    @Override
