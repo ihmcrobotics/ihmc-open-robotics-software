@@ -72,7 +72,7 @@ public class GraspValveBehavior extends BehaviorInterface
       midPoseOffsetFromFinalPose = new DoubleYoVariable("offsetToThePointOfGrabbing", registry);
    }
 
-   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Vector3d approachDirection, boolean graspValveRim)
+   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Vector3d approachDirectionInValveFrame, boolean graspValveRim)
    {
       Vector3d worldToValveVec = new Vector3d();
       valveTransformToWorld.getTranslation(worldToValveVec);
@@ -88,7 +88,10 @@ public class GraspValveBehavior extends BehaviorInterface
          finalGraspPosInWorld.add(valveCenterToRimVecInWorldFrame);
       }
 
-      setGraspPose(valveType, valveTransformToWorld, finalGraspPosInWorld, approachDirection);
+      Vector3d approachDirectionInWorld = new Vector3d(approachDirectionInValveFrame);
+      valveTransformToWorld.transform(approachDirectionInWorld);
+      
+      setGraspPose(valveType, valveTransformToWorld, finalGraspPosInWorld, approachDirectionInWorld);
    }
 
    public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Point3d finalGraspPosInWorld, Vector3d finalToMidGraspVec)

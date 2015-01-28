@@ -1,36 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
@@ -42,33 +27,21 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
-import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.FrameOrientation2d;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 
 public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterface
 {
@@ -151,7 +124,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      ThreadTools.sleepForever();
+      //      ThreadTools.sleepForever();
       if (drcSimulationTestHelper != null)
       {
          drcSimulationTestHelper.destroySimulation();
@@ -161,9 +134,11 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-      @Test(timeout = 300000)
+   @Test(timeout = 300000)
    public void testWalkAndTurnValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
+      BambooTools.reportTestStartedMessage();
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -173,10 +148,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
       FramePose valvePose = new FramePose(worldFrame, valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose);
-      SysoutTool.println("Robot Pose = " + getRobotPose());
+      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
+      SysoutTool.println("Robot Pose = " + getRobotPose(), DEBUG);
 
-      double trajectoryTime = 20.0;
+      double elapsedTimeToWalkAndTurnValve = 20.0;
 
       final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
             yoTippingDetected, getRobotModel().getWalkingControllerParameters());
@@ -186,10 +161,15 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
 
-      success = executeBehavior(turnValveBehavior, trajectoryTime);
+      double initialValveAngle = valveRobot.getClosePercentage();
+      success = executeBehavior(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
       assertTrue(success);
+      double finalValveAngle = valveRobot.getClosePercentage();
 
       assertTrue(turnValveBehavior.isDone());
+      assertTrue(finalValveAngle > initialValveAngle);
+
+      BambooTools.reportTestFinishedMessage();
    }
 
    private FramePose getRobotPose()
