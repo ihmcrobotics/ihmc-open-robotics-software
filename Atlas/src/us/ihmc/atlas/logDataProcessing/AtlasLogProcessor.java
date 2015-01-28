@@ -6,6 +6,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.DRCLogProcessor;
+import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
 
 public class AtlasLogProcessor extends DRCLogProcessor
 {
@@ -13,6 +14,7 @@ public class AtlasLogProcessor extends DRCLogProcessor
    {
       super();
       
+      LogDataProcessorHelper logDataProcessorHelper = createLogDataProcessorHelper();
       FootRotationProcessor footRotationProcessor = new FootRotationProcessor(logDataProcessorHelper);
       setLogDataProcessor(footRotationProcessor);
       

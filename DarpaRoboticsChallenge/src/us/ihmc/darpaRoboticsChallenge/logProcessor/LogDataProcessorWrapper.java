@@ -21,6 +21,7 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    private final List<YoVariable<?>> varsToSave = new ArrayList<>();
    private final LinkedHashMap<YoVariable<?>, Double> yoVarsToDoublesMap = new LinkedHashMap<>();
 
+   private final boolean haveFoundControllerTimerVariable;
    private boolean isControllerTick = true;
 
    public LogDataProcessorWrapper(SimulationConstructionSet scs)
@@ -29,14 +30,22 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
       scs.addScript(this);
       
       YoVariable<?> controllerTimerCount = scs.getVariable(DRCControllerThread.class.getSimpleName(), "controllerTimerCount");
-      controllerTimerCount.addVariableChangedListener(new VariableChangedListener()
+      haveFoundControllerTimerVariable = controllerTimerCount != null;
+      if (!haveFoundControllerTimerVariable)
       {
-         @Override
-         public void variableChanged(YoVariable<?> v)
+         System.err.println("Could not find controller timer variable, running processors at log data rate");
+      }
+      else
+      {
+         controllerTimerCount.addVariableChangedListener(new VariableChangedListener()
          {
-            isControllerTick = true;
-         }
-      });
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               isControllerTick = true;
+            }
+         });
+      }
    }
 
    @Override
@@ -49,7 +58,7 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    public void processData()
    {
       retrieveYoVariablesFromDoubles();
-      if (isControllerTick)
+      if (isControllerTick || !haveFoundControllerTimerVariable)
       {
          isControllerTick = false;
          processDataAtControllerRate();
@@ -61,7 +70,7 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    @Override
    public void doScript(double t)
    {
-      if (isControllerTick)
+      if (isControllerTick || !haveFoundControllerTimerVariable)
       {
          isControllerTick = false;
          processDataAtControllerRate();

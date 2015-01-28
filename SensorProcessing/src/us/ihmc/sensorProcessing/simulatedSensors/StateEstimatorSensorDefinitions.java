@@ -41,6 +41,12 @@ public class StateEstimatorSensorDefinitions
       imuSensorDefinitions.add(imuDefinition);
    }
 
+   public void addIMUSensorDefinition(IMUDefinition[] imuDefinitions)
+   {
+      for (IMUDefinition imuDefinition : imuDefinitions)
+         imuSensorDefinitions.add(imuDefinition);
+   }
+
    public void addForceSensorDefinition(ForceSensorDefinition forceSensorDefinition)
    {
       forceSensorDefinitions.add(forceSensorDefinition);

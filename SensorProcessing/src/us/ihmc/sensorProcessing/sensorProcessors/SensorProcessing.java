@@ -429,7 +429,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          YoFrameVector intermediateAngularVelocity = intermediateAngularVelocities.get(imuDefinition);
          List<ProcessingYoVariable> processors = processedAngularVelocities.get(imuDefinition);
          String suffix = "_sp" + processors.size();
-         AlphaFilteredYoFrameVector filteredAngularVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("prefilt_qd_w", imuName + suffix, registry, alphaFilter, intermediateAngularVelocity);
+         AlphaFilteredYoFrameVector filteredAngularVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_qd_w", imuName + suffix, registry, alphaFilter, intermediateAngularVelocity);
          processors.add(filteredAngularVelocity);
          
          if (!forVizOnly)
