@@ -17,13 +17,13 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public abstract class DRCLogProcessor
 {
    private final LogVisualizer logVisualizer;
-   private final SimulationConstructionSet scs;
    private final Plotter plotter;
 
-   private final DRCRobotModel drcRobotModel;
    private final LogDataProcessorWrapper logDataProcessorWrapper;
+   private final SDFRobot sdfRobot;
 
-   protected final LogDataProcessorHelper logDataProcessorHelper;
+   protected final SimulationConstructionSet scs;
+   protected final DRCRobotModel drcRobotModel;
 
    public DRCLogProcessor() throws IOException
    {
@@ -37,10 +37,14 @@ public abstract class DRCLogProcessor
       scs.setFastSimulate(true, numberOfTicksBeforeUpdatingGraphs);
 
       logDataProcessorWrapper = new LogDataProcessorWrapper(scs);
-      SDFRobot sdfRobot = logVisualizer.getSDFRobot();
-      logDataProcessorHelper = new LogDataProcessorHelper(drcRobotModel, scs, sdfRobot);
+      sdfRobot = logVisualizer.getSDFRobot();
 
       scs.addButton(new UpdateLogDataProcessorButton(logDataProcessorWrapper));
+   }
+
+   public LogDataProcessorHelper createLogDataProcessorHelper()
+   {
+      return new LogDataProcessorHelper(drcRobotModel, scs, sdfRobot);
    }
 
    public abstract DRCRobotModel createDRCRobotModel();

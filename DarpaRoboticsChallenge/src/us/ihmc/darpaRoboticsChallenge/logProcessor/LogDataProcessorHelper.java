@@ -6,8 +6,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -16,6 +18,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
@@ -24,14 +29,11 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 public class LogDataProcessorHelper
 {
    private final FullRobotModel fullRobotModel;
+   private final FullInverseDynamicsStructure inverseDynamicsStructure;
    private final ReferenceFrames referenceFrames;
    private final SDFPerfectSimulatedSensorReader sensorReader;
+   private final LogDataRawSensorMap rawSensorMap;
    private final TwistCalculator twistCalculator;
-   public WalkingControllerParameters getWalkingControllerParameters()
-   {
-      return walkingControllerParameters;
-   }
-
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
@@ -41,12 +43,20 @@ public class LogDataProcessorHelper
    private final double controllerDT;
    private final WalkingControllerParameters walkingControllerParameters;
 
+   private final SideDependentList<FootSwitchInterface> stateEstimatorFootSwitches;
+   
+   private final SimulationConstructionSet scs;
+
    public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, SDFRobot sdfRobot)
    {
+      this.scs = scs;
       fullRobotModel = model.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
       sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
+      rawSensorMap = new LogDataRawSensorMap(fullRobotModel, scs);
       twistCalculator = new TwistCalculator(fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator());
+      
+      inverseDynamicsStructure = new FullInverseDynamicsStructure(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getRootJoint());
 
       controllerDT = model.getControllerDT();
       this.walkingControllerParameters = model.getWalkingControllerParameters();
@@ -83,6 +93,70 @@ public class LogDataProcessorHelper
          EnumYoVariable<?> footState = (EnumYoVariable<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
          footStates.put(robotSide, footState);
       }
+
+      stateEstimatorFootSwitches = createStateEstimatorFootSwitches(scs);
+   }
+
+   private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(YoVariableHolder yoVariableHolder)
+   {
+      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
+      
+      for (final RobotSide robotSide : RobotSide.values)
+      {
+         String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
+         String nameSpaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
+         final BooleanYoVariable hasFootHitGround = (BooleanYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
+         final BooleanYoVariable forceMagnitudePastThreshhold = (BooleanYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix +  "ForcePastThresh");
+         final DoubleYoVariable footLoadPercentage = (DoubleYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
+
+         FootSwitchInterface footSwitch = new FootSwitchInterface()
+         {
+            
+            @Override
+            public void reset()
+            {
+            }
+            
+            @Override
+            public boolean hasFootHitGround()
+            {
+               return hasFootHitGround.getBooleanValue();
+            }
+            
+            @Override
+            public ReferenceFrame getMeasurementFrame()
+            {
+               return null;
+            }
+            
+            @Override
+            public boolean getForceMagnitudePastThreshhold()
+            {
+               return forceMagnitudePastThreshhold.getBooleanValue();
+            }
+            
+            @Override
+            public double computeFootLoadPercentage()
+            {
+               return footLoadPercentage.getDoubleValue();
+            }
+            
+            @Override
+            public void computeAndPackFootWrench(Wrench footWrenchToPack)
+            {
+            }
+            
+            @Override
+            public void computeAndPackCoP(FramePoint2d copToPack)
+            {
+               cops.get(robotSide).getFrameTuple2dIncludingFrame(copToPack);
+            }
+         };
+         
+         footSwitches.put(robotSide, footSwitch);
+      }
+      
+      return footSwitches;
    }
 
    public void update()
@@ -96,6 +170,11 @@ public class LogDataProcessorHelper
       return fullRobotModel;
    }
 
+   public FullInverseDynamicsStructure getInverseDynamicsStructure()
+   {
+      return inverseDynamicsStructure;
+   }
+
    public ReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
@@ -106,9 +185,19 @@ public class LogDataProcessorHelper
       return twistCalculator;
    }
 
+   public LogDataRawSensorMap getRawSensorMap()
+   {
+      return rawSensorMap;
+   }
+
    public SideDependentList<ContactablePlaneBody> getContactableFeet()
    {
       return contactableFeet;
+   }
+
+   public SideDependentList<FootSwitchInterface> getStateEstimatorFootSwitches()
+   {
+      return stateEstimatorFootSwitches;
    }
 
    public ConstraintType getCurrenFootState(RobotSide robotSide)
@@ -129,5 +218,15 @@ public class LogDataProcessorHelper
    public double getControllerDT()
    {
       return controllerDT;
+   }
+
+   public WalkingControllerParameters getWalkingControllerParameters()
+   {
+      return walkingControllerParameters;
+   }
+
+   public YoVariableHolder getLogYoVariableHolder()
+   {
+      return scs;
    }
 }
