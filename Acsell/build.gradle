@@ -29,7 +29,10 @@ setupProjectSpecificDependencies()
 jar {
 	List depend = []
 	configurations.runtime.each {
-		depend.add('lib/' + it.name)
+	if(!it.name.contains("IHMCHumanoidOperatorInterface"))
+		{
+			depend.add('lib/' + it.name)
+		}
 	}
 	manifest {		
 		attributes('Created-By': 'IHMC Gradle Build Script', 'Implementation-Vendor': 'IHMC', 'Class-Path': depend.join(' '))
