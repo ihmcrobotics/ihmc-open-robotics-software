@@ -6,9 +6,9 @@ import javax.vecmath.Point3f;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.QuadTreeListener;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
 
-public class DRCOctree extends Octree implements QuadTreeListener
+public class DRCOctree extends Octree implements QuadTreeForGroundListener
 {
 
    public DRCOctree(OneDimensionalBounds[] bounds, double resolution)

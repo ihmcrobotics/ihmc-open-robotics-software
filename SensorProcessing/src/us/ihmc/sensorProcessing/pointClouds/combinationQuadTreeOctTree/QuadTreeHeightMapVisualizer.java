@@ -10,14 +10,11 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadLeaf;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadNode;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundLeaf;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundNode;
 
-public class SimplifiedGroundOnlyQuadTreeVisualizer
+public class QuadTreeHeightMapVisualizer
 {
-// private static final AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
-
-   
    public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, double minX, double minY, double maxX, double maxY, double resolution)
    {
       AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
@@ -50,10 +47,10 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
 
    public static Graphics3DNode drawAllPointsInQuadTree(QuadTreeHeightMapInterface heightMap, double resolution, SimulationConstructionSet scs, AppearanceDefinition appearance)
    {
-      if (heightMap instanceof SimplifiedGroundOnlyQuadTree)
+      if (heightMap instanceof QuadTreeForGroundHeightMap)
       {
          ArrayList<Point3d> points = new ArrayList<Point3d>();
-         ((SimplifiedGroundOnlyQuadTree) heightMap).getAllPoints(points);
+         ((QuadTreeForGroundHeightMap) heightMap).getAllPoints(points);
 
          return drawPoints(scs, points, resolution, appearance);
       }
@@ -76,9 +73,9 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
    }
 
 
-   public static Graphics3DNode drawNodeBoundingBoxes(SimplifiedGroundOnlyQuadTree heightMap, SimulationConstructionSet scs, double heightToDrawAt)
+   public static Graphics3DNode drawNodeBoundingBoxes(QuadTreeForGroundHeightMap heightMap, SimulationConstructionSet scs, double heightToDrawAt)
    {
-      SimplifiedQuadNode rootNode = heightMap.getRootNode();
+      QuadTreeForGroundNode rootNode = heightMap.getRootNode();
       Graphics3DObject nodeBoundsGraphic = new Graphics3DObject();
       drawNodeBoundingBoxesRecursively(rootNode, nodeBoundsGraphic, 0, heightToDrawAt);
 
@@ -86,7 +83,7 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
       return graphics3DNodeHandle;
    }
 
-   private static void drawNodeBoundingBoxesRecursively(SimplifiedQuadNode node, Graphics3DObject nodeBoundsGraphic, int depth, double nodeZ)
+   private static void drawNodeBoundingBoxesRecursively(QuadTreeForGroundNode node, Graphics3DObject nodeBoundsGraphic, int depth, double nodeZ)
    {
       AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
 
@@ -101,29 +98,21 @@ public class SimplifiedGroundOnlyQuadTreeVisualizer
       }
       else
       {
-         SimplifiedQuadLeaf leaf = node.getLeaf();
+         QuadTreeForGroundLeaf leaf = node.getLeaf();
          if (leaf != null)
          {
             Point3d averagePoint = leaf.getAveragePoint();
             nodeBoundsGraphic.translate(bounds.centreX, bounds.centreY, averagePoint.getZ());
             nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, YoAppearance.Black());
          }
-         else
-         {
-            // throw new RuntimeException("Any node without children should have leafs!");
-         }
       }
 
-
-      ArrayList<SimplifiedQuadNode> children = new ArrayList<SimplifiedQuadNode>();
+      ArrayList<QuadTreeForGroundNode> children = new ArrayList<QuadTreeForGroundNode>();
       node.getChildrenNodes(children);
 
-      for (SimplifiedQuadNode child : children)
+      for (QuadTreeForGroundNode child : children)
       {
          drawNodeBoundingBoxesRecursively(child, nodeBoundsGraphic, depth + 1, nodeZ + 0.01);
       }
-
    }
-
-
 }

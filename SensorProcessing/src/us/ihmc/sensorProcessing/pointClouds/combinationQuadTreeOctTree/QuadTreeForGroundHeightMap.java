@@ -12,12 +12,12 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTree;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreeParameters;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreePutResult;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGround;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundPutResult;
 import us.ihmc.utilities.math.geometry.InclusionFunction;
 
-public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements QuadTreeHeightMapInterface
+public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements QuadTreeHeightMapInterface
 {
    private final Random random = new Random(1776L);
    private final double noiseAmplitude = 0.0;    // 0.0; //0.02;
@@ -28,7 +28,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
    private File pointListFile;
    private BufferedWriter bufferedWriter;
 
-   public SimplifiedGroundOnlyQuadTree(Box bounds, SimplifiedQuadTreeParameters quadTreeParameters)
+   public QuadTreeForGroundHeightMap(Box bounds, QuadTreeForGroundParameters quadTreeParameters)
    {
       super(bounds, quadTreeParameters);
 
@@ -57,7 +57,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
 
       writeToFile(noisyX, noisyY, noisyZ);
 
-      SimplifiedQuadTreePutResult result = put(noisyX, noisyY, noisyZ);
+      QuadTreeForGroundPutResult result = put(noisyX, noisyY, noisyZ);
 
       return result.treeChanged;
    }
@@ -87,7 +87,7 @@ public class SimplifiedGroundOnlyQuadTree extends SimplifiedQuadTree implements 
 
       writeToFile(noisyX, noisyY, noisyZ);
 
-      SimplifiedQuadTreePutResult result = this.put(noisyX, noisyY, noisyZ);
+      QuadTreeForGroundPutResult result = this.put(noisyX, noisyY, noisyZ);
 
       return result.treeChanged;
    }

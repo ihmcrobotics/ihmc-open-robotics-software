@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception;
 
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.SimplifiedGroundOnlyQuadTree;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -27,7 +27,7 @@ public class PointMapCropping
       int maxNumberOfPoints = 2000000;
       try
       {
-         ArrayList<Point3d> points = SimplifiedGroundOnlyQuadTree.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
+         ArrayList<Point3d> points = QuadTreeForGroundHeightMap.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
 
          JFileChooser outputChooser = new JFileChooser();
          outputChooser.setDialogTitle("Specify a file to save");
