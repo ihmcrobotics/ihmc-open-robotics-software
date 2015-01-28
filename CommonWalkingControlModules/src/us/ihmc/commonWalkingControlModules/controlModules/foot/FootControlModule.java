@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -384,6 +385,13 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
    {
+      if (stateMachine.getCurrentStateEnum() == ConstraintType.TOES)
+      {
+         FrameOrientation initialOrientation = new FrameOrientation();
+         FrameVector initialAngularVelocity = new FrameVector();
+         onToesState.getDesireds(initialOrientation, initialAngularVelocity);
+         swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
+      }
       swingState.setFootstep(footstep, trajectoryParameters, false);
    }
 

@@ -233,4 +233,9 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       momentumBasedController.setOneDoFJointAcceleration(knee, qdd);
    }
 
+   @Override
+   public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
+   {
+      // TODO Auto-generated method stub
+   }
 }
