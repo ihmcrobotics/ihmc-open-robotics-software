@@ -2,9 +2,11 @@ package us.ihmc.wholeBodyController;
 
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -12,10 +14,11 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
@@ -32,7 +35,7 @@ public abstract class WholeBodyTrajectoryTest
 
    private final ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handArrayList = new ArrayList<Pair<ReferenceFrame, ReferenceFrame>>();
 
-   static private final boolean DEBUG = false && !BambooTools.isRunningOnBamboo();
+   static private final boolean DEBUG = false;
 
 
    public abstract WholeBodyControllerParameters getRobotModel();
@@ -48,87 +51,88 @@ public abstract class WholeBodyTrajectoryTest
 
       Vector3d rootPosition = new Vector3d(0,0, 0.93);
       actualRobotModel.getRootJoint().setPosition( rootPosition );   
+
    }    
-   
+
+   private TrajectoryND buildTrajectory(SDFFullRobotModel initialModel, SDFFullRobotModel finalModel) throws Exception
+   {
+      if( false )
+      {
+         return WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
+               initialModel.getOneDoFJoints(), 
+               finalModel.getOneDoFJoints());
+      }
+      else{
+
+         return  WholeBodyTrajectory.createTaskSpaceTrajectory( wbSolver,  initialModel,  finalModel );
+      }
+   }
+
    @Test
    public void testTrajectory() throws Exception
    {
-      wbSolver.setVerbose(false);
-     
-      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
+   /*   wbSolver.setVerbose(false);
+
+      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
       wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
-      
+
       ReferenceFrame soleFrame = actualRobotModel.getSoleFrame(RobotSide.RIGHT);
-      
-      ReferenceFrame targetL = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(
-            "targetL", soleFrame, new Vector3d( 0.4, -0.15, 1.3 ) );
-      
-      ReferenceFrame targetR = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(
-            "targetR", soleFrame, new Vector3d( 0.4, 0.35, 1.0 ) );
-      
-      wbSolver.setHandTarget(actualRobotModel, RobotSide.LEFT,  targetL );
-      wbSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
-      
-      int ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.RESEED );
-      ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
-      
-      if( ret >=0 )
+
+      ArrayList<Point3d> targetListRight = new ArrayList<Point3d>();
+
+      FramePose targetL = new FramePose(soleFrame, new Point3d( 0.5, 0.4, 0.8 ), new Quat4d() );
+
+      targetListRight.add( new Point3d( 0.4, -0.1, 0.8 ));
+      targetListRight.add( new Point3d( 0.5, 0.2,  1.1 ));
+      targetListRight.add( new Point3d( 0.5, -0.2,  1.1 ));
+
+      for (Point3d rightTarget: targetListRight)
       {
-         TrajectoryND trajectory;
-         
-         trajectory = WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
-               actualRobotModel.getOneDoFJoints(), 
-               desiredRobotModel.getOneDoFJoints());
-         
-         Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
-         
-         while( result.first().booleanValue() == false)
+         for (int a=0; a< 300; a++)
          {
-            actualRobotModel.copyAllJointsButKeepOneFootFixed( result.second().position, RobotSide.RIGHT );
-            result = trajectory.getNextInterpolatedPoints(0.01);
-            Thread.sleep(10);
+            Thread.sleep(5);
             getFullRobotModelVisualizer().update(0);
          }
          
-      }
-      else{
-         fail("no solution found\n");
-      }
-      
-      //-------------------------------------------------------------
-      targetL = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(
-            "targetL", soleFrame, new Vector3d( 0.4, -0.15, 0.7 ) );
-      
-      wbSolver.setHandTarget(actualRobotModel, RobotSide.LEFT,  targetL );
-      wbSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
-      
-      ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
-      
-      if( ret >=0 )
-      {
-         TrajectoryND trajectory;
-         
-         wbSolver.setVerbose(true);
-         trajectory = WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
-               actualRobotModel.getOneDoFJoints(), 
-               desiredRobotModel.getOneDoFJoints());
-         
-         wbSolver.setVerbose(false);
-         
-         Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
-         
-         while( result.first().booleanValue() == false)
+         FramePose targetR = new FramePose(soleFrame, rightTarget, new Quat4d() );
+
+         wbSolver.setHandTarget(actualRobotModel, RobotSide.LEFT,  targetL );
+         wbSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
+
+         int ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.RESEED );
+         ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_JOINTS_CACHE );
+
+         if( ret >=0 )
          {
-            actualRobotModel.copyAllJointsButKeepOneFootFixed( result.second().position, RobotSide.RIGHT );
-            result = trajectory.getNextInterpolatedPoints(0.01);
-            Thread.sleep(10);
-            getFullRobotModelVisualizer().update(0);
+            TrajectoryND trajectory = buildTrajectory(actualRobotModel, desiredRobotModel);
+
+            Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
+
+            while( result.first().booleanValue() == false)
+            {
+               HashMap<String, Double> angles = new  HashMap<String, Double>();
+               int index = 0;
+               for(OneDoFJoint joint: actualRobotModel.getOneDoFJoints())
+               {
+                  if( wbSolver.hasJoint( joint.getName() ))
+                  {
+                     angles.put( joint.getName(),result.second().position[index++]);
+                  }
+               }
+
+               actualRobotModel.updateJointsAngleButKeepOneFootFixed( angles, RobotSide.RIGHT );
+               result = trajectory.getNextInterpolatedPoints(0.01);
+               Thread.sleep(5);
+               getFullRobotModelVisualizer().update(0);
+            }
+
+         }
+         else{
+            fail("no solution found\n");
          }
       }
-      else{
-         fail("no solution found\n");
-      }
-      
+
+      */
    }
 
 }
