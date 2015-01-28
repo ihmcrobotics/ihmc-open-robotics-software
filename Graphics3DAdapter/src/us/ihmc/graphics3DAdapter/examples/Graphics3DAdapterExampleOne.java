@@ -33,7 +33,7 @@ import us.ihmc.utilities.math.geometry.Transform3d;
 public class Graphics3DAdapterExampleOne
 {   
 
-   public void doExample(Graphics3DAdapter graphics3DAdapter)
+   public Boolean doExample(Graphics3DAdapter graphics3DAdapter)
    {
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", Graphics3DNodeType.JOINT);
       Graphics3DObject teapotObject = new Graphics3DObject();
@@ -104,6 +104,8 @@ public class Graphics3DAdapterExampleOne
             e.printStackTrace();
          }
       }
+      
+      return true;
    }
    
    
