@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -42,6 +43,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -126,7 +128,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    }
 
    @Test(timeout = 300000)
-   public void testFootPoseBehaviorZOffset() throws SimulationExceededMaximumTimeException
+   public void testSimpleFootPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -152,11 +154,82 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
 
       success = executeBehaviors(behaviors, trajectoryTime);
       assertTrue(success);
+
       FramePose finalFootPose = getCurrentFootPose(robotSide);
       assertTrue(footPoseBehavior.isDone());
       assertPosesAreWithinThresholds(desiredFootPose, finalFootPose);
 
       BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test(timeout = 300000)
+   public void testSimulataneousLeftAndRightFootPoses() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      double trajectoryTime = 3.0;
+      double deltaZ = 0.2;
+
+      SideDependentList<FramePose> initialFootPoses = new SideDependentList<FramePose>();
+      SideDependentList<FootPoseBehavior> footPoseBehaviors = new SideDependentList<FootPoseBehavior>();
+      LinkedHashMap<FootPoseBehavior, FramePose> desiredFootPoses = new LinkedHashMap<FootPoseBehavior, FramePose>();
+
+      RobotSide lastRobotSideSentToController = null;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         final FootPoseBehavior footPoseBehavior = new FootPoseBehavior(communicationBridge, yoTime, yoDoubleSupport);
+         communicationBridge.attachGlobalListenerToController(footPoseBehavior.getControllerGlobalPacketConsumer());
+
+         FramePose initialFootPose = getCurrentFootPose(robotSide);
+         initialFootPoses.put(robotSide, initialFootPose);
+
+         FramePose desiredFootPose = new FramePose(initialFootPose);
+         desiredFootPose.setZ(desiredFootPose.getZ() + deltaZ);
+
+         FootPosePacket desiredFootPosePacket = createFootPosePacket(robotSide, desiredFootPose, trajectoryTime);
+         footPoseBehavior.initialize();
+         footPoseBehavior.setInput(desiredFootPosePacket);
+
+         footPoseBehaviors.put(robotSide, footPoseBehavior);
+         desiredFootPoses.put(footPoseBehavior, desiredFootPose);
+
+         lastRobotSideSentToController = robotSide;
+      }
+
+      success = executeBehaviors(footPoseBehaviors, trajectoryTime);
+      assertTrue(success);
+
+      assertFootPoseCompletedSuccessfully(lastRobotSideSentToController, footPoseBehaviors, desiredFootPoses);
+      assertFootPoseDidNotChange(lastRobotSideSentToController.getOppositeSide(), footPoseBehaviors, initialFootPoses);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   private void assertFootPoseCompletedSuccessfully(RobotSide robotSide, SideDependentList<FootPoseBehavior> footPoseBehaviors,
+         LinkedHashMap<FootPoseBehavior, FramePose> desiredFootPoses)
+   {
+      FramePose finalFootPose = getCurrentFootPose(robotSide);
+
+      FootPoseBehavior footPoseBehavior = footPoseBehaviors.get(robotSide);
+      FramePose desiredFootPose = desiredFootPoses.get(footPoseBehavior);
+
+      assertTrue(footPoseBehavior.isDone());
+      assertPosesAreWithinThresholds(desiredFootPose, finalFootPose);
+   }
+
+   private void assertFootPoseDidNotChange(RobotSide robotSide, SideDependentList<FootPoseBehavior> footPoseBehaviors, SideDependentList<FramePose> initialFootPoses)
+   {
+      FramePose finalFootPose = getCurrentFootPose(robotSide);
+
+      FootPoseBehavior footPoseBehavior = footPoseBehaviors.get(robotSide);
+      FramePose initialFootPose = initialFootPoses.get(robotSide);
+
+      assertTrue(footPoseBehavior.isDone());
+      assertPosesAreWithinThresholds(finalFootPose, initialFootPose);
    }
 
    private FootPosePacket createFootPosePacket(RobotSide robotSide, FramePose desiredFootPose, double trajectoryTime)
@@ -180,6 +253,22 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       footPose.setToZero(footFrame);
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
       return footPose;
+   }
+
+   private boolean executeBehaviors(final SideDependentList<FootPoseBehavior> behaviorsSideDependentList, final double simulationRunTime)
+         throws SimulationExceededMaximumTimeException
+   {
+      ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         BehaviorInterface handPoseBehavior = behaviorsSideDependentList.get(robotSide);
+         behaviors.add(handPoseBehavior);
+      }
+
+      boolean ret = executeBehaviors(behaviors, simulationRunTime);
+
+      return ret;
    }
 
    private boolean executeBehaviors(final ArrayList<BehaviorInterface> behaviors, double trajectoryTime) throws SimulationExceededMaximumTimeException
