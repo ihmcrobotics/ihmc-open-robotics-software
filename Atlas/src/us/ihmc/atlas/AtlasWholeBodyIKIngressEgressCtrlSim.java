@@ -26,6 +26,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -153,7 +154,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       wholeBodyIKSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT, desiredReferenceFrame);
       try
       {
-        successInt = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel);
+        successInt = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
       }
       catch (Exception e)
       {

@@ -12,6 +12,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -57,7 +58,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       wholeBodyIKSolver.setHandTarget(actualFullRobotModel, robotSide, endEffectorPose);
       
-      wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel);
+      wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
       hasInputBeenSet.set(true);
    }
 

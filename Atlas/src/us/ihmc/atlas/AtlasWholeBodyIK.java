@@ -9,13 +9,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyOrientation;
-import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPosition;
+import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPose;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -131,44 +126,39 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       RobotSide LEFT = RobotSide.LEFT;
       RobotSide RIGHT = RobotSide.RIGHT;
       
-      HierarchicalTask_BodyPosition task_ee_pose_R_pos = task_end_effector_translations.get(RIGHT);
-      HierarchicalTask_BodyPosition task_ee_pose_L_pos = task_end_effector_translations.get(LEFT);
-      HierarchicalTask_BodyOrientation task_ee_pose_R_rot = task_end_effector_rotations.get(RIGHT);
-      HierarchicalTask_BodyOrientation task_ee_pose_L_rot = task_end_effector_rotations.get(LEFT);
+      HierarchicalTask_BodyPose task_ee_pose_R = taskEndEffectorPose.get(RIGHT);
+      HierarchicalTask_BodyPose task_ee_pose_L = taskEndEffectorPose.get(LEFT);
 
-      int rleg_akx = jointNamesMap.get("r_leg_akx");
-      int rleg_aky = jointNamesMap.get("r_leg_aky");
-      int rleg_kny = jointNamesMap.get("r_leg_kny");
-      int rleg_hpy = jointNamesMap.get("r_leg_hpy");
-      int rleg_hpx = jointNamesMap.get("r_leg_hpx");
-      int rleg_hpz = jointNamesMap.get("r_leg_hpz");
 
-      int lleg_akx = jointNamesMap.get("l_leg_akx");
-      int lleg_aky = jointNamesMap.get("l_leg_aky");
-      int lleg_kny = jointNamesMap.get("l_leg_kny");
-      int lleg_hpy = jointNamesMap.get("l_leg_hpy");
-      int lleg_hpx = jointNamesMap.get("l_leg_hpx");
-      int lleg_hpz = jointNamesMap.get("l_leg_hpz");
+      int rleg_akx = jointNamesToIndex.get("r_leg_akx");
+      int rleg_aky = jointNamesToIndex.get("r_leg_aky");
+      int rleg_kny = jointNamesToIndex.get("r_leg_kny");
+      int rleg_hpy = jointNamesToIndex.get("r_leg_hpy");
+      int rleg_hpx = jointNamesToIndex.get("r_leg_hpx");
+      int rleg_hpz = jointNamesToIndex.get("r_leg_hpz");
 
-      int back_bkz = jointNamesMap.get("back_bkz");
-      int back_bky = jointNamesMap.get("back_bky");
-      int back_bkx = jointNamesMap.get("back_bkx");
+      int lleg_akx = jointNamesToIndex.get("l_leg_akx");
+      int lleg_aky = jointNamesToIndex.get("l_leg_aky");
+      int lleg_kny = jointNamesToIndex.get("l_leg_kny");
+      int lleg_hpy = jointNamesToIndex.get("l_leg_hpy");
+      int lleg_hpx = jointNamesToIndex.get("l_leg_hpx");
+      int lleg_hpz = jointNamesToIndex.get("l_leg_hpz");
 
-      int larm_elx = jointNamesMap.get("l_arm_elx");
-      int rarm_elx = jointNamesMap.get("r_arm_elx");
+      int back_bkz = jointNamesToIndex.get("back_bkz");
+      int back_bky = jointNamesToIndex.get("back_bky");
+      int back_bkx = jointNamesToIndex.get("back_bkx");
 
-      task_ee_pose_L_pos.setMaximumError(0.2);
-      task_ee_pose_L_rot.setMaximumError(0.4);
+      int larm_elx = jointNamesToIndex.get("l_arm_elx");
+      int rarm_elx = jointNamesToIndex.get("r_arm_elx");
 
-      task_ee_pose_R_pos.setMaximumError(0.2);
-      task_ee_pose_R_rot.setMaximumError(0.4);
-      task_joints_pose.setMaximumError(0.6);
+      task_ee_pose_L.setMaximumError(0.3);
+      task_ee_pose_R.setMaximumError(0.3);
 
-      task_ee_pose_R_pos.setEnabled(false);
-      task_ee_pose_R_rot.setEnabled(false);
-      task_ee_pose_L_pos.setEnabled(false);
-      task_ee_pose_L_rot.setEnabled(false);
+      taskJointsPose.setMaximumError(0.6);
 
+      this.setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
+      this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_NONE);
+      
       //--------------------------------------------------
       // Important: you can't activate a joint in higher priorities and disable it later
       // use this vector for any setWeightJointSpace
@@ -182,44 +172,33 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
          joint_weights.set(legJointIds.get(RIGHT)[i], 1);
       }
 
-      task_leg_pose.setWeightsJointSpace(joint_weights);
+      taskLegPose.setWeightsJointSpace(joint_weights);
 
       //TODO
       Vector64F target_left_foot = new Vector64F(7, 0, 2 * 0.11, 0, 0, 0, 0, 1);
-      task_leg_pose.setTarget(target_left_foot, 0.001);
+      taskLegPose.setTarget(target_left_foot, 0.001);
 
       //--------------------------------------------------
-      // control only the X and Y directions of the COM
-      //TODO this might not work when the footroot is not flat on the ground
-      task_com_position.setWeightsTaskSpace(new Vector64F(3, 1, 1, 0));
-
-      // Don't move the arm to keep the balance. But torso need to be activated
+       // Don't move the arm to keep the balance. But torso need to be activated
       joint_weights.set(back_bkz, 1);
       joint_weights.set(back_bky, 1);
       joint_weights.set(back_bkx, 1);
 
-      task_com_position.setWeightsJointSpace(joint_weights);
+      taskComPosition.setWeightsJointSpace(joint_weights);
 
-      // TODO make this the center of the feet
-      Vector64F target_com = new Vector64F(3, 0, 0.11, 0);    
-      task_com_position.setTarget(target_com, 0.01);
+      // this value shall be overwritten later
+      Vector64F target_com = new Vector64F(3, 0, 0, 0);    
+      taskComPosition.setTarget(target_com, 0.01);
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
-      Vector64F weights_ee_pos = new Vector64F(3, 1, 1, 1);
-      Vector64F weights_ee_rot = new Vector64F(3, 1, 1, 1);
-
-      task_ee_pose_L_pos.setWeightsTaskSpace(weights_ee_pos);
-      task_ee_pose_L_rot.setWeightsTaskSpace(weights_ee_rot);
-      task_ee_pose_R_pos.setWeightsTaskSpace(weights_ee_pos);
-      task_ee_pose_R_rot.setWeightsTaskSpace(weights_ee_rot);
 
       for (int i = 0; i < getNumberDoFperArm(); i++)
       {
          int index = armJointIds.get(RobotSide.LEFT)[i];
          joint_weights.set(index, 1);
       }
-      task_ee_pose_L_pos.setWeightsJointSpace(joint_weights);
-      task_ee_pose_L_rot.setWeightsJointSpace(joint_weights);
+      task_ee_pose_L.setWeightsJointSpace(joint_weights);
+
 
       for (int i = 0; i < getNumberDoFperArm(); i++)
       {
@@ -228,8 +207,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
          index = armJointIds.get(RobotSide.RIGHT)[i];
          joint_weights.set(index, 1);
       }
-      task_ee_pose_R_pos.setWeightsJointSpace(joint_weights);
-      task_ee_pose_R_rot.setWeightsJointSpace(joint_weights);
+      task_ee_pose_R.setWeightsJointSpace(joint_weights);
 
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
@@ -270,12 +248,11 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       preferedJointPose.set(larm_elx, 1.0);
       preferedJointPose.set(rarm_elx, -1.0);
 
-      task_joints_pose.setWeightsTaskSpace(weights_jointpose);
-      task_joints_pose.setWeightsJointSpace(joint_weights);
-      task_joints_pose.setCoupledJointWeights(coupledJointWeights);
+      taskJointsPose.setWeightsTaskSpace(weights_jointpose);
+      taskJointsPose.setWeightsJointSpace(joint_weights);
+      taskJointsPose.setCoupledJointWeights(coupledJointWeights);
 
-      task_joints_pose.setTarget(preferedJointPose, 35);
-
+      taskJointsPose.setTarget(preferedJointPose, 35);
    }
 
 }
