@@ -16,6 +16,7 @@ import org.junit.Test;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PolygonArtifact;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.BoundingBoxKDTree2D;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
@@ -39,7 +40,8 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
    private static final boolean VERBOSE = false;
    private static final boolean SHOW_PLOTTER = false;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygon()
    {
 
@@ -137,7 +139,8 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTwo()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -194,7 +197,8 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonThree()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -291,7 +295,8 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {
       Random random = new Random(1776L);
@@ -387,7 +392,8 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testBadCase()
    {
       ArrayList<Point2d> points = new ArrayList<Point2d>();

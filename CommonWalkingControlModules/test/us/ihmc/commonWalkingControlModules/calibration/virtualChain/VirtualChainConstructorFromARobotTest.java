@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -32,9 +33,9 @@ public class VirtualChainConstructorFromARobotTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOneAtZero()
    {
       VirtualChainConstructorFromARobot constructor = new VirtualChainConstructorFromARobot();
@@ -108,28 +109,32 @@ public class VirtualChainConstructorFromARobotTest
       assertTupleEquals(centerOfMass, comEstimateAtZero);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOnePartTwo()
    {
       VirtualChainExampleRobot testRobotOne = VirtualChainExampleRobot.constructExampleOne();
       testRobotInRandomPositions(testRobotOne);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwo()
    {
       VirtualChainExampleRobot testRobotTwo = VirtualChainExampleRobot.constructExampleTwo();
       testRobotInRandomPositions(testRobotTwo);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testThree()
    {
       VirtualChainExampleRobot testRobotThree = VirtualChainExampleRobot.constructExampleThree();
       testRobotInRandomPositions(testRobotThree);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFour()
    {
       VirtualChainExampleRobot testRobotFour = VirtualChainExampleRobot.constructExampleFour();

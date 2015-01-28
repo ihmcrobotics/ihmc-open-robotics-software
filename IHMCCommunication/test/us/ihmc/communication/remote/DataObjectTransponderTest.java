@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.test.JUnitTools;
 
 
@@ -68,7 +69,8 @@ public class DataObjectTransponderTest
       }
    }
 
-   @Test(timeout=20000)
+	@AverageDuration
+	@Test(timeout=20000)
    public void testBidirectionalCommunication() throws InterruptedException
    {
       int port = 1341;
@@ -79,8 +81,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-
-   @Test(timeout=200000)
+	@AverageDuration
+	@Test(timeout=200000)
    public void testDoubleBidirectionalCommunication() throws InterruptedException
    {
       int numberOfPackets = 60000;
@@ -93,31 +95,32 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSerializabilityOfInteger() throws IOException
    {
       Integer integer = new Integer(2);
       JUnitTools.assertSerializable(integer);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSerializabilityOfIntPacket() throws IOException
    {
       IntegerPacket intPacket = new IntegerPacket(2);
       JUnitTools.assertSerializable(intPacket);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSerializabilityOfStringPacket() throws IOException
    {
       StringPacket packet = new StringPacket("Buzzap!");
       JUnitTools.assertSerializable(packet);
    }
 
-
-   @Test(timeout=20000)
+	@AverageDuration
+	@Test(timeout=20000)
    public void testServerClientIntPacketCommunication() throws InterruptedException
    {
       int port = 1337;
@@ -127,8 +130,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-
-   @Test(timeout=20000)
+	@AverageDuration
+	@Test(timeout=20000)
    public void testServerClientStringPacketCommunication() throws InterruptedException
    {
       int port = 1338;
@@ -138,7 +141,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @Test(timeout=20000)
+	@AverageDuration
+	@Test(timeout=20000)
    public void testTwoPacketTypesAtTheSameTime() throws InterruptedException
    {
       int port = 1339;
@@ -149,7 +153,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @Test(timeout=20000)
+	@AverageDuration
+	@Test(timeout=20000)
    public void testUnhandledPackets() throws InterruptedException
    {
       int port = 1340;

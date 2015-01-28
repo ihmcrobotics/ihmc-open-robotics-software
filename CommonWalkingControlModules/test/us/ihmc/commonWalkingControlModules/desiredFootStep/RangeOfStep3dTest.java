@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -35,8 +36,9 @@ public class RangeOfStep3dTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testExampleUsage()
    {
       RigidBody rigidBody = new RigidBody("rigidBody", ReferenceFrame.getWorldFrame());
@@ -57,14 +59,16 @@ public class RangeOfStep3dTest
       assertEquals(range.getEllipsoid3d().getYRadius(), 0.5 * sideLength, 1e-7);
       assertEquals(range.getEllipsoid3d().getZRadius(), 0.5 * verticalLength, 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAtCenter()
    {
       testAtTranslation(2013L, ReferenceFrame.getWorldFrame(), new Vector3d(0.0, 0.0, 0.0));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAtRandomTranslation()
    {
       Random random = new Random(58008L);
@@ -80,8 +84,9 @@ public class RangeOfStep3dTest
       
       testAtTranslation(5318008L, frame, new Vector3d(xTranslation, yTranslation, zTranslation));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void test90DegreeRotation()
    {
       RobotSide robotSide = null;
@@ -181,8 +186,9 @@ public class RangeOfStep3dTest
          }
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testUnderRotation()
    {
       RobotSide robotSide = null;

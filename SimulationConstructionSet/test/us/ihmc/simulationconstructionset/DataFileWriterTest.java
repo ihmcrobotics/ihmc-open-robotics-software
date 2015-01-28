@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -34,8 +35,8 @@ public class DataFileWriterTest
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDataFileWriterAndReader() throws IOException, RepeatDataBufferEntryException
    {
       int numDataPoints = 10000;
@@ -145,7 +146,9 @@ public class DataFileWriterTest
    }
 
    @SuppressWarnings("deprecation")
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndDataInputStream() throws IOException, FileNotFoundException, NullPointerException
    {
       Random rng = new Random();
@@ -170,7 +173,8 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
    {
       expectedException.expect(EOFException.class);
@@ -205,7 +209,8 @@ public class DataFileWriterTest
       assertTrue(integerReadBack == -testInteger);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndDeferredBufferedReaderCreation() throws IOException
    {
       Random rng = new Random();
@@ -238,7 +243,8 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndBufferedReaderStringsOnly() throws IOException
    {
       String string1 = "This is the first string";
@@ -273,8 +279,8 @@ public class DataFileWriterTest
       assertTrue(string3.equals(readBack3));
    }
 
-
-   @Test(timeout = 5000)
+	@AverageDuration
+	@Test(timeout = 5000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
       File fileOne = new File("fileOne.state");
@@ -314,8 +320,9 @@ public class DataFileWriterTest
 
       fileOne.delete();
    }
-   
-   @Test(timeout = 5000)
+
+	@AverageDuration
+	@Test(timeout = 5000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException, RepeatDataBufferEntryException
    {
       File fileOne = new File("fileOne.data.gz");

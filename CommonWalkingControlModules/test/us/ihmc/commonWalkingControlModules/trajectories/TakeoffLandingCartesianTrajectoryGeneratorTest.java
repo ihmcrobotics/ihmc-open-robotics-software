@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.Differentiator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.Direction;
@@ -33,8 +34,9 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOne()
    {
       boolean pause = false;

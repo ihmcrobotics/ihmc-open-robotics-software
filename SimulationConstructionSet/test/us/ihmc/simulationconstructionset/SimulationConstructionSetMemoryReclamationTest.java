@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -17,7 +18,8 @@ public class SimulationConstructionSetMemoryReclamationTest
 {
    private static final boolean DEBUG = true;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithoutARobot()
    {
       boolean useRobot = false;
@@ -31,7 +33,8 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobot()
    {
       boolean useRobot = true;
@@ -46,7 +49,9 @@ public class SimulationConstructionSetMemoryReclamationTest
    }
 
    @Ignore // TODO https://jira.ihmc.us/browse/DRC-2208
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndMovie()
    {
       boolean useRobot = true;

@@ -13,6 +13,7 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -42,7 +43,9 @@ public class CentroidalMomentumBenchmarkTest
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
 //   @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);

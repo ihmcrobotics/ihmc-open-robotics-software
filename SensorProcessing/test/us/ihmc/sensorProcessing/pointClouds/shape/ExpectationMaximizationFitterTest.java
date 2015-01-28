@@ -12,11 +12,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class ExpectationMaximizationFitterTest
 {
    static Random rand = new Random(152L);
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFitToCube()
    {
       Point3D_F64 center = new Point3D_F64(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());

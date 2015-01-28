@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -48,8 +49,9 @@ public class MomentumOptimizerOldTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFloatingChain()
    {
       Random random = new Random(44345L);
@@ -77,8 +79,8 @@ public class MomentumOptimizerOldTest
       doChecks(random, elevator, rootJoint, joints);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFloatingTree()
    {
       Random random = new Random(44345L);

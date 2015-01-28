@@ -36,6 +36,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -75,7 +76,8 @@ public class OptimizationMomentumControlModuleTest
    private final double controlDT = 1e-5;    // 5e-3;
    private final double gravityZ = 9.81;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223521L);
@@ -129,7 +131,8 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMomentumAndTaskSpaceConstraints()
    {
       Random random = new Random(1223525L);
@@ -204,7 +207,8 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMomentumAndPointAccelerationConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
@@ -285,7 +289,8 @@ public class OptimizationMomentumControlModuleTest
       JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSingleRigidBody() throws NoConvergenceException
    {
       Random random = new Random(125152L);
@@ -347,7 +352,8 @@ public class OptimizationMomentumControlModuleTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPrimaryAndSecondaryConstraints() throws NoConvergenceException
    {
       Random random = new Random(1223525L);
@@ -441,7 +447,8 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testNullspaceMultipliers() throws NoConvergenceException
    {
       Random random = new Random(2534L);

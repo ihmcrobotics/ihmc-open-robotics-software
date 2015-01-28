@@ -17,6 +17,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.calib.StereoParameters;
@@ -30,7 +31,9 @@ public class EstimateGroundPlaneFromFeaturesTest
    /**
     * Create a set of observations with perfect data and see if it can reconstruct the plane and transform
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void perfect()
    {
       StereoParameters param = new StereoParameters();

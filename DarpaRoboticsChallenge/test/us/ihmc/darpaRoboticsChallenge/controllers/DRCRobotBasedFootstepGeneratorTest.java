@@ -23,6 +23,7 @@ import us.ihmc.ihmcPerception.footstepGenerator.TurningThenStraightFootstepGener
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -64,14 +65,16 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testStraightLinePath()
    {
       Point3d destination = new Point3d(5.0, 0.0, 0.0);
       testPathToDestination(destination);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAngledPaths()
    {
       double maxAngle = Math.PI;

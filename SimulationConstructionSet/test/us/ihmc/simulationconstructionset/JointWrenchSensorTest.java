@@ -11,13 +11,16 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class JointWrenchSensorTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testStaticallyHangingMasses() throws UnreasonableAccelerationException
    {
       double massOne = 7.21;
@@ -64,8 +67,8 @@ public class JointWrenchSensorTest
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
    }
 
-   
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testJointTorquesMatchWhenSensorAtJoint() throws UnreasonableAccelerationException
    {
       double massOne = 7.21;
@@ -110,8 +113,9 @@ public class JointWrenchSensorTest
          assertEquals(pinJointTwo.getTau().getDoubleValue(), jointTorque.getX(), 1e-7);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOffsetAtCenterOfMassWithCantileveredBeam() throws UnreasonableAccelerationException
    {
       double massOne = 7.21;

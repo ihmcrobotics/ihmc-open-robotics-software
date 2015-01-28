@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class StreamingDataTCPServerTest
 {
 
-   @Test(timeout=4000)
+	@AverageDuration
+	@Test(timeout=4000)
    public void testTypicalUsage()
    {
       String hostname = "localhost";
@@ -44,9 +46,9 @@ public class StreamingDataTCPServerTest
       streamingDataTCPClient.close();
       streamingDataTCPServer.closeAndBlockTillFullyClosed();
    }
-   
 
-   @Test(timeout=4000)
+	@AverageDuration
+	@Test(timeout=4000)
    public void testMultipleProducersAndConsumersRobustly()
    {
       String hostname = "localhost";
@@ -98,8 +100,8 @@ public class StreamingDataTCPServerTest
       
    }
 
-
-   @Test(timeout=6000)
+	@AverageDuration
+	@Test(timeout=6000)
    public void testPersistentConsumerToServerRestart()
    {
       String hostname = "localhost";

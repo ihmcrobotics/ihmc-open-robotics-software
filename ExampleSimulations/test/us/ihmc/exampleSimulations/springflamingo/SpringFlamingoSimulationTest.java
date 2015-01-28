@@ -7,6 +7,7 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class SpringFlamingoSimulationTest
 {
@@ -32,7 +33,8 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
 //      testFixture.showWindow();

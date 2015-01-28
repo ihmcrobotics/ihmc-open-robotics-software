@@ -11,10 +11,13 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class GraphicsDemoToolsTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCreatePointCloud()
    {
       List<Point3d> worldPoints = new ArrayList<Point3d>();

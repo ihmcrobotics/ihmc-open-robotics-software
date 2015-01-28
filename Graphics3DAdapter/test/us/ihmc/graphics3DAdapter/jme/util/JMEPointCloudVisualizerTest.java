@@ -8,6 +8,7 @@ import javax.vecmath.Point3f;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class JMEPointCloudVisualizerTest
 {
@@ -15,8 +16,9 @@ public class JMEPointCloudVisualizerTest
    {
       new JMEPointCloudVisualizerTest().testJMEPointCloudVisualizer();
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testJMEPointCloudVisualizer()
    {
       JMEPointCloudVisualizer jmePointCloudVisualizer = new JMEPointCloudVisualizer();

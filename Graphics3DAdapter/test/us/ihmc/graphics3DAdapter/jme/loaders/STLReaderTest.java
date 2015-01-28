@@ -30,6 +30,7 @@ import us.ihmc.loaders.jme.BinarySTLReader;
 import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.
@@ -42,7 +43,9 @@ import us.ihmc.loaders.jme.Triangle;
  */
 public class STLReaderTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASCIILoad() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("testASCIISTL.STL");
@@ -52,8 +55,9 @@ public class STLReaderTest
       
       checkData(reader);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testBinaryLoad() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("testBinarySTL.STL");

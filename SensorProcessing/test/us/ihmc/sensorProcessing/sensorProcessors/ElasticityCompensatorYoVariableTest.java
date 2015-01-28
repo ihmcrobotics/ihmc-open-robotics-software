@@ -8,6 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -17,7 +18,8 @@ public class ElasticityCompensatorYoVariableTest
 {
    private static final double EPSILON = 1e-10;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroJointTau1()
    {
       Random random = new Random(1561651L);
@@ -50,7 +52,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroJointTau2()
    {
       Random random = new Random(1561651L);
@@ -81,7 +84,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroJointTau3()
    {
       Random random = new Random(1561651L);
@@ -104,7 +108,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroJointTau4()
    {
       Random random = new Random(1561651L);
@@ -126,7 +131,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroStiffness4()
    {
       Random random = new Random(1561651L);
@@ -156,7 +162,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -180,7 +187,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDefaultMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -205,8 +213,9 @@ public class ElasticityCompensatorYoVariableTest
          assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInfiniteMaximumDeflection4()
    {
       Random random = new Random(1561651L);
@@ -231,7 +240,8 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomMaximumDeflection4()
    {
       Random random = new Random(1561651L);

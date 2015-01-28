@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -35,9 +36,9 @@ public class VirtualChainBuilderTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOne()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleOne();
@@ -46,7 +47,8 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwo()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleTwo();
@@ -55,7 +57,8 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testThree()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleThree();
@@ -64,7 +67,8 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFour()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleFour();

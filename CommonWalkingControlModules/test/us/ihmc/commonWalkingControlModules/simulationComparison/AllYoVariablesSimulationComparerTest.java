@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -120,7 +121,8 @@ public class AllYoVariablesSimulationComparerTest
 
 	      return ret;
 	   }
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testCompareWithZeroEpsilon() 
 	{
@@ -152,9 +154,8 @@ public class AllYoVariablesSimulationComparerTest
 		assertEquals(doubleYoVariable4, differences.get(0)[1]);
 		
 	}
-	
-	
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testWithLowEpsilon()
 	{
@@ -180,7 +181,8 @@ public class AllYoVariablesSimulationComparerTest
 		doubleYoVariable4.set(2.009);
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2)); 
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testWithHighEpsilon()
 	{

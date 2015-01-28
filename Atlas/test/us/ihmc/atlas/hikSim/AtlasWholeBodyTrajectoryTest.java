@@ -1,14 +1,11 @@
 package us.ihmc.atlas.hikSim;
 
-import org.junit.Test;
-
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;

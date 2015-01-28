@@ -9,13 +9,16 @@ import net.java.games.input.Event;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 
 public class DoubleYoVariableJoystickEventListenerTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMinMaxAverage()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");

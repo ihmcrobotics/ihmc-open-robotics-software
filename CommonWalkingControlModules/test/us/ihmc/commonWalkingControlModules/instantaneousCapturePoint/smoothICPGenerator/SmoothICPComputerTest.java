@@ -20,6 +20,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -100,7 +101,8 @@ public class SmoothICPComputerTest
       icpVelocityLineSegment = null;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTypicalFourStepExample()
    {
       
@@ -258,10 +260,8 @@ public class SmoothICPComputerTest
       }
    }
 
-
-
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTypicalFourStepExampleWithSuddenStop()
    {
       double deltaT = 0.001;
@@ -667,7 +667,8 @@ public class SmoothICPComputerTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTrivialTwoStepExample()
    {
       int maxNumberOfConsideredFootsteps = 4;

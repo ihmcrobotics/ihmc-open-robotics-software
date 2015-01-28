@@ -7,12 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class SliderBoardUtilsTest
 {
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleConversion()
    {
       int sliderBoardMax = 128;
@@ -44,8 +45,9 @@ public class SliderBoardUtilsTest
       intValue = SliderBoardUtils.valueRatioConvertToIntWithExponents(sliderBoardMax, max, min, exponent, value);
       assertEquals(intValue, sliderValue);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleSquareConversion()
    {
       int sliderBoardMax = 128;
@@ -94,8 +96,9 @@ public class SliderBoardUtilsTest
       intValue = SliderBoardUtils.valueRatioConvertToIntWithExponents(sliderBoardMax, max, min, exponent, hires, value);
       assertEquals(intValue, sliderValue);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomConversions()
    {
       Random random = new Random(1776L);
@@ -113,8 +116,9 @@ public class SliderBoardUtilsTest
          assertEquals(intValue, sliderValue);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomConversionsWithHires()
    {
       Random random = new Random(1776L);

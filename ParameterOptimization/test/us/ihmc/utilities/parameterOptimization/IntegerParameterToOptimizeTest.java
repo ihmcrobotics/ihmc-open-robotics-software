@@ -4,9 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class IntegerParameterToOptimizeTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetBitsOfResolution()
    {
       testNBit(0, 0, 1);
@@ -33,8 +37,9 @@ public class IntegerParameterToOptimizeTest
 
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroToOneConversions()
    {
       testZeroToOneConversion(0, 100);

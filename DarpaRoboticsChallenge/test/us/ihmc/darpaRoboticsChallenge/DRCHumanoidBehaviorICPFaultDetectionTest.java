@@ -22,6 +22,7 @@ import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -93,7 +94,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    // cropped to 1.5 - 6.3 seconds
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -113,7 +116,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -133,7 +138,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
 
@@ -154,7 +161,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -183,7 +192,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException
    {
 
@@ -227,7 +238,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();

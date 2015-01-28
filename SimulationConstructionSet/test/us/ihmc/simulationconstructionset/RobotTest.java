@@ -22,6 +22,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -43,7 +44,8 @@ public class RobotTest
       System.err.flush();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       Random random = new Random(1765L);
@@ -150,7 +152,8 @@ public class RobotTest
       assertEquals(computeScalarInertiaAroundJointAxis(link21, pin1), computeScalarInertiaAroundJointAxis(link22, pin2), epsilonAfter);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSingleFloatingBodyWithCoMOffset() throws SimulationExceededMaximumTimeException, InterruptedException, UnreasonableAccelerationException
    {
       Random random = new Random(1659L);
@@ -221,7 +224,8 @@ public class RobotTest
 //    sleepIfShowingGUI();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFloatingJointAndPinJointWithMassiveBody() throws UnreasonableAccelerationException
    {
       Random random = new Random(1659L);
@@ -253,7 +257,8 @@ public class RobotTest
       assertEquals(pin1.getTau().getDoubleValue(), torqueFromDynamics, pin1.getTau().getDoubleValue() * 1e-3);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCalculateAngularMomentum()
    {
 	   double epsilon = 1e-7;
@@ -281,8 +286,9 @@ public class RobotTest
 	   floatingJoint1.setPosition(new Vector3d());
 	   
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCompareFloatingJointAndFLoatingPlanarJoint()
            throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -540,8 +546,9 @@ public class RobotTest
 
       return angularMomentum;
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFreezeJointAtZero() throws UnreasonableAccelerationException
    {
       Robot robot = new Robot("robot");
@@ -655,9 +662,9 @@ public class RobotTest
       assertEquals(expectedJoint.getQD().getDoubleValue(), joint1.getQD().getDoubleValue(), epsilon);
       assertEquals(expectedJoint.getQDD().getDoubleValue(), joint1.getQDD().getDoubleValue(), epsilon);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFreezeJointAtZeroTwo() throws UnreasonableAccelerationException
    {
       Robot robotOne = createTestRobot();
@@ -791,8 +798,9 @@ public class RobotTest
       if (index == 2) return tuple.getZ();
       throw new RuntimeException();
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testChangeLinkParameters() throws UnreasonableAccelerationException
    {      
       Vector3d jointOffset1 = new Vector3d(0.12, 1.17, 3.125);
@@ -942,8 +950,9 @@ public class RobotTest
       assertEquals(joint2.getQD().getDoubleValue(), joint2B.getQD().getDoubleValue(), epsilon);
       assertEquals(joint2.getQDD().getDoubleValue(), joint2B.getQDD().getDoubleValue(), epsilon);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testConservationOfEnergyAndMomentum() throws UnreasonableAccelerationException
    {
       String name = "robot";

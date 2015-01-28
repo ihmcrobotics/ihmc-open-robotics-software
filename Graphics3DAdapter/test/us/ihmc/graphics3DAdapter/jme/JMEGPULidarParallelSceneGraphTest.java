@@ -15,6 +15,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
 import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -26,7 +27,9 @@ public class JMEGPULidarParallelSceneGraphTest
    /**
     * The blue sphere should not show up in the lidar data.
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGPULidarParallelSceneGraph()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(getClass().getSimpleName(), new JMEGraphics3DAdapter(true));

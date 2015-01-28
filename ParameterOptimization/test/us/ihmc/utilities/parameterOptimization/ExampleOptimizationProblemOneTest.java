@@ -6,10 +6,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class ExampleOptimizationProblemOneTest
 {
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleXSquaredOptimization()
    {
       SimpleXSquaredCostFunction sampleCostFunction = new SimpleXSquaredCostFunction();      
@@ -83,9 +86,9 @@ public class ExampleOptimizationProblemOneTest
          return new SimpleXSquaredCostFunction();
       }
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleThreeParameterCostFunction()
    {      
       SimpleThreeParameterCostFunction sampleCostFunction = new SimpleThreeParameterCostFunction();

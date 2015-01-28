@@ -28,6 +28,7 @@ import us.ihmc.loaders.jme.NormalCalculator;
 import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
@@ -37,7 +38,9 @@ import us.ihmc.loaders.jme.Triangle;
  */
 public class NormalCalculatorTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testNormalsBasedOnTeapot() throws IOException
    {
       InputStream stream = getClass().getClassLoader().getResourceAsStream("teapotBinary.STL");

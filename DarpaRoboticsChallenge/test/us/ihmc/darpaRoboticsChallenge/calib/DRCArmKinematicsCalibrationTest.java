@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 
@@ -18,7 +19,8 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class DRCArmKinematicsCalibrationTest
 {
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void estimateCameraPose()
    {
       BufferedImage image = UtilImageIO.loadImage("../DarpaRoboticsChallenge/data/atlas_chessboard.jpg");

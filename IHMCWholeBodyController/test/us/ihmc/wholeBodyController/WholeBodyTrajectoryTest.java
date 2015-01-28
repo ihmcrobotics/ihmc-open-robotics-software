@@ -1,12 +1,7 @@
 package us.ihmc.wholeBodyController;
 
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -15,14 +10,9 @@ import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
-import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public abstract class WholeBodyTrajectoryTest
@@ -68,7 +58,8 @@ public abstract class WholeBodyTrajectoryTest
       }
    }
 
-   @Test
+	@AverageDuration
+	@Test
    public void testTrajectory() throws Exception
    {
    /*   wbSolver.setVerbose(false);

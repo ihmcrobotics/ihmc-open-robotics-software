@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 import Jama.Matrix;
 
@@ -21,8 +22,8 @@ public class MatrixTest
    Matrix matrix;
    Matrix matrixInverted;
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInvert()
    {
       if (VERBOSE)
@@ -63,8 +64,8 @@ public class MatrixTest
       assertTrue("Matrix Inversion works well", true);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPseudoInvert()
    {
       if (VERBOSE)

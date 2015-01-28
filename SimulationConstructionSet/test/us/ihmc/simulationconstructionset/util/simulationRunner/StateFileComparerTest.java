@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -31,7 +32,8 @@ public class StateFileComparerTest
    {
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAbsoluteCompareStateFiles() throws FileNotFoundException
    {
       File fileOne = new File("fileOne.state");
@@ -94,9 +96,9 @@ public class StateFileComparerTest
       stream.println("variable2 = 0.2;");
       stream.close();
    }
-  
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCompareVarLists()
    {
       YoVariableRegistry registry1 = createRegistryAndFillWithVariables();

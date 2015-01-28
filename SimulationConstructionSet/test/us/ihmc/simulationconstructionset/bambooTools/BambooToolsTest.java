@@ -10,9 +10,13 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class BambooToolsTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetClassAndMethodName()
    {
       String classAndMethodName = BambooTools.getClassAndMethodName();
@@ -21,8 +25,9 @@ public class BambooToolsTest
       classAndMethodName = BambooTools.getClassAndMethodName(0);
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {
       BambooTools.reportTestStartedMessage();

@@ -29,6 +29,7 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -65,7 +66,9 @@ public class FootstepDataTest
     * This test verifies that FootstepData can be sent and received using our current message passing utilities
     * @throws IOException 
     */
-   @Test(timeout=300000) //(timeout = 6000)
+
+	@AverageDuration
+	@Test(timeout=300000) //(timeout = 6000)
    public void testPassingFootstepData() throws IOException
    {
       // setup comms
@@ -101,7 +104,8 @@ public class FootstepDataTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @Test(timeout = 6000)
+	@AverageDuration
+	@Test(timeout = 6000)
    public void testPassingFootstepPath() throws IOException
    {
       Random random = new Random(1582l);
@@ -130,7 +134,8 @@ public class FootstepDataTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @Test(timeout = 6000)
+	@AverageDuration
+	@Test(timeout = 6000)
    public void testPassingPauseCommand() throws IOException
    {
       // setup comms
@@ -169,7 +174,8 @@ public class FootstepDataTest
       }
    }
 
-   @Test(timeout = 6000)
+	@AverageDuration
+	@Test(timeout = 6000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
       // Create one server for two types of data
@@ -239,7 +245,8 @@ public class FootstepDataTest
       }
    }
 
-   @Test(timeout = 6000)
+	@AverageDuration
+	@Test(timeout = 6000)
    public void testPassingFootstepStatus() throws IOException
    {
       // setup comms

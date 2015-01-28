@@ -8,13 +8,15 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionIns
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class Graphics3DTextTest implements Graphics3DFrameListener
 {
    int counter = 0;
    Graphics3DAddExtrusionInstruction instruction;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTextDisplay()
    {
       Graphics3DWorld world = new Graphics3DWorld(new JMEGraphics3DAdapter());

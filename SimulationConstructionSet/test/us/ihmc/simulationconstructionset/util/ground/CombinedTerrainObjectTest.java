@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -12,7 +13,9 @@ public class CombinedTerrainObjectTest
 {
 
    //TODO: Flesh out this test case to be a really good one.
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoIntersectingBoxes()
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("Combined Terrain Object to Test");

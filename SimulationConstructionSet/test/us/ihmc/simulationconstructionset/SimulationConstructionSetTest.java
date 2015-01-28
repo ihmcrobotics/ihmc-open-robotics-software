@@ -9,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class SimulationConstructionSetTest
 {
@@ -24,7 +25,9 @@ public class SimulationConstructionSetTest
    }
    
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
@@ -54,7 +57,9 @@ public class SimulationConstructionSetTest
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationConstructionSetMovieGenerationUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());

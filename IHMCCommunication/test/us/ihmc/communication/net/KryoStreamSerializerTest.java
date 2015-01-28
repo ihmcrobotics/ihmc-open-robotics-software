@@ -9,10 +9,13 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class KryoStreamSerializerTest
 {
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test() throws IOException
    {
       KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(14);

@@ -25,6 +25,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.dataStructures.AbstractHeightMapTest;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
@@ -46,7 +47,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
    private static final boolean DO_ASSERTS = true;
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testSimpleThings()
    {
       float xMin = 0.0f;
@@ -64,13 +66,15 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(true, quadTree.getLeafNodeAtLocation(0.5f, 0.5f).getMetaData().getIsStuffAboveMe());
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testGettingAreas()
    {
       super.testGettingAreas();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testSomethingAbove() throws Exception
    {
       float xMin = 0.0f;
@@ -192,7 +196,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       return new GroundOnlyQuadTree(xMin, yMin, xMax, yMax, quadTreeResolution, heightThreshold, 100000);
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testPuttingDifferentHeightPointsAtDifferentLocations() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -218,7 +223,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testPuttingSimilarHeightPoints() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -245,7 +251,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testAll() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -544,7 +551,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
        */
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testMerging() throws Exception
    {
       /*
@@ -679,7 +687,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testClear() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -740,7 +749,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }*/
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testGetMinX() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -750,7 +760,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testGetMaxX() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -760,7 +771,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testGetMinY() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -770,7 +782,8 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testGetMaxY() throws Exception
    {
       GroundOnlyQuadTree quadTree = createDefaultQuadTree(0.5f);
@@ -783,7 +796,9 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
   
 
    @Ignore
-   @Test(timeout = 150000)   public void testOnALineOfPoints()
+
+	@AverageDuration
+	@Test(timeout = 150000)   public void testOnALineOfPoints()
    {
       ArrayList<Point3d> points = new ArrayList<Point3d>();
       points.add(new Point3d(0.0, 0.0, 0.0));
@@ -801,7 +816,9 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @Test(timeout = 150000)   public void testOnSomeSlopes()
+
+	@AverageDuration
+	@Test(timeout = 150000)   public void testOnSomeSlopes()
    {
       double halfWidth = 0.5;
       double resolution = 0.1;
@@ -822,7 +839,9 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
 // @Ignore
-   @Test(timeout = 150000)   public void testOnSomeStairCases()
+
+	@AverageDuration
+	@Test(timeout = 150000)   public void testOnSomeStairCases()
    {
       double halfWidth = 0.6;
       double resolution = 0.02;
@@ -847,7 +866,9 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-   @Test(timeout = 150000)   public void testUsingStairGroundProfile()
+
+	@AverageDuration
+	@Test(timeout = 150000)   public void testUsingStairGroundProfile()
    {
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
 

@@ -13,10 +13,13 @@ import java.net.Socket;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class PersistentTCPClientTest
 {
-   @Test(timeout=4000)
+
+	@AverageDuration
+	@Test(timeout=4000)
    public void test() throws IOException
    {
       String serverIPAddress = "localHost";

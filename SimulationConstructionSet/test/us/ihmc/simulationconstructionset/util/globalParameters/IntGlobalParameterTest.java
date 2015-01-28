@@ -7,6 +7,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class IntGlobalParameterTest
 {
    private static final boolean VERBOSE = false;
@@ -24,7 +26,8 @@ public class IntGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -35,7 +38,8 @@ public class IntGlobalParameterTest
       assertEquals(DEFAULT_VALUE, intGlobalParameter.getValue());
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -62,7 +66,8 @@ public class IntGlobalParameterTest
       assertEquals(newValue, intGlobalParameter.getValue());
    }
 
-   @Test(timeout=300000,expected = RuntimeException.class)
+	@AverageDuration
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
@@ -72,8 +77,8 @@ public class IntGlobalParameterTest
       parent.set(1);
    }
 
-
-   @Test(timeout=300000,expected = RuntimeException.class)
+	@AverageDuration
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "", 0, null);

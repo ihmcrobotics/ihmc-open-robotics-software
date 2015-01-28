@@ -6,9 +6,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class GenotypeTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGenotype()
    {
       Random random = new Random(1776L);
@@ -85,8 +89,9 @@ public class GenotypeTest
          assertEquals(array1[i], array2[i], epsilon);
       }
    }
-   
-   @Test(timeout=300000) 
+
+	@AverageDuration
+	@Test(timeout=300000) 
    public void testGenotypeAtExactlyOneAndZero()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -100,8 +105,9 @@ public class GenotypeTest
          else assertEquals(1, bits[i]);
       }
    }
-   
-   @Test(timeout=300000) 
+
+	@AverageDuration
+	@Test(timeout=300000) 
    public void testGenotypeNearOneAndZero()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -115,10 +121,9 @@ public class GenotypeTest
          else assertEquals(1, bits[i]);
       }
    }
-  
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPhenotypeTwo()
    {
       Genotype genotype = new Genotype(new int[] { 8, 8 });
@@ -141,8 +146,9 @@ public class GenotypeTest
          assertEquals(phenotypeIn[1], phenotypeOut[1], epsilon);
       } 
    }
-   
-   @Test(timeout=300000) 
+
+	@AverageDuration
+	@Test(timeout=300000) 
    public void testPhenotypeReconstruction()
    {
       Random random = new Random(1984L);

@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 

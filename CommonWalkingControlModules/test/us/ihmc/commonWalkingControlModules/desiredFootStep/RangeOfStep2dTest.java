@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -33,8 +34,9 @@ public class RangeOfStep2dTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testExampleUsage()
    {
       double forwardLength = 1.0;
@@ -49,8 +51,9 @@ public class RangeOfStep2dTest
       assertEquals(range.height, forwardLength, 1e-7);
       assertEquals(range.width, sideLength, 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testEllipseAtCenter()
    {
       double forwardLength = 1.0;
@@ -87,8 +90,9 @@ public class RangeOfStep2dTest
          assertFalse(range.contains(new FramePoint(ReferenceFrame.getWorldFrame(), -forwardLength, robotSide.negateIfRightSide(offset - EPSILON), 0.0)));
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTranslatedEllipse()
    {
       double forwardLength = 1.0;

@@ -18,6 +18,7 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -33,8 +34,9 @@ public class JointStateUpdaterTest
 
    private static final Random random = new Random(1776L);
    private static final double EPS = 1e-10;
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testConstructorNormalCase()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
@@ -60,7 +62,8 @@ public class JointStateUpdaterTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInitializingAndReading()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");

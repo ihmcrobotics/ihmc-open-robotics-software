@@ -11,11 +11,14 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class ContactableToroidRobotTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testIsPointOnOrInsideAtOrigin()
    {
       double majorRadius = ContactableToroidRobot.DEFAULT_RADIUS;
@@ -47,8 +50,9 @@ public class ContactableToroidRobotTest
          }
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testIsPointOnOrInsideNotAtOriginUsingTransform()
    {
       Random random = new Random(1972L);
@@ -86,8 +90,9 @@ public class ContactableToroidRobotTest
          }
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPointIsntInsideWhenUsingComOffset()
    {
       Random random = new Random(1972L);

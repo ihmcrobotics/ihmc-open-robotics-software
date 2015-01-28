@@ -23,6 +23,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
@@ -42,7 +43,9 @@ public class QuadTreeForGroundHeightMapTest
 
    
    @Ignore
-   @Test(timeout = 300000)
+
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
       boolean visualizeAndKeepUp = false;
@@ -101,7 +104,8 @@ public class QuadTreeForGroundHeightMapTest
          ThreadTools.sleepForever();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testOnSomeSlopes()
    {
       boolean visualizeAndKeepUp = false;
@@ -124,7 +128,8 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testOnSomeStairCases()
    {
       boolean visualizeAndKeepUp = false;
@@ -151,7 +156,8 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testUsingStairGroundProfile()
    {
       boolean visualizeAndKeepUp = false;

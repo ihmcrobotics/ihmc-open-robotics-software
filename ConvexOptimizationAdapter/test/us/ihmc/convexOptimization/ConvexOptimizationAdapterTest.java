@@ -13,6 +13,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
@@ -57,10 +58,9 @@ public abstract class ConvexOptimizationAdapterTest
          MatrixTools.yamlFieldToMatrix(f,"f",object);
       }
    }
-      
-  
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASimpleRedundantEqualityCase()
    {
       // Minimize x subject to x = 2 and x = 2;
@@ -74,8 +74,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1, solution.length);
       assertEquals(2.0, solution[0], 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASimpleRedundantEqualityCase2d()
    {
       ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
@@ -89,8 +90,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(0.0, solution[0], 1e-7);
       assertEquals(1.0, solution[1], 1e-7);
    }
-   
-  @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
   public void JOptimizerWebpageLPExample() throws Exception
   {
       //from http://www.joptimizer.com/linearProgramming.html
@@ -137,9 +139,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.5, sol2[0], 1e-5);
       assertEquals(0, sol2[1], 1e-5);
    }
-  
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASimpleInequalityCase() throws Exception
    {
       // Minimize x subject to -x <= -2; (x >= 2)
@@ -152,8 +154,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1, solution.length);
       assertEquals(2.0, solution[0], 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASimpleMaximizationInequalityCase()
    {
       // Minimize -x subject to x <= 5
@@ -168,7 +171,9 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    @Ignore // Need to implement addQuadraticInequalities
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLinearCostQuadraticInequalityOptimizationProblem()
    {
       // Minimize -x-y subject to x^2 + y^2 <= 4  (1/2 [x y] [I] [x y]^T - 2 <= 0)
@@ -190,8 +195,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(Math.sqrt(2.0), solution[0], 1e-5);
       assertEquals(Math.sqrt(2.0), solution[1], 1e-5);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem()
    {
       // Minimize x subject to x+y=4 and x-y=2. Should return (3,1).
@@ -211,8 +217,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(3.0, solution[0], 1e-5);
       assertEquals(1.0, solution[1], 1e-5);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
       // Minimize 0 subject to x+y=4. Should return any feasible solution.
@@ -233,7 +240,9 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    @Ignore //Not implemented yet!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
       // Minimize x subject to x+y=4 and y >= x^2. Answer should be ((-1-sqrt(17))/2, (9+sqrt(17))/2))
@@ -261,9 +270,8 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
    }
 
-
-   
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and sqrt(x^2 + y^2) <= z. Answer should be (3, 3, sqrt(18))

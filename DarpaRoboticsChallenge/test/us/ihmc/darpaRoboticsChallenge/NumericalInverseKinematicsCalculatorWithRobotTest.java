@@ -11,6 +11,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
@@ -95,7 +96,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void generateRandomFeasibleRobotPoses()
    {
       int nTests = 10;
@@ -144,7 +146,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return equal;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void generateRandomDoubleInRangeTest()
    {
       double min = -randomNumberGenerator.nextDouble();

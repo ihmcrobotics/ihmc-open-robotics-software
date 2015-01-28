@@ -6,6 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class DoubleGlobalParameterTest    // extends TestCase
 {
    private static final boolean VERBOSE = false;
@@ -24,7 +26,8 @@ public class DoubleGlobalParameterTest    // extends TestCase
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -35,7 +38,8 @@ public class DoubleGlobalParameterTest    // extends TestCase
       assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue(), eps);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -62,7 +66,8 @@ public class DoubleGlobalParameterTest    // extends TestCase
       assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
    }
 
-   @Test(timeout=300000,expected = RuntimeException.class)
+	@AverageDuration
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
@@ -71,8 +76,8 @@ public class DoubleGlobalParameterTest    // extends TestCase
       parent.set(1.0);
    }
 
-
-   @Test(timeout=300000,expected = RuntimeException.class)
+	@AverageDuration
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "", 0.7, null);

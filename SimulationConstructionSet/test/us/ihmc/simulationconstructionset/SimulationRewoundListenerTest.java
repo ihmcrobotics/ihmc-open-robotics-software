@@ -5,11 +5,14 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
 public class SimulationRewoundListenerTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationRewoundListener()
    {
       boolean showGUI = false;

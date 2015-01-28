@@ -23,6 +23,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 @SuppressWarnings("deprecation")
@@ -47,7 +48,9 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
    
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
       BambooTools.reportTestStartedMessage();
@@ -68,7 +71,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

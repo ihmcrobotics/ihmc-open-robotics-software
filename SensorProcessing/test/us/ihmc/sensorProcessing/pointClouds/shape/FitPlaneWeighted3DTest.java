@@ -13,12 +13,15 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class FitPlaneWeighted3DTest
 {
    Random rand = new Random(1231L);
    double eps = 3e-7;
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAgainstUnweighted() {
       for (int i = 0; i<100; i++) {
          int n = rand.nextInt(500) + 4;

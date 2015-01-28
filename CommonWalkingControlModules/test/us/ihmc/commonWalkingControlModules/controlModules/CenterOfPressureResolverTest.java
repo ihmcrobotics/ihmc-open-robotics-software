@@ -16,6 +16,7 @@ import org.junit.Test;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -41,8 +42,9 @@ public class CenterOfPressureResolverTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {      
       Point3d groundPoint = new Point3d();
@@ -60,8 +62,9 @@ public class CenterOfPressureResolverTest
       computeAndVerifyCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassPoint, centerOfMassForce, centerOfMassTorque,
             expectedCenterOfPressure, expectedNormalTorque);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {      
       Point3d groundPoint = new Point3d();
@@ -79,9 +82,9 @@ public class CenterOfPressureResolverTest
       computeAndVerifyCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassPoint, centerOfMassForce, centerOfMassTorque,
             expectedCenterOfPressure, expectedNormalTorque);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCenterOfPressureResolverNoForceInZ()
    {      
       Point3d groundPoint = new Point3d();
@@ -100,8 +103,8 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomExamples()
    {
       Random random = new Random(1776L);

@@ -48,6 +48,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -248,7 +249,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -289,7 +291,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -315,8 +318,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -340,7 +343,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -365,7 +369,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -418,7 +423,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

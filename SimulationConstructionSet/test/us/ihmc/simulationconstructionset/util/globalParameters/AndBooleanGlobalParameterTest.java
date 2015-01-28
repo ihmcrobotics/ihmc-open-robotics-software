@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class AndBooleanGlobalParameterTest
 {
    private static final boolean VERBOSE = false;
@@ -24,7 +26,8 @@ public class AndBooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetThrowsException()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -52,7 +55,8 @@ public class AndBooleanGlobalParameterTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAndBooleanGlobalParameter()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -74,8 +78,8 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAndBooleanGlobalParameterUpdate()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -110,7 +114,8 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFamilyTree()
    {
 //    SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();

@@ -58,6 +58,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -170,7 +171,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       Files.delete(file);
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testComHeightScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -206,7 +208,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       robotDataReceiver.updateRobotModel();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testHandPosePacketScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);

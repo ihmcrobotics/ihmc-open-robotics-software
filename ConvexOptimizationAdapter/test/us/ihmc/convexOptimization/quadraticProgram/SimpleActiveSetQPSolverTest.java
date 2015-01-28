@@ -6,9 +6,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class SimpleActiveSetQPSolverTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleUnconstrainedOptimization()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2; (Solution = [1, 2])
@@ -30,7 +34,8 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleEqualityConstrainedOptimization()
    {
       // Minimize 1/2 * (x1^2 + x2^2) subject to x1 + x2 = 2; (Solution = [1, 1])
@@ -59,8 +64,8 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(1.0, solution[1], 1e-7);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleInequalityConstrainedOptimizationWithActiveConstraint()
    {
       // Minimize 1/2 * (x1^2 + x2^2) subject to x1 + x2 <= -2; (Solution = [-1, -1])
@@ -89,7 +94,8 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(-1.0, solution[1], 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleInequalityConstrainedOptimizationWithInactiveConstraint()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 + x2 <= 4; (Solution = [1, 2])
@@ -118,9 +124,8 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testNoValidSolutionDueToNonSolvableEqualityConstraints()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 + x2 = 1; x1 + x2 = 2; (No solution)
@@ -150,7 +155,9 @@ public class SimpleActiveSetQPSolverTest
    }
 
    @Ignore // Fails when conflicting constraints are active... Need to fix this case.
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {
       // Minimize 1/2 * (x1^2 + x2^2) - x1 - 2.0 * x2 subject to x1 = -4; x1 < 4; (Solution = [-4, 2])

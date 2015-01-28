@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class VarGroupTest {
@@ -23,6 +24,7 @@ public class VarGroupTest {
 		varGroup = new VarGroup("varGroup");
 	}
 
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testSetAndGetName() {
 		assertTrue("varGroup" == varGroup.getName());
@@ -35,6 +37,7 @@ public class VarGroupTest {
 				.getName());
 	}
 
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testAddGetAndRemoveSingleVariable() {
 		varGroup.addVar(variable1);
@@ -47,6 +50,7 @@ public class VarGroupTest {
 		assertTrue(0 == varGroupArray.length);
 	}
 
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testAddMultipleVariables() {
 		String[] variablesToBeAdded = { variable1, variable2, variable3,
@@ -61,6 +65,7 @@ public class VarGroupTest {
 
 	}
 
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testAddRemoveAndGetRegularExpressions() {
 		String[] regularExpressionsToBeAdded = { variable1, variable2,

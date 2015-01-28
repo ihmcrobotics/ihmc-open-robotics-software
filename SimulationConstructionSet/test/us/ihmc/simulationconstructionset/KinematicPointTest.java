@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -29,7 +30,8 @@ public class KinematicPointTest
 		robot = new Robot("testRobot");
 		kinematicPoint = new KinematicPoint("testPoint", offset, robot.getRobotsYoVariableRegistry());
 	}
-	 
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetAndSetParentJoint() 
 	{
@@ -38,13 +40,15 @@ public class KinematicPointTest
 		kinematicPoint.setParentJoint(joint);
 		assertTrue(joint == kinematicPoint.getParentJoint());
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testToString()
 	{
 		assertEquals("name: testPoint x: 0.0, y: 0.0, z: 0.0", kinematicPoint.toString());
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testSetOffsetJointWithBothVectorAndXYAndZValuesAsParameters()
 	{
@@ -75,13 +79,15 @@ public class KinematicPointTest
 //		assertTrue(1.5 == kinematicPoint.getOffset().getY());
 //		assertTrue(3.5 == kinematicPoint.getOffset().getZ());
 //	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetName()
 	{
 		assertTrue(kinematicPoint.getName() == "testPoint");
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetPosition()
 	{
@@ -98,8 +104,8 @@ public class KinematicPointTest
 		assertTrue(5.2 == positionToPack.z);
 
 	}
-	
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetPositionPoint()
 	{
@@ -114,7 +120,8 @@ public class KinematicPointTest
 		assertTrue(5.1 == positionReceivedFromGetMethod.y);
 		assertTrue(5.2 == positionReceivedFromGetMethod.z);
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetVelocityVector()
 	{
@@ -130,7 +137,8 @@ public class KinematicPointTest
 		assertTrue(5.2 == vectorReceivedFromGetMethod.z);
 		
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetVelocity()
 	{
@@ -147,7 +155,8 @@ public class KinematicPointTest
 		assertTrue(5.2 == velocityToPack.z);
 		
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetYoPosition()
 	{
@@ -158,7 +167,8 @@ public class KinematicPointTest
 		yoPosition.set(new Point3d(5.0, 5.1, 5.2));
 		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoPosition.toString());
 	}
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testGetYoVelocity()
 	{
@@ -169,8 +179,8 @@ public class KinematicPointTest
 		yoVelocity.set(new Vector3d(5.0, 5.1, 5.2));
 		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoVelocity.toString());
 	}
-	
-	
+
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testChangeableOffset()
 	{

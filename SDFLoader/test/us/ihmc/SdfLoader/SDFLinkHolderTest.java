@@ -10,11 +10,14 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 
 public class SDFLinkHolderTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void noInertialPose()
    {
       // Setup
@@ -52,7 +55,8 @@ public class SDFLinkHolderTest
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void inertialPoseTranslationOnly()
    {
       // Setup
@@ -89,8 +93,9 @@ public class SDFLinkHolderTest
       Matrix3d expectedInertia = new Matrix3d(Ixx,Ixy,Ixz,Ixy,Iyy,Iyz,Ixz,Iyz,Izz);
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void inertialPoseWithRotationOnly()//This one should have right COM, but inertia will have to change.
    {
       // Setup
@@ -147,8 +152,9 @@ public class SDFLinkHolderTest
 //      }
       //assertTrue("Inertia matrix should be changed to link frame. " + helpMessage, inertiaEqual);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void inertialPoseProximaliRobotWithRotationAndTranslation()
    {      
       // Setup
@@ -212,8 +218,9 @@ public class SDFLinkHolderTest
       //assertTrue("Inertia matrix should be changed to link frame. " + helpMessage, inertiaEqual);
       assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.m00, inertiaMatrix.m01, inertiaMatrix.m02, inertiaMatrix.m11, inertiaMatrix.m12, inertiaMatrix.m22}, 3e-9);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void inertialPoseDistaliRobotWithRotationAndTranslation()
    {      
       // Setup

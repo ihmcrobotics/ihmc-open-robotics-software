@@ -5,10 +5,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.examples.Graphics3DAdapterExampleOne;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class JMEGraphics3dAdapterTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleObject()
    {
       JMEGraphics3DAdapter renderer = new JMEGraphics3DAdapter();

@@ -14,6 +14,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -33,8 +34,9 @@ public class SimulationRewindabilityVerifierTest
    public void tearDown() throws Exception
    {
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRewindableSimulation() throws UnreasonableAccelerationException
    {
       SimulationConstructionSet scs1 = constructRewindableSimulationConstructionSet();
@@ -52,9 +54,9 @@ public class SimulationRewindabilityVerifierTest
       scs1.closeAndDispose();
       scs2.closeAndDispose();
    }
-   
-  
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testEasilyDetectableNonRewindableSimulation() throws UnreasonableAccelerationException
    {
       SimulationConstructionSet scs1 = constructEasilyDetectableNonRewindableSimulationConstructionSet();
@@ -78,9 +80,9 @@ public class SimulationRewindabilityVerifierTest
       scs1.closeAndDispose();
       scs2.closeAndDispose();
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDifficultToDetectNonRewindableSimulation() throws UnreasonableAccelerationException
    {
       SimulationConstructionSet scs1 = constructDifficultToDetectNonRewindableSimulationConstructionSet();

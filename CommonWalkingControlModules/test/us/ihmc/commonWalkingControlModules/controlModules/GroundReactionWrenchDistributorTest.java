@@ -39,6 +39,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -72,7 +73,8 @@ public class GroundReactionWrenchDistributorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -84,7 +86,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithLeeGoswamiDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -96,7 +100,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithOptimizationBasedDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -108,7 +114,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithContactPointDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -119,7 +127,8 @@ public class GroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -132,7 +141,8 @@ public class GroundReactionWrenchDistributorTest
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -146,7 +156,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithLeeGoswamiDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -163,7 +175,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithLeeGoswamiDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -180,7 +194,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithContactPointDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -194,7 +210,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithOptimizationBasedtDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -210,7 +228,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithContactPointDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -224,7 +244,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithOptimizationBasedDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -240,7 +262,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleNonFlatGroundExampleWithLeeGoswamiDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -252,7 +276,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleNonFlatGroundExampleWithContactPointDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -264,7 +290,9 @@ public class GroundReactionWrenchDistributorTest
    }
 
    @Ignore // Fix or delete!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleNonFlatGroundExampleWithOptimizationBasedWrenchDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -277,7 +305,9 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore
    // Cylindrical grasping stuff has been put the grave yard.
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleExampleWithCylindersUsingOptimizationBasedWrenchDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -291,7 +321,9 @@ public class GroundReactionWrenchDistributorTest
    }
    
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTroublesomeExamplesWithLeeGoswamiDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -303,7 +335,8 @@ public class GroundReactionWrenchDistributorTest
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTroublesomeExamplesWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -317,7 +350,9 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore
    // This Troublesome example is not demonstrated to work with the contact point distributor, predecessor of the OptimizationBasedDistributor
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTroublesomeExamplesWithOptimizationBasedDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -331,7 +366,9 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore
    // Cylindrical grasping stuff has been put the grave yard.
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomMultiContactOptimizationBased()
    {
       Random random = new Random(129532L);
