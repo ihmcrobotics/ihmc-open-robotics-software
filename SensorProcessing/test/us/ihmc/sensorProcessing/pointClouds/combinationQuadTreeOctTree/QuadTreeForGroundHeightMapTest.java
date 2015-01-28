@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreeParameters;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.math.dataStructures.HeightMap;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Box3d;
@@ -37,7 +37,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-public class SimplifiedGroundOnlyQuadTreeTest
+public class QuadTreeForGroundHeightMapTest
 {
    private static final boolean DO_ASSERTS = true;
 
@@ -69,7 +69,7 @@ public class SimplifiedGroundOnlyQuadTreeTest
 
      int skipPoints = 0;
      int maxNumberOfPoints = 2000000;
-      ArrayList<Point3d> points = SimplifiedGroundOnlyQuadTree.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
+      ArrayList<Point3d> points = QuadTreeForGroundHeightMap.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
 
       
       int pointsPerBallUpdate = 10000;
@@ -109,8 +109,8 @@ public class SimplifiedGroundOnlyQuadTreeTest
 
       //      CleanQuadTree quadTree = new CleanQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold);
       Box bounds = new Box(minX, minY, maxX, maxY);
-      SimplifiedQuadTreeParameters quadTreeParameters = new SimplifiedQuadTreeParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
-      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(bounds, quadTreeParameters);
+      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+      QuadTreeForGroundHeightMap quadTree = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
       float height0 = 0.0f;
       float height1 = 0.0f;
@@ -389,19 +389,19 @@ public class SimplifiedGroundOnlyQuadTreeTest
         
       private Graphics3DNode drawHeightMap(double minX, double minY, double maxX, double maxY, float resolution)
       {
-         return SimplifiedGroundOnlyQuadTreeVisualizer.drawHeightMap(heightMap, scs, minX, minY, maxX, maxY, resolution);  
+         return QuadTreeHeightMapVisualizer.drawHeightMap(heightMap, scs, minX, minY, maxX, maxY, resolution);  
       }
 
       private Graphics3DNode drawAllPointsInQuadTree(AppearanceDefinition appearance)
       {
-         return SimplifiedGroundOnlyQuadTreeVisualizer.drawAllPointsInQuadTree(heightMap, resolution, scs, appearance);
+         return QuadTreeHeightMapVisualizer.drawAllPointsInQuadTree(heightMap, resolution, scs, appearance);
       }
 
       private Graphics3DNode drawNodeBoundingBoxes(double heightToDrawAt)
       {
-         if (heightMap instanceof SimplifiedGroundOnlyQuadTree)
+         if (heightMap instanceof QuadTreeForGroundHeightMap)
          {
-            Graphics3DNode handle = SimplifiedGroundOnlyQuadTreeVisualizer.drawNodeBoundingBoxes((SimplifiedGroundOnlyQuadTree) heightMap, scs, heightToDrawAt);
+            Graphics3DNode handle = QuadTreeHeightMapVisualizer.drawNodeBoundingBoxes((QuadTreeForGroundHeightMap) heightMap, scs, heightToDrawAt);
             return handle;
          }
          
@@ -504,8 +504,8 @@ public class SimplifiedGroundOnlyQuadTreeTest
          double maxY = rangeOfPointsToTest.getMaxPoint().getY();
 
          Box bounds = new Box(minX, minY, maxX, maxY);
-         SimplifiedQuadTreeParameters quadTreeParameters = new SimplifiedQuadTreeParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
-         heightMap = new SimplifiedGroundOnlyQuadTree(bounds, quadTreeParameters);
+         QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+         heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
          
 //      CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise);
 //         CleanQuadTreeHeightMap heightMap = new CleanQuadTreeHeightMap(minX - resolution, minY - resolution, maxX + resolution, maxY + resolution, resolution,

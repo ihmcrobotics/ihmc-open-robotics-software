@@ -962,8 +962,6 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    {
       private HeightMap heightMap;
 
-//    private final double centerX, centerY;
-//    private final double minX, minY, maxX, maxY;
       private final BoundingBox2d rangeOfPointsToTest;
 
       private double resolution = 0.1;

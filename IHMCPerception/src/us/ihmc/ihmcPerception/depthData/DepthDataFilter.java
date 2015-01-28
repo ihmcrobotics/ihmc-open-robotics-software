@@ -13,13 +13,13 @@ import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.SimplifiedGroundOnlyQuadTree;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.userInterface.util.DecayingResolutionFilter;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.SphericalLinearResolutionProvider;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
-import us.ihmc.utilities.dataStructures.quadTree.SimplifiedQuadTreeParameters;
+import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -76,10 +76,10 @@ public class DepthDataFilter
       if (USE_SIMPLIFIED_QUAD_TREE)
       {
          Box bounds = new Box(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT);
-         SimplifiedQuadTreeParameters quadTreeParameters = new SimplifiedQuadTreeParameters(DepthDataFilterParameters.GRID_RESOLUTION, 
+         QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(DepthDataFilterParameters.GRID_RESOLUTION, 
                parameters.quadtreeHeightThreshold, parameters.quadTreeMaxMultiLevelZChangeToFilterNoise, parameters.maxSameHeightPointsPerNode, parameters.maxAllowableXYDistanceForAPointToBeConsideredClose);
 
-         return new SimplifiedGroundOnlyQuadTree(bounds, quadTreeParameters);
+         return new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
       }
 
       return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, DepthDataFilterParameters.GRID_RESOLUTION,
