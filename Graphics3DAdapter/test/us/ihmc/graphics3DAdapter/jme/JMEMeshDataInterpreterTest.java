@@ -16,7 +16,7 @@ import com.jme3.scene.Mesh;
 public class JMEMeshDataInterpreterTest
 {
 
-   @Test
+   @Test(timeout = 300000)
    public void testForASingleTriangle()
    {
       Point3f[] vertices = new Point3f[]{new Point3f(0.0f, 0.0f, 0.0f), new Point3f(1.0f, 0.0f, 0.0f), new Point3f(1.0f, 1.0f, 0.0f)};
@@ -40,7 +40,7 @@ public class JMEMeshDataInterpreterTest
       assertJMEVectorEqualsPoint(triangle.get3(), vertices[2]);  
    }
    
-   @Test
+   @Test(timeout = 300000)
    public void testForASimpleCube()
    {
       Point3f[] vertices = new Point3f[]{new Point3f(0.0f, 0.0f, 0.0f), new Point3f(1.0f, 0.0f, 0.0f), new Point3f(1.0f, 1.0f, 0.0f), new Point3f(0.0f, 1.0f, 0.0f), 
