@@ -45,8 +45,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterface
 {
-   private final double POSITION_THRESHOLD = 0.007;
-   private final double ORIENTATION_THRESHOLD = 0.007;
+   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 8.0;
+   
    private static final boolean DEBUG = true;
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -161,14 +161,18 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
 
-      double initialValveAngle = valveRobot.getClosePercentage();
+      double initialValveClosePercentage = valveRobot.getClosePercentage();
       success = executeBehavior(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
       assertTrue(success);
-      double finalValveAngle = valveRobot.getClosePercentage();
+      double finalValveClosePercentage = valveRobot.getClosePercentage();
+      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage, DEBUG);
 
       assertTrue(turnValveBehavior.isDone());
-      assertTrue(finalValveAngle > initialValveAngle);
-
+      assertTrue(finalValveClosePercentage > initialValveClosePercentage);
+      assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
+      
+      //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
+      
       BambooTools.reportTestFinishedMessage();
    }
 
