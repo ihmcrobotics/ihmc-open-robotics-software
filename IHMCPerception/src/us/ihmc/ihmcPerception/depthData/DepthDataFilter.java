@@ -25,6 +25,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class DepthDataFilter
 {
@@ -56,9 +57,10 @@ public class DepthDataFilter
 
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
 
-      ReferenceFrame head = fullRobotModel.getHead().getBodyFixedFrame();
-      quadTree = getGroundOnlyQuadTree(head);
-      octree = getOctree(head);
+      RigidBody head = fullRobotModel.getHead();
+      ReferenceFrame headFrame = head == null ? ReferenceFrame.getWorldFrame() : head.getBodyFixedFrame();
+      quadTree = getGroundOnlyQuadTree(headFrame);
+      octree = getOctree(headFrame);
       quadTree.setOctree(octree);
    }
 
