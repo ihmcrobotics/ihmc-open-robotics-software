@@ -401,4 +401,9 @@ public class FootControlModule
    {
       return touchdownOnToesState.getTouchdownInitialPitchAngle();
    }
+
+   public void setPredictedToeOffDuration(double predictedToeOffDuration)
+   {
+      onToesState.setPredictedToeOffDuration(predictedToeOffDuration);
+   }
 }
