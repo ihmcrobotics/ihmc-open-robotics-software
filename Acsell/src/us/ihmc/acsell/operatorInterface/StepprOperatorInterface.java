@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidOperatorInterface.DRCOperatorInterface;
 
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
@@ -32,8 +31,14 @@ public class StepprOperatorInterface
 
             try
             {
-               Method method = DRCOperatorInterface.class.getDeclaredMethod("startUserInterface", us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.class);
+               Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.DRCOperatorInterface");
+               Method method = clazz.getDeclaredMethod("startUserInterface", us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.class);
                method.invoke(null, robotModel);
+            }
+            catch (ClassNotFoundException e)
+            {
+               // TODO insert Dennis Nedry troll here
+               e.printStackTrace();
             }
             catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
             {
