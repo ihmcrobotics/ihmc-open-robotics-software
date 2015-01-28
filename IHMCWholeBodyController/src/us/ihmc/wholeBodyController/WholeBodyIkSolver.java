@@ -53,7 +53,7 @@ abstract public class WholeBodyIkSolver
    private final ReferenceFrames workingFrames;
 
 
- //  private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
+   //  private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> workingSoleFrames = new SideDependentList<ReferenceFrame>();
 
    //---------- robot models in different contexts and different formats ----------
@@ -100,7 +100,7 @@ abstract public class WholeBodyIkSolver
    abstract public String getURDFConfigurationFileName()  throws IOException ;
    abstract protected HashSet<String> configureCollisionAvoidance(String urdfFileName )  throws Exception;
    abstract protected void configureTasks();
-   
+
    abstract public ReferenceFrame  getRootFrame( SDFFullRobotModel model);
 
    //---------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ abstract public class WholeBodyIkSolver
    public ReferenceFrame getRootFrame(){
       return getRootFrame(workingSdfModel);
    }
-   
+
    public void setVerbose(boolean verbose)
    {
       hierarchicalSolver.setVerbose(verbose);
@@ -161,7 +161,7 @@ abstract public class WholeBodyIkSolver
       out.setTranslation( new Vector3d( body_pos.get(0), body_pos.get(1), body_pos.get(2) ) ); 
       return out;
    }
-   
+
 
    public ReferenceFrame getBodyReferenceFrame(String bodyname)
    {
@@ -180,7 +180,7 @@ abstract public class WholeBodyIkSolver
       return bodyFrame;
    }   
 
-   
+
    public HierarchicalKinematicSolver getHierarchicalSolver()
    {
       return hierarchicalSolver;
@@ -191,13 +191,15 @@ abstract public class WholeBodyIkSolver
       return urdfModel.getNrOfJoints();
    }
 
-
+   static 
+   {
+      NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
+      NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
+   }
+   
    public WholeBodyIkSolver( WholeBodyControllerParameters robotControllerParameters ) 
    {
       // load external library
-      NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
-      NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
-
       workingSdfModel  = robotControllerParameters.createFullRobotModel();
       workingFrames = new ReferenceFrames(workingSdfModel);
 
@@ -205,7 +207,7 @@ abstract public class WholeBodyIkSolver
 
       // create a RobotModel using a special URDF
       urdfModel = new RobotModel();
-      
+
       try{
          urdfModel.loadURDF( getURDFConfigurationFileName() , false);
       }
@@ -234,7 +236,7 @@ abstract public class WholeBodyIkSolver
          disabledtHandRotationY.set(robotSide, new MutableBoolean(false));
          keepArmQuiet.set(robotSide, new MutableBoolean(true));
       }
-      
+
       for (int i = 0; i < numOfJoints; i++)
       {
          String joint_name_in_urdf = urdfModel.getActiveJointName(i);
@@ -349,7 +351,7 @@ abstract public class WholeBodyIkSolver
    public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, ReferenceFrame end_effector_pose)
    {
       movePelvisToHaveOverlappingFeet( actualRobotModel, workingSdfModel );
-      
+
       final HierarchicalTask_BodyPosition task_ee_trans = task_end_effector_translations.get(end_effector_side);
       final HierarchicalTask_BodyOrientation task_ee_rot = task_end_effector_rotations.get(end_effector_side);
 
@@ -396,13 +398,13 @@ abstract public class WholeBodyIkSolver
          }
       }
    }
-   
+
    public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, FramePose end_effector_pose)
    {
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", end_effector_pose);
       setHandTarget(actualRobotModel, end_effector_side, endEffectorPoseReferenceFrame);
    }
-   
+
    public void setPreferedJointPose(String joint_name, double q)
    {
       int index = jointNamesMap.get(joint_name);
@@ -517,7 +519,7 @@ abstract public class WholeBodyIkSolver
                q_init.set(i, randQ.get(i));
             }
          }
-         
+
          // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
          q_init.set(jointNamesMap.get("l_leg_aky"), -0.7);
          q_init.set(jointNamesMap.get("r_leg_aky"), -0.7);
@@ -565,34 +567,34 @@ abstract public class WholeBodyIkSolver
 
       task_com_position.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
    }
-   
+
    private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
    {
       referenceModel.updateFrames();
       followerModel.updateFrames();
-  
+
       ReferenceFrame referenceSoleFrame = referenceModel.getSoleFrame( getSideOfTheFootRoot() );
       ReferenceFrame followerSoleFrame  = followerModel.getSoleFrame( getSideOfTheFootRoot() );
-  
+
       RigidBodyTransform soleWorldToFollow = new RigidBodyTransform();
       RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
       RigidBodyTransform pelvisTransform   = new RigidBodyTransform();
-  
+
       ReferenceFrame followerPelvisFrame = followerModel.getRootJoint().getFrameAfterJoint();
-  
+
       followerPelvisFrame.getTransformToDesiredFrame(soleToPelvis,  followerSoleFrame);
       referenceSoleFrame.getTransformToDesiredFrame(soleWorldToFollow, ReferenceFrame.getWorldFrame());
       pelvisTransform.multiply( soleWorldToFollow, soleToPelvis);
-  
+
       followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
       followerModel.updateFrames();
    }
-   
+
 
    synchronized private int computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack)
    {    
       movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
-      
+
       int ret = -1;
       Vector64F q_out = new Vector64F(numOfJoints);
 
@@ -644,12 +646,12 @@ abstract public class WholeBodyIkSolver
             desiredRobotModelToPack.updateFrames();
          }
       }
-      
+
       if(desiredRobotModelToPack != null)
       {
          movePelvisToHaveOverlappingFeet( actualSdfModel, desiredRobotModelToPack );
       }
-      
+
       return ret;
    }
 
@@ -674,7 +676,7 @@ abstract public class WholeBodyIkSolver
       task_leg_pose.setTarget(quat, pos, 0.0005);
    }
 
-   
+
    public ReferenceFrame getDesiredAfterJointFrame(String jointName, ReferenceFrame parentFrame)
    {
       workingFrames.updateFrames();
