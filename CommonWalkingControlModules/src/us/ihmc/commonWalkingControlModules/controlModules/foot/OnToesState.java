@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -286,6 +287,12 @@ public class OnToesState extends AbstractFootControlState
          toeOffDesiredPitchVelocity.set(footTwist.getAngularPartY());
 
       toeOffDesiredPitchAcceleration.set(Math.max(0.0, toeOffTrajectory.getAcceleration()));
+   }
+
+   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack)
+   {
+      desiredOrientationToPack.setIncludingFrame(desiredOrientation);
+      desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);
    }
 
    private void copyOriginalContactPointPositions()

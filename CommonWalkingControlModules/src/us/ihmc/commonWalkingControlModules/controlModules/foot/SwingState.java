@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTra
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGeneratorWithPushRecovery;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -67,6 +68,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    
    private final TwoViaPointTrajectoryGenerator continuousTrajectory;
    private final DoubleYoVariable swingClearanceAngle, swingLandingAngle, defaultHeightClearance;
+   
+   private final VectorProvider currentAngularVelocityProvider;
+   private final FrameVector initialAngularVelocity = new FrameVector();
+   private boolean hasInitialAngularVelocityBeenProvided = false;
 
    public SwingState(DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
          RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
@@ -153,15 +158,25 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       positionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, registry);
 
-      VectorProvider initialAngularVelocityProvider = new CurrentAngularVelocityProvider(footFrame, rigidBody, twistCalculator);
+      currentAngularVelocityProvider = new CurrentAngularVelocityProvider(footFrame, rigidBody, twistCalculator);
+      VectorProvider initialAngularVelocityProvider = new ConstantVectorProvider(initialAngularVelocity);
       VectorProvider finalAngularVelocityProvider = new ConstantVectorProvider(new FrameVector(footFrame));
       orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
    }
 
    @Override
+   public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
+   {
+      hasInitialAngularVelocityBeenProvided = true;
+      this.initialAngularVelocity.setIncludingFrame(initialAngularVelocity);
+   }
+
+   @Override
    protected void initializeTrajectory()
    {
+      if (!hasInitialAngularVelocityBeenProvided)
+         currentAngularVelocityProvider.get(initialAngularVelocity);
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
 
@@ -284,11 +299,12 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       super.doTransitionIntoAction();
    }
 
-//   @Override
-//   public void doTransitionOutOfAction()
-//   {
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      hasInitialAngularVelocityBeenProvided = false;
 //      if (USE_NEW_CONTINUOUS_TRAJECTORY)
-//         twoViaPointTrajectoryGenerator.hideVisualization();
-//      super.doTransitionOutOfAction();
-//   }
+//         continuousTrajectory.hideVisualization();
+      super.doTransitionOutOfAction();
+   }
 }
