@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.fest.util.Files;
+
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileSaver;
@@ -28,26 +30,33 @@ public class CommandRecorder
    {
       this.timestampProvider = timestampProvider;
    }
-
-
    public synchronized void startRecording(String originalFilename, ReferenceFrame recordFrame)
+   {
+      startRecording(originalFilename, recordFrame, false);
+   }
+
+   public synchronized void startRecording(String originalFilename, ReferenceFrame recordFrame, Boolean overwriteExistingFile)
    {
       try
       {
-         int counter = 1;
          originalFilename = originalFilename + ScriptEngineSettings.extension;
-         String proposedFilename = new String(originalFilename);
-         boolean fileAlreadyExists = doesFileAlreadyExists(proposedFilename);
+         String proposedFilename;
+         
+         boolean fileAlreadyExists = doesFileAlreadyExists(originalFilename);
 
-         while(fileAlreadyExists)
+         if (fileAlreadyExists && !overwriteExistingFile)
          {
-            proposedFilename  = "duplicate"  + Integer.toString(counter) + "_" + originalFilename;
-            counter++;
-            fileAlreadyExists = doesFileAlreadyExists(proposedFilename);
+            proposedFilename = makeFilenameUnique(originalFilename);
+         }
+         else
+         {
+            File file = new File(ScriptEngineSettings.scriptSavingDirectory + originalFilename);
+            Files.delete(file);
+            
+            proposedFilename = new String(originalFilename);
          }
 
          String path = ScriptEngineSettings.scriptSavingDirectory + "/" + proposedFilename;
-
 
          scriptFileSaver = new ScriptFileSaver(path, false);
          startTime = timestampProvider.getTimestamp();
@@ -60,6 +69,23 @@ public class CommandRecorder
          System.out.println("CommandRecorder: fileanme =" + originalFilename);
          throw new RuntimeException(e);
       }
+   }
+   
+   private String makeFilenameUnique(String originalFilename)
+   {
+      String proposedFilename = new String(originalFilename);
+      int counter = 1;
+      
+      boolean fileAlreadyExists = true;
+      
+      while(fileAlreadyExists)
+      {
+         proposedFilename  = "duplicate"  + Integer.toString(counter) + "_" + originalFilename;
+         counter++;
+         fileAlreadyExists = doesFileAlreadyExists(proposedFilename);
+      }
+      
+      return proposedFilename;
    }
 
    private synchronized void addEndOfScriptOjectToList()
