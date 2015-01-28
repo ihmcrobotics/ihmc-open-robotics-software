@@ -25,13 +25,13 @@ public class HighLevelStateBehavior extends BehaviorInterface
    {
       if (!packetHasBeenSent.getBooleanValue() && (outgoingHighLevelStatePacket != null))
       {
-         sendFootStateToController();
+         sendPacketToController();
       }
    }
 
-   private void sendFootStateToController()
+   private void sendPacketToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          sendPacketToController(outgoingHighLevelStatePacket);
          packetHasBeenSent.set(true);
@@ -74,7 +74,7 @@ public class HighLevelStateBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return packetHasBeenSent.getBooleanValue() &&!isPaused.getBooleanValue();
+      return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
@@ -91,11 +91,12 @@ public class HighLevelStateBehavior extends BehaviorInterface
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
-   
-   public boolean hasInputBeenSet() {
-	   if (outgoingHighLevelStatePacket != null)
-		   return true;
-	   else
-		   return false;
+
+   public boolean hasInputBeenSet()
+   {
+      if (outgoingHighLevelStatePacket != null)
+         return true;
+      else
+         return false;
    }
 }
