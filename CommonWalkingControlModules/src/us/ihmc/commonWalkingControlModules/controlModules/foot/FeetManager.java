@@ -303,12 +303,15 @@ public class FeetManager
       return walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide);
    }
 
-   public void requestToeOffBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP)
+   public void requestToeOffBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP, double predictedToeOffDuration)
    {
       walkOnTheEdgesManager.updateToeOffStatusBasedOnICP(trailingLeg, desiredICP, finalDesiredICP);
       
       if (doToeOff())
+      {
+         footControlModules.get(trailingLeg).setPredictedToeOffDuration(predictedToeOffDuration);
          setOnToesContactState(trailingLeg);
+      }
    }
 
    public boolean doToeOff()
@@ -316,11 +319,14 @@ public class FeetManager
       return walkOnTheEdgesManager.doToeOff();
    }
 
-   public void requestToeOffBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void requestToeOffBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP, double predictedToeOffDuration)
    {
       walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP, desiredICP, currentICP);
       if (doToeOff())
+      {
+         footControlModules.get(trailingLeg).setPredictedToeOffDuration(predictedToeOffDuration);
          setOnToesContactState(trailingLeg);
+      }
    }
 
    public boolean willLandOnToes()

@@ -555,7 +555,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
 
                RobotSide trailingLeg = transferToSide.getOppositeSide();
-               feetManager.requestToeOffBasedOnICP(trailingLeg, desiredICP.getFramePoint2dCopy(), finalDesiredICP);
+               double predictedToeOffDuration = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
+               feetManager.requestToeOffBasedOnICP(trailingLeg, desiredICP.getFramePoint2dCopy(), finalDesiredICP, predictedToeOffDuration);
             }
             else if (!initializedAtStart)
             {
@@ -591,7 +592,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             RobotSide trailingLeg = transferToSide.getOppositeSide();
             icpAndMomentumBasedController.getDesiredCMP(desiredCMP);
-            feetManager.requestToeOffBasedOnECMP(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy(), capturePoint2d);
+            
+            double predictedToeOffDuration = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
+            feetManager.requestToeOffBasedOnECMP(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy(), capturePoint2d, predictedToeOffDuration);
 
             if (feetManager.doToeOff())
             {
