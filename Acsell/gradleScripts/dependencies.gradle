@@ -15,7 +15,6 @@ dependencies {
 			
 	compile project(':CommonWalkingControlModules')
 	compile project(':DarpaRoboticsChallenge')
-	compile project(':IHMCHumanoidOperatorInterface')
 	compile project(':Graphics3DAdapter')
 	compile project(':IHMCUtilities')
 	compile project(':SDFLoader')
@@ -27,4 +26,6 @@ dependencies {
     compile project(':IHMCPerception')
     compile project(':IHMCWholeBodyController')
     compile project(':IHMCROSTools')
+    
+    runtime project(':IHMCHumanoidOperatorInterface')
 }
