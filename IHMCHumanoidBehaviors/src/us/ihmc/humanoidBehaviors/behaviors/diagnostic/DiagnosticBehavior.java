@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
@@ -16,6 +17,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
@@ -37,6 +39,7 @@ import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class DiagnosticBehavior extends BehaviorInterface
 {
@@ -52,10 +55,13 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final PelvisPoseBehavior pelvisPoseBehavior;
    private final FootstepListBehavior footstepListBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
+   private final ComHeightBehavior comHeightBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
    private final DoubleYoVariable sleepTimeBetweenPoses;
+   private final IntegerYoVariable numberOfCyclesToRun;
+   private final DoubleYoVariable minCoMHeightOffset, maxCoMHeightOffset;
    private final int numberOfArmJoints;
    private final FullRobotModel fullRobotModel;
 
@@ -65,7 +71,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private enum DiagnosticTask
    {
-      CHEST_MOTIONS, PELVIS_MOTIONS, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS
+      CHEST_MOTIONS, PELVIS_MOTIONS, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATS
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -102,6 +108,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
       sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 2.0);
 
+      minCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MinCoMHeightOffset", registry);
+      minCoMHeightOffset.set(-0.05);
+      maxCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxCoMHeightOffset", registry);
+      maxCoMHeightOffset.set(0.05);
+
       footstepLength = new DoubleYoVariable(behaviorNameFirstLowerCase + "FootstepLength", registry);
       footstepLength.set(0.3);
       
@@ -119,6 +130,9 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
       registry.addChild(footstepListBehavior.getYoVariableRegistry());
+
+      comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(comHeightBehavior.getYoVariableRegistry());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -146,6 +160,9 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       activeSideForHandControl = new EnumYoVariable<>("activeSideForHandControl", registry, RobotSide.class);
       activeSideForHandControl.set(RobotSide.LEFT);
+
+      numberOfCyclesToRun = new IntegerYoVariable("numberOfDiagnosticCyclesToRun", registry);
+      numberOfCyclesToRun.set(1);
    }
 
    private void sequenceUpperBody()
@@ -677,6 +694,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
 
+   private void sequenceSquats()
+   {
+      submitDesiredCoMHeightOffset(minCoMHeightOffset.getDoubleValue());
+      submitDesiredCoMHeightOffset(maxCoMHeightOffset.getDoubleValue());
+   }
+
    private ReferenceFrame findFixedFrameForPelvisOrientation()
    {
       if (supportLeg.getEnumValue() == null)
@@ -691,6 +714,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredChestOrientation.changeFrame(worldFrame);
       pipeLine.submit(new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
+   }
+
+   private void submitDesiredCoMHeightOffset(double offsetHeight)
+   {
+      pipeLine.submit(new CoMHeightTask(offsetHeight, yoTime, comHeightBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
    }
 
    private void submitDesiredPelvisOrientation(double yaw, double pitch, double roll)
@@ -860,6 +888,9 @@ public class DiagnosticBehavior extends BehaviorInterface
             karateKid(activeSideForFootControl.getEnumValue());
             sequenceBow();
             break;
+         case SQUATS:
+            for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+               sequenceSquats();
          default:
             break;
          }
