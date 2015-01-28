@@ -87,8 +87,8 @@ public class Graphics3DAdapterExampleOne
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
       runnables.add(rotator);
       runnables.add(blinker);
-
-      while (true)
+      
+      for (int i = 0; i < 600; i++)
       {
          for (Runnable runnable : runnables)
          {
@@ -256,7 +256,7 @@ public class Graphics3DAdapterExampleOne
    
    private class PanBackAndForthTrackingAndDollyPositionHolder extends SimpleCameraTrackingAndDollyPositionHolder implements Runnable
    {
-      private long startTime = System.currentTimeMillis();
+      private final long startTime = System.currentTimeMillis();
       private final double panXOffset, panXAmplitude, panXFrequency;
       
       public PanBackAndForthTrackingAndDollyPositionHolder(double panXOffset, double panXAmplitude, double panXFrequency)
