@@ -50,6 +50,9 @@ public class QuadTreeForGroundHeightMapTest
       double minY = -3.0; //5.0f;
       double maxX = 1.0; //5.0f;
       double maxY = 4.0; //5.0f;
+      
+      Box bounds = new Box(minX, minY, maxX, maxY);
+      
       float resolution = 0.025f;
       float heightThreshold = 0.005f;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.02;
@@ -69,9 +72,10 @@ public class QuadTreeForGroundHeightMapTest
 
      int skipPoints = 0;
      int maxNumberOfPoints = 2000000;
-      ArrayList<Point3d> points = QuadTreeForGroundHeightMap.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
 
-      
+     QuadTreeForGroundReaderAndWriter quadTreeForGroundReaderAndWriter = new QuadTreeForGroundReaderAndWriter();
+     ArrayList<Point3d> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, bounds, maxZ);
+
       int pointsPerBallUpdate = 10000;
       boolean drawPointsInBlue = false;
       testHelper.createHeightMapFromAListOfPoints(points, drawPointsInBlue , pointsPerBallUpdate);
