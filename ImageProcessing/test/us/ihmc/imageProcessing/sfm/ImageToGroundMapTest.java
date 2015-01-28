@@ -2,6 +2,7 @@ package us.ihmc.imageProcessing.sfm;
 
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -9,7 +10,7 @@ import org.junit.Test;
  */
 public class ImageToGroundMapTest
 {
-
+   @Ignore
    @Test(timeout=300000)
    public void stuff()
    {
