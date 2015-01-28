@@ -10,6 +10,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -21,7 +22,8 @@ public class InefficientPushrodTransmissionJacobianTest
    private boolean DEBUG = false;
    private final boolean visualizeAndKeepUp = false;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInefficientPushrodTransmissionJacobianForAnklesAtZero()
    {
       Robot robot = new Robot("testPushrodTransmission");
@@ -41,8 +43,9 @@ public class InefficientPushrodTransmissionJacobianTest
       assertJacobianEquals(jacobian, -0.0366712094326246, -0.0366712094326246, -0.034118686505983736, 0.034118686505983736);
 
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
    {
       Robot robot = new Robot("testPushrodTransmission");
@@ -61,8 +64,9 @@ public class InefficientPushrodTransmissionJacobianTest
       computeAndPrint(inefficientPushrodTransmissionJacobian, roll, pitch, jacobian, null);
       assertJacobianEquals(jacobian, -0.04520035766057378, 0.04520035766057378, -0.06336787027660956, -0.06336787027660956); // Regression. Need to double check with Solid Works numbers.
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInefficientPushrodTransmissionForAnkles()
    {
       Robot robot = new ValkyrieAnkleRobot();
@@ -160,8 +164,9 @@ public class InefficientPushrodTransmissionJacobianTest
       }
 
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInefficientPushrodTransmissionForWaist()
    {
       Robot robot = new ValkyrieWaistRobot();      

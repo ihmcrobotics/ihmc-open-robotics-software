@@ -31,6 +31,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -97,7 +98,8 @@ public class ValkyriePosePlaybackDemoTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException
    {
       int numberOfPoses = 5;
@@ -116,7 +118,9 @@ public class ValkyriePosePlaybackDemoTest
    }
 
    // FlakyUnitTest: Hung on https://bamboo.ihmc.us/browse/RC-ALLGRADLE-VAL-952
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
    {
       int numberOfPoses = 5;
@@ -136,7 +140,8 @@ public class ValkyriePosePlaybackDemoTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException
    {
       int numberOfPoses = 5;

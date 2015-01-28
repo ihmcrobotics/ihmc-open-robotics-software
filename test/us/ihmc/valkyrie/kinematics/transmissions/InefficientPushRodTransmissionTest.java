@@ -7,6 +7,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
@@ -16,7 +17,8 @@ public class InefficientPushRodTransmissionTest
 {
    private static final boolean DEBUG = false;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testForwardBackward()
    {
       Random random = new Random(1234L);
@@ -80,8 +82,8 @@ public class InefficientPushRodTransmissionTest
       }
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRegression()
    {
       double reflectBottom = 1.0;
