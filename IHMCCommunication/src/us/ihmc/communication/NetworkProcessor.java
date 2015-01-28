@@ -12,36 +12,84 @@ public class NetworkProcessor
    private final TIntObjectHashMap<PacketCommunicator> communicators = new TIntObjectHashMap<PacketCommunicator>();
    private final TIntObjectHashMap<PacketConsumer<Packet>> consumers = new TIntObjectHashMap<PacketConsumer<Packet>>();
    private final TIntIntHashMap redirects = new TIntIntHashMap();
+   private final int BROADCAST = 0;
 
    public NetworkProcessor()
    {
    }
 
-   public void attachPacketCommunicator(PacketCommunicator packetCommunicator, int id)
+   public void attachPacketCommunicator(final PacketCommunicator packetCommunicator)
    {
       PacketConsumer<Packet> packetConsumer = new PacketConsumer<Packet>()
       {
+         PacketCommunicator communicator = packetCommunicator;
+         
          @Override
          public void receivedPacket(Packet packet)
          {
-            int destination = packet.getDestination();
-            if (redirects.containsKey(destination))
-            {
-               destination = getRedirectDestination(destination);
-               packet.setDestination(destination);
-            }
-            PacketCommunicator destinationCommunicator = communicators.get(destination);
+            processPacket(communicator,packet);
+         }
+      };
+
+      packetCommunicator.attacthGlobalListener(packetConsumer);
+      
+      int id = packetCommunicator.getId();
+      consumers.put(id, packetConsumer);
+      communicators.put(id, packetCommunicator);
+   }
+   
+   /**
+    * will send to the destination of or if a redirect is set, it will
+    * forward to the redirect.
+    * If a the redirect happens to be set to the senders id it will assume 
+    * the sender new about the redirect and send to the original destination,  
+    * ignoring the redirect
+    * @param source the source communicator that sent the packet
+    * @param packet
+    */
+   private void processPacket(PacketCommunicator source, Packet packet)
+   {
+      int destination = packet.getDestination();
+      if (redirects.containsKey(destination))
+      {
+         destination = getRedirectDestination(destination);
+         if(destination != source.getId())
+         {
+            packet.setDestination(destination);
+         }
+      }
+      
+      PacketCommunicator destinationCommunicator = communicators.get(destination);
+      if (destinationCommunicator != null && destinationCommunicator.isConnected())
+      {
+         destinationCommunicator.receivedPacket(packet);
+      }
+      
+      if(destination == BROADCAST)
+      {
+         broadcastPacket(source, packet);
+      }
+   }
+   
+   /**
+    * sends the packet to every communicator once, except the sender or any
+    * communicators with redirects
+   **/
+   private void broadcastPacket(PacketCommunicator source, Packet packet)
+   {
+      int[] ids = communicators.keys();
+      for(int i = 0; i < ids.length; i++)
+      {
+         int destinationId = ids[i];
+         if(destinationId != source.getId() && !redirects.containsKey(destinationId))
+         {
+            PacketCommunicator destinationCommunicator = communicators.get(destinationId);
             if (destinationCommunicator != null && destinationCommunicator.isConnected())
             {
                destinationCommunicator.receivedPacket(packet);
             }
          }
-      };
-
-      packetCommunicator.attacthGlobalListener(packetConsumer);
-
-      consumers.put(id, packetConsumer);
-      communicators.put(id, packetCommunicator);
+      }
    }
    
    /**
