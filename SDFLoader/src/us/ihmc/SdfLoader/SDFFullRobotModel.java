@@ -649,17 +649,7 @@ public class SDFFullRobotModel implements FullRobotModel
       }
       return sensorFrames.get(linkName);
    }
-   
-   public void copyAllJointsButKeepOneFootFixed( double[] newQ, RobotSide sideOfSole )
-   {
-      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();    
-      int numJoints = getOneDoFJoints().length;
 
-      for (int i=0; i<numJoints; i++)  {
-         newJointAngles.put( getOneDoFJoints()[i].getName() ,  newQ[i] ); 
-      }
-      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
-   }
    
    public void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
    {

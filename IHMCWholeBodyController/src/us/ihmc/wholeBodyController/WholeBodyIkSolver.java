@@ -13,6 +13,7 @@ import org.apache.commons.lang.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.hierarchicalKinematics.ForwardKinematicSolver;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalKinematicSolver;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyOrientation;
@@ -36,6 +37,10 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 abstract public class WholeBodyIkSolver
 {
+   static{
+      NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
+      NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
+   }
 
    ///--------------- Constants -----------------------------------------
    static public final double IGNORE = -66666.666;
@@ -47,7 +52,7 @@ abstract public class WholeBodyIkSolver
 
    // I just like shorter names :/
    final private static RobotSide RIGHT = RobotSide.RIGHT;
-   final private static RobotSide LEFT = RobotSide.LEFT;
+   final private static RobotSide LEFT  = RobotSide.LEFT;
 
    ///--------------- Reference Frames and Transfoms --------------------------
    private final ReferenceFrames workingFrames;
@@ -62,21 +67,20 @@ abstract public class WholeBodyIkSolver
    protected final HierarchicalKinematicSolver hierarchicalSolver;
 
    //---------------  tasks assigned to this solver --------------------------------
-   public HierarchicalTask_COM        task_com_position;
-   public HierarchicalTask_JointsPose task_joints_pose;
-   public final SideDependentList<HierarchicalTask_BodyOrientation> task_end_effector_rotations = new SideDependentList<HierarchicalTask_BodyOrientation>();
-   public final SideDependentList<HierarchicalTask_BodyPosition> task_end_effector_translations = new SideDependentList<HierarchicalTask_BodyPosition>();
-   public final HierarchicalTask_BodyPose task_leg_pose;
+   public HierarchicalTask_COM        taskComPosition;
+   public HierarchicalTask_JointsPose taskJointsPose;
+   public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPose = new SideDependentList<HierarchicalTask_BodyPose>();
+   public final HierarchicalTask_BodyPose taskLegPose;
 
    // ------------- Parameters that change the overall behavior ----------------------
 
    private final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
-   private final SideDependentList<MutableBoolean> disabledtHandRotationY = new SideDependentList<MutableBoolean>();
+   private final SideDependentList<ControlledDoF>  controlledDoF = new SideDependentList<ControlledDoF>();
    private boolean lockLegs = false;
    private boolean suggestKneeAngle = true;
 
    // --------------------- Miscellaneous -------------------------------------
-   protected final HashMap<String, Integer> jointNamesMap = new HashMap<String, Integer>();
+   protected final HashMap<String, Integer> jointNamesToIndex = new HashMap<String, Integer>();
    protected final OneDoFJoint[] workingJointsInUrdfOrder;
    protected final SideDependentList<int[]> armJointIds = new SideDependentList<int[]>();
    protected final SideDependentList<int[]> legJointIds = new SideDependentList<int[]>();
@@ -114,6 +118,11 @@ abstract public class WholeBodyIkSolver
       return getRootFrame(workingSdfModel);
    }
 
+   public boolean hasJoint(String jointName)
+   {
+      return (jointNamesToIndex.get(jointName) != null);
+   }
+
    public void setVerbose(boolean verbose)
    {
       hierarchicalSolver.setVerbose(verbose);
@@ -123,6 +132,7 @@ abstract public class WholeBodyIkSolver
    {
       return urdfModel;
    }
+
 
    /* Note. The after/before direction is reversed between the SDF and HIK models for the right leg.
     * This method uses the direction specified by the WB (reversed).
@@ -196,7 +206,7 @@ abstract public class WholeBodyIkSolver
       NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
    }
-   
+
    public WholeBodyIkSolver( WholeBodyControllerParameters robotControllerParameters ) 
    {
       // load external library
@@ -233,14 +243,14 @@ abstract public class WholeBodyIkSolver
          workingSoleFrames.set(robotSide, workingFrames.getSoleFrame(robotSide));
          armJointIds.set(robotSide, new int[ getNumberDoFperArm() ]);
          legJointIds.set(robotSide, new int[ getNumberDoFperLeg() ]);
-         disabledtHandRotationY.set(robotSide, new MutableBoolean(false));
+         controlledDoF.set(robotSide, ControlledDoF.DOF_NONE );
          keepArmQuiet.set(robotSide, new MutableBoolean(true));
       }
 
       for (int i = 0; i < numOfJoints; i++)
       {
          String joint_name_in_urdf = urdfModel.getActiveJointName(i);
-         jointNamesMap.put(joint_name_in_urdf, i);
+         jointNamesToIndex.put(joint_name_in_urdf, i);
          OneDoFJoint joint = workingSdfModel.getOneDoFJointByName(joint_name_in_urdf);
          if (joint != null)
          {
@@ -256,20 +266,19 @@ abstract public class WholeBodyIkSolver
 
       ForwardKinematicSolver fk = hierarchicalSolver.getForwardSolver();
 
-      task_com_position = new HierarchicalTask_COM(fk);
+      taskComPosition = new HierarchicalTask_COM(fk);
 
       for (RobotSide robotSide : RobotSide.values())
       {
          int currentHandId = urdfModel.getBodyId(getEndEffectorLinkName(robotSide));
 
-         task_end_effector_translations.set(robotSide, new HierarchicalTask_BodyPosition(fk, currentHandId));
-         task_end_effector_rotations.set(robotSide, new HierarchicalTask_BodyOrientation(fk, currentHandId));
+         taskEndEffectorPose.set(robotSide, new HierarchicalTask_BodyPose(fk, currentHandId));
          urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , armJointIds.get(robotSide));
       }     
 
       RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
       int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
-      task_leg_pose = new HierarchicalTask_BodyPose(fk, leftFootId);
+      taskLegPose = new HierarchicalTask_BodyPose(fk, leftFootId);
 
       urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), legJointIds.get( otherFootSide ) );
 
@@ -278,16 +287,14 @@ abstract public class WholeBodyIkSolver
          legJointIds.get( getSideOfTheFootRoot() )[i] = i;
       }
 
-      task_joints_pose = new HierarchicalTask_JointsPose(fk);
+      taskJointsPose = new HierarchicalTask_JointsPose(fk);
 
       // the order is important!! first to be added have higher priority
-      hierarchicalSolver.addTask(task_leg_pose);
-      hierarchicalSolver.addTask(task_com_position);
-      hierarchicalSolver.addTask(task_end_effector_translations.get(RIGHT));
-      hierarchicalSolver.addTask(task_end_effector_rotations.get(RIGHT));
-      hierarchicalSolver.addTask(task_end_effector_translations.get(LEFT));
-      hierarchicalSolver.addTask(task_end_effector_rotations.get(LEFT));
-      hierarchicalSolver.addTask(task_joints_pose);
+      hierarchicalSolver.addTask(taskLegPose);
+      hierarchicalSolver.addTask(taskComPosition);
+      hierarchicalSolver.addTask(taskEndEffectorPose.get(RIGHT));
+      hierarchicalSolver.addTask(taskEndEffectorPose.get(LEFT));
+      hierarchicalSolver.addTask(taskJointsPose);
 
       preferedJointPose = new Vector64F(numOfJoints);
       preferedJointPose.zero();
@@ -318,8 +325,8 @@ abstract public class WholeBodyIkSolver
       {
          return;
       }
-      HierarchicalTask_BodyPosition taskL = task_end_effector_translations.get(LEFT);
-      HierarchicalTask_BodyPosition taskR = task_end_effector_translations.get(RIGHT);
+      HierarchicalTask_BodyPose taskL = taskEndEffectorPose.get(LEFT);
+      HierarchicalTask_BodyPose taskR = taskEndEffectorPose.get(RIGHT);
 
       double zL = taskL.getTarget().get(2);
       double zR = taskR.getTarget().get(2);
@@ -338,63 +345,88 @@ abstract public class WholeBodyIkSolver
       double preferedKneeAngle = 2.4 - (zL +  zR)*0.5;
       if( preferedKneeAngle < 0.4) preferedKneeAngle = 0.4;
 
-      preferedJointPose.set(jointNamesMap.get("l_leg_kny"), preferedKneeAngle);
-      preferedJointPose.set(jointNamesMap.get("r_leg_kny"), preferedKneeAngle);
-      task_joints_pose.setTarget(preferedJointPose, 3);
+      preferedJointPose.set(jointNamesToIndex.get("l_leg_kny"), preferedKneeAngle);
+      preferedJointPose.set(jointNamesToIndex.get("r_leg_kny"), preferedKneeAngle);
+      taskJointsPose.setTarget(preferedJointPose, 3);
    }
 
-   public void disableHandRotationMainAxis(RobotSide side, boolean disable)
+   /* public void disableHandRotationMainAxis(RobotSide side, boolean disable)
    {
       disabledtHandRotationY.get(side).setValue(disable);
-   }
+   }*/
 
    public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, ReferenceFrame end_effector_pose)
    {
       movePelvisToHaveOverlappingFeet( actualRobotModel, workingSdfModel );
 
-      final HierarchicalTask_BodyPosition task_ee_trans = task_end_effector_translations.get(end_effector_side);
-      final HierarchicalTask_BodyOrientation task_ee_rot = task_end_effector_rotations.get(end_effector_side);
+      final HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(end_effector_side);
 
-      if (task_ee_trans.isEnabled() || task_ee_rot.isEnabled())
+      RigidBodyTransform ee_transform;
+      ee_transform = end_effector_pose.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
+
+      keepArmQuiet.get(end_effector_side).setValue( false );
+
+      RobotSide steadySide = end_effector_side.getOppositeSide();
+
+      hierarchicalSolver.prioritizeTasks(taskEndEffectorPose.get(steadySide), handTask);
+
+      Vector64F target_ee = new Vector64F(7);
+      Quat4d quat = new Quat4d();
+      Vector3d pos = new Vector3d();
+
+      ee_transform.get(quat, pos);
+      target_ee.set(0, pos.x);
+      target_ee.set(1, pos.y);
+      target_ee.set(2, pos.z);
+
+      target_ee.set(3, quat.x);
+      target_ee.set(4, quat.y);
+      target_ee.set(5, quat.z);
+      target_ee.set(6, quat.w);
+
+      handTask.setTarget(target_ee, 0.001); 
+   }
+
+   private void enforceControlledDoF( ComputeOption opt  )
+   {
+      double rotationWeight = 0.5;
+
+      for ( RobotSide side: RobotSide.values)
       {
-         RigidBodyTransform ee_transform = new RigidBodyTransform();
-         end_effector_pose.getTransformToDesiredFrame(ee_transform, getRootFrame( actualRobotModel ));
+         HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(side);
 
-         keepArmQuiet.get(end_effector_side).setValue( false );
-
-         RobotSide steadySide = end_effector_side.getOppositeSide();
-
-         hierarchicalSolver.prioritizeTasks(task_end_effector_translations.get(steadySide), task_ee_trans);
-         hierarchicalSolver.prioritizeTasks(task_end_effector_rotations.get(steadySide), task_ee_rot);
-
-         Vector64F target_ee = new Vector64F(7);
-         Quat4d quat = new Quat4d();
-         Vector3d pos = new Vector3d();
-
-         ee_transform.get(quat, pos);
-         target_ee.set(0, pos.x);
-         target_ee.set(1, pos.y);
-         target_ee.set(2, pos.z);
-
-         target_ee.set(3, quat.x);
-         target_ee.set(4, quat.y);
-         target_ee.set(5, quat.z);
-         target_ee.set(6, quat.w);
-
-         task_ee_trans.setTarget(target_ee, 0.001);
-         task_ee_rot.setTarget(target_ee, 0.001);
-
-         if (task_ee_rot.isEnabled())
+         switch( controlledDoF.get(side) )
          {
-            if ( disabledtHandRotationY.get(end_effector_side).isTrue())
-            {
-               Matrix3d rot = new Matrix3d();
-               rot.set(quat);
-               task_ee_rot.disableAxisInTaskSpace(new Vector3d(rot.m01, rot.m11, rot.m21));
-            }
-            else{
-               task_ee_rot.setWeightsTaskSpace(new Vector64F(3, 1, 1, 1));
-            }
+         case DOF_NONE:
+            handTask.setEnabled(false);
+            break;
+            
+         case DOF_3P:
+            handTask.setEnabled(true);
+
+            if( opt != ComputeOption.RESEED)
+               handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.05, 0.05, 0.05) );
+            else
+               handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.0, 0.0, 0.0) );
+
+            handTask.setWeightError( new Vector64F(6, 1, 1, 1,  0,0,0) );
+            break;
+
+         case DOF_3P2R:
+            handTask.setEnabled(true);
+            handTask.setWeightError( new Vector64F(6, 1,1,1,  1,1,1 ) );
+            
+            Vector64F target = handTask.getTarget();
+            Matrix3d rot = new Matrix3d();
+            rot.set( new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) ) );
+            handTask.disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m01, rot.m11, rot.m21)); 
+            
+            break;
+         case DOF_3P3R:
+            handTask.setEnabled(true);
+            handTask.setWeightError( new Vector64F(6, 1,1,1,  1,1,1 ) );
+            handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, rotationWeight, rotationWeight, rotationWeight) ); 
+            break;   
          }
       }
    }
@@ -407,14 +439,14 @@ abstract public class WholeBodyIkSolver
 
    public void setPreferedJointPose(String joint_name, double q)
    {
-      int index = jointNamesMap.get(joint_name);
+      int index = jointNamesToIndex.get(joint_name);
       preferedJointPose.set(index, q);
-      task_joints_pose.setTarget(preferedJointPose, 3);
+      taskJointsPose.setTarget(preferedJointPose, 3);
    }
 
    private void checkIfArmShallStayQuiet(Vector64F q_init)
    {
-      DenseMatrix64F weights_joint = task_joints_pose.getWeightMatrixTaskSpace();
+      DenseMatrix64F weights_joint = taskJointsPose.getWeightMatrixTaskSpace();
 
       for( RobotSide side: RobotSide.values())
       {
@@ -436,27 +468,26 @@ abstract public class WholeBodyIkSolver
             }
          }
       }
-      task_joints_pose.setWeightsTaskSpace(weights_joint);
-      task_joints_pose.setTarget(preferedJointPose, 3);
+      taskJointsPose.setWeightsTaskSpace(weights_joint);
+      taskJointsPose.setTarget(preferedJointPose, 3);
    }
 
    private void checkIfLegsNeedToBeLocked()
    {
-      task_com_position.setEnabled(!lockLegs);
-      task_leg_pose.setEnabled(!lockLegs);
+      taskComPosition.setEnabled(!lockLegs);
+      taskLegPose.setEnabled(!lockLegs);
+
       for (RobotSide side: RobotSide.values)
       {
-         Vector64F weightsRot    =  task_end_effector_rotations.get(side).getWeightsJointSpace();
-         Vector64F weightsPos    =  task_end_effector_translations.get(side).getWeightsJointSpace();
-         Vector64F weightsJoints =  task_joints_pose.getWeightsJointSpace();
+         Vector64F weightsEE        =  taskEndEffectorPose.get(side).getWeightsJointSpace();
+         Vector64F weightsJoints    =  taskJointsPose.getWeightsJointSpace();
          Vector64F weightsCollision = getHierarchicalSolver().collisionAvoidance.getJointWeights();
 
          double val = lockLegs ? 0 : 1;
 
          for (int i = 0; i < getNumberDoFperLeg(); i++)
          {
-            weightsRot.set(legJointIds.get(side)[i], val);
-            weightsPos.set(legJointIds.get(side)[i], val);
+            weightsEE.set(legJointIds.get(side)[i], val);
             weightsJoints.set(legJointIds.get(side)[i], val);
             weightsCollision.set(legJointIds.get(side)[i], val);
          }
@@ -464,17 +495,16 @@ abstract public class WholeBodyIkSolver
    }
 
 
-   public int compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack) throws Exception
-   {
-      return compute(actualSdfModel, desiredRobotModelToPack, ComputeOption.USE_JOINTS_CACHE);
-   }
-
    public int compute(SDFFullRobotModel actualSdfModel,  Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
    {
       for (int i = 0; i < numOfJoints; i++)
-      {
-         double new_value =  anglesToUseAsInitialState.get( urdfModel.getActiveJointName(i) );
-         q_init.set(i, new_value);
+      { 
+         String activeJointName = urdfModel.getActiveJointName(i);
+         Double newValue =  anglesToUseAsInitialState.get( activeJointName );
+
+         if( newValue == null) {
+            q_init.set(i, newValue.doubleValue());
+         }
       }
 
       int ret = compute(actualSdfModel, null,  ComputeOption.USE_JOINTS_CACHE);
@@ -521,17 +551,17 @@ abstract public class WholeBodyIkSolver
          }
 
          // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
-         q_init.set(jointNamesMap.get("l_leg_aky"), -0.7);
-         q_init.set(jointNamesMap.get("r_leg_aky"), -0.7);
-         q_init.set(jointNamesMap.get("l_leg_kny"), 1.4);
-         q_init.set(jointNamesMap.get("r_leg_kny"), 1.4);
-         q_init.set(jointNamesMap.get("l_leg_hpy"), -0.7);
-         q_init.set(jointNamesMap.get("r_leg_hpy"), -0.7);
+         q_init.set(jointNamesToIndex.get("l_leg_aky"), -0.7);
+         q_init.set(jointNamesToIndex.get("r_leg_aky"), -0.7);
+         q_init.set(jointNamesToIndex.get("l_leg_kny"), 1.4);
+         q_init.set(jointNamesToIndex.get("r_leg_kny"), 1.4);
+         q_init.set(jointNamesToIndex.get("l_leg_hpy"), -0.7);
+         q_init.set(jointNamesToIndex.get("r_leg_hpy"), -0.7);
 
          if( keepArmQuiet.get(LEFT).isFalse())
-            q_init.set(jointNamesMap.get("l_arm_elx"), 0.7);
+            q_init.set(jointNamesToIndex.get("l_arm_elx"), 0.7);
          if( keepArmQuiet.get(RIGHT).isFalse())
-            q_init.set(jointNamesMap.get("r_arm_elx"), -0.7);
+            q_init.set(jointNamesToIndex.get("r_arm_elx"), -0.7);
 
          break;
       case USE_ACTUAL_MODEL_JOINTS:
@@ -546,6 +576,8 @@ abstract public class WholeBodyIkSolver
       case USE_JOINTS_CACHE:
          //do nothing, the cache is used by default.
       }
+
+      enforceControlledDoF( opt );
 
       int ret = computeImpl(actualSdfModel, desiredRobotModelToPack);
 
@@ -565,7 +597,7 @@ abstract public class WholeBodyIkSolver
       Vector3d diff = new Vector3d();
       rightToLeftFoot.getTranslation(diff); 
 
-      task_com_position.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
+      taskComPosition.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
    }
 
    private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
@@ -657,7 +689,7 @@ abstract public class WholeBodyIkSolver
 
    public double getDesiredJointAngle(String jointName)
    {
-      int index = jointNamesMap.get(jointName);
+      int index = jointNamesToIndex.get(jointName);
       return workingJointsInUrdfOrder[index].getQ();
    }
 
@@ -673,7 +705,7 @@ abstract public class WholeBodyIkSolver
       Vector3d pos = new Vector3d();
 
       foot_other_transform.get(quat, pos);
-      task_leg_pose.setTarget(quat, pos, 0.0005);
+      taskLegPose.setTarget(quat, pos, 0.0005);
    }
 
 
@@ -720,48 +752,12 @@ abstract public class WholeBodyIkSolver
 
    public ControlledDoF getNumberOfControlledDoF(RobotSide side)
    {
-      if( task_end_effector_translations.get(side).isEnabled() )
-      {
-         if( task_end_effector_rotations.get(side).isEnabled() )
-         {
-            if( disabledtHandRotationY.get(side).isTrue() ){
-               return ControlledDoF.DOF_3P2R;
-            }
-            else{
-               return ControlledDoF.DOF_3P3R;
-            }
-         }
-         else{
-            return ControlledDoF.DOF_3P;
-         }
-      }
-      return ControlledDoF.DOF_NONE;
+      return controlledDoF.get(side);
    }
 
    public void setNumberOfControlledDoF(RobotSide side, ControlledDoF dof)
    {
-      switch( dof )
-      {
-      case DOF_NONE:
-         task_end_effector_translations.get(side).setEnabled(false);
-         task_end_effector_rotations.get(side).setEnabled(false);
-         break;
-      case DOF_3P:
-         task_end_effector_translations.get(side).setEnabled(true);
-         task_end_effector_rotations.get(side).setEnabled(false);
-         break;
-      case DOF_3P2R:
-         task_end_effector_translations.get(side).setEnabled(true);
-         task_end_effector_rotations.get(side).setEnabled(true);
-         disableHandRotationMainAxis(side, true);
-         break;
-      case DOF_3P3R:
-         task_end_effector_translations.get(side).setEnabled(true);
-         task_end_effector_rotations.get(side).setEnabled(true);
-         disableHandRotationMainAxis(side, false);
-         break;   
-      }
-
+      controlledDoF.set(side, dof );
    }
 
    public boolean isLowerBodyLocked()

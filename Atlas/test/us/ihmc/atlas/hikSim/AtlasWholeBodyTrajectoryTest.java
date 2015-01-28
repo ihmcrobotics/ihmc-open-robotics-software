@@ -33,6 +33,8 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
          modelVisualizer = new FullRobotModelVisualizer( scs, actualRobotModel,  0.01 );
          scs.startOnAThread(); 
 
+         scs.maximizeMainWindow();
+         
          Thread.sleep(3000);
       }  
    }
@@ -64,11 +66,11 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
       return scs;
    }
 
-   @Test(timeout = 300000)
+  /* @Test(timeout = 300000)
    public void test()
    {
     
-   }
+   }*/
 
 
 
