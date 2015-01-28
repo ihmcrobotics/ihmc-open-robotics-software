@@ -1,5 +1,7 @@
 package us.ihmc.graphics3DAdapter.jme;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.examples.Graphics3DAdapterExampleOne;
@@ -12,7 +14,7 @@ public class JMEGraphics3dAdapterTest
       JMEGraphics3DAdapter renderer = new JMEGraphics3DAdapter();
       Graphics3DAdapterExampleOne example1 = new Graphics3DAdapterExampleOne();
 
-      example1.doExample(renderer);
+      assertTrue(example1.doExample(renderer));
    }
 
 }
