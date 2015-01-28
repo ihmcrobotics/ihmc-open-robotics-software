@@ -40,6 +40,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private final DoubleYoVariable userStepHeight = new DoubleYoVariable("userStepHeight", registry);
    private final DoubleYoVariable userStepYaw = new DoubleYoVariable("userStepYaw", registry);
    private final BooleanYoVariable userStepsTakeEm = new BooleanYoVariable("userStepsTakeEm", registry);
+   private final BooleanYoVariable userStepSquareUp = new BooleanYoVariable("userStepSquareUp", registry);
    private final IntegerYoVariable userStepsNotifyCompleteCount = new IntegerYoVariable("userStepsNotifyCompleteCount", registry);
 
    private final DoubleYoVariable userStepHeelPercentage = new DoubleYoVariable("userStepHeelPercentage", registry);
@@ -97,6 +98,10 @@ public class UserDesiredFootstepProvider implements FootstepProvider
             {
                footstep = createFirstFootstep(stepSide);
             }
+            else if (i == userStepsToTake.getIntegerValue() - 1 && userStepSquareUp.getBooleanValue())
+            {
+               footstep = squareUp(previousFootstep, stepSide);
+            }
             else
             {
                footstep = createNextFootstep(previousFootstep, stepSide);
@@ -136,6 +141,41 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
 
       return createFootstep(referenceFrame, swingLegSide);
+   }
+
+   private Footstep squareUp(Footstep previousFootstep, RobotSide swingLegSide)
+   {
+      FramePose pose = new FramePose();
+      previousFootstep.getPose(pose);
+      pose.setY(pose.getY() + swingLegSide.negateIfRightSide(userStepWidth.getDoubleValue()));
+      PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
+
+      ContactablePlaneBody foot = bipedFeet.get(swingLegSide);
+
+      boolean trustHeight = false;
+      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), swingLegSide, foot.getSoleFrame(), referenceFrame, trustHeight);
+
+      List<FramePoint2d> contactFramePoints = foot.getContactPoints2d();
+      ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
+
+      for (FramePoint2d contactFramePoint : contactFramePoints)
+      {
+         Point2d contactPoint = contactFramePoint.getPointCopy();
+
+         if (contactFramePoint.getX() > 0.0)
+         {
+            contactPoint.setX(contactPoint.getX() * userStepToePercentage.getDoubleValue());
+         }
+         else
+         {
+            contactPoint.setX(contactPoint.getX() * userStepHeelPercentage.getDoubleValue());
+         }
+
+         contactPoints.add(contactPoint);
+      }
+
+      desiredFootstep.setPredictedContactPointsFromPoint2ds(contactPoints);
+      return desiredFootstep;
    }
 
    private Footstep createFootstep(ReferenceFrame previousFootFrame, RobotSide swingLegSide)
