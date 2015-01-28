@@ -95,11 +95,23 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 100000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
-      drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
-      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel.getDRCHandType(), fullRobotModel);
-      lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
 
-      this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
+      boolean doesRobotHaveLidar = robotModel.getSensorInformation().getLidarParameters().length > 0;
+
+      if (doesRobotHaveLidar)
+      {
+         drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
+         RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel.getDRCHandType(), fullRobotModel);
+         lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
+
+         this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
+      }
+      else
+      {
+         drcRobotDataReceiver = null;
+         lidarFilter = null;
+      }
+
       this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
       {
          @Override
@@ -121,6 +133,9 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
 
    private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, PacketCommunicator localObjectCommunicator, URI sensorURI)
    {
+      if (sensorSuiteManager == null)
+         return;
+
       if (useSimulatedSensors)
       {
          sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel,
