@@ -37,9 +37,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.9291411281184467</Camera X>
- <Camera Y>3.4741061086854432</Camera Y>
- <Camera Z>2.5584601264309095</Camera Z>
+ <Camera X>6.0</Camera X>
+ <Camera Y>-2.0</Camera Y>
+ <Camera Z>4.5</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

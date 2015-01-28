@@ -12,9 +12,21 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundLeaf;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundNode;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 
 public class QuadTreeHeightMapVisualizer
 {
+   
+   public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, BoundingBox2d rangeOfPointsToDraw, double resolution)
+   {
+      double minX = rangeOfPointsToDraw.getMinPoint().getX();
+      double minY = rangeOfPointsToDraw.getMinPoint().getY();
+      double maxX = rangeOfPointsToDraw.getMaxPoint().getX();
+      double maxY = rangeOfPointsToDraw.getMaxPoint().getY();
+      
+      return drawHeightMap(heightMap, scs, minX, minY, maxX, maxY, resolution);
+   }
+   
    public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, double minX, double minY, double maxX, double maxY, double resolution)
    {
       AppearanceDefinition[] rainbow = YoAppearance.getStandardRoyGBivRainbow();
