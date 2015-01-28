@@ -3,11 +3,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class TypicalMotionConstraintsTest
 {
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDoubleSupportKneesBentTypicalMotionConstraints()
    {
       // Have J x = p; A x = b. Check if an all out solution without requiring optimization. 
@@ -117,8 +119,9 @@ public class TypicalMotionConstraintsTest
       System.out.println("combinedSolution = " + combinedSolution);
 
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDoubleSupportKneesStraightNoSingularity()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -235,8 +238,9 @@ public class TypicalMotionConstraintsTest
       System.out.println("combinedSolution = " + combinedSolution);
 
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDoubleSupportKneesStraightNoSingularityTwo()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -368,8 +372,9 @@ public class TypicalMotionConstraintsTest
       System.out.println("combinedSolution = " + combinedSolution);
 
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDoubleSupportKneesStraightThree()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{

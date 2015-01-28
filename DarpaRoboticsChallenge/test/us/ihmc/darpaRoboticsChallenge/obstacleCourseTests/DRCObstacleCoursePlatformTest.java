@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -55,8 +56,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -99,8 +101,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       BambooTools.reportTestFinishedMessage();
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -134,9 +137,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       BambooTools.reportTestFinishedMessage();
    }
-   
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

@@ -16,6 +16,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 
@@ -38,7 +39,8 @@ public abstract class SCSCollisionDetectorTest
       margin = 0.02;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void createBox_checkBounds_noHit()
    {
       collisionDetector = createCollisionInterface();
@@ -72,7 +74,8 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void createBox_checkBounds_hit()
    {
       collisionDetector = createCollisionInterface();
@@ -108,7 +111,9 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Make a small object and see if it detects the collision correctly.  Small objects aren't already handled correctly
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void createBox_Collision_Small()
    {
       double tau = 0.0001;
@@ -137,7 +142,8 @@ public abstract class SCSCollisionDetectorTest
       collisionDetector.performCollisionDetection();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void collisionMask_hit()
    {
       collisionDetector = createCollisionInterface();
@@ -162,7 +168,9 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Makes sure the offset from the link is handled correctly
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void checkCollisionShape_offset()
    {
       collisionDetector = createCollisionInterface();

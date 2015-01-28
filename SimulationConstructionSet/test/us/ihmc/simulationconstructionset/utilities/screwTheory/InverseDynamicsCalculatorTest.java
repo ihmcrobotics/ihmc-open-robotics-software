@@ -25,6 +25,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.robotExplorer.RobotExplorer;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -64,7 +65,8 @@ public class InverseDynamicsCalculatorTest
    {
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
       Robot robot = new Robot("robot");
@@ -117,7 +119,8 @@ public class InverseDynamicsCalculatorTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testChainNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -135,9 +138,9 @@ public class InverseDynamicsCalculatorTest
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
       Robot robot = new Robot("robot");
@@ -161,8 +164,9 @@ public class InverseDynamicsCalculatorTest
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTreeWithGravity()
    {
       Robot robot = new Robot("robot");
@@ -187,7 +191,8 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDoingInverseDynamicsTermPerTerm()
    {
       Robot robot = new Robot("robot");
@@ -230,7 +235,8 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDoingNothing()
    {
       Robot robot = new Robot("robot");
@@ -258,8 +264,9 @@ public class InverseDynamicsCalculatorTest
          assertEquals(0.0, tau, epsilon);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
       Robot robot = new Robot("robot");
@@ -277,7 +284,8 @@ public class InverseDynamicsCalculatorTest
       assertZeroAccelerations(jointMap);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testChainWithGravity()
    {
       Robot robot = new Robot("robot");

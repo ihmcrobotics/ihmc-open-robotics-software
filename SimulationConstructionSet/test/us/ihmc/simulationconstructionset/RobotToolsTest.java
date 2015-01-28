@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -26,7 +27,8 @@ public class RobotToolsTest
       return randomFloatingChain;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testScsRobotFromInverseDynamicsRobotModel()
    {
       SCSRobotFromInverseDynamicsRobotModel scsRobotFromInverseDynamicsRobotModel = new RobotTools.SCSRobotFromInverseDynamicsRobotModel("robot",
@@ -35,7 +37,8 @@ public class RobotToolsTest
       assertNotNull(scsRobotFromInverseDynamicsRobotModel);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAddScsJointUsingIDJoint()
    {
       Joint scsRootJoint = RobotTools.addSCSJointUsingIDJoint(getRandomFloatingChain().getRootJoint(), new Robot("robot"), true);

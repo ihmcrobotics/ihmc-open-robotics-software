@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class VaryingStairGroundProfileTest
 {
@@ -21,8 +22,9 @@ public class VaryingStairGroundProfileTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void test()
    {
       double startX = -0.1;

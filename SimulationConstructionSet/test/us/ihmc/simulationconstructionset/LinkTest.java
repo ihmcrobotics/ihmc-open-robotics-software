@@ -8,12 +8,13 @@ import org.junit.Test;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class LinkTest
 {
 
-  
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLinkInertia()
    {
       // This is a manual test. Run it with visualize = true and verify that the ellipsoid graphics rotates around the long axis.

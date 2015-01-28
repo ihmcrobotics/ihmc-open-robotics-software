@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -25,8 +26,9 @@ public class DampedLeastSquaresJacobianSolverTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void test()
    {
       Random random = new Random(176L);

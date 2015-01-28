@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -32,7 +33,9 @@ import us.ihmc.utilities.test.JUnitTools;
 
 public class CentroidalMomentumMatrixTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTree()
    {
       Random random = new Random(167L);
@@ -65,7 +68,8 @@ public class CentroidalMomentumMatrixTest
       JUnitTools.assertTuple3dEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFloatingBody()
    {
       Random random = new Random(167L);

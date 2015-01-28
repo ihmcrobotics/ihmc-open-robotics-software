@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -25,7 +26,9 @@ public class ShipCorridorGroundProfileTest
    {
       groundProfile = new ShipCorridorGroundProfile(100.0, -10.0, 5.0, -5.0, 0.8, -0.8, 0.0, 3.0, Math.toRadians( 2.0 ));
    }
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSurfaceNormalAlongYAxis()
    {
       int nSteps = 1000;

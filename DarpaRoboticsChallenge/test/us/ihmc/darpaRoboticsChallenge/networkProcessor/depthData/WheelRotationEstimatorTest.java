@@ -7,12 +7,15 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.AngleTools;
 
 public class WheelRotationEstimatorTest
 {
    private static final double eps = 1e-7;
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAngleDefinitions()
    {
       int sectors = 370;
@@ -30,8 +33,9 @@ public class WheelRotationEstimatorTest
       assertEquals(0,wheelRotationEstimator.angleToIndex(0.0),eps);
       
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testIndexBounds()
    {
       int sectors = 370;
@@ -51,8 +55,9 @@ public class WheelRotationEstimatorTest
       assertEquals(0,wheelRotationEstimator.angleToIndex(0.0),eps);
       
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAngleTautology()
    {
       int sectors = 11100;

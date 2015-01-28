@@ -14,6 +14,7 @@ import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -32,7 +33,8 @@ public class SimulationConstructionSetFestTest
       return false;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());
@@ -240,7 +242,8 @@ public class SimulationConstructionSetFestTest
       testFixture = null;
    }
 
-   @Test(timeout=45000)
+	@AverageDuration
+	@Test(timeout=45000)
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {
       Assume.assumeTrue(!isGradleBuild());

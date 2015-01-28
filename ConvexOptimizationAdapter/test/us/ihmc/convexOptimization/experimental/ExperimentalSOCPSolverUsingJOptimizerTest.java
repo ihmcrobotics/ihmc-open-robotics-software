@@ -9,6 +9,8 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 
@@ -17,7 +19,9 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    public static final boolean VERBOSE = false;
 
    @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testASimpleSecondOrderConeProblem()
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and ||(x, y, 0)|| <= z. Answer should be (3, 3, sqrt(18))
@@ -49,7 +53,9 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    }
    
    @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testARotatedSecondOrderConeProblem()
    {
       // Cone constraint: Given cone tilted to a normal vector and friction like constraints, with mu

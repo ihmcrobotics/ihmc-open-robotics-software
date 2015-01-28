@@ -6,11 +6,14 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
 public class Graphics3DWorldTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testShowGui()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -19,7 +22,8 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testWithoutGui()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -28,7 +32,8 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void addASphere()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -37,8 +42,9 @@ public class Graphics3DWorldTest
       world.keepAlive(1.0);
       world.stop();
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void addASphereAfterGuiStarted()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -48,7 +54,8 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetCameraPosition()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -59,7 +66,8 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void fixCameraOnSphere()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());

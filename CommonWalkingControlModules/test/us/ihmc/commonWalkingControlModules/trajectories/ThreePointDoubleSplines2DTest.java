@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class ThreePointDoubleSplines2DTest
 {
@@ -28,8 +29,9 @@ public class ThreePointDoubleSplines2DTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleFlatExample()
    {
       ThreePointDoubleSplines2D spline = new ThreePointDoubleSplines2D();
@@ -46,8 +48,9 @@ public class ThreePointDoubleSplines2DTest
 
       assertFlatAndAtHeight(zHeight, zSlopeAndSecondDerivative);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInitialInALineExample()
    {
       ThreePointDoubleSplines2D spline = new ThreePointDoubleSplines2D();
@@ -68,8 +71,9 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(2.0 * slope, zSlopeAndSecondDerivative[1], 1e-7);
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInitialInALineExampleTwo()
    {
       ThreePointDoubleSplines2D spline = new ThreePointDoubleSplines2D();
@@ -107,8 +111,9 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(2.0 * slope, zSlopeAndSecondDerivative[1], 1e-7);
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInitialInALineExampleThree()
    {
       Random random = new Random(1776L);
@@ -154,8 +159,9 @@ public class ThreePointDoubleSplines2DTest
          }
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAFewQueriesOnFlatExampleOne()
    {
       double zHeight = 1.3;
@@ -187,7 +193,9 @@ public class ThreePointDoubleSplines2DTest
    
    
    @Ignore // Not passing!
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAFewQueries()
    {
       Random random = new Random(1776L);

@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalcula
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -52,7 +53,9 @@ public class FootstepPathCoordinatorTest
    /**
     * This test only verifies that polling returns the first footstep in the list *
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPoll() throws Exception
    {
       // create a random list of footsteps
@@ -80,7 +83,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testIsEmpty() throws Exception
    {
       // verify list is initially empty
@@ -113,7 +117,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testUpdatePath() throws Exception
    {
       // create a random list of footsteps
@@ -155,7 +160,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetPaused() throws Exception
    {
       // create a random list of footsteps

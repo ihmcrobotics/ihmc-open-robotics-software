@@ -24,6 +24,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimula
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -42,8 +43,9 @@ public class ReflectionSimulationComparerTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoEmptySimulations()
    {
       ReflectionSimulationComparer comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -89,9 +91,9 @@ public class ReflectionSimulationComparerTest
          return null;
       }
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
       Robot robot0 = createSimpleRobot();
@@ -127,8 +129,9 @@ public class ReflectionSimulationComparerTest
       robot0.addRootJoint(floatingJoint0);
       return robot0;
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoNonRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
       Robot robot0 = new Robot("robot");

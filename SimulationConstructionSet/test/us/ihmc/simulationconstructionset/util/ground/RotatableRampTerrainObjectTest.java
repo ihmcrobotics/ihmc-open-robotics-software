@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.test.JUnitTools;
 
 public class RotatableRampTerrainObjectTest
@@ -79,66 +80,76 @@ public class RotatableRampTerrainObjectTest
       ramp90Translated = new RotatableRampTerrainObject(transX, transY, 1, 2, 1, 90);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAt()
    {
       testHeightAtRampForAnyRamp(pointsOnSimpleRamp, simpleRamp);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtForRampDown()
    {
       testHeightAtRampForAnyRamp(strictlyInternalPointsOnSimpleRampDown, simpleRampDown);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
       testSurfaceNormalsForAnyRampFace(simpleRamp, expectedSimpleSurfaceNormal, pointsOnSimpleRamp);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOtherSurfaceNormalAt()
    {
       testSurfaceNormalsForAnyOtherRampSides(simpleRamp, 
             expectedSimpleSurfaceNormalOnOtherFaces, pointsOnOtherRampFaces);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSurfaceNormalAtForSlopedDown()
    {
       testSurfaceNormalsForAnyRampFace(simpleRampDown, 
             expectedSimpleSurfaceNormalSlopeDown, strictlyInternalPointsOnSimpleRampDown);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOtherSurfaceNormalAtForSlopedDown()
    {
       testSurfaceNormalsForAnyOtherRampSides(simpleRampDown,
             expectedSimpleSurfaceNormalOnOtherFacesSlopeDown, pointsOnOtherRampFacesSlopeDown);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtRamp90()
    {
       testHeightAtRampForAnyRamp(pointsOnRamp90, ramp90);
       testHeightAtRampForAnyRamp(pointsOnRamp90PassingHeightCornerCases, ramp90);      
    }
-   
-   @Test(timeout=300000) @Ignore
+
+	@AverageDuration
+	@Test(timeout=300000) @Ignore
    public void HeightAtRamp90EdgeCasesFailDueToNumericalErrorTest()
    {
       testHeightAtRampForAnyRamp(pointsOnRamp90withNumericalRotationError, ramp90);
    }   
 
-   @Test(timeout=300000)   
+	@AverageDuration
+	@Test(timeout=300000)   
    public void testSurfaceNormalForRamp90()
    {
       testSurfaceNormalsForAnyRampFace(ramp90, 
             expectedSurfaceNormalRamp90, pointsOnRamp90);
    }
 
-   @Test(timeout=300000)   
+	@AverageDuration
+	@Test(timeout=300000)   
    public void testOtherSurfaceNormalForRamp90()
    {
       testSurfaceNormalsForAnyOtherRampSides(ramp90, 
@@ -163,14 +174,16 @@ public class RotatableRampTerrainObjectTest
          assertEquals(message, pointsOnRamp[i].getZ(), ramp.heightAt(pointsOnRamp[i].getX()+translation.x, pointsOnRamp[i].getY()+translation.y, pointsOnRamp[i].getZ()), epsilon);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtTranslation()
    {
       testHeightAtRampForAnyRampWithTranslation(pointsOnSimpleRamp, simpleRampTranslated, new Vector3d(transX,transY,0));
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAt90Translation()
    {
       testHeightAtRampForAnyRampWithTranslation(pointsOnRamp90Translated, ramp90Translated, new Vector3d(transX,transY,0));

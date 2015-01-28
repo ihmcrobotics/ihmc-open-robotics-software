@@ -4,14 +4,16 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class SimulationConstructionSetProcessDataCallTest
 {   
    private YoVariableRegistry registry;
-      
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testForwardCount()
    {
       Robot robot = new Robot("testRobot");
@@ -62,8 +64,9 @@ public class SimulationConstructionSetProcessDataCallTest
          assertEquals(testNum1-testNum2, startValue, 0);
       }    
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testBackwardCount()
    {
       Robot robot = new Robot("testRobot");
@@ -114,8 +117,9 @@ public class SimulationConstructionSetProcessDataCallTest
          assertEquals(testNum1+testNum2, maxValue-1, 0);
       }    
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testForwardCopy()
    {
       Robot robot = new Robot("testRobot");
@@ -166,8 +170,9 @@ public class SimulationConstructionSetProcessDataCallTest
          assertEquals(testNum1-testNum2, 0, 0);
       }    
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testBackwardCopy()
    {
       Robot robot = new Robot("testRobot");

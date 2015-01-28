@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -18,7 +19,8 @@ public class CylinderTerrainObjectTest
    private static final double errEpsilon = 1e-14;
    private static final double testDelta = .0001;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleCylinder()
    {
       double height = 1.3;
@@ -52,9 +54,9 @@ public class CylinderTerrainObjectTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, height), intersection, 1e-7);
 
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtTranslatedRot90TallHorizontalCylinderJustInsideAndOutside()
    {
       double slopeDegrees = 0.0;
@@ -93,7 +95,8 @@ public class CylinderTerrainObjectTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtRot90TallHorizontalCylinderJustInsideAndOutside()
    {
       Vector3d center = new Vector3d(0, 0, 0);
@@ -130,7 +133,8 @@ public class CylinderTerrainObjectTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtTranslatedVerticalCylinderJustInside()
    {
       double slopeDegrees = 0.0;
@@ -158,7 +162,8 @@ public class CylinderTerrainObjectTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtTranslatedHorizontalCylinderJustInside()
    {
       double slopeDegrees = 0.0;
@@ -187,7 +192,8 @@ public class CylinderTerrainObjectTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtTranslatedVerticalCylinderJustOutside()
    {
       double slopeDegrees = 0.0;
@@ -213,7 +219,8 @@ public class CylinderTerrainObjectTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtTranslatedHorizontalCylinderJustOutside()
    {
       double slopeDegrees = 0.0;
@@ -241,7 +248,8 @@ public class CylinderTerrainObjectTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtVerticalCylinderOutside()
    {
       Vector3d center = new Vector3d(0, 0, 0);
@@ -279,7 +287,8 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeightOnCircle, horizontalCylinder.heightAt(height / 4, radius / 2, radius), errEpsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesTop()
    {
       Vector3d center = new Vector3d(0, 0, 0);
@@ -308,7 +317,8 @@ public class CylinderTerrainObjectTest
       assertEquals(z, slopedRotatedCylinder.heightAt(x, y, z + 1), errEpsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesBottom()
    {
       Vector3d center = new Vector3d(0, 0, 0);
@@ -339,7 +349,8 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeight, slopedRotatedCylinder.heightAt(x, y, -1), errEpsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideTop()
    {
       Vector3d center = new Vector3d(0, 0, 0);
@@ -367,7 +378,8 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeight, slopedRotatedCylinder.heightAt(x, y, 2), errEpsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideBottom()
    {
       Vector3d center = new Vector3d(0, 0, 0);

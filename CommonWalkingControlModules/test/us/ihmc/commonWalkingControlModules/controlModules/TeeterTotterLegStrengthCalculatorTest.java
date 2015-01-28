@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -45,7 +46,8 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints = new SideDependentList<FramePoint2d>();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCenter()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -60,7 +62,8 @@ public class TeeterTotterLegStrengthCalculatorTest
       }
    }
 
-   @Test(timeout=300000,expected = RuntimeException.class)
+	@AverageDuration
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testFrameMismatch1()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -69,7 +72,8 @@ public class TeeterTotterLegStrengthCalculatorTest
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
-   @Test(timeout=300000,expected = RuntimeException.class)
+	@AverageDuration
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testFrameMismatch2()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -78,7 +82,8 @@ public class TeeterTotterLegStrengthCalculatorTest
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAllWeightOnOneLeg()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
@@ -94,7 +99,8 @@ public class TeeterTotterLegStrengthCalculatorTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCoPOffVTPLineSegment()
    {
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));

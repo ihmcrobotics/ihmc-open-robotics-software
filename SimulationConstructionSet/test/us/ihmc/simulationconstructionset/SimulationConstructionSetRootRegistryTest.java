@@ -7,14 +7,16 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.VarPanel;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRootRegistryNothingFancy()
    {
       Robot robot = new Robot("RobotsRootRegistry");
@@ -50,8 +52,9 @@ public class SimulationConstructionSetRootRegistryTest
       
       scs.closeAndDispose();
    }
-   
-   @Test(timeout=300000) 
+
+	@AverageDuration
+	@Test(timeout=300000) 
    public void testVarGroups()
    {
       Robot robot = new Robot("testVarGroups");
@@ -94,10 +97,9 @@ public class SimulationConstructionSetRootRegistryTest
       
       scs.closeAndDispose();
    }
-   
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {
       Robot robot = new Robot("TestAfterConstruction");

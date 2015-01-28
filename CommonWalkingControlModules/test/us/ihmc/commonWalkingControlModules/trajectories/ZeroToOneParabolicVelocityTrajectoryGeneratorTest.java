@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
@@ -38,23 +39,26 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       epsilon = 1e-7;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testStartValue()
    {
       trajectoryGenerator.compute(0.0);
       
       assertEquals(0.0, trajectoryGenerator.getValue(), epsilon);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testEndValue()
    {
       trajectoryGenerator.compute(trajectoryTime);
       
       assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMidValue()
    {
       trajectoryGenerator.compute(trajectoryTime / 2.0);
@@ -62,15 +66,17 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
       assertEquals(0.5, trajectoryGenerator.getValue(), epsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAfterEndValue()
    {
       trajectoryGenerator.compute(trajectoryTime * 1.5);
       
       assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testIsDone()
    {
       trajectoryGenerator.compute(0.0);

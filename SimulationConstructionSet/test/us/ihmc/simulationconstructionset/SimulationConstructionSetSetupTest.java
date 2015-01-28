@@ -5,12 +5,14 @@ import javax.swing.JWindow;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.gui.SplashPanel;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class SimulationConstructionSetSetupTest
 {
    private static final int pauseTimeForGUIs = 5000;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSplashScreen()
    {
       SplashPanel splashPanel = new SplashPanel();
@@ -20,7 +22,8 @@ public class SimulationConstructionSetSetupTest
       window.dispose();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationConstructionSetWithoutARobot()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
@@ -31,7 +34,8 @@ public class SimulationConstructionSetSetupTest
       scs.closeAndDispose();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationConstructionSetWithARobot()
    {
       Robot robot = new Robot("NullRobot");

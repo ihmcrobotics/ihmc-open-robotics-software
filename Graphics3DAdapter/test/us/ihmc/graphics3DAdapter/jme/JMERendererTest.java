@@ -14,11 +14,14 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.utils.CoordinateFrameNode;
 import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
 public class JMERendererTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInitialization()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());
@@ -33,7 +36,9 @@ public class JMERendererTest
    /**
     * Ground should flash on and off a few times.
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetGroundVisible()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());
@@ -57,7 +62,9 @@ public class JMERendererTest
    /**
     * Should see a sphere orbit in a circle and leave 5 copies of itself along the way.
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFreezeFrame()
    {
       final JMEGraphics3DWorld world = new JMEGraphics3DWorld(new JMEGraphics3DAdapter());

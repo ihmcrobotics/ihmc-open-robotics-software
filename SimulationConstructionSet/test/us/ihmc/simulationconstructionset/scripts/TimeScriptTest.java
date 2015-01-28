@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -59,7 +60,8 @@ public class TimeScriptTest
       enumVariable = null;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testEmptyTimeScript()
    {
       YoVariableRegistry registry = new YoVariableRegistry("Test");
@@ -69,8 +71,9 @@ public class TimeScriptTest
       double time = 1.0;
       timeScript.doScript(time);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAddEntryAndDoScript()
    {
       TimeScript timeScript = new TimeScript(rootRegistry);
@@ -128,9 +131,9 @@ public class TimeScriptTest
          }
       }
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTimeScriptCommand()
    {
       TimeScript timeScript = new TimeScript(rootRegistry);
@@ -214,9 +217,9 @@ public class TimeScriptTest
          }
       }
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSaveAndLoad()
    {
       Random random = new Random(1776L);

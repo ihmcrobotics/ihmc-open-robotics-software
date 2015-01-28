@@ -8,6 +8,7 @@ import javax.vecmath.TexCoord2f;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 import com.jme3.math.Triangle;
 import com.jme3.math.Vector3f;
@@ -16,7 +17,8 @@ import com.jme3.scene.Mesh;
 public class JMEMeshDataInterpreterTest
 {
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testForASingleTriangle()
    {
       Point3f[] vertices = new Point3f[]{new Point3f(0.0f, 0.0f, 0.0f), new Point3f(1.0f, 0.0f, 0.0f), new Point3f(1.0f, 1.0f, 0.0f)};
@@ -39,8 +41,9 @@ public class JMEMeshDataInterpreterTest
       assertJMEVectorEqualsPoint(triangle.get2(), vertices[1]);
       assertJMEVectorEqualsPoint(triangle.get3(), vertices[2]);  
    }
-   
-   @Test(timeout = 300000)
+
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testForASimpleCube()
    {
       Point3f[] vertices = new Point3f[]{new Point3f(0.0f, 0.0f, 0.0f), new Point3f(1.0f, 0.0f, 0.0f), new Point3f(1.0f, 1.0f, 0.0f), new Point3f(0.0f, 1.0f, 0.0f), 

@@ -3,11 +3,13 @@ package us.ihmc.communication.streamingData;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class StreamingDataProducerConsumerTest
 {
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTypicalUsage()
    {
       SimpleStreamingDataProducer simpleStreamingDataProducer = new SimpleStreamingDataProducer();
@@ -21,8 +23,9 @@ public class StreamingDataProducerConsumerTest
          ThreadTools.sleep(100L);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMultipleProducersAndConsumers()
    {
       SimpleStreamingDataProducer simpleStreamingDataProducerA = new SimpleStreamingDataProducer();

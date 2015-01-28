@@ -13,13 +13,12 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
@@ -148,7 +147,8 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
       return scs;
    }
 
-   @Test(timeout = 150000)
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testRightHandIn3PMode()
    {
 //      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
@@ -156,57 +156,65 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
       executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray);
    }
 
-   @Test(timeout = 150000)
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testLeftHandIn3PMode()
    {
 //      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.LEFT);
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testBothHandsIn3PMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testRightHandIn3P2RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testLeftHandIn3P2RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       this.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testBothHandsIn3P2RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testRightHandIn3P3RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testLeftHandIn3P3RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       this.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray);
    }
-   
-   @Test(timeout = 150000)
+
+	@AverageDuration
+	@Test(timeout = 150000)
    public void testBothHandsIn3P3RMode()
    {
       ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);

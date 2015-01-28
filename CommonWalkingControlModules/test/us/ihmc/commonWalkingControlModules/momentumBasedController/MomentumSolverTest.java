@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -74,7 +75,8 @@ public class MomentumSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFloatingChainWithJointSpaceConstraints()
    {
       Random random = new Random(44345L);
@@ -126,8 +128,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFloatingTreeWithJointSpaceConstraints()
    {
       Random random = new Random(44345L);
@@ -177,7 +179,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoFloatingBodiesWithTaskSpaceAcceleration()
    {
       Random random = new Random(12342L);
@@ -237,7 +240,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, new ArrayList<RevoluteJoint>(), DT, desiredMomentumRate, 1e-4);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testJointSpaceAndTaskSpaceAccelerations()
    {
       Random random = new Random(13552L);
@@ -295,7 +299,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testInternalSpatialAcceleration()
    {
       Random random = new Random(44345L);
@@ -344,7 +349,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoInternalSpatialAccelerations()
    {
       Random random = new Random(44345L);
@@ -417,7 +423,9 @@ public class MomentumSolverTest
 
 
    @Ignore    // Not working yet. We need to revisit momentum solving, add cases like this, clean it up, optimize it, and make it pretty
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoInternalOverlappingSpatialAccelerations()
    {
       // This is the chicken and the egg test with the GFE Robot. We want to
@@ -510,7 +518,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-3);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSubspaces()
    {
       Random random = new Random(12342L);
@@ -589,7 +598,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAngularAcceleration()
    {
       Random random = new Random(2534L);
@@ -639,7 +649,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testNullspaceMultipliers()
    {
       Random random = new Random(2534L);

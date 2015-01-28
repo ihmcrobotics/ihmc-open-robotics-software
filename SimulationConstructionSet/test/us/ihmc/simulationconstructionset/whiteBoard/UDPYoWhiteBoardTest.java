@@ -5,9 +5,13 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testUDPWhiteBoardOne() throws IOException
    {
       String IPAddress = "localHost";
@@ -37,9 +41,9 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       int numberOfTests = 500;
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 203, 207);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testUDPWhiteBoardTwo() throws IOException
    {
       String IPAddress = "localHost";

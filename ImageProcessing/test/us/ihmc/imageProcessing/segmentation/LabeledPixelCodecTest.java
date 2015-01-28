@@ -12,12 +12,16 @@ import java.util.List;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 /**
  * @author Peter Abeles
  */
 public class LabeledPixelCodecTest
 {
-   @Test(timeout = 300000)
+
+	@AverageDuration
+	@Test(timeout = 300000)
    public void write_read() throws IOException
    {
       String expectedName = "foo";

@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorTest
 {
@@ -33,7 +34,9 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
 
    //this is not a jUnit test. This is a playable pose sequence. Start the sim and press play. Remove @ignore and run locally. 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFromExample()
    {
       DRCRobotModel robotModel = getRobotModel();

@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -29,8 +30,9 @@ import us.ihmc.utilities.robotSide.RobotSide;
 public class HandPosePacketTransformerTest
 {
    private final static int numberOfArmJoints = 6;
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTransformHandPosePacket()
    {
       int numberOfTests = 10;

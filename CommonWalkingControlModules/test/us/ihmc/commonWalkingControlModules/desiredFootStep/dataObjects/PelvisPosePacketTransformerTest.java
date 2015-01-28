@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -27,7 +28,9 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
  */
 public class PelvisPosePacketTransformerTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPelvisPosePacketTransformer()
    {
       int numberOfTests = 10;

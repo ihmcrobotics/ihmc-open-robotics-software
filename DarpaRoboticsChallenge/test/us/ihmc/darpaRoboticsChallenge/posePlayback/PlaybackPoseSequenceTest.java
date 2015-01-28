@@ -14,10 +14,13 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterface
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testReadAndWriteWithRandomSequence()
    {
       DRCRobotModel robotModel = getRobotModel();

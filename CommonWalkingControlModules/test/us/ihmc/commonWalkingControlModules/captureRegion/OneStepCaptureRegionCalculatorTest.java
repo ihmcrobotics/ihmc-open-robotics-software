@@ -18,6 +18,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
@@ -53,7 +54,9 @@ public class OneStepCaptureRegionCalculatorTest
    private final YoVariableRegistry registry = new YoVariableRegistry("CaptureRegionCalculatorTest");
    
    @SuppressWarnings("unused")
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testConstructor()
    {
       double midFootAnkleXOffset = 0.0;
@@ -63,8 +66,9 @@ public class OneStepCaptureRegionCalculatorTest
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(
             midFootAnkleXOffset, footWidth, kineamaticStepRange, ankleZUpFrames, registry, null);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPointsInsideCaptureRegion()
    {
       // do not change parameters
@@ -144,8 +148,9 @@ public class OneStepCaptureRegionCalculatorTest
          waitForButtonOrPause(testFrame);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testProjectedFootCorners()
    {
       // do not change parameters
@@ -217,8 +222,9 @@ public class OneStepCaptureRegionCalculatorTest
          waitForButtonOrPause(testFrame);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCalculationWithICPInFootPolygon()
    {
       double midFootAnkleXOffset = 0.2;
@@ -291,7 +297,8 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCalculationWithHighSwingTime()
    {
       // do not change parameters

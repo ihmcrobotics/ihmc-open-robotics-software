@@ -7,6 +7,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class TypicalTorqueSpeedCurveTest
 {
    @Before
@@ -19,8 +21,8 @@ public class TypicalTorqueSpeedCurveTest
    {
    }
 
-   
-   @Test(timeout=300000) 
+	@AverageDuration
+	@Test(timeout=300000) 
    public void testOne()
    {
       TypicalTorqueSpeedCurve torqueSpeedCurve = new TypicalTorqueSpeedCurve();

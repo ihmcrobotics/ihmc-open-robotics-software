@@ -9,10 +9,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 public class PopulationTest
 {
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPopulation()
    {
       Random random = new Random(1776L);

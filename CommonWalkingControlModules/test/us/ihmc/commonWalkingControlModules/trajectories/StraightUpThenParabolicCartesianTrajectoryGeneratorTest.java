@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -28,8 +29,9 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMaxHeight()
    {
       Random random = new Random(176L);

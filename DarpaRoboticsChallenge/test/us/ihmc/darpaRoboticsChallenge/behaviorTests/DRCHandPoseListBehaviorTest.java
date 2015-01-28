@@ -32,6 +32,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -125,7 +126,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testMoveOneRandomJoint90Deg() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -159,7 +161,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testDoNothing() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -188,7 +191,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testWackyInflatableArmFlailingTubeManDance() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

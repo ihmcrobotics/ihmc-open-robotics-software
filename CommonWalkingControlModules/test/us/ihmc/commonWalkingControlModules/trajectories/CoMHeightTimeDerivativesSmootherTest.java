@@ -10,6 +10,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -30,8 +31,9 @@ public class CoMHeightTimeDerivativesSmootherTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testConstantHeight()
    {
       double dt = 0.001;
@@ -62,9 +64,9 @@ public class CoMHeightTimeDerivativesSmootherTest
       assertEquals(comHeightVelocity, comHeightVelocityOut, 1e-7);
       assertEquals(comHeightAcceleration, comHeightAccelerationOut, 1e-7);  
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDiscreetJump()
    {
       boolean visualize = false;
@@ -157,9 +159,9 @@ public class CoMHeightTimeDerivativesSmootherTest
          ThreadTools.sleepForever();
       }
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSinusoidalInput()
    {
       boolean visualize = false;

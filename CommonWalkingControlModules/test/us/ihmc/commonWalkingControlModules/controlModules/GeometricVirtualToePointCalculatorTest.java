@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
@@ -46,8 +47,9 @@ public class GeometricVirtualToePointCalculatorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleCaseWithRectangularFeetAllSquaredUp()
    {
       RobotSide upcomingSupportSide = null;
@@ -99,8 +101,8 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToFootTranslation(leftFootPoints, rightFootPoints, copDesired, footTranslation, upcomingSupportSide);
    }
 
-   
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRotationWhenOnEdge()
    {
       RobotSide upcomingSupportSide = null;
@@ -112,7 +114,8 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToFootRotation(leftFootPoints, rightFootPoints, copDesired, upcomingSupportSide);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTranslationIntoFoot()
    {
       RobotSide upcomingSupportSide = RobotSide.LEFT;
@@ -126,7 +129,8 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToCoPMotion(leftFootPoints, rightFootPoints, startCoPDesired, endCoPDesired, upcomingSupportSide);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTranslationOfFoot()
    {
       RobotSide upcomingSupportSide = RobotSide.LEFT;

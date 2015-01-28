@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.NonFlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -44,8 +45,9 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void raisedFlatSingleSupportCoMHeightTrajectoryTest()
    {
       double nominalCoMHeightAboveAnkle = 1.0;
@@ -70,7 +72,8 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               coMQueries, expectedHeights, 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void raisedFlatDoubleSupportCoMHeightTrajectoryTest()
    {
       double nominalCoMHeightAboveAnkle = 1.0;
@@ -95,7 +98,8 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               coMQueries, expectedHeights, 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void raisedSlopedSingleSupportCoMHeightTrajectoryTest()
    {
       double nominalCoMHeightAboveSupportAnkle = 1.0;
@@ -123,7 +127,8 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               doubleSupport, coMQueries, expectedHeights, 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void raisedSlopedDoubleSupportCoMHeightTrajectoryTest()
    {
       double nominalCoMHeightAboveAnkle = 1.0;

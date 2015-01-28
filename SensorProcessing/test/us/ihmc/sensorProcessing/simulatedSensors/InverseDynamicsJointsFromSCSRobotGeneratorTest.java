@@ -29,6 +29,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -78,8 +79,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException
    {
       Robot robot = new Robot("TestSinglePinJoint");
@@ -111,9 +113,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException
    {
       Robot robot = new Robot("TestTwoPinJoints");
@@ -164,9 +166,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException
    {
       Robot robot = new Robot("TestSingleFloatingJoint");
@@ -203,9 +205,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(1984L);

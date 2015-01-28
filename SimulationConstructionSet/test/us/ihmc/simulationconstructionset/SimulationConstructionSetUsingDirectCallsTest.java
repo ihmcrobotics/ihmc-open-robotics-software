@@ -58,6 +58,7 @@ import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -206,7 +207,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs = null;
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationConstructionSetMiscellaneous() throws AWTException
    {
       Robot[] robotFromSCS = scs.getRobots();
@@ -280,7 +282,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationManagement()
    {
       double startTime = scs.getTime();
@@ -357,7 +360,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    }
 
    @Ignore // Only run this one locally since it doesn't work on Bamboo on Linux necessarily.
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFrameMethodsThatOnlyWorkOnSomeOperatingSystems()
    {
       scs.setFrameSize(dimension);
@@ -392,9 +397,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int frameStateFromSCS2 = getExtendedStateFromSCS(scs);
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testFrameMethods()
    {
       ThreadTools.sleep(THREAD_SLEEP_TIME);
@@ -448,7 +453,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(component, componentFromSCS);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCameraMethods()
    {
       scs.setCameraTracking(true, false, false, false);
@@ -614,7 +620,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertBooleansAreOpposite(initialCameraKeyModeStatus, finalCameraKeyModeStatus);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test3DGraphicsMethods()
    {
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -669,7 +676,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertIfGUIComponentsAreDisableOrEnabled(scs, true);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariableMethods() throws AWTException
    {
       ArrayList<YoVariable<?>> allVariablesFromRobot = simpleRobot.getAllVariables();
@@ -726,7 +734,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTimingMethods() throws AWTException
    {
       scs.setDT(simulateDT, recordFrequency);
@@ -754,7 +763,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Math.PI, timeFromSCS, epsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationTickControl()
    {
       scs.setIndex(index);
@@ -897,7 +907,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(keyPoint - 1, currentIndexFromSCS6, epsilon);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testVariablesMethods()
    {
       addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
@@ -951,7 +962,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertYoVariableListContainsArrayListOfVariables(yoVariableListFromSCS3, yoVariableArrayLists);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGroupMethods()
    {
       addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
@@ -998,7 +1010,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertNotNull(extraPanelConfigurationPanelFromSCS);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimulationListeners()
    {
       SimulationDoneListener simulationDoneListener = createSimulationDoneListener();
@@ -1052,7 +1065,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTrue(toggleKeyPointModeCommandListenerHasBeenCalled.getBooleanValue());
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testDataExporting()
    {
       simulateForTime(scs, simulateTime);

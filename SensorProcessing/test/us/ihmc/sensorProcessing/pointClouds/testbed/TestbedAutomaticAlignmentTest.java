@@ -15,6 +15,8 @@ import java.util.List;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -26,7 +28,8 @@ public class TestbedAutomaticAlignmentTest {
    Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(this.getClass().
            getResourceAsStream("/testbed/estimatedToModel.xml"));
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void expectedSolution() {
 
       TestbedAutomaticAlignment alg = new TestbedAutomaticAlignment(3, estimatedToModel);
@@ -51,7 +54,9 @@ public class TestbedAutomaticAlignmentTest {
    /**
     * Should produce the approximately the solution when run multiple times
     */
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void multipleRuns() {
 
       TestbedAutomaticAlignment alg = new TestbedAutomaticAlignment(3,estimatedToModel);
@@ -83,7 +88,8 @@ public class TestbedAutomaticAlignmentTest {
       assertTrue(MatrixFeatures.isIdentical(first.getR(), second.getR(), 0.01));
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void findLineLocation() {
 
       LineParametric3D_F64 line = new LineParametric3D_F64();
@@ -108,7 +114,8 @@ public class TestbedAutomaticAlignmentTest {
       assertEquals(found[1],end,1e-8);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void adjustSign() {
 
       Vector3D_F64 v = new Vector3D_F64(1,0,0);

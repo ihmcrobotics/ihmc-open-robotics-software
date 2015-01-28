@@ -22,6 +22,7 @@ import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchD
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.EndEffectorOutput;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.OptimizerCylinderContactModel;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrenchDistribution.OptimizerPlaneContactModel;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -41,7 +42,9 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    private final ReferenceFrame comFrame = ReferenceFrame.constructAWorldFrame("com");
 
    @Ignore // Cylindrical grasping stuff has been put the grave yard.
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void test4limbsTogether()
    {
       List<EndEffector> endEffectorsWithDefinedContactModels = new ArrayList<EndEffector>();
@@ -69,7 +72,9 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLeftFootAtOrigin()
    {
       List<EndEffector> endEffectorsWithDefinedContactModels = new ArrayList<EndEffector>();
@@ -90,7 +95,9 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    }
 
    @Ignore
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLeftHandAtOrigin()
    {
       List<EndEffector> endEffectorsWithDefinedContactModels = new ArrayList<EndEffector>();

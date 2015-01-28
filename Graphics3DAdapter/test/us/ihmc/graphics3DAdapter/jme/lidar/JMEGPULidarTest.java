@@ -12,6 +12,7 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar120FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -50,28 +51,32 @@ public class JMEGPULidarTest implements LidarTestListener
       lidarTest.getWorld().stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test60DegreeFieldOfView()
    {
       parameters = new JMELidar60FovTest();
       doATest(parameters);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test120DegreeFieldOfView()
    {
       parameters = new JMELidar120FovTest();
       doATest(parameters);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test360DegreeFieldOfView()
    {
       parameters = new JMELidar360FovTest();
       doATest(parameters);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test270DegreeFieldOfView()
    {
       parameters = new JMELidarSphere270FovTest();

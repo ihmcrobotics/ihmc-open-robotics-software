@@ -20,6 +20,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
@@ -45,7 +46,8 @@ public class EstimateMotionFromBoxTest
    Point3D_F64 foundP = new Point3D_F64();
    Point3D_F64 expectedP = new Point3D_F64();
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void translation() {
       Se3_F64 canonicalToA =  new Se3_F64();
       Se3_F64 canonicalToB =  new Se3_F64();
@@ -56,7 +58,8 @@ public class EstimateMotionFromBoxTest
       checkCase(new EstimateMotionFromBox(), canonicalToA, canonicalToB);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void rotation() {
       Se3_F64 canonicalToA =  new Se3_F64();
       Se3_F64 canonicalToB =  new Se3_F64();
@@ -67,7 +70,8 @@ public class EstimateMotionFromBoxTest
       checkCase(new EstimateMotionFromBox(), canonicalToA, canonicalToB);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void both() {
       Se3_F64 canonicalToA =  new Se3_F64();
       Se3_F64 canonicalToB =  new Se3_F64();
@@ -80,7 +84,8 @@ public class EstimateMotionFromBoxTest
       checkCase(new EstimateMotionFromBox(), canonicalToA, canonicalToB);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void randomTransforms()
    {
       EstimateMotionFromBox alg = new EstimateMotionFromBox();
@@ -142,8 +147,9 @@ public class EstimateMotionFromBoxTest
 
       return a;
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMovingBox()
    {
       EstimateMotionFromBox boxMotion = new EstimateMotionFromBox();

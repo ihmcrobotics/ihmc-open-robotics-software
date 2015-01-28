@@ -34,6 +34,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -113,7 +114,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -128,7 +130,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testSingleChestPitchOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -147,7 +150,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testSingleChestRollOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -166,7 +170,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Test(timeout = 300000)
+	@AverageDuration
+	@Test(timeout = 300000)
    public void testSingleChestYawOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

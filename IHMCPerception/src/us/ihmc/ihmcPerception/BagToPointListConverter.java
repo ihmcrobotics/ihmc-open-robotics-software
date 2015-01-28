@@ -1,9 +1,15 @@
 package us.ihmc.ihmcPerception;
 
-import com.sun.org.apache.xml.internal.serialize.LineSeparator;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
-import javax.swing.*;
-import java.io.*;
+import javax.swing.JFileChooser;
 
 /**
  * Created by agrabertilton on 1/26/15.

@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.test.JUnitTools;
 
 public class SingularValueExplorationAndExamplesTest
@@ -19,7 +20,8 @@ public class SingularValueExplorationAndExamplesTest
    {
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSimpleCase()
    {
       DenseMatrix64F matrixJ = new DenseMatrix64F(new double[][]{{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}});
@@ -54,8 +56,9 @@ public class SingularValueExplorationAndExamplesTest
 
       JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void showIMinusNNTransposeJDoesntMakeSense()
    {
       
@@ -145,9 +148,9 @@ public class SingularValueExplorationAndExamplesTest
       
       return ret;
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void foo2()
    {
       

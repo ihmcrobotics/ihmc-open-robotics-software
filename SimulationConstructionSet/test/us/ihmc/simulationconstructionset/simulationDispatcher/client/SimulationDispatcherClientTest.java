@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class SimulationDispatcherClientTest
 {
@@ -20,7 +21,8 @@ public class SimulationDispatcherClientTest
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void test()
    {
 //    YoVariable foo = new YoVariable("foo", null);

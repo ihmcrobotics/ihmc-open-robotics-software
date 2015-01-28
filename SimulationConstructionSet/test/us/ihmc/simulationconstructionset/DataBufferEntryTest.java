@@ -8,12 +8,15 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DataBufferEntryTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVal()
    {
       int nPoints = 10000;
@@ -27,7 +30,8 @@ public class DataBufferEntryTest
       assertEquals(tempDouble, dataBufferEntry.getVariableValueAsADouble(), 0);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testTickAndUpdate()
    {
       int nPoints = 10000;
@@ -52,8 +56,9 @@ public class DataBufferEntryTest
          assertEquals(tempData[i], data[i], epsilon);
       }
    }
-   
-   @Test(timeout=300000) public void testComputeAverage()
+
+	@AverageDuration
+	@Test(timeout=300000) public void testComputeAverage()
    {
       int nPoints = 100;
       
@@ -77,7 +82,8 @@ public class DataBufferEntryTest
       assertEquals(average, computedAverage, 1e-7);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testUpdateValue()
    {
       int nPoints = 10000;
@@ -102,7 +108,8 @@ public class DataBufferEntryTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCheckIfDataIsEqual()
    {
       int nPoints = 10000;
@@ -151,7 +158,8 @@ public class DataBufferEntryTest
       assertFalse(dataBufferEntry.checkIfDataIsEqual(entry2, nPoints, nPoints - 1, epsilon)); //inPoint out of bounds
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetMinAndMaxScaling()
    {
       int nPoints = 10000;
@@ -168,7 +176,8 @@ public class DataBufferEntryTest
       assertEquals(maxScaling, dataBufferEntry.getManualMaxScaling(), 0);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariable()
    {
       int nPoints = 10000;
@@ -180,7 +189,8 @@ public class DataBufferEntryTest
       assertEquals(doubleYoVariable, dataBufferEntry.getVariable());
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCopyValueThrough()
    {
       int nPoints = 10000;
@@ -200,7 +210,8 @@ public class DataBufferEntryTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testEnlargeBufferSize()
    {
       int nPoints = 10000;
@@ -228,7 +239,8 @@ public class DataBufferEntryTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCropData()
    {
       int nPoints = 10000;
@@ -288,9 +300,9 @@ public class DataBufferEntryTest
          assertEquals(tempData[100 + i], dataBufferEntry.getData()[i], 0);
       }
    }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testCutData()
    {
       int nPoints = 1000;
@@ -378,8 +390,8 @@ public class DataBufferEntryTest
       }
    }
 
-
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testPackData()
    {
       int nPoints = 10000;
@@ -419,7 +431,8 @@ public class DataBufferEntryTest
       }
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetMax()
    {
       int nPoints = 10000;
@@ -438,7 +451,8 @@ public class DataBufferEntryTest
       assertEquals(tempInteger + 10, dataBufferEntry.getMax(), 0);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetMin()
    {
       int nPoints = 10000;
@@ -457,7 +471,8 @@ public class DataBufferEntryTest
       assertEquals(0, dataBufferEntry.getMin(), 0);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMinMaxWithNaN()
    {
       int nPoints = 10000;
@@ -474,7 +489,8 @@ public class DataBufferEntryTest
       assertEquals(0.0, dataBufferEntry.getMax(), 0.0);
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testMinMaxWithNaN2()
    {
       int nPoints = 10000;
@@ -495,8 +511,9 @@ public class DataBufferEntryTest
       assertFalse(Double.isNaN(dataBufferEntry.getMax()));
       assertTrue(dataBufferEntry.getMin() <= dataBufferEntry.getMax());
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testResetMinMaxChanged()
    {
       int nPoints = 10000;
@@ -512,8 +529,9 @@ public class DataBufferEntryTest
       dataBufferEntry.resetMinMaxChanged();
       assertFalse(dataBufferEntry.minMaxChanged());
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetData()
    {
       int nPoints = 10000;
@@ -528,8 +546,9 @@ public class DataBufferEntryTest
       
       assertEquals(tempDouble, dataBufferEntry.getData()[randomIndex], 0);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetWindowedData()
    {
       int nPoints = 10000;
@@ -560,8 +579,9 @@ public class DataBufferEntryTest
          assertEquals(tempDataSubset[i], windowedData[i], 0);
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testEnableAutoScale()
    {
       int nPoints = 10000;
@@ -574,8 +594,9 @@ public class DataBufferEntryTest
       dataBufferEntry.enableAutoScale(false);
       assertFalse(dataBufferEntry.isAutoScaleEnabled());
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetMaxWithParameters()
    {
       int nPoints = 10000;
@@ -604,8 +625,9 @@ public class DataBufferEntryTest
       assertEquals(oldMax, dataBufferEntry.getMax(350,0,350,450), 0);
       assertEquals(oldMax, dataBufferEntry.getMax(500,450,350,450), 0);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetMinWithParameters()
    {
       int nPoints = 10000;

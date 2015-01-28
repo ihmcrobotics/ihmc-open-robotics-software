@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -52,16 +53,18 @@ public class YoVariableHolderImplementationNewTest
       yoVariableHolderImplementation = null;
       testVariables = null;
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAddSingleYoVariableToHolderAndGetVariableByName()
    {
       DoubleYoVariable doubleYoVariableFromArrayList = (DoubleYoVariable) testVariables.get(0);
       yoVariableHolderImplementation.addVariableToHolder(doubleYoVariableFromArrayList);      
       assertEquals(doubleYoVariableFromArrayList, yoVariableHolderImplementation.getVariable("doubleYoVariable"));
    }
-  
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testAddMultipleYoVariablesToHolderAndGetAllVariables()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
@@ -71,8 +74,9 @@ public class YoVariableHolderImplementationNewTest
          assertTrue(testVariables.contains(var));
       }
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetAllVariablesArray()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
@@ -85,8 +89,9 @@ public class YoVariableHolderImplementationNewTest
       }
       
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariableUsingFullNamespace()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
@@ -107,24 +112,26 @@ public class YoVariableHolderImplementationNewTest
 //      
 //      
 //   }
-   
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariable()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
       assertTrue(testVariables.get(0) == yoVariableHolderImplementation.getVariable("doubleYoVariable"));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariableCaseInsensitive()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
       YoVariable<?> variable = yoVariableHolderImplementation.getVariable("DoubleYoVariable");
       assertTrue(testVariables.get(0) == variable);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariableWithNameSpace() 
    {
       YoVariableRegistry testRegistry;
@@ -133,8 +140,9 @@ public class YoVariableHolderImplementationNewTest
       yoVariableHolderImplementation.addVariableToHolder(doubleYoVariableWithNameSpace);
       assertEquals(doubleYoVariableWithNameSpace, yoVariableHolderImplementation.getVariable("testRegistry", "doubleYoVariableWithNameSpace"));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariableWithNameSpaceCaseInsensitiveExceptNameSpace() 
    {
       YoVariableRegistry testRegistry;
@@ -144,8 +152,9 @@ public class YoVariableHolderImplementationNewTest
       assertEquals(doubleYoVariableWithNameSpace, yoVariableHolderImplementation.getVariable("testRegistry", "DOUBLEYoVariableWithNameSpace"));
       assertNull(yoVariableHolderImplementation.getVariable("TESTRegistry", "doubleYoVariableWithNameSpace"));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHasUniqueVariable()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);      
@@ -155,8 +164,9 @@ public class YoVariableHolderImplementationNewTest
       assertTrue(yoVariableHolderImplementation.hasUniqueVariable("integerYoVariable"));
       assertFalse(yoVariableHolderImplementation.hasUniqueVariable("integerYoVariableNotPresent"));
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testHasUniqueVariableWithNameSpace()
    {
       YoVariableRegistry testRegistry1;
@@ -172,8 +182,9 @@ public class YoVariableHolderImplementationNewTest
       assertFalse(yoVariableHolderImplementation.hasUniqueVariable("testRegistry1", "doubleYoVariableWithNameSpace2"));
       assertFalse(yoVariableHolderImplementation.hasUniqueVariable("testRegistry2", "doubleYoVariableWithNameSpace1"));
    }
-  
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariablesArrayList() //returns an ArrayList of size 1?
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
@@ -182,7 +193,8 @@ public class YoVariableHolderImplementationNewTest
    
    //testGetVariables(String fullName)
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testGetVariablesInNameSpace()
    {
       YoVariableRegistry testRegistry1;

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
 
@@ -13,7 +14,8 @@ public class GeneticAlgorithmTest
 {
    private static final boolean SHOW_GUI = false;
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testOptimizeExampleIndividualOne()
    {
       int populationSize = 500;

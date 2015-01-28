@@ -5,11 +5,14 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLocalYoWhiteBoardOne() throws IOException
    {
       LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));
@@ -20,8 +23,9 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       int numberOfTests = 2000;
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testLocalYoWhiteBoardTwo() throws IOException
    {
       LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));

@@ -13,12 +13,9 @@ import org.apache.commons.lang.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.hierarchicalKinematics.ForwardKinematicSolver;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalKinematicSolver;
-import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyOrientation;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPose;
-import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPosition;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_COM;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;

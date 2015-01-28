@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
 import com.jme3.material.Material;
@@ -16,7 +17,9 @@ import com.jme3.scene.shape.Sphere;
 
 public class JMEGraphics3DWorldTest
 {
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void testShowGui()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -27,7 +30,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testWithoutGui()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -38,7 +42,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void addASphere()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -49,8 +54,9 @@ public class JMEGraphics3DWorldTest
       world.keepAlive(1);
       world.stop();
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void addASphereAfterGuiStarted()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -61,8 +67,9 @@ public class JMEGraphics3DWorldTest
       world.keepAlive(1);
       world.stop();
    }
-   
-   @Test(timeout=300000)
+
+	@AverageDuration
+	@Test(timeout=300000)
    public void addAJMESphere()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -84,7 +91,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void testSetCameraPosition()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
@@ -97,7 +105,8 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-   @Test(timeout=300000)
+	@AverageDuration
+	@Test(timeout=300000)
    public void fixCameraOnSphere()
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
