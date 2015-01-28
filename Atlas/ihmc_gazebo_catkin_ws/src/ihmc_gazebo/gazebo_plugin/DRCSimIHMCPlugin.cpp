@@ -99,10 +99,10 @@ public:
 		//back_bkx back_bky back_bkz hokuyo_joint l_arm_elx l_arm_ely l_arm_shx l_arm_shy l_arm_wrx l_arm_wry l_leg_akx l_leg_aky l_leg_hpx l_leg_hpy l_leg_hpz l_leg_kny neck_ry r_arm_elx r_arm_ely r_arm_shx r_arm_shy r_arm_wrx r_arm_wry r_leg_akx r_leg_aky r_leg_hpx r_leg_hpy r_leg_hpz r_leg_kny
 		double initialAngles[] = { 0.0, 0.0, 0.0, 0.0, 0.498, 2.0, -1.3, 0.3, -0.004, 0.0, -0.062, -0.276, 0.062, -0.233, 0.0, 0.518, 0, -0.498, 2.0, 1.3, 0.3, 0.004, 0.0, 0.062, -0.276, -0.062, -0.233, 0.0, 0.518 };
 
-		double anklePitchAngle = -0.346;
+		double anklePitchAngle = -0.347; //0.346
 		double hipPitchAngle = -0.663;
 		double kneeAngle = 1.008;
-		double backPitch = 0.2798;
+		double backPitch = 0.263966; //0.2658, slightly far forward
 
 		double ankleRoll = 0.062;
 		initialAngles[10] = -ankleRoll; //left ankle x
