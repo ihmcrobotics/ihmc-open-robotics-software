@@ -1,11 +1,17 @@
 package us.ihmc.ihmcPerception;
 
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
-
-import javax.swing.*;
-import javax.vecmath.Point3d;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+
+import javax.swing.JFileChooser;
+import javax.vecmath.Point3d;
+
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
+import us.ihmc.utilities.dataStructures.quadTree.Box;
 
 /**
  * Created by agrabertilton on 1/26/15.
@@ -21,13 +27,15 @@ public class PointMapCropping
       double maxX = 1.0; //5.0f;
       double maxY = 4.0; //5.0f;
 
+      Box bounds = new Box(minX, minY, maxX, maxY);
 
       double maxZ = 0.6;
       int skipPoints = 0;
       int maxNumberOfPoints = 2000000;
       try
       {
-         ArrayList<Point3d> points = QuadTreeForGroundHeightMap.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, minX, minY, maxX, maxY, maxZ);
+         QuadTreeForGroundReaderAndWriter quadTreeForGroundReaderAndWriter = new QuadTreeForGroundReaderAndWriter();
+         ArrayList<Point3d> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
          JFileChooser outputChooser = new JFileChooser();
          outputChooser.setDialogTitle("Specify a file to save");
