@@ -102,6 +102,20 @@ public class HandPoseBehavior extends BehaviorInterface
          trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());
       }
    }
+   
+   private void stopArmMotion()
+   {
+      if (outgoingHandPosePacket != null )
+      {
+         RobotSide robotSide = outgoingHandPosePacket.getRobotSide();
+         if (robotSide != null)
+         {
+            StopArmMotionPacket pausePacket = new StopArmMotionPacket();
+            pausePacket.setDestination(PacketDestination.CONTROLLER);
+            sendPacketToController(pausePacket);
+         }
+      }
+   }
 
    @Override
    public void initialize()
@@ -140,18 +154,15 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
-      StopArmMotionPacket pausePacket = new StopArmMotionPacket(outgoingHandPosePacket.getRobotSide());
-      pausePacket.setDestination(PacketDestination.CONTROLLER);
-      sendPacketToController(pausePacket);
+      stopArmMotion();
       isStopped.set(true);
    }
+
 
    @Override
    public void pause()
    {
-      StopArmMotionPacket pausePacket = new StopArmMotionPacket(outgoingHandPosePacket.getRobotSide());
-      pausePacket.setDestination(PacketDestination.CONTROLLER);
-      sendPacketToController(pausePacket);
+      stopArmMotion();
       isPaused.set(true);
    }
 
