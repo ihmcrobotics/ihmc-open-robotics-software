@@ -19,9 +19,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
@@ -40,8 +37,6 @@ public class MovieSaveDialog implements TickUpdateListener
    private final int previewWidth = frameWidth;
    private final int previewHeight = 360;
 
-   private final Graphics3DAdapter graphics3dAdapter;
-   private final ExportMovieCommandExecutor exportMovieCommandExecutor;
    private final GUIEnablerAndDisabler guiEnablerAndDisabler;
    private final StandardSimulationGUI myGUI;
 
@@ -50,16 +45,17 @@ public class MovieSaveDialog implements TickUpdateListener
    private JTextField frameRateTextField;
    private JTextField playbackRateTextField;
    
-   private Dimension dimension;
-
+   private final Dimension dimension = new Dimension(1900, 1080);
+   private final ExportMovieCommandExecutor exportMovieCommandExecutor;
+      
    public MovieSaveDialog(Window owner, StandardSimulationGUI myGUI, StandardGUIActions standardGUIActions, ActiveCanvas3DHolder activeCanvas3DHolder,
                           ExportMovieCommandExecutor exportMovieCommandExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler)
-   {
+   {      
+      this.exportMovieCommandExecutor = exportMovieCommandExecutor;
+
       exportDialog = new JDialog(owner, "Export Movie");
       exportDialog.setName("Export Movie");
       
-      graphics3dAdapter = myGUI.getGraphics3dAdapter();
-      this.exportMovieCommandExecutor = exportMovieCommandExecutor;
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
       this.myGUI = myGUI;
 
@@ -166,25 +162,11 @@ public class MovieSaveDialog implements TickUpdateListener
       if (selectedFile != null)
       {
          float frameRate = new Float(frameRateTextField.getText());
-         float playRate = new Float(playbackRateTextField.getText());
+         float playBackRate = new Float(playbackRateTextField.getText());
 
-         exportMovie(selectedFile,frameRate,playRate);
+         Boolean isSequanceSelected = false;
+         exportMovieCommandExecutor.createMovie(viewportPanel.getCamera(), selectedFile, dimension, isSequanceSelected , playBackRate, frameRate);
       }
-   }
-
-   private void exportMovie(File selectedFile, float frameRate, float playbackspeed)
-   {
-      guiEnablerAndDisabler.disableGUIComponents();
-
-      ViewportAdapter adapter = graphics3dAdapter.createNewViewport(null, false, true);
-      adapter.setupOffscreenView((int) dimension.getWidth(), (int) dimension.getHeight());
-      adapter.setCameraController(viewportPanel.getCamera());
-
-      CaptureDevice captureDevice = adapter.getCaptureDevice();
-      exportMovieCommandExecutor.createMovie(captureDevice, selectedFile, false, playbackspeed, frameRate);
-
-      graphics3dAdapter.closeViewport(adapter);
-      guiEnablerAndDisabler.enableGUIComponents();
    }
 
    private void close()
@@ -198,10 +180,9 @@ public class MovieSaveDialog implements TickUpdateListener
       myGUI.removeTickUpdateListener(this);
    }
 
-   private void setResolution(Dimension d)
+   private void setResolution(Dimension dimension)
    {
-      double aspectRatio = ((double) d.getWidth()) / ((double) d.getHeight());
-
+      double aspectRatio = ((double) dimension.getWidth()) / ((double) dimension.getHeight());
       double screenAspect = ((double) previewWidth) / ((double) previewHeight);
 
       int width, height;
@@ -219,7 +200,8 @@ public class MovieSaveDialog implements TickUpdateListener
       viewportPanel.setBounds((previewWidth - width) / 2, (previewHeight - height) / 2, width, height);
       viewportPanel.repaint();
       viewportPanel.revalidate();
-      dimension = d;
+      
+      this.dimension.setSize(dimension);
    }
 
    public void update(int tick)

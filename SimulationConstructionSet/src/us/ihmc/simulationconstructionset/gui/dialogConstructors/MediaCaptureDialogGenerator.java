@@ -42,7 +42,6 @@ public class MediaCaptureDialogGenerator implements MediaCaptureDialogConstructo
 
    public void constructMediaCaptureDialog()
    {
-
       stopCommandExecutor.stop();
       new MovieSaveDialog(null, myGUI, standardGUIActions, activeCanvas3DHolder, exportMovieCommandExecutor, guiEnablerAndDisabler);    
 
