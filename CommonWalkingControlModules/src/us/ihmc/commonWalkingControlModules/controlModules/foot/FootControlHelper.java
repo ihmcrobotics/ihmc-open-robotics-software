@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -16,11 +17,13 @@ public class FootControlHelper
    private final MomentumBasedController momentumBasedController;
    private final TwistCalculator twistCalculator;
    private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
+   private final WalkingControllerParameters walkingControllerParameters;
 
-   public FootControlHelper(RobotSide robotSide, MomentumBasedController momentumBasedController, YoVariableRegistry registry)
+   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
       this.momentumBasedController = momentumBasedController;
+      this.walkingControllerParameters = walkingControllerParameters;
 
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       twistCalculator = momentumBasedController.getTwistCalculator();
@@ -56,5 +59,10 @@ public class FootControlHelper
    public RigidBodySpatialAccelerationControlModule getAccelerationControlModule()
    {
       return accelerationControlModule;
+   }
+
+   public WalkingControllerParameters getWalkingControllerParameters()
+   {
+      return walkingControllerParameters;
    }
 }

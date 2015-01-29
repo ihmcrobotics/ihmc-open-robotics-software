@@ -72,7 +72,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
-         YoVariableRegistry registry, WalkingControllerParameters walkingControllerParameters)
+         YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, gains, registry);
@@ -105,6 +105,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       if (!USE_NEW_CONTINUOUS_TRAJECTORY)
       {
+         WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
          swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
                initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
                registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);

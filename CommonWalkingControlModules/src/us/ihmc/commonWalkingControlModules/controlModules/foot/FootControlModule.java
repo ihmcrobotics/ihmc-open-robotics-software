@@ -99,7 +99,7 @@ public class FootControlModule
       String namePrefix = foot.getName();
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new FootControlHelper(robotSide, momentumBasedController, registry);
+      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       double controlDT = momentumBasedController.getControlDT();
@@ -145,16 +145,16 @@ public class FootControlModule
       touchdownVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, walkingControllerParameters, touchdownVelocityProvider,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, jacobianId, nullspaceMultiplier,
+            jacobianDeterminantInRange, doSingularityEscape, registry);
       states.add(touchdownOnToesState);
 
-      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, walkingControllerParameters, touchdownVelocityProvider,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, jacobianId,
+            nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
       states.add(touchdownOnHeelState);
 
-      onToesState = new OnToesState(footControlHelper, walkingControllerParameters, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, toeOffFootControlGains, registry);
+      onToesState = new OnToesState(footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            toeOffFootControlGains, registry);
       states.add(onToesState);
 
       FullyConstrainedState supportState = new FullyConstrainedState(footControlHelper, requestHoldPosition, requestedState, jacobianId, nullspaceMultiplier,
@@ -177,8 +177,7 @@ public class FootControlModule
       else
       {
          SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, jacobianId, nullspaceMultiplier,
-               jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry,
-               walkingControllerParameters);
+               jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry);
          states.add(swingState);
          this.swingState = swingState;
       }
