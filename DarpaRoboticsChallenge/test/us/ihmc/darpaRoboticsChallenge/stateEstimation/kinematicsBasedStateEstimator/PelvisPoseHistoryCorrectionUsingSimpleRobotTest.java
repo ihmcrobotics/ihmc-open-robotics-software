@@ -535,7 +535,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
          throw e;
       }
    }

@@ -45,6 +45,7 @@ public class MidiSliderBoard implements ExitActionListener
    private int preferdDeviceNumber = -1;
 
    private static final boolean DEBUG = false;
+   private static final boolean DEBUG_CLOSE_AND_DISPOSE = false;
 
    private MidiDevice inDevice = null;
    private Receiver midiOut = null;
@@ -175,7 +176,7 @@ public class MidiSliderBoard implements ExitActionListener
 
    public void closeAndDispose()
    {
-      System.out.println("Closing And Disposing virtualSliderBoard");
+      if (DEBUG_CLOSE_AND_DISPOSE) System.out.println("Closing And Disposing virtualSliderBoard");
       if (virtualSliderBoard != null)
          virtualSliderBoard.closeAndDispose();
       if (inDevice != null)

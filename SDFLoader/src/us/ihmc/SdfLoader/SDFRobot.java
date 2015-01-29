@@ -65,6 +65,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
+   private static final boolean DEBUG = false;
 
    private final List<String> resourceDirectories;
 
@@ -205,7 +206,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
-      System.out.println("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
+      printIfDebug("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
 
    }
 
@@ -810,6 +811,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          this.setPositionInWorld( position );
          this.setOrientation(rotation);
       }
+   }
+   
+   private void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);
    }
 
 }
