@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.movies;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +9,10 @@ import java.util.Vector;
 import org.openh264.EUsageType;
 
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.camera.CameraController;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
+import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.simulationconstructionset.TimeHolder;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ExportMovieCommandExecutor;
@@ -35,10 +39,6 @@ public class ExportMovie implements ExportMovieCommandExecutor
 
    private ActiveCanvas3DHolder captureDeviceHolder;
 
-   private double frameRate = 1.0;
-
-   private double playBackRate = 1.0;
-
    public ExportMovie(TimeHolder timeHolder, StandardSimulationGUI standardSimulationGUI, DataBufferCommandsExecutor dataBufferCommandsExecutor,
          RunCommandsExecutor runCommandsExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler, ActiveCanvas3DHolder activeCanvas3DHolder,
          SimulationSynchronizer simulationSynchronizer)
@@ -53,17 +53,39 @@ public class ExportMovie implements ExportMovieCommandExecutor
       this.captureDeviceHolder = activeCanvas3DHolder;
    }
 
-   public void createMovie(File selected)
+   public void createMovie(File selectedFile)
    {
-      this.createMovie(selected, false);
+      Dimension dimension = new Dimension(1280, 720); // Default to 720p
+//      Dimension dimension = new Dimension(1920, 1080); // Default to 1080p
+
+      Boolean isSequanceSelected = false;
+      double playBackRate = 1.0;
+      double frameRate = 30.0;
+      
+      CameraController cameraController = standardSimulationGUI.getActiveView().getCameraController();
+
+      this.createMovie(cameraController, selectedFile, dimension, isSequanceSelected, playBackRate, frameRate);
+   }
+   
+   public void createMovie(CameraController cameraController, File selectedFile, Dimension dimension, Boolean isSequanceSelected, double playBackRate, double frameRate)
+   { 
+      Graphics3DAdapter graphics3dAdapter = standardSimulationGUI.getGraphics3dAdapter();
+      
+      ViewportAdapter adapter = graphics3dAdapter.createNewViewport(null, false, true);
+      
+      adapter.setupOffscreenView((int) dimension.getWidth(), (int) dimension.getHeight());
+      
+      adapter.setCameraController(cameraController);
+
+      CaptureDevice captureDevice = adapter.getCaptureDevice();
+      this.createMovie(captureDevice, selectedFile, false, playBackRate, frameRate);
+
+      graphics3dAdapter.closeViewport(adapter);
    }
 
    public void createMovie(CaptureDevice captureDevice, File selected, Boolean isSequenceSelected, double playBackRate, double frameRate)
    {
       printIfDebug("Creating Movie. File = " + selected);
-
-      this.frameRate = frameRate;
-      this.playBackRate = playBackRate;
 
       Vector<BufferedImage> imageVector = new Vector<BufferedImage>();
       int currentTick = 1;
@@ -134,7 +156,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
       }
       else
       {
-         moviePlaybackAsBufferedImage(selectedFile.getAbsolutePath(), captureDevice);
+         moviePlaybackAsBufferedImage(selectedFile.getAbsolutePath(), captureDevice, playBackRate, frameRate);
 
          //         buffer = canvas3D.getBufferedImage();
       }
@@ -150,12 +172,7 @@ public class ExportMovie implements ExportMovieCommandExecutor
          System.out.println(message);
    }
 
-   public void createMovie(File selected, Boolean isSequanceSelected)
-   {
-      createMovie(captureDeviceHolder.getActiveCaptureDevice(), selected, isSequanceSelected, 1.0, 30);
-   }
-
-   public void moviePlaybackAsBufferedImage(String file, CaptureDevice captureDevice)
+   public void moviePlaybackAsBufferedImage(String file, CaptureDevice captureDevice, double playBackRate, double frameRate)
    {
 
       // *****************************
@@ -172,17 +189,17 @@ public class ExportMovie implements ExportMovieCommandExecutor
       {
       }
 
-      BufferedImage tmp = captureDevice.exportSnapshotAsBufferedImage();
+      BufferedImage bufferedImage = captureDevice.exportSnapshotAsBufferedImage();
 
-      int bitrate = tmp.getWidth() * tmp.getHeight() * 5; // Heuristic bitrate
+      int bitrate = bufferedImage.getWidth() * bufferedImage.getHeight() * 5; // Heuristic bitrate
       
       MP4H264MovieBuilder movieBuilder = null;
       try
       {
-         movieBuilder = new MP4H264MovieBuilder(new File(file), tmp.getWidth(), tmp.getHeight(), (int) frameRate, bitrate,
+         movieBuilder = new MP4H264MovieBuilder(new File(file), bufferedImage.getWidth(), bufferedImage.getHeight(), (int) frameRate, bitrate,
                EUsageType.CAMERA_VIDEO_REAL_TIME);
    
-         movieBuilder.encodeFrame(tmp);
+         movieBuilder.encodeFrame(bufferedImage);
    
          dataBufferCommandsExecutor.gotoInPoint();
          boolean reachedEndPoint = false; // This keeps track of what the previous index was to stop the playback when it starts to loop back.
