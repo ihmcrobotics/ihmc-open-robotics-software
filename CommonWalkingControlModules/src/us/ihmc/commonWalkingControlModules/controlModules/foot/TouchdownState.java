@@ -8,10 +8,8 @@ import javax.vecmath.Vector3d;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -20,14 +18,12 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
@@ -59,15 +55,11 @@ public class TouchdownState extends AbstractFootControlState
 
    private final VectorProvider touchdownVelocityProvider;
 
-   public TouchdownState(ConstraintType stateEnum, WalkingControllerParameters walkingControllerParameters, VectorProvider touchdownVelocityProvider,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
-         ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, RobotSide robotSide,
-         YoVariableRegistry registry)
+   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, WalkingControllerParameters walkingControllerParameters,
+         VectorProvider touchdownVelocityProvider, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+         BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
    {
-      super(stateEnum, accelerationControlModule, momentumBasedController,
-            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            robotSide, registry);
+      super(stateEnum, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
       this.walkingControllerParameters = walkingControllerParameters;
       this.touchdownVelocityProvider = touchdownVelocityProvider;

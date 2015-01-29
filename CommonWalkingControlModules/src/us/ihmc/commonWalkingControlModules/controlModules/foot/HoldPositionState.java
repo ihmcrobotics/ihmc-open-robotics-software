@@ -1,19 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class HoldPositionState extends AbstractFootControlState
 {
@@ -30,13 +26,12 @@ public class HoldPositionState extends AbstractFootControlState
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   public HoldPositionState(RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
-         ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, PartialFootholdControlModule partialFootholdControlModule,
-         FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry)
+   public HoldPositionState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState,
+         int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         PartialFootholdControlModule partialFootholdControlModule, FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains,
+         YoVariableRegistry registry)
    {
-      super(ConstraintType.HOLD_POSITION, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
+      super(ConstraintType.HOLD_POSITION, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;

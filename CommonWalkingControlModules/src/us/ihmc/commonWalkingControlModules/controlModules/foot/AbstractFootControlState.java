@@ -33,6 +33,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final YoVariableRegistry registry;
 
+   protected final FootControlHelper footControlHelper;
+
    // magic numbers:
    protected static final double minJacobianDeterminant = 0.035;
    protected static final double EPSILON_POINT_ON_EDGE = 1e-2;
@@ -64,24 +66,24 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected FrameLineSegment2d edgeToRotateAbout;
    protected final RobotSide robotSide;
 
-   public AbstractFootControlState(ConstraintType stateEnum, RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, RobotSide robotSide, YoVariableRegistry registry)
+   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
    {
       super(stateEnum);
 
+      this.footControlHelper = footControlHelper;
       this.registry = registry;
-      this.contactableBody = contactableBody;
+      this.contactableBody = footControlHelper.getContactableFoot();
 
-      this.accelerationControlModule = accelerationControlModule;
-      this.momentumBasedController = momentumBasedController;
+      this.accelerationControlModule = footControlHelper.getAccelerationControlModule();
+      this.momentumBasedController = footControlHelper.getMomentumBasedController();
       this.jacobianId = jacobianId;
 
       this.nullspaceMultiplier = nullspaceMultiplier;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.doSingularityEscape = doSingularityEscape;
 
-      this.robotSide = robotSide;
+      this.robotSide = footControlHelper.getRobotSide();
 
       edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getSoleFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
