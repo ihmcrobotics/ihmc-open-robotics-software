@@ -46,7 +46,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = false || createMovie;
 
-   private final double POSITION_THRESHOLD = 0.05;
+   public static final double POSITION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
