@@ -29,6 +29,7 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -57,11 +58,13 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -171,47 +174,83 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       Files.delete(file);
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
-   public void testComHeightScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testSingleComHeightScriptPacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
+
+      double trajectoryTime = 1.0;
+      double desiredFinalHeightOffset = createValidComHeightOffset(0.1);
+      ComHeightPacket comHeightPacket = new ComHeightPacket(desiredFinalHeightOffset, trajectoryTime);
+
+      recordScriptFile(comHeightPacket, fileName);
+      ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime);
+      assertTrue(scriptBehavior.isDone());
+
+      Point3d finalComPoint = new Point3d();
+      robot.computeCenterOfMass(finalComPoint);
+      assertProperComHeightOffsetFromGround(desiredFinalHeightOffset, finalComPoint);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       Point3d nominalComPosition = new Point3d();
       robot.computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
-      double desiredFinalHeightOffset = 0.8 * ComHeightPacket.MAX_COM_HEIGHT;
+      double trajectoryTime = 4.0;
+      double desiredIntermediateHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
+      double desiredFinalHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
 
-      ComHeightPacket comHeightPacket0 = new ComHeightPacket(0.8 * ComHeightPacket.MIN_COM_HEIGHT, 1.0);
-      ComHeightPacket comHeightPacket1 = new ComHeightPacket(desiredFinalHeightOffset, 1.0);
+      ComHeightPacket comHeightPacket0 = new ComHeightPacket(desiredIntermediateHeightOffset, trajectoryTime);
+      ComHeightPacket comHeightPacket1 = new ComHeightPacket(desiredFinalHeightOffset, trajectoryTime);
 
-      CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
+      ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
+      scriptPackets.add(comHeightPacket0);
+      scriptPackets.add(comHeightPacket1);
+      recordScriptFile(scriptPackets, fileName);
+      ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      recordFrame = worldFrame;
-      boolean overwriteExistingFile = true;
-      commandRecorder.startRecording(fileName, worldFrame, overwriteExistingFile);
+      boolean addExtraSimTimeForSettling = true;
+      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+      Point3d intermediateComPoint = new Point3d();
+      robot.computeCenterOfMass(intermediateComPoint);
+      assertTrue(!scriptBehavior.isDone());
 
-      commandRecorder.recordObject(comHeightPacket0);
-      commandRecorder.recordObject(comHeightPacket1);
-
-      commandRecorder.stopRecording();
-
-      ScriptBehavior scriptBehavior = testScriptBehavior(4.0);
-      assertTrue(scriptBehavior.isDone());
-
+      addExtraSimTimeForSettling = true;
+      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
       Point3d finalComPoint = new Point3d();
       robot.computeCenterOfMass(finalComPoint);
+      assertTrue(scriptBehavior.isDone());
 
+      assertProperComHeightOffsetFromGround(desiredIntermediateHeightOffset, intermediateComPoint);
       assertProperComHeightOffsetFromGround(desiredFinalHeightOffset, finalComPoint);
 
-      robotDataReceiver.updateRobotModel();
+      BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testHandPosePacketScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
+      BambooTools.reportTestStartedMessage();
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -229,29 +268,56 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       desiredHandPose2.setOrientation(new double[] { 0.0, 0.0, 0.6 });
       HandPosePacket handPosePacket2 = createHandPosePacket(desiredHandPose2, robotSide, trajectoryTime);
 
-      CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
+      ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
+      scriptPackets.add(handPosePacket1);
+      scriptPackets.add(handPosePacket2);
 
-      recordFrame = worldFrame;
-      boolean overwriteExistingFile = true;
-      commandRecorder.startRecording(fileName, worldFrame, overwriteExistingFile);
+      recordScriptFile(scriptPackets, fileName);
 
-      commandRecorder.recordObject(handPosePacket1);
-      commandRecorder.recordObject(handPosePacket2);
-
-      commandRecorder.stopRecording();
-
-      ScriptBehavior scriptBehavior = testScriptBehavior(2.0 * trajectoryTime);
+      ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime * scriptPackets.size());
       assertTrue(scriptBehavior.isDone());
 
       FramePose finalHandPose = getCurrentHandPose(fullRobotModel, robotSide);
       assertPosesAreWithinThresholds(desiredHandPose2, finalHandPose);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   private double createValidComHeightOffset(double relativeOffsetBetweenZeroAndOne)
+   {
+      double alpha = MathTools.clipToMinMax(relativeOffsetBetweenZeroAndOne, 0.0, 1.0);
+      double ret = (ComHeightPacket.MIN_COM_HEIGHT + (ComHeightPacket.MAX_COM_HEIGHT - ComHeightPacket.MIN_COM_HEIGHT) * alpha);
+
+      return ret;
+   }
+
+   private void recordScriptFile(Packet<?> scriptPacket, String fileName)
+   {
+      ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
+      scriptPackets.add(scriptPacket);
+
+      recordScriptFile(scriptPackets, fileName);
+   }
+
+   private void recordScriptFile(ArrayList<Packet<?>> scriptPackets, String fileName)
+   {
+      CommandRecorder commandRecorder = new CommandRecorder(timestampProvider);
+      recordFrame = worldFrame;
+      boolean overwriteExistingFile = true;
+      commandRecorder.startRecording(fileName, worldFrame, overwriteExistingFile);
+
+      for (Packet<?> scriptPacket : scriptPackets)
+      {
+         commandRecorder.recordObject(scriptPacket);
+      }
+      commandRecorder.stopRecording();
    }
 
    private FramePose getCurrentHandPose(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
       robotDataReceiver.updateRobotModel();
       fullRobotModel.updateFrames();
-      
+
       ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSide);
       FramePose ret = new FramePose();
       ret.setToZero(handFrame);
@@ -273,16 +339,24 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private ScriptBehavior testScriptBehavior(double trajectoryTime) throws SimulationExceededMaximumTimeException, FileNotFoundException
+   private ScriptBehavior setupNewScriptBehavior(File filePath) throws FileNotFoundException
    {
       final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
       communicationBridge.attachGlobalListenerToController(scriptBehavior.getControllerGlobalPacketConsumer());
 
-      InputStream inputStream = new FileInputStream(new File(file.getAbsolutePath()));
+      InputStream inputStream = new FileInputStream(new File(filePath.getAbsolutePath()));
       RigidBodyTransform scriptTransformToWorld = recordFrame.getTransformToDesiredFrame(worldFrame);
 
       scriptBehavior.initialize();
       scriptBehavior.importChildInputPackets(inputStream.toString(), inputStream, scriptTransformToWorld);
+
+      return scriptBehavior;
+   }
+
+   private ScriptBehavior setupNewScriptBehaviorAndTestIt(File filePath, double trajectoryTime) throws SimulationExceededMaximumTimeException,
+         FileNotFoundException
+   {
+      ScriptBehavior scriptBehavior = setupNewScriptBehavior(filePath);
 
       boolean success = executeBehavior(scriptBehavior, trajectoryTime);
       assertTrue(success);
@@ -292,10 +366,38 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
-      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
+      boolean addExtraSimTimeForSettling = true;
+
+      boolean success = executeBehavior(behavior, trajectoryTime, addExtraSimTimeForSettling);
+
+      return success;
+   }
+
+   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime, boolean addExtraSimTimeForSettling)
+         throws SimulationExceededMaximumTimeException
+   {
+      final double simulationRunTime;
+
+      if (addExtraSimTimeForSettling)
+      {
+         simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
+      }
+      else
+      {
+         simulationRunTime = trajectoryTime;
+      }
 
       SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
+      Thread behaviorThread = createBehaviorThread(behavior, simulationRunTime);
+      behaviorThread.start();
+      boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
 
+      return ret;
+   }
+
+   private Thread createBehaviorThread(final BehaviorInterface behavior, final double simulationRunTime)
+   {
       Thread behaviorThread = new Thread()
       {
          public void run()
@@ -318,19 +420,13 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
                   behavior.doControl();
 
+                  ThreadTools.sleep(1);
                   capturePointUpdatable.update(yoTime.getDoubleValue());
                }
             }
          }
       };
-
-      behaviorThread.start();
-
-      boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-
-      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-
-      return ret;
+      return behaviorThread;
    }
 
    private Quat4d createQuat4d(Vector3d axis, double rotationAngle)
@@ -453,7 +549,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          SysoutTool.println("actualHeightOffset: " + actualHeightOffset);
       }
 
-      assertEquals(desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);
+      assertEquals(desiredHeightOffset, actualHeightOffset, DRCComHeightBehaviorTest.POSITION_THRESHOLD);
    }
 
    private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
