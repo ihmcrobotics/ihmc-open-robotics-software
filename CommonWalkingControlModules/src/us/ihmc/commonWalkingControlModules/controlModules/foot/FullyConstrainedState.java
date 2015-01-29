@@ -25,8 +25,7 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    public FullyConstrainedState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState,
          int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         PartialFootholdControlModule partialFootholdControlModule, FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl,
-         YoSE3PIDGains gains, YoVariableRegistry registry)
+         FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
@@ -35,7 +34,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       this.doFancyOnToesControl = doFancyOnToesControl;
       this.requestedState = requestedState;
       this.gains = gains;
-      this.partialFootholdControlModule = partialFootholdControlModule;
+      this.partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
    }
 
    public void doTransitionIntoAction()

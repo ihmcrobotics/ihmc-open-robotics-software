@@ -23,7 +23,6 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -83,8 +82,6 @@ public class FootControlModule
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
-   private final PartialFootholdControlModule partialFootholdControlModule;
-
    private final FootControlHelper footControlHelper;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
@@ -101,10 +98,6 @@ public class FootControlModule
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
-      double controlDT = momentumBasedController.getControlDT();
-      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
-      
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getPelvis(), foot, foot.getBodyFixedFrame());
 
@@ -158,13 +151,12 @@ public class FootControlModule
       states.add(onToesState);
 
       FullyConstrainedState supportState = new FullyConstrainedState(footControlHelper, requestHoldPosition, requestedState, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, partialFootholdControlModule, fullyConstrainedNormalContactVector, doFancyOnToesControl,
-            supportFootControlGains, registry);
+            jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector, doFancyOnToesControl, supportFootControlGains,
+            registry);
       states.add(supportState);
 
       holdPositionState = new HoldPositionState(footControlHelper, requestHoldPosition, requestedState, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, partialFootholdControlModule, fullyConstrainedNormalContactVector, holdPositionFootControlGains,
-            registry);
+            jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector, holdPositionFootControlGains, registry);
       states.add(holdPositionState);
 
       if (USE_HEURISTIC_SWING_STATE)
@@ -315,7 +307,7 @@ public class FootControlModule
       stateMachine.checkTransitionConditions();
 
       if (!isInFlatSupportState())
-         partialFootholdControlModule.reset();
+         footControlHelper.getPartialFootholdControlModule().reset();
 
       stateMachine.doAction();
    }

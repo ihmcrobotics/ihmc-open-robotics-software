@@ -18,8 +18,10 @@ public class FootControlHelper
    private final TwistCalculator twistCalculator;
    private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final PartialFootholdControlModule partialFootholdControlModule;
 
-   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController, YoVariableRegistry registry)
+   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
+         YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
       this.momentumBasedController = momentumBasedController;
@@ -27,13 +29,16 @@ public class FootControlHelper
 
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       twistCalculator = momentumBasedController.getTwistCalculator();
-      
+
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
       ReferenceFrame bodyFrame = contactableFoot.getFrameAfterParentJoint();
       double controlDT = momentumBasedController.getControlDT();
 
       accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, bodyFrame, controlDT, registry);
+
+      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters,
+            registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
    }
 
    public RobotSide getRobotSide()
@@ -64,5 +69,10 @@ public class FootControlHelper
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   public PartialFootholdControlModule getPartialFootholdControlModule()
+   {
+      return partialFootholdControlModule;
    }
 }
