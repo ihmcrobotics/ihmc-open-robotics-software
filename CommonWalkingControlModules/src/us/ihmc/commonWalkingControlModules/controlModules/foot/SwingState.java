@@ -7,9 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGeneratorWithPushRecovery;
@@ -29,7 +27,6 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
@@ -37,7 +34,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.TwoViaPointTrajectoryGenerator;
@@ -73,14 +69,13 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final FrameVector initialAngularVelocity = new FrameVector();
    private boolean hasInitialAngularVelocityBeenProvided = false;
 
-   public SwingState(DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
-         ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         YoSE3PIDGains gains, RobotSide robotSide, YoVariableRegistry registry, WalkingControllerParameters walkingControllerParameters)
+   public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, int jacobianId,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
+         YoVariableRegistry registry, WalkingControllerParameters walkingControllerParameters)
    {
-      super(ConstraintType.SWING, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, gains, robotSide, registry);
+      super(ConstraintType.SWING, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            legSingularityAndKneeCollapseAvoidanceControlModule, gains, registry);
 
       this.swingTimeProvider = swingTimeProvider;
 

@@ -6,9 +6,7 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -18,7 +16,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -28,7 +25,6 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -37,7 +33,6 @@ import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvide
 
 public class HeuristicSwingState extends AbstractFootControlState implements SwingStateInterface
 {
-
    private final OneDoFJoint knee;
    private final GeometricJacobian gimpedJacobian;
    protected final YoSE3PIDGains gains;
@@ -66,13 +61,11 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    private final DoubleYoVariable estimatedFinalKneeAngle;
    private final double upperLegLength, lowerLegLength;
 
-   public HeuristicSwingState(DoubleProvider swingTimeProvider, RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, RobotSide robotSide,
-         YoVariableRegistry registry)
+   public HeuristicSwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.SWING, accelerationControlModule, momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
+      super(ConstraintType.SWING, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+
       this.gains = gains;
       this.swingTimeProvider = swingTimeProvider;
       List<InverseDynamicsJoint> joints = new ArrayList<>();

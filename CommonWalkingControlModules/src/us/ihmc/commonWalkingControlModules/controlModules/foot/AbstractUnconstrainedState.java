@@ -1,19 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -43,15 +39,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    
    protected final RigidBody pelvis;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains, RobotSide robotSide,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
          YoVariableRegistry registry)
    {
-      super(constraintType, accelerationControlModule, momentumBasedController,
-            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            robotSide, registry);
+      super(constraintType, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
       
       this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
       this.gains = gains;
