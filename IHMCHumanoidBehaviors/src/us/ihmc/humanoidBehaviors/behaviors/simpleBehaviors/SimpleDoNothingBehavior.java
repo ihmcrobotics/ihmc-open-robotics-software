@@ -19,29 +19,36 @@ public class SimpleDoNothingBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      isPaused.set(false);
+      isStopped.set(false);
    }
 
    @Override
    public void finalize()
    {
+      isPaused.set(false);
+      isStopped.set(false);
    }
 
    @Override
    public void stop()
    {
-
+      isStopped.set(true);
+      isPaused.set(false);
    }
 
    @Override
    public void pause()
    {
-
+      isPaused.set(true);
+      isStopped.set(false);
    }
 
    @Override
    public boolean isDone()
    {
-      return false;
+      boolean ret = !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
+      return ret;
    }
 
    @Override
@@ -53,22 +60,23 @@ public class SimpleDoNothingBehavior extends BehaviorInterface
    @Override
    public void resume()
    {
-      
+      isPaused.set(false);
    }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      
+
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      
+
    }
-   
-   public boolean hasInputBeenSet() {
-		   return false;
+
+   public boolean hasInputBeenSet()
+   {
+      return false;
    }
 }
