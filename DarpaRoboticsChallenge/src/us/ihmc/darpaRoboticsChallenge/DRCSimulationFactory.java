@@ -66,10 +66,14 @@ public class DRCSimulationFactory
 
    private ThreadDataSynchronizer threadDataSynchronizer;
 
+   private GlobalDataProducer globalDataProducer;
+   
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
+      this.globalDataProducer = globalDataProducer;
+      
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
       
@@ -274,9 +278,11 @@ public class DRCSimulationFactory
    public void dispose()
    {
       multiThreadedRobotController.stop();
+      if (globalDataProducer != null) globalDataProducer.stop();
       drcEstimatorThread = null;
       drcControllerThread = null;
       multiThreadedRobotController = null;
+      globalDataProducer = null;
    }
 
    public SDFRobot getRobot()
