@@ -187,7 +187,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       robot.computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
-      double trajectoryTime = 1.0;
+      double trajectoryTime = 2.0;
       double desiredFinalHeightOffset = createValidComHeightOffset(0.1);
       ComHeightPacket comHeightPacket = new ComHeightPacket(desiredFinalHeightOffset, trajectoryTime);
 
@@ -214,7 +214,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       robot.computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
-      double trajectoryTime = 4.0;
+      double trajectoryTime = 3.0; //FIXME: Test fails if trajectory time is too short
       double desiredIntermediateHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
       double desiredFinalHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
 
@@ -283,10 +283,10 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   private double createValidComHeightOffset(double relativeOffsetBetweenZeroAndOne)
+   private double createValidComHeightOffset(double relativeOffsetFromMinHeightBetweenZeroAndOne)
    {
-      double alpha = MathTools.clipToMinMax(relativeOffsetBetweenZeroAndOne, 0.0, 1.0);
-      double ret = (ComHeightPacket.MIN_COM_HEIGHT + (ComHeightPacket.MAX_COM_HEIGHT - ComHeightPacket.MIN_COM_HEIGHT) * alpha);
+      double alpha = MathTools.clipToMinMax(relativeOffsetFromMinHeightBetweenZeroAndOne, 0.0, 1.0);
+      double ret = (1-alpha) * ComHeightPacket.MIN_COM_HEIGHT + alpha * ComHeightPacket.MAX_COM_HEIGHT;
 
       return ret;
    }
