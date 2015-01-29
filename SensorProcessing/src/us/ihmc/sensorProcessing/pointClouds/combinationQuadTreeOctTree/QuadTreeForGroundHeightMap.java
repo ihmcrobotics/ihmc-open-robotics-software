@@ -32,6 +32,15 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    {
       if (readerAndWriter != null) readerAndWriter.writePoint(x, y, z);
       
+      // Set the default height to the first point you see. 
+      // TODO: Should probably change this later to allow the user to select a point somewhere and 
+      // Set that to be the default height...
+      if (super.isEmpty())
+      {
+         super.setDefaultHeightWhenNoPoints(z);
+      }
+      
+      
       QuadTreeForGroundPutResult result = put(x, y, z);
       return result.treeChanged;
    }
@@ -39,10 +48,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    @Override
    public boolean addToQuadtree(double x, double y, double z)
    {
-      if (readerAndWriter != null) readerAndWriter.writePoint(x, y, z);
-
-      QuadTreeForGroundPutResult result = this.put(x, y, z);
-      return result.treeChanged;
+      return addPoint(x, y, z);
    }
 
    @Override
@@ -141,16 +147,23 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       // TODO Auto-generated method stub
    }
 
+   ArrayList<HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData>> hyperCubeTreeListeners = new ArrayList<HyperCubeTreeListener<GroundAirDescriptor,GroundOnlyQuadTreeData>>();
+   
    @Override
    public void clearTree()
    {
+      for (HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> listener : this.hyperCubeTreeListeners)
+      {
+         listener.treeCleared();
+      }
+      
       this.clear();
    }
 
    @Override
-   public void addListener(HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> jmeGroundONlyQuadTreeVisualizer)
+   public void addListener(HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> listener)
    {
-      // Ignore for this type.
+      hyperCubeTreeListeners.add(listener);
    }
 
    @Override
