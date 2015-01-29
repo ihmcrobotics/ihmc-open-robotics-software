@@ -32,7 +32,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
    static private WholeBodyIkSolver wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
 
    static private SimulationConstructionSet scs;
-   static private boolean VISUALIZE_GUI = true;
+   static private boolean VISUALIZE_GUI = false;
    static FullRobotModelVisualizer modelVisualizer;
    private ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
    private ArrayList<Matrix4d> LeftHandToWorldArray = new ArrayList<Matrix4d>();
