@@ -2145,7 +2145,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
             catch (UnreasonableAccelerationException ex)
             {
-               System.err.println("Simulation Stopped due to unreasonable acceleration.");
+               System.err.println("\nSimulation Stopped due to unreasonable acceleration.");
                System.err.println("   Simulation either went unstable or is too stiff.");
                System.err.println("   Try reducing gains, ground stiffness and damping, or DT");
 
@@ -2154,10 +2154,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
                for (Joint joint : unreasonableAccelerationJoints)
                {
-                  System.err.println(joint.getName());
+                  System.err.println("     " + joint.getName());
                }
 
-               ex.printStackTrace();
+//               ex.printStackTrace();
 
                stop();
 
