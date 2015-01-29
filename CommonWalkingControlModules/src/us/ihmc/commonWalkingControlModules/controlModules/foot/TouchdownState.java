@@ -28,7 +28,6 @@ import us.ihmc.yoUtilities.math.trajectories.ConstantVelocityTrajectoryGenerator
 import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-
 public class TouchdownState extends AbstractFootControlState
 {
    private static final int NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT = 2;
@@ -55,13 +54,12 @@ public class TouchdownState extends AbstractFootControlState
 
    private final VectorProvider touchdownVelocityProvider;
 
-   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, WalkingControllerParameters walkingControllerParameters,
-         VectorProvider touchdownVelocityProvider, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
+   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, int jacobianId,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
    {
       super(stateEnum, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       this.touchdownVelocityProvider = touchdownVelocityProvider;
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
 

@@ -9,7 +9,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.utilities.math.MathTools;
@@ -81,9 +80,8 @@ public class OnToesState extends AbstractFootControlState
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
 
-   public OnToesState(FootControlHelper footControlHelper, WalkingControllerParameters walkingControllerParameters, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains,
-         YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
@@ -91,7 +89,7 @@ public class OnToesState extends AbstractFootControlState
 
       String namePrefix = contactableBody.getName();
       maximumToeOffAngleProvider = new YoVariableDoubleProvider(namePrefix + "MaximumToeOffAngle", registry);
-      maximumToeOffAngleProvider.set(walkingControllerParameters.getMaximumToeOffAngle());
+      maximumToeOffAngleProvider.set(footControlHelper.getWalkingControllerParameters().getMaximumToeOffAngle());
 
       //      if (edgeContactPoints.size() != NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT)
       //         throw new RuntimeException("Number of contacts not handled for OnEdgeState: " + edgeContactPoints.size());
