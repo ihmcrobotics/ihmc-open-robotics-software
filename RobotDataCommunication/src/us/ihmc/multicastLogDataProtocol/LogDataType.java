@@ -3,7 +3,8 @@ package us.ihmc.multicastLogDataProtocol;
 public enum LogDataType
 {
    DATA(0x41),
-   HANDSHAKE(0x12);
+   HANDSHAKE(0x12), 
+   VIDEO(0x25);
    
    
    private byte header;

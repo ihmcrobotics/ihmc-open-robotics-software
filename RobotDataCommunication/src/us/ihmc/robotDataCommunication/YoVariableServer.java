@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -28,7 +29,7 @@ public class YoVariableServer implements RobotVisualizer
    
    private final double dt;
    private final Class<?> mainClazz;
-   private final InetAddress address;   
+   private final InetAddress bindAddress;   
    private final LogModelProvider logModelProvider;
    private final LogSettings logSettings;
    
@@ -56,11 +57,11 @@ public class YoVariableServer implements RobotVisualizer
    private YoVariableProducer producer;
    
    
-   public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, LogSettings logSettings, InetAddress address, double dt)
+   public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this.dt = dt;
       this.mainClazz = mainClazz;
-      this.address = address;
+      this.bindAddress = LogUtils.getMyIP(logSettings.getHost());
       this.logModelProvider = logModelProvider;
       this.logSettings = logSettings;
    }
@@ -75,7 +76,7 @@ public class YoVariableServer implements RobotVisualizer
       
       startControlServer();
       
-      InetSocketAddress controlAddress = new InetSocketAddress(address, controlServer.getPort());
+      InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
       sessionBroadcaster = new LogSessionBroadcaster(controlAddress, mainClazz, logSettings);
       producer = new YoVariableProducer(sessionBroadcaster, controlServer, mainBuffer,
             buffers.values());
