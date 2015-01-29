@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerRemainingTime</Variables>
+		<Variables>root.atlas.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerDesiredCapturePointPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerDesiredCapturePointPositionY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerIsDoubleSupport,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.SmoothICPComputer2D.icpPlannerIsDoubleSupport,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerTimeInCurrentState</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,8 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes Tab Pane>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -49,14 +50,14 @@
 
 <Extra Panels>
 <Main Viewport>
-Plotter,
+
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-7.880068214788816</Camera X>
- <Camera Y>0.4427870792591076</Camera Y>
- <Camera Z>10.427034906134459</Camera Z>
+ <Camera X>-7.4147310787850955</Camera X>
+ <Camera Y>-0.9787737946409036</Camera Y>
+ <Camera Z>1.935486880776214</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -80,8 +81,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>1.8672651495738253</Fix X>
-<Fix Y>-0.18808631014663094</Fix Y>
-<Fix Z>0.8612737915276824</Fix Z>
+<Fix X>5.203263015332935</Fix X>
+<Fix Y>4.428935240535439</Fix Y>
+<Fix Z>0.5836177334344588</Fix Z>
 </Fix Position>
 </Canvas 1>
