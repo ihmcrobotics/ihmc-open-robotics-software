@@ -121,9 +121,9 @@ abstract public class WholeBodyIkSolver
       return (jointNamesToIndex.get(jointName) != null);
    }
 
-   public void setVerbose(boolean verbose)
+   public void setVerbosityLevel(int level)
    {
-      hierarchicalSolver.setVerbose(verbose);
+      hierarchicalSolver.setVerbosityLevel(level);
    }
 
    public RobotModel getUrdfRobotModel()
@@ -232,7 +232,7 @@ abstract public class WholeBodyIkSolver
       int NumberOfIterations = 40;
 
       hierarchicalSolver = new HierarchicalKinematicSolver(urdfModel, NumberOfIterations, EpsilonInRadiansForVerySmallAngles);
-      hierarchicalSolver.setVerbose(false);
+      hierarchicalSolver.setVerbosityLevel(0);
 
       q_init = new Vector64F(numOfJoints);
 
@@ -286,6 +286,12 @@ abstract public class WholeBodyIkSolver
       }
 
       taskJointsPose = new HierarchicalTask_JointsPose(fk);
+      
+      taskLegPose.setName( "left Leg Pose");
+      taskComPosition.setName( "COM Position");
+      taskEndEffectorPose.get(RIGHT).setName( "Right Hand Pose" );
+      taskEndEffectorPose.get(LEFT).setName( "Left Hand Pose" );
+      taskJointsPose.setName( "Whole body Posture" );
 
       // the order is important!! first to be added have higher priority
       hierarchicalSolver.addTask(taskLegPose);
@@ -648,10 +654,6 @@ abstract public class WholeBodyIkSolver
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
-      }
-      if (ret < 0)
-      {
-         System.out.println("failed\n");
       }
 
       if (ret != -2)
