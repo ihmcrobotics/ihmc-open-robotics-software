@@ -100,7 +100,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
       
-      wholeBodyIKSolver.setVerbose(false);
+      wholeBodyIKSolver.setVerbosityLevel(0);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(false);
    }
 
