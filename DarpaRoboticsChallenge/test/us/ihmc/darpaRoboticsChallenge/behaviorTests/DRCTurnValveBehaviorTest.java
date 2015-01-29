@@ -58,7 +58,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    private final double valveX = 2.0 * TurnValveBehavior.howFarToStandBackFromValve;
    private final double valveY = TurnValveBehavior.howFarToStandToTheRightOfValve;
    private final double valveZ = 1.0;
-   private final double valveYaw_degrees = 45.0 * 0.0;
+   private final double valveYaw_degrees = 0.0 * 45.0;
 
    private final DRCValveEnvironment testEnvironment = new DRCValveEnvironment(valveX, valveY, valveZ, valveYaw_degrees);
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
@@ -159,7 +159,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
             yoTippingDetected, getRobotModel().getWalkingControllerParameters());
       communicationBridge.attachGlobalListenerToController(turnValveBehavior.getControllerGlobalPacketConsumer());
 
-      ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(new String("testTurnValveNoScript"), valveTransformToWorld);
+//      String scriptName = "testTurnValveNoScript";
+      String scriptName = null;
+
+      ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(scriptName, valveTransformToWorld);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
 
