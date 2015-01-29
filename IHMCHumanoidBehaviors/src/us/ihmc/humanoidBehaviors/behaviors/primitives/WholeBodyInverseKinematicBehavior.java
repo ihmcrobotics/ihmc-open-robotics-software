@@ -13,13 +13,12 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 {
-   private static final double trajectoryDuration = 2.0;
-   
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet" + behaviorName, registry);
 
@@ -42,59 +41,65 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();
 
       this.yoTime = yoTime;
-      
+
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
       startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
-      
+
       this.actualFullRobotModel = actualFullRobotModel;
       this.desiredFullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
    }
 
-   public void setInputs(RobotSide robotSide, FramePose endEffectorPose) throws Exception
+   public void setInputs(RobotSide robotSide, FramePose endEffectorPose, double trajectoryDuration)
    {
+      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P3R);
+      trajectoryTime.set(trajectoryDuration);
       wholeBodyIKSolver.setHandTarget(actualFullRobotModel, robotSide, endEffectorPose);
       
-      wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
       hasInputBeenSet.set(true);
    }
 
-   
    @Override
    public void doControl()
    {
-      //TODO check all the status
+      //TODO check all the status 
       if (!packetHasBeenSent.getBooleanValue())
       {
-         sendSolutionToController(trajectoryDuration);
-         packetHasBeenSent.set(true);
+         try
+         {
+            wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+            sendSolutionToController(trajectoryTime.getDoubleValue());
+            packetHasBeenSent.set(true);
+         }
+         catch (Exception e)
+         {
+            System.out.println(e); // TODO: handle exception
+         }
       }
    }
 
    private void sendSolutionToController(double trajectoryDuration)
    {
       packetsToSend.clear();
+      startTime.set(yoTime.getDoubleValue());
       wholeBodyNetworkModule.createPackets(desiredFullRobotModel, trajectoryDuration, packetsToSend);
       for (int i = 0; i < packetsToSend.size(); i++)
       {
          sendPacketToController(packetsToSend.get(i));
       }
    }
-   
+
    @Override
    public void initialize()
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
-
-      wholeBodyIKSolver.setPreferedJointPose("r_leg_kny", 1.5);//- 0.81
-
+      
       wholeBodyIKSolver.setVerbose(false);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(false);
-
    }
 
    @Override
@@ -105,7 +110,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
       isPaused.set(false);
       isStopped.set(false);
-      
+
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
    }
