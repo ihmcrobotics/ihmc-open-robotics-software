@@ -30,6 +30,7 @@ import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -309,4 +310,16 @@ public class BonoRobotModel implements DRCRobotModel
       return new StepprOutputProcessor(controllerFullRobotModel);
    }
 
+   @Override
+   public LogSettings getLogSettings()
+   {
+      if(runningOnRealRobot)
+      {
+         return LogSettings.STEPPR_IHMC;
+      }
+      else
+      {
+         return LogSettings.SIMULATION;
+      }
+   }
 }
