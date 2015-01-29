@@ -48,7 +48,6 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.networking.CommandRecorder;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -94,7 +93,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
    private static final boolean showGUI = false || createMovie;
 
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
+   private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
@@ -123,7 +122,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private BooleanYoVariable yoDoubleSupport;
 
    private double nominalComHeightAboveGround;
-   
+
    private ArmJointName[] armJointNames;
    private int numberOfArmJoints;
    private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
@@ -166,7 +165,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
       capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(), robot.getRobotsYoVariableRegistry());
       yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
-      
+
       armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
 
@@ -212,9 +211,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime);
       assertTrue(scriptBehavior.isDone());
 
-      Point3d finalComPoint = new Point3d();
-      robot.computeCenterOfMass(finalComPoint);
-      assertProperComHeightOffsetFromGround(desiredFinalHeightOffset, finalComPoint);
+      assertProperHeightOffset(desiredFinalHeightOffset);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -227,6 +224,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
+      
       Point3d nominalComPosition = new Point3d();
       robot.computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
@@ -246,18 +244,96 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       boolean addExtraSimTimeForSettling = true;
       executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
-      Point3d intermediateComPoint = new Point3d();
-      robot.computeCenterOfMass(intermediateComPoint);
+      assertProperHeightOffset(desiredIntermediateHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
       addExtraSimTimeForSettling = true;
       executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
-      Point3d finalComPoint = new Point3d();
-      robot.computeCenterOfMass(finalComPoint);
+      assertProperHeightOffset(desiredFinalHeightOffset);
       assertTrue(scriptBehavior.isDone());
 
-      assertProperComHeightOffsetFromGround(desiredIntermediateHeightOffset, intermediateComPoint);
-      assertProperComHeightOffsetFromGround(desiredFinalHeightOffset, finalComPoint);
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testStopScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
+
+      double trajectoryTime = 4.0;
+      double desiredIntermediateHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
+      double desiredFinalHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
+
+      ComHeightPacket comHeightPacket0 = new ComHeightPacket(desiredIntermediateHeightOffset, trajectoryTime);
+      ComHeightPacket comHeightPacket1 = new ComHeightPacket(desiredFinalHeightOffset, trajectoryTime);
+
+      ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
+      scriptPackets.add(comHeightPacket0);
+      scriptPackets.add(comHeightPacket1);
+      recordScriptFile(scriptPackets, fileName);
+      ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
+
+      boolean addExtraSimTimeForSettling = false;
+      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+
+      scriptBehavior.stop();
+      assertProperHeightOffset(desiredIntermediateHeightOffset);
+
+      executeBehavior(scriptBehavior, trajectoryTime);
+      assertProperHeightOffset(desiredIntermediateHeightOffset);
+      assertTrue(!scriptBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
+
+      double trajectoryTime = 2.0;
+      double desiredIntermediateHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
+      double desiredFinalHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
+
+      ComHeightPacket comHeightPacket0 = new ComHeightPacket(desiredIntermediateHeightOffset, trajectoryTime);
+      ComHeightPacket comHeightPacket1 = new ComHeightPacket(desiredFinalHeightOffset, trajectoryTime);
+
+      ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
+      scriptPackets.add(comHeightPacket0);
+      scriptPackets.add(comHeightPacket1);
+      recordScriptFile(scriptPackets, fileName);
+      ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
+
+      boolean addExtraSimTimeForSettling = false;
+      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+
+      scriptBehavior.pause();
+      assertProperHeightOffset(desiredIntermediateHeightOffset);
+
+      executeBehavior(scriptBehavior, trajectoryTime);
+      assertProperHeightOffset(desiredIntermediateHeightOffset);
+      assertTrue( !scriptBehavior.isDone() );
+
+      scriptBehavior.resume();
+      executeBehavior(scriptBehavior, trajectoryTime);
+      assertProperHeightOffset(desiredFinalHeightOffset);
+      assertTrue(scriptBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -274,9 +350,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
 
-      double [] desiredArmPose = createRandomArmPose(robotSide);
+      double[] desiredArmPose = createRandomArmPose(robotSide);
       HandPosePacket handPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredArmPose);
-      
+
       ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
       scriptPackets.add(handPosePacket);
 
@@ -284,13 +360,12 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime);
       assertTrue(scriptBehavior.isDone());
 
-      double [] finalArmPose = getCurrentArmPose(robotSide);
+      double[] finalArmPose = getCurrentArmPose(robotSide);
       assertRobotAchievedDesiredArmPose(desiredArmPose, finalArmPose, robotSide);
 
       BambooTools.reportTestFinishedMessage();
    }
-   
-   
+
    @AverageDuration
    @Test(timeout = 300000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
@@ -301,11 +376,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
-      double trajectoryTime1 = 3.0;  //FIXME: Test fails if trajectory time is too short
+      double trajectoryTime1 = 3.0; //FIXME: Test fails if trajectory time is too short
       double trajectoryTime2 = 2.0;
-      
-      double [] desiredArmPose1 = createRandomArmPose(robotSide);
-      double [] desiredArmPose2 = createRandomArmPose(robotSide);
+
+      double[] desiredArmPose1 = createRandomArmPose(robotSide);
+      double[] desiredArmPose2 = createRandomArmPose(robotSide);
 
       HandPosePacket handPosePacket1 = new HandPosePacket(robotSide, trajectoryTime1, desiredArmPose1);
       HandPosePacket handPosePacket2 = new HandPosePacket(robotSide, trajectoryTime2, desiredArmPose2);
@@ -318,13 +393,13 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       boolean addExtraSimTimeForSettling = false;
       executeBehavior(scriptBehavior, trajectoryTime1, addExtraSimTimeForSettling);
-      double [] armPoseAfterFirstHandPosePacket = getCurrentArmPose(robotSide);
+      double[] armPoseAfterFirstHandPosePacket = getCurrentArmPose(robotSide);
       assertRobotAchievedDesiredArmPose(desiredArmPose1, armPoseAfterFirstHandPosePacket, robotSide);
       assertTrue(!scriptBehavior.isDone());
 
       addExtraSimTimeForSettling = true;
       executeBehavior(scriptBehavior, trajectoryTime2, addExtraSimTimeForSettling);
-      double [] armPoseAfterSecondHandPosePacket = getCurrentArmPose(robotSide);
+      double[] armPoseAfterSecondHandPosePacket = getCurrentArmPose(robotSide);
       assertRobotAchievedDesiredArmPose(desiredArmPose2, armPoseAfterSecondHandPosePacket, robotSide);
       assertTrue(scriptBehavior.isDone());
 
@@ -334,7 +409,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private double createValidComHeightOffset(double relativeOffsetFromMinHeightBetweenZeroAndOne)
    {
       double alpha = MathTools.clipToMinMax(relativeOffsetFromMinHeightBetweenZeroAndOne, 0.0, 1.0);
-      double ret = (1-alpha) * ComHeightPacket.MIN_COM_HEIGHT + alpha * ComHeightPacket.MAX_COM_HEIGHT;
+      double ret = (1 - alpha) * ComHeightPacket.MIN_COM_HEIGHT + alpha * ComHeightPacket.MAX_COM_HEIGHT;
 
       return ret;
    }
@@ -386,7 +461,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return ret;
    }
-   
+
    private ScriptBehavior setupNewScriptBehavior(File filePath) throws FileNotFoundException
    {
       final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
@@ -586,7 +661,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return totalFingerJointQ;
    }
-   
+
    private double[] getCurrentArmPose(RobotSide robotSide)
    {
       double[] armPose = new double[numberOfArmJoints];
@@ -600,7 +675,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return armPose;
    }
-   
+
    private double[] createRandomArmPose(RobotSide robotSide)
    {
       double[] armPose = new double[numberOfArmJoints];
@@ -613,7 +688,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return armPose;
    }
-   
+
    private void assertRobotAchievedDesiredArmPose(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide)
    {
       for (int i = 0; i < numberOfArmJoints; i++)
@@ -647,6 +722,13 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       q = MathTools.clipToMinMax(desiredJointAngle, qMin, qMax);
       return q;
+   }
+
+   private void assertProperHeightOffset(double desiredIntermediateHeightOffset)
+   {
+      Point3d comPointAfterPause = new Point3d();
+      robot.computeCenterOfMass(comPointAfterPause);
+      assertProperComHeightOffsetFromGround(desiredIntermediateHeightOffset, comPointAfterPause);
    }
 
    private void assertProperComHeightOffsetFromGround(double desiredHeightOffset, Point3d finalComPoint)

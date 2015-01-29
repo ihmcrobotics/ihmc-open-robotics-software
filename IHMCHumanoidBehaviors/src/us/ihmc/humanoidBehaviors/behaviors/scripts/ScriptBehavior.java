@@ -59,7 +59,7 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class ScriptBehavior extends BehaviorInterface
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final BooleanYoVariable scriptImported = new BooleanYoVariable("scriptImported", registry);
    private final BooleanYoVariable scriptFinished = new BooleanYoVariable("scriptFinished", registry);
@@ -211,7 +211,7 @@ public class ScriptBehavior extends BehaviorInterface
          final BehaviorStateWrapper<PrimitiveBehaviorType> behaviorState)
    {
       BehaviorStateWrapper<PrimitiveBehaviorType> idleState = stateMachine.getState(PrimitiveBehaviorType.IDLE);
-      boolean waitUntilDone = false;
+      boolean waitUntilDone = true;
 
       StateMachineTools.addRequestedStateTransition(requestedState, waitUntilDone, idleState, behaviorState);
    }
