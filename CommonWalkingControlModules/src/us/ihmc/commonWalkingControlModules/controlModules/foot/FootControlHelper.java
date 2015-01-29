@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -10,6 +11,7 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class FootControlHelper
@@ -23,6 +25,8 @@ public class FootControlHelper
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final int jacobianId;
+   private final GeometricJacobian jacobian;
+   private final EnumYoVariable<ConstraintType> requestedState;
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
@@ -48,6 +52,9 @@ public class FootControlHelper
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody pelvis = fullRobotModel.getPelvis();
       jacobianId = momentumBasedController.getOrCreateGeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
+      jacobian = momentumBasedController.getJacobian(jacobianId);
+
+      requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
    }
 
    public RobotSide getRobotSide()
@@ -88,5 +95,25 @@ public class FootControlHelper
    public int getJacobianId()
    {
       return jacobianId;
+   }
+
+   public GeometricJacobian getJacobian()
+   {
+      return jacobian;
+   }
+
+   public void requestState(ConstraintType requestedState)
+   {
+      this.requestedState.set(requestedState);
+   }
+
+   public ConstraintType getRequestedState()
+   {
+      return requestedState.getEnumValue();
+   }
+
+   public void setRequestedStateAsProcessed()
+   {
+      requestedState.set(null);
    }
 }
