@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -20,6 +22,8 @@ public class FootControlHelper
    private final WalkingControllerParameters walkingControllerParameters;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
+   private final int jacobianId;
+
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
    {
@@ -32,13 +36,18 @@ public class FootControlHelper
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
-      ReferenceFrame bodyFrame = contactableFoot.getFrameAfterParentJoint();
+      ReferenceFrame frameAfterAnkle = contactableFoot.getFrameAfterParentJoint();
       double controlDT = momentumBasedController.getControlDT();
 
-      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, bodyFrame, controlDT, registry);
+      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, frameAfterAnkle, controlDT, registry);
 
       partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters,
             registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
+
+
+      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      jacobianId = momentumBasedController.getOrCreateGeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
    }
 
    public RobotSide getRobotSide()
@@ -74,5 +83,10 @@ public class FootControlHelper
    public PartialFootholdControlModule getPartialFootholdControlModule()
    {
       return partialFootholdControlModule;
+   }
+
+   public int getJacobianId()
+   {
+      return jacobianId;
    }
 }

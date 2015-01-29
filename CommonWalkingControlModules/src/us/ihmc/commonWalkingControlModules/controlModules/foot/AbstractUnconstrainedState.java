@@ -39,12 +39,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    
    protected final RigidBody pelvis;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
          YoVariableRegistry registry)
    {
-      super(constraintType, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(constraintType, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
       
       this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
       this.gains = gains;

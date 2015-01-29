@@ -66,8 +66,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected FrameLineSegment2d edgeToRotateAbout;
    protected final RobotSide robotSide;
 
-   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
+   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+         BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
    {
       super(stateEnum);
 
@@ -77,7 +77,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
       this.accelerationControlModule = footControlHelper.getAccelerationControlModule();
       this.momentumBasedController = footControlHelper.getMomentumBasedController();
-      this.jacobianId = jacobianId;
+      this.jacobianId = footControlHelper.getJacobianId();
 
       this.nullspaceMultiplier = nullspaceMultiplier;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;

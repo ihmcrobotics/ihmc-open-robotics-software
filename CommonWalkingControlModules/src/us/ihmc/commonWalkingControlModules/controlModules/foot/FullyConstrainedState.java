@@ -24,10 +24,10 @@ public class FullyConstrainedState extends AbstractFootControlState
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    public FullyConstrainedState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState,
-         int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, YoVariableRegistry registry)
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
+         BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.FULL, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.FULL, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
