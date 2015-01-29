@@ -1,28 +1,25 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
-
 
 public class FootStateTransitionAction implements StateTransitionAction
 {
-   EnumYoVariable<ConstraintType> requestedState;
+   private final FootControlHelper fooconControlHelper;
    private final BooleanYoVariable doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 
-   public FootStateTransitionAction(EnumYoVariable<ConstraintType> requestedState, BooleanYoVariable doSingularityEscape,
+   public FootStateTransitionAction(FootControlHelper fooconControlHelper, BooleanYoVariable doSingularityEscape,
          BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
    {
-      this.requestedState = requestedState;
+      this.fooconControlHelper = fooconControlHelper;
       this.doSingularityEscape = doSingularityEscape;
       this.waitSingularityEscapeBeforeTransitionToNextState = waitSingularityEscapeBeforeTransitionToNextState;
    }
 
    public void doTransitionAction()
    {
-      requestedState.set(null);
+      fooconControlHelper.setRequestedStateAsProcessed();
       doSingularityEscape.set(false);
       waitSingularityEscapeBeforeTransitionToNextState.set(false);
    }

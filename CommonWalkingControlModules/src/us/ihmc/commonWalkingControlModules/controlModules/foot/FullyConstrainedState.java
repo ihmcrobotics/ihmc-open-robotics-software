@@ -8,7 +8,6 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 
 public class FullyConstrainedState extends AbstractFootControlState
@@ -17,14 +16,12 @@ public class FullyConstrainedState extends AbstractFootControlState
    private final FrameVector fullyConstrainedNormalContactVector;
    private final BooleanYoVariable doFancyOnToesControl;
 
-   private final EnumYoVariable<ConstraintType> requestedState;
-
    private final YoSE3PIDGains gains;
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   public FullyConstrainedState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
+   public FullyConstrainedState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
          BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
@@ -32,7 +29,6 @@ public class FullyConstrainedState extends AbstractFootControlState
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
       this.doFancyOnToesControl = doFancyOnToesControl;
-      this.requestedState = requestedState;
       this.gains = gains;
       this.partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
    }
@@ -62,9 +58,9 @@ public class FullyConstrainedState extends AbstractFootControlState
       if (FootControlModule.USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
       {
          if (isCoPOnEdge && doFancyOnToesControl.getBooleanValue())
-            requestedState.set(ConstraintType.HOLD_POSITION);
+            footControlHelper.requestState(ConstraintType.HOLD_POSITION);
          else if (requestHoldPosition != null && requestHoldPosition.getBooleanValue())
-            requestedState.set(ConstraintType.HOLD_POSITION);
+            footControlHelper.requestState(ConstraintType.HOLD_POSITION);
       }
 
       if (gains == null)

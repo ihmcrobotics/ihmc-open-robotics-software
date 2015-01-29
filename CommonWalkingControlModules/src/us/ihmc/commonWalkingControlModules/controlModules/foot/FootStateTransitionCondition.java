@@ -8,9 +8,7 @@ import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-
 
 public class FootStateTransitionCondition implements StateTransitionCondition
 {
@@ -18,20 +16,20 @@ public class FootStateTransitionCondition implements StateTransitionCondition
 
    private final ConstraintType stateEnum;
    private final GeometricJacobian jacobian;
-   private final EnumYoVariable<ConstraintType> requestedState;
    private final BooleanYoVariable doSingularityEscape;
    private final NullspaceCalculator nullspaceCalculator;
    private final DenseMatrix64F jointVelocities;
    private final BooleanYoVariable jacobianDeterminantInRange;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
+   private final FootControlHelper footControlHelper;
 
-   public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo, GeometricJacobian jacobian, EnumYoVariable<ConstraintType> requestedState,
+   public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo, FootControlHelper footControlHelper,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
    {
       this.stateEnum = stateToTransitionTo.getStateEnum();
+      this.footControlHelper = footControlHelper;
 
-      this.jacobian = jacobian;
-      this.requestedState = requestedState;
+      this.jacobian = footControlHelper.getJacobian();
       this.doSingularityEscape = doSingularityEscape;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.waitSingularityEscapeBeforeTransitionToNextState = waitSingularityEscapeBeforeTransitionToNextState;
@@ -42,7 +40,7 @@ public class FootStateTransitionCondition implements StateTransitionCondition
 
    public boolean checkCondition()
    {
-      boolean transitionRequested = requestedState.getEnumValue() == stateEnum;
+      boolean transitionRequested = footControlHelper.getRequestedState() == stateEnum;
 
       if (!transitionRequested)
          return false;
