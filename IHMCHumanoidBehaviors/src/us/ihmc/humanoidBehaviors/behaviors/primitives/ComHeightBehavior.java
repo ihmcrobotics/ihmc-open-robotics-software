@@ -38,7 +38,7 @@ public class ComHeightBehavior extends BehaviorInterface
 
    public void kneelDown()
    {
-      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.15);
+      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.08);  // ComHeightPacket.MIN_COM_HEIGHT + 0.15
       setInput(packet);
    }
 
@@ -114,7 +114,6 @@ public class ComHeightBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      
       if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
          trajectoryTimeElapsed.set(false);
       else
