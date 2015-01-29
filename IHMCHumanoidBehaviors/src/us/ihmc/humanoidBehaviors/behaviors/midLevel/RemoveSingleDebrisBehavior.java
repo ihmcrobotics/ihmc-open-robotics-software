@@ -41,6 +41,8 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
    private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.65; //0.85
 
+   private static final Boolean useWholeBodyIK = true;
+
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
          WalkingControllerParameters walkingControllerParameters)
@@ -49,7 +51,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
 
-      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
+      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime, useWholeBodyIK);
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       walkCloseToObject = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, walkingControllerParameters);
 
