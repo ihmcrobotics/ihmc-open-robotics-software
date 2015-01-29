@@ -55,7 +55,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private final double POSITION_THRESHOLD = 0.007;
    private final double ORIENTATION_THRESHOLD = 0.007;
-   private final double JOINT_POSITION_THRESHOLD = 0.05;
+   public static final double JOINT_POSITION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 0.5;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();

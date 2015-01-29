@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
@@ -46,6 +48,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.networking.CommandRecorder;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -57,6 +60,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
@@ -64,6 +68,7 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -118,6 +123,10 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private BooleanYoVariable yoDoubleSupport;
 
    private double nominalComHeightAboveGround;
+   
+   private ArmJointName[] armJointNames;
+   private int numberOfArmJoints;
+   private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
 
    @Before
    public void setUp()
@@ -157,6 +166,14 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
       capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(), robot.getRobotsYoVariableRegistry());
       yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      
+      armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+      numberOfArmJoints = armJointNames.length;
+
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         armJointIndices.put(armJointNames[i], i);
+      }
    }
 
    @After
@@ -176,7 +193,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    @AverageDuration
    @Test(timeout = 300000)
-   public void testSingleComHeightScriptPacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testScriptWithSingleComHeightScriptPacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -204,7 +221,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    @AverageDuration
    @Test(timeout = 300000)
-   public void testTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testScriptWithTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -247,7 +264,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    @AverageDuration
    @Test(timeout = 300000)
-   public void testHandPosePacketScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -257,28 +274,59 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
 
-      FramePose initialHandPose = getCurrentHandPose(fullRobotModel, robotSide);
+      double [] desiredArmPose = createRandomArmPose(robotSide);
+      HandPosePacket handPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredArmPose);
+      
+      ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
+      scriptPackets.add(handPosePacket);
 
-      FramePose desiredHandPose1 = new FramePose(initialHandPose);
-      desiredHandPose1.setZ(desiredHandPose1.getZ() + 0.05);
-      HandPosePacket handPosePacket1 = createHandPosePacket(desiredHandPose1, robotSide, trajectoryTime);
+      recordScriptFile(scriptPackets, fileName);
+      ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime);
+      assertTrue(scriptBehavior.isDone());
 
-      FramePose desiredHandPose2 = new FramePose(initialHandPose);
-      desiredHandPose2.setZ(initialHandPose.getZ() + 0.2);
-      desiredHandPose2.setOrientation(new double[] { 0.0, 0.0, 0.6 });
-      HandPosePacket handPosePacket2 = createHandPosePacket(desiredHandPose2, robotSide, trajectoryTime);
+      double [] finalArmPose = getCurrentArmPose(robotSide);
+      assertRobotAchievedDesiredArmPose(desiredArmPose, finalArmPose, robotSide);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime1 = 3.0;  //FIXME: Test fails if trajectory time is too short
+      double trajectoryTime2 = 2.0;
+      
+      double [] desiredArmPose1 = createRandomArmPose(robotSide);
+      double [] desiredArmPose2 = createRandomArmPose(robotSide);
+
+      HandPosePacket handPosePacket1 = new HandPosePacket(robotSide, trajectoryTime1, desiredArmPose1);
+      HandPosePacket handPosePacket2 = new HandPosePacket(robotSide, trajectoryTime2, desiredArmPose2);
 
       ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
       scriptPackets.add(handPosePacket1);
       scriptPackets.add(handPosePacket2);
-
       recordScriptFile(scriptPackets, fileName);
+      ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime * scriptPackets.size());
+      boolean addExtraSimTimeForSettling = false;
+      executeBehavior(scriptBehavior, trajectoryTime1, addExtraSimTimeForSettling);
+      double [] armPoseAfterFirstHandPosePacket = getCurrentArmPose(robotSide);
+      assertRobotAchievedDesiredArmPose(desiredArmPose1, armPoseAfterFirstHandPosePacket, robotSide);
+      assertTrue(!scriptBehavior.isDone());
+
+      addExtraSimTimeForSettling = true;
+      executeBehavior(scriptBehavior, trajectoryTime2, addExtraSimTimeForSettling);
+      double [] armPoseAfterSecondHandPosePacket = getCurrentArmPose(robotSide);
+      assertRobotAchievedDesiredArmPose(desiredArmPose2, armPoseAfterSecondHandPosePacket, robotSide);
       assertTrue(scriptBehavior.isDone());
-
-      FramePose finalHandPose = getCurrentHandPose(fullRobotModel, robotSide);
-      assertPosesAreWithinThresholds(desiredHandPose2, finalHandPose);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -338,7 +386,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return ret;
    }
-
+   
    private ScriptBehavior setupNewScriptBehavior(File filePath) throws FileNotFoundException
    {
       final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
@@ -537,6 +585,68 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       }
 
       return totalFingerJointQ;
+   }
+   
+   private double[] getCurrentArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         ArmJointName jointName = armJointNames[jointNum];
+         double currentAngle = fullRobotModel.getArmJoint(robotSide, jointName).getQ();
+         armPose[jointNum] = currentAngle;
+      }
+
+      return armPose;
+   }
+   
+   private double[] createRandomArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         double qDesired = clipDesiredJointQToJointLimits(robotSide, armJointNames[jointNum], RandomTools.generateRandomDouble(new Random(), 1.5));
+         armPose[jointNum] = qDesired;
+      }
+
+      return armPose;
+   }
+   
+   private void assertRobotAchievedDesiredArmPose(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide)
+   {
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         ArmJointName armJointName = armJointNames[i];
+
+         double q_desired = desiredArmPose[i];
+         double q_actual = actualArmPose[i];
+
+         if (DEBUG)
+         {
+            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
+         }
+
+         assertEquals(q_desired, q_actual, DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
+      }
+   }
+
+   private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
+   {
+      double q;
+      double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
+      double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
+
+      if (qMin > qMax)
+      {
+         double temp = qMax;
+         qMax = qMin;
+         qMin = temp;
+      }
+
+      q = MathTools.clipToMinMax(desiredJointAngle, qMin, qMax);
+      return q;
    }
 
    private void assertProperComHeightOffsetFromGround(double desiredHeightOffset, Point3d finalComPoint)
