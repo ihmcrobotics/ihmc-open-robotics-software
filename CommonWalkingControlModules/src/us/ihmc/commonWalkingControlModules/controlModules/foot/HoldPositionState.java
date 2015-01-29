@@ -27,10 +27,10 @@ public class HoldPositionState extends AbstractFootControlState
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    public HoldPositionState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState,
-         int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, YoVariableRegistry registry)
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
+         YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.HOLD_POSITION, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.HOLD_POSITION, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;

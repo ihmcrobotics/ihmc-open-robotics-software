@@ -61,10 +61,10 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    private final DoubleYoVariable estimatedFinalKneeAngle;
    private final double upperLegLength, lowerLegLength;
 
-   public HeuristicSwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public HeuristicSwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.SWING, footControlHelper, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.SWING, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
       this.gains = gains;
       this.swingTimeProvider = swingTimeProvider;
