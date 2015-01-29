@@ -9,7 +9,7 @@ import us.ihmc.utilities.ThreadTools;
 public class NonBlockingStreamingDataProducer<T extends Packet> extends PacketProducer<T>
 {
    private final ConcurrentLinkedQueue<T> queuedData = new ConcurrentLinkedQueue<T>(); 
-   
+   private volatile boolean running = true;
    
    public void notifyConsumers(T dataObject)
    {
@@ -28,7 +28,7 @@ public class NonBlockingStreamingDataProducer<T extends Packet> extends PacketPr
 
          public void run()
          {
-            while (true)
+            while (running)
             {
                T dataObject;
                while((dataObject = queuedData.poll()) != null)
@@ -42,5 +42,10 @@ public class NonBlockingStreamingDataProducer<T extends Packet> extends PacketPr
          }
       };
       ThreadTools.startAsDaemon(runnable, "Streaming Data Producer");
+   }
+   
+   public void stop()
+   {
+      this.running = false;
    }
 }
