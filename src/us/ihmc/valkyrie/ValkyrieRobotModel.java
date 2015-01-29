@@ -25,6 +25,7 @@ import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -72,6 +73,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final RobotNetworkParameters networkParameters;
+   private final boolean runningOnRealRobot;
    
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()  {
@@ -89,6 +91,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    public ValkyrieRobotModel(boolean runningOnRealRobot, boolean headless)
    {
+      this.runningOnRealRobot = runningOnRealRobot;
       jointMap = new ValkyrieJointMap();
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation();
@@ -367,5 +370,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
    {
       return null;
+   }
+   
+   @Override
+   public LogSettings getLogSettings()
+   {
+      if(runningOnRealRobot)
+      {
+         return LogSettings.VALKYRIE_IHMC;
+      }
+      else
+      {
+         return LogSettings.SIMULATION;
+      }
    }
 }
