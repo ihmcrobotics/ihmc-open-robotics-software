@@ -7,11 +7,9 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.acsell.parameters.BonoRobotModel;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -19,7 +17,6 @@ import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.command.StepprCommand;
 import us.ihmc.steppr.hardware.command.StepprJointCommand;
 import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
-import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.hardware.state.StepprXSensState;
@@ -39,7 +36,7 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       YoVariableRegistry registry = new YoVariableRegistry("steppr");
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
-      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, robotModel.getLogModelProvider(), LogSettings.STEPPR_IHMC, LogUtils.getMyIP(StepprNetworkParameters.CONTROL_COMPUTER_HOST), 0.01);
+      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.01);
 
       StepprSetup stepprSetup = new StepprSetup(variableServer);
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
