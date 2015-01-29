@@ -12,7 +12,7 @@ import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
    us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
    us.ihmc.atlas.AtlasFlatGroundWalkingTest.class,
    us.ihmc.atlas.AtlasMultiContactTest.class,
-   us.ihmc.atlas.AtlasObstacleCourseDemoTest.class,
+   us.ihmc.atlas.AtlasObstacleCourseDemoGUITest.class,
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
    us.ihmc.atlas.AtlasPushRecoveryStandingTest.class,
    us.ihmc.atlas.AtlasPushRecoveryTest.class,
