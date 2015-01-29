@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -19,6 +20,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -40,7 +42,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final SDFFullRobotModel actualRobotModel;
    private final KryoLocalPacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
-   private final ArrayList<ReferenceFrame> desiredReferenceFrameList = new ArrayList<ReferenceFrame>();
+   private final ArrayList<FramePose> desiredReferenceFrameList = new ArrayList<FramePose>();
    private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
    private boolean USE_INGRESS_ONLY = false;
    private final YoVariableRegistry registry;
@@ -122,35 +124,32 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       final double reachLength = 0.5;
       for (int i = 0; i < 4; i++)
       {
-         FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), reachLength * Math.cos(-i * Math.PI / 4), reachLength * Math.sin(-i * Math.PI / 4), 0.6);
-         FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
-         ReferenceFrame desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCareEither", point, zAxis);
-         desiredReferenceFrameList.add(desiredReferenceFrame);
+         Point3d point = new Point3d(reachLength * Math.cos(-i * Math.PI / 4), reachLength * Math.sin(-i * Math.PI / 4), 0.6);
+         FramePose desiredPose = new FramePose( ReferenceFrame.getWorldFrame(), point , new Quat4d() );
+         desiredReferenceFrameList.add(desiredPose);
       }
    }
 
-   private ReferenceFrame getNextDesiredReferenceFrame(int index)
+   private FramePose getNextDesiredReferenceFrame(int index)
    {
-      ReferenceFrame desiredReferenceFrame;
+      FramePose desiredPose;
       if (random)
       {
          Random random = new Random();
          Point3d randomPoint = RandomTools.generateRandomPoint(random, -0.2, -0.2, 0.2, 0.2, 1.0, 1.5);
-         FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), randomPoint, "dontCareFramePoint");
-         FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
-         desiredReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("dontCare", point, zAxis);
+         desiredPose =  new FramePose( ReferenceFrame.getWorldFrame(), randomPoint , new Quat4d() );
       }
       else
       {
-         desiredReferenceFrame = desiredReferenceFrameList.get(index);
+         desiredPose = desiredReferenceFrameList.get(index);
       }
-      return desiredReferenceFrame;
+      return desiredPose;
    }
 
    private void doControl(int index)
    {
-      ReferenceFrame desiredReferenceFrame = getNextDesiredReferenceFrame(index);
-      wholeBodyIKSolver.setHandTarget(actualRobotModel, RobotSide.RIGHT, desiredReferenceFrame);
+      FramePose desiredPose = getNextDesiredReferenceFrame(index);
+      wholeBodyIKSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT, desiredPose);
       try
       {
         successInt = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
