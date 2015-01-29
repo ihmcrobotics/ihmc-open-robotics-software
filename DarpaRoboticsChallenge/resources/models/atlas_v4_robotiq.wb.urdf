@@ -522,12 +522,18 @@
 
     <joint name="r_ee_fixed_joint" type="fixed">
         <parent link="r_hand"/>
-        <child  link="r_ee_link"/>
+        <child  link="r_gripper_attachment"/>
  
-        <origin rpy="0 0 -1.5708" xyz="0 -0.10  0"/>
-        
+        <origin rpy="0 0 -1.5708" xyz="0 -0.10  0"/> 
     </joint>    
-    <link name="r_ee_link"/>
+    <link name="r_gripper_attachment"/>
+    
+    <joint name="r_ee_fixed_joint2" type="fixed">
+        <parent link="r_gripper_attachment"/>
+        <child  link="r_gripper_palm"/>
+        <origin rpy="0 0 0" xyz="0.16  0  0"/>    
+    </joint>    
+    <link name="r_gripper_palm"/>
 
 	
 	
@@ -591,14 +597,19 @@
         <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-11.1781" soft_upper_limit="11.1781" />
     </joint>
 
-	<joint name="l_ee_fixed_joint" type="fixed">
+	<joint name="l_ee_fixed_joint1" type="fixed">
         <parent link="l_hand"/>
-        <child  link="l_ee_link"/>
+        <child  link="l_gripper_attachment"/>
         <origin rpy="0 0 1.5708" xyz="0  0.10  0"/>
-        
     </joint>    
-    <link name="l_ee_link"/>
+    <link name="l_gripper_attachment"/>
 
+	<joint name="l_ee_fixed_joint2" type="fixed">
+        <parent link="l_gripper_attachment"/>
+        <child  link="l_gripper_palm"/>
+        <origin rpy="0 0 0" xyz="0.16 0  0"/>
+    </joint>    
+    <link name="l_gripper_palm"/>
 
 
     <joint name="l_leg_hpz" type="revolute">

@@ -21,12 +21,15 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 { 
 
    @Override 
-   public String getEndEffectorLinkName(RobotSide side)  {
-      if( side == RobotSide.LEFT) 
-         return "l_ee_link";
-      else
-         return "r_ee_link";
+   public String getGripperPalmLinkName(RobotSide side)  {
+      return (side == RobotSide.LEFT) ? "l_gripper_palm" :  "r_gripper_palm";
    }
+   
+   @Override 
+   public String getGripperAttachmentLinkName(RobotSide side)  {
+      return (side == RobotSide.LEFT) ? "l_gripper_attachment" :  "r_gripper_attachment";
+   }
+   
 
    @Override 
    public String getFootLinkName(RobotSide side) {

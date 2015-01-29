@@ -92,7 +92,8 @@ abstract public class WholeBodyIkSolver
 
    //------- Abstract method that provide robot-specific information and configuration  -------------
 
-   abstract public String getEndEffectorLinkName(RobotSide side);
+   abstract public String getGripperAttachmentLinkName(RobotSide side);
+   abstract public String getGripperPalmLinkName(RobotSide side);
    abstract public String getFootLinkName(RobotSide side);
 
    abstract public int getNumberDoFperArm();
@@ -267,15 +268,15 @@ abstract public class WholeBodyIkSolver
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         int currentHandId = urdfModel.getBodyId(getEndEffectorLinkName(robotSide));
+         int currentHandId = urdfModel.getBodyId(getGripperPalmLinkName(robotSide));
 
-         taskEndEffectorPose.set(robotSide, new HierarchicalTask_BodyPose(fk, currentHandId));
+         taskEndEffectorPose.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
          urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , armJointIds.get(robotSide));
       }     
 
       RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
       int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
-      taskLegPose = new HierarchicalTask_BodyPose(fk, leftFootId);
+      taskLegPose = new HierarchicalTask_BodyPose(fk,urdfModel,  getFootLinkName(otherFootSide ));
 
       urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), legJointIds.get( otherFootSide ) );
 
@@ -347,41 +348,53 @@ abstract public class WholeBodyIkSolver
       taskJointsPose.setTarget(preferedJointPose, 3);
    }
 
-   /* public void disableHandRotationMainAxis(RobotSide side, boolean disable)
+   /*
+    * We call "GripperAttachment" the location where the end effector would be if no gripper is present.
+    * Its position corresponds with SDFFullRobotModel.getHandControlFrame
+    */
+   public void setGripperAttachmentTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
    {
-      disabledtHandRotationY.get(side).setValue(disable);
-   }*/
+      PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
+      
+      taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
+      
+      System.out.println( taskEndEffectorPose.get(endEffectorSide).jacobianPointOffset );
+      setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
+   }
+   
+   /*
+    * We call "GripperPalm" the location where grasping shall be made.
+    * Its position corresponds with the blue cylinder of the ModifiafleCylinderGrabber.
+    */
+   public void setGripperPalmTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
+   {
+      PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
+      
+      taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
 
-   public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, ReferenceFrame end_effector_pose)
+      setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
+   }
+
+   private void setEndEffectorTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, ReferenceFrame endEffectorPose)
    {
       movePelvisToHaveOverlappingFeet( actualRobotModel, workingSdfModel );
 
-      final HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(end_effector_side);
+      final HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(endEffectorSide);
 
       RigidBodyTransform ee_transform;
-      ee_transform = end_effector_pose.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
+      ee_transform = endEffectorPose.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
 
-      keepArmQuiet.get(end_effector_side).setValue( false );
+      keepArmQuiet.get(endEffectorSide).setValue( false );
 
-      RobotSide steadySide = end_effector_side.getOppositeSide();
+      RobotSide steadySide = endEffectorSide.getOppositeSide();
 
       hierarchicalSolver.prioritizeTasks(taskEndEffectorPose.get(steadySide), handTask);
 
-      Vector64F target_ee = new Vector64F(7);
       Quat4d quat = new Quat4d();
       Vector3d pos = new Vector3d();
-
       ee_transform.get(quat, pos);
-      target_ee.set(0, pos.x);
-      target_ee.set(1, pos.y);
-      target_ee.set(2, pos.z);
 
-      target_ee.set(3, quat.x);
-      target_ee.set(4, quat.y);
-      target_ee.set(5, quat.z);
-      target_ee.set(6, quat.w);
-
-      handTask.setTarget(target_ee, 0.001); 
+      handTask.setTarget( quat, pos,  0.001); 
    }
 
    private void enforceControlledDoF( ComputeOption opt  )
@@ -428,11 +441,6 @@ abstract public class WholeBodyIkSolver
       }
    }
 
-   public void setHandTarget(SDFFullRobotModel actualRobotModel, RobotSide end_effector_side, FramePose end_effector_pose)
-   {
-      PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", end_effector_pose);
-      setHandTarget(actualRobotModel, end_effector_side, endEffectorPoseReferenceFrame);
-   }
 
    public void setPreferedJointPose(String joint_name, double q)
    {
@@ -728,9 +736,14 @@ abstract public class WholeBodyIkSolver
       movePelvisToHaveOverlappingFeet( sdfModel, workingSdfModel );
    }
 
-   public ReferenceFrame getDesiredHandFrame(RobotSide handSide, ReferenceFrame parentFrame)
+   public ReferenceFrame getDesiredGripperAttachmentFrame(RobotSide handSide, ReferenceFrame parentFrame)
    {
-      return getDesiredBodyFrame(getEndEffectorLinkName(handSide), parentFrame);
+      return getDesiredBodyFrame(getGripperAttachmentLinkName(handSide), parentFrame);
+   }
+   
+   public ReferenceFrame getDesiredGripperPalmFrame(RobotSide handSide, ReferenceFrame parentFrame)
+   {
+      return getDesiredBodyFrame(getGripperPalmLinkName(handSide), parentFrame);
    }
 
    public ReferenceFrame getDesiredBodyFrame(String name, ReferenceFrame parentFrame)

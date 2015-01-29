@@ -10,6 +10,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket.WholeBodyPose;
 import us.ihmc.utilities.math.Vector64F;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -161,13 +162,16 @@ public class WholeBodyTrajectory
 
             interpolatedTransform.interpolate(initialTransform, finalTransform, ((double)s)/numSegments);
 
-            ReferenceFrame target =  ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("interpolatedTarget",
-                  ReferenceFrame.getWorldFrame(), interpolatedTransform );
+            FramePose target =  new FramePose( ReferenceFrame.getWorldFrame(), interpolatedTransform );
 
-            wbSolver.setHandTarget( actualRobotModel,  side, target );
+            wbSolver.setGripperPalmTarget( actualRobotModel,  side, target );
 
             if( side == RobotSide.RIGHT )
-               System.out.println( side + ": \n" + target.getTransformToWorldFrame().cloneTranslation() );
+            {
+               RigidBodyTransform targetTrans = new RigidBodyTransform();
+               target.getRigidBodyTransform( targetTrans );
+               System.out.println( side + ": \n" + targetTrans.cloneTranslation() );
+            }
          }
 
          Vector64F thisWaypointAngles = waypointAngles.get(s);

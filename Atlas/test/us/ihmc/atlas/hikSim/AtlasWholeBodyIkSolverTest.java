@@ -18,6 +18,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -32,7 +33,9 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
    static private WholeBodyIkSolver wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
 
    static private SimulationConstructionSet scs;
-   static private boolean VISUALIZE_GUI = false;
+
+   static private boolean VISUALIZE_GUI = true;   
+
    static FullRobotModelVisualizer modelVisualizer;
    private ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
    private ArrayList<Matrix4d> LeftHandToWorldArray = new ArrayList<Matrix4d>();
@@ -151,25 +154,29 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testRightHandIn3PMode()
    {
+     ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
+
 //      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
-      executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, false);
+     // ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
+      executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
+
    }
 
 	@AverageDuration
 	@Test(timeout = 150000)
    public void testLeftHandIn3PMode()
    {
-//      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.LEFT);
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
-      this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, false);
-   }
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.LEFT);
 
+   //   ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
+      this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
+   }
+/*
 	@AverageDuration
 	@Test(timeout = 150000)
    public void testBothHandsIn3PMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, false);
    }
 
@@ -177,7 +184,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testRightHandIn3P2RMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray, false);
    }
 
@@ -185,7 +192,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testLeftHandIn3P2RMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       this.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, false);
    }
 
@@ -193,7 +200,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testBothHandsIn3P2RMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false);
    }
 
@@ -201,7 +208,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testRightHandIn3P3RMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray, false);
    }
 
@@ -209,7 +216,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testLeftHandIn3P3RMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       this.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray, false);
    }
 
@@ -217,10 +224,10 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 	@Test(timeout = 150000)
    public void testBothHandsIn3P3RMode()
    {
-      ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       this.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
    }
-   
+   */
 
    public void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize)
    {
