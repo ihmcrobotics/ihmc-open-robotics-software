@@ -1,7 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
 import static org.junit.Assert.assertEquals;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.DataBuffer;
@@ -32,7 +31,7 @@ public class YoVariableConnectionBurstTest
       
 
 	  //start server
-      final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.VALKYRIE_IHMC, LogUtils.getMyIP("localhost"), 0.001);
+      final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.SIMULATION, 0.001);
       server.setMainRegistry(registry, null, null);
       server.start();
 

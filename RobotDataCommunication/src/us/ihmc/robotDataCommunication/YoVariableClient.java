@@ -41,9 +41,9 @@ public class YoVariableClient
       }
    }
 
-   public YoVariableClient(String host, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   public YoVariableClient(String hostToBindTo, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
    {
-      this(getRequest(host), listener, registryPrefix, showOverheadView);
+      this(getRequest(hostToBindTo), listener, registryPrefix, showOverheadView);
    }
 
    public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)

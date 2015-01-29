@@ -19,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
@@ -37,6 +36,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
@@ -77,9 +77,9 @@ public class DRCSimulationFactory
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
       
-      if(LogSettings.SIMULATION.isLog())
+      if(drcRobotModel.getLogSettings().isLog())
       {
-         yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP("127.0.0.1"), drcRobotModel.getEstimatorDT());
+         yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), drcRobotModel.getLogSettings(), drcRobotModel.getEstimatorDT());
       }
       else
       {

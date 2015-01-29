@@ -29,7 +29,7 @@ public class SegmentedDatagramServer
    public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group, int port) throws IOException
    {
       this.sessionID = sessionID;
-      System.out.println(iface);
+      System.out.println("Binding Segmented Datagram Server to " + iface);
       if(iface.isLoopback())
       {
          maximumPacketSize = 65536 - 32;

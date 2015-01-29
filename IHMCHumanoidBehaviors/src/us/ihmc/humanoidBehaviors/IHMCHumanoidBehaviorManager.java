@@ -26,7 +26,6 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscribe
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
@@ -62,8 +61,7 @@ public class IHMCHumanoidBehaviorManager
 
       if (ENABLE_BEHAVIOR_VISUALIZATION)
       {
-         yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, LogUtils.getMyIP(BEHAVIOR_YO_VARIABLE_SERVER_HOST),
-               BEHAVIOR_YO_VARIABLE_SERVER_DT);
+         yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
       SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();

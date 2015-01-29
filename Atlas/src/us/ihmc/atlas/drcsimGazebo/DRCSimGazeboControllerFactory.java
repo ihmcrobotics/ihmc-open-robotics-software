@@ -26,7 +26,6 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -57,7 +56,7 @@ public class DRCSimGazeboControllerFactory
        */
       KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboSimControllerCommunicator" );
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), LogSettings.SIMULATION, LogUtils.getMyIP(robotModel.getNetworkParameters().getLoggingHostIP()), robotModel.getEstimatorDT());
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
 
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 

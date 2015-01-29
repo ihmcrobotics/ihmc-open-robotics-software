@@ -10,10 +10,44 @@ import java.util.Enumeration;
 
 public class LogUtils
 {
+   
+   public static InetAddress getByName(String address)
+   {
+      try
+      {
+         return InetAddress.getByName(address);
+      }
+      catch (UnknownHostException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+   public static InetAddress getByAddress(byte[] address)
+   {
+      try
+      {
+         return InetAddress.getByAddress(address);
+      }
+      catch (UnknownHostException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+   
+   public static NetworkInterface getMyInterface(String hostOnNetwork)
+   {
+      try
+      {
+         return NetworkInterface.getByInetAddress(LogUtils.getMyIP(hostOnNetwork));
+      }
+      catch (SocketException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
    public static InetAddress getMyIP(String host)
    {
-      System.out.println("Getting ip for " + host);
       try
       {
          return getMyIP(InetAddress.getByName(host));

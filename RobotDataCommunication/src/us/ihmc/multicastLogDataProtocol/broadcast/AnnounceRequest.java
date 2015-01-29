@@ -43,8 +43,11 @@ public class AnnounceRequest
    public short dataPort;
    public byte[] controlIP = new byte[4];
    public short controlPort;
+   public byte[] videoStream = new byte[4];
+   public short videoPort;
+   
+   
    public byte[] cameras;
-
    public String name;
 
    public boolean log = true;
@@ -68,6 +71,8 @@ public class AnnounceRequest
          this.cameras = new byte[original.cameras.length];
          System.arraycopy(original.cameras, 0, cameras, 0, original.cameras.length);
       }
+      System.arraycopy(original.videoStream, 0, videoStream, 0, videoStream.length);
+      this.videoPort = original.videoPort;
    }
 
    public boolean readHeader(ByteBuffer buffer)
@@ -80,6 +85,8 @@ public class AnnounceRequest
          dataPort = buffer.getShort();
          buffer.get(controlIP);
          controlPort = buffer.getShort();
+         buffer.get(videoStream);
+         videoPort = buffer.getShort();
          return true;
       }
       else
@@ -143,6 +150,8 @@ public class AnnounceRequest
       buffer.putShort(dataPort);
       buffer.put(controlIP);
       buffer.putShort(controlPort);
+      buffer.put(videoStream);
+      buffer.putShort(videoPort);
       if (cameras != null)
       {
          buffer.put((byte) cameras.length);
@@ -263,6 +272,30 @@ public class AnnounceRequest
       }
    }
 
+   public byte[] getVideoStream()
+   {
+      return videoStream;
+   }
+
+   public void setVideoStream(byte[] videoStream)
+   {
+      this.videoStream = videoStream;
+   }
+
+   
+   public int getVideoPort()
+   {
+      return videoPort;
+   }
+
+   public void setVideoPort(int videoPort)
+   {
+      this.videoPort = (short) videoPort;
+   }
+
+
+   
+
    @Override
    public int hashCode()
    {
@@ -271,11 +304,14 @@ public class AnnounceRequest
       result = prime * result + Arrays.hashCode(cameras);
       result = prime * result + Arrays.hashCode(controlIP);
       result = prime * result + controlPort;
+      result = prime * result + dataPort;
       result = prime * result + Arrays.hashCode(group);
       result = prime * result + (log ? 1231 : 1237);
       result = prime * result + ((name == null) ? 0 : name.hashCode());
       result = prime * result + (int) (sessionID ^ (sessionID >>> 32));
       result = prime * result + ((type == null) ? 0 : type.hashCode());
+      result = prime * result + videoPort;
+      result = prime * result + Arrays.hashCode(videoStream);
       return result;
    }
 
@@ -295,6 +331,8 @@ public class AnnounceRequest
          return false;
       if (controlPort != other.controlPort)
          return false;
+      if (dataPort != other.dataPort)
+         return false;
       if (!Arrays.equals(group, other.group))
          return false;
       if (log != other.log)
@@ -309,6 +347,10 @@ public class AnnounceRequest
       if (sessionID != other.sessionID)
          return false;
       if (type != other.type)
+         return false;
+      if (videoPort != other.videoPort)
+         return false;
+      if (!Arrays.equals(videoStream, other.videoStream))
          return false;
       return true;
    }

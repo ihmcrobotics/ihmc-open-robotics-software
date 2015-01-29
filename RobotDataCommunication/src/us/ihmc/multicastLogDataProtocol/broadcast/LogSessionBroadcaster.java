@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
+import us.ihmc.robotDataCommunication.gui.GUICaptureStreamer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 
 public class LogSessionBroadcaster extends Thread
@@ -94,6 +95,8 @@ public class LogSessionBroadcaster extends Thread
       canIHazRequest.setSessionID(sessionID);
       canIHazRequest.setControlIP(controlAddress.getAddress().getAddress());
       canIHazRequest.setControlPort((short) controlAddress.getPort());
+      canIHazRequest.setVideoStream(logSettings.getVideoStream().getAddress());
+      canIHazRequest.setVideoPort(GUICaptureStreamer.PORT);
       canIHazRequest.setCameras(logSettings.getCameras());
       canIHazRequest.setLog(logSettings.isLog());
       canIHazRequest.setName(className);
@@ -164,6 +167,8 @@ public class LogSessionBroadcaster extends Thread
       announcement.setDataPort(dataPort);
       announcement.setControlIP(controlAddress.getAddress().getAddress());
       announcement.setControlPort((short) controlAddress.getPort());
+      announcement.setVideoStream(logSettings.getVideoStream().getAddress());
+      announcement.setVideoPort(GUICaptureStreamer.PORT);
       announcement.setCameras(logSettings.getCameras());
       announcement.setLog(logSettings.isLog());
       announcement.setName(className);

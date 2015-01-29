@@ -1,6 +1,5 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.utilities.ThreadTools;
@@ -26,7 +25,7 @@ public class TestYoVariableConnection
    private final IntegerYoVariable echoIn = new IntegerYoVariable("echoIn", registry);
    private final IntegerYoVariable echoOut = new IntegerYoVariable("echoOut", registry);
    
-   private final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.SIMULATION, LogUtils.getMyIP("localhost"), 0.001);
+   private final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.SIMULATION, 0.001);
    private final YoVariableClient client;
    
    
