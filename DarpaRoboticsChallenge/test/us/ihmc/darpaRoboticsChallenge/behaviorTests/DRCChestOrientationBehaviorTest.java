@@ -137,7 +137,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestStartedMessage();
 
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
-      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0, 1, 0, rotationAngle);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0.0, 1.0, 0.0, rotationAngle);
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestQuat.set(desiredAxisAngle);
 
@@ -157,7 +157,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestStartedMessage();
 
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
-      AxisAngle4d desiredAxisAngle = new AxisAngle4d(1, 0, 0, rotationAngle);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(1.0, 0.0, 0.0, rotationAngle);
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestQuat.set(desiredAxisAngle);
 
@@ -177,7 +177,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestStartedMessage();
 
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
-      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0, 0, 1, rotationAngle);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0.0, 0.0, 1.0, rotationAngle);
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestQuat.set(desiredAxisAngle);
 
