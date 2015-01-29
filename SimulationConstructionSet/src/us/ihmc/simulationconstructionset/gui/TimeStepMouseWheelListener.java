@@ -10,7 +10,7 @@ import java.awt.event.MouseWheelListener;
  */
 public class TimeStepMouseWheelListener implements MouseWheelListener
 {
-   private final StandardSimulationGUI standardSimulationGUI;
+   private StandardSimulationGUI standardSimulationGUI;
 
 
    public TimeStepMouseWheelListener(StandardSimulationGUI standardSimulationGUI)
@@ -38,5 +38,10 @@ public class TimeStepMouseWheelListener implements MouseWheelListener
          else
             standardSimulationGUI.stepBackward();
       }
+   }
+   
+   public void closeAndDispose()
+   {
+      standardSimulationGUI = null;
    }
 }

@@ -25,5 +25,12 @@ public class PlaybackPropertiesDialogGenerator implements PlaybackPropertiesDial
    {
       new PlaybackPropertiesDialog(parentContainer, frame, sim);
    }
+
+   public void closeAndDispose()
+   {
+      sim = null;
+      frame = null;
+      parentContainer = null;
+   }
 }
 

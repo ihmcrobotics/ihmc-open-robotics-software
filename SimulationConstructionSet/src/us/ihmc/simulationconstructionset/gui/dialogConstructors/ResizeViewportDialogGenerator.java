@@ -3,20 +3,15 @@ package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 
 public class ResizeViewportDialogGenerator implements ResizeViewportDialogConstructor
 {
    private JFrame frame;
-   @SuppressWarnings("unused")
-   private CaptureDevice canvas3D;
 
    public ResizeViewportDialogGenerator(JFrame frame, ViewportSelectorCommandExecutor viewportSelector)
    {
       this.frame = frame;
-
-      // this.activeCanvas3DHolder = activeCanvas3DHolder;
    }
 
    public void constructResizeViewportDialog()
@@ -40,6 +35,11 @@ public class ResizeViewportDialogGenerator implements ResizeViewportDialogConstr
             }
          }
       }
+   }
+
+   public void closeAndDispose()
+   {
+      this.frame = null;
    }
 }
 

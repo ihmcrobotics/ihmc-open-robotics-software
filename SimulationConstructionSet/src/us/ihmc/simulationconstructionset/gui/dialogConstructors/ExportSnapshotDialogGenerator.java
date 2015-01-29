@@ -14,8 +14,8 @@ import us.ihmc.simulationconstructionset.gui.SwingWorker;
 
 public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstructor
 {
-   private final ExportSnapshotCommandExecutor exportSnapshotCommandExecutor;
-   private final GUIEnablerAndDisabler guiEnablerAndDisabler;
+   private ExportSnapshotCommandExecutor exportSnapshotCommandExecutor;
+   private GUIEnablerAndDisabler guiEnablerAndDisabler;
    
    @SuppressWarnings("unused")
    private ActiveCanvas3DHolder activeCanvas3DHolder;
@@ -153,6 +153,18 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
          }
 
       };
+   }
+
+   public void closeAndDispose()
+   {
+      exportSnapshotCommandExecutor = null;
+      guiEnablerAndDisabler = null;
+
+      activeCanvas3DHolder = null;
+      frame = null;
+      fileChooser = null;
+
+      jpegFileFilter = null;
    }
 
 }

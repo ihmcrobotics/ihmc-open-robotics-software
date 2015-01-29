@@ -22,29 +22,29 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 
 public class StandardAllDialogConstructorsGenerator implements AllDialogConstructorsHolder
 {
-   private final ExportDataDialogConstructor exportDataDialogConstructor;
-   private final ImportDataDialogConstructor importDataDialogConstructor;
+   private ExportDataDialogConstructor exportDataDialogConstructor;
+   private ImportDataDialogConstructor importDataDialogConstructor;
    
-   private final MediaCaptureDialogGenerator mediaCaptureDialogConstructor;
-   private final ExportSnapshotDialogGenerator exportSnapshotDialogConstructor;
+   private MediaCaptureDialogGenerator mediaCaptureDialogConstructor;
+   private ExportSnapshotDialogGenerator exportSnapshotDialogConstructor;
    
-   private final PlaybackPropertiesDialogGenerator playbackPropertiesDialogConstructor;
+   private PlaybackPropertiesDialogGenerator playbackPropertiesDialogConstructor;
    
-   private final SaveConfigurationDialogGenerator saveConfigurationDialogConstructor;
-   private final LoadConfigurationDialogGenerator loadConfigurationDialogConstructor;
-   private final SaveGraphConfigurationDialogGenerator saveGraphConfigurationDialogConstructor;
-   private final LoadGraphGroupDialogConstructor loadGraphGroupDialogConstructor;
-   private final SaveRobotConfigurationDialogGenerator saveRobotConfigurationDialogConstructor;
-   private final ExportSimulationTo3DMaxDialogGenerator exportSimulationTo3DMaxDialogConstructor;
+   private SaveConfigurationDialogGenerator saveConfigurationDialogConstructor;
+   private LoadConfigurationDialogGenerator loadConfigurationDialogConstructor;
+   private SaveGraphConfigurationDialogGenerator saveGraphConfigurationDialogConstructor;
+   private LoadGraphGroupDialogConstructor loadGraphGroupDialogConstructor;
+   private SaveRobotConfigurationDialogGenerator saveRobotConfigurationDialogConstructor;
+   private ExportSimulationTo3DMaxDialogGenerator exportSimulationTo3DMaxDialogConstructor;
    
-   private final PrintGraphsDialogGenerator printGraphsDialogConstructor;
+   private PrintGraphsDialogGenerator printGraphsDialogConstructor;
    
-   private final DataBufferPropertiesDialogGenerator dataBufferPropertiesDialogConstructor;
+   private DataBufferPropertiesDialogGenerator dataBufferPropertiesDialogConstructor;
    
-   private final CameraPropertiesDialogGenerator cameraPropertiesDialogConstructor;
-   private final ResizeViewportDialogGenerator resizeViewportDialogConstructor;
+   private CameraPropertiesDialogGenerator cameraPropertiesDialogConstructor;
+   private ResizeViewportDialogGenerator resizeViewportDialogConstructor;
    
-   private final AboutDialogGenerator aboutDialogConstructor;
+   private AboutDialogGenerator aboutDialogConstructor;
 
    public StandardAllDialogConstructorsGenerator(SimulationConstructionSet sim, Robot[] robots, DataBuffer myDataBuffer,
          StandardSimulationGUI myGUI, 
@@ -169,6 +169,112 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    public ExportSimulationTo3DMaxDialogConstructor getExportSimulationTo3DMaxDialogConstructor()
    {
       return exportSimulationTo3DMaxDialogConstructor;
+   }
+
+   private boolean alreadyClosing = false;
+   public void closeAndDispose()
+   {
+      if (alreadyClosing) return;
+      alreadyClosing = true;
+      
+      if (exportDataDialogConstructor != null)
+      {
+         exportDataDialogConstructor.closeAndDispose();
+         exportDataDialogConstructor = null;
+      }
+      
+      if (importDataDialogConstructor != null)
+      {
+         importDataDialogConstructor.closeAndDispose();
+         importDataDialogConstructor = null;
+      }
+      
+      if (mediaCaptureDialogConstructor != null)
+      {
+         mediaCaptureDialogConstructor.closeAndDispose();
+         mediaCaptureDialogConstructor = null;
+      }
+      
+      if (exportSnapshotDialogConstructor != null)
+      {
+         exportSnapshotDialogConstructor.closeAndDispose();
+         exportSnapshotDialogConstructor = null;
+      }
+      
+      if (playbackPropertiesDialogConstructor != null)
+      {
+         playbackPropertiesDialogConstructor.closeAndDispose();
+         playbackPropertiesDialogConstructor = null;
+      }
+      
+      if (saveConfigurationDialogConstructor != null)
+      {
+         saveConfigurationDialogConstructor.closeAndDispose();
+         saveConfigurationDialogConstructor = null;
+      }
+      
+      if (loadConfigurationDialogConstructor != null)
+      {
+         loadConfigurationDialogConstructor.closeAndDispose();
+         loadConfigurationDialogConstructor = null;
+      }
+      
+      if (saveGraphConfigurationDialogConstructor != null)
+      {
+         saveGraphConfigurationDialogConstructor.closeAndDispose();
+         saveGraphConfigurationDialogConstructor = null;
+      }
+      
+      if (loadGraphGroupDialogConstructor != null)
+      {
+         loadGraphGroupDialogConstructor.closeAndDispose();
+         loadGraphGroupDialogConstructor = null;
+      }
+      
+      if (saveRobotConfigurationDialogConstructor != null)
+      {
+         saveRobotConfigurationDialogConstructor.closeAndDispose();
+         saveRobotConfigurationDialogConstructor = null;
+      }
+      
+      if (exportSimulationTo3DMaxDialogConstructor != null)
+      {
+         exportSimulationTo3DMaxDialogConstructor.closeAndDispose();
+         exportSimulationTo3DMaxDialogConstructor = null;
+      }
+      
+      if (printGraphsDialogConstructor != null)
+      {
+         printGraphsDialogConstructor.closeAndDispose();
+         printGraphsDialogConstructor = null;
+      }
+      
+      if (dataBufferPropertiesDialogConstructor != null)
+      {
+         dataBufferPropertiesDialogConstructor.closeAndDispose();
+         dataBufferPropertiesDialogConstructor = null;
+      }
+      
+      if (cameraPropertiesDialogConstructor != null)
+      {
+         cameraPropertiesDialogConstructor.closeAndDispose();
+         cameraPropertiesDialogConstructor = null;
+      }
+      
+      if (resizeViewportDialogConstructor != null)
+      {
+         resizeViewportDialogConstructor.closeAndDispose();
+         resizeViewportDialogConstructor = null;
+      }
+      
+      if (aboutDialogConstructor != null)
+      {
+         aboutDialogConstructor.closeAndDispose();
+         aboutDialogConstructor = null;
+      }
+      
+      
+  
    }
 
 }

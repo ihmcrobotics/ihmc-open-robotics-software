@@ -176,10 +176,13 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    // private ArrayList guiActions;
    private StandardGUIActions standardGUIActions;
+   private AllDialogConstructorsHolder allDialogConstructorsHolder;
+   
    private VarGroupList varGroupList;
-   public ViewportPanel viewportPanel; // TODO: Make private
-   public JPanel mainPanel; // TODO: Make private
-   public JPanel mainPanelHolder; // TODO: Make private
+   private ViewportPanel viewportPanel;
+   private TimeStepMouseWheelListener timeStepMouseWheelListener;
+   private JPanel mainPanel;
+   private JPanel mainPanelHolder;
 
    private String currentView = "Normal View";
    public Canvas3DPanel canvas; // TODO: This appears to never be used
@@ -649,7 +652,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
 
       // GUI Actions:
-      AllDialogConstructorsHolder allDialogConstructorsHolder = null;
       if (robots != null)
       {
          standardGUIActions = new StandardGUIActions();
@@ -660,8 +662,10 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportPanel = createViewportPanel();
 
       // +++ jjc added for wheel mouse time step control
-      viewportPanel.addMouseWheelListener(new TimeStepMouseWheelListener(this));
-      contentPane.addMouseWheelListener(new TimeStepMouseWheelListener(this));
+      timeStepMouseWheelListener = new TimeStepMouseWheelListener(this);
+      viewportPanel.addMouseWheelListener(timeStepMouseWheelListener);
+      contentPane.addMouseWheelListener(timeStepMouseWheelListener);
+      
       splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
       contentPane.add(splitPane);
 
@@ -2936,7 +2940,14 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          standardGUIActions.closeAndDispose();
          standardGUIActions = null;
       }
-
+      
+      
+      if (allDialogConstructorsHolder != null)
+      {
+         allDialogConstructorsHolder.closeAndDispose();
+         allDialogConstructorsHolder = null;
+      }
+      
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Closing and Disposing ViewportPanel");
       System.out.flush();
@@ -2945,6 +2956,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          viewportPanel.closeAndDispose();
          viewportPanel = null;
+      }
+      
+      if (timeStepMouseWheelListener != null)
+      {
+         timeStepMouseWheelListener.closeAndDispose();
+         timeStepMouseWheelListener = null;
       }
 
       if (splitPane != null)
@@ -2971,8 +2988,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
 
       varGroupList = null;
-      canvas = null;
-
       cameraMountList = null;
       graphGroupList = null;
 
@@ -3061,9 +3076,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void clearAllEntryTabs()
    {
-
       myEntryBoxArrayPanel.closeAndDispose();
+   }
 
+   public void addViewportPanelToMainPanel()
+   {
+      mainPanel.add(viewportPanel); //TODO: Why is this here? 
    }
 
 }

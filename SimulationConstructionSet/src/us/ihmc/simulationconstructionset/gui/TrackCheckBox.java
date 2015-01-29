@@ -50,7 +50,7 @@ public class TrackCheckBox extends JCheckBox implements ActionListener
          public void run()
          {
             CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();
-            setSelected(camera.isTracking());
+            if (camera != null) setSelected(camera.isTracking());
          }});
    }
 }

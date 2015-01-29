@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class AboutDialogGenerator implements AboutDialogConstructor
 {
-   private final JFrame parentJFrame;
+   private JFrame parentJFrame;
 
    public AboutDialogGenerator(JFrame parentJFrame)
    {
@@ -33,6 +33,11 @@ public class AboutDialogGenerator implements AboutDialogConstructor
       aboutDialog.setSize(new Dimension(450, 300));
       aboutDialog.validate();
       aboutDialog.setVisible(true);
+   }
+
+   public void closeAndDispose()
+   {
+      parentJFrame = null; 
    }
 
 }

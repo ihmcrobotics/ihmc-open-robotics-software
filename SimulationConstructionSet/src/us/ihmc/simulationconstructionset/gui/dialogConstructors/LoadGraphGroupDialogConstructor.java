@@ -8,4 +8,5 @@ public interface LoadGraphGroupDialogConstructor
    public abstract void setCurrentDirectory(String directory);
    public abstract void constructLoadConfigurationDialog();
    public abstract void loadGraphGroupFile(File file);
+   public abstract void closeAndDispose();
 }

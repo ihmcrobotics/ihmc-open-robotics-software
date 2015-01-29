@@ -20,8 +20,8 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
    private SimulationConstructionSet simulationConstructionSet;
    private DataBuffer dataBuffer;
 
-   private final ArrayList<ViewportSelectorCommandListener> viewportSelectorCommandListenersToRegister = new ArrayList<ViewportSelectorCommandListener>();
-   private final ArrayList<ToggleKeyPointModeCommandListener> toggleKeyPointModeCommandListenersToRegister = new ArrayList<ToggleKeyPointModeCommandListener>();
+   private ArrayList<ViewportSelectorCommandListener> viewportSelectorCommandListenersToRegister = new ArrayList<ViewportSelectorCommandListener>();
+   private ArrayList<ToggleKeyPointModeCommandListener> toggleKeyPointModeCommandListenersToRegister = new ArrayList<ToggleKeyPointModeCommandListener>();
 
    public StandardAllCommandsExecutor()
    {
@@ -406,6 +406,40 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
    public void disableGUIComponents()
    {
       simulationConstructionSet.disableGUIComponents();
+   }
+
+   private boolean alreadyStartedClosing = false;
+   
+   public void closeAndDispose()
+   {
+      if (alreadyStartedClosing) return;
+      
+      alreadyStartedClosing = true;
+      
+      this.standardSimulationGUI = null;
+      this.simulationConstructionSet = null;
+      this.dataBuffer = null;
+
+      if (viewportSelectorCommandListenersToRegister != null)
+      {
+         for (ViewportSelectorCommandListener viewportSelectorCommandListener : viewportSelectorCommandListenersToRegister)
+         {
+            viewportSelectorCommandListener.closeAndDispose();
+         }
+         viewportSelectorCommandListenersToRegister.clear();
+      }
+
+      if (toggleKeyPointModeCommandListenersToRegister != null)
+      {
+         for (ToggleKeyPointModeCommandListener toggleKeyPointModeCommandListener : toggleKeyPointModeCommandListenersToRegister)
+         {
+            toggleKeyPointModeCommandListener.closeAndDispose();
+         }
+         toggleKeyPointModeCommandListenersToRegister.clear();
+      }
+
+      viewportSelectorCommandListenersToRegister = null;
+      toggleKeyPointModeCommandListenersToRegister = null;
    }
 
 }
