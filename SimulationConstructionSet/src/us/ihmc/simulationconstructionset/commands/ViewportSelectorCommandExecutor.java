@@ -9,4 +9,5 @@ public interface ViewportSelectorCommandExecutor
    public abstract boolean isViewportHidden();
    
    public abstract void registerViewportSelectorCommandListener(ViewportSelectorCommandListener commandListener);
+   public abstract void closeAndDispose();
 }

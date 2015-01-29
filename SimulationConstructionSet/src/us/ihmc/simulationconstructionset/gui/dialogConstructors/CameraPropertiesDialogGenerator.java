@@ -28,4 +28,11 @@ public class CameraPropertiesDialogGenerator implements CameraPropertiesDialogCo
    {
       new CameraPropertiesDialog(parentContainer, frame, trackCheckBox, dollyCheckBox, cameraHolder);
    }
+
+   public void closeAndDispose()
+   {
+      cameraHolder = null;
+      parentContainer = null;
+      frame = null;
+   }
 }

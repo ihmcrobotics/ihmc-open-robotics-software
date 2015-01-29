@@ -246,7 +246,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private final boolean showGUI;
    private StandardSimulationGUI myGUI;
-   private final StandardAllCommandsExecutor standardAllCommandsExecutor;
+   private StandardAllCommandsExecutor standardAllCommandsExecutor;
 
    private VarGroupList varGroupList = new VarGroupList();
    private YoVariableRegistry rootRegistry;
@@ -1167,6 +1167,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       rootRegistry = null;
 
+      
+      if (standardAllCommandsExecutor != null)
+      {
+         standardAllCommandsExecutor.closeAndDispose();
+         standardAllCommandsExecutor = null;
+      }
+      
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Disposing StandardSimulationGUI");
 

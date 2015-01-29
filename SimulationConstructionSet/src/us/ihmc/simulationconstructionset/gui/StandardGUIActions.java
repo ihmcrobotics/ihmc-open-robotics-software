@@ -1193,14 +1193,14 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
    protected void makeCheckBoxesConsistentWithCamera()
    {
-      trackCheckBox.makeCheckBoxConsistent();
-      dollyCheckBox.makeCheckBoxConsistent();
+      if (trackCheckBox != null) trackCheckBox.makeCheckBoxConsistent();
+      if (dollyCheckBox != null) dollyCheckBox.makeCheckBoxConsistent();
    }
 
    protected void makeCameraConsistentWithCheckBoxes()
    {
-      trackCheckBox.makeCameraConsistent();
-      dollyCheckBox.makeCameraConsistent();
+      if (trackCheckBox != null) trackCheckBox.makeCameraConsistent();
+      if (dollyCheckBox != null) dollyCheckBox.makeCameraConsistent();
 
    }
 
@@ -1243,8 +1243,6 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
    public void closeAndDispose()
    {
-      //      allCommandsExecutor = null;
-
       if (guiActions != null)
       {
          guiActions.clear();

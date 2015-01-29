@@ -565,6 +565,12 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
       }
    }
 
+   public void closeAndDispose()
+   {
+      sim = null;
+      fileChooser = null;
+   }
+
 // private void printJointsAndPositions(Joint joint)
 // {
 //    Matrix3d rotation = new Matrix3d();

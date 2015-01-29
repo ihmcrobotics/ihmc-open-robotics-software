@@ -28,14 +28,15 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class ViewportPanel extends JPanel implements CameraSelector, ActiveCameraHolder, ActiveCanvas3DHolder
 {
    private static final long serialVersionUID = -2903057563160516887L;
-   private final ArrayList<ViewportAdapterAndCameraControllerHolder> standard3DViews = new ArrayList<ViewportAdapterAndCameraControllerHolder>();
-   private final ArrayList<Canvas3DPanel> canvasPanels = new ArrayList<Canvas3DPanel>();
+   private static final boolean DEBUG_CLOSE_AND_DISPOSE = false;
+   private ArrayList<ViewportAdapterAndCameraControllerHolder> standard3DViews = new ArrayList<ViewportAdapterAndCameraControllerHolder>();
+   private ArrayList<Canvas3DPanel> canvasPanels = new ArrayList<Canvas3DPanel>();
    private ViewportAdapterAndCameraControllerHolder activeView;
    private CameraConfigurationList cameraConfigurationList;
    private CameraMountList cameraMountList;
    private YoVariableHolder yoVariableHolder;
-   private final RunCommandsExecutor runCommandsExecutor;
-   private final Graphics3DAdapter graphics3DAdapter;
+   private RunCommandsExecutor runCommandsExecutor;
+   private Graphics3DAdapter graphics3DAdapter;
 
    private StandardGUIActions standardGUIActions;
 
@@ -307,14 +308,23 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
 
    public void closeAndDispose()
    {
+      if (DEBUG_CLOSE_AND_DISPOSE) System.out.println("Closing and Disposing things in " + getClass().getSimpleName());
+      
       if (standard3DViews != null)
       {
          clearStandard3DViews();
+         standard3DViews = null;
       }
 
       if (canvasPanels != null)
       {
+         for (Canvas3DPanel canvas3dPanel : canvasPanels)
+         {
+            canvas3dPanel.closeAndDispose();
+         }
+         
          canvasPanels.clear();
+         canvasPanels = null;
       }
 
       activeView = null;
@@ -323,7 +333,8 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       cameraMountList = null;
       yoVariableHolder = null;
       standardGUIActions = null;
-
+      runCommandsExecutor = null;
+      graphics3DAdapter = null;
    }
 
    // public YoCanvas3D getCanvas3D(){return activeView.getCanvas3D();}
@@ -418,6 +429,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       for (ViewportAdapterAndCameraControllerHolder viewportAdapterAndCameraControllerHolder : standard3DViews)
       {
          graphics3DAdapter.closeViewport(viewportAdapterAndCameraControllerHolder.getViewportAdapter());
+         viewportAdapterAndCameraControllerHolder.closeAndDispose();
       }
 
       standard3DViews.clear();

@@ -296,6 +296,10 @@ public class ActionsTest
          {
             executorCalled[2] = true;
          }
+
+         public void closeAndDispose()
+         {            
+         }
       };
 
       HideShowViewportAction action = new HideShowViewportAction(executor);
@@ -586,6 +590,10 @@ public class ActionsTest
       public void registerToggleKeyPointModeCommandListener(ToggleKeyPointModeCommandListener commandListener)
       {
          executorCalled[2] = true;
+      }
+
+      public void closeAndDispose()
+      {         
       }
     };
 

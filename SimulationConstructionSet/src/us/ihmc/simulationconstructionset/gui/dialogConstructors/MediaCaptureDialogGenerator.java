@@ -12,14 +12,14 @@ import us.ihmc.simulationconstructionset.movies.MovieSaveDialog;
 
 public class MediaCaptureDialogGenerator implements MediaCaptureDialogConstructor
 {
-   private final ViewportSelectorCommandExecutor viewportSelector;
-   private final GUIEnablerAndDisabler guiEnablerAndDisabler;
-   private final StopCommandExecutor stopCommandExecutor;
-   private final ExportMovieCommandExecutor exportMovieCommandExecutor;
-   private final StandardSimulationGUI myGUI;
+   private ViewportSelectorCommandExecutor viewportSelector;
+   private GUIEnablerAndDisabler guiEnablerAndDisabler;
+   private StopCommandExecutor stopCommandExecutor;
+   private ExportMovieCommandExecutor exportMovieCommandExecutor;
+   private StandardSimulationGUI myGUI;
    
-   private final StandardGUIActions standardGUIActions;
-   private final ActiveCanvas3DHolder activeCanvas3DHolder;
+   private StandardGUIActions standardGUIActions;
+   private ActiveCanvas3DHolder activeCanvas3DHolder;
    
    
    public MediaCaptureDialogGenerator(ExportMovieCommandExecutor exportMovieCommandExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler,
@@ -45,6 +45,18 @@ public class MediaCaptureDialogGenerator implements MediaCaptureDialogConstructo
       stopCommandExecutor.stop();
       new MovieSaveDialog(null, myGUI, standardGUIActions, activeCanvas3DHolder, exportMovieCommandExecutor, guiEnablerAndDisabler);    
 
+   }
+
+   public void closeAndDispose()
+   {
+      viewportSelector = null;
+      guiEnablerAndDisabler = null;
+      stopCommandExecutor = null;
+      exportMovieCommandExecutor = null;
+      myGUI = null;
+
+      standardGUIActions = null;
+      activeCanvas3DHolder = null;
    }
 }
 

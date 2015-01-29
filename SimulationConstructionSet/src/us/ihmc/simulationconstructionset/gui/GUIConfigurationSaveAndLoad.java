@@ -203,7 +203,7 @@ public class GUIConfigurationSaveAndLoad
 
    public void setupMultiViews(String xmlRepresentation)
    {
-      myGUI.mainPanel.add(myGUI.viewportPanel); //TODO: Why is this here?
+      myGUI.addViewportPanelToMainPanel(); //TODO: Why is this here? 
       String currentView = XMLReaderUtility.getMiddleString(0, xmlRepresentation, "<Current View>", "</Current View>");
       myGUI.selectViewport(currentView);
       myGUI.setupMultiViews(xmlRepresentation, currentView);

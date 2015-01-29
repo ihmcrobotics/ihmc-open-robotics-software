@@ -112,5 +112,15 @@ public class SaveConfigurationDialogGenerator implements SaveConfigurationDialog
       return textToWrite;
    }
 
+   public void closeAndDispose()
+   {
+      dataFileFilter = null;
+      chosenFile = null;
+      dataFileChooser = null;
+      frame = null;
+      myGUI = null;
+      sim = null;
+   }
+
 }
 

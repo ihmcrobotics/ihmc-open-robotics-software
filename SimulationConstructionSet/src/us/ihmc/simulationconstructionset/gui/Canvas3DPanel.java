@@ -135,4 +135,11 @@ public class Canvas3DPanel extends JPanel implements MouseListener
       {
       }
    }
+   
+   public void closeAndDispose()
+   {
+      view = null;
+      viewportPanel = null;
+      border =  null;
+   }
 }

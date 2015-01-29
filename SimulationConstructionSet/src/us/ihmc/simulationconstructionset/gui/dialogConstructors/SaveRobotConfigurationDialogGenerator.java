@@ -104,4 +104,12 @@ public class SaveRobotConfigurationDialogGenerator implements SaveRobotConfigura
 
    }
 
+   public void closeAndDispose()
+   {
+      dataFileFilter = null;
+      dataFileChooser = null;
+      frame = null;
+      sim = null;
+   }
+
 }

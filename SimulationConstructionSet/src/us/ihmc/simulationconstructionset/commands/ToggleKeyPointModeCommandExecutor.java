@@ -6,5 +6,6 @@ public interface ToggleKeyPointModeCommandExecutor
    public abstract void toggleKeyPointMode();
    
    public abstract void registerToggleKeyPointModeCommandListener(ToggleKeyPointModeCommandListener commandListener);
+   public abstract void closeAndDispose();
 
 }

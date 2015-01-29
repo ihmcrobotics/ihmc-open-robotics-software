@@ -168,4 +168,16 @@ public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstr
       }
    }
 
+   public void closeAndDispose()
+   {      
+       dataFileFilter = null;
+       chosenFile = null;
+       dataFileChooser = null;
+       frame = null;
+       guiEnablerAndDisabler = null;
+       graphArrayPanel = null;
+       myGUI = null;
+       graphGroupSelector = null;
+   }
+
 }

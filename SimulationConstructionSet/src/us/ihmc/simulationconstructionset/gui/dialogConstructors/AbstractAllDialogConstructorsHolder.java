@@ -251,6 +251,10 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          public void loadGraphGroupFile(File file)
          {            
          }
+
+         public void closeAndDispose()
+         {
+         }
       };
    }
 
@@ -285,6 +289,11 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          {
          }
       };
+   }
+
+
+   public void closeAndDispose()
+   {      
    }
 
 }

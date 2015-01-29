@@ -51,7 +51,7 @@ public class DollyCheckBox extends JCheckBox implements ActionListener
          public void run()
          {
             CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();
-            setSelected(camera.isDolly());
+            if (camera != null) setSelected(camera.isDolly());
          }
 
       });

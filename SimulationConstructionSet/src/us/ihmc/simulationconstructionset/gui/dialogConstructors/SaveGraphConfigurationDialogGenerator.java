@@ -116,4 +116,14 @@ public class SaveGraphConfigurationDialogGenerator implements SaveGraphConfigura
       return textToWrite;
    }
 
+   public void closeAndDispose()
+   {
+      dataFileFilter = null;
+      chosenFile = null;
+      dataFileChooser = null;
+      frame = null;
+      guiEnablerAndDisabler = null;
+      graphArrayPanel = null;
+   }
+
 }

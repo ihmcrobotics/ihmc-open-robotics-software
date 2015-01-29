@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListene
 public class HideShowViewportAction extends AbstractAction implements ViewportSelectorCommandListener
 {
    private static final long serialVersionUID = 1774088226210361744L;
-   private final ViewportSelectorCommandExecutor viewportSelector;
+   private ViewportSelectorCommandExecutor viewportSelector;
 
    public HideShowViewportAction(ViewportSelectorCommandExecutor viewportSelector)
    {
@@ -48,6 +48,13 @@ public class HideShowViewportAction extends AbstractAction implements ViewportSe
       {
          putValue(NAME, "Hide Viewport");
       }
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      if (viewportSelector != null) viewportSelector.closeAndDispose();
+      viewportSelector = null;
    }
 
 }

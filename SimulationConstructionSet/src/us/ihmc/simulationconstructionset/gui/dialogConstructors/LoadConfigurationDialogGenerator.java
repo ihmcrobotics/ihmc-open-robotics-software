@@ -252,7 +252,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
 
    public void setupMultiViews(String xmlRepresentation)
    {
-      myGUI.mainPanel.add(myGUI.viewportPanel); //TODO: Why is this here?
+      myGUI.addViewportPanelToMainPanel(); //TODO: Why is this here?
       String CurrentView = XMLReaderUtility.getMiddleString(0, xmlRepresentation, "<Current View>", "</Current View>");
       myGUI.selectViewport(CurrentView);
       myGUI.setupMultiViews(xmlRepresentation, CurrentView);
@@ -394,6 +394,15 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
       sim.setupEntryBoxGroup(file.getName(), name);
       myGUI.updateGUI();
       myGUI.selectEntryBoxGroup(file.getName());
+   }
+
+   public void closeAndDispose()
+   {
+      dataFileFilter = null;
+      dataFileChooser = null;
+      frame = null;
+      myGUI = null;
+      sim = null;
    }
 }
 

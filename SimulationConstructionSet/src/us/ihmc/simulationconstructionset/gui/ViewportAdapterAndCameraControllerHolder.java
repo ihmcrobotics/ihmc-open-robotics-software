@@ -5,8 +5,8 @@ import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 
 public class ViewportAdapterAndCameraControllerHolder
 {
-   private final ViewportAdapter viewportAdapter;
-   private final TrackingDollyCameraController trackingDollyCameraController;
+   private ViewportAdapter viewportAdapter;
+   private TrackingDollyCameraController trackingDollyCameraController;
 
    public ViewportAdapterAndCameraControllerHolder(ViewportAdapter viewportAdapter, TrackingDollyCameraController trackingDollyCameraController)
    {
@@ -22,6 +22,12 @@ public class ViewportAdapterAndCameraControllerHolder
    public TrackingDollyCameraController getCameraController()
    {
       return trackingDollyCameraController;
+   }
+
+   public void closeAndDispose()
+   {
+      viewportAdapter = null;
+      trackingDollyCameraController = null;
    }
 
 }

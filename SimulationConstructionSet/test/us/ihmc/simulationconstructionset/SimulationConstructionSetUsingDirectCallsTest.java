@@ -1268,6 +1268,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
          {
             toggleKeyPointModeCommandListenerHasBeenCalled.set(true);
          }
+
+         public void closeAndDispose()
+         {            
+         }
       };
       
       return toggleKeyPointModeCommandListener;
