@@ -12,20 +12,17 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class FullyConstrainedState extends AbstractFootControlState
 {
    private final FrameVector fullyConstrainedNormalContactVector;
-   private final BooleanYoVariable doFancyOnToesControl;
 
    private final YoSE3PIDGains gains;
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    public FullyConstrainedState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector, BooleanYoVariable doFancyOnToesControl, YoSE3PIDGains gains,
-         YoVariableRegistry registry)
+         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
-      this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
-      this.doFancyOnToesControl = doFancyOnToesControl;
+      this.fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       this.gains = gains;
       this.partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
    }
@@ -48,9 +45,6 @@ public class FullyConstrainedState extends AbstractFootControlState
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
       partialFootholdControlModule.applyShrunkPolygon(contactState);
-
-      if (doFancyOnToesControl.getBooleanValue())
-         determineCoPOnEdge();
 
       if (gains == null)
       {

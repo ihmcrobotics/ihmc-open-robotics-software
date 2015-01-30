@@ -82,7 +82,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       super.doTransitionIntoAction();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
 
-      isCoPOnEdge = false;
       initializeTrajectory();
 
       accelerationControlModule.setGains(gains);
