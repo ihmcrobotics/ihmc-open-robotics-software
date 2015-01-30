@@ -75,7 +75,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
          joints.add(joint);
       }
 
-      ReferenceFrame footFrame = contactableBody.getFrameAfterParentJoint();
+      ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();

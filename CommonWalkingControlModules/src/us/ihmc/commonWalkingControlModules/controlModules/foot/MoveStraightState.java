@@ -25,7 +25,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
    {
       super(ConstraintType.MOVE_STRAIGHT, footControlHelper, gains, registry);
 
-      RigidBody rigidBody = contactableBody.getRigidBody();
+      RigidBody rigidBody = contactableFoot.getRigidBody();
       String namePrefix = rigidBody.getName();
 
       finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "MoveStraightFootFinal", worldFrame, registry);

@@ -87,7 +87,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
-      RigidBody rigidBody = contactableBody.getRigidBody();
+      RigidBody rigidBody = contactableFoot.getRigidBody();
       VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);

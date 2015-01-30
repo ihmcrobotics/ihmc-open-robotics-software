@@ -21,7 +21,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    protected final RobotSide robotSide;
    protected final RigidBody rootBody;
-   protected final ContactablePlaneBody contactableBody;
+   protected final ContactablePlaneBody contactableFoot;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
@@ -38,7 +38,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       super(stateEnum);
 
       this.footControlHelper = footControlHelper;
-      this.contactableBody = footControlHelper.getContactableFoot();
+      this.contactableFoot = footControlHelper.getContactableFoot();
 
       this.momentumBasedController = footControlHelper.getMomentumBasedController();
 
