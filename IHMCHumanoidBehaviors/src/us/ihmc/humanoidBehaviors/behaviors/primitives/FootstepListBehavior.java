@@ -141,6 +141,7 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
+      sendPacketToController(new PauseCommand(true));
       isStopped.set(true);
    }
 
