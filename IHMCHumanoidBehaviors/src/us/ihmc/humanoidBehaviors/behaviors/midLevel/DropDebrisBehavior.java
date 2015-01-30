@@ -48,7 +48,6 @@ public class DropDebrisBehavior extends BehaviorInterface
 
    private final DoubleYoVariable yoTime;
 
-
    public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
@@ -56,7 +55,7 @@ public class DropDebrisBehavior extends BehaviorInterface
       this.yoTime = yoTime;
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
-      
+
       zHeightOffsetFromChestFrameForMidPoint = new DoubleYoVariable("zHeightOffsetFromChestFrameForMidPoint", registry);
       zHeightOffsetFromChestFrameForMidPoint.set(0.27);
 
@@ -66,7 +65,7 @@ public class DropDebrisBehavior extends BehaviorInterface
 
       handReferenceFrames.put(RobotSide.LEFT, fullRobotModel.getHandControlFrame(RobotSide.LEFT));
       handReferenceFrames.put(RobotSide.RIGHT, fullRobotModel.getHandControlFrame(RobotSide.RIGHT));
-      
+
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
    }
 
@@ -82,12 +81,12 @@ public class DropDebrisBehavior extends BehaviorInterface
       if (side == RobotSide.LEFT)
       {
          dropLocationPose.translate(0.3, 0.7, -0.1);
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(dropRotation, -Math.PI / 2, Math.PI/2, 0);
+         RotationFunctions.setQuaternionBasedOnYawPitchRoll(dropRotation, -Math.PI / 2, Math.PI / 2, 0);
       }
       else
       {
          dropLocationPose.translate(0.3, -0.7, -0.1);
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(dropRotation, Math.PI / 2, Math.PI/2, 0);
+         RotationFunctions.setQuaternionBasedOnYawPitchRoll(dropRotation, Math.PI / 2, Math.PI / 2, 0);
       }
       dropLocationPose.setOrientation(dropRotation);
       dropLocationPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -102,13 +101,13 @@ public class DropDebrisBehavior extends BehaviorInterface
       getMidPose();
       midPose.getPose(tempPose);
       taskExecutor.submit(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
-                  
+
       getDropLocation(side);
       dropLocationPose.getPose(tempPose);
       taskExecutor.submit(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
-      
+
       taskExecutor.submit(new HandPoseTask(PacketControllerTools.createGoToHomePacket(side, 3.0), handPoseBehavior, yoTime));
 
    }
@@ -119,7 +118,6 @@ public class DropDebrisBehavior extends BehaviorInterface
       midPose.changeFrame(chestFrame);
       dropLocationPose.changeFrame(chestFrame);
       dropLocationPose.setToZero(chestFrame);
-
    }
 
    @Override
@@ -138,13 +136,19 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
+      if (taskExecutor.getCurrentTask() instanceof HandPoseTask)
+         handPoseBehavior.consumeObjectFromNetworkProcessor(object);
+      if (taskExecutor.getCurrentTask() instanceof FingerStateTask)
+         fingerStateBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromController(object);
+      if (taskExecutor.getCurrentTask() instanceof HandPoseTask)
+         handPoseBehavior.consumeObjectFromController(object);
+      if (taskExecutor.getCurrentTask() instanceof FingerStateTask)
+         fingerStateBehavior.consumeObjectFromController(object);
    }
 
    @Override
@@ -174,7 +178,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return taskExecutor.isDone();
+      return (taskExecutor.isDone() && hasInputBeenSet());
    }
 
    @Override

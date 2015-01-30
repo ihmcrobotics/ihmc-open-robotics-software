@@ -140,7 +140,6 @@ public class FingerStateBehavior extends BehaviorInterface
       isStopped.set(false);
       trajectoryTime.set(1.0); //hardCoded to be determined
       
-      
       trajectoryTimeElapsed.set(false);
    }
 

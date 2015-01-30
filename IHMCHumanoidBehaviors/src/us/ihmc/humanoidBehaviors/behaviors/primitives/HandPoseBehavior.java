@@ -183,7 +183,7 @@ public class HandPoseBehavior extends BehaviorInterface
    {
       checkForHandPoseStatus();
 
-      if (status == Status.COMPLETED)
+      if (status == Status.COMPLETED && hasInputBeenSet())
       {
          isDone.set(true);
       }
