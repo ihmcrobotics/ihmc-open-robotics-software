@@ -3,26 +3,23 @@ package us.ihmc.robotDataCommunication.logger;
 import java.io.File;
 import java.io.IOException;
 
-import us.ihmc.communication.net.TimestampListener;
 import us.ihmc.robotDataCommunication.logger.util.BMDCapture;
 import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 
-public class VideoDataLogger implements TimestampListener
+public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface
 {
-   private static final String timestampDataPostfix = "Timestamps.dat";
-   private static final String videoPostfix = "Video.mov";
 
    /**
     * Make sure to set a progressive mode, otherwise the timestamps will be all wrong!
     */
 
    private final PipedCommandExecutor commandExecutor;
-   private final String videoFile;
-   private final String timestampData;
 
-   public VideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
+
+   public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
    {
+      super(logPath, logProperties, settings.getDescription(), settings.isInterlaced());
       logProperties.addVideoFile(settings.getDescription());
       logProperties.setInterlaced(settings.getDescription(), settings.isInterlaced());
       String videoFilename = settings.getDescription() + videoPostfix;
@@ -36,7 +33,6 @@ public class VideoDataLogger implements TimestampListener
       bmdCapture.setVideoIn(settings.getVideoIn());
       bmdCapture.setFormat("nut");
       bmdCapture.setFilename("pipe:1");
-      timestampData = logPath.getAbsolutePath() + File.separator + timestampDataFilename;
       bmdCapture.setTimestampData(timestampData);
 
       FFMpeg avconv = new FFMpeg();
@@ -44,7 +40,6 @@ public class VideoDataLogger implements TimestampListener
       avconv.setVideoCodec(options.getVideoCodec());
       avconv.setQuality(options.getVideoQuality());
       avconv.setInputFile("-");
-      videoFile = logPath.getAbsolutePath() + File.separator + videoFilename;
       avconv.setOutputFile(videoFile);
 
       commandExecutor = new PipedCommandExecutor(bmdCapture, avconv);
@@ -52,6 +47,10 @@ public class VideoDataLogger implements TimestampListener
 
    }
    
+   /* (non-Javadoc)
+    * @see us.ihmc.robotDataCommunication.logger.VideoDataLoggerInterface#restart()
+    */
+   @Override
    public void restart() throws IOException
    {
       close();
@@ -59,11 +58,19 @@ public class VideoDataLogger implements TimestampListener
       commandExecutor.execute();
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.robotDataCommunication.logger.VideoDataLoggerInterface#timestampChanged(long)
+    */
+   @Override
    public void timestampChanged(long newTimestamp)
    {
       commandExecutor.writeln(Long.toString(newTimestamp));
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.robotDataCommunication.logger.VideoDataLoggerInterface#close()
+    */
+   @Override
    public void close()
    {
       System.out.println("Signalling recorder");
@@ -71,21 +78,6 @@ public class VideoDataLogger implements TimestampListener
       commandExecutor.waitFor();
    }
 
-   public void removeLogFiles()
-   {
-      File timestampFile = new File(timestampData);
-      if (timestampFile.exists())
-      {
-         System.out.println("Deleting timestamp data " + timestampData);
-         timestampFile.delete();
-      }
 
-      File videoFileFile = new File(videoFile);
-      if (videoFileFile.exists())
-      {
-         System.out.println("Deleting video file " + videoFile);
-         videoFileFile.delete();
-      }
-   }
 
 }

@@ -5,12 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
@@ -43,6 +45,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private FileChannel dataChannel;
    private FileChannel indexChannel;
 
+   private final AnnounceRequest request;
+   
    private final ByteBuffer indexBuffer = ByteBuffer.allocate(16);
    private ByteBuffer compressedBuffer;
 
@@ -51,10 +55,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private long totalTimeout = 0;
 
    private final LogPropertiesWriter logProperties;
-   private ArrayList<VideoDataLogger> videoDataLoggers = new ArrayList<VideoDataLogger>();
+   private ArrayList<VideoDataLoggerInterface> videoDataLoggers = new ArrayList<VideoDataLoggerInterface>();
 
    private final ArrayList<VideoSettings> cameras = new ArrayList<>();
-
+   private final InetSocketAddress videoStreamAddress;
+   
    private boolean clearingLog = false;
 
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
@@ -62,6 +67,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       this.tempDirectory = tempDirectory;
       this.finalDirectory = finalDirectory;
       this.options = options;
+      this.request = request;
       logProperties = new LogPropertiesWriter(new File(tempDirectory, propertyFile));
       logProperties.setHandshakeFile(handshakeFilename);
       logProperties.setVariableDataFile(dataFilename);
@@ -80,6 +86,16 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          for (int camera : request.getCameras())
          {
             cameras.add(cameraSettings.get(camera));
+         }
+         
+         if(request.hasVideoStream())
+         {
+            videoStreamAddress = new InetSocketAddress(LogUtils.getByAddress(request.getVideoStream()), request.getVideoPort());
+            System.out.println("Video stream: " + videoStreamAddress);
+         }
+         else
+         {
+            videoStreamAddress = null;
          }
 
          configuration.close();
@@ -183,7 +199,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          e.printStackTrace();
       }
 
-      for (VideoDataLogger videoDataLogger : videoDataLoggers)
+      for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
       {
          videoDataLogger.close();
       }
@@ -200,7 +216,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       if (!connected)
       {
          System.err.println("Never started logging, cleaning up");
-         for (VideoDataLogger videoDataLogger : videoDataLoggers)
+         for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
          {
             videoDataLogger.removeLogFiles();
          }
@@ -344,7 +360,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             for (VideoSettings camera : cameras)
             {
-               videoDataLoggers.add(new VideoDataLogger(tempDirectory, logProperties, camera, options));
+               videoDataLoggers.add(new BlackmagicVideoDataLogger(tempDirectory, logProperties, camera, options));
+            }
+            
+            if(videoStreamAddress != null)
+            {
+               videoDataLoggers.add(new NetworkStreamVideoDataLogger(request, tempDirectory, logProperties, options, videoStreamAddress));
             }
          }
          catch (IOException e)
@@ -358,7 +379,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    @Override
    public void timestampReceived(long timestamp)
    {
-      for (VideoDataLogger videoDataLogger : videoDataLoggers)
+      for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
       {
          videoDataLogger.timestampChanged(timestamp);
       }
@@ -376,7 +397,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          System.out.println("Clearing log.");
          dataChannel.truncate(0);
          indexChannel.truncate(0);
-         for (VideoDataLogger videoDataLogger : videoDataLoggers)
+         for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
          {
             videoDataLogger.restart();
          }
