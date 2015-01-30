@@ -124,8 +124,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -143,8 +143,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testTurn90WalkTurnNeg90() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -163,17 +163,77 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testStopBehavior() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      double walkDistance = 4.0;
+      Vector2d walkDirection = new Vector2d(1, 0);
+      double trajectoryTime = walkDistance / ASSUMED_WALKING_SPEED_mPerSec;
+
+      FramePose2d initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2d desiredMidFeetPose = createDesiredPose2d(walkDistance, walkDirection);
+      WalkToLocationBehavior walkToLocationBehavior = createWalkToLocationBehavior(desiredMidFeetPose);
+      
+      double percentDistanceToWalkBeforeStop = 50.0;
+      success = executeBehavior(walkToLocationBehavior, trajectoryTime, initialMidFeetPose, desiredMidFeetPose, percentDistanceToWalkBeforeStop);
+      assertTrue(success);
+
+      walkToLocationBehavior.stop();
+      assertTrue(success);
+      assertTrue( !walkToLocationBehavior.isDone() );
+      FramePose2d midFeetPoseAfterStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      
+      success = executeBehavior(walkToLocationBehavior, 2.0);
+      assertTrue(success);
+      FramePose2d midFeetPoseFinal = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      
+      assertPosesAreWithinThresholds(midFeetPoseAfterStop, midFeetPoseFinal);
+      
+      double percentDistanceWalked = getPercentDistanceWalked(initialMidFeetPose, desiredMidFeetPose);
+      
+      assertEquals(percentDistanceToWalkBeforeStop, percentDistanceWalked, 30.0);
+     
+      BambooTools.reportTestFinishedMessage();
+   }
+
    private WalkToLocationBehavior testWalkToLocationBehavior(double walkDistance, Vector2d walkDirection, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-//      FramePose2d initialMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
+      FramePose2d desiredMidFeetPose = createDesiredPose2d(walkDistance, walkDirection);
+      WalkToLocationBehavior walkToLocationBehavior = createWalkToLocationBehavior(desiredMidFeetPose);
+
+      boolean success = executeBehavior(walkToLocationBehavior, trajectoryTime);
+      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      //      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
+
+      assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
+      assertTrue(success);
+
+      return walkToLocationBehavior;
+   }
+
+   private FramePose2d createDesiredPose2d(double walkDistance, Vector2d walkDirection)
+   {
+      //      FramePose2d initialMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
       FramePose2d initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      SysoutTool.println(" initial Midfeet Pose :\n" + initialMidFeetPose + "\n", DEBUG);
+
       FramePose2d desiredMidFeetPose = new FramePose2d(initialMidFeetPose);
 
       walkDirection.normalize();
       desiredMidFeetPose.setX(initialMidFeetPose.getX() + walkDistance * walkDirection.getX());
       desiredMidFeetPose.setY(initialMidFeetPose.getY() + walkDistance * walkDirection.getY());
 
+      return desiredMidFeetPose;
+   }
+
+   private WalkToLocationBehavior createWalkToLocationBehavior(FramePose2d desiredMidFeetPose)
+   {
       final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
       communicationBridge.attachGlobalListenerToController(walkToLocationBehavior.getControllerGlobalPacketConsumer());
@@ -181,20 +241,18 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(desiredMidFeetPose);
 
-      boolean success = executeBehavior(walkToLocationBehavior, trajectoryTime);
-      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
-//      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
-
-      SysoutTool.println(" initial Midfeet Pose :\n" + initialMidFeetPose + "\n", DEBUG);
-
-      assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
-
-      assertTrue(success);
-
       return walkToLocationBehavior;
    }
-
+   
    private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      boolean success = executeBehavior(behavior, trajectoryTime, new FramePose2d(), new FramePose2d(), 100.0);
+      
+      return success;
+   }
+
+
+   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime, final FramePose2d initialMidFeetPose, final FramePose2d desiredMidFeetPose, final double percentToWalk) throws SimulationExceededMaximumTimeException
    {
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
 
@@ -212,6 +270,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
                double startTime = Double.NaN;
                boolean simStillRunning = true;
                boolean initalized = false;
+               boolean behaviorIsStopped = false;
 
                while (simStillRunning)
                {
@@ -226,6 +285,18 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
                   robotDataReceiver.updateRobotModel();
                   behavior.doControl();
+                  
+                  if( percentToWalk < 100.0 )
+                  {
+                     double percentWalked = getPercentDistanceWalked(initialMidFeetPose, desiredMidFeetPose);
+                     
+                     if (percentWalked > percentToWalk  && !behaviorIsStopped)
+                     {
+                        SysoutTool.println("Stopping Walking.  Percent of total distance walked = " + percentWalked, DEBUG);
+                        behavior.stop();
+                        behaviorIsStopped = true;
+                     }
+                  }
                }
             }
          }
@@ -254,6 +325,19 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       ret.setPoseIncludingFrame(midFeetPose.getReferenceFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
+   }
+   
+   private double getPercentDistanceWalked(FramePose2d initialMidFeetPose, FramePose2d finalDesiredMidFeetPose)
+   {
+      double totalDistanceToWalk = initialMidFeetPose.getPositionDistance(finalDesiredMidFeetPose);
+      
+      FramePose2d currentMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      
+      double distanceWalked = initialMidFeetPose.getPositionDistance(currentMidFeetPose);
+      
+      double percentDistanceWalked = 100.0 * distanceWalked / totalDistanceToWalk;
+      
+      return percentDistanceWalked;
    }
 
    private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFRobot robot)

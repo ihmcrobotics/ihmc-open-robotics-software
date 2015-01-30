@@ -178,6 +178,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
+      footstepListBehavior.stop();
       isStopped.set(true);
    }
 
