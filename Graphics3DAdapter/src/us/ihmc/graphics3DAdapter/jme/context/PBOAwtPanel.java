@@ -345,4 +345,23 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor {
 
     public void cleanup() {
     }
+
+    public void closeAndDispose()
+    {
+       img = null;
+       fb = null;
+       rm = null;
+
+       if (viewPorts != null)
+       {
+          viewPorts.clear();
+          viewPorts = null;
+       }
+
+       if (pboAwtPanelListeners != null)
+       {
+          pboAwtPanelListeners.clear();
+          pboAwtPanelListeners = null;
+       } 
+   }
 }

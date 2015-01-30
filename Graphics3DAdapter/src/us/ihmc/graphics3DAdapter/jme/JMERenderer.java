@@ -922,6 +922,11 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       
       if (pboAwtPanels != null)
       {
+         for (PBOAwtPanel  pboAwtPanel : pboAwtPanels)
+         {
+            pboAwtPanel.closeAndDispose();
+         }
+         
          pboAwtPanels.clear();
          pboAwtPanels = null;
       }

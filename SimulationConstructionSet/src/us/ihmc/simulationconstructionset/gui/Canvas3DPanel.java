@@ -25,14 +25,16 @@ public class Canvas3DPanel extends JPanel implements MouseListener
    private boolean active = false;
 
    private AbstractBorder border;
-
+   private Canvas canvas;
+   private SpaceKeyListener spaceKeyListener;
+   
    public Canvas3DPanel(RunCommandsExecutor runCommandsExecutor, ViewportAdapterAndCameraControllerHolder viewportAdapterAndCameraControllerHolder, ViewportPanel viewportPanel)
    {
       super(new GridLayout(1, 1));
       this.view = viewportAdapterAndCameraControllerHolder;
       this.viewportPanel = viewportPanel;
 
-      Canvas canvas = viewportAdapterAndCameraControllerHolder.getViewportAdapter().getCanvas();
+      canvas = viewportAdapterAndCameraControllerHolder.getViewportAdapter().getCanvas();
       this.add(canvas);
 
       this.setRequestFocusEnabled(true);
@@ -44,7 +46,8 @@ public class Canvas3DPanel extends JPanel implements MouseListener
       border = BorderFactory.createCompoundBorder(raisedbevel, loweredbevel);
 
       this.setBorder(border);
-      canvas.addKeyListener(new SpaceKeyListener(runCommandsExecutor));
+      spaceKeyListener = new SpaceKeyListener(runCommandsExecutor);
+      canvas.addKeyListener(spaceKeyListener);
    }
 
    public ViewportAdapterAndCameraControllerHolder getStandard3DView()
@@ -106,7 +109,7 @@ public class Canvas3DPanel extends JPanel implements MouseListener
 
    private class SpaceKeyListener implements KeyListener
    {
-      private final RunCommandsExecutor runCommandsExecutor;
+      private RunCommandsExecutor runCommandsExecutor;
 
       public SpaceKeyListener(RunCommandsExecutor runCommandsExecutor)
       {
@@ -134,10 +137,28 @@ public class Canvas3DPanel extends JPanel implements MouseListener
       public void keyPressed(KeyEvent e)
       {
       }
+
+      public void closeAndDispose()
+      {
+         this.runCommandsExecutor = null;
+      }
    }
    
    public void closeAndDispose()
    {
+      this.removeAll();
+
+      if (canvas != null)
+      {
+         canvas.removeKeyListener(spaceKeyListener);
+         canvas = null;
+      }
+
+      if (spaceKeyListener != null)
+      {
+         spaceKeyListener.closeAndDispose();
+      }
+
       view = null;
       viewportPanel = null;
       border =  null;
