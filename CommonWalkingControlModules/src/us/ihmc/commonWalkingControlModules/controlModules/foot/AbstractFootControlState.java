@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.List;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -9,11 +7,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -26,7 +22,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.stateMachines.State;
-
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {
@@ -62,12 +57,11 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final BooleanYoVariable jacobianDeterminantInRange;
    protected final BooleanYoVariable doSingularityEscape;
    protected final DenseMatrix64F selectionMatrix;
-   protected boolean isCoPOnEdge;
    protected FrameLineSegment2d edgeToRotateAbout;
    protected final RobotSide robotSide;
 
-   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
+   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
    {
       super(stateEnum);
 
@@ -135,46 +129,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
          nullspaceMultipliers.reshape(0, 1);
          doSingularityEscape.set(false);
       }
-   }
-
-   private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
-   private final FrameOrientation currentOrientation = new FrameOrientation();
-
-   protected void determineCoPOnEdge()
-   {
-      FramePoint2d cop = momentumBasedController.getDesiredCoP(contactableBody);
-
-      if (cop == null || cop.containsNaN())
-      {
-         isCoPOnEdge = false;
-      }
-      else
-      {
-         List<FramePoint2d> contactPoints = contactableBody.getContactPoints2d();
-         contactPolygon.setIncludingFrameAndUpdate(contactPoints);
-         cop.changeFrame(contactPolygon.getReferenceFrame());
-         FrameLineSegment2d closestEdge = contactPolygon.getClosestEdge(cop);
-         boolean copOnEdge = closestEdge.distance(cop) < EPSILON_POINT_ON_EDGE;
-         boolean hasCoPBeenOnEdge = isCoPOnEdge;
-         if (copOnEdge && !hasCoPBeenOnEdge)
-         {
-            currentOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
-            currentOrientation.changeFrame(worldFrame);
-         }
-         isCoPOnEdge = copOnEdge;
-
-         edgeToRotateAbout = closestEdge;
-      }
-   }
-
-   public boolean isCoPOnEdge()
-   {
-      return isCoPOnEdge;
-   }
-
-   public void setCoPOnEdge(boolean isCoPOnEdge)
-   {
-      this.isCoPOnEdge = isCoPOnEdge;
    }
 
    @Override

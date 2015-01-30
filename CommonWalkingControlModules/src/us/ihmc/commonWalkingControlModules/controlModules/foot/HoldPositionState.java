@@ -24,11 +24,11 @@ public class HoldPositionState extends AbstractFootControlState
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    public HoldPositionState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, YoVariableRegistry registry)
+         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
-      this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
+      this.fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       this.gains = gains;
       this.pelvisBody = momentumBasedController.getFullRobotModel().getPelvis();
       this.partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
@@ -68,7 +68,6 @@ public class HoldPositionState extends AbstractFootControlState
       partialFootholdControlModule.applyShrunkPolygon(contactState);
 
       accelerationControlModule.setGains(gains);
-      determineCoPOnEdge();
 
       RigidBody baseForControl = CONTROL_WRT_PELVIS ? pelvisBody : rootBody;
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,

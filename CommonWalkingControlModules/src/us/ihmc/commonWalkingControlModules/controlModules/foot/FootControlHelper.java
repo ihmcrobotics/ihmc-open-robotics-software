@@ -5,6 +5,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -16,6 +19,8 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 
 public class FootControlHelper
 {
+   private static final double EPSILON_POINT_ON_EDGE = 1e-2;
+
    private final RobotSide robotSide;
    private final ContactablePlaneBody contactableFoot;
    private final MomentumBasedController momentumBasedController;
@@ -27,6 +32,9 @@ public class FootControlHelper
    private final int jacobianId;
    private final GeometricJacobian jacobian;
    private final EnumYoVariable<ConstraintType> requestedState;
+   private final FrameVector fullyConstrainedNormalContactVector;
+
+   private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
@@ -55,6 +63,20 @@ public class FootControlHelper
       jacobian = momentumBasedController.getJacobian(jacobianId);
 
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+
+      fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+
+      contactPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
+   }
+
+   protected boolean isCoPOnEdge()
+   {
+      FramePoint2d cop = momentumBasedController.getDesiredCoP(contactableFoot);
+
+      if (cop == null || cop.containsNaN())
+         return false;
+      else
+         return !contactPolygon.isPointInside(cop, EPSILON_POINT_ON_EDGE);
    }
 
    public RobotSide getRobotSide()
@@ -115,5 +137,10 @@ public class FootControlHelper
    public void setRequestedStateAsProcessed()
    {
       requestedState.set(null);
+   }
+
+   public FrameVector getFullyConstrainedNormalContactVector()
+   {
+      return fullyConstrainedNormalContactVector;
    }
 }
