@@ -17,7 +17,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    static private AtlasWholeBodyIK wbSolver = new AtlasWholeBodyIK( atlasRobotModel );
    
    static private SimulationConstructionSet scs;
-   static private boolean VISUALIZE_GUI = false;
+   static private boolean VISUALIZE_GUI = false; // don't commit this to true, will break bamboo
    static FullRobotModelVisualizer modelVisualizer;
    
    public AtlasWholeBodyTrajectoryTest() throws InterruptedException

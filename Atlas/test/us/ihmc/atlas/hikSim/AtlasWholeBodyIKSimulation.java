@@ -22,7 +22,7 @@ public class AtlasWholeBodyIKSimulation
    private static final int DataFreq = 50;
    private static final int BufferSize = (int) (SimulationTime / DataFreq / DT + 1);
 
-   public static final boolean showGUI = true; // don't show the GUI for faster simulation
+   public static final boolean showGUI = false; // don't commit this to true, will break bamboo
    private final SimulationConstructionSet scs;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIKSimulation");
