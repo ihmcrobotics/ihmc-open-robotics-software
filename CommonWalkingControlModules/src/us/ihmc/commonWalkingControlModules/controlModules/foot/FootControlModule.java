@@ -157,7 +157,7 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.FULL, trues);
       contactStatesMap.put(ConstraintType.HOLD_POSITION, trues);
       contactStatesMap.put(ConstraintType.HEEL_TOUCHDOWN, getOnEdgeContactPointStates(contactableFoot, ConstraintType.HEEL_TOUCHDOWN));
-      contactStatesMap.put(ConstraintType.TOES, trues);
+      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
       contactStatesMap.put(ConstraintType.TOES_TOUCHDOWN, contactStatesMap.get(ConstraintType.TOES));
    }
 
