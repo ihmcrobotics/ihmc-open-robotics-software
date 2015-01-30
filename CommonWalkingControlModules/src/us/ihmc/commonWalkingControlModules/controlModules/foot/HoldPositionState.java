@@ -71,6 +71,6 @@ public class HoldPositionState extends AbstractFootControlState
             desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      setTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
    }
 }

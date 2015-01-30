@@ -117,7 +117,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
             desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      setTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
 
       desiredPosition.changeFrame(worldFrame);
       yoDesiredPosition.set(desiredPosition);

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -58,7 +58,7 @@ public class TouchdownState extends AbstractFootControlState
 
       this.walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       this.touchdownVelocityProvider = touchdownVelocityProvider;
-      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
+      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, contactableBody.getRigidBody(), rootBody.getBodyFixedFrame());
 
       String namePrefix = contactableBody.getName();
 
@@ -179,6 +179,7 @@ public class TouchdownState extends AbstractFootControlState
       axisOfRotation.normalize();
       axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
 
+      DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
       selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
       selectionMatrix.set(0, 0, axisOfRotation.getX());
       selectionMatrix.set(0, 1, axisOfRotation.getY());
@@ -190,16 +191,14 @@ public class TouchdownState extends AbstractFootControlState
       // Just to make sure we're not trying to do singularity escape
       // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
       footControlHelper.resetNullspaceMultipliers();
-      setTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      // TODO: kind of a hack
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
+      footControlHelper.resetSelectionMatrix();
    }
 
    private List<FramePoint2d> getEdgeContactPoints2d()

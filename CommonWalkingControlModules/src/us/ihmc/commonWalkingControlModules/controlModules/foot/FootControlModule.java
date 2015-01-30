@@ -297,6 +297,7 @@ public class FootControlModule
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
+      footControlHelper.computeNullspaceMultipliers();
 
       stateMachine.checkTransitionConditions();
 

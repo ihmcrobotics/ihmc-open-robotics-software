@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -14,6 +16,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -27,6 +31,7 @@ public class FootControlHelper
    private static final double minJacobianDeterminant = 0.035;
 
    private final RobotSide robotSide;
+   private final RigidBody rootBody;
    private final ContactablePlaneBody contactableFoot;
    private final MomentumBasedController momentumBasedController;
    private final TwistCalculator twistCalculator;
@@ -49,6 +54,9 @@ public class FootControlHelper
    private final BooleanYoVariable jacobianDeterminantInRange;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+
+   private final DenseMatrix64F selectionMatrix;
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
@@ -90,6 +98,11 @@ public class FootControlHelper
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);
+
+      selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+      rootBody = twistCalculator.getRootBody();
+      taskspaceConstraintData.set(rootBody, contactableFoot.getRigidBody());
    }
 
    public boolean isCoPOnEdge()
@@ -125,6 +138,20 @@ public class FootControlHelper
          nullspaceMultipliers.reshape(0, 1);
          doSingularityEscape.set(false);
       }
+   }
+
+   public void submitTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
+   {
+      submitTaskspaceConstraint(jacobianId, footAcceleration);
+   }
+
+   public void submitTaskspaceConstraint(int jacobianId, SpatialAccelerationVector footAcceleration)
+   {
+      ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
+      footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
+      footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
+      taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
+      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
    }
 
    public RobotSide getRobotSide()
@@ -250,5 +277,16 @@ public class FootControlHelper
    public LegSingularityAndKneeCollapseAvoidanceControlModule getLegSingularityAndKneeCollapseAvoidanceControlModule()
    {
       return legSingularityAndKneeCollapseAvoidanceControlModule;
+   }
+
+   public DenseMatrix64F getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
+   public void resetSelectionMatrix()
+   {
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
    }
 }
