@@ -28,36 +28,35 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    protected final YoSE3PIDGains gains;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
-   
+
    private final OneDoFJoint hipYawJoint, anklePitchJoint, ankleRollJoint;
-   
+
    private final YoFramePoint yoDesiredPosition;
    private final YoFrameVector yoDesiredLinearVelocity;
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
-   
+
    protected final RigidBody pelvis;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
-         YoVariableRegistry registry)
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper, registry);
-      
-      this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
+
+      this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
       this.gains = gains;
 
       this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
       this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
       this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-   
+
       RigidBody foot = contactableBody.getRigidBody();
       String namePrefix = foot.getName() + FormattingTools.underscoredToCamelCase(constraintType.toString().toLowerCase(), true);
       yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
       yoDesiredPosition.setToNaN();
-      yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix+"SetDesiredAccelerationToZero", registry);
-      yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix+"SetDesiredVelocityToZero",registry);
+      yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
+      yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
    }
 
@@ -119,7 +118,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
-      
+
       desiredPosition.changeFrame(worldFrame);
       yoDesiredPosition.set(desiredPosition);
       desiredLinearVelocity.changeFrame(worldFrame);
