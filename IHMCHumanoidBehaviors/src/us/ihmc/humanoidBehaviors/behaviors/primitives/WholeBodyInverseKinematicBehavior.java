@@ -98,13 +98,13 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
-     
+
       isPaused.set(false);
       isStopped.set(false);
-      
+
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
-      
+
       wholeBodyIKSolver.setVerbosityLevel(0);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(true);
    }
