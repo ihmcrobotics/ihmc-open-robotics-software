@@ -91,7 +91,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
    private void sendHandPoseToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingHandPosePacket.setDestination(PacketDestination.UI);
 
@@ -102,10 +102,10 @@ public class HandPoseBehavior extends BehaviorInterface
          trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());
       }
    }
-   
+
    private void stopArmMotion()
    {
-      if (outgoingHandPosePacket != null )
+      if (outgoingHandPosePacket != null)
       {
          RobotSide robotSide = outgoingHandPosePacket.getRobotSide();
          if (robotSide != null)
@@ -157,7 +157,6 @@ public class HandPoseBehavior extends BehaviorInterface
       stopArmMotion();
       isStopped.set(true);
    }
-
 
    @Override
    public void pause()
