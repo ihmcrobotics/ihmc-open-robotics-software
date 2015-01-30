@@ -50,7 +50,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
       this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
 
-      RigidBody foot = contactableBody.getRigidBody();
+      RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName() + FormattingTools.underscoredToCamelCase(constraintType.toString().toLowerCase(), true);
       yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
       yoDesiredLinearVelocity.setToNaN();

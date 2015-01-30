@@ -43,12 +43,12 @@ public class HoldPositionState extends AbstractFootControlState
       // Remember the previous contact normal, in case the foot leaves the ground and rotates
       holdPositionNormalContactVector.setIncludingFrame(fullyConstrainedNormalContactVector);
       holdPositionNormalContactVector.changeFrame(worldFrame);
-      momentumBasedController.setPlaneContactStateNormalContactVector(contactableBody, holdPositionNormalContactVector);
+      momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, holdPositionNormalContactVector);
 
-      desiredPosition.setToZero(contactableBody.getFrameAfterParentJoint());
+      desiredPosition.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredPosition.changeFrame(worldFrame);
 
-      desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
+      desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
 
       desiredLinearVelocity.setToZero(worldFrame);
@@ -64,9 +64,9 @@ public class HoldPositionState extends AbstractFootControlState
    public void doSpecificAction()
    {
       footSwitch.computeAndPackCoP(cop);
-      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableBody);
+      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFoot);
       partialFootholdControlModule.compute(desiredCoP, cop);
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
       partialFootholdControlModule.applyShrunkPolygon(contactState);
 
       footControlHelper.setGains(gains);

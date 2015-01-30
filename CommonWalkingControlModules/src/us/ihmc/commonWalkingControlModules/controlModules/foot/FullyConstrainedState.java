@@ -33,30 +33,30 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      momentumBasedController.setPlaneContactStateNormalContactVector(contactableBody, fullyConstrainedNormalContactVector);
+      momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
    }
 
    @Override
    public void doSpecificAction()
    {
       footSwitch.computeAndPackCoP(cop);
-      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableBody);
+      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFoot);
       partialFootholdControlModule.compute(desiredCoP, cop);
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
       partialFootholdControlModule.applyShrunkPolygon(contactState);
 
       if (gains == null)
       {
-         footAcceleration.setToZero(contactableBody.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableBody.getFrameAfterParentJoint());
+         footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
       }
       else
       {
          footControlHelper.setGains(gains);
 
-         desiredPosition.setToZero(contactableBody.getFrameAfterParentJoint());
+         desiredPosition.setToZero(contactableFoot.getFrameAfterParentJoint());
          desiredPosition.changeFrame(worldFrame);
 
-         desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
+         desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
          desiredOrientation.changeFrame(worldFrame);
 
          desiredLinearVelocity.setToZero(worldFrame);
