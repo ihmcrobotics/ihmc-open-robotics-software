@@ -176,6 +176,8 @@ public class PBOAwtPanelsContext implements JmeContext
 
    private void updateInThread()
    {
+      if (alreadyDestroying) return;
+      
       // Check if throttle required
       boolean needThrottle = true;
 
@@ -217,9 +219,38 @@ public class PBOAwtPanelsContext implements JmeContext
       listener.update();
    }
 
+   boolean alreadyDestroying = false;
+   
    private void destroyInThread()
    {
+      if (alreadyDestroying) return;
+      alreadyDestroying = true;
+      
       listener.destroy();
+
+      if (pboAwtPanelListeners != null)
+      {
+         pboAwtPanelListeners.clear();
+         pboAwtPanelListeners = null;
+      }
+
+      if (panels != null)
+      {
+         for (PBOAwtPanel pboAwtPanel : panels)
+         {
+            pboAwtPanel.closeAndDispose();
+         }
+         
+         panels.clear();
+         panels = null;
+      }
+
+      actualContext = null;
+      settings = null;
+      inputSource = null;
+
+      mouseInput = null;
+      keyInput = null;
    }
 
    public void setSettings(AppSettings settings)

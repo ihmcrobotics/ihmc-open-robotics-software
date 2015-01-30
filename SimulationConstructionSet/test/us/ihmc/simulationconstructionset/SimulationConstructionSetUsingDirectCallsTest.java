@@ -46,6 +46,7 @@ import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import us.ihmc.simulationconstructionset.gui.DynamicGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
+import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
@@ -160,29 +161,31 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
    private String[] regularExpressions = new String[] { "gc.*.fs" };
    private Dimension dimension = new Dimension(250, 350);
-   private NameSpace simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
-   private YoVariableRegistry simpleRegistry = new YoVariableRegistry(simpleRegistryName);
-   private YoVariableRegistry dummyRegistry = new YoVariableRegistry("dummyRegistry");
-   private Link staticLink = new Link("simpleLink");
-   private Graphics3DObject staticLinkGraphics = staticLink.getLinkGraphics();
-   private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
-   private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
-   private YoGraphic yoGraphic = new YoGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint.getYoPosition(), simpleExternalForcePoint.getYoForce(), 1.0/50.0);
-   private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry);
-   private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
-   private BooleanYoVariable simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);
-   private BooleanYoVariable setSimulationDoneCriterion = new BooleanYoVariable("setSimulationDoneCriterion", dummyRegistry);
-   private ExtraPanelConfiguration extraPanelConfiguration = createExtraPanelConfigurationWithPanel(extraPanelConfigurationName);
-   private CameraConfiguration cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
-   private ViewportConfiguration viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
-   private GraphConfiguration[] graphConfigurations = createGraphConfigurations(graphConfigurationNames);
-   private DoubleYoVariable realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
-   private BooleanYoVariable processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
-   private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
-   private YoGraphicsListRegistry yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
-   private DynamicGraphicMenuManager dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
-   private ScsPhysics simpleScsPhysics = createScsPhysics();
-   private WrenchContactPoint simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
+   
+   
+   private NameSpace simpleRegistryNameSpace;
+   private YoVariableRegistry simpleRegistry;
+   private YoVariableRegistry dummyRegistry;
+   private Link staticLink;
+   private Graphics3DObject staticLinkGraphics;
+   private Graphics3DNodeType graphics3DNodeType;
+   private ExternalForcePoint simpleExternalForcePoint;
+   private YoGraphic yoGraphic;
+   private BooleanYoVariable exitActionListenerHasBeenNotified;
+   private BooleanYoVariable simulationRewoundListenerHasBeenNotified;
+   private BooleanYoVariable simulationDoneListenerHasBeenNotified;
+   private BooleanYoVariable setSimulationDoneCriterion;
+   private ExtraPanelConfiguration extraPanelConfiguration;
+   private CameraConfiguration cameraConfiguration;
+   private ViewportConfiguration viewportConfiguration;
+   private GraphConfiguration[] graphConfigurations;
+   private DoubleYoVariable realTimeRateInSCS;
+   private BooleanYoVariable processDataHasBeenCalled;
+   private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled;
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+   private DynamicGraphicMenuManager dynamicGraphicMenuManager;
+   private ScsPhysics simpleScsPhysics;
+   private WrenchContactPoint simpleWrenchContactPoint;
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -194,6 +197,32 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Before
    public void createAndStartSCSWithRobot()
    {
+      simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
+      simpleRegistry = new YoVariableRegistry(simpleRegistryName);
+      dummyRegistry = new YoVariableRegistry("dummyRegistry");
+      staticLink = new Link("simpleLink");
+      staticLinkGraphics = staticLink.getLinkGraphics();
+      graphics3DNodeType = Graphics3DNodeType.GROUND;
+      simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
+      yoGraphic = new YoGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint.getYoPosition(), simpleExternalForcePoint.getYoForce(), 1.0/50.0);
+      exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry);
+      simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
+      simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);
+      setSimulationDoneCriterion = new BooleanYoVariable("setSimulationDoneCriterion", dummyRegistry);
+      extraPanelConfiguration = createExtraPanelConfigurationWithPanel(extraPanelConfigurationName);
+      cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
+      viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
+      viewportConfiguration.addCameraView("Back View", 0, 0, 1, 1);
+      
+      graphConfigurations = createGraphConfigurations(graphConfigurationNames);
+      realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
+      processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
+      toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
+      yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
+      dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+      simpleScsPhysics = createScsPhysics();
+      simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
+
       scs = new SimulationConstructionSet(simpleRobot);
       scs.setFrameMaximized();
       scs.startOnAThread();
@@ -205,6 +234,30 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ThreadTools.sleep(CLOSING_SLEEP_TIME);
       scs.closeAndDispose();
       scs = null;
+      
+      simpleRegistryNameSpace = null;
+      simpleRegistry = null;
+      dummyRegistry = null;
+      staticLink = null;
+      staticLinkGraphics = null;
+      graphics3DNodeType = null;
+      simpleExternalForcePoint = null;
+      yoGraphic = null;
+      exitActionListenerHasBeenNotified = null;
+      simulationRewoundListenerHasBeenNotified = null;
+      simulationDoneListenerHasBeenNotified = null;
+      setSimulationDoneCriterion = null;
+      extraPanelConfiguration = null;
+      cameraConfiguration = null;
+      viewportConfiguration = null;
+      graphConfigurations = null;
+      realTimeRateInSCS = null;
+      processDataHasBeenCalled = null;
+      toggleKeyPointModeCommandListenerHasBeenCalled = null;
+      yoGraphicsListRegistry = null;
+      dynamicGraphicMenuManager = null;
+      simpleScsPhysics = null;
+      simpleWrenchContactPoint = null;
    }
 
 	@AverageDuration
@@ -1721,12 +1774,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private boolean isCurrentView(SimulationConstructionSet scs, String currentViewName)
    {
-      return getRepresentationOfCurrentView(scs).contains(currentViewName);
+      String representationOfCurrentView = getRepresentationOfCurrentView(scs);
+      return representationOfCurrentView.contains(currentViewName);
    }
 
    private String getRepresentationOfCurrentView(SimulationConstructionSet scs)
    {
-      return scs.getGUI().getXMLStyleRepresentationofMultiViews();
+      StandardSimulationGUI gui = scs.getGUI();
+      return gui.getXMLStyleRepresentationofMultiViews();
    }
 
    private String[] getViewportConfigurationNames(SimulationConstructionSet scs)

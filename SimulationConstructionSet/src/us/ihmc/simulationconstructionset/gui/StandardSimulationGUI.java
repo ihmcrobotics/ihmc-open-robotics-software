@@ -1995,7 +1995,18 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       });
    }
 
-   public void selectViewport(String viewportName)
+   public void selectViewport(final String viewportName)
+   {
+      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      {
+         public void run()
+         {
+            selectViewportLocal(viewportName);
+         }
+      });
+   }
+   
+   public void selectViewportLocal(String viewportName)
    {
       if (robots == null)
       {
