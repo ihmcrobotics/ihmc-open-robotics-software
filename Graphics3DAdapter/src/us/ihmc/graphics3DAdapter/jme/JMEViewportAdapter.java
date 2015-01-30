@@ -208,7 +208,11 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
          contextSwitchedListeners = null;
       }
 
-      screenShotHelper = null;
+      if (screenShotHelper != null)
+      {
+         screenShotHelper.closeAndDispose();
+         screenShotHelper = null;
+      }
       stateManager = null;
 
       primaryLight = null;

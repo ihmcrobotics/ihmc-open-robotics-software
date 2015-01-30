@@ -453,6 +453,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public void simpleUpdate(float tpf)
    {
+      if (alreadyClosing) return;
+      
       synchronized (graphicsConch)
       {
          for (JMEGraphics3DNode jmeGraphicsNode : jmeGraphicsNodesListView)
@@ -472,6 +474,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private void updateCameras()
    {
+      if (alreadyClosing) return;
+
       for (JMEViewportAdapter viewportAdapter : viewportAdapters)
       {
          viewportAdapter.updateCamera();
@@ -877,6 +881,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       if (alreadyClosing) return;
       alreadyClosing = true;
       
+      stop();
+      
       if (viewportAdapters != null)
       {
          for (JMEViewportAdapter viewportAdapter : viewportAdapters)
@@ -887,7 +893,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          viewportAdapters = null;
       }
 
-      contextManager = null;
+      if (contextManager != null)
+      {
+         contextManager.closeAndDispose();    
+         contextManager = null;
+      }
+      
       assetLocator = null;
       
       if (jmeGraphicsNodes != null)
@@ -932,8 +943,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
       
       primaryLight = null;
-
-      stop();
    }
 
    public JMEContextManager getContextManager()

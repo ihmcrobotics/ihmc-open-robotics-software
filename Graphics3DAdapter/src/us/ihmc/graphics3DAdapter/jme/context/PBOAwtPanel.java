@@ -279,12 +279,14 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
       this.attachAsMain = overrideMainFramebuffer;
    }
 
-   public void initialize(RenderManager rm, ViewPort vp)
+   public void initialize(RenderManager renderManager, ViewPort vp)
    {
+      if (alreadyClosing) return;
+
       if (this.renderManager == null)
       {
          // First time called in OGL thread
-         this.renderManager = rm;
+         this.renderManager = renderManager;
 
          // Get two PBO buffers, put their indices in buffer
          IntBuffer buffer = BufferUtils.createIntBuffer(2);
@@ -299,6 +301,8 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
 
    private void reshapeInThread(int width, int height)
    {
+      if (alreadyClosing) return;
+
       frameBuffer = new FrameBuffer(width, height, 1);
       frameBuffer.setDepthBuffer(Format.Depth);
       frameBuffer.setColorBuffer(Format.RGB8);
@@ -367,6 +371,8 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
 
    public void postFrame(FrameBuffer out)
    {
+      if (alreadyClosing) return;
+      
       if (!attachAsMain && (out != frameBuffer))
       {
          throw new IllegalStateException("Why did you change the output framebuffer?");
@@ -395,8 +401,13 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
    {
    }
 
+   private boolean alreadyClosing = false;
+   
    public void closeAndDispose()
    {
+      if (alreadyClosing) return;
+      alreadyClosing = true;
+      
       bufferedImage = null;
       frameBuffer = null;
       renderManager = null;

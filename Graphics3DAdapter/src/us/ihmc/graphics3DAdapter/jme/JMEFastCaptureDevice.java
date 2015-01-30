@@ -99,10 +99,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private final static boolean CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME = true;
 
    private Renderer renderer;
-   private RenderManager rm;
+   private RenderManager renderManager;
    private int width, height;
-   private final ViewPort viewport;
-
+   private ViewPort viewport;
 
    private BufferedImage bufferedImage;
 
@@ -141,7 +140,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    public void initialize(RenderManager rm, ViewPort vp)
    {
       renderer = rm.getRenderer();
-      this.rm = rm;
+      this.renderManager = rm;
       reshape(vp, vp.getCamera().getWidth(), vp.getCamera().getHeight());
 
 
@@ -197,12 +196,14 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public void postFrame(FrameBuffer out)
    {
+      if (alreadyClosing) return;
+      
       synchronized (syncObject)
       {
          if (captureFrame)
          {
             // Setup view
-            Camera curCamera = rm.getCurrentCamera();
+            Camera curCamera = renderManager.getCurrentCamera();
             int viewX = (int) (curCamera.getViewPortLeft() * curCamera.getWidth());
             int viewY = (int) (curCamera.getViewPortBottom() * curCamera.getHeight());
             int viewWidth = (int) ((curCamera.getViewPortRight() - curCamera.getViewPortLeft()) * curCamera.getWidth());
@@ -343,6 +344,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public void convertScreenShot()
    {
+      if (alreadyClosing) return;
+
       WritableRaster wr = bufferedImage.getRaster();
       DataBufferByte db = (DataBufferByte) wr.getDataBuffer();
 
@@ -435,5 +438,28 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       this.cameraStreamer = cameraStreamer;
       
       TimerTaskScheduler.scheduleAtFixedRate(new GraphicsUpdater(), 0, 1000 / framesPerSecond);
+   }
+
+   private boolean alreadyClosing = false;
+   
+   public void closeAndDispose()
+   {
+      if (alreadyClosing) return;
+      
+      alreadyClosing = true;
+      
+      renderer = null;
+      renderManager = null;
+      viewport = null;
+
+      bufferedImage = null;
+
+      systemRam = null;
+      cpuArray = null;
+
+      syncObject = null;
+      captureHolder = null;
+
+      cameraStreamer = null;
    }
 }

@@ -12,12 +12,12 @@ import com.jme3.math.ColorRGBA;
  */
 public abstract class JMEContextManager implements ContextManager
 {
-   private final JMERenderer jmeRenderer;
+   private JMERenderer jmeRenderer;
    
    private boolean enableSwitching = true;
    private ArrayList<InputMapSetter> inputMapSetters = new ArrayList<InputMapSetter>();
    
-   protected final ArrayList<JMEViewportAdapter> viewports = new ArrayList<JMEViewportAdapter>();
+   protected ArrayList<JMEViewportAdapter> viewports = new ArrayList<JMEViewportAdapter>();
    private JMEViewportAdapter currentViewport;
    
 
@@ -25,7 +25,6 @@ public abstract class JMEContextManager implements ContextManager
    {
       this.jmeRenderer = jmeRenderer;
    }
-
    
    public void setSwitchingEnabled(boolean enable)
    {
@@ -95,5 +94,25 @@ public abstract class JMEContextManager implements ContextManager
       {
          inputMapSetter.reset();
       }
+   }
+
+
+   public void closeAndDispose()
+   {
+      this.jmeRenderer = null;
+      
+      if (inputMapSetters != null)
+      {
+         inputMapSetters.clear();
+         inputMapSetters = null;
+      }
+         
+      if (viewports != null)
+      {
+         viewports.clear();
+         viewports = null;
+      }
+      
+      currentViewport = null;
    }
 }

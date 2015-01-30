@@ -104,4 +104,17 @@ public class AWTPanelsContextManager extends JMEContextManager implements MouseL
       // TODO Auto-generated method stub
       
    }
+   
+   public void closeAndDispose()
+   {
+      super.closeAndDispose();
+      
+      jmeRenderer = null;
+      
+      if (panelViewports != null)
+      {
+         panelViewports.clear();
+         panelViewports = null;
+      }      
+   }
 }

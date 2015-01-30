@@ -95,7 +95,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=900000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -216,7 +216,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=900000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -346,7 +346,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
 	@AverageDuration
-	@Test(timeout=300000)    // ignored due to need to rerecord
+	@Test(timeout=900000)    // ignored due to need to rerecord
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -432,7 +432,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     */
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=900000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

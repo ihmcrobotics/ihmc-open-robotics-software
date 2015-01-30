@@ -30,6 +30,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.vecmath.Color3f;
 
+import org.lwjgl.opengl.Display;
+
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -1225,6 +1227,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       mySimulation = null;
       jFrame = null;
 
+      // Destroy the LWJGL Threads. Not sure if need to or not.
+//      Display.destroy();
    }
 
    /**
@@ -4106,21 +4110,36 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       
       if (yoGraphicsLists == null) return;
       
-      for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
-      {
-         if (yoGraphicsList == null)
-         {
-            System.out.println("graphics list is null");
-            continue;
-         }
-
-         DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(yoGraphicsList.getLabel(), yoGraphicsList.getYoGraphics());
-         dynamicGraphicMenuManager.addCheckBox(checkBox);
-      }
+      addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
 
       displayYoGraphicMenu();
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
+
+   
+   
+   private void addCheckBoxesToDynamicGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
+   {
+      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      {
+         public void run()
+         {
+            for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
+            {
+               if (yoGraphicsList == null)
+               {
+                  System.out.println("graphics list is null");
+                  continue;
+               }
+
+               DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(yoGraphicsList.getLabel(), yoGraphicsList.getYoGraphics());
+               dynamicGraphicMenuManager.addCheckBox(checkBox);
+            }
+         }
+      }); 
+   }
+
+  
 
    public void hideAllDynamicGraphicObjects()
    {

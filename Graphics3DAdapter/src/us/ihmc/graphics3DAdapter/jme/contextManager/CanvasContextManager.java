@@ -17,7 +17,7 @@ import com.jme3.math.Vector2f;
 
 public class CanvasContextManager extends JMEContextManager implements InputMapSetter, AnalogListener, MouseListener
 {
-   private final JMERenderer jmeRenderer;
+   private JMERenderer jmeRenderer;
    
    
    public CanvasContextManager(JMERenderer jmeRenderer)
@@ -123,6 +123,13 @@ public class CanvasContextManager extends JMEContextManager implements InputMapS
    public void mouseExited(MouseEvent e)
    {
       resetViewport(getCurrentViewport());
+   }
+   
+   public void closeAndDispose()
+   {
+      super.closeAndDispose();
+      
+      jmeRenderer = null;
    }
 
 
