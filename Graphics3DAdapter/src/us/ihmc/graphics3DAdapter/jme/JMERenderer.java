@@ -909,7 +909,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       
       if (jmeGraphicsNodesListView != null)
       {
-         jmeGraphicsNodesListView.clear();
+         synchronized (graphicsConch)
+         {
+            jmeGraphicsNodesListView.clear();
+         }
          jmeGraphicsNodesListView = null;
       }
       
