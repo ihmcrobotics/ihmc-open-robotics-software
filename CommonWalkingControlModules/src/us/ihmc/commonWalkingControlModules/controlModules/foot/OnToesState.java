@@ -168,16 +168,9 @@ public class OnToesState extends AbstractFootControlState
       desiredPosition.changeFrame(worldFrame);
 
       if (USE_TOEOFF_TRAJECTORY)
-      {
-         if (toeOffTrajectoryTime.getDoubleValue() > MIN_TRAJECTORY_TIME) // Returns false if the trajectory time is NaN
-            computeDesiredsForTrajectoryBasedMotion();
-         else
-            computeDesiredsForFreeMotion();
-      }
+         computeDesiredsForTrajectoryBasedMotion();
       else
-      {
          computeDesiredsForFreeMotion();
-      }
 
       desiredOrientation.setYawPitchRoll(desiredYawToHold, toeOffDesiredPitchAngle.getDoubleValue(), desiredRollToHold);
 
@@ -200,11 +193,22 @@ public class OnToesState extends AbstractFootControlState
       axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
 
       DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
-      selectionMatrix.reshape(1, SpatialMotionVector.SIZE);
-      selectionMatrix.set(0, 0, axisOfRotation.getX());
-      selectionMatrix.set(0, 1, axisOfRotation.getY());
-      selectionMatrix.set(0, 2, axisOfRotation.getZ());
-
+      if (CONTROL_SINGLE_POINT)
+      {
+         // Need to control the whole orientation of the foot as only one contact point is position controlled.
+         selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+         selectionMatrix.set(0, 0, 1.0);
+         selectionMatrix.set(1, 1, 1.0);
+         selectionMatrix.set(2, 2, 1.0);
+      }
+      else
+      {
+         selectionMatrix.reshape(1, SpatialMotionVector.SIZE);
+         // Hack to control the y axis of the foot in the root frame
+         selectionMatrix.set(0, 0, axisOfRotation.getX());
+         selectionMatrix.set(0, 1, axisOfRotation.getY());
+         selectionMatrix.set(0, 2, axisOfRotation.getZ());
+      }
       // Just to make sure we're not trying to do singularity escape
       // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
       footControlHelper.resetNullspaceMultipliers();
@@ -262,6 +266,12 @@ public class OnToesState extends AbstractFootControlState
 
    private void computeDesiredsForTrajectoryBasedMotion()
    {
+      if (toeOffTrajectoryTime.isNaN() || toeOffTrajectoryTime.getDoubleValue() < MIN_TRAJECTORY_TIME)
+      {
+         computeDesiredsForFreeMotion();
+         return;
+      }
+
       double time = MathTools.clipToMinMax(getTimeInCurrentState(), 0.0, toeOffTrajectoryTime.getDoubleValue());
       toeOffTrajectory.compute(time);
 
