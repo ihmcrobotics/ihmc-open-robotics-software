@@ -66,7 +66,6 @@ public class FootControlModule
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final BooleanYoVariable requestHoldPosition;
-   private final FrameVector fullyConstrainedNormalContactVector;
 
    private final BooleanYoVariable doFancyOnToesControl;
 
@@ -105,8 +104,6 @@ public class FootControlModule
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
-
-      fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
@@ -300,10 +297,7 @@ public class FootControlModule
          else
             constraintType = ConstraintType.FULL;
 
-         if (normalContactVector != null)
-            fullyConstrainedNormalContactVector.setIncludingFrame(normalContactVector);
-         else
-            fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+         footControlHelper.setFullyConstrainedNormalContactVector(normalContactVector);
       }
 
       momentumBasedController.setPlaneContactState(contactableFoot, contactStatesMap.get(constraintType), normalContactVector);

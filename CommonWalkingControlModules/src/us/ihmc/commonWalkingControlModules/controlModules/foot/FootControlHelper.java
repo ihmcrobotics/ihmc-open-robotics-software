@@ -139,6 +139,14 @@ public class FootControlHelper
       requestedState.set(null);
    }
 
+   public void setFullyConstrainedNormalContactVector(FrameVector normalContactVector)
+   {
+      if (normalContactVector != null)
+         fullyConstrainedNormalContactVector.setIncludingFrame(normalContactVector);
+      else
+         fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+   }
+
    public FrameVector getFullyConstrainedNormalContactVector()
    {
       return fullyConstrainedNormalContactVector;
