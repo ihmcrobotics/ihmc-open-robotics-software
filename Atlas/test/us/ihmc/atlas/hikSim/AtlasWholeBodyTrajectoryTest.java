@@ -7,6 +7,8 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;
 
@@ -24,13 +26,28 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    {
       super(actualRobotModel, wbSolver);
       
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0.500); //arm_shy
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(
+               robotSide.negateIfRightSide(-1.0)); //arm_shx
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(2.00); //arm_ely
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(
+               robotSide.negateIfRightSide(0.6)); //arm_elx
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000); //arm_wry
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(
+               robotSide.negateIfRightSide(0)); //arm_wrx
+      }
+      
       if( scs == null && VISUALIZE_GUI )
       {
          scs = new SimulationConstructionSet( atlasRobotModel.createSdfRobot(false) );
          modelVisualizer = new FullRobotModelVisualizer( scs, actualRobotModel,  0.01 );
          scs.startOnAThread(); 
-
+         
          scs.maximizeMainWindow();
+         modelVisualizer.update(0);
          
          Thread.sleep(3000);
       }  

@@ -45,7 +45,7 @@ abstract public class WholeBodyIkSolver
 
    static public enum ControlledDoF { DOF_NONE, DOF_3P, DOF_3P2R, DOF_3P3R }
 
-   static public enum ComputeOption { RESEED, USE_ACTUAL_MODEL_JOINTS, USE_JOINTS_CACHE };
+   static public enum ComputeOption { RESEED, USE_ACTUAL_MODEL_JOINTS, USE_JOINTS_CACHE, RELAX };
 
    // I just like shorter names :/
    final private static RobotSide RIGHT = RobotSide.RIGHT;
@@ -85,7 +85,7 @@ abstract public class WholeBodyIkSolver
    protected final DenseMatrix64F coupledJointWeights;
    protected final Vector64F      preferedJointPose;
 
-   private final Vector64F q_init;
+   private final Vector64F cachedAnglesQ;
 
    final private int numOfJoints;
    private HashSet<String> listOfVisibleAndEnableColliders;
@@ -121,6 +121,13 @@ abstract public class WholeBodyIkSolver
       return (jointNamesToIndex.get(jointName) != null);
    }
 
+   /*
+    * Vervosity levels:
+    * 0: none
+    * 1: When compute() fails, a resume of the errors is displayed.
+    * 2: Lot of data...
+    */
+   
    public void setVerbosityLevel(int level)
    {
       hierarchicalSolver.setVerbosityLevel(level);
@@ -228,13 +235,13 @@ abstract public class WholeBodyIkSolver
 
       workingJointsInUrdfOrder = new OneDoFJoint[numOfJoints];
 
-      double EpsilonInRadiansForVerySmallAngles = 0.0001;
-      int NumberOfIterations = 40;
+      double EpsilonInRadiansForVerySmallAngles = 0.001;
+      int NumberOfIterations = 50;
 
       hierarchicalSolver = new HierarchicalKinematicSolver(urdfModel, NumberOfIterations, EpsilonInRadiansForVerySmallAngles);
       hierarchicalSolver.setVerbosityLevel(0);
 
-      q_init = new Vector64F(numOfJoints);
+      cachedAnglesQ = new Vector64F(numOfJoints);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -361,7 +368,6 @@ abstract public class WholeBodyIkSolver
    public void setGripperAttachmentTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
    {
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
-      
       taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
       
       System.out.println( taskEndEffectorPose.get(endEffectorSide).jacobianPointOffset );
@@ -375,7 +381,6 @@ abstract public class WholeBodyIkSolver
    public void setGripperPalmTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
    {
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
-      
       taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
 
       setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
@@ -513,19 +518,21 @@ abstract public class WholeBodyIkSolver
          String activeJointName = urdfModel.getActiveJointName(i);
          Double newValue =  anglesToUseAsInitialState.get( activeJointName );
 
-         if( newValue == null) {
-            q_init.set(i, newValue.doubleValue());
+         if( newValue != null) {
+            cachedAnglesQ.set(i, newValue.doubleValue());
          }
       }
 
       int ret = compute(actualSdfModel, null,  ComputeOption.USE_JOINTS_CACHE);
 
-      for (int i = 0; i < numOfJoints; i++)
+      if( ret > -2)
       {
-         double new_value = q_init.get(i);
-         String jointName =  urdfModel.getActiveJointName(i);
-
-         outputAngles.put(jointName, new Double(new_value) );
+         for (int i = 0; i < numOfJoints; i++)
+         {
+            double new_value = cachedAnglesQ.get(i);
+            String jointName =  urdfModel.getActiveJointName(i);
+            outputAngles.put(jointName, new Double(new_value) );
+         }
       }
       return ret;
    }
@@ -557,22 +564,22 @@ abstract public class WholeBodyIkSolver
             }           
 
             if( !partOfQuietArm ) {
-               q_init.set(i, randQ.get(i));
+               cachedAnglesQ.set(i, randQ.get(i));
             }
          }
 
          // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
-         q_init.set(jointNamesToIndex.get("l_leg_aky"), -0.7);
-         q_init.set(jointNamesToIndex.get("r_leg_aky"), -0.7);
-         q_init.set(jointNamesToIndex.get("l_leg_kny"), 1.4);
-         q_init.set(jointNamesToIndex.get("r_leg_kny"), 1.4);
-         q_init.set(jointNamesToIndex.get("l_leg_hpy"), -0.7);
-         q_init.set(jointNamesToIndex.get("r_leg_hpy"), -0.7);
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_aky"), -0.7);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_aky"), -0.7);
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_kny"), 1.4);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_kny"), 1.4);
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpy"), -0.7);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpy"), -0.7);
 
          if( keepArmQuiet.get(LEFT).isFalse())
-            q_init.set(jointNamesToIndex.get("l_arm_elx"), 0.7);
+            cachedAnglesQ.set(jointNamesToIndex.get("l_arm_elx"), 0.7);
          if( keepArmQuiet.get(RIGHT).isFalse())
-            q_init.set(jointNamesToIndex.get("r_arm_elx"), -0.7);
+            cachedAnglesQ.set(jointNamesToIndex.get("r_arm_elx"), -0.7);
 
          break;
       case USE_ACTUAL_MODEL_JOINTS:
@@ -580,17 +587,21 @@ abstract public class WholeBodyIkSolver
          for (int i = 0; i < numOfJoints; i++)
          {
             OneDoFJoint joint = actualSdfModel.getOneDoFJointByName(urdfModel.getActiveJointName(i));
-            q_init.set(i, joint.getQ());
+            cachedAnglesQ.set(i, joint.getQ());
          }
          break;
 
       case USE_JOINTS_CACHE:
          //do nothing, the cache is used by default.
+         break;
+      case RELAX:
+         // 
+         break;
       }
 
       enforceControlledDoF( opt );
 
-      int ret = computeImpl(actualSdfModel, desiredRobotModelToPack);
+      int ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
 
       if(opt != ComputeOption.RESEED)
       {
@@ -634,7 +645,7 @@ abstract public class WholeBodyIkSolver
    }
 
 
-   synchronized private int computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack)
+   synchronized private int computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
    {    
       movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
 
@@ -647,8 +658,8 @@ abstract public class WholeBodyIkSolver
          setPreferedKneeAngle();
          adjustOtherFoot(actualSdfModel);
 
-         checkIfArmShallStayQuiet(q_init);
-         ret = hierarchicalSolver.solve(q_init, q_out);
+         checkIfArmShallStayQuiet(cachedAnglesQ);
+         ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
       }
       catch (Exception e)
       {
@@ -658,7 +669,7 @@ abstract public class WholeBodyIkSolver
 
       if (ret != -2)
       {
-         q_init.set(q_out);
+         cachedAnglesQ.set(q_out);
 
          HashMap<String, Double> listOfNewJointAngles = new HashMap<String, Double>();
 
