@@ -98,5 +98,9 @@ public class SimpleCameraTrackingAndDollyPositionHolder implements CameraTrackin
       this.fieldOfView = fieldOfView;
    }
 
+   public void closeAndDispose()
+   {      
+   }
+
 
 }

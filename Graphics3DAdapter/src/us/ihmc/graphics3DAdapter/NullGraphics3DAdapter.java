@@ -120,26 +120,25 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
             {
                public double getHorizontalFieldOfViewInRadians()
                {
-                  // TODO Auto-generated method stub
                   return Math.PI;
                }
 
                public double getClipNear()
                {
-                  // TODO Auto-generated method stub
                   return 0.1;
                }
 
                public double getClipFar()
                {
-                  // TODO Auto-generated method stub
                   return 100.0;
                }
 
                public void computeTransform(RigidBodyTransform cameraTransform)
                {
-                  // TODO Auto-generated method stub
+               }
 
+               public void closeAndDispose()
+               {                  
                }
             };
          }

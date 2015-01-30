@@ -186,4 +186,10 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   public void closeAndDispose()
+   {
+      track_x_var = track_y_var = track_z_var = dolly_x_var = dolly_y_var = dolly_z_var = null;
+      field_of_view_var = null;
+   }
+
 }

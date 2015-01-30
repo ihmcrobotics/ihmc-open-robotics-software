@@ -44,25 +44,25 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 {
    public enum ViewportType {OFFSCREEN, CANVAS, MULTICAM}
 
-   private final JMECamera jmeCamera;
-   private final JMESelectedListener selectedListener;
+   private JMECamera jmeCamera;
+   private JMESelectedListener selectedListener;
    private final boolean isMainViewport;
 
-   private final JmeContext context;
+   private JmeContext context;
 
    private Canvas panel = null;
    private FrameBuffer frameBuffer = null;
    private ViewportType viewportType;
-   private final ViewPort viewPort;
-   private final AssetManager assetManager;
-   private final ArrayList<ContextSwitchedListener> contextSwitchedListeners = new ArrayList<ContextSwitchedListener>();
+   private ViewPort viewPort;
+   private AssetManager assetManager;
+   private ArrayList<ContextSwitchedListener> contextSwitchedListeners = new ArrayList<ContextSwitchedListener>();
 
-   private final RenderManager renderManager;
+   private RenderManager renderManager;
 
-   private final JMEFastCaptureDevice screenShotHelper;
-   private final AppStateManager stateManager;
+   private JMEFastCaptureDevice screenShotHelper;
+   private AppStateManager stateManager;
 
-   private final DirectionalLight primaryLight;
+   private DirectionalLight primaryLight;
    private FilterPostProcessor fpp;
 
    private Timer frameTimer = new Timer().start();
@@ -88,9 +88,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       viewPort.addProcessor(this);
       screenShotHelper = new JMEFastCaptureDevice(viewPort);
       stateManager.attach(screenShotHelper);
-
-
-
 
       if (addExtraVisuals)
       {
@@ -179,13 +176,52 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       frameBuffer.setColorBuffer(Format.RGBA8);
    }
 
+   private boolean alreadyClosing = false;
    public void closeAndDispose()
    {
+      if (alreadyClosing) return;
+      alreadyClosing = true;
+      
       viewPort.setEnabled(false);
       renderManager.removeMainView(viewPort);
+      
+      viewPort = null;
+      renderManager = null;
+
+      if (jmeCamera != null)
+      {
+         jmeCamera.closeAndDispose();
+         jmeCamera = null;
+      }
+      selectedListener = null;
+
+      context = null;
+
+      panel = null;
+      frameBuffer = null;
+      viewportType = null;
+      assetManager = null;
+
+      if (contextSwitchedListeners != null)
+      {
+         contextSwitchedListeners.clear();
+         contextSwitchedListeners = null;
+      }
+
+      screenShotHelper = null;
+      stateManager = null;
+
+      primaryLight = null;
+      fpp = null;
+      frameTimer = null;
    }
-
-
+   
+   
+   public void closeViewportAdapter()
+   {
+      if (viewPort != null) viewPort.setEnabled(false);
+      if (renderManager != null) renderManager.removeMainView(viewPort);
+   }
 
    boolean addedPostProcessors = false;
 
@@ -389,6 +425,8 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public void postFrame(FrameBuffer out)
    {
+      if (alreadyClosing) return; 
+      
       double timePerFrame = frameTimer.lap();
       for (Graphics3DFrameListener listener : getFrameListeners())
       {
@@ -401,4 +439,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       // TODO Auto-generated method stub
 
    }
+
+
 }

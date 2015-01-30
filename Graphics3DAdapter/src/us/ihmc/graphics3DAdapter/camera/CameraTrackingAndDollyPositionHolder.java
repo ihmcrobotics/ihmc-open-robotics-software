@@ -22,5 +22,7 @@ public interface CameraTrackingAndDollyPositionHolder
    
    public abstract double getFieldOfView();
 
+   public abstract void closeAndDispose();
+
 
 }
