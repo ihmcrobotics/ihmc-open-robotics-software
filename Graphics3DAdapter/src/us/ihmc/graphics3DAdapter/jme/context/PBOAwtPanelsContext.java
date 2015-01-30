@@ -15,211 +15,258 @@ import com.jme3.system.JmeSystem;
 import com.jme3.system.SystemListener;
 import com.jme3.system.Timer;
 
-public class PBOAwtPanelsContext implements JmeContext {
+public class PBOAwtPanelsContext implements JmeContext
+{
+   protected JmeContext actualContext;
+   protected AppSettings settings = new AppSettings(true);
+   protected SystemListener listener;
+   protected ArrayList<PBOAwtPanel> panels = new ArrayList<PBOAwtPanel>();
+   protected PBOAwtPanel inputSource;
 
-    protected JmeContext actualContext;
-    protected AppSettings settings = new AppSettings(true);
-    protected SystemListener listener;
-    protected ArrayList<PBOAwtPanel> panels = new ArrayList<PBOAwtPanel>();
-    protected PBOAwtPanel inputSource;
+   protected AwtMouseInput mouseInput = new AwtMouseInput();
+   protected AwtKeyInput keyInput = new AwtKeyInput();
 
-    protected AwtMouseInput mouseInput = new AwtMouseInput();
-    protected AwtKeyInput keyInput = new AwtKeyInput();
+   protected boolean lastThrottleState = false;
 
-    protected boolean lastThrottleState = false;
-    
-    private ArrayList<PBOAwtPanelListener> pboAwtPanelListeners = new ArrayList<>();
+   private ArrayList<PBOAwtPanelListener> pboAwtPanelListeners = new ArrayList<>();
 
-    private class AwtPanelsListener implements SystemListener {
+   private class AwtPanelsListener implements SystemListener
+   {
+      public void initialize()
+      {
+         initInThread();
+      }
 
-        public void initialize() {
-            initInThread();
-        }
+      public void reshape(int width, int height)
+      {
+         throw new IllegalStateException();
+      }
 
-        public void reshape(int width, int height) {
-            throw new IllegalStateException();
-        }
+      public void update()
+      {
+         updateInThread();
+      }
 
-        public void update() {
-            updateInThread();
-        }
+      public void requestClose(boolean esc)
+      {
+         // shouldn't happen
+         throw new IllegalStateException();
+      }
 
-        public void requestClose(boolean esc) {
-            // shouldn't happen
-            throw new IllegalStateException();
-        }
+      public void gainFocus()
+      {
+         // shouldn't happen
+         throw new IllegalStateException();
+      }
 
-        public void gainFocus() {
-            // shouldn't happen
-            throw new IllegalStateException();
-        }
+      public void loseFocus()
+      {
+         // shouldn't happen
+         throw new IllegalStateException();
+      }
 
-        public void loseFocus() {
-            // shouldn't happen
-            throw new IllegalStateException();
-        }
+      public void handleError(String errorMsg, Throwable t)
+      {
+         listener.handleError(errorMsg, t);
+      }
 
-        public void handleError(String errorMsg, Throwable t) {
-            listener.handleError(errorMsg, t);
-        }
+      public void destroy()
+      {
+         destroyInThread();
+      }
+   }
 
-        public void destroy() {
-            destroyInThread();
-        }
-    }
-    
-    public void addPBOAwtPanelListener(PBOAwtPanelListener listener)
-    {
-       pboAwtPanelListeners.add(listener);
-    }
 
-    public void setInputSource(PBOAwtPanel panel){
-        if (!panels.contains(panel))
-            throw new IllegalArgumentException();
+   public void addPBOAwtPanelListener(PBOAwtPanelListener listener)
+   {
+      pboAwtPanelListeners.add(listener);
+   }
 
-        inputSource = panel;
-        mouseInput.setInputSource(panel);
-        keyInput.setInputSource(panel);
-    }
+   public void setInputSource(PBOAwtPanel panel)
+   {
+      if (!panels.contains(panel))
+         throw new IllegalArgumentException();
 
-    public ArrayList<PBOAwtPanel> getPanelList()
-    {
-       return panels;
-    }
-    
-    public Type getType() {
-        return Type.OffscreenSurface;
-    }
+      inputSource = panel;
+      mouseInput.setInputSource(panel);
+      keyInput.setInputSource(panel);
+   }
 
-    public void setSystemListener(SystemListener listener) {
-        this.listener = listener;
-    }
+   public ArrayList<PBOAwtPanel> getPanelList()
+   {
+      return panels;
+   }
 
-    public AppSettings getSettings() {
-        return settings;
-    }
+   public Type getType()
+   {
+      return Type.OffscreenSurface;
+   }
 
-    public Renderer getRenderer() {
-        return actualContext.getRenderer();
-    }
+   public void setSystemListener(SystemListener listener)
+   {
+      this.listener = listener;
+   }
 
-    public MouseInput getMouseInput() {
-        return mouseInput;
-    }
+   public AppSettings getSettings()
+   {
+      return settings;
+   }
 
-    public KeyInput getKeyInput() {
-        return keyInput;
-    }
+   public Renderer getRenderer()
+   {
+      return actualContext.getRenderer();
+   }
 
-    public JoyInput getJoyInput() {
-        return null;
-    }
+   public MouseInput getMouseInput()
+   {
+      return mouseInput;
+   }
 
-    public TouchInput getTouchInput() {
-        return null;
-    }
+   public KeyInput getKeyInput()
+   {
+      return keyInput;
+   }
 
-    public Timer getTimer() {
-        return actualContext.getTimer();
-    }
+   public JoyInput getJoyInput()
+   {
+      return null;
+   }
 
-    public boolean isCreated() {
-        return actualContext != null && actualContext.isCreated();
-    }
+   public TouchInput getTouchInput()
+   {
+      return null;
+   }
 
-    public boolean isRenderable() {
-        return actualContext != null && actualContext.isRenderable();
-    }
+   public Timer getTimer()
+   {
+      return actualContext.getTimer();
+   }
 
-    public PBOAwtPanelsContext(){
-    }
+   public boolean isCreated()
+   {
+      return (actualContext != null) && actualContext.isCreated();
+   }
 
-    public PBOAwtPanel createPanel(){
-       PBOAwtPanel panel = new PBOAwtPanel(pboAwtPanelListeners);
-        panels.add(panel);
-        
-        for (PBOAwtPanelListener listener : pboAwtPanelListeners)
-        {
-           listener.isCreated(panel);
-        }
-        
-        return panel;
-    }
+   public boolean isRenderable()
+   {
+      return (actualContext != null) && actualContext.isRenderable();
+   }
 
-    private void initInThread(){
-        listener.initialize();
-    }
+   public PBOAwtPanelsContext()
+   {
+   }
 
-    private void updateInThread(){
-        // Check if throttle required
-        boolean needThrottle = true;
+   public PBOAwtPanel createPanel()
+   {
+      PBOAwtPanel panel = new PBOAwtPanel(pboAwtPanelListeners);
+      panels.add(panel);
 
-        for (PBOAwtPanel panel : panels){
-            if (panel.isActiveDrawing()){
-                needThrottle = false;
-                break;
-            }
-        }
+      for (PBOAwtPanelListener listener : pboAwtPanelListeners)
+      {
+         listener.isCreated(panel);
+      }
 
-        if (lastThrottleState != needThrottle){
-            lastThrottleState = needThrottle;
-            if (lastThrottleState){
-                System.out.println(getClass().getSimpleName() + ": Throttling update loop.");
-            }else{
-                System.out.println(getClass().getSimpleName() + ": Ceased throttling update loop.");
-            }
-        }
+      return panel;
+   }
 
-        if (needThrottle){
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-            }
-        }
+   private void initInThread()
+   {
+      listener.initialize();
+   }
 
-        listener.update();
-    }
+   private void updateInThread()
+   {
+      // Check if throttle required
+      boolean needThrottle = true;
 
-    private void destroyInThread(){
-        listener.destroy();
-    }
+      for (PBOAwtPanel panel : panels)
+      {
+         if (panel.isActiveDrawing())
+         {
+            needThrottle = false;
 
-    public void setSettings(AppSettings settings) {
-        this.settings.copyFrom(settings);
-        this.settings.setRenderer(AppSettings.LWJGL_OPENGL2);
-        if (actualContext != null){
-            actualContext.setSettings(settings);
-        }
-    }
+            break;
+         }
+      }
 
-    public void create(boolean waitFor) {
-        if (actualContext != null){
-            throw new IllegalStateException("Already created");
-        }
+      if (lastThrottleState != needThrottle)
+      {
+         lastThrottleState = needThrottle;
 
-        actualContext = JmeSystem.newContext(settings, Type.OffscreenSurface);
-        actualContext.setSystemListener(new AwtPanelsListener());
-        actualContext.create(waitFor);
-    }
+         if (lastThrottleState)
+         {
+            System.out.println(getClass().getSimpleName() + ": Throttling update loop.");
+         }
+         else
+         {
+            System.out.println(getClass().getSimpleName() + ": Ceased throttling update loop.");
+         }
+      }
 
-    public void destroy(boolean waitFor) {
-        if (actualContext == null)
-            throw new IllegalStateException("Not created");
+      if (needThrottle)
+      {
+         try
+         {
+            Thread.sleep(100);
+         }
+         catch (InterruptedException ex)
+         {
+         }
+      }
 
-        // destroy parent context
-        actualContext.destroy(waitFor);
-    }
+      listener.update();
+   }
 
-    public void setTitle(String title) {
-        // not relevant, ignore
-    }
+   private void destroyInThread()
+   {
+      listener.destroy();
+   }
 
-    public void setAutoFlushFrames(boolean enabled) {
-        // not relevant, ignore
-    }
+   public void setSettings(AppSettings settings)
+   {
+      this.settings.copyFrom(settings);
+      this.settings.setRenderer(AppSettings.LWJGL_OPENGL2);
 
-    public void restart() {
-        // only relevant if changing pixel format.
-    }
+      if (actualContext != null)
+      {
+         actualContext.setSettings(settings);
+      }
+   }
+
+   public void create(boolean waitFor)
+   {
+      if (actualContext != null)
+      {
+         throw new IllegalStateException("Already created");
+      }
+
+      actualContext = JmeSystem.newContext(settings, Type.OffscreenSurface);
+      actualContext.setSystemListener(new AwtPanelsListener());
+      actualContext.create(waitFor);
+   }
+
+   public void destroy(boolean waitFor)
+   {
+      if (actualContext == null)
+         throw new IllegalStateException("Not created");
+
+      // destroy parent context
+      actualContext.destroy(waitFor);
+   }
+
+   public void setTitle(String title)
+   {
+      // not relevant, ignore
+   }
+
+   public void setAutoFlushFrames(boolean enabled)
+   {
+      // not relevant, ignore
+   }
+
+   public void restart()
+   {
+      // only relevant if changing pixel format.
+   }
 
 }
