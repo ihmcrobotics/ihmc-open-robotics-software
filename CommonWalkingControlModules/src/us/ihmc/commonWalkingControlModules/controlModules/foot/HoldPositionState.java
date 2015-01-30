@@ -7,8 +7,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HoldPositionState extends AbstractFootControlState
 {
@@ -23,10 +21,9 @@ public class HoldPositionState extends AbstractFootControlState
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   public HoldPositionState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.HOLD_POSITION, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.HOLD_POSITION, footControlHelper, registry);
 
       this.fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       this.gains = gains;

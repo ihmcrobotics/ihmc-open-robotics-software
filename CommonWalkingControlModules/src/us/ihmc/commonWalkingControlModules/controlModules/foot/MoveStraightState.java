@@ -8,8 +8,6 @@ import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvide
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
@@ -23,12 +21,11 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
 
-   public MoveStraightState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         YoSE3PIDGains gains, YoVariableRegistry registry)
+   public MoveStraightState(FootControlHelper footControlHelper,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
+         YoVariableRegistry registry)
    {
-      super(ConstraintType.MOVE_STRAIGHT, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule,
-            gains, registry);
+      super(ConstraintType.MOVE_STRAIGHT, footControlHelper, legSingularityAndKneeCollapseAvoidanceControlModule, gains, registry);
 
       RigidBody rigidBody = contactableBody.getRigidBody();
       String namePrefix = rigidBody.getName();

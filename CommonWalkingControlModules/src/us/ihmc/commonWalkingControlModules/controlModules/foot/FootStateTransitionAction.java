@@ -6,21 +6,18 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 public class FootStateTransitionAction implements StateTransitionAction
 {
    private final FootControlHelper fooconControlHelper;
-   private final BooleanYoVariable doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 
-   public FootStateTransitionAction(FootControlHelper fooconControlHelper, BooleanYoVariable doSingularityEscape,
-         BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
+   public FootStateTransitionAction(FootControlHelper fooconControlHelper, BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
    {
       this.fooconControlHelper = fooconControlHelper;
-      this.doSingularityEscape = doSingularityEscape;
       this.waitSingularityEscapeBeforeTransitionToNextState = waitSingularityEscapeBeforeTransitionToNextState;
    }
 
    public void doTransitionAction()
    {
       fooconControlHelper.setRequestedStateAsProcessed();
-      doSingularityEscape.set(false);
+      fooconControlHelper.resetSingularityEscape();
       waitSingularityEscapeBeforeTransitionToNextState.set(false);
    }
 }

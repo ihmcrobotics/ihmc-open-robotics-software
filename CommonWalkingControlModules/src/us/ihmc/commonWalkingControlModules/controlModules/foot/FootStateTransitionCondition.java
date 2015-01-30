@@ -16,22 +16,18 @@ public class FootStateTransitionCondition implements StateTransitionCondition
 
    private final ConstraintType stateEnum;
    private final GeometricJacobian jacobian;
-   private final BooleanYoVariable doSingularityEscape;
    private final NullspaceCalculator nullspaceCalculator;
    private final DenseMatrix64F jointVelocities;
-   private final BooleanYoVariable jacobianDeterminantInRange;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
    private final FootControlHelper footControlHelper;
 
    public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo, FootControlHelper footControlHelper,
-         BooleanYoVariable doSingularityEscape, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
+         BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
    {
       this.stateEnum = stateToTransitionTo.getStateEnum();
       this.footControlHelper = footControlHelper;
 
       this.jacobian = footControlHelper.getJacobian();
-      this.doSingularityEscape = doSingularityEscape;
-      this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.waitSingularityEscapeBeforeTransitionToNextState = waitSingularityEscapeBeforeTransitionToNextState;
 
       nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
@@ -47,7 +43,7 @@ public class FootStateTransitionCondition implements StateTransitionCondition
 
       boolean singularityEscapeDone = true;
 
-      if (doSingularityEscape.getBooleanValue() && waitSingularityEscapeBeforeTransitionToNextState.getBooleanValue())
+      if (footControlHelper.isDoingSingularityEscape() && waitSingularityEscapeBeforeTransitionToNextState.getBooleanValue())
       {
          nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), 1);
          DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
@@ -56,7 +52,7 @@ public class FootStateTransitionCondition implements StateTransitionCondition
 
          int velocitySign = (int) Math.round(Math.signum(nullspaceVelocityDotProduct));
          boolean velocitySignOK = velocitySign == velocitySignForSingularityEscape;
-         if (jacobianDeterminantInRange.getBooleanValue() || !velocitySignOK)
+         if (footControlHelper.isJacobianDeterminantInRange() || !velocitySignOK)
          {
             singularityEscapeDone = false;
          }

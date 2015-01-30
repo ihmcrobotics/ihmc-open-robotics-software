@@ -69,11 +69,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final FrameVector initialAngularVelocity = new FrameVector();
    private boolean hasInitialAngularVelocityBeenProvided = false;
 
-   public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+   public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
          YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.SWING, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule,
+      super(ConstraintType.SWING, footControlHelper, legSingularityAndKneeCollapseAvoidanceControlModule,
             gains, registry);
 
       this.swingTimeProvider = swingTimeProvider;

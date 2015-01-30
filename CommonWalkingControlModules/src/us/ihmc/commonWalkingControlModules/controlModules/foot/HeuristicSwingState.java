@@ -23,7 +23,6 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
@@ -61,10 +60,9 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    private final DoubleYoVariable estimatedFinalKneeAngle;
    private final double upperLegLength, lowerLegLength;
 
-   public HeuristicSwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public HeuristicSwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.SWING, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.SWING, footControlHelper, registry);
 
       this.gains = gains;
       this.swingTimeProvider = swingTimeProvider;
@@ -201,7 +199,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
 
-      taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
+      taskspaceConstraintData.set(footAcceleration, footControlHelper.getNullspaceMultipliers(), selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(gimpedJacobian, taskspaceConstraintData);
       double qDesired;
       double qdDesired;
