@@ -34,7 +34,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 
    static private SimulationConstructionSet scs;
 
-   static private boolean VISUALIZE_GUI = true;   
+   static private boolean VISUALIZE_GUI = false;  // don't commit this to true, will break bamboo  
 
    static FullRobotModelVisualizer modelVisualizer;
    private ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
