@@ -8,8 +8,10 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -51,12 +53,13 @@ public class TouchdownState extends AbstractFootControlState
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final VectorProvider touchdownVelocityProvider;
+   private final FrameLineSegment2d edgeToRotateAbout;
 
    public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, YoVariableRegistry registry)
    {
       super(stateEnum, footControlHelper, registry);
 
-      this.walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
+      walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       this.touchdownVelocityProvider = touchdownVelocityProvider;
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, contactableBody.getRigidBody(), rootBody.getBodyFixedFrame());
 
@@ -81,13 +84,15 @@ public class TouchdownState extends AbstractFootControlState
       touchdownInitialAngularVelocityProvider = new YoVariableDoubleProvider(namePrefix + "TouchdownPitchAngularVelocity", registry);
       DoubleProvider touchdownTrajectoryTime = new ConstantDoubleProvider(walkingControllerParameters.getDefaultTransferTime() / 3.0);
 
-      this.onEdgePitchAngleTrajectoryGenerator = new ConstantVelocityTrajectoryGenerator(namePrefix + "FootTouchdownPitchTrajectoryGenerator",
+      onEdgePitchAngleTrajectoryGenerator = new ConstantVelocityTrajectoryGenerator(namePrefix + "FootTouchdownPitchTrajectoryGenerator",
             touchdownInitialPitchProvider, touchdownInitialAngularVelocityProvider, touchdownTrajectoryTime, registry);
 
-      this.edgeContactPoints = getEdgeContactPoints2d();
+      edgeContactPoints = getEdgeContactPoints2d();
       desiredEdgeContactPositions = new ArrayList<FramePoint>();
       for (int i = 0; i < 2; i++)
          desiredEdgeContactPositions.add(edgeContactPoints.get(i).toFramePoint());
+
+      edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getSoleFrame());
    }
 
    @Override
@@ -145,9 +150,28 @@ public class TouchdownState extends AbstractFootControlState
       desiredAngularAcceleration.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, footPitchdd, 0.0);
       desiredAngularAcceleration.changeFrame(worldFrame);
 
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
+      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
+
+      FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
+      FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
+      axisOfRotation.normalize();
+      axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
+
+      DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
+      selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 0, axisOfRotation.getX());
+      selectionMatrix.set(0, 1, axisOfRotation.getY());
+      selectionMatrix.set(0, 2, axisOfRotation.getZ());
+      selectionMatrix.set(1, 0, 0.0);
+      selectionMatrix.set(1, 1, 0.0);
+      selectionMatrix.set(1, 2, 1.0);
+
+      // Just to make sure we're not trying to do singularity escape
+      // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
+      footControlHelper.resetNullspaceMultipliers();
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
 
       for (int i = 0; i < edgeContactPoints.size(); i++)
       {
@@ -173,25 +197,6 @@ public class TouchdownState extends AbstractFootControlState
 
          momentumBasedController.setDesiredPointAcceleration(rootToFootJacobianId, contactPointPosition, desiredLinearAcceleration);
       }
-
-      FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
-      FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
-      axisOfRotation.normalize();
-      axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
-
-      DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
-      selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
-      selectionMatrix.set(0, 0, axisOfRotation.getX());
-      selectionMatrix.set(0, 1, axisOfRotation.getY());
-      selectionMatrix.set(0, 2, axisOfRotation.getZ());
-      selectionMatrix.set(1, 0, 0.0);
-      selectionMatrix.set(1, 1, 0.0);
-      selectionMatrix.set(1, 2, 1.0);
-
-      // Just to make sure we're not trying to do singularity escape
-      // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
-      footControlHelper.resetNullspaceMultipliers();
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
    }
 
    @Override
@@ -253,15 +258,14 @@ public class TouchdownState extends AbstractFootControlState
 
    private void setTouchdownOnEdgeGains()
    {
-      double kPosition = 0.0;
-      double dPosition = GainCalculator.computeDerivativeGain(kPosition, 1.0);
       double kxzOrientation = 300.0;
       double kyOrientation = 0.0;
       double dxzOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4);
       double dyOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4); //Only damp the pitch velocity
 
-      accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
-      accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
+      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
+      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
       accelerationControlModule.setOrientationProportionalGains(kxzOrientation, kyOrientation, kxzOrientation);
       accelerationControlModule.setOrientationDerivativeGains(dxzOrientation, dyOrientation, dxzOrientation);
    }

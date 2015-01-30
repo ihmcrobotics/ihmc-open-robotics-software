@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -80,13 +81,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       initializeTrajectory();
 
-      accelerationControlModule.setGains(gains);
+      footControlHelper.setGains(gains);
    }
 
    @Override
    public void doSpecificAction()
    {
-      accelerationControlModule.setGains(gains);
+      footControlHelper.setGains(gains);
 
       if (footControlHelper.isDoingSingularityEscape())
       {
@@ -94,8 +95,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       }
 
       computeAndPackTrajectory();
-
-      desiredOrientation.setIncludingFrame(trajectoryOrientation);
 
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
          correctInputsAccordingToJointLimits();
@@ -113,6 +112,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       }
 
       RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
+      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);

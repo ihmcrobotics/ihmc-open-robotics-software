@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -22,23 +19,19 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    protected final FootControlHelper footControlHelper;
 
-   protected final ContactablePlaneBody contactableBody;
+   protected final RobotSide robotSide;
    protected final RigidBody rootBody;
+   protected final ContactablePlaneBody contactableBody;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
    protected final FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
+   protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
    protected final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
-   protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   protected final FrameOrientation trajectoryOrientation = new FrameOrientation(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
-   protected final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    protected final MomentumBasedController momentumBasedController;
-
-   protected FrameLineSegment2d edgeToRotateAbout;
-   protected final RobotSide robotSide;
 
    public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, YoVariableRegistry registry)
    {
@@ -47,12 +40,10 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.footControlHelper = footControlHelper;
       this.contactableBody = footControlHelper.getContactableFoot();
 
-      this.accelerationControlModule = footControlHelper.getAccelerationControlModule();
       this.momentumBasedController = footControlHelper.getMomentumBasedController();
 
       this.robotSide = footControlHelper.getRobotSide();
 
-      edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getSoleFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
    }
 
@@ -67,12 +58,10 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    @Override
    public void doTransitionIntoAction()
    {
-      accelerationControlModule.reset();
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      accelerationControlModule.reset();
    }
 }

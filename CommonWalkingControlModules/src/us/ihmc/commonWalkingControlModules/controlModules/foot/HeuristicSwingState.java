@@ -6,6 +6,7 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -157,7 +158,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    @Override
    public void doSpecificAction()
    {
-      accelerationControlModule.setGains(gains);
+      footControlHelper.setGains(gains);
 
       if (getTimeInCurrentState() < swingTimeProvider.getValue())
       {
@@ -190,9 +191,9 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
 
       positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      desiredOrientation.setIncludingFrame(trajectoryOrientation);
+      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
+      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);

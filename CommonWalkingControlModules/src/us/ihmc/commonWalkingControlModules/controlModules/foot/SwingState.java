@@ -200,7 +200,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       }
 
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
-      orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
 
    private final FramePose newFootstepPose = new FramePose();

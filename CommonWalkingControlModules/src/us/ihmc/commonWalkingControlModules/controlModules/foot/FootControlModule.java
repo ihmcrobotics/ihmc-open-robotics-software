@@ -164,16 +164,14 @@ public class FootControlModule
    private void setupStateMachine(List<AbstractFootControlState> states)
    {
       // TODO Clean that up (Sylvain)
+      FootStateTransitionAction footStateTransitionAction = new FootStateTransitionAction(footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
       for (AbstractFootControlState state : states)
       {
          for (AbstractFootControlState stateToTransitionTo : states)
          {
-            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper,
-                  waitSingularityEscapeBeforeTransitionToNextState);
-            FootStateTransitionAction footStateTransitionAction = new FootStateTransitionAction(footControlHelper,
-                  waitSingularityEscapeBeforeTransitionToNextState);
-            state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
-                  footStateTransitionAction));
+            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
+            ConstraintType nextStateEnum = stateToTransitionTo.getStateEnum();
+            state.addStateTransition(new StateTransition<ConstraintType>(nextStateEnum, footStateTransitionCondition, footStateTransitionAction));
          }
       }
 
@@ -191,7 +189,7 @@ public class FootControlModule
                return false;
             return footControlHelper.isCoPOnEdge();
          }
-      }));
+      }, footStateTransitionAction));
 
       holdPositionState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
       {
@@ -205,7 +203,7 @@ public class FootControlModule
                return false;
             return !footControlHelper.isCoPOnEdge();
          }
-      }));
+      }, footStateTransitionAction));
 
       for (State<ConstraintType> state : states)
       {

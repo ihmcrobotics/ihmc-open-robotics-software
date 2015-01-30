@@ -19,6 +19,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -169,14 +171,36 @@ public class FootControlHelper
       return momentumBasedController;
    }
 
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
-   }
-
    public RigidBodySpatialAccelerationControlModule getAccelerationControlModule()
    {
       return accelerationControlModule;
+   }
+
+   public void setGains(YoSE3PIDGains gains)
+   {
+      accelerationControlModule.setGains(gains);
+   }
+
+   public void setOrientationGains(YoOrientationPIDGains gains)
+   {
+      accelerationControlModule.setOrientationGains(gains);
+   }
+
+   public void setGainsToZero()
+   {
+      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionIntegralGains(0.0, 0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionMaxAccelerationAndJerk(0.0, 0.0);
+      accelerationControlModule.setOrientationProportionalGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setOrientationDerivativeGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setOrientationIntegralGains(0.0, 0.0, 0.0, 0.0);
+      accelerationControlModule.setOrientationMaxAccelerationAndJerk(0.0, 0.0);
+   }
+
+   public void resetAccelerationControlModule()
+   {
+      accelerationControlModule.reset();
    }
 
    public WalkingControllerParameters getWalkingControllerParameters()

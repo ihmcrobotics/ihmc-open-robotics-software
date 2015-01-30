@@ -64,6 +64,6 @@ public class MoveStraightState extends AbstractUnconstrainedState
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
 
       positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
 }
