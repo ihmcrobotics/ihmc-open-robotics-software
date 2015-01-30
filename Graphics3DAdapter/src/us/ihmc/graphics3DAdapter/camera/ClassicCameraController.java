@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.ContextManager;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.input.Key;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
@@ -47,7 +48,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private double trackDX = 0.0, trackDY = 0.0, trackDZ = 0.0;
    private double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
 
-   private final ViewportAdapter viewportAdapter;
+   private ViewportAdapter viewportAdapter;
 
    // Flying
    private boolean fly = true;
@@ -80,7 +81,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private int cameraKeyPointIndex;
    private ArrayList<Integer> cameraKeyPoints = new ArrayList<Integer>(0);
 
-   private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
+   private CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
 
    private Graphics3DAdapter graphics3dAdapter;
 
@@ -98,6 +99,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter,
          CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
+      if (graphics3dAdapter == null) throw new RuntimeException("graphics3dAdapter == null");
       this.graphics3dAdapter = graphics3dAdapter;
       this.viewportAdapter = viewportAdapter;
 
@@ -1320,7 +1322,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
-      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+      ContextManager contextManager = graphics3dAdapter.getContextManager();
+      if (contextManager.getCurrentViewport() != viewportAdapter)
          return;
 
       switch (mouseButton)
@@ -1420,5 +1423,17 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          System.out.println("Copying camera keys");
       }
 
+   }
+
+   public void closeAndDispose()
+   {
+      this.cameraMount = null;
+      this.viewportAdapter = null;
+      if (cameraTrackAndDollyVariablesHolder != null)
+      {
+         cameraTrackAndDollyVariablesHolder.closeAndDispose();
+         cameraTrackAndDollyVariablesHolder = null;
+      }
+      graphics3dAdapter = null;
    }
 }

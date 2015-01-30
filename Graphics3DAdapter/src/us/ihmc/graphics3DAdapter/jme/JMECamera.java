@@ -240,4 +240,18 @@ public class JMECamera extends Camera implements CameraAdapter
    {
       return (int) (height * (viewPortTop - viewPortBottom));
    }
+   
+   private boolean alreadyClosing = false;
+   
+   public void closeAndDispose()
+   {
+      if (alreadyClosing) return;
+      alreadyClosing = true;
+      
+      if (cameraController != null)
+      {
+         cameraController.closeAndDispose();
+         cameraController = null;
+      }
+   }
 }

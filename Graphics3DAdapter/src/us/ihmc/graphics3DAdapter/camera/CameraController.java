@@ -10,4 +10,5 @@ public interface CameraController
    public double getHorizontalFieldOfViewInRadians();
    public double getClipNear();
    public double getClipFar();
+   public void closeAndDispose();
 }

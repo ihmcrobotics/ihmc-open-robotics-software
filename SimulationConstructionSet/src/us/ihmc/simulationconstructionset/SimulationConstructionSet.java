@@ -1165,7 +1165,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       System.out.flush();
       notifyExitActionListeners();
 
-      rootRegistry = null;
+      if (rootRegistry != null)
+      {
+         rootRegistry.closeAndDispose();
+         rootRegistry = null;
+      }
 
       
       if (standardAllCommandsExecutor != null)
@@ -1218,6 +1222,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          jFrame.setVisible(false);
          jFrame.dispose();
+         jFrame = null;
       }
 
       if (DEBUG_CLOSE_AND_DISPOSE)

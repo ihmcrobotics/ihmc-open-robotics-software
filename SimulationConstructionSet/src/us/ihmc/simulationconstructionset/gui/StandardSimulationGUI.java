@@ -201,6 +201,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    private ArrayList<TickUpdateListener> tickUpdateListeners = new ArrayList<TickUpdateListener>();
 
+   private FileDrop fileDrop;
+   
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
          DataBuffer buffer, VarGroupList varGroupList, JApplet jApplet, YoVariableRegistry rootRegistry)
@@ -248,7 +250,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          parentContainer = jApplet;
       }
 
-      new FileDrop(parentContainer, /* dragBorder, */StdOutFileDropListener.INSTANCE);
+      this.fileDrop = new FileDrop(parentContainer, /* dragBorder, */StdOutFileDropListener.INSTANCE);
 
       // frame.addPropertyChangeListener(this);
       // frame.addWindowStateListener(this);
@@ -2912,16 +2914,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
 
       if (DEBUG_CLOSE_AND_DISPOSE)
-         System.out.println("Closing and Disposing graphics3dAdapter");
-      System.out.flush();
-
-      if (graphics3dAdapter != null)
-      {
-         graphics3dAdapter.closeAndDispose();
-         graphics3dAdapter = null;
-      }
-
-      if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Removing all From NumericContentPane.");
       System.out.flush();
 
@@ -2986,6 +2978,16 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          mainPanel.removeAll(); // Remove all seems to be taking too long. Perhaps it needs to be put on a Swing Thread or something?
          mainPanel = null;
       }
+      
+      if (DEBUG_CLOSE_AND_DISPOSE)
+         System.out.println("Closing and Disposing graphics3dAdapter");
+      System.out.flush();
+
+      if (graphics3dAdapter != null)
+      {
+         graphics3dAdapter.closeAndDispose();
+         graphics3dAdapter = null;
+      }
 
       varGroupList = null;
       cameraMountList = null;
@@ -3006,6 +3008,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Removing FileDrop hooks.");
       FileDrop.remove(parentContainer);
+      fileDrop = null;
+      
       parentContainer.removeAll();
       parentContainer = null;
 

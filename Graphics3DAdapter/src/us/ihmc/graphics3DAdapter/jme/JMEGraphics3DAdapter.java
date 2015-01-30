@@ -25,7 +25,7 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
  */
 public class JMEGraphics3DAdapter implements Graphics3DAdapter
 {
-   private final JMERenderer jmeRenderer = new JMERenderer(RenderType.AWTPANELS);
+   private JMERenderer jmeRenderer = new JMERenderer(RenderType.AWTPANELS);
 
    public JMEGraphics3DAdapter()
    {
@@ -83,6 +83,7 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    public void closeAndDispose()
    {
       jmeRenderer.closeAndDispose();
+      jmeRenderer = null;
    }
 
    public void setBackgroundColor(Color3f color)
@@ -122,7 +123,7 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
 
    public void closeViewport(ViewportAdapter viewport)
    {
-      jmeRenderer.closeViewport(viewport);
+      if (jmeRenderer != null) jmeRenderer.closeViewport(viewport);
    }
 
    public JMERenderer getRenderer()

@@ -104,22 +104,22 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private JMEContextManager contextManager;
    private JMEAssetLocator assetLocator;
 
-   private final ArrayList<JMEViewportAdapter> viewportAdapters = new ArrayList<JMEViewportAdapter>();
+   private ArrayList<JMEViewportAdapter> viewportAdapters = new ArrayList<JMEViewportAdapter>();
 
-   private final HashBiMap<Graphics3DNode, JMEGraphics3DNode> jmeGraphicsNodes = HashBiMap.create();
-   private final Collection<JMEGraphics3DNode> jmeGraphicsNodesListView = jmeGraphicsNodes.values();
+   private HashBiMap<Graphics3DNode, JMEGraphics3DNode> jmeGraphicsNodes = HashBiMap.create();
+   private Collection<JMEGraphics3DNode> jmeGraphicsNodesListView = jmeGraphicsNodes.values();
 
    private boolean isTerrainVisible = true;
 
-   private final SelectedListenerHolder selectedListenerHolder = new SelectedListenerHolder();
-   private final KeyListenerHolder keyListenerHolder = new KeyListenerHolder();
-   private final MouseListenerHolder mouseListenerHolder = new MouseListenerHolder();
+   private SelectedListenerHolder selectedListenerHolder = new SelectedListenerHolder();
+   private KeyListenerHolder keyListenerHolder = new KeyListenerHolder();
+   private MouseListenerHolder mouseListenerHolder = new MouseListenerHolder();
 
    private Node rootJoint;
    private Node terrain;
    private Node zUpNode;
    
-   private final ArrayList<JMEGPULidar> gpuLidars = new ArrayList<>();
+   private ArrayList<JMEGPULidar> gpuLidars = new ArrayList<>();
    private ArrayList<PBOAwtPanel> pboAwtPanels;
 
    private DirectionalLight primaryLight;
@@ -226,7 +226,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    public void closeViewport(ViewportAdapter viewport)
    {
-      ((JMEViewportAdapter) viewport).closeAndDispose();
+      ((JMEViewportAdapter) viewport).closeViewportAdapter();
       while (viewportAdapters.remove(viewport))
       ;
    }
@@ -617,6 +617,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    
    private void syncSubsceneToMain(Node main, Node sub, Node subsceneRoot)
    {
+      if (alreadyClosing) return;
+      
       sub.setLocalTransform(main.getLocalTransform());
       
       for (Spatial child : main.getChildren())
@@ -868,12 +870,63 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       });
    }
 
+   private boolean alreadyClosing = false;
+   
    public void closeAndDispose()
    {
-      for (JMEViewportAdapter viewportAdapter : viewportAdapters)
+      if (alreadyClosing) return;
+      alreadyClosing = true;
+      
+      if (viewportAdapters != null)
       {
-         viewportAdapter.closeAndDispose();
+         for (JMEViewportAdapter viewportAdapter : viewportAdapters)
+         {
+            viewportAdapter.closeAndDispose();
+         }
+         viewportAdapters.clear();
+         viewportAdapters = null;
       }
+
+      contextManager = null;
+      assetLocator = null;
+      
+      if (jmeGraphicsNodes != null)
+      {
+         jmeGraphicsNodes.clear();
+         jmeGraphicsNodes = null;
+      }
+      
+      if (jmeGraphicsNodesListView != null)
+      {
+         jmeGraphicsNodesListView.clear();
+         jmeGraphicsNodesListView = null;
+      }
+      
+      selectedListenerHolder = null;
+      keyListenerHolder = null;
+      mouseListenerHolder = null;
+
+      rootJoint = null;
+      terrain = null;
+      zUpNode = null;
+      
+      if (gpuLidars != null)
+      {
+         for (JMEGPULidar jmegpuLidar : gpuLidars)
+         {
+            jmegpuLidar.cleanup();
+         }
+         gpuLidars.clear();
+         gpuLidars = null;
+      }
+      
+      if (pboAwtPanels != null)
+      {
+         pboAwtPanels.clear();
+         pboAwtPanels = null;
+      }
+      
+      primaryLight = null;
 
       stop();
    }
