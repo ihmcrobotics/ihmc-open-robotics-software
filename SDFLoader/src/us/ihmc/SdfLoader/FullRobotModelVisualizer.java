@@ -28,7 +28,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private final String name;
    private final SDFRobot robot;
    private final double updateDT;
-
+   private final FullRobotModel fullRobot;
 
    private SimulationConstructionSet scs;
    private YoVariableRegistry robotRegistry;
@@ -37,6 +37,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
   
    public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
    {   
+      this.fullRobot = fullRobotModel;
       this.scs = scs;
       this.robot = (SDFRobot) scs.getRobots()[0];
       this.name = robot.getName() + "Simulated";    
@@ -104,6 +105,8 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    
    public void update(long timestamp)
    {
+      fullRobot.updateFrames();
+      
       if(rootJoint != null)
       {
          RigidBodyTransform rootTransform = rootJoint.getJointTransform3D();

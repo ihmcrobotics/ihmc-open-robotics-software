@@ -33,10 +33,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
    @Override 
    public String getFootLinkName(RobotSide side) {
-      if( side == RobotSide.LEFT) 
-         return "l_foot";
-      else
-         return "r_foot";
+      return (side == RobotSide.LEFT) ? "l_foot" : "r_foot";
    }
 
    @Override 
@@ -230,9 +227,9 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       coupledJointWeights.set(rleg_hpy, rleg_kny, -1);
 
       // back
-      weights_jointpose.set(back_bkz, 1);
-      weights_jointpose.set(back_bky, 1);
-      weights_jointpose.set(back_bkx, 1);
+      weights_jointpose.set(back_bkz, 0.5);
+      weights_jointpose.set(back_bky, 1.5);
+      weights_jointpose.set(back_bkx, 1.5);
 
       // try keep hpx mirrored 
       weights_jointpose.set(rleg_hpx, 1);
@@ -245,8 +242,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       weights_jointpose.set(lleg_hpz, 0.2);
 
       //elbows
-      weights_jointpose.set(larm_elx, 1.0);
-      weights_jointpose.set(rarm_elx, 1.0);
+      weights_jointpose.set(larm_elx, 0.1);
+      weights_jointpose.set(rarm_elx, 0.1);
 
       preferedJointPose.set(larm_elx, 1.0);
       preferedJointPose.set(rarm_elx, -1.0);
