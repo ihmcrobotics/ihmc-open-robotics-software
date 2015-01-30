@@ -107,6 +107,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       FramePose midGrabPose = new FramePose();
 
       computeDesiredGraspOrientation(debrisTransform, graspVector, fullRobotModel.getHandControlFrame(robotSide), rotationToBePerformedInWorldFrame);
+      
       computeDesiredHandPosesWithOffsetAlongGraspVector(midGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector,
             offsetToThePointOfGrabbing.getDoubleValue());
       computeDesiredHandPosesWithOffsetAlongGraspVector(desiredGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
@@ -256,10 +257,18 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    {
       haveInputsBeenSet.set(false);
 
-      homePelvisPose = new FramePose(pelvisFrame);
+      if(homePelvisPose == null)
+         homePelvisPose = new FramePose(pelvisFrame);
+      else
+         homePelvisPose.setToZero(pelvisFrame);
+      
       homePelvisPose.changeFrame(worldFrame);
 
-      homeChestOrientation = new FrameOrientation(chestFrame);
+      if(homeChestOrientation == null)
+         homeChestOrientation = new FrameOrientation(chestFrame);
+      else
+         homeChestOrientation.setToZero(chestFrame);
+      
       homeChestOrientation.changeFrame(worldFrame);
    }
 
