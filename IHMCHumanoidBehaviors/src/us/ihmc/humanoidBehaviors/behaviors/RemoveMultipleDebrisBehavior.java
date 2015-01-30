@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -30,9 +30,8 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
    private final ArrayList<DebrisData> debrisDataList = new ArrayList<>();
    private final ArrayList<DebrisData> sortedDebrisDataList = new ArrayList<>();
-   private final LinkedHashMap<DebrisData, Double> debrisDistanceMap = new LinkedHashMap<>();
+   private final TreeMap<Double, DebrisData> debrisDistanceMap = new TreeMap<>();
 
-   private double currentDistanceToObject;
    private final FramePoint currentObjectPosition = new FramePoint();
 
    private final SideDependentList<WristForceSensorFilteredUpdatable> wristSensors;
@@ -90,6 +89,8 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
    private void sortDebrisFromCloserToFarther()
    {
+      double currentDistanceToObject;
+
       for (int i = 0; i < debrisDataList.size(); i++)
       {
 
@@ -99,25 +100,11 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
          currentObjectPosition.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
          currentDistanceToObject = currentObjectPosition.getX();
 
-         debrisDistanceMap.put(currentDebrisData, currentDistanceToObject);
-
+         debrisDistanceMap.put(currentDistanceToObject, currentDebrisData);
       }
 
       sortedDebrisDataList.clear();
-      sortedDebrisDataList.add(debrisDataList.get(0));
-      for (int i = 1; i < debrisDataList.size(); i++)
-      {
-         currentDistanceToObject = debrisDistanceMap.get(debrisDataList.get(i));
-         int j = 0;
-         while (j < sortedDebrisDataList.size() && currentDistanceToObject > debrisDistanceMap.get(sortedDebrisDataList.get(j)))
-         {
-            j++;
-         }
-         if (j == sortedDebrisDataList.size())
-            sortedDebrisDataList.add(debrisDataList.get(i));
-         else
-            sortedDebrisDataList.add(j, debrisDataList.get(i));
-      }
+      sortedDebrisDataList.addAll(debrisDistanceMap.values());
    }
 
    @Override
