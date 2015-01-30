@@ -174,6 +174,7 @@ public class OnToesState extends AbstractFootControlState
       else
       {
          ArrayList<InverseDynamicsJoint> jointPathWithoutKnee = new ArrayList<>(Arrays.asList(ScrewTools.createJointPath(rootBody, foot)));
+         jointPathWithoutKnee.remove(kneeJoint);
          jacobianId = momentumBasedController.getOrCreateGeometricJacobian(jointPathWithoutKnee.toArray(new InverseDynamicsJoint[0]), jacobianFrame);
       }
       return jacobianId;
