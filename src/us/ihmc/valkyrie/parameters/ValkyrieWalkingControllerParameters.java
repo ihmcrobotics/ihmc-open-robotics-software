@@ -527,6 +527,32 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
+
+      double kp = 0.0;
+      double zetaXYZ = runningOnRealRobot ? 0.0 : 0.0;
+      double kpXYOrientation = runningOnRealRobot ? 40.0 : 300.0;
+      double kpZOrientation = runningOnRealRobot ? 40.0 : 300.0;
+      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
+      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kp, kp);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
    public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
    {
       return null;
