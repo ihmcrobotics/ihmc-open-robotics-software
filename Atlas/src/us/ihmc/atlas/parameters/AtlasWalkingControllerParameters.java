@@ -548,6 +548,32 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
+   {
+      YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
+
+      double kp = 0.0;
+      double zetaXYZ = (target == AtlasTarget.REAL_ROBOT) ? 0.0 : 0.0;
+      double kpXYOrientation = (target == AtlasTarget.REAL_ROBOT) ? 40.0 : 300.0;
+      double kpZOrientation = (target == AtlasTarget.REAL_ROBOT) ? 40.0 : 300.0;
+      double zetaOrientation = (target == AtlasTarget.REAL_ROBOT) ? 0.4 : 0.4;
+      double maxLinearAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxLinearJerk = (target == AtlasTarget.REAL_ROBOT) ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAngularAcceleration = (target == AtlasTarget.REAL_ROBOT) ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAngularJerk = (target == AtlasTarget.REAL_ROBOT) ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kp, kp);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
+   @Override
    public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
    {
       YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SupportFoot", registry);

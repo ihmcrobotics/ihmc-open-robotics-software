@@ -22,7 +22,7 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
@@ -55,10 +55,13 @@ public class TouchdownState extends AbstractFootControlState
    private final VectorProvider touchdownVelocityProvider;
    private final FrameLineSegment2d edgeToRotateAbout;
 
-   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, YoVariableRegistry registry)
+   private final YoSE3PIDGains gains;
+
+   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(stateEnum, footControlHelper, registry);
 
+      this.gains = gains;
       walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       this.touchdownVelocityProvider = touchdownVelocityProvider;
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, contactableBody.getRigidBody(), rootBody.getBodyFixedFrame());
@@ -140,7 +143,7 @@ public class TouchdownState extends AbstractFootControlState
       footPitchdd = onEdgePitchAngleTrajectoryGenerator.getAcceleration();
       //      desiredOnEdgeAngle.set(footPitch);
 
-      desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]);
+//      desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]); // Only damp the foot
 
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, footPitchd, 0.0);
@@ -258,15 +261,7 @@ public class TouchdownState extends AbstractFootControlState
 
    private void setTouchdownOnEdgeGains()
    {
-      double kxzOrientation = 300.0;
-      double kyOrientation = 0.0;
-      double dxzOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4);
-      double dyOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4); //Only damp the pitch velocity
-
-      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setOrientationProportionalGains(kxzOrientation, kyOrientation, kxzOrientation);
-      accelerationControlModule.setOrientationDerivativeGains(dxzOrientation, dyOrientation, dxzOrientation);
+      footControlHelper.setGainsToZero();
+      footControlHelper.setOrientationGains(gains.getOrientationGains());
    }
 }
