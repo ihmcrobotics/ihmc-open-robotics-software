@@ -16,7 +16,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UITest;
 
+@UITest
 public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorTest
 {
 
