@@ -57,10 +57,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P3R);
       trajectoryTime.set(trajectoryDuration);
-      
-      //TODO check this
-      wholeBodyIKSolver.setGripperPalmTarget(actualFullRobotModel, robotSide, endEffectorPose);
-      
+      wholeBodyIKSolver.setGripperAttachmentTarget(actualFullRobotModel, robotSide, endEffectorPose);
+
       hasInputBeenSet.set(true);
    }
 
@@ -99,7 +97,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
-      
+     
       wholeBodyIKSolver.setVerbosityLevel(0);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(false);
    }

@@ -8,10 +8,12 @@ import us.ihmc.utilities.taskExecutor.Task;
 
 public class FingerStateTask implements Task
 {
+   private static final boolean DEBUG = false;
+
    private final FingerStatePacket fingerStatePacket;
    private final FingerStateBehavior fingerStateBehavior;
 
-   public FingerStateTask(RobotSide robotSide, FingerState fingerState,FingerStateBehavior fingerStateBehavior)
+   public FingerStateTask(RobotSide robotSide, FingerState fingerState, FingerStateBehavior fingerStateBehavior)
    {
       this.fingerStatePacket = new FingerStatePacket(robotSide, fingerState);
 
@@ -21,7 +23,8 @@ public class FingerStateTask implements Task
    @Override
    public void doTransitionIntoAction()
    {
-      System.out.println("started a finger Task");
+      if (DEBUG)
+         System.out.println("started a finger Task");
       fingerStateBehavior.initialize();
       fingerStateBehavior.setInput(fingerStatePacket);
    }
@@ -35,7 +38,8 @@ public class FingerStateTask implements Task
    @Override
    public void doTransitionOutOfAction()
    {
-      System.out.println("finished a finger Task");
+      if (DEBUG)
+         System.out.println("finished a finger Task");
       fingerStateBehavior.finalize();
    }
 

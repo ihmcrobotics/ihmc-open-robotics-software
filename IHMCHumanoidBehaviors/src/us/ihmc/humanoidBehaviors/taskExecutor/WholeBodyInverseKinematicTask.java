@@ -9,10 +9,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WholeBodyInverseKinematicTask implements Task
 {
-   private static final boolean DEBUG = false;
-
-   private static final double trajectoryDuration = 2.0;
-   
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
@@ -32,14 +28,13 @@ public class WholeBodyInverseKinematicTask implements Task
       this.trajectoryTime = trajectoryTime;
       desiredHandPose.checkReferenceFrameMatch(worldFrame);
       this.desiredHandPose = desiredHandPose;
-
    }
 
    @Override
    public void doTransitionIntoAction()
    {
       wholeBodyIKBehavior.initialize();
-      wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryDuration);
+      wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime);
    }
 
    @Override

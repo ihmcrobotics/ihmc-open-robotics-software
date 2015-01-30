@@ -45,7 +45,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
       removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime,
             wholeBodyControllerParameters, walkingControllerParameters);
       isDone = new BooleanYoVariable("isDone", registry);
-      haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
+      haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
 
       this.fullRobotModel = fullRobotModel;
       this.attachNetworkProcessorListeningQueue(inputListeningQueue, HumanoidBehaviorDebrisPacket.class);

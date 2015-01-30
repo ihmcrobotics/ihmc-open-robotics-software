@@ -90,13 +90,13 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       offsetToThePointOfGrabbing.set(0.3);
    }
 
-   public void setGraspPose(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector)
+   public void setGraspPose(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector, RobotSide robotSide)
    {
       if (graspVector.length() == 0.0)
       {
          throw new RuntimeException("graspVector has not been set!");
       }
-      robotSide = determineSideToUse(graspPosition);
+      this.robotSide = robotSide;
       setTasks(debrisTransform, graspPosition, graspVector);
       haveInputsBeenSet.set(true);
    }
@@ -106,12 +106,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       FramePose desiredGrabPose = new FramePose();
       FramePose midGrabPose = new FramePose();
 
-      FramePose prepareToDropPose = new FramePose(chestFrame);
-      prepareToDropPose.setOrientation(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
-      prepareToDropPose.setPosition(0.0, robotSide.negateIfRightSide(0.2), 0.0);
-      prepareToDropPose.changeFrame(worldFrame);
-
-      computeDesiredGraspOrientation(debrisTransform, fullRobotModel.getHandControlFrame(robotSide), rotationToBePerformedInWorldFrame, graspVector);
+      computeDesiredGraspOrientation(debrisTransform, graspVector, fullRobotModel.getHandControlFrame(robotSide), rotationToBePerformedInWorldFrame);
       computeDesiredHandPosesWithOffsetAlongGraspVector(midGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector,
             offsetToThePointOfGrabbing.getDoubleValue());
       computeDesiredHandPosesWithOffsetAlongGraspVector(desiredGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
@@ -129,6 +124,11 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
          taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, desiredGrabPose, trajectoryTime));
 
       taskExecutor.submit(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
+
+      FramePose prepareToDropPose = new FramePose(chestFrame);
+      prepareToDropPose.setOrientation(rotationToBePerformedInWorldFrame);
+      prepareToDropPose.setPosition(0.7, robotSide.negateIfRightSide(0.1), -0.2);
+      prepareToDropPose.changeFrame(worldFrame);
 
       if (useWholeBodyIK.getBooleanValue())
       {
@@ -156,8 +156,8 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       desiredPoseToPack.setPosition(translation);
    }
 
-   private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, ReferenceFrame handFrame, Quat4d desiredGraspOrientationToPack,
-         Vector3d graspVector)
+   private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, Vector3d graspVector, ReferenceFrame handFrame,
+         Quat4d desiredGraspOrientationToPack)
    {
       PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", worldFrame);
       handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
@@ -186,17 +186,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       handPose.getOrientation(desiredGraspOrientationToPack);
    }
 
-   private RobotSide determineSideToUse(Point3d position)
-   {
-      FramePose pose = new FramePose(worldFrame);
-      pose.setPose(position, new Quat4d(0, 0, 0, 1));
-      pose.changeFrame(pelvisFrame);
-      if (pose.getY() <= 0.0)
-         return RobotSide.RIGHT;
-      else
-         return RobotSide.LEFT;
-   }
-
    @Override
    public void doControl()
    {
@@ -206,15 +195,19 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      wholeBodyIKBehavior.consumeObjectFromNetworkProcessor(object);
+      if (taskExecutor.getCurrentTask() instanceof HandPoseTask)
+         handPoseBehavior.consumeObjectFromNetworkProcessor(object);
+      if (taskExecutor.getCurrentTask() instanceof WholeBodyInverseKinematicTask)
+         wholeBodyIKBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromController(object);
-      wholeBodyIKBehavior.consumeObjectFromController(object);
+      if (taskExecutor.getCurrentTask() instanceof HandPoseTask)
+         handPoseBehavior.consumeObjectFromController(object);
+      if (taskExecutor.getCurrentTask() instanceof WholeBodyInverseKinematicTask)
+         wholeBodyIKBehavior.consumeObjectFromController(object);
    }
 
    public RobotSide getSideToUse()
@@ -249,7 +242,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return taskExecutor.isDone();
+      return (taskExecutor.isDone() && hasInputBeenSet());
    }
 
    @Override
