@@ -167,6 +167,16 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       }
    }
 
+   public boolean isCoPOnEdge()
+   {
+      return isCoPOnEdge;
+   }
+
+   public void setCoPOnEdge(boolean isCoPOnEdge)
+   {
+      this.isCoPOnEdge = isCoPOnEdge;
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
