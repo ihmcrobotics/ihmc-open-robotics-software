@@ -336,8 +336,7 @@ public class OnToesState extends AbstractFootControlState
       edgeToRotateAbout.set(edgeContactPoints.get(0), edgeContactPoints.get(1));
       for (int i = 0; i < 2; i++)
       {
-         desiredEdgeContactPositions.get(i).setIncludingFrame(edgeContactPoints.get(i).getReferenceFrame(), edgeContactPoints.get(i).getX(),
-               edgeContactPoints.get(i).getY(), 0.0);
+         desiredEdgeContactPositions.get(i).setXYIncludingFrame(edgeContactPoints.get(i));
          desiredEdgeContactPositions.get(i).changeFrame(rootBody.getBodyFixedFrame());
       }
 
