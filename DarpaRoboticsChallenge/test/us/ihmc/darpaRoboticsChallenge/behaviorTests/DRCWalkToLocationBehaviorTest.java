@@ -378,7 +378,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       return percentDistanceWalked;
    }
 
-   private FramePose2d getCurrentMidFeetPose2d(ReferenceFrames referenceFrames)
+   private FramePose2d getCurrentMidFeetPose2d_THIS_DOES_NOT_WORK(ReferenceFrames referenceFrames)
    {
       robotDataReceiver.updateRobotModel();
       referenceFrames.updateFrames();
