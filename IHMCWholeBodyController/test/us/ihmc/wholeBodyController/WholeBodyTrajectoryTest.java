@@ -9,6 +9,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
@@ -57,7 +58,6 @@ public abstract class WholeBodyTrajectoryTest
 
       Vector3d rootPosition = new Vector3d(0,0, 0.93);
       actualRobotModel.getRootJoint().setPosition( rootPosition );   
-
    }    
 
    private TrajectoryND buildTrajectory(SDFFullRobotModel initialModel, SDFFullRobotModel finalModel) throws Exception
@@ -74,6 +74,7 @@ public abstract class WholeBodyTrajectoryTest
       }
    }
 
+   @Ignore
 	@AverageDuration
 	@Test
    public void testTrajectory() throws Exception
@@ -99,10 +100,13 @@ public abstract class WholeBodyTrajectoryTest
 
       for (Point3d rightTarget: targetListRight)
       {
-         for (int a=0; a< 100; a++)
+         if( getSimulationConstructionSet() != null )
          {
-            Thread.sleep(5);
-            getFullRobotModelVisualizer().update(0);
+            for (int a=0; a< 100; a++)
+            {
+               Thread.sleep(5);
+               getFullRobotModelVisualizer().update(0);
+            }
          }
          
          FramePose targetR = new FramePose(ReferenceFrame.getWorldFrame(), rightTarget, new Quat4d() );
@@ -112,8 +116,6 @@ public abstract class WholeBodyTrajectoryTest
          wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
 
          int ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS );
-
-
 
          if( ret >=0 )
          {
@@ -135,8 +137,12 @@ public abstract class WholeBodyTrajectoryTest
 
                actualRobotModel.updateJointsAngleButKeepOneFootFixed( angles, RobotSide.RIGHT );
                result = trajectory.getNextInterpolatedPoints(0.01);
-               Thread.sleep(5);
-               getFullRobotModelVisualizer().update(0);
+               
+               if( getSimulationConstructionSet() != null )
+               {
+                  Thread.sleep(5);
+                  getFullRobotModelVisualizer().update(0);
+               }
             }
 
          }
@@ -144,10 +150,13 @@ public abstract class WholeBodyTrajectoryTest
             fail("no solution found\n");
          }
          
-         for (int a=0; a< 200; a++)
+         if( getSimulationConstructionSet() != null )
          {
-            Thread.sleep(5);
-            getFullRobotModelVisualizer().update(0);
+            for (int a=0; a< 200; a++)
+            {
+               Thread.sleep(5);
+               getFullRobotModelVisualizer().update(0);
+            }
          }
       } 
    }
