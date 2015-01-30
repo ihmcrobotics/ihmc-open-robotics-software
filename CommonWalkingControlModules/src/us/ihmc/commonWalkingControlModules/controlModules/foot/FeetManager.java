@@ -72,7 +72,7 @@ public class FeetManager
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, supportFootControlGains, swingTimeProvider, momentumBasedController, registry);
-         footControlModule.setParameters(singularityEscapeMultiplierForSwing);
+         footControlModule.setNullspaceMultiplier(singularityEscapeMultiplierForSwing);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -281,9 +281,8 @@ public class FeetManager
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
-      FootControlModule endEffectorControlModule = footControlModules.get(robotSide);
-      endEffectorControlModule.doSingularityEscape(true);
-      endEffectorControlModule.setContactState(ConstraintType.SWING);
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.setContactState(ConstraintType.SWING);
    }
 
    private void setContactStateForMoveStraight(RobotSide robotSide)

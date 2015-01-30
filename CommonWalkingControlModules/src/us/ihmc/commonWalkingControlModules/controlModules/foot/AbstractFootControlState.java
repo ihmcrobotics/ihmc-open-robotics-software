@@ -18,8 +18,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.stateMachines.State;
 
@@ -51,17 +49,12 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    protected final int jacobianId;
 
-   protected final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
-   protected final DoubleYoVariable nullspaceMultiplier;
    protected final GeometricJacobian jacobian;
-   protected final BooleanYoVariable jacobianDeterminantInRange;
-   protected final BooleanYoVariable doSingularityEscape;
    protected final DenseMatrix64F selectionMatrix;
    protected FrameLineSegment2d edgeToRotateAbout;
    protected final RobotSide robotSide;
 
-   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, YoVariableRegistry registry)
+   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, YoVariableRegistry registry)
    {
       super(stateEnum);
 
@@ -72,10 +65,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.accelerationControlModule = footControlHelper.getAccelerationControlModule();
       this.momentumBasedController = footControlHelper.getMomentumBasedController();
       this.jacobianId = footControlHelper.getJacobianId();
-
-      this.nullspaceMultiplier = nullspaceMultiplier;
-      this.jacobianDeterminantInRange = jacobianDeterminantInRange;
-      this.doSingularityEscape = doSingularityEscape;
 
       this.robotSide = footControlHelper.getRobotSide();
 
@@ -93,7 +82,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    @Override
    public void doAction()
    {
-      computeNullspaceMultipliers();
+      footControlHelper.computeNullspaceMultipliers();
       doSpecificAction();
    }
 
@@ -102,33 +91,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       ReferenceFrame bodyFixedFrame = contactableBody.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
+      taskspaceConstraintData.set(footAcceleration, footControlHelper.getNullspaceMultipliers(), selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
-   }
-
-   private void computeNullspaceMultipliers()
-   {
-      double det = jacobian.det();
-      jacobianDeterminantInRange.set(Math.abs(det) < minJacobianDeterminant);
-
-      if (jacobianDeterminantInRange.getBooleanValue())
-      {
-         nullspaceMultipliers.reshape(1, 1);
-         if (doSingularityEscape.getBooleanValue())
-         {
-            nullspaceMultipliers.set(0, nullspaceMultiplier.getDoubleValue());
-         }
-         else
-         {
-            nullspaceMultipliers.set(0, 0);
-         }
-      }
-      else
-      {
-         nullspaceMultiplier.set(Double.NaN);
-         nullspaceMultipliers.reshape(0, 1);
-         doSingularityEscape.set(false);
-      }
    }
 
    @Override

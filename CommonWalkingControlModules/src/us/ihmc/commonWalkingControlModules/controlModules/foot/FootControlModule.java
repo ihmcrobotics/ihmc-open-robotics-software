@@ -20,7 +20,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -54,15 +53,6 @@ public class FootControlModule
 
    private final MomentumBasedController momentumBasedController;
 
-   private final DoubleYoVariable jacobianDeterminant;
-   private final BooleanYoVariable jacobianDeterminantInRange;
-
-   private final BooleanYoVariable doSingularityEscape;
-   private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplier;
-   private final DoubleYoVariable nullspaceMultiplier;
-   private final GeometricJacobian jacobian;
-
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final BooleanYoVariable requestHoldPosition;
@@ -82,6 +72,8 @@ public class FootControlModule
 
    private final FootControlHelper footControlHelper;
 
+   private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
+
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
          YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains supportFootControlGains, DoubleProvider swingTimeProvider,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
@@ -96,8 +88,6 @@ public class FootControlModule
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
-      this.jacobian = momentumBasedController.getJacobian(footControlHelper.getJacobianId());
-
       this.momentumBasedController = momentumBasedController;
 
       this.requestHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
@@ -105,16 +95,10 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
-      waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
-      jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", registry);
-      jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
-      nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
-      //      nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
-      singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
-
       doFancyOnToesControl = new BooleanYoVariable(contactableFoot.getName() + "DoFancyOnToesControl", registry);
       doFancyOnToesControl.set(walkingControllerParameters.doFancyOnToesControl());
+
+      waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);
@@ -128,42 +112,36 @@ public class FootControlModule
       touchdownVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, registry);
+      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, registry);
       states.add(touchdownOnToesState);
 
-      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, registry);
+      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, registry);
       states.add(touchdownOnHeelState);
 
-      onToesState = new OnToesState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, toeOffFootControlGains, registry);
+      onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
 
-      supportState = new FullyConstrainedState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, supportFootControlGains,
-            registry);
+      supportState = new FullyConstrainedState(footControlHelper, supportFootControlGains, registry);
       states.add(supportState);
 
-      holdPositionState = new HoldPositionState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            holdPositionFootControlGains, registry);
+      holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(holdPositionState);
 
       if (USE_HEURISTIC_SWING_STATE)
       {
-         HeuristicSwingState swingState = new HeuristicSwingState(footControlHelper, swingTimeProvider, nullspaceMultiplier, jacobianDeterminantInRange,
-               doSingularityEscape, swingFootControlGains, registry);
+         HeuristicSwingState swingState = new HeuristicSwingState(footControlHelper, swingTimeProvider, swingFootControlGains, registry);
          states.add(swingState);
          this.swingState = swingState;
       }
       else
       {
-         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, nullspaceMultiplier,
-               jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry);
+         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider,
+               legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry);
          states.add(swingState);
          this.swingState = swingState;
       }
 
-      moveStraightState = new MoveStraightState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule,
-            swingFootControlGains, registry);
+      moveStraightState = new MoveStraightState(footControlHelper, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry);
       states.add(moveStraightState);
 
       setupStateMachine(states);
@@ -192,10 +170,9 @@ public class FootControlModule
       {
          for (AbstractFootControlState stateToTransitionTo : states)
          {
-            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper,
-                  doSingularityEscape, jacobianDeterminantInRange, waitSingularityEscapeBeforeTransitionToNextState);
-            state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
-                  new FootStateTransitionAction(footControlHelper, doSingularityEscape, waitSingularityEscapeBeforeTransitionToNextState)));
+            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
+            FootStateTransitionAction footStateTransitionAction = new FootStateTransitionAction(footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
+            state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition, footStateTransitionAction));
          }
       }
 
@@ -243,14 +220,12 @@ public class FootControlModule
 
    public void doSingularityEscape(boolean doSingularityEscape)
    {
-      this.doSingularityEscape.set(doSingularityEscape);
-      this.nullspaceMultiplier.set(singularityEscapeNullspaceMultiplier.getDoubleValue());
+      footControlHelper.doSingularityEscape(doSingularityEscape);
    }
 
    public void doSingularityEscape(double temporarySingularityEscapeNullspaceMultiplier)
    {
-      doSingularityEscape.set(true);
-      this.nullspaceMultiplier.set(temporarySingularityEscapeNullspaceMultiplier);
+      footControlHelper.doSingularityEscape(temporarySingularityEscapeNullspaceMultiplier);
    }
 
    public void doSingularityEscapeBeforeTransitionToNextState()
@@ -261,17 +236,17 @@ public class FootControlModule
 
    public double getJacobianDeterminant()
    {
-      return jacobianDeterminant.getDoubleValue();
+      return footControlHelper.getJacobianDeterminant();
    }
 
    public boolean isInSingularityNeighborhood()
    {
-      return jacobianDeterminantInRange.getBooleanValue();
+      return footControlHelper.isJacobianDeterminantInRange();
    }
 
-   public void setParameters(double singularityEscapeNullspaceMultiplier)
+   public void setNullspaceMultiplier(double singularityEscapeNullspaceMultiplier)
    {
-      this.singularityEscapeNullspaceMultiplier.set(singularityEscapeNullspaceMultiplier);
+      footControlHelper.setNullspaceMultiplier(singularityEscapeNullspaceMultiplier);
    }
 
    public void setContactState(ConstraintType constraintType)
@@ -321,7 +296,6 @@ public class FootControlModule
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
-      jacobianDeterminant.set(jacobian.det());
 
       stateMachine.checkTransitionConditions();
 

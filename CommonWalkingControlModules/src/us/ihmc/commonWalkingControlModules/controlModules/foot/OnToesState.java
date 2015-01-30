@@ -23,7 +23,6 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
@@ -80,10 +79,9 @@ public class OnToesState extends AbstractFootControlState
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
 
-   public OnToesState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.TOES, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.TOES, footControlHelper, registry);
 
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
 
@@ -237,7 +235,7 @@ public class OnToesState extends AbstractFootControlState
 
       // Just to make sure we're not trying to do singularity escape
       // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
-      nullspaceMultipliers.reshape(0, 1);
+      footControlHelper.resetNullspaceMultipliers();
       setTaskspaceConstraint(footAcceleration);
 
       shrinkFootSizeToMidToe();

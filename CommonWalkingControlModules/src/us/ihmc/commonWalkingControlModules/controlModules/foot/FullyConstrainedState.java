@@ -6,8 +6,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class FullyConstrainedState extends AbstractFootControlState
 {
@@ -17,10 +15,9 @@ public class FullyConstrainedState extends AbstractFootControlState
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   public FullyConstrainedState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public FullyConstrainedState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.FULL, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
+      super(ConstraintType.FULL, footControlHelper, registry);
 
       this.fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       this.gains = gains;

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -14,12 +16,15 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class FootControlHelper
 {
    private static final double EPSILON_POINT_ON_EDGE = 1e-2;
+   private static final double minJacobianDeterminant = 0.035;
 
    private final RobotSide robotSide;
    private final ContactablePlaneBody contactableFoot;
@@ -35,6 +40,13 @@ public class FootControlHelper
    private final FrameVector fullyConstrainedNormalContactVector;
 
    private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
+
+   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+   private final BooleanYoVariable doSingularityEscape;
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplier;
+   private final DoubleYoVariable nullspaceMultiplier;
+   private final DoubleYoVariable jacobianDeterminant;
+   private final BooleanYoVariable jacobianDeterminantInRange;
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
@@ -67,9 +79,15 @@ public class FootControlHelper
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       contactPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
+
+      doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
+      jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", registry);
+      jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
+      nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
+      singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
    }
 
-   protected boolean isCoPOnEdge()
+   public boolean isCoPOnEdge()
    {
       FramePoint2d cop = momentumBasedController.getDesiredCoP(contactableFoot);
 
@@ -77,6 +95,31 @@ public class FootControlHelper
          return false;
       else
          return !contactPolygon.isPointInside(cop, EPSILON_POINT_ON_EDGE);
+   }
+
+   public void computeNullspaceMultipliers()
+   {
+      jacobianDeterminant.set(jacobian.det());
+      jacobianDeterminantInRange.set(Math.abs(jacobianDeterminant.getDoubleValue()) < minJacobianDeterminant);
+
+      if (jacobianDeterminantInRange.getBooleanValue())
+      {
+         nullspaceMultipliers.reshape(1, 1);
+         if (doSingularityEscape.getBooleanValue())
+         {
+            nullspaceMultipliers.set(0, nullspaceMultiplier.getDoubleValue());
+         }
+         else
+         {
+            nullspaceMultipliers.set(0, 0);
+         }
+      }
+      else
+      {
+         nullspaceMultiplier.set(Double.NaN);
+         nullspaceMultipliers.reshape(0, 1);
+         doSingularityEscape.set(false);
+      }
    }
 
    public RobotSide getRobotSide()
@@ -150,5 +193,52 @@ public class FootControlHelper
    public FrameVector getFullyConstrainedNormalContactVector()
    {
       return fullyConstrainedNormalContactVector;
+   }
+
+   public DenseMatrix64F getNullspaceMultipliers()
+   {
+      return nullspaceMultipliers;
+   }
+
+   public void resetNullspaceMultipliers()
+   {
+      nullspaceMultipliers.reshape(0, 1);
+   }
+
+   public boolean isDoingSingularityEscape()
+   {
+      return doSingularityEscape.getBooleanValue();
+   }
+
+   public void resetSingularityEscape()
+   {
+      doSingularityEscape.set(false);
+   }
+
+   public void doSingularityEscape(boolean doSingularityEscape)
+   {
+      this.doSingularityEscape.set(doSingularityEscape);
+      this.nullspaceMultiplier.set(singularityEscapeNullspaceMultiplier.getDoubleValue());
+   }
+
+   public void doSingularityEscape(double temporarySingularityEscapeNullspaceMultiplier)
+   {
+      doSingularityEscape.set(true);
+      this.nullspaceMultiplier.set(temporarySingularityEscapeNullspaceMultiplier);
+   }
+
+   public void setNullspaceMultiplier(double singularityEscapeNullspaceMultiplier)
+   {
+      this.singularityEscapeNullspaceMultiplier.set(singularityEscapeNullspaceMultiplier);
+   }
+
+   public double getJacobianDeterminant()
+   {
+      return jacobianDeterminant.getDoubleValue();
+   }
+
+   public boolean isJacobianDeterminantInRange()
+   {
+      return jacobianDeterminantInRange.getBooleanValue();
    }
 }
