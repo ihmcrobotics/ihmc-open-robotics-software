@@ -9,9 +9,11 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -20,6 +22,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoPositionPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -73,17 +76,22 @@ public class OnToesState extends AbstractFootControlState
 
    private final FramePoint2d singleToeContactPoint;
 
-   double alphaShrinkFootSizeForToeOff = 0.0;
+   private final double alphaShrinkFootSizeForToeOff = 0.0;
 
    private final YoSE3PIDGains gains;
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
+
+   private final FrameLineSegment2d edgeToRotateAbout;
+
+   private final TwistCalculator twistCalculator;
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper, registry);
 
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, contactableBody.getRigidBody(), rootBody.getBodyFixedFrame());
+      twistCalculator = momentumBasedController.getTwistCalculator();
 
       String namePrefix = contactableBody.getName();
       maximumToeOffAngleProvider = new YoVariableDoubleProvider(namePrefix + "MaximumToeOffAngle", registry);
@@ -148,6 +156,8 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
+
+      edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getSoleFrame());
    }
 
    @Override
@@ -157,7 +167,7 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
-      momentumBasedController.getTwistCalculator().packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
+      twistCalculator.packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
       footTwist.changeFrame(contactableBody.getFrameAfterParentJoint());
 
       toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
@@ -191,9 +201,26 @@ public class OnToesState extends AbstractFootControlState
       desiredAngularAcceleration.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, toeOffDesiredPitchAcceleration.getDoubleValue(), 0.0);
       desiredAngularAcceleration.changeFrame(worldFrame);
 
+      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
+
+      FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
+      FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
+      axisOfRotation.normalize();
+      axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
+
+      DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
+      selectionMatrix.reshape(1, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 0, axisOfRotation.getX());
+      selectionMatrix.set(0, 1, axisOfRotation.getY());
+      selectionMatrix.set(0, 2, axisOfRotation.getZ());
+
+      // Just to make sure we're not trying to do singularity escape
+      // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
+      footControlHelper.resetNullspaceMultipliers();
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
 
       int numberOfContactPointsToControl = CONTROL_SINGLE_POINT ? 1 : edgeContactPoints.size();
       for (int i = 0; i < numberOfContactPointsToControl; i++)
@@ -222,22 +249,6 @@ public class OnToesState extends AbstractFootControlState
 
          momentumBasedController.setDesiredPointAcceleration(rootToFootJacobianId, contactPointPosition, desiredLinearAcceleration);
       }
-
-      FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
-      FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
-      axisOfRotation.normalize();
-      axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
-
-      DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
-      selectionMatrix.reshape(1, SpatialMotionVector.SIZE);
-      selectionMatrix.set(0, 0, axisOfRotation.getX());
-      selectionMatrix.set(0, 1, axisOfRotation.getY());
-      selectionMatrix.set(0, 2, axisOfRotation.getZ());
-
-      // Just to make sure we're not trying to do singularity escape
-      // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
-      footControlHelper.resetNullspaceMultipliers();
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
 
       shrinkFootSizeToMidToe();
    }
@@ -337,7 +348,7 @@ public class OnToesState extends AbstractFootControlState
 
       if (toeOffTrajectoryTime.getDoubleValue() > MIN_TRAJECTORY_TIME) // Returns false if the trajectory time is NaN
       {
-         momentumBasedController.getTwistCalculator().packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
+         twistCalculator.packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
          footTwist.changeFrame(contactableBody.getFrameAfterParentJoint());
 
          toeOffInitialAngle.set(desiredOrientation.getPitch());
@@ -378,11 +389,8 @@ public class OnToesState extends AbstractFootControlState
    {
       // TODO Pretty hackish there clean that up
       // We use the RigidBodySpatialAccelerationControlModule only for the orientation, the position control part is done in this class
-      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionIntegralGains(0.0, 0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionMaxAccelerationAndJerk(0.0, 0.0);
-      accelerationControlModule.setOrientationGains(gains.getOrientationGains());
+      footControlHelper.setGainsToZero();
+      footControlHelper.setOrientationGains(gains.getOrientationGains());
    }
 
    protected List<FramePoint2d> getEdgeContactPoints2d()
