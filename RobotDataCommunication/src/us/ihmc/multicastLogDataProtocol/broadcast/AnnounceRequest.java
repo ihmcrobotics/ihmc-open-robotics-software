@@ -45,8 +45,7 @@ public class AnnounceRequest
    public short controlPort;
    public byte[] videoStream = new byte[4];
    public short videoPort;
-   
-   
+
    public byte[] cameras;
    public String name;
 
@@ -272,6 +271,11 @@ public class AnnounceRequest
       }
    }
 
+   public boolean hasVideoStream()
+   {
+      return !(videoStream[0] == 0x0 && videoStream[1] == 0x0 && videoStream[2] == 0x0 && videoStream[3] == 0x0);
+   }
+
    public byte[] getVideoStream()
    {
       return videoStream;
@@ -282,7 +286,6 @@ public class AnnounceRequest
       this.videoStream = videoStream;
    }
 
-   
    public int getVideoPort()
    {
       return videoPort;
@@ -292,9 +295,6 @@ public class AnnounceRequest
    {
       this.videoPort = (short) videoPort;
    }
-
-
-   
 
    @Override
    public int hashCode()
