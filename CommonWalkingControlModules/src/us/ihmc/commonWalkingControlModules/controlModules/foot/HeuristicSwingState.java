@@ -7,6 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -33,7 +34,7 @@ import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvide
 public class HeuristicSwingState extends AbstractFootControlState implements SwingStateInterface
 {
    private final OneDoFJoint knee;
-   private final GeometricJacobian gimpedJacobian;
+   private final int gimpedJacobianId;
    protected final YoSE3PIDGains gains;
    private final FramePose footPose = new FramePose();
    protected final DenseMatrix64F selectionMatrix;
@@ -67,6 +68,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       this.gains = gains;
       this.swingTimeProvider = swingTimeProvider;
       List<InverseDynamicsJoint> joints = new ArrayList<>();
+      GeometricJacobian jacobian = footControlHelper.getJacobian();
       for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
       {
          joints.add(joint);
@@ -75,9 +77,10 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       ReferenceFrame footFrame = contactableBody.getFrameAfterParentJoint();
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
-      knee = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
+      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      knee = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
       joints.remove(knee);
-      gimpedJacobian = new GeometricJacobian(joints.toArray(new InverseDynamicsJoint[joints.size()]), jacobian.getJacobianFrame());
+      gimpedJacobianId = momentumBasedController.getOrCreateGeometricJacobian(joints.toArray(new InverseDynamicsJoint[joints.size()]), jacobian.getJacobianFrame());
 
       selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
@@ -103,8 +106,8 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
 
       estimatedFinalKneeAngle = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "EstimatedFinalKneeAngle", registry);
 
-      hipFrame = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameAfterJoint();
-      ReferenceFrame beforeAnkleFrame = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH).getFrameBeforeJoint();
+      hipFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameAfterJoint();
+      ReferenceFrame beforeAnkleFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH).getFrameBeforeJoint();
 
       FramePoint hip = new FramePoint(hipFrame);
       hip.changeFrame(knee.getFrameBeforeJoint());
@@ -155,7 +158,6 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    public void doSpecificAction()
    {
       accelerationControlModule.setGains(gains);
-      gimpedJacobian.compute();
 
       if (getTimeInCurrentState() < swingTimeProvider.getValue())
       {
@@ -195,12 +197,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      ReferenceFrame bodyFixedFrame = contactableBody.getRigidBody().getBodyFixedFrame();
-      footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
-      footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-
-      taskspaceConstraintData.set(footAcceleration, footControlHelper.getNullspaceMultipliers(), selectionMatrix);
-      momentumBasedController.setDesiredSpatialAcceleration(gimpedJacobian, taskspaceConstraintData);
+      footControlHelper.submitTaskspaceConstraint(gimpedJacobianId, footAcceleration);
       double qDesired;
       double qdDesired;
       double qddDesired;

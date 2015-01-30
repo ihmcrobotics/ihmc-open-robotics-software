@@ -68,6 +68,6 @@ public class FullyConstrainedState extends AbstractFootControlState
          accelerationControlModule.packAcceleration(footAcceleration);
       }
 
-      setTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
    }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Matrix3d;
 
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -83,7 +83,7 @@ public class OnToesState extends AbstractFootControlState
    {
       super(ConstraintType.TOES, footControlHelper, registry);
 
-      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
+      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, contactableBody.getRigidBody(), rootBody.getBodyFixedFrame());
 
       String namePrefix = contactableBody.getName();
       maximumToeOffAngleProvider = new YoVariableDoubleProvider(namePrefix + "MaximumToeOffAngle", registry);
@@ -228,6 +228,7 @@ public class OnToesState extends AbstractFootControlState
       axisOfRotation.normalize();
       axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
 
+      DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
       selectionMatrix.reshape(1, SpatialMotionVector.SIZE);
       selectionMatrix.set(0, 0, axisOfRotation.getX());
       selectionMatrix.set(0, 1, axisOfRotation.getY());
@@ -236,7 +237,7 @@ public class OnToesState extends AbstractFootControlState
       // Just to make sure we're not trying to do singularity escape
       // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
       footControlHelper.resetNullspaceMultipliers();
-      setTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration);
 
       shrinkFootSizeToMidToe();
    }
@@ -369,9 +370,7 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
       // TODO: kind of a hack
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
-
+      footControlHelper.resetSelectionMatrix();
       resetContactPointPositions();
    }
 
