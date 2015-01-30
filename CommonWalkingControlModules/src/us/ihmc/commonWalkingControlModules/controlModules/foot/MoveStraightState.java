@@ -21,11 +21,9 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
 
-   public MoveStraightState(FootControlHelper footControlHelper,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains,
-         YoVariableRegistry registry)
+   public MoveStraightState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.MOVE_STRAIGHT, footControlHelper, legSingularityAndKneeCollapseAvoidanceControlModule, gains, registry);
+      super(ConstraintType.MOVE_STRAIGHT, footControlHelper, gains, registry);
 
       RigidBody rigidBody = contactableBody.getRigidBody();
       String namePrefix = rigidBody.getName();

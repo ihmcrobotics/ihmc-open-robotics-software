@@ -48,6 +48,8 @@ public class FootControlHelper
    private final DoubleYoVariable jacobianDeterminant;
    private final BooleanYoVariable jacobianDeterminantInRange;
 
+   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
    {
@@ -85,6 +87,9 @@ public class FootControlHelper
       jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
       nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
+
+      legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
+            walkingControllerParameters, momentumBasedController, registry);
    }
 
    public boolean isCoPOnEdge()
@@ -240,5 +245,10 @@ public class FootControlHelper
    public boolean isJacobianDeterminantInRange()
    {
       return jacobianDeterminantInRange.getBooleanValue();
+   }
+
+   public LegSingularityAndKneeCollapseAvoidanceControlModule getLegSingularityAndKneeCollapseAvoidanceControlModule()
+   {
+      return legSingularityAndKneeCollapseAvoidanceControlModule;
    }
 }

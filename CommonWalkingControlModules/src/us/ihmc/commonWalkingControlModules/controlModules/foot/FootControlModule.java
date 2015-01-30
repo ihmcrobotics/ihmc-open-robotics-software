@@ -75,8 +75,8 @@ public class FootControlModule
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains,
-         YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains supportFootControlGains, DoubleProvider swingTimeProvider,
-         MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         YoSE3PIDGains holdPositionFootControlGains, YoSE3PIDGains toeOffFootControlGains, YoSE3PIDGains supportFootControlGains,
+         DoubleProvider swingTimeProvider, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
@@ -100,8 +100,7 @@ public class FootControlModule
 
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
 
-      legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-            walkingControllerParameters, momentumBasedController, registry);
+      legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
       DoubleYoVariable time = momentumBasedController.getYoTime();
@@ -135,13 +134,12 @@ public class FootControlModule
       }
       else
       {
-         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider,
-               legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry);
+         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, swingFootControlGains, registry);
          states.add(swingState);
          this.swingState = swingState;
       }
 
-      moveStraightState = new MoveStraightState(footControlHelper, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains, registry);
+      moveStraightState = new MoveStraightState(footControlHelper, swingFootControlGains, registry);
       states.add(moveStraightState);
 
       setupStateMachine(states);
@@ -170,9 +168,12 @@ public class FootControlModule
       {
          for (AbstractFootControlState stateToTransitionTo : states)
          {
-            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
-            FootStateTransitionAction footStateTransitionAction = new FootStateTransitionAction(footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
-            state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition, footStateTransitionAction));
+            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper,
+                  waitSingularityEscapeBeforeTransitionToNextState);
+            FootStateTransitionAction footStateTransitionAction = new FootStateTransitionAction(footControlHelper,
+                  waitSingularityEscapeBeforeTransitionToNextState);
+            state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
+                  footStateTransitionAction));
          }
       }
 
@@ -181,7 +182,7 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
-            if (!USE_SUPPORT_FOOT_HOLD_POSITION_STATE) 
+            if (!USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
                return false;
             updateRequestHoldPosition();
             if (requestHoldPosition.getBooleanValue())
