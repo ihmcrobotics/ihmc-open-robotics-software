@@ -15,7 +15,6 @@ public class HoldPositionState extends AbstractFootControlState
    private static final boolean CONTROL_WRT_PELVIS = false;
 
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
-   private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
 
    private final YoSE3PIDGains gains;
@@ -24,13 +23,11 @@ public class HoldPositionState extends AbstractFootControlState
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   public HoldPositionState(FootControlHelper footControlHelper, BooleanYoVariable requestHoldPosition, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
-         YoSE3PIDGains gains, YoVariableRegistry registry)
+   public HoldPositionState(FootControlHelper footControlHelper, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+         BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, registry);
 
-      this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
       this.gains = gains;
       this.pelvisBody = momentumBasedController.getFullRobotModel().getPelvis();
@@ -72,11 +69,6 @@ public class HoldPositionState extends AbstractFootControlState
 
       accelerationControlModule.setGains(gains);
       determineCoPOnEdge();
-
-      if (!isCoPOnEdge && (requestHoldPosition == null || !requestHoldPosition.getBooleanValue()))
-         footControlHelper.requestState(ConstraintType.FULL);
-      if (!FootControlModule.USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
-         footControlHelper.requestState(ConstraintType.FULL);
 
       RigidBody baseForControl = CONTROL_WRT_PELVIS ? pelvisBody : rootBody;
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,

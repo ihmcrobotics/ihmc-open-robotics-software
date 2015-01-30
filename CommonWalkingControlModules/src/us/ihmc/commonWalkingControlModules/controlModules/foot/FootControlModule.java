@@ -32,6 +32,7 @@ import us.ihmc.yoUtilities.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class FootControlModule
 {
@@ -75,6 +76,7 @@ public class FootControlModule
    private final TouchdownState touchdownOnToesState;
    private final TouchdownState touchdownOnHeelState;
    private final OnToesState onToesState;
+   private final FullyConstrainedState supportState;
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
@@ -140,12 +142,12 @@ public class FootControlModule
       onToesState = new OnToesState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, toeOffFootControlGains, registry);
       states.add(onToesState);
 
-      FullyConstrainedState supportState = new FullyConstrainedState(footControlHelper, requestHoldPosition, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, fullyConstrainedNormalContactVector, doFancyOnToesControl, supportFootControlGains, registry);
+      supportState = new FullyConstrainedState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            fullyConstrainedNormalContactVector, doFancyOnToesControl, supportFootControlGains, registry);
       states.add(supportState);
 
-      holdPositionState = new HoldPositionState(footControlHelper, requestHoldPosition, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            fullyConstrainedNormalContactVector, holdPositionFootControlGains, registry);
+      holdPositionState = new HoldPositionState(footControlHelper, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector,
+            holdPositionFootControlGains, registry);
       states.add(holdPositionState);
 
       if (USE_HEURISTIC_SWING_STATE)
@@ -199,6 +201,30 @@ public class FootControlModule
                   new FootStateTransitionAction(footControlHelper, doSingularityEscape, waitSingularityEscapeBeforeTransitionToNextState)));
          }
       }
+
+      supportState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.HOLD_POSITION, new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            if (!USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
+               return false;
+            
+            return requestHoldPosition.getBooleanValue() || (supportState.isCoPOnEdge() && doFancyOnToesControl.getBooleanValue());
+         }
+      }));
+
+      holdPositionState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            if (!USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
+               return true;
+
+            return !holdPositionState.isCoPOnEdge() && !requestHoldPosition.getBooleanValue();
+         }
+      }));
 
       for (State<ConstraintType> state : states)
       {
