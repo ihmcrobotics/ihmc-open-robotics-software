@@ -796,7 +796,6 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
   
 
    @Ignore
-
 	@AverageDuration
 	@Test(timeout = 150000)   public void testOnALineOfPoints()
    {
@@ -816,7 +815,6 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-
 	@AverageDuration
 	@Test(timeout = 150000)   public void testOnSomeSlopes()
    {
@@ -838,8 +836,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 //    ThreadTools.sleepForever();
    }
 
-// @Ignore
-
+   @Ignore
 	@AverageDuration
 	@Test(timeout = 150000)   public void testOnSomeStairCases()
    {
@@ -866,7 +863,6 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }
 
    @Ignore
-
 	@AverageDuration
 	@Test(timeout = 150000)   public void testUsingStairGroundProfile()
    {
