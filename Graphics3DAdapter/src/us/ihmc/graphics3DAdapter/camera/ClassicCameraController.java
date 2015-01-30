@@ -1211,6 +1211,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void keyPressed(Key key)
    {
+      if (alreadyClosing) return;
+
       if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
 
@@ -1251,6 +1253,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void keyReleased(Key key)
    {
+      if (alreadyClosing) return;
+
       if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
 
@@ -1306,6 +1310,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
    {
+      if (alreadyClosing) return;
+
       if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
 
@@ -1322,6 +1328,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
+      if (alreadyClosing) return;
+      
       ContextManager contextManager = graphics3dAdapter.getContextManager();
       if (contextManager.getCurrentViewport() != viewportAdapter)
          return;
@@ -1425,8 +1433,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
+   private boolean alreadyClosing = false;
+   
    public void closeAndDispose()
    {
+      if (alreadyClosing) return;
+      alreadyClosing = true;
+      
       this.cameraMount = null;
       this.viewportAdapter = null;
       if (cameraTrackAndDollyVariablesHolder != null)

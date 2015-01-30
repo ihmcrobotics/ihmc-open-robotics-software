@@ -1159,6 +1159,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       stop();
       stopSimulationThread();
 
+      if (jFrame != null)
+      {
+         jFrame.setVisible(false);
+         jFrame.dispose();
+      }
+      
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Notifying Exit Action Listeners");
 
@@ -1168,14 +1174,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (rootRegistry != null)
       {
          rootRegistry.closeAndDispose();
-         rootRegistry = null;
       }
 
       
       if (standardAllCommandsExecutor != null)
       {
          standardAllCommandsExecutor.closeAndDispose();
-         standardAllCommandsExecutor = null;
       }
       
       if (DEBUG_CLOSE_AND_DISPOSE)
@@ -1189,7 +1193,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             System.out.println("Disposing StandardSimulationGUI and myGUI != null ");
 
          myGUI.closeAndDispose();
-         myGUI = null;
       }
 
       if (DEBUG_CLOSE_AND_DISPOSE)
@@ -1200,35 +1203,27 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (mySimulation != null)
       {
          mySimulation.closeAndDispose();
-         mySimulation = null;
       }
 
-      if (robots != null)
-      {
-         robots = null;
-      }
 
-      if (myDataBuffer != null)
-      {
-         myDataBuffer = null;
-      }
 
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Disposing of JFrame");
 
       System.out.flush();
 
-      if (jFrame != null)
-      {
-         jFrame.setVisible(false);
-         jFrame.dispose();
-         jFrame = null;
-      }
-
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Done Closing and Disposing SCS.");
 
       System.out.flush();
+
+      rootRegistry = null;
+      standardAllCommandsExecutor = null;
+      myGUI = null;
+      myDataBuffer = null;
+      robots = null;
+      mySimulation = null;
+      jFrame = null;
 
    }
 
