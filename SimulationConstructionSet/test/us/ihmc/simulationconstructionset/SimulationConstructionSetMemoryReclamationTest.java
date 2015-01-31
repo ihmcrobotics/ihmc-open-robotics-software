@@ -11,9 +11,11 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UITest;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
+@UITest
 public class SimulationConstructionSetMemoryReclamationTest
 {
    private static final boolean DEBUG = true;
