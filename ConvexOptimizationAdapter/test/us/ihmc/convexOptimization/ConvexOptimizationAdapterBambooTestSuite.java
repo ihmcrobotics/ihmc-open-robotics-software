@@ -7,6 +7,7 @@ import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.convexOptimization.randomSearch.RandomSearchConvexOptimizationAdapterTest.class
 //  us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class, 
 //  us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class
 })
