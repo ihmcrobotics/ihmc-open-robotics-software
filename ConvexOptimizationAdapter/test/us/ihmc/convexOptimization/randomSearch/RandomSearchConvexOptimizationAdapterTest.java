@@ -12,4 +12,9 @@ public class RandomSearchConvexOptimizationAdapterTest extends ConvexOptimizatio
       return new RandomSearchConvexOptimizationAdapter();
    }
 
+   public double getTestErrorEpsilon()
+   {
+      return 0.02;
+   }
+
 }
