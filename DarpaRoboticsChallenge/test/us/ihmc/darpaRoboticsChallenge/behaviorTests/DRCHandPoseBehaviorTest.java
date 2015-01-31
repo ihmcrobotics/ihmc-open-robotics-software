@@ -53,8 +53,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    private static final boolean KEEP_SCS_UP = false;
    private static final boolean DEBUG = false;
 
-   private final double POSITION_THRESHOLD = 0.007;
-   private final double ORIENTATION_THRESHOLD = 0.007;
+   private final double POSITION_THRESHOLD = 0.01;
+   private final double ORIENTATION_THRESHOLD = 0.01;
    public static final double JOINT_POSITION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 0.5;
 
@@ -79,7 +79,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private ArmJointName[] armJointNames;
    private int numberOfArmJoints;
-   private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
+   private final LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
 
    private boolean returnValue = true;
 
