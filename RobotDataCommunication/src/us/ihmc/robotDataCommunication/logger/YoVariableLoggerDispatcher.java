@@ -13,7 +13,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class YoVariableLoggerDispatcher implements LogBroadcastListener
 {
-   private static final String host = "localhost";//"192.168.130.112";
+   private static final String host = "10.66.171.46";
 
    private final YoVariableLoggerOptions options;
 
