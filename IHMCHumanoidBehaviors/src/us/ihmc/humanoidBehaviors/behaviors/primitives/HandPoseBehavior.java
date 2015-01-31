@@ -110,7 +110,7 @@ public class HandPoseBehavior extends BehaviorInterface
          RobotSide robotSide = outgoingHandPosePacket.getRobotSide();
          if (robotSide != null)
          {
-            StopArmMotionPacket pausePacket = new StopArmMotionPacket();
+            StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
             pausePacket.setDestination(PacketDestination.CONTROLLER);
             sendPacketToController(pausePacket);
          }
