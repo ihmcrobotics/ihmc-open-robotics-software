@@ -119,7 +119,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private Object captureHolder = new Object();
 
    private CameraStreamer cameraStreamer;
-
+   private TimerTask graphicsUpdaterTimerTask;
 
    public JMEFastCaptureDevice(ViewPort viewport)
    {
@@ -288,6 +288,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       public void run()
       {
+         if (alreadyClosing) return;
+
          if (!cameraStreamer.isReadyForNewData())
          {
             return;
@@ -314,6 +316,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             }
          }
 
+         if (alreadyClosing) return;
+         
          convertScreenShot();
 
          cameraStreamer.updateImage(bufferedImage, timeStamp, position, orientation, fov);
@@ -437,7 +441,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       this.cameraStreamer = cameraStreamer;
       
-      TimerTaskScheduler.scheduleAtFixedRate(new GraphicsUpdater(), 0, 1000 / framesPerSecond);
+      graphicsUpdaterTimerTask = new GraphicsUpdater();
+      
+      TimerTaskScheduler.scheduleAtFixedRate(graphicsUpdaterTimerTask, 0, 1000 / framesPerSecond);
    }
 
    private boolean alreadyClosing = false;
@@ -448,6 +454,19 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       
       alreadyClosing = true;
       
+      if (graphicsUpdaterTimerTask != null)
+      {
+         graphicsUpdaterTimerTask.cancel();
+         graphicsUpdaterTimerTask = null;
+      }
+      
+      // Wake up the graphics updater task...
+      synchronized(syncObject)
+      {
+         syncObject.notifyAll();
+      }
+      syncObject = null;
+
       renderer = null;
       renderManager = null;
       viewport = null;
@@ -457,7 +476,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       systemRam = null;
       cpuArray = null;
 
-      syncObject = null;
       captureHolder = null;
 
       cameraStreamer = null;
