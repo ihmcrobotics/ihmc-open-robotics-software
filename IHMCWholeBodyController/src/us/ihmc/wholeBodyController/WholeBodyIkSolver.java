@@ -122,9 +122,9 @@ abstract public class WholeBodyIkSolver
    }
 
    /*
-    * Vervosity levels:
+    * Verbosity levels:
     * 0: none
-    * 1: When compute() fails, a resume of the errors is displayed.
+    * 1: show a resume of the errors.
     * 2: Lot of data...
     */
    
@@ -555,10 +555,13 @@ abstract public class WholeBodyIkSolver
 
             for(RobotSide robotSide: RobotSide.values())
             {
-               for(int j=0; j< getNumberDoFperArm(); j++){
-                  if ( armJointIds.get(robotSide)[j] == i){
-                     partOfQuietArm = true;
-                     break;
+               if( keepArmQuiet.get(robotSide).isFalse())
+               {
+                  for(int j=0; j< getNumberDoFperArm(); j++){
+                     if ( armJointIds.get(robotSide)[j] == i){
+                        partOfQuietArm = true;
+                        break;
+                     }
                   }
                }
             }           
@@ -569,13 +572,24 @@ abstract public class WholeBodyIkSolver
          }
 
          // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_aky"), -0.7);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_aky"), -0.7);
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_kny"), 1.4);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_kny"), 1.4);
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpy"), -0.7);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpy"), -0.7);
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_akx"), 0.0);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_akx"), 0.0);
+         
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_aky"), -0.8);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_aky"), -0.8);
+         
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_kny"), 1.6);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_kny"), 1.6);
+         
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpy"), -0.8);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpy"), -0.8);
+         
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpx"), 0.0);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpx"), 0.0);
 
+         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpz"), 0.0);
+         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpz"), 0.0);
+         
          if( keepArmQuiet.get(LEFT).isFalse())
             cachedAnglesQ.set(jointNamesToIndex.get("l_arm_elx"), 0.7);
          if( keepArmQuiet.get(RIGHT).isFalse())
@@ -659,7 +673,10 @@ abstract public class WholeBodyIkSolver
          adjustOtherFoot(actualSdfModel);
 
          checkIfArmShallStayQuiet(cachedAnglesQ);
+         
+         q_out.set(cachedAnglesQ);
          ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
+         
       }
       catch (Exception e)
       {
