@@ -24,9 +24,11 @@ import com.joptimizer.optimizers.OptimizationRequest;
 public abstract class ConvexOptimizationAdapterTest
 {
    public abstract ConvexOptimizationAdapter createConvexOptimizationAdapter();
+   public abstract double getTestErrorEpsilon();
    
    @SuppressWarnings("unchecked")
    @Ignore
+   @Test
    public void qpsFileTest() throws IOException
    {
 
@@ -72,13 +74,14 @@ public abstract class ConvexOptimizationAdapterTest
       double[] solution = convexOptimizationAdapter.solve();
       
       assertEquals(1, solution.length);
-      assertEquals(2.0, solution[0], 1e-7);
+      assertEquals(2.0, solution[0], getTestErrorEpsilon());
    }
 
 	@AverageDuration
 	@Test(timeout=300000)
    public void testASimpleRedundantEqualityCase2d()
    {
+	   // Minimize x + y subject to x + 2y = 2, 2x + 4y = 4, 3x + 7y = 7; Solution is (0, 1)
       ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
       convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{1.0,1.0});
       convexOptimizationAdapter.setLinearEqualityConstraintsAMatrix(new double[][]{{1,2},{2,4},{3,7}});
@@ -87,8 +90,8 @@ public abstract class ConvexOptimizationAdapterTest
       double[] solution = convexOptimizationAdapter.solve();
       
       assertEquals(2, solution.length);
-      assertEquals(0.0, solution[0], 1e-7);
-      assertEquals(1.0, solution[1], 1e-7);
+      assertEquals(0.0, solution[0], getTestErrorEpsilon());
+      assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
 	@AverageDuration
@@ -214,8 +217,8 @@ public abstract class ConvexOptimizationAdapterTest
       double[] solution = convexOptimizationAdapter.solve();
 
 //      if (VERBOSE) System.out.println("solution = (" + solution[0] + ", " + solution[1] + ")");
-      assertEquals(3.0, solution[0], 1e-5);
-      assertEquals(1.0, solution[1], 1e-5);
+      assertEquals(3.0, solution[0], getTestErrorEpsilon());
+      assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
 	@AverageDuration
@@ -236,11 +239,10 @@ public abstract class ConvexOptimizationAdapterTest
       double[] solution = convexOptimizationAdapter.solve();
 
 //      if (VERBOSE) System.out.println("solution = (" + solution[0] + ", " + solution[1] + ")");
-      assertEquals(4.0, solution[0] + solution[1], 1e-5);
+      assertEquals(4.0, solution[0] + solution[1], getTestErrorEpsilon());
    }
    
    @Ignore //Not implemented yet!
-
 	@AverageDuration
 	@Test(timeout=300000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
@@ -270,6 +272,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
    }
 
+   @Ignore //Not implemented yet!
 	@AverageDuration
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception

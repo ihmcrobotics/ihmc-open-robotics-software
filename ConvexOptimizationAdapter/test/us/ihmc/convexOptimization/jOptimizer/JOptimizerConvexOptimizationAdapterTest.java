@@ -12,4 +12,9 @@ public class JOptimizerConvexOptimizationAdapterTest extends ConvexOptimizationA
       return new JOptimizerConvexOptimizationAdapter();
    }
 
+   public double getTestErrorEpsilon()
+   {
+      return 1e-5;
+   }
+
 }
