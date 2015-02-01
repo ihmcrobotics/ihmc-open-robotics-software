@@ -4,9 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
@@ -32,14 +34,16 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    
    private volatile long timestamp = 0;
    
-   public NetworkStreamVideoDataLogger(AnnounceRequest request, File logPath, LogProperties logProperties, YoVariableLoggerOptions options, InetSocketAddress address) throws SocketException
+   public NetworkStreamVideoDataLogger(AnnounceRequest request, File logPath, LogProperties logProperties, YoVariableLoggerOptions options, InetSocketAddress address) throws SocketException, UnknownHostException
    {
       super(logPath, logProperties, description, false);
       
       NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(request.getControlIP()));
 
+      System.out.println("Connecting network stream to " + iface);
       client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, iface,
-            LogSettings.SIMULATION.getVideoStream(), GUICaptureStreamer.PORT, this);
+            InetAddress.getByAddress(request.getVideoStream())
+            , request.getVideoPort(), this);
       client.start();
    }
 

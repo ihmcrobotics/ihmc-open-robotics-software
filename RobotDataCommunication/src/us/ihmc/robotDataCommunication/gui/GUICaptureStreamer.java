@@ -2,6 +2,7 @@ package us.ihmc.robotDataCommunication.gui;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -29,9 +30,9 @@ public class GUICaptureStreamer
 {
    public static final int MAGIC_SESSION_ID = 0x81359;
    public static final int PORT = 12451;
-   
+
    public static final InetAddress group = LogUtils.getByName("239.255.25.1");
-   
+
    private final JFrame window;
    private final int fps;
 
@@ -49,19 +50,20 @@ public class GUICaptureStreamer
    private final Dimension size = new Dimension();
 
    private final SegmentedDatagramServer server;
+
    
    public GUICaptureStreamer(JFrame window, int fps, float quality, String hostToBindTo, InetAddress group, int port)
    {
       this(window, fps, quality, LogUtils.getMyInterface(hostToBindTo), group, port);
    }
-   
+
    public GUICaptureStreamer(JFrame window, int fps, float quality, NetworkInterface iface, InetAddress group, int port)
    {
       this.window = window;
       this.fps = fps;
       param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
       param.setCompressionQuality(quality);
-   
+
       try
       {
          server = new SegmentedDatagramServer(MAGIC_SESSION_ID, iface, group, port);
@@ -87,11 +89,12 @@ public class GUICaptureStreamer
    private class CaptureRunner implements Runnable
    {
 
-
       @Override
       public void run()
       {
-         Rectangle captureRectangle = window.getBounds();
+         Rectangle windowBounds = window.getBounds();
+         Rectangle screen = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+         Rectangle captureRectangle = windowBounds.intersection(screen);
          Dimension windowSize = captureRectangle.getSize();
          if (!windowSize.equals(size))
          {
@@ -104,11 +107,14 @@ public class GUICaptureStreamer
          try
          {
             BufferedImage img = screenCapture.createScreenCapture(captureRectangle);
-            buffer.clear();
-            writer.write(null, new IIOImage(img, null, null), param);
-            buffer.flip();
-            
-            server.send(LogDataType.VIDEO, System.nanoTime(), buffer);
+            if(img != null)
+            {
+               buffer.clear();
+               writer.write(null, new IIOImage(img, null, null), param);
+               buffer.flip();
+   
+               server.send(LogDataType.VIDEO, System.nanoTime(), buffer);
+            }
          }
          catch (IOException e)
          {

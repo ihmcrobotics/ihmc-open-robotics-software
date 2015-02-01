@@ -18,12 +18,12 @@ import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 
 public class GUICaptureViewer implements LogPacketHandler
 {
-   public static String host = "localhost";
+   public static String host = "10.66.171.41";
 
    public static void main(String[] args)
    {
       SegmentedDatagramClient client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, LogUtils.getMyInterface(host),
-            LogSettings.SIMULATION.getVideoStream(), GUICaptureStreamer.PORT, new GUICaptureViewer());
+            LogSettings.STEPPR_IHMC.getVideoStream(), GUICaptureStreamer.PORT, new GUICaptureViewer());
       
       client.start();
    }
