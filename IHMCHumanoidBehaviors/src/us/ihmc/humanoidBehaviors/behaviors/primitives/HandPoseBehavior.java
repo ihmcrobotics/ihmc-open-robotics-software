@@ -124,6 +124,7 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          SysoutTool.println("WARNING:  INITIALIZING BEHAVIOR *AFTER* INPUT HAS BEEN SET!");
       }
+      inputListeningQueue.clear();
       status = null;
       trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
