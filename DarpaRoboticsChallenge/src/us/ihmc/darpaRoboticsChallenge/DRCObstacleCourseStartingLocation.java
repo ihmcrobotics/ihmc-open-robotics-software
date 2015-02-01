@@ -56,7 +56,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS, new SquaredUpDRCDemo01Robot(0.0, 5.9, Math.toRadians(44.2), Math.toRadians(45.0)));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD, new SquaredUpDRCDemo01Robot(0.0, 7.0, Math.toRadians(44.2), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD, new SquaredUpDRCDemo01Robot(0.0, 10.80, Math.toRadians(44.0), 0.0));
-      addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS, new SquaredUpDRCDemo01Robot(0.0, 18.6, Math.toRadians(44.5), Math.toRadians(45.0)));
+      addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS, new SquaredUpDRCDemo01Robot(0.0, 18.6, Math.toRadians(44.2), Math.toRadians(45.0)));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS, new SquaredUpDRCDemo01Robot(0.0, 10.1, Math.toRadians(44.5), Math.toRadians(45.0)));
       addMapping(DRCObstacleCourseStartingLocation.SMALL_PLATFORM, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthPlatform(2));
       addMapping(DRCObstacleCourseStartingLocation.STAIRS, new SquaredUpDRCDemo01Robot(0.0, 1.9818, Math.toRadians(135.0), 0.0));
