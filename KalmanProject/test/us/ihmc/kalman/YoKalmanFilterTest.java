@@ -150,7 +150,7 @@ public class YoKalmanFilterTest
          ys[i] = RandomMatrices.createRandom(nMeasurements, 1, random);
       }
 
-      final DataBuffer dataBuffer = new DataBuffer();
+      final DataBuffer dataBuffer = new DataBuffer(1024);
       parentRegistry.attachYoVariableRegistryChangedListener(new YoVariableToDataBufferAdder(dataBuffer));
 
       YoKalmanFilter yoKalmanFilter1 = new YoKalmanFilter("yo1", parentRegistry);
