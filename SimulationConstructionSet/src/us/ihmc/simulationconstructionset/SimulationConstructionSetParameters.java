@@ -4,8 +4,8 @@ public class SimulationConstructionSetParameters
 {
    private boolean showSplashScreen = true;
    private boolean createGUI = true;
-   private boolean showWindow = true;
-   private int initialDataBufferSize = 8192;
+   private boolean showWindows = true;
+   private int dataBufferSize = 8192;
    
    public SimulationConstructionSetParameters()
    {
@@ -15,22 +15,59 @@ public class SimulationConstructionSetParameters
    public SimulationConstructionSetParameters(boolean createGUI, int bufferSize)
    {
       this.createGUI = createGUI;
-      this.initialDataBufferSize = bufferSize;
+      this.dataBufferSize = bufferSize;
    }
 
-   public SimulationConstructionSetParameters(int bufferSize)
+   public SimulationConstructionSetParameters(int dataBufferSize)
    {
-      this.initialDataBufferSize = bufferSize;
+      this.dataBufferSize = dataBufferSize;
    }
 
    public SimulationConstructionSetParameters(boolean createGUI)
    {
       this.createGUI = createGUI;
    }
+   
+   public static SimulationConstructionSetParameters createFromEnvironmentVariables()
+   {
+      SimulationConstructionSetParameters parametersToReturn = new SimulationConstructionSetParameters();
+
+      parametersToReturn.setFromSystemProperties();
+
+      return parametersToReturn;
+   }
+   
+   public void setFromSystemProperties()
+   {
+      String property = System.getProperty("create.scs.gui");
+      if (property != null)
+      {
+         Boolean createSCSGUI = Boolean.parseBoolean(property);
+         setCreateGUI(createSCSGUI);
+      }
+      
+      property = System.getProperty("show.scs.windows");
+      if (property != null)
+      {
+         Boolean showSCSWindows = Boolean.parseBoolean(property);
+         setShowWindows(showSCSWindows);
+         setShowSplashScreen(showSCSWindows);
+      }
+      
+      property = System.getProperty("scs.dataBuffer.size");
+      if (property != null)
+      {
+         Integer dataBufferSize = Integer.parseInt(property);
+         if (dataBufferSize != null) 
+         {
+            setDataBufferSize(dataBufferSize);
+         }
+      }
+   }
 
    public int getInitialDataBufferSize()
    {
-      return initialDataBufferSize;
+      return dataBufferSize;
    }
 
    public boolean getCreateGUI()
@@ -43,9 +80,9 @@ public class SimulationConstructionSetParameters
       this.createGUI = createGUI; 
    }
 
-   public void setInitialDataBufferSize(int initialDataBufferSize)
+   public void setDataBufferSize(int dataBufferSize)
    {
-      this.initialDataBufferSize = initialDataBufferSize;      
+      this.dataBufferSize = dataBufferSize;      
    }
 
    public void setShowSplashScreen(boolean showSplashScreen)
@@ -53,14 +90,14 @@ public class SimulationConstructionSetParameters
       this.showSplashScreen = showSplashScreen;      
    }
 
-   public boolean getShowWindow()
+   public boolean getShowWindows()
    {
-      return showWindow;
+      return showWindows;
    }
 
-   public void setShowWindow(boolean showWindow)
+   public void setShowWindows(boolean showWindow)
    {
-      this.showWindow = showWindow;
+      this.showWindows = showWindow;
    }
 
    public boolean getShowSplashScreen()

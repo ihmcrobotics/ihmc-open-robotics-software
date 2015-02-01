@@ -2148,7 +2148,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       if (myGUI != null)
       {
-         if (parameters.getShowWindow()) myGUI.show();
+         if (parameters.getShowWindows()) myGUI.show();
       }
 
       if (robots == null)
@@ -3305,7 +3305,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public void createMovie(File movieFile)
    {
-      myGUI.getViewportPanel().getStandardGUIActions().createMovie(movieFile);
+      if (myGUI != null) myGUI.getViewportPanel().getStandardGUIActions().createMovie(movieFile);
    }
 
    /**

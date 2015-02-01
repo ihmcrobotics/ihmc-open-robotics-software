@@ -12,9 +12,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -35,25 +37,10 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
+
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
-   private static final boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean createGUI = KEEP_SCS_UP || createMovie;
-
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   
-   private final static boolean VISUALIZE_FORCE = false;
-   private final static double PUSH_DELAY = 0.5;
-
-   protected DRCPushRobotController pushRobotController;
-   protected BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-   protected double forceMagnitude;
-   protected double forceDuration;
-
-   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-   StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -69,8 +56,39 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
          ThreadTools.sleepForever();
       }
 
-      // Do this here in case a test fails. That way the memory will be
-      // recycled.
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   
+   
+   private final static boolean VISUALIZE_FORCE = false;
+   private final static double PUSH_DELAY = 0.5;
+
+   protected DRCPushRobotController pushRobotController;
+   protected BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+   protected double forceMagnitude;
+   protected double forceDuration;
+
+   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
+   StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+
+
+   @After
+   public void destroyOtherStuff()
+   {
       if (blockingSimulationRunner != null)
       {
          blockingSimulationRunner.destroySimulation();
@@ -88,12 +106,6 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 	@AverageDuration
@@ -208,9 +220,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setCreateGUI(createGUI);
-      guiInitialSetup.setShowWindow(showWindow);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
 
@@ -254,7 +264,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (createMovie)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
