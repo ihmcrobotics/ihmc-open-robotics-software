@@ -136,7 +136,9 @@ public class ActiveSetQPMomentumOptimizer extends QPMomentumOptimizer implements
             );
           System.out.println("Try again, iter=" + iter +"\n -----");
          }
-
+         for(int i=0;i<vd.data.length;i++)
+            if(Double.isNaN(vd.get(i)))
+               break;
          if(saveNoConvergeProblem)
          {
                  String fileName = getClass().getSimpleName()+"_diverence"+System.nanoTime();

@@ -110,19 +110,25 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       // setup solvers
       momentumOptimizers.put(QPSolverFlavor.CVX_NULL, new CVXMomentumOptimizerAdapter(nDoF));
-      ActiveSetQPMomentumOptimizer eigenQP = new ActiveSetQPMomentumOptimizer(nDoF, false)
+      
+      final boolean ENABLE_EIGEN_ACTIVESET_QP = false;
+      if(ENABLE_EIGEN_ACTIVESET_QP)
       {
-         public int solve() throws NoConvergenceException
-         {
-            return super.solve(true);
-         }
-      };
-      eigenQP.setSaveNoConvergeProblem(false);
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_NULL, eigenQP);
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_DIRECT, eigenQP);
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_NULL, new ActiveSetQPMomentumOptimizer(nDoF, false));
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF, false));
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT_JNA, new ActiveSetQPMomentumOptimizer(nDoF, true));
+              ActiveSetQPMomentumOptimizer eigenQP = new ActiveSetQPMomentumOptimizer(nDoF, false)
+              {
+                 public int solve() throws NoConvergenceException
+                 {
+                    return super.solve(true);
+                 }
+              };
+              eigenQP.setSaveNoConvergeProblem(false);
+              momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_NULL, new ActiveSetQPMomentumOptimizer(nDoF, false));
+              momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF, false));
+              momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT_JNA, new ActiveSetQPMomentumOptimizer(nDoF, true));
+
+              momentumOptimizers.put(QPSolverFlavor.EIGEN_NULL, eigenQP);
+              momentumOptimizers.put(QPSolverFlavor.EIGEN_DIRECT, eigenQP);
+      }
       momentumOptimizers.put(QPSolverFlavor.CQP_OASES_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new OASESConstrainedQPSolver(registry)));
       momentumOptimizers.put(QPSolverFlavor.SIMPLE_ACTIVE_SET, new CQPMomentumBasedOptimizer(nDoF, new CompositeActiveSetQPSolver(registry)));
       momentumOptimizers.put(QPSolverFlavor.SIMPLE_ACTIVE_SET_NULL, new CQPMomentumBasedOptimizer(nDoF, new CompositeActiveSetQPSolver(registry)));
@@ -131,7 +137,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 //    momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
 
       // initialize default solver
-      final QPSolverFlavor defaultSolver = QPSolverFlavor.CVX_NULL;
+      final QPSolverFlavor defaultSolver = QPSolverFlavor.SIMPLE_ACTIVE_SET_NULL;
       requestedQPSolver.set(defaultSolver);
       currentQPSolver.set(defaultSolver);
       momentumOptimizer = momentumOptimizers.get(defaultSolver);

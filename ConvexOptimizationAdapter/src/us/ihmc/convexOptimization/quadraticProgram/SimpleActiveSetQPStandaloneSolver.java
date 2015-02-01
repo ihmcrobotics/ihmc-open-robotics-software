@@ -118,9 +118,6 @@ public class SimpleActiveSetQPStandaloneSolver
             leftSide.reshape(activeConstraintSize, activeConstraintSize);
             CommonOps.mult(-1, rMatrix, wInverseRTranspose, leftSide);
             
-            if(activeInequalityConstraintSize>0)
-               System.out.println(activeInequalityConstraintSize);;
-
             // RHS
             rightSide.reshape(activeConstraintSize, 1);
             rightSide.set(eVector);
