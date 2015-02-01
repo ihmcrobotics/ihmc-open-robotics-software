@@ -333,11 +333,16 @@ public class VideoDataPlayer
    {
       private static final long serialVersionUID = -3494797002318746347L;
       final JLabel label = new JLabel();
+      
+      private int width, height;
+      
       public HideableMediaFrame(String name, int width, int height)
       {
          super(name);
          label.setPreferredSize(new Dimension(width, height));
          getContentPane().add(label);
+         this.width = width;
+         this.height = height;
          pack();
       }
       
@@ -351,6 +356,14 @@ public class VideoDataPlayer
             {
                ImageIcon icon = new ImageIcon(img);
                label.setIcon(icon);
+               
+               if(img.getWidth() != width || img.getHeight() != height)
+               {
+            	   width = img.getWidth();
+            	   height = img.getHeight();
+            	   label.setPreferredSize(new Dimension(width, height));
+            	   pack();
+               }
             }
          });
       }      
