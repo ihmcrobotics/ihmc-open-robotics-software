@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
@@ -57,7 +57,7 @@ public class ValkyrieFullRobotModelVisualizer
       robotGraphics.update();
       
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
+      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
       
       InverseDynamicsMechanismReferenceFrameVisualizer referenceFrameVis = new InverseDynamicsMechanismReferenceFrameVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry, 0.5);
