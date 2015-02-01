@@ -65,8 +65,8 @@ public class PelvisPosePacketTransformerTest
    private static void performEqualsTestForQuat(PelvisPosePacket starting, RigidBodyTransform transform3D, PelvisPosePacket ending)
    {
 //    public Quat4d quaternion;
-      Quat4d startQuat = starting.getQuaternion();
-      Quat4d endQuat = ending.getQuaternion();
+      Quat4d startQuat = starting.getOrientation();
+      Quat4d endQuat = ending.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
 //    public Point3d point;
@@ -84,8 +84,8 @@ public class PelvisPosePacketTransformerTest
       assertEquals("not equal", 0.0, distance, 1e-6);
 
 //    public Point3d point;
-      assertTrue(starting.getQuaternion() == null);
-      assertTrue(ending.getQuaternion() == null);
+      assertTrue(starting.getOrientation() == null);
+      assertTrue(ending.getOrientation() == null);
    }
 
    private static double getDistanceBetweenPoints(Point3d startingPoint, RigidBodyTransform transform3D, Point3d endPoint)
