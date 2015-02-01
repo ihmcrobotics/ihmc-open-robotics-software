@@ -363,7 +363,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public SimulationConstructionSet(Robot[] robotArray, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, parameters.getInitialDataBufferSize()), SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(parameters.getCreateGUI()), parameters);
+      this(new Simulation(robotArray, parameters.getDataBufferSize()), SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(parameters.getCreateGUI()), parameters);
    }
 
    public SimulationConstructionSet(Robot robot, Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
@@ -373,12 +373,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public SimulationConstructionSet(Robot[] robotArray, Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, parameters.getInitialDataBufferSize()), graphicsAdapter, parameters);
+      this(new Simulation(robotArray, parameters.getDataBufferSize()), graphicsAdapter, parameters);
    }
 
    public SimulationConstructionSet(Robot[] robotArray, SupportedGraphics3DAdapter supportedGraphicsAdapter, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, parameters.getInitialDataBufferSize()), supportedGraphicsAdapter.instantiateGraphics3DAdapter(), parameters);
+      this(new Simulation(robotArray, parameters.getDataBufferSize()), supportedGraphicsAdapter.instantiateGraphics3DAdapter(), parameters);
    }
 
    public SimulationConstructionSet(Simulation simulation, SimulationConstructionSetParameters parameters)
@@ -1976,6 +1976,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             myGUI.updateSimulationGraphics();
          }
       }
+      
    }
 
    /**
@@ -2156,6 +2157,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          if (parameters.getShowWindows()) myGUI.show();
+         
+         if (!parameters.getShowYoGraphicObjects())
+         {
+            dynamicGraphicMenuManager.hideAllGraphics();
+         }
+         
       }
 
       if (robots == null)
@@ -4138,6 +4145,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       displayYoGraphicMenu();
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
+      
+
    }
 
    

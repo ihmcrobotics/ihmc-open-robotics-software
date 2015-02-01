@@ -35,6 +35,11 @@ public class DynamicGraphicMenuManager
    {
       this.jMenu = jMenu;
    }
+   
+   public void hideAllGraphics()
+   {
+      hideAllGraphicObjects.hideAllGraphics();
+   }
 
    public void addCheckBox(DynamicGraphicCheckBoxMenuItem checkBox)
    {
