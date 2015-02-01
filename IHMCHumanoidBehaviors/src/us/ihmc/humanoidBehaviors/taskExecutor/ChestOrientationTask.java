@@ -32,7 +32,7 @@ public class ChestOrientationTask implements Task
       this.sleepTime = sleepTime;
       Quat4d chestOrientation = new Quat4d();
       desiredChestOrientation.getQuaternion(chestOrientation);
-      chestOrientationPacket = new ChestOrientationPacket(chestOrientation, trajectoryTime);
+      chestOrientationPacket = new ChestOrientationPacket(chestOrientation, false, trajectoryTime);
    }
 
    @Override

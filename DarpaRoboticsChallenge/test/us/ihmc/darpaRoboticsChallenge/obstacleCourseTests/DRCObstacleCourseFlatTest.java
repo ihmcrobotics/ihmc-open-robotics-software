@@ -209,7 +209,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
       double trajectoryTime = 0.5;
-      ChestOrientationPacket packet = new ChestOrientationPacket(desiredChestQuat, trajectoryTime);
+      ChestOrientationPacket packet = new ChestOrientationPacket(desiredChestQuat, false, trajectoryTime);
       drcSimulationTestHelper.sendChestOrientationPacketToListeners(packet);
       
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
