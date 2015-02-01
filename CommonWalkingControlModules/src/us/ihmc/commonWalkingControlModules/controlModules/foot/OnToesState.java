@@ -226,9 +226,7 @@ public class OnToesState extends AbstractFootControlState
       {
          // Need to control the whole orientation of the foot as only one contact point is position controlled.
          selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
-         selectionMatrix.set(0, 0, 1.0);
-         selectionMatrix.set(1, 1, 1.0);
-         selectionMatrix.set(2, 2, 1.0);
+         footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();
       }
       else
       {
