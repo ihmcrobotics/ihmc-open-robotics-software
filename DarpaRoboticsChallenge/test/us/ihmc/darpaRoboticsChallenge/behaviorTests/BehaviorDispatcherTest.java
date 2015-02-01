@@ -101,10 +101,6 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private final double ORIENTATION_THRESHOLD = 0.05;
 
    private static final boolean DEBUG = true;
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = true || createMovie;
-
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

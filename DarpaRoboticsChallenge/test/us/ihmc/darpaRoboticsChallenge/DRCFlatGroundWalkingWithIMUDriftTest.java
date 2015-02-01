@@ -11,10 +11,13 @@ import org.junit.Before;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -32,13 +35,39 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 @SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
-   public static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (KEEP_SCS_UP)
+      {
+         ThreadTools.sleepForever();
+      }
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
 
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
@@ -50,20 +79,11 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
    private static final boolean drawGroundProfile = false;
 
-   @Before
-   public void showMemoryUsageBeforeTest()
-   {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-   }
+ 
    
    @After
-   public void destroySimulationAndRecycleMemory()
+   public void tearDown()
    {
-      if (KEEP_SCS_UP)
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
       if (blockingSimulationRunner != null)
       {
@@ -82,12 +102,6 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-      
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName) throws SimulationExceededMaximumTimeException
@@ -103,7 +117,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
 
       NothingChangedVerifier nothingChangedVerifier = null;
       double walkingTimeDuration;
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(runName, scs);
          walkingTimeDuration = 7.0;
@@ -137,7 +151,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
          }
       }
 
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
          checkNothingChanged(nothingChangedVerifier);
 
       createMovie(scs);
@@ -155,7 +169,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (CREATE_MOVIE)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
@@ -203,9 +217,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setCreateGUI(SHOW_GUI);
-
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       return guiInitialSetup;
    }
 

@@ -17,19 +17,19 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -47,34 +47,20 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
  */
 public class AtlasSDFVerificationTest
 {
-   private static final boolean KEEP_SCS_UP = false;
-   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-
-   private static final double SIM_DURATION = 5.0;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-
-   @BeforeClass
-   public static void setUpBeforeClass()
-   {
-   }
-
-   @AfterClass
-   public static void tearDownAfterClass()
-   {
-   }
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
-   public void setUp()
+   public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
    @After
-   public void tearDown()
+   public void destroySimulationAndRecycleMemory()
    {
       if (KEEP_SCS_UP)
       {
@@ -82,18 +68,36 @@ public class AtlasSDFVerificationTest
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
+      if (drcSimulationTestHelper != null)
       {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
       }
-
+      
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+   
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private static final double SIM_DURATION = 5.0;
 
+   private BlockingSimulationRunner blockingSimulationRunner;
+
+  
+
+   @After
+   public void tearDown()
+   {
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
+      }
    }
 
 	@AverageDuration
@@ -113,12 +117,12 @@ public class AtlasSDFVerificationTest
 
       simulate(scs);
 
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          checkNothingChanged(nothingChangedVerifier);
       }
 
-      if (CREATE_MOVIE)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
       }
@@ -257,7 +261,7 @@ public class AtlasSDFVerificationTest
    private NothingChangedVerifier setupNothingChangedVerifier(SimulationConstructionSet scs)
    {
       NothingChangedVerifier nothingChangedVerifier = null;
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier("AtlasSDFVerificationTest.SimpleLegSwing", scs);
       }

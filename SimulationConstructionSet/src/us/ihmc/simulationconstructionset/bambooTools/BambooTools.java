@@ -58,12 +58,6 @@ public class BambooTools
       return ((buildType != null) && (buildType.equals("nightly")));
    }
 
-   public static boolean doMovieCreation()
-   {
-      return Boolean.parseBoolean(System.getProperty("create.movies"));
-   }
-   
-
    /**
     * If you set {@code upload.movies} to {@code true} you must also set the system properties
     * defined in {@link YouTubeCredentials}.
@@ -71,11 +65,6 @@ public class BambooTools
    public static boolean doMovieUpload()
    {
       return Boolean.parseBoolean(System.getProperty("upload.movies"));
-   }
-
-   public static boolean getCheckNothingChanged()
-   {
-      return Boolean.parseBoolean(System.getProperty("check.nothing.changed"));
    }
 
    public static boolean isEveryCommitBuild()

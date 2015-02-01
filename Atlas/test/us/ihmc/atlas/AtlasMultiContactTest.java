@@ -8,9 +8,11 @@ import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -24,15 +26,11 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class AtlasMultiContactTest
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || CREATE_MOVIE;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -48,6 +46,28 @@ public class AtlasMultiContactTest
          ThreadTools.sleepForever();
       }
 
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+
+  
+   @After
+   public void destroyOtherStuff()
+   {
       // Do this here in case a test fails. That way the memory will be recycled.
       if (blockingSimulationRunner != null)
       {
@@ -66,12 +86,6 @@ public class AtlasMultiContactTest
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 	@AverageDuration
@@ -131,7 +145,7 @@ public class AtlasMultiContactTest
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (CREATE_MOVIE)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
       }
@@ -139,9 +153,7 @@ public class AtlasMultiContactTest
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setCreateGUI(SHOW_GUI);
-
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       return guiInitialSetup;
    }
 
