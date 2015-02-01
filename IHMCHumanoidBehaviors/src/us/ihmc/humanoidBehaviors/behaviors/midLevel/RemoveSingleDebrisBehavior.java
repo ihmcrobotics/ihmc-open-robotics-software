@@ -126,23 +126,17 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      if (taskExecutor.getCurrentTask() instanceof GraspPieceOfDebrisTask)
-         graspPieceOfDebris.consumeObjectFromNetworkProcessor(object);
-      if (taskExecutor.getCurrentTask() instanceof DropDebrisTask)
-         dropPieceOfDebris.consumeObjectFromNetworkProcessor(object);
-      if (taskExecutor.getCurrentTask() instanceof WalkToLocationTask)
-         walkCloseToObjectBehavior.consumeObjectFromNetworkProcessor(object);
+      graspPieceOfDebris.consumeObjectFromNetworkProcessor(object);
+      dropPieceOfDebris.consumeObjectFromNetworkProcessor(object);
+      walkCloseToObjectBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      if (taskExecutor.getCurrentTask() instanceof GraspPieceOfDebrisTask)
-         graspPieceOfDebris.consumeObjectFromController(object);
-      if (taskExecutor.getCurrentTask() instanceof DropDebrisTask)
-         dropPieceOfDebris.consumeObjectFromController(object);
-      if (taskExecutor.getCurrentTask() instanceof WalkToLocationTask)
-         walkCloseToObjectBehavior.consumeObjectFromController(object);
+      graspPieceOfDebris.consumeObjectFromController(object);
+      dropPieceOfDebris.consumeObjectFromController(object);
+      walkCloseToObjectBehavior.consumeObjectFromController(object);
    }
 
    @Override
