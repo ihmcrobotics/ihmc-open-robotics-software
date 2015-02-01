@@ -18,6 +18,9 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final BooleanYoVariable goToHomePosition = new BooleanYoVariable("UserDesiredPelvisGoToHomePosition", registry);
+   private final BooleanYoVariable goToHomeOrientation = new BooleanYoVariable("UserDesiredPelvisGoToHomeOrientation", registry);
+
    private final DoubleYoVariable userPelvisTrajectoryTime = new DoubleYoVariable("userDesiredPelvisTrajectoryTime", registry);
 
    private final BooleanYoVariable isNewPelvisOrientationInformationAvailable = new BooleanYoVariable("isNewPelvisOrientationInformationAvailable", registry);
@@ -53,7 +56,27 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
             userPelvisPosition.get(desiredPoint);
          }
       });
-      
+
+      goToHomeOrientation.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (goToHomeOrientation.getBooleanValue())
+               userPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0, false);
+         }
+      });
+
+      goToHomePosition.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (goToHomePosition.getBooleanValue())
+               userPelvisPosition.setToZero(false);
+         }
+      });
+
       parentRegistry.addChild(registry);
    }
 
@@ -99,5 +122,27 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    public double getTrajectoryTime()
    {
       return userPelvisTrajectoryTime.getDoubleValue();
+   }
+
+   @Override
+   public boolean checkForHomePosition()
+   {
+      if (goToHomePosition.getBooleanValue())
+      {
+         goToHomePosition.set(false);
+         return true;
+      }
+      return false;
+   }
+
+   @Override
+   public boolean checkForHomeOrientation()
+   {
+      if (goToHomeOrientation.getBooleanValue())
+      {
+         goToHomeOrientation.set(false);
+         return true;
+      }
+      return false;
    }
 }
