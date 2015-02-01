@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,7 +18,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.utilities.taskExecutor.TaskExecutor;
+import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -26,7 +27,8 @@ public class DropDebrisBehavior extends BehaviorInterface
 {
    private final FullRobotModel fullRobotModel;
 
-   private final TaskExecutor taskExecutor = new TaskExecutor();
+   //   private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private final HandPoseBehavior handPoseBehavior;
    private final FingerStateBehavior fingerStateBehavior;
@@ -46,12 +48,15 @@ public class DropDebrisBehavior extends BehaviorInterface
    private final FramePose midPose = new FramePose();
    private final FramePose dropLocationPose = new FramePose();
 
+   private final ReferenceFrames referenceFrames;
    private final DoubleYoVariable yoTime;
 
-   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
+         DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
+      this.referenceFrames = referenceFrames;
       this.yoTime = yoTime;
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
@@ -100,15 +105,15 @@ public class DropDebrisBehavior extends BehaviorInterface
 
       getMidPose();
       midPose.getPose(tempPose);
-      taskExecutor.submit(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
+      pipeLine.submitSingleTaskStage(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
       getDropLocation(side);
       dropLocationPose.getPose(tempPose);
-      taskExecutor.submit(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
+      pipeLine.submitSingleTaskStage(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
 
-      taskExecutor.submit(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
+      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
 
-      taskExecutor.submit(new HandPoseTask(PacketControllerTools.createGoToHomePacket(side, 3.0), handPoseBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, 3.0), handPoseBehavior, yoTime));
 
    }
 
@@ -123,7 +128,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      taskExecutor.doControl();
+      pipeLine.doControl();
    }
 
    public void setInputs(RobotSide side)
@@ -136,19 +141,15 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      if (taskExecutor.getCurrentTask() instanceof HandPoseTask)
-         handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      if (taskExecutor.getCurrentTask() instanceof FingerStateTask)
-         fingerStateBehavior.consumeObjectFromNetworkProcessor(object);
+      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
+      fingerStateBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      if (taskExecutor.getCurrentTask() instanceof HandPoseTask)
-         handPoseBehavior.consumeObjectFromController(object);
-      if (taskExecutor.getCurrentTask() instanceof FingerStateTask)
-         fingerStateBehavior.consumeObjectFromController(object);
+      handPoseBehavior.consumeObjectFromController(object);
+      fingerStateBehavior.consumeObjectFromController(object);
    }
 
    @Override
@@ -178,7 +179,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return (taskExecutor.isDone() && hasInputBeenSet());
+      return (pipeLine.isDone() && hasInputBeenSet());
    }
 
    @Override
