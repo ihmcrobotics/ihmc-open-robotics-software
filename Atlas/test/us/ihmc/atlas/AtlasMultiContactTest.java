@@ -26,8 +26,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class AtlasMultiContactTest
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -41,7 +39,7 @@ public class AtlasMultiContactTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }

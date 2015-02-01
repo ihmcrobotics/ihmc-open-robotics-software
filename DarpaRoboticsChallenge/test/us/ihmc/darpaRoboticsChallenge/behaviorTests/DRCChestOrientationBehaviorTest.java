@@ -49,8 +49,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -64,7 +62,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }

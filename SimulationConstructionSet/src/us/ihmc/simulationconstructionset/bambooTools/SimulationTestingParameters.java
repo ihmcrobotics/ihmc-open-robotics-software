@@ -6,6 +6,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
 {
    private boolean createSCSMovies = false;
    private boolean checkNothingChangedInSimulation = false;
+   private boolean keepSCSUp = false;
    
    public SimulationTestingParameters()
    {
@@ -35,6 +36,13 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          Boolean checkNothingChanged = Boolean.parseBoolean(property);
          setCheckNothingChangedInSimulation(checkNothingChanged);
       }
+      
+      property = System.getProperty("keep.scs.up");
+      if (property != null)
+      {
+         Boolean keepSCSUp = Boolean.parseBoolean(property);
+         setKeepSCSUp(keepSCSUp);
+      }
    }
    
    public boolean getCreateSCSMovies()
@@ -56,6 +64,17 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    {
       this.checkNothingChangedInSimulation = checkNothingChangedInSimulation;
    }
+   
+   public boolean getKeepSCSUp()
+   {
+      return keepSCSUp;
+   }
+
+   public void setKeepSCSUp(boolean keepSCSUp)
+   {
+      this.keepSCSUp = keepSCSUp;
+   }
+
 
 
 }

@@ -17,7 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -32,8 +31,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterface 
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -47,7 +44,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -58,10 +55,6 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }

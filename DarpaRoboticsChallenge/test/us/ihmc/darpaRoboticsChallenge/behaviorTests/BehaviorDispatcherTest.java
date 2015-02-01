@@ -63,8 +63,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -78,7 +76,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }

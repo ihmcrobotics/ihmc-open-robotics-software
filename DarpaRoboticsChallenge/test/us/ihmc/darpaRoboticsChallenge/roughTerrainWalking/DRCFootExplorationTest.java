@@ -47,8 +47,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 @SuppressWarnings("deprecation")
 public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -62,7 +60,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -74,10 +72,6 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
          drcSimulationTestHelper = null;
       }
       
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    

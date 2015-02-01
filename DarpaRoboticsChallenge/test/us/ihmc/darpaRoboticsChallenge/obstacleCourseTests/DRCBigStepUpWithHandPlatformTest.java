@@ -37,8 +37,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -52,7 +50,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -63,10 +61,6 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }

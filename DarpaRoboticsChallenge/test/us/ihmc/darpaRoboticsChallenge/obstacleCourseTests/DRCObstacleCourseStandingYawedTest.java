@@ -27,8 +27,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
    public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
    {
-      private final static boolean KEEP_SCS_UP = false;
-
       private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       
       private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -42,7 +40,7 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
       @After
       public void destroySimulationAndRecycleMemory()
       {
-         if (KEEP_SCS_UP)
+         if (simulationTestingParameters.getKeepSCSUp())
          {
             ThreadTools.sleepForever();
          }
@@ -53,10 +51,6 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
             drcSimulationTestHelper.destroySimulation();
             drcSimulationTestHelper = null;
          }
-         
-         GlobalTimer.clearTimers();
-         TimerTaskScheduler.cancelAndReset();
-         AsyncContinuousExecutor.cancelAndReset();
 
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
       }

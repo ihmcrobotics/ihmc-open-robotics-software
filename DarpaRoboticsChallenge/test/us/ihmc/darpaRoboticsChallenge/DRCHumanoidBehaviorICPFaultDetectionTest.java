@@ -16,6 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -34,23 +35,8 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
-   private final static boolean SHOW_GUI = false;
-   private final static boolean VISUALIZE_FORCE = true;
-
-   private double swingTime, transferTime;
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
-
-   private DRCPushRobotController pushRobotController;
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-   private SimulationConstructionSet scs;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
-   private  BooleanYoVariable enablePushing;
-
-
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -60,19 +46,45 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
 
-      // Do this here in case a test fails. That way the memory will be
-      // recycled.
+      // Do this here in case a test fails. That way the memory will be recycled.
       if (blockingSimulationRunner != null)
       {
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   
+   
+   private final static boolean VISUALIZE_FORCE = true;
+
+   private double swingTime, transferTime;
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
+
+   private DRCPushRobotController pushRobotController;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+   private SimulationConstructionSet scs;
+   
+   private  BooleanYoVariable enablePushing;
+
+
+   @After
+   public void tearDown()
+   {
       if (drcSimulation != null)
       {
          drcSimulation.dispose();
@@ -84,12 +96,6 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    // cropped to 1.5 - 6.3 seconds
