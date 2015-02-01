@@ -27,5 +27,5 @@ dependencies {
     compile project(':IHMCWholeBodyController')
     compile project(':IHMCROSTools')
     
-    runtime project(':IHMCHumanoidOperatorInterface')
+    compile project(':IHMCHumanoidOperatorInterface')
 }
