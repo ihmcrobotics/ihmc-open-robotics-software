@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -91,7 +92,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       TwoWaypointPositionTrajectoryGenerator trajectoryGenerator = getTrajectoryGenerator();
 
       int initialBufferSize = 8192;
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse, initialBufferSize);
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse, new SimulationConstructionSetParameters(initialBufferSize));
       scs.setDT(stepTime.getDoubleValue() / (double) numberOfTicks, 5);
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);

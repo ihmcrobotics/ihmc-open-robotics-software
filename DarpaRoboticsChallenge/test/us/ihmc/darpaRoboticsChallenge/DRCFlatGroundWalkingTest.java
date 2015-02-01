@@ -12,9 +12,11 @@ import org.junit.Before;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -34,31 +36,29 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 @SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = true;//;
-   public static final boolean KEEP_SCS_UP = false;
-
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
+   private final static boolean KEEP_SCS_UP = false;
+   private final static boolean createMovie = BambooTools.doMovieCreation();
+  
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
+   static
+   {
+      boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
+      boolean createGUI = KEEP_SCS_UP || createMovie;
 
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || KEEP_SCS_UP || checkNothingChanged || CREATE_MOVIE;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-
-   private static final double yawingTimeDuration = 0.1;
-   private static final double standingTimeDuration = 1.0;
-   private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
-   private static final boolean useVelocityAndHeadingScript = true;
-   private static final boolean cheatWithGroundHeightAtForFootstep = false;
-   private static final boolean drawGroundProfile = false;
+      simulationConstructionSetParameters.setCreateGUI(createGUI);
+      simulationConstructionSetParameters.setShowSplashScreen(showWindow);
+      simulationConstructionSetParameters.setShowWindow(showWindow);
+   }
+   
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -67,6 +67,28 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          ThreadTools.sleepForever();
       }
 
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+   
+
+   //TODO: Get rid of the stuff below and use a test helper.....
+   
+   @After
+   public void destroyOtherStuff()
+   {
+     
       // Do this here in case a test fails. That way the memory will be recycled.
       if (blockingSimulationRunner != null)
       {
@@ -85,13 +107,19 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-      
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+   
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+
+   private static final double yawingTimeDuration = 0.1;
+   private static final double standingTimeDuration = 1.0;
+   private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
+   private static final boolean useVelocityAndHeadingScript = true;
+   private static final boolean cheatWithGroundHeightAtForFootstep = false;
+   private static final boolean drawGroundProfile = false;
 
    protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException
    {
@@ -242,7 +270,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (CREATE_MOVIE)
+      if (createMovie)
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
@@ -329,9 +357,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
-
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationConstructionSetParameters);
       return guiInitialSetup;
    }
 

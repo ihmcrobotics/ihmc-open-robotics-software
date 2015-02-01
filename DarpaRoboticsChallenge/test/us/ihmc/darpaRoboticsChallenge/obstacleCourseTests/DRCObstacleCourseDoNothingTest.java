@@ -1,0 +1,232 @@
+package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
+
+import static org.junit.Assert.assertTrue;
+
+import javax.vecmath.Point3d;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
+import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
+import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
+import us.ihmc.yoUtilities.time.GlobalTimer;
+
+public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
+{
+   private static final boolean KEEP_SCS_UP = false;
+
+   private static final boolean createMovie = BambooTools.doMovieCreation();
+   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+
+   private DRCSimulationTestHelper drcSimulationTestHelper;
+
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (KEEP_SCS_UP)
+      {
+         ThreadTools.sleepForever();
+      }
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+      
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+   @AfterClass
+   public static void garbageCollectAndPauseForYourKitToSeeWhatIsStillAllocated()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("DRCObstacleCourseDoNothingTest after class.");
+      
+//      ThreadTools.sleepForever();
+   }
+
+   //@AverageDuration
+   @Test //(timeout = 300000)
+   public void testDoNothing1() throws SimulationExceededMaximumTimeException
+   {
+      doATest();
+   }
+   
+  // @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing2() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing3() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing4() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing5() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing6() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing7() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing8() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing9() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//   
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testDoNothing10() throws SimulationExceededMaximumTimeException
+//   {
+//      doATest();
+//   }
+//
+//
+//   @AverageDuration
+//   @Test(timeout = 300000)
+//   public void testRecovery() throws SimulationExceededMaximumTimeException
+//   {
+//      // Do Nothing.
+//   }
+
+   
+   private void doATest() throws SimulationExceededMaximumTimeException
+   {
+      doATestWithDRCStuff();      
+   }
+   
+   private void doATestWithDRCStuff() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
+
+      
+//      new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI, showGUI,
+//      createMovie, false, robotModel
+      
+      CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
+      PacketCommunicator networkObjectCommunicator = null;
+      String name = "DRCDoNothingTest";
+      String scriptFileName = "";
+      
+
+      boolean startNetworkProcessor = false;
+      DRCRobotModel robotModel = getRobotModel();
+      
+      
+      SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
+      simulationConstructionSetParameters.setCreateGUI(createMovie);
+      simulationConstructionSetParameters.setShowSplashScreen(false);
+      simulationConstructionSetParameters.setShowWindow(false);
+
+      
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, checkNothingChanged, simulationConstructionSetParameters, createMovie, startNetworkProcessor, robotModel);
+//      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie,
+//            getRobotModel());
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
+
+      ThreadTools.sleep(100);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 2);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   private void doATestWithJustAnSCS() throws SimulationExceededMaximumTimeException
+   {
+//      BambooTools.reportTestStartedMessage();
+
+      SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
+      simulationConstructionSetParameters.setCreateGUI(true);
+      simulationConstructionSetParameters.setShowSplashScreen(false);
+      simulationConstructionSetParameters.setShowWindow(true);
+
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("TEST"), simulationConstructionSetParameters);
+      
+      scs.startOnAThread();
+      ThreadTools.sleep(4000);
+      scs.closeAndDispose();
+
+//      ThreadTools.sleepForever();
+//      BambooTools.reportTestFinishedMessage();
+   }
+
+
+   private void setupCameraForWalkingOverSmallPlatform(SimulationConstructionSet scs)
+   {
+      Point3d cameraFix = new Point3d(-3.0, -4.6, 0.8);
+      Point3d cameraPosition = new Point3d(-11.5, -5.8, 2.5);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
+}

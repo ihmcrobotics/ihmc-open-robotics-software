@@ -13,25 +13,35 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@SuppressWarnings("deprecation")
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
-   private Class<DRCObstacleCourseTrialsWalkingTaskTest> thisClass = DRCObstacleCourseTrialsWalkingTaskTest.class;
-   private static final boolean KEEP_SCS_UP = false;
-
-
-   private static final boolean createMovie = BambooTools.doMovieCreation();
+   private final static boolean KEEP_SCS_UP = false;
+   private final static boolean createMovie = BambooTools.doMovieCreation();
+  
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+   private static final SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
+   static
+   {
+      boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
+      boolean createGUI = KEEP_SCS_UP || createMovie;
 
+      simulationConstructionSetParameters.setCreateGUI(createGUI);
+      simulationConstructionSetParameters.setShowSplashScreen(showWindow);
+      simulationConstructionSetParameters.setShowWindow(showWindow);
+   }
+   
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -54,6 +64,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -69,7 +83,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", scriptName, selectedLocation, checkNothingChanged,
-              showGUI, createMovie, getRobotModel());
+            simulationConstructionSetParameters, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -104,7 +118,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", scriptName, selectedLocation, checkNothingChanged,
-              showGUI, createMovie, getRobotModel());
+            simulationConstructionSetParameters, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 

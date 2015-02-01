@@ -16,6 +16,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.dataExporter.DataExporter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
@@ -25,11 +26,20 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
    private static final boolean SHOW_OVERHEAD_VIEW = true;
    
-   private boolean isGuiShown = true;
+   private final SimulationConstructionSetParameters simulationConstructionSetParameters;
+   
+   
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    private boolean showOverheadView = SHOW_OVERHEAD_VIEW;
+
+   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SimulationConstructionSetParameters simulationConstructionSetParameters)
+   {
+      this.groundProfileVisible = groundProfileVisible;
+      this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
+      this.simulationConstructionSetParameters = simulationConstructionSetParameters;
+   }
 
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight)
    {
@@ -38,11 +48,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, boolean showGUI)
    {
-      this.groundProfileVisible = groundProfileVisible;
-      this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
-      this.isGuiShown = showGUI;
+      this(groundProfileVisible, drawPlaneAtZeroHeight, new SimulationConstructionSetParameters(showGUI));
    }
 
+   public SimulationConstructionSetParameters getSimulationConstructionSetParameters()
+   {
+      return simulationConstructionSetParameters;
+   }
+   
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
       // use
@@ -110,21 +123,33 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    public boolean isGuiShown()
    {
-      return isGuiShown;
+      return simulationConstructionSetParameters.getCreateGUI();
+   }
+   
+   public boolean getShowWindow()
+   {
+      return simulationConstructionSetParameters.getShowWindow();
    }
 
-   public void setIsGuiShown(boolean isGuiShown)
+   public void setCreateGUI(boolean createGUI)
    {
-      this.isGuiShown = isGuiShown;
+      this.simulationConstructionSetParameters.setCreateGUI(createGUI);
+   }
+   
+   public void setShowWindow(boolean showWindow)
+   {
+      this.simulationConstructionSetParameters.setShowSplashScreen(showWindow);
+      this.simulationConstructionSetParameters.setShowWindow(showWindow);
+      
    }
 
    public Graphics3DAdapter getGraphics3DAdapter()
    {
-      if (isGuiShown && is3dGraphicsShown)
+      if (simulationConstructionSetParameters.getCreateGUI() && is3dGraphicsShown)
       {
          return new JMEGraphics3DAdapter();
       }
-      else if (isGuiShown)
+      else if (simulationConstructionSetParameters.getCreateGUI())
       {
          return new NullGraphics3DAdapter();
       }

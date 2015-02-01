@@ -686,7 +686,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(showGUI);
+      guiInitialSetup.setCreateGUI(showGUI);
       GroundProfile3D groundProfile = new FlatGroundProfile();
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(false);

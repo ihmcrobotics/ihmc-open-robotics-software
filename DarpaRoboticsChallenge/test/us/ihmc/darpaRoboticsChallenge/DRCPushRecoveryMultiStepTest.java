@@ -35,8 +35,13 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean SHOW_GUI = KEEP_SCS_UP || CREATE_MOVIE;
+   
+   private static final boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
+   private static final boolean createMovie = BambooTools.doMovieCreation();
+   private static final boolean createGUI = KEEP_SCS_UP || createMovie;
+
+   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   
    private final static boolean VISUALIZE_FORCE = false;
    private final static double PUSH_DELAY = 0.5;
 
@@ -204,7 +209,8 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
    private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(createGUI);
+      guiInitialSetup.setShowWindow(showWindow);
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
 
@@ -248,7 +254,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (CREATE_MOVIE)
+      if (createMovie)
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }

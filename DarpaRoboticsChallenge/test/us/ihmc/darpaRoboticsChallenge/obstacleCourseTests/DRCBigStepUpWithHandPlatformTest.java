@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.BigStepUpWithHandPlatformEnvir
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
@@ -76,8 +77,10 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       BigStepUpWithHandPlatformEnvironment environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
+      SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters(showGUI);
+      
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "testBigStepUpWithHandPlatform", "", selectedLocation, checkNothingChanged,
-            showGUI, createMovie, getRobotModel());
+            simulationConstructionSetParameters, createMovie, getRobotModel());
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 

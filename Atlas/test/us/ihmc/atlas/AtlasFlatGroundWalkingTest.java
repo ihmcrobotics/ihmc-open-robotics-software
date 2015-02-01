@@ -16,7 +16,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    private DRCRobotModel robotModel;
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=900000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

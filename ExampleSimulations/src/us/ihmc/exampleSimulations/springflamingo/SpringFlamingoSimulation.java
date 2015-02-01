@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -125,7 +126,7 @@ public class SpringFlamingoSimulation
       else
       {
          int initialBufferSize = 4*8192;
-         sim = new SimulationConstructionSet(springFlamingos, graphics3DAdapterToUse, initialBufferSize );
+         sim = new SimulationConstructionSet(springFlamingos, graphics3DAdapterToUse, new SimulationConstructionSetParameters(initialBufferSize));
       }
       
       Graphics3DObject coneGraphics = new Graphics3DObject();
