@@ -312,22 +312,22 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
       footPose.setOrientation(0.0, 0.8 * Math.PI / 2.0, 0.0);
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
 
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(20.0), 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(10.0), 0.0);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
-      pipeLine.submit(new NullTask());
+      pipeLine.submitSingleTaskStage(new NullTask());
 
       // Do a "Y" stance with the foot outside
       submitSymmetricHandPose(new double[] { 0.0, -1.5 * Math.PI / 2.0, 0.0, 0.0 });
@@ -336,21 +336,21 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.1);
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
       desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
       desiredPelvisOrientation.setToZero(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(25.0)));
       desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
-      pipeLine.submit(new NullTask());
+      pipeLine.submitSingleTaskStage(new NullTask());
 
       // Go back to stand prep but don't put the foot on the ground yet
       submitSymmetricHandPose(HumanoidArmPose.STAND_PREP.getArmJointAngles());
@@ -359,13 +359,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
       footPose.setOrientation(0.0, 0.0, 0.0);
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
 
       desiredPelvisOrientation.setToZero(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
       desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
       // Put the foot back on the ground
@@ -395,14 +395,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, 0.0, -0.1 });
       submitHandPoses(desiredJointAngles);
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
       submitHandPoses(desiredJointAngles);
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       //bend forward and arms
       desiredJointAngles = new SideDependentList<>();
@@ -413,22 +413,22 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(30), 0.0);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(35.0), 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       //back to normal stance
       desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
@@ -436,10 +436,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -0.1 });
@@ -453,7 +453,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPosition(robotSide, desiredFootstepPosition);
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       // Put the foot back on the ground
       // Put the foot back on the ground
@@ -463,50 +463,50 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.0, -0.3, 0.0, -0.2 });
       submitHandPoses(desiredJointAngles);
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       desiredJointAngles = new SideDependentList<>();
       desiredJointAngles.put(robotSide, new double[] { 0.0, -0.3, 0.0, -Math.PI / 2 });
       desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.0, -0.3, 0.0, -Math.PI / 2 });
       submitHandPoses(desiredJointAngles);
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
    }
 
    private void sequenceSteps()
    {
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
       
       // forward
       FramePose2d targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, 0.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue()));
       
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
       
       //backward
       targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0, 0.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI,footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI,footstepLength.getDoubleValue()));
       
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
       
       //sideWalk
       targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, -Math.PI/2.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
       
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
       
       targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0,0.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2.0,footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2.0,footstepLength.getDoubleValue()));
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 //      
 //      targetPoseInWorld = new FramePose2d();
 //      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, 0.0);
@@ -585,7 +585,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (RobotSide tempSide : RobotSide.values)
       {
          HandPoseListPacket handPoseListPacket = new HandPoseListPacket(tempSide, armFlyingSequence, flyingTrajectoryTime.getDoubleValue() * numberOfHandPoses);
-         pipeLine.submit(handPoseListBehaviors.get(tempSide), new HandPoseListTask(handPoseListPacket, handPoseListBehaviors.get(tempSide), yoTime,
+         pipeLine.submitTaskForPallelPipesStage(handPoseListBehaviors.get(tempSide), new HandPoseListTask(handPoseListPacket, handPoseListBehaviors.get(tempSide), yoTime,
                sleepTimeBetweenPoses.getDoubleValue()));
       }
 
@@ -593,7 +593,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       double[] armInFront = new double[] { -0.5, -0.6, 1.0, -halfPi };
       submitSymmetricHandPose(new double[] { 0.0, -0.6, 0.0, -halfPi });
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       submitSymmetricHandPose(armInFront);
 
@@ -603,22 +603,22 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
       footPose.setOrientation(0.0, -halfPi / 2.0, 0.0);
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
 
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(-5.0), 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(-15.0), 0.0);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       // Supa powerful back kick!!!!!
       SideDependentList<double[]> desiredJointAngles = new SideDependentList<>();
@@ -629,21 +629,21 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
       footPose.setOrientation(0.0, 0.8 * halfPi, 0.0);
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
 
       desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, Math.toRadians(30.0), 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
       desiredPelvisOrientation.setIncludingFrame(findFixedFrameForPelvisOrientation(), 0.0, Math.toRadians(20.0), 0.0);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       // Supa powerful side kick!!!!!
       desiredJointAngles.put(robotSide, new double[] { 0.0, -halfPi, 0.4, -0.1 });
@@ -653,21 +653,21 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.85), 0.3);
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
 
       desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(30.0)));
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
       desiredPelvisOrientation.setIncludingFrame(findFixedFrameForPelvisOrientation(), 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(20.0)));
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
-      pipeLine.requestNextStage();
+      pipeLine.requestNewStage();
 
       // Go back to stand prep but don't put the foot on the ground yet
       submitSymmetricHandPose(HumanoidArmPose.STAND_PREP.getArmJointAngles());
@@ -676,18 +676,18 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
       footPose.setOrientation(0.0, 0.0, 0.0);
       footPose.changeFrame(worldFrame);
-      pipeLine.submit(footPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,
             new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
 
       desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, 0.0);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
       desiredPelvisOrientation.setToZero(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
 
       // Put the foot back on the ground
@@ -712,20 +712,20 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       desiredChestOrientation.checkReferenceFrameMatch(pelvisZUpFrame);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submit(new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitSingleTaskStage(new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
    }
 
    private void submitDesiredCoMHeightOffset(double offsetHeight)
    {
-      pipeLine.submit(new CoMHeightTask(offsetHeight, yoTime, comHeightBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new CoMHeightTask(offsetHeight, yoTime, comHeightBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
    }
 
    private void submitDesiredPelvisOrientation(double yaw, double pitch, double roll)
    {
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
+      pipeLine.submitSingleTaskStage(new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
             .getDoubleValue()));
    }
 
@@ -736,11 +736,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredChestOrientation.changeFrame(worldFrame);
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), pelvisYaw, pelvisPitch, pelvisRoll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submit(
+      pipeLine.submitTaskForPallelPipesStage(
             chestOrientationBehavior,
             new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                   .getDoubleValue()));
-      pipeLine.submit(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
    }
 
@@ -749,7 +749,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       double[] temp = ensureJointAnglesSize(desiredJointAngles);
 
       HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-      pipeLine.submit(handPoseBehavior,
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
             new HandPoseTask(robotSide, temp, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
    }
 
@@ -781,7 +781,7 @@ public class DiagnosticBehavior extends BehaviorInterface
             temp = src;
 
          HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-         pipeLine.submit(handPoseBehavior,
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
                new HandPoseTask(robotSide, temp, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
@@ -798,7 +798,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
 
          HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-         pipeLine.submit(handPoseBehavior, new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(),
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(),
                sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
@@ -815,7 +815,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       FramePose footPose = new FramePose(desiredFootstepPosition);
 
-      pipeLine.submit(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose));
+      pipeLine.submitSingleTaskStage(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose));
    }
 
    private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
@@ -825,7 +825,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      pipeLine.submit(new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
+      pipeLine.submitSingleTaskStage(new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
    }
 
@@ -941,7 +941,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
-      pipeLine.clear();
+      pipeLine.clearAll();
    }
 
    @Override
