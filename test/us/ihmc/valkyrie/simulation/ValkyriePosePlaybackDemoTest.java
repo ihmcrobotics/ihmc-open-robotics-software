@@ -27,11 +27,9 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -40,12 +38,9 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class ValkyriePosePlaybackDemoTest
 {
-   private final static boolean KEEP_SCS_UP = false;
-
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    @Before
@@ -57,7 +52,7 @@ public class ValkyriePosePlaybackDemoTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -69,10 +64,6 @@ public class ValkyriePosePlaybackDemoTest
          blockingSimulationRunner = null;
       }
       
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
