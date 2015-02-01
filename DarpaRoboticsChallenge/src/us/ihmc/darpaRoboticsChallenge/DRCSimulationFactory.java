@@ -30,6 +30,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
@@ -87,9 +88,12 @@ public class DRCSimulationFactory
       }
 
       Robot[] allSimulatedRobots = setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
-      scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
+      
+      SimulationConstructionSetParameters simulationConstructionSetParameters = guiInitialSetup.getSimulationConstructionSetParameters();
+      simulationConstructionSetParameters.setInitialDataBufferSize(scsInitialSetup.getSimulationDataBufferSize());
+      scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), simulationConstructionSetParameters);
       scs.setDT(drcRobotModel.getSimulateDT(), 1);
-
+      
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());

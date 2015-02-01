@@ -21,14 +21,17 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -70,15 +73,41 @@ public class DRCSimulationTestHelper
             createMovie, false, robotModel);
    }
    
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
-         boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
+   
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, boolean checkNothingChanged,
+         SimulationConstructionSetParameters simulationconstructionsetparameters, boolean createMovie, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, simulationconstructionsetparameters, 
             createMovie, false, robotModel);
    }
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
+         boolean checkNothingChanged, boolean createGUI, boolean createMovie, DRCRobotModel robotModel)
+   {
+      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(createGUI),
+            createMovie, false, robotModel);
+   }
+   
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
+         boolean checkNothingChanged, SimulationConstructionSetParameters simulationConstructionSetParameters, boolean createMovie, DRCRobotModel robotModel)
+   {
+      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, simulationConstructionSetParameters,
+            createMovie, false, robotModel);
+   }
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
+         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI, 
+         boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
+   {
+      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, 
+            scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(showGUI),
+            createMovie, startNetworkProcessor, robotModel);
+   }
+  
          
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
-         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, SimulationConstructionSetParameters simulationConstructionSetParameters,
          boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
    {
       this.networkObjectCommunicator = networkObjectCommunicator;
@@ -86,7 +115,7 @@ public class DRCSimulationTestHelper
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
       if (createMovie)
-         showGUI = true;
+         simulationConstructionSetParameters.setCreateGUI(true);
 
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
@@ -96,7 +125,7 @@ public class DRCSimulationTestHelper
       boolean automaticallyStartSimulation = false;
       boolean initializeEstimatorToActual = true;
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, showGUI);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationConstructionSetParameters);
 
       DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(commonAvatarEnvironmentInterface, scriptFileName, selectedLocation, guiInitialSetup,
             initializeEstimatorToActual, automaticallyStartSimulation, startNetworkProcessor, robotModel, networkObjectCommunicator);
@@ -115,6 +144,7 @@ public class DRCSimulationTestHelper
          nothingChangedVerifier = null;
       }
    }
+
 
    public BlockingSimulationRunner getBlockingSimulationRunner()
    {
@@ -238,7 +268,7 @@ public class DRCSimulationTestHelper
       catch (Exception e)
       {
          System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
-         throw e;
+         return false;
       }
    }
 

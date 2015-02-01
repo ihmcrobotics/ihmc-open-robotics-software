@@ -62,6 +62,11 @@ public class BambooTools
    {
       return Boolean.parseBoolean(System.getProperty("create.movies"));
    }
+   
+   public static boolean getShowSCSWindows()
+   {
+      return Boolean.parseBoolean(System.getProperty("show.scs.windows"));
+   }
 
    /**
     * If you set {@code upload.movies} to {@code true} you must also set the system properties
@@ -74,7 +79,7 @@ public class BambooTools
 
    public static boolean getCheckNothingChanged()
    {
-      return Boolean.parseBoolean(System.getProperty("checkNothingChanged"));
+      return Boolean.parseBoolean(System.getProperty("check.nothing.changed"));
    }
 
    public static boolean isEveryCommitBuild()
@@ -705,5 +710,7 @@ public class BambooTools
    {
       M2V2, R2, VALKYRIE, ATLAS, BONO, SPOKED_RUNNER
    }
+
+
 
 }

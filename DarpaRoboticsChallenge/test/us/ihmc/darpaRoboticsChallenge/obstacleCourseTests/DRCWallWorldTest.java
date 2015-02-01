@@ -24,6 +24,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
@@ -76,8 +77,9 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 
       double wallMaxY = 3.5;
       DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-1.0, wallMaxY);
+      SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters(showGUI);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", "", selectedLocation, checkNothingChanged,
-            showGUI, createMovie, getRobotModel());
+            simulationConstructionSetParameters, createMovie, getRobotModel());
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 

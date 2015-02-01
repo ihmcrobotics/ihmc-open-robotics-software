@@ -29,8 +29,11 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
+  
+   private static final boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
    private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean SHOW_GUI = KEEP_SCS_UP || createMovie;
+   private static final boolean createGUI = KEEP_SCS_UP || createMovie;
+   
    private final static boolean VISUALIZE_FORCE = false;
 
    private DRCPushRobotController pushRobotController;
@@ -290,7 +293,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(createGUI);
+      guiInitialSetup.setShowWindow(showWindow);
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
 

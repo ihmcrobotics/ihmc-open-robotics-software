@@ -15,21 +15,34 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
+   private final static boolean createMovie = BambooTools.doMovieCreation();
 
-   private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+   private static final SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
+   static
+   {
+      boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
+      boolean createGUI = KEEP_SCS_UP || createMovie;
+
+      simulationConstructionSetParameters.setCreateGUI(createGUI);
+      simulationConstructionSetParameters.setShowSplashScreen(showWindow);
+      simulationConstructionSetParameters.setShowWindow(showWindow);
+   }
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -54,8 +67,13 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
          drcSimulationTestHelper = null;
       }
 
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+
 
 	@AverageDuration
 	@Test(timeout=300000)
@@ -67,7 +85,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingEasySteppingStonesTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingEasySteppingStonesTest", "", selectedLocation, checkNothingChanged, simulationConstructionSetParameters, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

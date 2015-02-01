@@ -140,7 +140,7 @@ public class AtlasMultiContactTest
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(SHOW_GUI);
 
       return guiInitialSetup;
    }

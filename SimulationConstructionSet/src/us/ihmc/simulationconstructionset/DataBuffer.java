@@ -38,7 +38,7 @@ public class DataBuffer extends YoVariableHolderImplementation
 
    public KeyPoints keyPoints = new KeyPoints();
    private ArrayList<DataBufferListener> dataBufferListeners = new ArrayList<DataBufferListener>();
-   private int bufferSize = SimulationConstructionSet.DEFAULT_INITIAL_BUFFER_SIZE;
+   private int bufferSize;
    private ArrayList<DataBufferEntry> entries;
    private ArrayList<IndexChangedListener> indexChangedListeners;
 

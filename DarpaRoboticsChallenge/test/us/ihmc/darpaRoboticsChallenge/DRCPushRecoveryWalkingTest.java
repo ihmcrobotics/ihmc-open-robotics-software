@@ -355,7 +355,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(SHOW_GUI);
       GroundProfile3D groundProfile = new FlatGroundProfile();
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());

@@ -40,12 +40,14 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 @SuppressWarnings("deprecation")
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
+   
+   private static final boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
+   private static final boolean createMovie = BambooTools.doMovieCreation();
+   private static final boolean createGUI = KEEP_SCS_UP || createMovie;
 
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
+   
    private DRCRobotModel robotModel;
 
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -363,7 +365,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (CREATE_MOVIE)
+      if (createMovie)
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
@@ -428,7 +430,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(createGUI);
+      guiInitialSetup.setShowWindow(showWindow);
 
       return guiInitialSetup;
    }

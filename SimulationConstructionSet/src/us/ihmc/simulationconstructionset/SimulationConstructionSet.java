@@ -30,8 +30,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.vecmath.Color3f;
 
-import org.lwjgl.opengl.Display;
-
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -42,6 +40,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
@@ -234,7 +233,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * The default size of the data buffer in record steps.
     */
-   public static final int DEFAULT_INITIAL_BUFFER_SIZE = 8192;
    public static final String rootRegistryName = "root";
    private static final boolean DEBUG_CLOSE_AND_DISPOSE = false;
 
@@ -246,7 +244,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    // private int count = 0;
    private double simulateDurationInSeconds = 10000.0;
 
-   private final boolean showGUI;
+   
    private StandardSimulationGUI myGUI;
    private StandardAllCommandsExecutor standardAllCommandsExecutor;
 
@@ -280,6 +278,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    private String runningName = ThreadTools.getBaseSimpleClassName();
 
    private ScsPhysics physics;
+
+   private final SimulationConstructionSetParameters parameters;
 
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
@@ -321,66 +321,26 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public SimulationConstructionSet(Robot robot)
    {
-      this(robot, true);
+      this(robot, new SimulationConstructionSetParameters());
    }
 
    public SimulationConstructionSet(Robot[] robots)
    {
-      this(robots, true);
+      this(robots, new SimulationConstructionSetParameters());
    }
 
-   /**
-    * Creates a SimulationConstructionSet with the specified Robot and DataBuffer size.
-    * The GUI will be displayed.
-    *
-    * @param rob               Robot to simulate.
-    * @param initialBufferSize Initial size of the DataBuffer.
-    */
-   public SimulationConstructionSet(Robot rob, int initialBufferSize)
-   {
-      this(rob, true, initialBufferSize);
-   }
-
-   public SimulationConstructionSet(Robot[] robot, int initialBufferSize)
-   {
-      this(robot, true, initialBufferSize);
-   }
-
-   /**
-    * Creates a SimulationConstructionSet with the specified Robot and GUI flag.
-    * If showGUI is true, the GUI will be displayed. If it is false, the GUI will not be displayed.
-    * The initial DataBuffer size will be set to the default size.
-    *
-    * @param rob     Robot to simulate.
-    * @param showGUI boolean specifying whether or not to display the GUI.
-    */
-   public SimulationConstructionSet(Robot robot, boolean showGUI)
-   {
-      this(robot, showGUI, DEFAULT_INITIAL_BUFFER_SIZE);
-   }
-
-   public SimulationConstructionSet(Robot[] robots, boolean showGUI)
-   {
-      this(robots, showGUI, DEFAULT_INITIAL_BUFFER_SIZE);
-   }
-
-   /**
-    * Creates a SimulationConstructionSet with no Robot.
-    *
-    * @param showGUI           boolean specifying whether or not to display the GUI.
-    * @param initialBufferSize Initial size of the DataBuffer.
-    */
-   public SimulationConstructionSet(boolean showGUI, int initialBufferSize)
-   {
-      this((Robot) null, showGUI, initialBufferSize);
-   }
 
    /**
     * Creates a SimulationConstructionSet with no Robot.
     */
    public SimulationConstructionSet()
    {
-      this(true, DEFAULT_INITIAL_BUFFER_SIZE);
+      this(new SimulationConstructionSetParameters());
+   }
+   
+   public SimulationConstructionSet(SimulationConstructionSetParameters parameters)
+   {
+      this((Robot) null, parameters);
    }
 
    /**
@@ -393,41 +353,42 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param showGUI           boolean specifying whether or not to display the GUI.
     * @param initialBufferSize Initial size of the DataBuffer.
     */
-   public SimulationConstructionSet(Robot robot, boolean showGUI, int initialBufferSize)
+   public SimulationConstructionSet(Robot robot, SimulationConstructionSetParameters parameters)
    {
-      this(new Robot[] { robot }, showGUI, initialBufferSize);
+      this(new Robot[] { robot }, parameters);
    }
 
-   public SimulationConstructionSet(Robot[] robotArray, boolean showGUI, int initialBufferSize)
+   public SimulationConstructionSet(Robot[] robotArray, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, initialBufferSize), SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(showGUI));
+      this(new Simulation(robotArray, parameters.getInitialDataBufferSize()), SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(parameters.getCreateGUI()), parameters);
    }
 
-   public SimulationConstructionSet(Robot robot, Graphics3DAdapter graphicsAdapter, int initialBufferSize)
+   public SimulationConstructionSet(Robot robot, Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
    {
-      this(new Robot[] { robot }, graphicsAdapter, initialBufferSize);
+      this(new Robot[] { robot }, graphicsAdapter, parameters);
    }
 
-   public SimulationConstructionSet(Robot[] robotArray, Graphics3DAdapter graphicsAdapter, int initialBufferSize)
+   public SimulationConstructionSet(Robot[] robotArray, Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, initialBufferSize), graphicsAdapter);
+      this(new Simulation(robotArray, parameters.getInitialDataBufferSize()), graphicsAdapter, parameters);
    }
 
-   public SimulationConstructionSet(Robot[] robotArray, SupportedGraphics3DAdapter supportedGraphicsAdapter, int initialBufferSize)
+   public SimulationConstructionSet(Robot[] robotArray, SupportedGraphics3DAdapter supportedGraphicsAdapter, SimulationConstructionSetParameters parameters)
    {
-      this(new Simulation(robotArray, initialBufferSize), supportedGraphicsAdapter.instantiateGraphics3DAdapter());
+      this(new Simulation(robotArray, parameters.getInitialDataBufferSize()), supportedGraphicsAdapter.instantiateGraphics3DAdapter(), parameters);
    }
 
-   public SimulationConstructionSet(Simulation simulation, boolean showGUI)
+   public SimulationConstructionSet(Simulation simulation, SimulationConstructionSetParameters parameters)
    {
-      this(simulation, SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(showGUI));
+      this(simulation, SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(parameters.getCreateGUI()), parameters);
    }
 
-   public SimulationConstructionSet(Simulation simulation, final Graphics3DAdapter graphicsAdapter)
+   public SimulationConstructionSet(Simulation simulation, final Graphics3DAdapter graphicsAdapter, SimulationConstructionSetParameters parameters)
    {
+      this.parameters = parameters;
       standardAllCommandsExecutor = new StandardAllCommandsExecutor();
 
-      this.showGUI = graphicsAdapter != null;
+      final boolean showGUI = ((graphicsAdapter != null) && (parameters.getCreateGUI()));
       this.rootRegistry = new YoVariableRegistry(rootRegistryName);
 
       if (showGUI)
@@ -513,7 +474,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       standardAllCommandsExecutor.setup(this, myGUI, myDataBuffer);
    }
-
+   
    private void createAndAttachAChangedListenerToTheRootRegistry()
    {
       YoVariableRegistryChangedListener listener = new YoVariableRegistryChangedListener()
@@ -563,9 +524,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this.rootRegistry.attachYoVariableRegistryChangedListener(listener);
    }
 
-   public SimulationConstructionSet(Robot robot, JApplet jApplet)
+   public SimulationConstructionSet(Robot robot, JApplet jApplet, SimulationConstructionSetParameters parameters)
    {
-      this(new Robot[] { robot }, jApplet);
+      this(new Robot[] { robot }, jApplet, parameters);
    }
 
    /**
@@ -576,14 +537,69 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param rob     Robot to simulate.
     * @param jApplet JApplet to display the GUI in.
     */
-   public SimulationConstructionSet(Robot[] robots, JApplet jApplet)
+   public SimulationConstructionSet(Robot[] robots, JApplet jApplet, SimulationConstructionSetParameters parameters)
    {
-      this(robots, true);
+      this(robots, parameters);
 
       this.jFrame = null;
       this.jApplet = jApplet;
 
       throw new RuntimeException("Not sure if this is all we have to do for jApplet. Problably not. We need to test and debug this constructor...");
+   }
+
+   public SimulationConstructionSet(boolean createGUI, int bufferSize)
+   {
+      this(new SimulationConstructionSetParameters(createGUI, bufferSize));
+   }
+
+   public SimulationConstructionSet(Robot robot, int bufferSize)
+   {
+      this(robot, new SimulationConstructionSetParameters(bufferSize));
+   }
+
+   public SimulationConstructionSet(Robot robot, boolean createGUI)
+   {
+      this(robot, new SimulationConstructionSetParameters(createGUI));
+   }
+
+   public SimulationConstructionSet(Robot robot, boolean createGUI, int bufferSize)
+   {
+      this(robot, new SimulationConstructionSetParameters(createGUI, bufferSize));
+   }
+
+   public SimulationConstructionSet(Robot robot, JMEGraphics3DAdapter graphicsAdapter, int initialBufferSize)
+   {
+      this(robot, graphicsAdapter, new SimulationConstructionSetParameters(initialBufferSize));
+   }
+
+   public SimulationConstructionSet(Robot[] robots, boolean showGUI, int initialBufferSize)
+   {
+      this(robots, new SimulationConstructionSetParameters(showGUI, initialBufferSize));
+   }
+
+   public SimulationConstructionSet(Robot[] robots, boolean showGUI)
+   {
+      this(robots, new SimulationConstructionSetParameters(showGUI));
+   }
+
+   public SimulationConstructionSet(Robot[] robots, Graphics3DAdapter graphics3dAdapter, int simulationDataBufferSize)
+   {
+      this(robots, graphics3dAdapter, new SimulationConstructionSetParameters(simulationDataBufferSize));
+   }
+
+   public SimulationConstructionSet(Robot[] robots, int simulationDataBufferSize)
+   {
+      this(robots, new SimulationConstructionSetParameters(simulationDataBufferSize));
+   }
+
+   public SimulationConstructionSet(Simulation simulation, boolean showGUI)
+   {
+      this(simulation, new SimulationConstructionSetParameters(showGUI));
+   }
+
+   public SimulationConstructionSet(Robot robot, Graphics3DAdapter graphicsAdapter, int simulationDataBufferSize)
+   {
+      this(robot, new SimulationConstructionSetParameters(simulationDataBufferSize));
    }
 
    /**
@@ -1227,8 +1243,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       mySimulation = null;
       jFrame = null;
 
-      // Destroy the LWJGL Threads. Not sure if need to or not.
+      // Destroy the LWJGL Threads. Not sure if need to do Display.destroy() or not.
 //      Display.destroy();
+      ThreadTools.interruptLiveThreadsExceptThisOneContaining("LWJGL Timer"); // This kills the silly LWJGL sleeping thread which just sleeps and does nothing else...
    }
 
    /**
@@ -1837,7 +1854,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
          // +++JEP: For Applets to work...
          {
-            StandardSimulationGUI.showSplashScreen();
+            if (parameters.getShowSplashScreen()) StandardSimulationGUI.showSplashScreen();
          }
          catch (Exception e)
          {
@@ -2131,7 +2148,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       if (myGUI != null)
       {
-         myGUI.show();
+         if (parameters.getShowWindow()) myGUI.show();
       }
 
       if (robots == null)
