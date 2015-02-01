@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -71,7 +71,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    private final PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator;
 
-   private final Map<QPSolverFlavor, MomentumOptimizerInterface> momentumOptimizers = new LinkedHashMap<>();
+   private final Map<QPSolverFlavor, MomentumOptimizerInterface> momentumOptimizers = new EnumMap<>(QPSolverFlavor.class);
    private MomentumOptimizerInterface momentumOptimizer;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
@@ -230,10 +230,18 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    {
       if (currentQPSolver.getEnumValue() != requestedQPSolver.getEnumValue())
       {
-         momentumOptimizer = momentumOptimizers.get(requestedQPSolver.getEnumValue());
-         if (momentumOptimizer instanceof ActiveSetQPMomentumOptimizer)
-            ((ActiveSetQPMomentumOptimizer) momentumOptimizer).loadNativeLibraries();
-         currentQPSolver.set(requestedQPSolver.getEnumValue());
+         if(momentumOptimizers.containsKey(requestedQPSolver.getEnumValue()))
+         {
+                 momentumOptimizer = momentumOptimizers.get(requestedQPSolver.getEnumValue());
+                 if (momentumOptimizer instanceof ActiveSetQPMomentumOptimizer)
+                    ((ActiveSetQPMomentumOptimizer) momentumOptimizer).loadNativeLibraries();
+                 currentQPSolver.set(requestedQPSolver.getEnumValue());
+         }
+         else
+         {
+            System.out.println(getClass().getSimpleName() + ": requestedQPSolver is not loaded");
+            requestedQPSolver.set(currentQPSolver.getEnumValue());
+         }
       }
    }
 
