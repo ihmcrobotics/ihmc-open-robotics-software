@@ -13,6 +13,7 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final BooleanYoVariable goToHomeOrientation = new BooleanYoVariable("userDesiredChestGoToHomeOrientation", registry);
    private final DoubleYoVariable chestTrajectoryTime = new DoubleYoVariable("userDesiredChestTrajectoryTime", registry);
    private final BooleanYoVariable isNewChestOrientationInformationAvailable = new BooleanYoVariable("isNewChestOrientationInformationAvailable", registry);
    private final YoFrameOrientation userChest;
@@ -36,14 +37,35 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
       };
 
       userChest.attachVariableChangedListener(variableChangedListener);
-      
+
+      goToHomeOrientation.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (goToHomeOrientation.getBooleanValue())
+               userChest.setYawPitchRoll(0.0, 0.0, 0.0, false);
+         }
+      });
+
       parentRegistry.addChild(registry);
    }
 
    @Override
-   public boolean isNewChestOrientationInformationAvailable()
+   public boolean checkForNewChestOrientation()
    {
       return isNewChestOrientationInformationAvailable.getBooleanValue();
+   }
+
+   @Override
+   public boolean checkForHomeOrientation()
+   {
+      if (goToHomeOrientation.getBooleanValue())
+      {
+         goToHomeOrientation.set(false);
+         return true;
+      }
+      return false;
    }
 
    @Override

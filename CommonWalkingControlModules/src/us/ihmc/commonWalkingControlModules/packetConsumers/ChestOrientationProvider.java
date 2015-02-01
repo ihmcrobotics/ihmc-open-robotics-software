@@ -7,7 +7,9 @@ public interface ChestOrientationProvider
 {
    public abstract ReferenceFrame getChestOrientationExpressedInFrame();
 
-   public abstract boolean isNewChestOrientationInformationAvailable();
+   public abstract boolean checkForNewChestOrientation();
+   
+   public abstract boolean checkForHomeOrientation();
 
    public abstract FrameOrientation getDesiredChestOrientation();
 

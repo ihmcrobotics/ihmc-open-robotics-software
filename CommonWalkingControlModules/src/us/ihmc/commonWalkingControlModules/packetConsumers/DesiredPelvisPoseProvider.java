@@ -81,6 +81,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       if (object == null)
          return;
 
+      trajectoryTime = object.getTrajectoryTime();
+
       // If go to home position requested, ignore the other commands.
       if (object.isToHomePosition())
       {
@@ -98,7 +100,5 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
          desiredPelvisOrientation.set(new FrameOrientation(worldFrame, object.getOrientation()));
       else
          desiredPelvisOrientation.set(null);
-
-      trajectoryTime = object.getTrajectoryTime();
    }
 }
