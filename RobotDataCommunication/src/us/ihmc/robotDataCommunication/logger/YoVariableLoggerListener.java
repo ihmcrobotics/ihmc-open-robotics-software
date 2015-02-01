@@ -46,7 +46,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private FileChannel indexChannel;
 
    private final AnnounceRequest request;
-   
+
    private final ByteBuffer indexBuffer = ByteBuffer.allocate(16);
    private ByteBuffer compressedBuffer;
 
@@ -59,11 +59,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    private final ArrayList<VideoSettings> cameras = new ArrayList<>();
    private final InetSocketAddress videoStreamAddress;
-   
+
    private boolean clearingLog = false;
 
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
+      System.out.println(request);
       this.tempDirectory = tempDirectory;
       this.finalDirectory = finalDirectory;
       this.options = options;
@@ -87,8 +88,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             cameras.add(cameraSettings.get(camera));
          }
-         
-         if(request.hasVideoStream())
+
+         if (request.hasVideoStream())
          {
             videoStreamAddress = new InetSocketAddress(LogUtils.getByAddress(request.getVideoStream()), request.getVideoPort());
             System.out.println("Video stream: " + videoStreamAddress);
@@ -292,7 +293,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                e.printStackTrace();
             }
          }
-         
+
          tempDirectory.renameTo(finalDirectory);
       }
    }
@@ -356,22 +357,30 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       if (!options.getDisableVideo())
       {
-         try
+         for (VideoSettings camera : cameras)
          {
-            for (VideoSettings camera : cameras)
+            try
             {
                videoDataLoggers.add(new BlackmagicVideoDataLogger(tempDirectory, logProperties, camera, options));
             }
-            
-            if(videoStreamAddress != null)
+            catch (IOException e)
+            {
+               System.err.println("Cannot start video data logger");
+               e.printStackTrace();
+            }
+         }
+
+         if (videoStreamAddress != null)
+         {
+            try
             {
                videoDataLoggers.add(new NetworkStreamVideoDataLogger(request, tempDirectory, logProperties, options, videoStreamAddress));
             }
-         }
-         catch (IOException e)
-         {
-            System.err.println("Cannot start video data logger");
-            e.printStackTrace();
+            catch (IOException e)
+            {
+               System.err.println("Cannot start video stream logger");
+               e.printStackTrace();
+            }
          }
       }
    }

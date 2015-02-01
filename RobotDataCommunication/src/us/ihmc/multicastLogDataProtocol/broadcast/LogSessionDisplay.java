@@ -14,6 +14,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import us.ihmc.multicastLogDataProtocol.LogUtils;
+
 public class LogSessionDisplay extends JFrame implements LogBroadcastListener
 {
    private static final long serialVersionUID = -4663925866110757300L;
@@ -92,6 +94,7 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
                   return;
                }
             }
+            System.out.println(description);
             model.addRow(new Object[] { name, description, controlIp, port, group, dataPort });
 
          }
@@ -206,6 +209,6 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
 
    public static void main(String[] args) throws IOException
    {
-      System.out.println(selectLogSession(NetworkInterface.getByName("lo")));
+      System.out.println(selectLogSession(LogUtils.getMyInterface("10.66.171.41")));
    }
 }

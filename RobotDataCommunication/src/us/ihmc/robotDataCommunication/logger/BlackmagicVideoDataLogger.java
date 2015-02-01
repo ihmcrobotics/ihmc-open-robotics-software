@@ -20,13 +20,6 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface
    public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, VideoSettings settings, YoVariableLoggerOptions options) throws IOException
    {
       super(logPath, logProperties, settings.getDescription(), settings.isInterlaced());
-      logProperties.addVideoFile(settings.getDescription());
-      logProperties.setInterlaced(settings.getDescription(), settings.isInterlaced());
-      String videoFilename = settings.getDescription() + videoPostfix;
-      logProperties.setVideoFile(settings.getDescription(), videoFilename);
-      String timestampDataFilename = settings.getDescription() + timestampDataPostfix;
-      logProperties.setTimestampFile(settings.getDescription(), timestampDataFilename);
-
       BMDCapture bmdCapture = new BMDCapture();
       bmdCapture.setCard(settings.getDevice());
       bmdCapture.setMode(settings.getMode());

@@ -355,8 +355,13 @@ public class AnnounceRequest
       return true;
    }
 
+   @Override
    public String toString()
    {
-      return String.valueOf(sessionID);
+      return "AnnounceRequest [type=" + type + ", sessionID=" + sessionID + ", group=" + Arrays.toString(group) + ", dataPort=" + dataPort + ", controlIP="
+            + Arrays.toString(controlIP) + ", controlPort=" + controlPort + ", videoStream=" + Arrays.toString(videoStream) + ", videoPort=" + videoPort
+            + ", cameras=" + Arrays.toString(cameras) + ", name=" + name + ", log=" + log + "]";
    }
+
+
 }
