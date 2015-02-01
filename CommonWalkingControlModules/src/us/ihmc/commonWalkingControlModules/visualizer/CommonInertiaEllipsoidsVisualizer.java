@@ -28,7 +28,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 
-public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
+public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
 {
    private final String name = getClass().getSimpleName();
 
@@ -58,12 +58,12 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
    }
    private final ArrayList<RigidBodyVisualizationData> centerOfMassData = new ArrayList<RigidBodyVisualizationData>();
 
-   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(rootBody, yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
    }  
-   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
       inertiaEllipsoidGhostOffset.set(0, 0.0, 0.0);
 
@@ -235,6 +235,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
        // System.out.println("V:\n " + MatrixToString(V));
 
        Matrix3d rotationMatrix3d = new Matrix3d(V.getRowPackedCopy());
+       rotationMatrix3d.negate();
 
        // Moment of inertia of an ellipsoid is 1/5 * mass * (ry^2+rz^2, rx^2+rz^2, rx^2+ry^2).  Backing this out:
        double a = 5.0 * S.get(0, 0) / mass, b = 5.0 * S.get(1, 1) / mass, c = 5.0 * S.get(2, 2) / mass;
