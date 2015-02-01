@@ -45,7 +45,7 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
 
    public void receivedPacket(ChestOrientationPacket object)
    {
-      desiredOrientation.set(object.getQuaternion());
+      desiredOrientation.set(object.getOrientation());
       trajectoryTime.set(object.getTrajectoryTime());
    }
 
