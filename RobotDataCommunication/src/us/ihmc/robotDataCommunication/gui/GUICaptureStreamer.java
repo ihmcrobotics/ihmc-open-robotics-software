@@ -114,6 +114,7 @@ public class GUICaptureStreamer
                buffer.flip();
    
                server.send(LogDataType.VIDEO, System.nanoTime(), buffer);
+               img.flush();
             }
          }
          catch (IOException e)
