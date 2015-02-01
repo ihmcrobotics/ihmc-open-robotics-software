@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.CommonHumanoidReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
-import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -44,7 +44,7 @@ import us.ihmc.yoUtilities.time.ExecutionTimer;
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
-   private static final boolean SHOW_INERTIA_GRAPHICS = false;
+   private static final boolean SHOW_INERTIA_GRAPHICS =false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
    private static final boolean SHOW_WRIST_SENSOR_WRENCHES = true;
@@ -217,7 +217,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
         if (SHOW_INERTIA_GRAPHICS)
         {
-            CommonInertiaElipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaElipsoidsVisualizer(controllerModel.getElevator(),
+            CommonInertiaEllipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaEllipsoidsVisualizer(controllerModel.getElevator(),
                   yoGraphicsListRegistry);
             modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
          }
