@@ -380,7 +380,7 @@ public class MomentumBasedController
          RigidBody hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "ToolRigidBody", hand.getParentJoint(), getFullRobotModel(), gravityZ, controlDT, registry, yoGraphicsListRegistry));
+            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "Tool", hand.getParentJoint(), getFullRobotModel(), gravityZ, controlDT, registry, yoGraphicsListRegistry));
             handWrenches.put(robotSide, new Wrench());
          }
       }
