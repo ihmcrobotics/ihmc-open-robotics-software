@@ -25,7 +25,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -33,6 +32,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
@@ -53,12 +53,12 @@ public class DRCSimulationTestHelper
    private final DRCSimulationFactory drcSimulationFactory;
    private final PacketCommunicator networkObjectCommunicator;
 
-   private final boolean checkNothingChanged;
+   private final SimulationTestingParameters simulationTestingParameters;
+
    private final NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
    private final WalkingControllerParameters walkingControlParameters;
 
-   private final boolean createMovie;
 
    private final FullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
@@ -66,56 +66,50 @@ public class DRCSimulationTestHelper
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
    
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
-         boolean createMovie, DRCRobotModel robotModel)
-   {
-      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
-            createMovie, false, robotModel);
-   }
+//   public DRCSimulationTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+//         boolean createMovie, DRCRobotModel robotModel)
+//   {
+//      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+//            createMovie, false, robotModel);
+//   }
    
    
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, boolean checkNothingChanged,
-         SimulationConstructionSetParameters simulationconstructionsetparameters, boolean createMovie, DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, simulationconstructionsetparameters, 
-            createMovie, false, robotModel);
+      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, false, robotModel);
    }
    
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
-         boolean checkNothingChanged, boolean createGUI, boolean createMovie, DRCRobotModel robotModel)
-   {
-      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(createGUI),
-            createMovie, false, robotModel);
-   }
+//   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
+//         boolean checkNothingChanged, boolean createGUI, boolean createMovie, DRCRobotModel robotModel)
+//   {
+//      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(createGUI),
+//            createMovie, false, robotModel);
+//   }
    
    
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
-         boolean checkNothingChanged, SimulationConstructionSetParameters simulationConstructionSetParameters, boolean createMovie, DRCRobotModel robotModel)
+         SimulationTestingParameters simulationConstructionSetParameters, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, simulationConstructionSetParameters,
-            createMovie, false, robotModel);
+      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationConstructionSetParameters, false, robotModel);
    }
    
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
-         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI, 
-         boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
-   {
-      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, 
-            scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(showGUI),
-            createMovie, startNetworkProcessor, robotModel);
-   }
+//   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
+//         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI, 
+//         boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
+//   {
+//      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, 
+//            scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(showGUI),
+//            createMovie, startNetworkProcessor, robotModel);
+//   }
   
          
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
-         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, SimulationConstructionSetParameters simulationConstructionSetParameters,
-         boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
+         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
    {
       this.networkObjectCommunicator = networkObjectCommunicator;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
-      this.checkNothingChanged = checkNothingChanged;
-      this.createMovie = createMovie;
-      if (createMovie)
-         simulationConstructionSetParameters.setCreateGUI(true);
+
+      this.simulationTestingParameters = simulationTestingParameters;
 
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
@@ -125,7 +119,7 @@ public class DRCSimulationTestHelper
       boolean automaticallyStartSimulation = false;
       boolean initializeEstimatorToActual = true;
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationConstructionSetParameters);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
       DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(commonAvatarEnvironmentInterface, scriptFileName, selectedLocation, guiInitialSetup,
             initializeEstimatorToActual, automaticallyStartSimulation, startNetworkProcessor, robotModel, networkObjectCommunicator);
@@ -135,7 +129,7 @@ public class DRCSimulationTestHelper
       drcSimulationFactory = drcSimulation.getSimulation();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
 
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(name, scs);
       }
@@ -173,7 +167,7 @@ public class DRCSimulationTestHelper
 
    public void checkNothingChanged()
    {
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          ThreadTools.sleep(1000);
 
@@ -274,7 +268,7 @@ public class DRCSimulationTestHelper
 
    public void createMovie(String simplifiedRobotModelName, int callStackHeight)
    {
-      if (createMovie)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }

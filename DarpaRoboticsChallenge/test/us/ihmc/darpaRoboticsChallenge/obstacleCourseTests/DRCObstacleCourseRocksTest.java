@@ -16,22 +16,23 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterface
 {
-   private static final boolean alwaysShowGUI = false;
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = alwaysShowGUI || KEEP_SCS_UP || createMovie;
-
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -54,9 +55,14 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+
 
 	@AverageDuration
 	@Test(timeout=300000)
@@ -66,7 +72,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

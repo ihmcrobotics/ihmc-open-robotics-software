@@ -63,10 +63,6 @@ public class BambooTools
       return Boolean.parseBoolean(System.getProperty("create.movies"));
    }
    
-   public static boolean getShowSCSWindows()
-   {
-      return Boolean.parseBoolean(System.getProperty("show.scs.windows"));
-   }
 
    /**
     * If you set {@code upload.movies} to {@code true} you must also set the system properties

@@ -15,12 +15,14 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -37,29 +39,20 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@SuppressWarnings("deprecation")
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
-   
-   private static final boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean createGUI = KEEP_SCS_UP || createMovie;
 
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
-   private DRCRobotModel robotModel;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      robotModel = getRobotModel();
    }
-   
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -69,24 +62,31 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
+      if (drcSimulationTestHelper != null)
       {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
       }
-
-      if (drcSimulation != null)
-      {
-         drcSimulation.dispose();
-         drcSimulation = null;
-      }
-
+      
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+   
+   
+   private DRCRobotModel robotModel;
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationFactory drcSimulation;
+
+   @Before
+   public void getRobotModelBeforeTests()
+   {
+      robotModel = getRobotModel();
+   }
+   
 
 	@AverageDuration
 	@Test(timeout=300000)
@@ -102,7 +102,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
 
-      if (checkNothingChanged) maximumWalkTime = 3.0;
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation()) maximumWalkTime = 3.0;
       
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
@@ -129,7 +129,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       NothingChangedVerifier nothingChangedVerifier = null;
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier("DRCOverShallowRampTest", scs);
       }
@@ -167,7 +167,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
             done = true;
       }
 
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
          checkNothingChanged(nothingChangedVerifier);
 
       createMovie(scs);
@@ -365,7 +365,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (createMovie)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
@@ -429,10 +429,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setCreateGUI(createGUI);
-      guiInitialSetup.setShowWindow(showWindow);
-
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       return guiInitialSetup;
    }
 

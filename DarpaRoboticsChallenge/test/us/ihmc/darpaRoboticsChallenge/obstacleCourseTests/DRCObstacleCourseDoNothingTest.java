@@ -20,6 +20,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -29,12 +30,10 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
-
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -61,7 +60,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
@@ -176,15 +175,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       boolean startNetworkProcessor = false;
       DRCRobotModel robotModel = getRobotModel();
       
-      
-      SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
-      simulationConstructionSetParameters.setCreateGUI(createMovie);
-      simulationConstructionSetParameters.setShowSplashScreen(false);
-      simulationConstructionSetParameters.setShowWindow(false);
-
-      
-      
-      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, checkNothingChanged, simulationConstructionSetParameters, createMovie, startNetworkProcessor, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, startNetworkProcessor, robotModel);
 //      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie,
 //            getRobotModel());
 
@@ -208,7 +199,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
       simulationConstructionSetParameters.setCreateGUI(true);
       simulationConstructionSetParameters.setShowSplashScreen(false);
-      simulationConstructionSetParameters.setShowWindow(true);
+      simulationConstructionSetParameters.setShowWindows(true);
 
       
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("TEST"), simulationConstructionSetParameters);

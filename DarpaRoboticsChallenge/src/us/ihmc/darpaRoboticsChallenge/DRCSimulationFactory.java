@@ -90,7 +90,7 @@ public class DRCSimulationFactory
       Robot[] allSimulatedRobots = setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
       
       SimulationConstructionSetParameters simulationConstructionSetParameters = guiInitialSetup.getSimulationConstructionSetParameters();
-      simulationConstructionSetParameters.setInitialDataBufferSize(scsInitialSetup.getSimulationDataBufferSize());
+      simulationConstructionSetParameters.setDataBufferSize(scsInitialSetup.getSimulationDataBufferSize());
       scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), simulationConstructionSetParameters);
       scs.setDT(drcRobotModel.getSimulateDT(), 1);
       

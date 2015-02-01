@@ -14,8 +14,8 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -28,19 +28,8 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
    public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
    {
       private final static boolean KEEP_SCS_UP = false;
-      private final static boolean createMovie = BambooTools.doMovieCreation();
-     
-      private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-      private static final SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
-      static
-      {
-         boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
-         boolean createGUI = KEEP_SCS_UP || createMovie;
 
-         simulationConstructionSetParameters.setCreateGUI(createGUI);
-         simulationConstructionSetParameters.setShowSplashScreen(showWindow);
-         simulationConstructionSetParameters.setShowWindow(showWindow);
-      }
+      private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       
       private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -72,6 +61,7 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
       }
 
+
 	@AverageDuration
 	@Test(timeout=300000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
@@ -80,7 +70,7 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
          
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, checkNothingChanged, simulationConstructionSetParameters, createMovie, getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
 
          SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
          ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

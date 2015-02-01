@@ -25,21 +25,57 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 {
+   private final static boolean KEEP_SCS_UP = false;
+
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
+   private DRCSimulationTestHelper drcSimulationTestHelper;
+
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (KEEP_SCS_UP)
+      {
+         ThreadTools.sleepForever();
+      }
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+   
    private final KryoLocalPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(), "HandPoseStatusTest");
    private final DRCDemo01NavigationEnvironment demo01NavEnvironmant = new DRCDemo01NavigationEnvironment();
 
-   private final boolean showGUI = false;
-
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private boolean hasSimulationBeenInitialized;
 
@@ -51,30 +87,15 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    private int rightStatusStartedCounter = 0;
    private int rightStatusCompletedCounter = 0;
 
-   public void showMemoryUsageBeforeTest()
-   {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-   }
 
    @Before
    public void setUp()
    {
       showMemoryUsageBeforeTest();
       drcSimulationTestHelper = new DRCSimulationTestHelper(demo01NavEnvironmant, networkObjectCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, false, showGUI, false, false, getRobotModel());
-
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
    }
 
-   @After
-   public void destroySimulationAndRecycleMemory()
-   {
-      if (drcSimulationTestHelper != null)
-      {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
-      }
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-   }
 
    private void sendHandPosePacket(HandPosePacket handPosePacket)
    {

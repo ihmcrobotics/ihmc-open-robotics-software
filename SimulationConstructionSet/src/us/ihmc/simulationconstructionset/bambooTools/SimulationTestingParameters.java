@@ -1,0 +1,61 @@
+package us.ihmc.simulationconstructionset.bambooTools;
+
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+
+public class SimulationTestingParameters extends SimulationConstructionSetParameters
+{
+   private boolean createSCSMovies = false;
+   private boolean checkNothingChangedInSimulation = false;
+   
+   public SimulationTestingParameters()
+   {
+   }
+   
+   public static SimulationTestingParameters createFromEnvironmentVariables()
+   {
+      SimulationTestingParameters parametersToReturn = new SimulationTestingParameters();
+      parametersToReturn.setFromSystemProperties();
+      return parametersToReturn;
+   }
+
+   public void setFromSystemProperties()
+   {
+      super.setFromSystemProperties();
+
+      String property = System.getProperty("create.scs.movies");
+      if (property != null)
+      {
+         Boolean createSCSMovies = Boolean.parseBoolean(property);
+         setCreateSCSMovies(createSCSMovies);
+      }
+
+      property = System.getProperty("check.nothing.changed.in.simulation");
+      if (property != null)
+      {
+         Boolean checkNothingChanged = Boolean.parseBoolean(property);
+         setCheckNothingChangedInSimulation(checkNothingChanged);
+      }
+   }
+   
+   public boolean getCreateSCSMovies()
+   {
+      return createSCSMovies;
+   }
+
+   public void setCreateSCSMovies(boolean createSCSMovies)
+   {
+      this.createSCSMovies = createSCSMovies;
+   }
+
+   public boolean getCheckNothingChangedInSimulation()
+   {
+      return checkNothingChangedInSimulation;
+   }
+
+   public void setCheckNothingChangedInSimulation(boolean checkNothingChangedInSimulation)
+   {
+      this.checkNothingChangedInSimulation = checkNothingChangedInSimulation;
+   }
+
+
+}

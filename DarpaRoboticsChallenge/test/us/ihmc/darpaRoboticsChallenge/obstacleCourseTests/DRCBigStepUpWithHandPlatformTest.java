@@ -23,22 +23,23 @@ import us.ihmc.darpaRoboticsChallenge.environment.BigStepUpWithHandPlatformEnvir
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -62,6 +63,10 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -77,10 +82,8 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       BigStepUpWithHandPlatformEnvironment environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
-      SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters(showGUI);
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "testBigStepUpWithHandPlatform", "", selectedLocation, checkNothingChanged,
-            simulationConstructionSetParameters, createMovie, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "testBigStepUpWithHandPlatform", "", selectedLocation, simulationTestingParameters, getRobotModel());
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 

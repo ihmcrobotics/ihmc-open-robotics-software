@@ -128,7 +128,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    
    public boolean getShowWindow()
    {
-      return simulationConstructionSetParameters.getShowWindow();
+      return simulationConstructionSetParameters.getShowWindows();
    }
 
    public void setCreateGUI(boolean createGUI)
@@ -139,7 +139,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    public void setShowWindow(boolean showWindow)
    {
       this.simulationConstructionSetParameters.setShowSplashScreen(showWindow);
-      this.simulationConstructionSetParameters.setShowWindow(showWindow);
+      this.simulationConstructionSetParameters.setShowWindows(showWindow);
       
    }
 

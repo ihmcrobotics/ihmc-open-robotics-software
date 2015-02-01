@@ -29,10 +29,14 @@ import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -43,16 +47,49 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterface
 {
+   private final static boolean KEEP_SCS_UP = false;
+
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
+   private DRCSimulationTestHelper drcSimulationTestHelper;
+
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (KEEP_SCS_UP)
+      {
+         ThreadTools.sleepForever();
+      }
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+   
    private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 8.0;
    
    private static final boolean DEBUG = true;
-   private static final boolean createMovie = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = true || createMovie;
-
+ 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private final double valveX = 2.0 * TurnValveBehavior.howFarToStandBackFromValve;
@@ -65,8 +102,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
          "DRCHandPoseBehaviorTestControllerCommunicator");
 
    final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private DoubleYoVariable yoTime;
 
@@ -91,10 +126,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
 
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, checkNothingChanged, showGUI, createMovie, false, getRobotModel());
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();
       yoTime = robotToTest.getYoTime();
@@ -120,19 +153,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       yoTippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
 
-   }
-
-   @After
-   public void destroySimulationAndRecycleMemory()
-   {
-      //      ThreadTools.sleepForever();
-      if (drcSimulationTestHelper != null)
-      {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
-      }
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 	@AverageDuration

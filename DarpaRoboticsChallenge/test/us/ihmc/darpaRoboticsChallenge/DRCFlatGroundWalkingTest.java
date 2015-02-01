@@ -18,6 +18,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -33,23 +34,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
-   private final static boolean createMovie = BambooTools.doMovieCreation();
-  
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
-   static
-   {
-      boolean showWindow = BambooTools.getShowSCSWindows() || KEEP_SCS_UP;
-      boolean createGUI = KEEP_SCS_UP || createMovie;
 
-      simulationConstructionSetParameters.setCreateGUI(createGUI);
-      simulationConstructionSetParameters.setShowSplashScreen(showWindow);
-      simulationConstructionSetParameters.setShowWindow(showWindow);
-   }
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -80,7 +69,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
    
 
    //TODO: Get rid of the stuff below and use a test helper.....
@@ -152,7 +140,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       NothingChangedVerifier nothingChangedVerifier = null;
       double walkingTimeDuration;
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(runName, scs);
          walkingTimeDuration = 7.0;
@@ -218,7 +206,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       
       verifyDesiredICPIsContinous(scs);
       
-      if (checkNothingChanged)
+      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
          checkNothingChanged(nothingChangedVerifier);
 
       createMovie(scs);
@@ -270,7 +258,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (createMovie)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
@@ -357,7 +345,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationConstructionSetParameters);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       return guiInitialSetup;
    }
 
