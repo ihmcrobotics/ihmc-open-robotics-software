@@ -37,7 +37,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
-   protected final RigidBody pelvis;
+   private final RigidBody pelvis;
 
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
@@ -82,6 +82,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       initializeTrajectory();
 
       footControlHelper.setGains(gains);
+      footControlHelper.resetSelectionMatrix();
    }
 
    @Override
@@ -117,6 +118,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
             desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
+      footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();
       footControlHelper.submitTaskspaceConstraint(footAcceleration);
 
       desiredPosition.changeFrame(worldFrame);
@@ -206,5 +208,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;
+      footControlHelper.resetSelectionMatrix();
    }
 }

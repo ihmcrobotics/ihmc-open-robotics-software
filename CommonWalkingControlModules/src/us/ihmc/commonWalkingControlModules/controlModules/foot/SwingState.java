@@ -67,7 +67,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameVector initialAngularVelocity = new FrameVector();
-   private boolean hasInitialAngularVelocityBeenProvided = false;
+
+   private final BooleanYoVariable hasInitialAngularConfigurationBeenProvided;
 
    public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
@@ -155,19 +156,20 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       VectorProvider finalAngularVelocityProvider = new ConstantVectorProvider(new FrameVector(footFrame));
       orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
+      hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
    }
 
    @Override
    public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
    {
-      hasInitialAngularVelocityBeenProvided = true;
+      hasInitialAngularConfigurationBeenProvided.set(true);
       this.initialAngularVelocity.setIncludingFrame(initialAngularVelocity);
    }
 
    @Override
    protected void initializeTrajectory()
    {
-      if (!hasInitialAngularVelocityBeenProvided)
+      if (!hasInitialAngularConfigurationBeenProvided.getBooleanValue())
          currentAngularVelocityProvider.get(initialAngularVelocity);
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
@@ -294,7 +296,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    @Override
    public void doTransitionOutOfAction()
    {
-      hasInitialAngularVelocityBeenProvided = false;
+      hasInitialAngularConfigurationBeenProvided.set(false);
 //      if (USE_NEW_CONTINUOUS_TRAJECTORY)
 //         continuousTrajectory.hideVisualization();
       super.doTransitionOutOfAction();
