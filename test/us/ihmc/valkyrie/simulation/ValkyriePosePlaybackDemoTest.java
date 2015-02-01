@@ -170,7 +170,7 @@ public class ValkyriePosePlaybackDemoTest
    {
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(SHOW_GUI);
       double floatingHeight = 0.3;
       double groundHeight = 0.0;
       double initialYaw = 0.0;
