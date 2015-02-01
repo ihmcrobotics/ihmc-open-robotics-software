@@ -66,8 +66,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       if (object == null)
          return;
 
-      if (object.getPoint() != null)
-         desiredPelvisPosition.set(new FramePoint(worldFrame, object.getPoint()));
+      if (object.getPosition() != null)
+         desiredPelvisPosition.set(new FramePoint(worldFrame, object.getPosition()));
       else
          desiredPelvisPosition.set(null);
 

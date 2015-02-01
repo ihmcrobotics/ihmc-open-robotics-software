@@ -70,16 +70,16 @@ public class PelvisPosePacketTransformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
 //    public Point3d point;
-      assertTrue(starting.getPoint() == null);
-      assertTrue(ending.getPoint() == null);
+      assertTrue(starting.getPosition() == null);
+      assertTrue(ending.getPosition() == null);
 
    }
 
    private static void performEqualsTestForPoint(PelvisPosePacket starting, RigidBodyTransform transform3D, PelvisPosePacket ending)
    {
 //    public Quat4d quaternion;
-      Point3d startPoint = starting.getPoint();
-      Point3d endPoint = ending.getPoint();
+      Point3d startPoint = starting.getPosition();
+      Point3d endPoint = ending.getPosition();
       double distance = getDistanceBetweenPoints(startPoint, transform3D, endPoint);
       assertEquals("not equal", 0.0, distance, 1e-6);
 
