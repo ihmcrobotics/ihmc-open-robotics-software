@@ -74,8 +74,8 @@ public class ProvidedMassMatrixToolRigidBody
       
       RigidBodyInertia inertia = new RigidBodyInertia(toolFrame, new Matrix3d(), 0.0);
       
-      this.toolJoint = new SixDoFJoint("toolJoint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
-      this.toolBody = new RigidBody("toolBody", inertia, toolJoint);
+      this.toolJoint = new SixDoFJoint(name+"Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
+      this.toolBody = new RigidBody(name+"Body", inertia, toolJoint);
       
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
       boolean doVelocityTerms = true;
