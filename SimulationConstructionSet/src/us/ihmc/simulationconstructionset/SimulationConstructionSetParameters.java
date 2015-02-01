@@ -6,7 +6,9 @@ public class SimulationConstructionSetParameters
    private boolean createGUI = true;
    private boolean showWindows = true;
    private int dataBufferSize = 8192;
-   
+   private boolean showYoGraphicObjects = true;
+  
+
    public SimulationConstructionSetParameters()
    {
       
@@ -58,14 +60,18 @@ public class SimulationConstructionSetParameters
       if (property != null)
       {
          Integer dataBufferSize = Integer.parseInt(property);
-         if (dataBufferSize != null) 
-         {
-            setDataBufferSize(dataBufferSize);
-         }
+         setDataBufferSize(dataBufferSize);
+      }
+      
+      property = System.getProperty("show.scs.yographics");
+      if (property != null)
+      {
+         Boolean showYoGraphicsObjects = Boolean.parseBoolean(property);
+         setShowYoGraphicObjects(showYoGraphicsObjects);
       }
    }
 
-   public int getInitialDataBufferSize()
+   public int getDataBufferSize()
    {
       return dataBufferSize;
    }
@@ -103,5 +109,15 @@ public class SimulationConstructionSetParameters
    public boolean getShowSplashScreen()
    {
       return showSplashScreen;
+   }
+   
+   public boolean getShowYoGraphicObjects()
+   {
+      return showYoGraphicObjects;
+   }
+
+   public void setShowYoGraphicObjects(boolean showYoGraphicObjects)
+   {
+      this.showYoGraphicObjects = showYoGraphicObjects;
    }
 }
