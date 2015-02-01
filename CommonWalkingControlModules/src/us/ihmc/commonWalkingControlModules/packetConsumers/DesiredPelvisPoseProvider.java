@@ -71,8 +71,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       else
          desiredPelvisPosition.set(null);
 
-      if (object.getQuaternion() != null)
-         desiredPelvisOrientation.set(new FrameOrientation(worldFrame, object.getQuaternion()));
+      if (object.getOrientation() != null)
+         desiredPelvisOrientation.set(new FrameOrientation(worldFrame, object.getOrientation()));
       else
          desiredPelvisOrientation.set(null);
 

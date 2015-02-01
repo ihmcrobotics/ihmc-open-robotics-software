@@ -302,17 +302,17 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
       if (pelvisPosePacket.position == null)
       {
-         desiredPelvisPose.setOrientation(pelvisPosePacket.quaternion);
+         desiredPelvisPose.setOrientation(pelvisPosePacket.orientation);
          assertOrientationsAreWithinThresholds(desiredPelvisPose, finalPelvisPose);
       }
-      else if (pelvisPosePacket.quaternion == null)
+      else if (pelvisPosePacket.orientation == null)
       {
          desiredPelvisPose.setPosition(pelvisPosePacket.position);
          assertPositionsAreWithinThresholds(desiredPelvisPose, finalPelvisPose);
       }
       else
       {
-         desiredPelvisPose.setPose(pelvisPosePacket.position, pelvisPosePacket.quaternion);
+         desiredPelvisPose.setPose(pelvisPosePacket.position, pelvisPosePacket.orientation);
          assertPosesAreWithinThresholds(desiredPelvisPose, finalPelvisPose);
       }
 
