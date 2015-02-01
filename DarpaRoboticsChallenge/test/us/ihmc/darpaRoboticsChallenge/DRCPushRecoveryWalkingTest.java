@@ -17,6 +17,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -36,19 +37,8 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
-   private final static boolean SHOW_GUI = false;
-   private final static boolean VISUALIZE_FORCE = false;
-
-   private double swingTime, transferTime;
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
-
-   private DRCPushRobotController pushRobotController;
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -58,19 +48,43 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
 
-      // Do this here in case a test fails. That way the memory will be
-      // recycled.
+      // Do this here in case a test fails. That way the memory will be recycled.
       if (blockingSimulationRunner != null)
       {
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   
+
+   private final static boolean VISUALIZE_FORCE = false;
+
+   private double swingTime, transferTime;
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
+
+   private DRCPushRobotController pushRobotController;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+
+  
+
+   @After
+   public void tearDown()
+   {
       if (drcSimulation != null)
       {
          drcSimulation.dispose();
@@ -82,12 +96,6 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    // cropped to 1.5 - 6.3 seconds
@@ -354,8 +362,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setCreateGUI(SHOW_GUI);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       GroundProfile3D groundProfile = new FlatGroundProfile();
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());

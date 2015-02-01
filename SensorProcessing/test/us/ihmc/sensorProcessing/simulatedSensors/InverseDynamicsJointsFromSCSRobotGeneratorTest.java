@@ -23,12 +23,15 @@ import us.ihmc.simulationconstructionset.RandomRobotGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -46,26 +49,22 @@ import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
-   private static final boolean SHOW_SCS = false;
-   private static final boolean KEEP_SCS_UP = false;
-   private static final boolean DO_ASSERTS = true;
-   private static final boolean DO_TWIST_ASSERTS = true;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (KEEP_SCS_UP)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -77,8 +76,17 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          blockingSimulationRunner = null;
       }
       
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   
+   private static final boolean DO_ASSERTS = true;
+   private static final boolean DO_TWIST_ASSERTS = true;
 
 	@AverageDuration
 	@Test(timeout=300000)
@@ -105,7 +113,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       VerifyGeneratorController controller = new VerifyGeneratorController(robot, generator);
       robot.setController(controller);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_SCS);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       scs.setDT(0.001, 1);
       scs.setGroundVisible(false);
       scs.startOnAThread();
@@ -158,7 +166,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       VerifyGeneratorController controller = new VerifyGeneratorController(robot, generator);
       robot.setController(controller);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_SCS);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       scs.setDT(0.001, 1);
       scs.setGroundVisible(false);
       scs.startOnAThread();
@@ -196,7 +204,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       VerifyGeneratorController controller = new VerifyGeneratorController(robot, generator);
       robot.setController(controller);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_SCS);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       scs.setDT(0.001, 1);
       scs.setGroundVisible(false);
       scs.startOnAThread();
@@ -223,7 +231,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       VerifyGeneratorController controller = new VerifyGeneratorController(robot, generator);
       robot.setController(controller);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_SCS);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       scs.setDT(0.0001, 1);
       scs.setGroundVisible(false);
       scs.startOnAThread();
