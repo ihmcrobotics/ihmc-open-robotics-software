@@ -129,18 +129,26 @@ public class PelvisICPBasedTranslationManager
 
    private void updateDesireds()
    {
-      if (desiredPelvisPoseProvider != null && desiredPelvisPoseProvider.checkForNewPosition())
+      if (desiredPelvisPoseProvider != null)
       {
-         initialPelvisPositionTime.set(yoTime.getDoubleValue());
-         if (desiredPelvisPoseProvider.getTrajectoryTime() < minTrajectoryTime)
-            pelvisPositionTrajectoryTime.set(minTrajectoryTime);
-         else
-            pelvisPositionTrajectoryTime.set(desiredPelvisPoseProvider.getTrajectoryTime());
-         tempPosition.setToZero(pelvisZUpFrame);
-         initialPelvisPosition.setAndMatchFrame(tempPosition);
-         finalPelvisPosition.setAndMatchFrame(desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame));
-         pelvisPositionTrajectoryGenerator.initialize();
-         isRunning.set(true);
+         if (desiredPelvisPoseProvider.checkForHomePosition())
+         {
+            disable();
+            enable();
+         }
+         else if (desiredPelvisPoseProvider.checkForNewPosition())
+         {
+            initialPelvisPositionTime.set(yoTime.getDoubleValue());
+            if (desiredPelvisPoseProvider.getTrajectoryTime() < minTrajectoryTime)
+               pelvisPositionTrajectoryTime.set(minTrajectoryTime);
+            else
+               pelvisPositionTrajectoryTime.set(desiredPelvisPoseProvider.getTrajectoryTime());
+            tempPosition.setToZero(pelvisZUpFrame);
+            initialPelvisPosition.setAndMatchFrame(tempPosition);
+            finalPelvisPosition.setAndMatchFrame(desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame));
+            pelvisPositionTrajectoryGenerator.initialize();
+            isRunning.set(true);
+         }
       }
 
       if (isRunning.getBooleanValue())

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
@@ -16,8 +17,11 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
+   private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
    private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint(ReferenceFrame.getWorldFrame()));
-   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(ReferenceFrame.getWorldFrame()));
+   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(
+         ReferenceFrame.getWorldFrame()));
    private double trajectoryTime = Double.NaN;
 
    public DesiredPelvisPoseProvider()
@@ -37,6 +41,18 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    }
 
    @Override
+   public boolean checkForHomePosition()
+   {
+      return goToHomePosition.getAndSet(false);
+   }
+
+   @Override
+   public boolean checkForHomeOrientation()
+   {
+      return goToHomeOrientation.getAndSet(false);
+   }
+
+   @Override
    public FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame)
    {
       return desiredPelvisPosition.getAndSet(null);
@@ -46,14 +62,13 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    public FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
    {
       FrameOrientation ret = desiredPelvisOrientation.getAndSet(null);
-      
+
       if (ret == null) return null;
-      
+
       ret.changeFrame(desiredPelvisFrame);
       return ret;
    }
 
-   // TODO That'd be nice to include the trajectory time in the packet
    @Override
    public double getTrajectoryTime()
    {
@@ -66,6 +81,14 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       if (object == null)
          return;
 
+      // If go to home position requested, ignore the other commands.
+      if (object.isToHomePosition())
+      {
+         goToHomePosition.set(true);
+         goToHomeOrientation.set(true);
+         return;
+      }
+
       if (object.getPosition() != null)
          desiredPelvisPosition.set(new FramePoint(worldFrame, object.getPosition()));
       else
@@ -76,8 +99,6 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       else
          desiredPelvisOrientation.set(null);
 
-      
-      
       trajectoryTime = object.getTrajectoryTime();
    }
 }
