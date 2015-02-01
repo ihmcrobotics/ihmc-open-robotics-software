@@ -117,11 +117,11 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
       
-      HandPosePacket releaseLeftHandToHome = PacketControllerTools.createGoToHomePacket(RobotSide.LEFT, 1.0);
+      HandPosePacket releaseLeftHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.LEFT, 1.0);
       drcSimulationTestHelper.sendHandPosePacketToListeners(releaseLeftHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      HandPosePacket releaseRightHandToHome = PacketControllerTools.createGoToHomePacket(RobotSide.RIGHT, 1.0);
+      HandPosePacket releaseRightHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.RIGHT, 1.0);
       drcSimulationTestHelper.sendHandPosePacketToListeners(releaseRightHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 

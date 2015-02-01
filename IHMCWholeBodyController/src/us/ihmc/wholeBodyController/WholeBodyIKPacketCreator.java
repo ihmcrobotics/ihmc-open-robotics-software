@@ -78,7 +78,7 @@ public class WholeBodyIKPacketCreator
       Vector3d translation = new Vector3d();
       pelvisPose.get (rotation, translation );
 
-      return new PelvisPosePacket(new Point3d(translation), rotation, trajectoryTime);
+      return new PelvisPosePacket(new Point3d(translation), rotation, false, trajectoryTime);
    }
 
    private HandPosePacket createHandPosePackets(RobotSide robotSide, double trajectoryTime)
