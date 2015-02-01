@@ -7,7 +7,9 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.ManualTest;
 
+@ManualTest
 public class SimulationDispatcherClientTest
 {
    private static final String pwd = "***REMOVED***";
