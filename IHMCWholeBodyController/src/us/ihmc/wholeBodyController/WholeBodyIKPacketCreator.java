@@ -62,7 +62,7 @@ public class WholeBodyIKPacketCreator
       FramePose chestPose = new FramePose(chestReferenceFrame);
       chestPose.changeFrame(ReferenceFrame.getWorldFrame());
       chestPose.getOrientation(chestOrientation);
-      return new ChestOrientationPacket(chestOrientation, trajectoryTime);
+      return new ChestOrientationPacket(chestOrientation, false, trajectoryTime);
    }
 
    private ComHeightPacket createCOMHeightPacket(double trajectoryTime)

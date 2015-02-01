@@ -142,7 +142,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestStartedMessage();
 
       Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
-      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
+      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
       
       ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
 
@@ -162,7 +162,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestQuat.set(desiredAxisAngle);
 
-      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
+      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
 
       ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
 
@@ -182,7 +182,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestQuat.set(desiredAxisAngle);
 
-      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
+      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
 
       ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
 
@@ -202,7 +202,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestQuat.set(desiredAxisAngle);
 
-      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, 1.0);
+      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
 
       ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
 
