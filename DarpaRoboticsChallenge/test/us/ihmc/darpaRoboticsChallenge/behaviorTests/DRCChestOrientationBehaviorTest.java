@@ -230,7 +230,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
          SysoutTool.println(" initial Chest Pose :\n" + initialChestPose);
       }
       FramePose desiredChestPose = new FramePose();
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestOrientationPacket.quaternion);
+      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestOrientationPacket.orientation);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);
