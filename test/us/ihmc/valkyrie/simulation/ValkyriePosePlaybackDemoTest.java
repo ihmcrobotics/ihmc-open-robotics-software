@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -43,21 +44,10 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class ValkyriePosePlaybackDemoTest
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
-   private static final boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = false;
 
-   private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-   private final Random random = new Random(6519651L);
-
-   private final ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -78,7 +68,27 @@ public class ValkyriePosePlaybackDemoTest
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+   
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+   private final Random random = new Random(6519651L);
+
+   private final ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
+
+
+
+   @After
+   public void tearDown()
+   {     
       if (drcSimulation != null)
       {
          drcSimulation.dispose();
@@ -90,12 +100,6 @@ public class ValkyriePosePlaybackDemoTest
          robotVisualizer.close();
          robotVisualizer = null;
       }
-
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
-
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 	@AverageDuration
@@ -170,7 +174,7 @@ public class ValkyriePosePlaybackDemoTest
    {
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setCreateGUI(SHOW_GUI);
+      guiInitialSetup.setCreateGUI(simulationTestingParameters.getCreateGUI());
       double floatingHeight = 0.3;
       double groundHeight = 0.0;
       double initialYaw = 0.0;
@@ -190,7 +194,7 @@ public class ValkyriePosePlaybackDemoTest
 
    private void createMovie(SimulationConstructionSet scs)
    {
-      if (CREATE_MOVIE)
+      if (simulationTestingParameters.getCreateSCSMovies())
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(
                BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE), scs, 1);
