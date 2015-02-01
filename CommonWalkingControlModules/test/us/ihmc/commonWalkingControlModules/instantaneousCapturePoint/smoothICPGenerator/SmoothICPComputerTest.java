@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UITest;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -33,6 +34,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
+@UITest
 public class SmoothICPComputerTest
 {
    private static final boolean USE_ASSERTS = true; //false;
@@ -69,8 +71,8 @@ public class SmoothICPComputerTest
       registry = new YoVariableRegistry(getClass().getSimpleName());
    }
 
-   private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
-   private BooleanYoVariable stopSignalFlag = new BooleanYoVariable("stopSignalFlag", registry);
+   private final DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
+   private final BooleanYoVariable stopSignalFlag = new BooleanYoVariable("stopSignalFlag", registry);
 
    @After
    public void removeVisualizersAfterTest()
