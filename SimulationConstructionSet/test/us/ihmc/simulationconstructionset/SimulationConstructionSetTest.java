@@ -10,7 +10,9 @@ import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.ManualTest;
 
+@ManualTest
 public class SimulationConstructionSetTest
 {
    private boolean isGradleBuild()
