@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -46,7 +46,7 @@ public class ValkyrieSDFLoadingDemo
       SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
       
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
+      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
       
       
