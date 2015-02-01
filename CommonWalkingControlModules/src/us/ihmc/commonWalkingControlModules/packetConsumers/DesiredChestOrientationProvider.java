@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
@@ -15,6 +16,7 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
 {
    private final AtomicReference<Quat4d> desiredOrientation = new AtomicReference<>();
    private final AtomicDouble trajectoryTime = new AtomicDouble();
+   private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
    private final ReferenceFrame chestOrientationFrame;
 
    public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime)
@@ -24,20 +26,23 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
    }
 
    @Override
-   public boolean isNewChestOrientationInformationAvailable()
+   public boolean checkForNewChestOrientation()
    {
       return desiredOrientation.get() != null;
+   }
+
+   @Override
+   public boolean checkForHomeOrientation()
+   {
+      return goToHomeOrientation.getAndSet(false);
    }
 
    @Override
    public FrameOrientation getDesiredChestOrientation()
    {
       Quat4d orientation = desiredOrientation.getAndSet(null);
-      if(orientation == null)
-      {
-         return null;
-      }
-      
+      if (orientation == null) return null;
+
       FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation);
       frameOrientation.changeFrame(chestOrientationFrame);
       return frameOrientation;
@@ -45,8 +50,18 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
 
    public void receivedPacket(ChestOrientationPacket object)
    {
-      desiredOrientation.set(object.getOrientation());
+      if (object == null) return;
+
       trajectoryTime.set(object.getTrajectoryTime());
+
+      // If go to home orientation requested, ignore the other commands.
+      if (object.isToHomeOrientation())
+      {
+         goToHomeOrientation.set(true);
+         return;
+      }
+
+      desiredOrientation.set(object.getOrientation());
    }
 
    @Override

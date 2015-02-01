@@ -122,7 +122,18 @@ public class ChestOrientationManager
       if (chestOrientationProvider == null)
          return;
 
-      if (chestOrientationProvider.isNewChestOrientationInformationAvailable())
+      if (chestOrientationProvider.checkForHomeOrientation())
+      {
+         simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
+         simpleOrientationTrajectoryGenerator.get(desiredOrientation);
+         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
+         desiredOrientation.setToZero(pelvisZUpFrame);
+         simpleOrientationTrajectoryGenerator.setFinalOrientation(desiredOrientation);
+         simpleOrientationTrajectoryGenerator.setTrajectoryTime(chestOrientationProvider.getTrajectoryTime());
+         simpleOrientationTrajectoryGenerator.initialize();
+         isTrackingOrientation.set(true);
+      }
+      else if (chestOrientationProvider.checkForNewChestOrientation())
       {
          receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 

@@ -18,8 +18,8 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable goToHomePosition = new BooleanYoVariable("UserDesiredPelvisGoToHomePosition", registry);
-   private final BooleanYoVariable goToHomeOrientation = new BooleanYoVariable("UserDesiredPelvisGoToHomeOrientation", registry);
+   private final BooleanYoVariable goToHomePosition = new BooleanYoVariable("userDesiredPelvisGoToHomePosition", registry);
+   private final BooleanYoVariable goToHomeOrientation = new BooleanYoVariable("userDesiredPelvisGoToHomeOrientation", registry);
 
    private final DoubleYoVariable userPelvisTrajectoryTime = new DoubleYoVariable("userDesiredPelvisTrajectoryTime", registry);
 

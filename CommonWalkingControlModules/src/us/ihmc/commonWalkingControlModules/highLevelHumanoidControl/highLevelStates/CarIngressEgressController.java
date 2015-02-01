@@ -392,7 +392,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       if (chestOrientationProvider != null)
       {
-         if (chestOrientationProvider.isNewChestOrientationInformationAvailable())
+         if (chestOrientationProvider.checkForNewChestOrientation())
          {
             chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
             FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
