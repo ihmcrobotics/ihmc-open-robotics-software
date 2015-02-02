@@ -49,7 +49,7 @@ public class StepprControllerFactory
 {
    private static final double gravity = -9.80; // From xsens
 
-   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = true;
+   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {
