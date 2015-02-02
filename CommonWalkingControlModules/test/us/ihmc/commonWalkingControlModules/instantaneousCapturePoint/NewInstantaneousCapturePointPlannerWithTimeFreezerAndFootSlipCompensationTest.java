@@ -106,6 +106,12 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 			return 0.25;
 		}
 
+	   @Override
+	   public double getAdditionalTimeForSingleSupport()
+	   {
+	      return 0.0;
+	   }
+
 		@Override
 		public int getNumberOfFootstepsToStop()
 		{

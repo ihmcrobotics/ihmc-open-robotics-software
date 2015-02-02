@@ -5,7 +5,11 @@ public interface CapturePointPlannerParameters
 	public abstract double getDoubleSupportInitialTransferDuration();
 	
 	public abstract double getDoubleSupportDuration();
-	
+
+	// FIXME That's a hack which makes the planner slower than the swing foot. Need to get rid of it.
+	@Deprecated
+   public abstract double getAdditionalTimeForSingleSupport();
+
 	public abstract double getSingleSupportDuration();
 	
 	public abstract int getNumberOfFootstepsToConsider();

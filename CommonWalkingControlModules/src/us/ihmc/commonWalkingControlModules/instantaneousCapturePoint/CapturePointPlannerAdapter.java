@@ -24,6 +24,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable capturePointInFromFootCenter = new DoubleYoVariable("icpInFromCenter", registry);
    private final DoubleYoVariable capturePointForwardFromFootCenter = new DoubleYoVariable("icpForwardFromCenter", registry);
+
+   // FIXME That's a hack which makes the planner slower than the swing foot. Need to get rid of it.
+   private final DoubleYoVariable additionalSwingTimeForICP = new DoubleYoVariable("additionalSwingTimeForICP", registry);
    
 	ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	boolean USE_OLD_HACKY_ICP_PLANNER = false;
@@ -67,11 +70,15 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 		registry.addChild(this.registry);
 		capturePointInFromFootCenter.set(capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
 		capturePointForwardFromFootCenter.set(capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance());
+		additionalSwingTimeForICP.set(capturePointPlannerParameters.getAdditionalTimeForSingleSupport());
 	}
 
 	@Override
 	public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
 	{
+	   transferToAndNextFootstepsData.setSingleSupportDuration(transferToAndNextFootstepsData.getSingleSupportDuration() + additionalSwingTimeForICP.getDoubleValue());
+	   transferToAndNextFootstepsData.setEstimatedStepTime(transferToAndNextFootstepsData.getEstimatedStepTime() + additionalSwingTimeForICP.getDoubleValue());
+
 		if (USE_OLD_HACKY_ICP_PLANNER)
 		{
 			oldCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, initialTime);
@@ -96,6 +103,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 	@Override
 	public void reInitializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double currentTime)
 	{
+      transferToAndNextFootstepsData.setSingleSupportDuration(transferToAndNextFootstepsData.getSingleSupportDuration() + additionalSwingTimeForICP.getDoubleValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(transferToAndNextFootstepsData.getEstimatedStepTime() + additionalSwingTimeForICP.getDoubleValue());
+
 		if (USE_OLD_HACKY_ICP_PLANNER)
 		{
 			oldCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, currentTime);
@@ -110,6 +120,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 	public void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData,
 			Point2d initialICPPosition, double initialTime)
 	{
+      transferToAndNextFootstepsData.setSingleSupportDuration(transferToAndNextFootstepsData.getSingleSupportDuration() + additionalSwingTimeForICP.getDoubleValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(transferToAndNextFootstepsData.getEstimatedStepTime() + additionalSwingTimeForICP.getDoubleValue());
+
 		if (USE_OLD_HACKY_ICP_PLANNER)
 		{
 			oldCapturePointPlanner.initializeDoubleSupportInitialTransfer(transferToAndNextFootstepsData, initialICPPosition, initialTime);
@@ -140,6 +153,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 	@Override
 	public void initializeDoubleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
 	{
+      transferToAndNextFootstepsData.setSingleSupportDuration(transferToAndNextFootstepsData.getSingleSupportDuration() + additionalSwingTimeForICP.getDoubleValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(transferToAndNextFootstepsData.getEstimatedStepTime() + additionalSwingTimeForICP.getDoubleValue());
+
 		if (USE_OLD_HACKY_ICP_PLANNER)
 		{
 			oldCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, initialTime);
@@ -333,6 +349,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
 	@Override
 	public void updatePlanForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition, double time) 
 	{
+      transferToAndNextFootstepsData.setSingleSupportDuration(transferToAndNextFootstepsData.getSingleSupportDuration() + additionalSwingTimeForICP.getDoubleValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(transferToAndNextFootstepsData.getEstimatedStepTime() + additionalSwingTimeForICP.getDoubleValue());
+
 		if(USE_OLD_HACKY_ICP_PLANNER)
 		{
 			oldCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, time);
@@ -357,6 +376,9 @@ public class CapturePointPlannerAdapter implements InstantaneousCapturePointPlan
    public void updatePlanForDoubleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition,
          double time)
    {
+      transferToAndNextFootstepsData.setSingleSupportDuration(transferToAndNextFootstepsData.getSingleSupportDuration() + additionalSwingTimeForICP.getDoubleValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(transferToAndNextFootstepsData.getEstimatedStepTime() + additionalSwingTimeForICP.getDoubleValue());
+
       if(USE_OLD_HACKY_ICP_PLANNER)
       {
          oldCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, time);
