@@ -64,43 +64,18 @@ public class DRCSimulationTestHelper
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
-   
-//   public DRCSimulationTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
-//         boolean createMovie, DRCRobotModel robotModel)
-//   {
-//      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
-//            createMovie, false, robotModel);
-//   }
-   
-   
+  
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
       this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, false, robotModel);
    }
-   
-//   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
-//         boolean checkNothingChanged, boolean createGUI, boolean createMovie, DRCRobotModel robotModel)
-//   {
-//      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(createGUI),
-//            createMovie, false, robotModel);
-//   }
-   
-   
+
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
          SimulationTestingParameters simulationConstructionSetParameters, DRCRobotModel robotModel)
    {
       this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationConstructionSetParameters, false, robotModel);
    }
    
-//   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
-//         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI, 
-//         boolean createMovie, boolean startNetworkProcessor, DRCRobotModel robotModel)
-//   {
-//      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, 
-//            scriptFileName, selectedLocation, checkNothingChanged, new SimulationConstructionSetParameters(showGUI),
-//            createMovie, startNetworkProcessor, robotModel);
-//   }
-  
          
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
          String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
