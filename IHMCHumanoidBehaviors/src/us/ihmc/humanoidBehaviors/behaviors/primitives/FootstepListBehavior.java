@@ -197,7 +197,8 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      if (numberOfFootsteps.getIntegerValue() != -1 && lastFootstepStatus != null)
+      boolean receivedFootStepStatusReplyFromController = lastFootstepStatus != null;
+      if (numberOfFootsteps.getIntegerValue() != -1 && receivedFootStepStatusReplyFromController)
          return true;
       else
          return false;
