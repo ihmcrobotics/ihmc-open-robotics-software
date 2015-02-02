@@ -62,23 +62,24 @@ public abstract class WholeBodyTrajectoryTest
 
    private TrajectoryND buildTrajectory(SDFFullRobotModel initialModel, SDFFullRobotModel finalModel) throws Exception
    {
-      if( false )
+     /* if( false )
       {
          return WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
                initialModel.getOneDoFJoints(), 
                finalModel.getOneDoFJoints());
       }
-      else{
+      else*/{
 
          return  WholeBodyTrajectory.createTaskSpaceTrajectory( wbSolver,  initialModel,  finalModel );
       }
    }
 
-   @Ignore
+  
 	@AverageDuration
 	@Test
    public void testTrajectory() throws Exception
    {
+   
       wbSolver.setVerbosityLevel(1);
 
       wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
@@ -96,15 +97,15 @@ public abstract class WholeBodyTrajectoryTest
       targetListRight.add( new Point3d( 0.5, -0.0,  1.0 ));
       targetListRight.add( new Point3d( 0.5, 0.6,  1.4 ));
       targetListRight.add( new Point3d( 0.5, -0.4,  1.4 ));
-      targetListRight.add( new Point3d( 0.5, -0.4,  0.6 ));
+      targetListRight.add( new Point3d( 0.5, -0.2,  0.6 ));
 
       for (Point3d rightTarget: targetListRight)
       {
          if( getSimulationConstructionSet() != null )
          {
-            for (int a=0; a< 100; a++)
+            for (int a=0; a< 50; a++)
             {
-               Thread.sleep(5);
+               Thread.sleep(10);
                getFullRobotModelVisualizer().update(0);
             }
          }
@@ -125,22 +126,25 @@ public abstract class WholeBodyTrajectoryTest
 
             while( result.first().booleanValue() == false)
             {
-               HashMap<String, Double> angles = new  HashMap<String, Double>();
+               HashMap<String, Double> angles     = new  HashMap<String, Double>();
+               HashMap<String, Double> velocities = new  HashMap<String, Double>();
                int index = 0;
                for(OneDoFJoint joint: actualRobotModel.getOneDoFJoints())
                {
                   if( wbSolver.hasJoint( joint.getName() ))
                   {
-                     angles.put( joint.getName(),result.second().position[index++]);
+                     angles.put( joint.getName(),     result.second().position[index]);
+                     velocities.put( joint.getName(), result.second().velocity[index]);
+                     index++;
                   }
                }
 
-               actualRobotModel.updateJointsAngleButKeepOneFootFixed( angles, RobotSide.RIGHT );
+               actualRobotModel.updateJointsStateButKeepOneFootFixed( angles,velocities, RobotSide.RIGHT );
                result = trajectory.getNextInterpolatedPoints(0.01);
                
                if( getSimulationConstructionSet() != null )
                {
-                  Thread.sleep(5);
+                  Thread.sleep(10);
                   getFullRobotModelVisualizer().update(0);
                }
             }
@@ -152,9 +156,9 @@ public abstract class WholeBodyTrajectoryTest
          
          if( getSimulationConstructionSet() != null )
          {
-            for (int a=0; a< 200; a++)
+            for (int a=0; a< 50; a++)
             {
-               Thread.sleep(5);
+               Thread.sleep(10);
                getFullRobotModelVisualizer().update(0);
             }
          }
