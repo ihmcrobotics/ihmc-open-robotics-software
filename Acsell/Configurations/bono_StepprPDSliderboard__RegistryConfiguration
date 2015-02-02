@@ -83,5 +83,6 @@ root.remotemain.steppr.StepprCommand.rightAnkleCommand*false*false
 root.remotemain.steppr.StepprCommand.rightAnkleCommand.rightAnkleCommandRightActuator*false*false
 root.remotemain.steppr.StepprCommand.rightAnkleCommand.rightAnkleCommandLeftActuator*false*false
 root.remotemain.steppr.StepprPDJointController*false*false
+root.remotemain.steppr.StepprPDJointController.FuncGenYoFunGen*false*false
 root.remotemain.StepprSetup*false*false
 root.StepprPDSliderBoard*false*false
