@@ -43,6 +43,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          Boolean keepSCSUp = Boolean.parseBoolean(property);
          setKeepSCSUp(keepSCSUp);
       }
+      System.out.println(toString());
    }
    
    public boolean getCreateSCSMovies()
@@ -73,6 +74,15 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    public void setKeepSCSUp(boolean keepSCSUp)
    {
       this.keepSCSUp = keepSCSUp;
+   }
+   
+   public String toString()
+   {
+      String st = super.toString();
+      st += "createSCSMovies: " + createSCSMovies + "\n";    
+      st += "checkNothingChangedInSimulation: " + checkNothingChangedInSimulation + "\n";    
+      st += "keepSCSUp: " + keepSCSUp + "\n";    
+      return st;   
    }
 
 

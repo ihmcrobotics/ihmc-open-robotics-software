@@ -120,4 +120,14 @@ public class SimulationConstructionSetParameters
    {
       this.showYoGraphicObjects = showYoGraphicObjects;
    }
+   
+   public String toString()
+   {
+      String st = "showSplashScreen: " + showSplashScreen + "\n";    
+      st += "createGUI: " + createGUI + "\n";    
+      st += "showWindows: " + showWindows + "\n";    
+      st += "dataBufferSize: " + dataBufferSize + "\n";    
+      st += "showYoGraphicObjects: " + showYoGraphicObjects + "\n";    
+      return st;   
+   }
 }
