@@ -89,6 +89,7 @@ public class BambooTools
    public static void createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
                                                                                                 int additionalStackDepthForRelevantCallingMethod)
    {
+      System.out.println("Trying to create movies!");
       try
       {
          String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
