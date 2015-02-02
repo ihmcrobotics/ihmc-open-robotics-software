@@ -57,12 +57,12 @@ public class HandPoseTask implements Task
       handPosePacket = PacketControllerTools.createHandPosePacket(frame, rigidBodyPose , robotSide, trajectoryTime);
    }
    
-   public HandPoseTask(HandPosePacket goToHomePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime)
+   public HandPoseTask(HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime)
    {
       this.handPoseBehavior = handPoseBehavior;
       this.yoTime = yoTime;
       this.sleepTime = 0.0;
-      this.handPosePacket = goToHomePacket;
+      this.handPosePacket = handPosePacket;
    }
    
    @Override
