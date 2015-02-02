@@ -3,8 +3,6 @@ package us.ihmc.atlas;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
@@ -15,6 +13,6 @@ public class AtlasLidarBambooGraphicalTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteGenerator.generateTestSuite(AtlasLidarBambooGraphicalTestSuite.class);
+//      JUnitTestSuiteGenerator.generateTestSuite(AtlasLidarBambooGraphicalTestSuite.class);
    }
 }

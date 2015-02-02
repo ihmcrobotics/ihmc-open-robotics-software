@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
+import us.ihmc.utilities.code.unitTesting.generator.JUnitTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses
