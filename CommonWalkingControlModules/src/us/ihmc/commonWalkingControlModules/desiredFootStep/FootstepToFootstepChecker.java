@@ -35,7 +35,6 @@ public class FootstepToFootstepChecker
    private static final double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0);    // 0.26
    private static final double MAXIMUM_DELTA_YAW = Math.toRadians(90.0);    // 1.57 radians
    private static final double MINIMUM_DELTA_YAW = Math.toRadians(26.0);
-   
    private static final double semiCircleOffset = 0.14;    // From RangeOfStepGraphicsManager: Should have a unified source, not just a magic number.
 
    public static boolean isFootstepToFootstepChangeLarge(Footstep initialFootstep, Footstep stanceFootstep, Footstep endingFootstep,
