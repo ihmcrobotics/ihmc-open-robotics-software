@@ -27,9 +27,11 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -38,11 +40,13 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class ValkyriePosePlaybackDemoTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -64,18 +68,16 @@ public class ValkyriePosePlaybackDemoTest
          blockingSimulationRunner = null;
       }
       
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
-   private BlockingSimulationRunner blockingSimulationRunner;
    
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
    private final Random random = new Random(6519651L);
-
-   private final ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-
-
 
    @After
    public void tearDown()
@@ -99,6 +101,7 @@ public class ValkyriePosePlaybackDemoTest
    {
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
+      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("PoseSequences/valkerena.poseSequence", fullRobotModel, 1.0);
 
@@ -121,6 +124,7 @@ public class ValkyriePosePlaybackDemoTest
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
+      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
       PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
@@ -142,6 +146,7 @@ public class ValkyriePosePlaybackDemoTest
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
+      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       ArrayList<OneDoFJoint> jointToControl = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
       int numberOfUncontrolledJoints = RandomTools.generateRandomInt(random, 2, jointToControl.size() / 2);
@@ -169,6 +174,7 @@ public class ValkyriePosePlaybackDemoTest
       double floatingHeight = 0.3;
       double groundHeight = 0.0;
       double initialYaw = 0.0;
+      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = valkyrieRobotModel.getDefaultRobotInitialSetup(groundHeight + floatingHeight, initialYaw);
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, valkyrieRobotModel.getSimulateDT());
