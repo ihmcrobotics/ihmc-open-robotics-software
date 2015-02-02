@@ -65,6 +65,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public boolean checkECMPLocationToTriggerToeOff()
+   {
+      return true;
+   }
+
+   @Override
    public double getMinStepLengthForToeOff()
    {
       return getFootLength();
