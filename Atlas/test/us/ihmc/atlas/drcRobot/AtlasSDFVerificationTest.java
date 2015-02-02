@@ -24,7 +24,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -32,24 +31,20 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 /**
  * Created by dstephen on 2/11/14.
  */
 public class AtlasSDFVerificationTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -66,15 +61,11 @@ public class AtlasSDFVerificationTest
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (blockingSimulationRunner != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
-      
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -83,20 +74,6 @@ public class AtlasSDFVerificationTest
    private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
    private static final double SIM_DURATION = 5.0;
 
-   private BlockingSimulationRunner blockingSimulationRunner;
-
-  
-
-   @After
-   public void tearDown()
-   {
-      // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
-      {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
-   }
 
 	@AverageDuration
 	@Test(timeout=300000)

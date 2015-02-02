@@ -10,7 +10,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -27,9 +26,8 @@ import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
 public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -46,20 +44,19 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (blockingSimulationRunner != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
+   
   
    private final static boolean VISUALIZE_FORCE = false;
 
    private DRCPushRobotController pushRobotController;
-   private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 

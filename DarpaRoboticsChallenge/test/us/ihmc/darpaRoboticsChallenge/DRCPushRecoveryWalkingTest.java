@@ -21,10 +21,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -33,12 +31,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -59,17 +57,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
-      
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
-   private BlockingSimulationRunner blockingSimulationRunner;
    
-
+ 
    private final static boolean VISUALIZE_FORCE = false;
 
    private double swingTime, transferTime;
@@ -96,6 +88,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          robotVisualizer.close();
          robotVisualizer = null;
       }
+      
+      pushRobotController = null;
    }
 
    // cropped to 1.5 - 6.3 seconds

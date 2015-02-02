@@ -12,7 +12,6 @@ import org.junit.Before;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -35,9 +34,8 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -54,29 +52,24 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (blockingSimulationRunner != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
+      
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
 
    //TODO: Get rid of the stuff below and use a test helper.....
    
    @After
    public void destroyOtherStuff()
    {
-     
-      // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
-      {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
-
       if (drcSimulation != null)
       {
          drcSimulation.dispose();
@@ -91,7 +84,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    }
    
 
-   private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 

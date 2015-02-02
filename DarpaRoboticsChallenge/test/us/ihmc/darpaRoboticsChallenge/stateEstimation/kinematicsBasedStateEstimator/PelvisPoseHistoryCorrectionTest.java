@@ -44,13 +44,10 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -69,7 +66,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestInterface
 {
@@ -176,7 +172,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private DoubleYoVariable manualTranslationOffsetY;
    private BooleanYoVariable manuallyTriggerLocalizationUpdate;
 
-   private BlockingSimulationRunner blockingSimulationRunner;
+//   private BlockingSimulationRunner blockingSimulationRunner;
 
 
    @Before
@@ -437,7 +433,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 1);
       activatePelvisPoseHistoryCorrector(registry, true);
 
-      blockingSimulationRunner.simulateAndBlock(1.0);
+      drcSimulationTestHelper.simulateAndBlock(1.0);
 
       assertTrue(walkForwardAndLocalizeInFrontOfFoot());
       sendPelvisCorrectionPackets = false;
@@ -452,13 +448,13 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
       try
       {
-         blockingSimulationRunner.simulateAndBlock(1.0);
+         drcSimulationTestHelper.simulateAndBlock(1.0);
          transferTime.set(1.2);
          swingTime.set(1.2);
          manualTranslationOffsetX.set(-.5);
          maxVelocityClip.set(.1);
          manuallyTriggerLocalizationUpdate.set(true);
-         blockingSimulationRunner.simulateAndBlock(20.0);
+         drcSimulationTestHelper.simulateAndBlock(20.0);
       }
       catch (SimulationExceededMaximumTimeException e)
       {
@@ -703,7 +699,6 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       DRCSimulationFactory drcSimulationFactory = drcFlatGroundWalkingTrack.getDrcSimulation();
       drcSimulationFactory.setExternelPelvisCorrectorSubscriber(externalPelvisPosePublisher);
-      blockingSimulationRunner = new BlockingSimulationRunner(simulationConstructionSet, 1000.0);
       BooleanYoVariable walk = (BooleanYoVariable) simulationConstructionSet.getVariable("walk");
       walk.set(true);
    }
