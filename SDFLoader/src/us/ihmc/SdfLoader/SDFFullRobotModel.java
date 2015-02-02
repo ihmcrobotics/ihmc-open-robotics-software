@@ -662,8 +662,12 @@ public class SDFFullRobotModel implements FullRobotModel
       updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
    }
 
-   
    public void updateJointsAngleButKeepOneFootFixed( Map<String, Double> jointsAngles, RobotSide sideOfSole )
+   {
+      updateJointsStateButKeepOneFootFixed( jointsAngles,null, sideOfSole);
+   }
+   
+   public void updateJointsStateButKeepOneFootFixed( Map<String, Double> jointsAngles, Map<String, Double> jointsVelocities, RobotSide sideOfSole )
    {   
       // next line of code must be executed BEFORE modifying the model
       RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
@@ -675,6 +679,15 @@ public class SDFFullRobotModel implements FullRobotModel
              getOneDoFJointByName( entry.getKey() ).setQ( entry.getValue() );
          }
       }
+      
+      if( jointsVelocities != null)
+      {
+         for ( Map.Entry<String, Double> entry: jointsVelocities.entrySet() )
+         {
+             getOneDoFJointByName( entry.getKey() ).setQd( entry.getValue() );
+         }
+      }
+      
 
       this.updateFrames();
       

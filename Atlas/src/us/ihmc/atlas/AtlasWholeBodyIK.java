@@ -24,12 +24,12 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    public String getGripperPalmLinkName(RobotSide side)  {
       return (side == RobotSide.LEFT) ? "l_gripper_palm" :  "r_gripper_palm";
    }
-   
+
    @Override 
    public String getGripperAttachmentLinkName(RobotSide side)  {
       return (side == RobotSide.LEFT) ? "l_gripper_attachment" :  "r_gripper_attachment";
    }
-   
+
 
    @Override 
    public String getFootLinkName(RobotSide side) {
@@ -49,11 +49,11 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    public RobotSide getSideOfTheFootRoot(){
       return RobotSide.RIGHT;
    }
-   
+
    @Override 
    public ReferenceFrame  getRootFrame( SDFFullRobotModel actualSdfModel)
    {
-   // important: this is AfterJoint, not beforeJoint, because the direction on the URDF model is reversed when
+      // important: this is AfterJoint, not beforeJoint, because the direction on the URDF model is reversed when
       // compared with the SDF model.
       return actualSdfModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
    }
@@ -96,7 +96,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    {
       HashSet<String> listOfEnabledColliders = new  HashSet<String>();
       hierarchicalSolver.collisionAvoidance.loadURDF(new File( urdfFileName ));
-      
+
       listOfEnabledColliders.add("pelvis");
       listOfEnabledColliders.add("utorso");
 
@@ -116,16 +116,16 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       hierarchicalSolver.collisionAvoidance.addBodyPair("l_larm", "l_uleg" );
       hierarchicalSolver.collisionAvoidance.addBodyPair("l_larm", "pelvis");
       hierarchicalSolver.collisionAvoidance.addBodyPair("l_larm", "utorso" );
-      
+
       return listOfEnabledColliders;
    }
-   
+
    @Override
    protected void configureTasks()
    {
       RobotSide LEFT = RobotSide.LEFT;
       RobotSide RIGHT = RobotSide.RIGHT;
-      
+
       HierarchicalTask_BodyPose task_ee_pose_R = taskEndEffectorPose.get(RIGHT);
       HierarchicalTask_BodyPose task_ee_pose_L = taskEndEffectorPose.get(LEFT);
 
@@ -158,7 +158,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       this.setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
       this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_NONE);
-      
+
       //--------------------------------------------------
       // Important: you can't activate a joint in higher priorities and disable it later
       // use this vector for any setWeightJointSpace
@@ -179,7 +179,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       taskLegPose.setTarget(target_left_foot, 0.001);
 
       //--------------------------------------------------
-       // Don't move the arm to keep the balance. But torso need to be activated
+      // Don't move the arm to keep the balance. But torso need to be activated
       joint_weights.set(back_bkz, 1);
       joint_weights.set(back_bky, 1);
       joint_weights.set(back_bkx, 1);
@@ -216,8 +216,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       coupledJointWeights.zero();
 
       // these are the joints to be knees
-      weights_jointpose.set(rleg_kny, 0.5);
-      weights_jointpose.set(lleg_kny, 0.5);
+      weights_jointpose.set(rleg_kny, 0.75);
+      weights_jointpose.set(lleg_kny, 0.75);
 
       // this is used to keep the pelvis straight
       // what you want is:
@@ -244,15 +244,25 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       //elbows
       weights_jointpose.set(larm_elx, 0.1);
       weights_jointpose.set(rarm_elx, 0.1);
-
       preferedJointPose.set(larm_elx, 1.0);
       preferedJointPose.set(rarm_elx, -1.0);
+      
+
+    /*  RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
+     * for ( int index = 0; index< weights_jointpose.getNumElements(); index++ )
+      {
+         if( Math.abs( weights_jointpose.get(index)) < 0.000001 )
+         {
+            weights_jointpose.set(index, 0.25 );
+            preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
+         }
+      }*/
 
       taskJointsPose.setWeightsTaskSpace(weights_jointpose);
       taskJointsPose.setWeightsJointSpace(joint_weights);
       taskJointsPose.setCoupledJointWeights(coupledJointWeights);
 
-      taskJointsPose.setTarget(preferedJointPose, 35);
+      taskJointsPose.setTarget(preferedJointPose, 3);
    }
 
 }
