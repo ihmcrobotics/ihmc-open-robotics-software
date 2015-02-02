@@ -1,5 +1,6 @@
 package us.ihmc.wholeBodyController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 public class WholeBodyTrajectory
 {
-   static public TrajectoryND createJointSpaceTrajectory(
+/*   static public TrajectoryND createJointSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
          final OneDoFJoint[] initialState, 
          final OneDoFJoint[] finalState ) throws Exception
@@ -65,7 +66,7 @@ public class WholeBodyTrajectory
       return wb_trajectory;
    }
 
-
+*/
    static public TrajectoryND createTaskSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
          final SDFFullRobotModel actualRobotModel,
@@ -75,7 +76,7 @@ public class WholeBodyTrajectory
       int N = wbSolver.getNumberOfJoints();
 
       HashMap<String,Integer> nameToIndex = new HashMap<String,Integer>();
-
+  
       SideDependentList<ControlledDoF> previousOption = new SideDependentList<ControlledDoF>();
       SideDependentList<RigidBodyTransform> initialTransform  = new SideDependentList<RigidBodyTransform>();
       SideDependentList<RigidBodyTransform> finalTransform    = new SideDependentList<RigidBodyTransform>();
@@ -109,19 +110,22 @@ public class WholeBodyTrajectory
       HashMap<String, Double> outputAngles = new HashMap<String, Double> ();
 
 
+      ArrayList<String> jointNames = new ArrayList<String>();
+      
       for (OneDoFJoint joint: actualRobotModel.getOneDoFJoints() )
       {
          if( wbSolver.hasJoint( joint.getName())  )
          {
             nameToIndex.put( joint.getName(), nameToIndex.size() );
+            jointNames.add(  joint.getName() );
          }    
       }
 
       int segmentsPos = 1;
       int segmentsRot = 1;
 
-      double maxDeltaPos = 0.1;
-      double maxDeltaRot = 0.3;
+      double maxDeltaPos = 0.025;
+      double maxDeltaRot = 0.1;
 
       for (RobotSide side: RobotSide.values)
       {
@@ -149,6 +153,7 @@ public class WholeBodyTrajectory
 
       Vector64F thisWaypointAngles = new Vector64F(N);
 
+
       for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
       {
          String jointName = entry.getKey();
@@ -159,7 +164,9 @@ public class WholeBodyTrajectory
       }
 
 
-      TrajectoryND wb_trajectory = new TrajectoryND(N, 0.5, 10 );
+      TrajectoryND wb_trajectory = new TrajectoryND(N, 2.0, 15.0 );
+      
+      wb_trajectory.addNames( jointNames );
 
       System.out.println("---------------- ");
 
@@ -206,7 +213,7 @@ public class WholeBodyTrajectory
                anglesToUseAsInitialState.put( jointName, thisWaypointAngles.get(index) );
             }
 
-            if( s!= numSegments )
+            if( s< numSegments )
             {
                //---------------------------------
                int ret =  wbSolver.compute(actualRobotModel,  anglesToUseAsInitialState, outputAngles);
@@ -245,7 +252,7 @@ public class WholeBodyTrajectory
       // build the trajectory packet from the new waypoints
 
       int numJointsPerArm = model.armJointIDsList.get(RobotSide.LEFT).size();
-      int numWaypoints = 0;//wbTrajectory.getNumWasypoints();
+      int numWaypoints = wbTrajectory.getNumWaypoints();
       int numJoints = wbTrajectory.getNumDimensions();
 
 
