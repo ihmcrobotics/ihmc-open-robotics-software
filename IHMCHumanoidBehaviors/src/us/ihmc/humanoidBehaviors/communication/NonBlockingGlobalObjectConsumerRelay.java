@@ -40,6 +40,7 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
       queuedData.add(packet);
    }
 
+   private boolean isRunning = true;
    public void startProducingData()
    {
       Runnable runnable = new Runnable()
@@ -47,7 +48,7 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
 
          public void run()
          {
-            while (true)
+            while (isRunning)
             {
                Packet dataObject;
                while((dataObject = queuedData.poll()) != null)
@@ -66,5 +67,10 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
          }
       };
       ThreadTools.startAsDaemon(runnable, "NonBlockingGlobalObjectConsumerRelay for " + communicatorToForwardFrom.getClass().getSimpleName());
+   }
+   
+   public void closeAndDispose()
+   {
+      isRunning = false;
    }
 }
