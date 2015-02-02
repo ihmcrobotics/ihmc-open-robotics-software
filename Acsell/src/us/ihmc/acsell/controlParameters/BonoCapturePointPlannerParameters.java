@@ -24,6 +24,12 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 		return runningOnRealRobot ? 0.5 : 0.25;
 	}
 
+   @Override
+   public double getAdditionalTimeForSingleSupport()
+   {
+      return 0.0;
+   }
+
 	@Override
 	public double getSingleSupportDuration()
 	{
