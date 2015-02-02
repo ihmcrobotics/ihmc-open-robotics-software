@@ -168,8 +168,6 @@ public class WholeBodyTrajectory
       
       wb_trajectory.addNames( jointNames );
 
-      System.out.println("---------------- ");
-
       for (int s=0; s <= numSegments; s++ )
       {
          for (RobotSide side: RobotSide.values)
@@ -187,7 +185,6 @@ public class WholeBodyTrajectory
             {
                RigidBodyTransform targetTrans = new RigidBodyTransform();
                target.getRigidBodyTransform( targetTrans );
-               System.out.format( "%s: %d/%d / %.2f :\n%s\n", side, s, numSegments, alpha, targetTrans );
             }
          }
 
