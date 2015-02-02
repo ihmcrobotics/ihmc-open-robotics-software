@@ -1,7 +1,6 @@
 package us.ihmc.wholeBodyController;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.vecmath.Vector3d;
@@ -18,7 +17,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 
@@ -247,7 +245,7 @@ public class WholeBodyTrajectory
       // build the trajectory packet from the new waypoints
 
       int numJointsPerArm = model.armJointIDsList.get(RobotSide.LEFT).size();
-      int numWaypoints = wbTrajectory.getNumWasypoints();
+      int numWaypoints = 0;//wbTrajectory.getNumWasypoints();
       int numJoints = wbTrajectory.getNumDimensions();
 
 
