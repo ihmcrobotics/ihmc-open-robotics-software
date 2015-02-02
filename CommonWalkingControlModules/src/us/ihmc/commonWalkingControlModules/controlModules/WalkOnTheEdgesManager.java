@@ -40,13 +40,6 @@ public class WalkOnTheEdgesManager
    private static final boolean DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN = true;
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
 
-   public enum SwitchToToeOffMethods
-   {
-      USE_ECMP, USE_ICP
-   };
-
-   public static final SwitchToToeOffMethods TOEOFF_TRIGGER_METHOD = SwitchToToeOffMethods.USE_ECMP;
-
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
@@ -57,11 +50,6 @@ public class WalkOnTheEdgesManager
 
    private final BooleanYoVariable doHeelTouchdownIfPossible = new BooleanYoVariable("doHeelTouchdownIfPossible", registry);
    private final BooleanYoVariable doHeelTouchdown = new BooleanYoVariable("doHeelTouchdown", registry);
-
-   private final DoubleYoVariable onToesTriangleArea = new DoubleYoVariable("onToesTriangleArea", registry);
-   private final DoubleYoVariable onToesTriangleAreaLimit = new DoubleYoVariable("onToesTriangleAreaLimit", registry);
-   private final BooleanYoVariable isOnToesTriangleLargeEnough = new BooleanYoVariable("isOnToesTriangleLargeEnough", registry);
-   private FrameConvexPolygon2d onToesTriangle;
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
@@ -123,8 +111,6 @@ public class WalkOnTheEdgesManager
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
 
-      onToesTriangleAreaLimit.set(0.01);
-
       extraCoMMaxHeightWithToes.set(0.08);
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
@@ -139,9 +125,9 @@ public class WalkOnTheEdgesManager
       parentRegistry.addChild(registry);
    }
 
-   public void updateToeOffStatusBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatus(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
-      if (!doToeOffIfPossible.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ECMP)
+      if (!doToeOffIfPossible.getBooleanValue())
       {
          doToeOff.set(false);
          isDesiredECMPOKForToeOff.set(false);
@@ -150,8 +136,15 @@ public class WalkOnTheEdgesManager
 
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
-      FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-      isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+      if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
+      {
+         FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
+         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+      }
+      else
+      {
+         isDesiredECMPOKForToeOff.set(true);
+      }
 
       FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
@@ -192,40 +185,6 @@ public class WalkOnTheEdgesManager
          return false;
 
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
-   }
-
-   public void updateToeOffStatusBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP)
-   {
-      if (!doToeOffIfPossible.getBooleanValue() || TOEOFF_TRIGGER_METHOD != SwitchToToeOffMethods.USE_ICP)
-      {
-         doToeOff.set(false);
-         isDesiredICPOKForToeOff.set(false);
-         return;
-      }
-
-      updateOnToesTriangle(finalDesiredICP, trailingLeg);
-
-      isDesiredICPOKForToeOff.set(onToesTriangle.isPointInside(desiredICP) && isOnToesTriangleLargeEnough.getBooleanValue());
-
-      if (!isDesiredICPOKForToeOff.getBooleanValue())
-      {
-         doToeOff.set(false);
-         return;
-      }
-
-      isReadyToSwitchToToeOff(trailingLeg);
-   }
-
-   public void updateOnToesTriangle(FramePoint2d finalDesiredICP, RobotSide supportSide)
-   {
-      onToesTriangle = getOnToesTriangleCopy(finalDesiredICP, feet.get(supportSide));
-      onToesTriangleArea.set(onToesTriangle.getArea());
-      isOnToesTriangleLargeEnough.set(onToesTriangleArea.getDoubleValue() > onToesTriangleAreaLimit.getDoubleValue());
-   }
-
-   public boolean isOnToesTriangleLargeEnough()
-   {
-      return isOnToesTriangleLargeEnough.getBooleanValue();
    }
 
    private void isReadyToSwitchToToeOff(RobotSide trailingLeg)
@@ -475,22 +434,6 @@ public class WalkOnTheEdgesManager
       isDesiredICPOKForToeOff.set(false);
 
       doToeOff.set(false);
-   }
-
-   private FrameConvexPolygon2d getOnToesTriangleCopy(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
-   {
-      List<FramePoint> toePoints = getToePointsCopy(supportFoot);
-      ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>();
-      for (int i = 0; i < toePoints.size(); i++)
-      {
-         FramePoint toePoint = toePoints.get(i);
-         toePoint.changeFrame(worldFrame);
-         points.add(toePoint.toFramePoint2d());
-      }
-
-      points.add(finalDesiredICP);
-
-      return new FrameConvexPolygon2d(points);
    }
 
    private List<FramePoint> getToePointsCopy(ContactablePlaneBody supportFoot)

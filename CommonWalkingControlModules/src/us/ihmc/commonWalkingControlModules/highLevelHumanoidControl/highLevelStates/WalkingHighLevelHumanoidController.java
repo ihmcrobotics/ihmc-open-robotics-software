@@ -549,16 +549,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
 
-            if (transferToSide != null) // the only case left for determining the contact state of the trailing foot
-            {
-               FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
-               finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
-
-               RobotSide trailingLeg = transferToSide.getOppositeSide();
-               double predictedToeOffDuration = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
-               feetManager.requestToeOffBasedOnICP(trailingLeg, desiredICP.getFramePoint2dCopy(), finalDesiredICP, predictedToeOffDuration);
-            }
-            else if (!initializedAtStart)
+            if (transferToSide == null && !initializedAtStart)
             {
                FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
                finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
@@ -594,7 +585,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             icpAndMomentumBasedController.getDesiredCMP(desiredCMP);
             
             double predictedToeOffDuration = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
-            feetManager.requestToeOffBasedOnECMP(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy(), capturePoint2d, predictedToeOffDuration);
+            feetManager.requestToeOff(trailingLeg, desiredCMP, desiredICP.getFramePoint2dCopy(), capturePoint2d, predictedToeOffDuration);
 
             if (feetManager.doToeOff())
             {
