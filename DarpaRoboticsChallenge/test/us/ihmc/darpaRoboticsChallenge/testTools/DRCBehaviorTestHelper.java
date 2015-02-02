@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
@@ -21,6 +22,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -32,12 +34,14 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
 
-   private final PacketCommunicator networkObjectCommunicator;
+   private final KryoPacketCommunicator networkObjectCommunicator;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
    private final RobotDataReceiver robotDataReceiver;
    private final BehaviorDisptacher behaviorDispatcher;
-
-   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, FullRobotModel fullRobotModel, PacketCommunicator networkObjectCommunicator,
+   private final ReferenceFrames referenceFrames;
+   private final FullRobotModel fullRobotModel;
+   
+   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, FullRobotModel fullRobotModel, KryoPacketCommunicator networkObjectCommunicator,
          PacketCommunicator controllerCommunicator)
    {
       this(new DRCDemo01NavigationEnvironment(), networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
@@ -46,18 +50,19 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-         FullRobotModel fullRobotModel, PacketCommunicator networkObjectCommunicator, PacketCommunicator controllerCommunicator)
+         FullRobotModel fullRobotModel, KryoPacketCommunicator networkObjectCommunicator, PacketCommunicator controllerCommunicator)
    {
       this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
             false, robotModel, fullRobotModel, controllerCommunicator);
    }
 
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name,
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, KryoPacketCommunicator networkObjectCommunicator, String name,
          String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, boolean startNetworkProcessor, DRCRobotModel robotModel, FullRobotModel fullRobotModel, PacketCommunicator controllerCommunicator)
    {
       super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
             startNetworkProcessor, robotModel);
 
+      this.fullRobotModel = fullRobotModel;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -66,8 +71,20 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       this.networkObjectCommunicator = networkObjectCommunicator;
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, networkObjectCommunicator, controllerCommunicator, robotDataReceiver, yoGraphicsListRegistry);
+      
+      referenceFrames = robotDataReceiver.getReferenceFrames();
+   }
+   
+   public FullRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
    }
 
+   public ReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
+   }
+   
    public BehaviorDisptacher getBehaviorDisptacher()
    {
       return behaviorDispatcher;
@@ -81,6 +98,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    public BehaviorCommunicationBridge getBehaviorCommunicationBridge()
    {
       return behaviorCommunicationBridge;
+   }
+   
+   public void updateRobotModel()
+   {
+      robotDataReceiver.updateRobotModel();
    }
 
    public void dispatchBehavior(BehaviorInterface behaviorToTest) throws SimulationExceededMaximumTimeException
@@ -115,4 +137,59 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       return ret;
    }
+
+   public void closeAndDispose()
+   {
+      if (networkObjectCommunicator != null)
+      {
+         networkObjectCommunicator.close();
+         networkObjectCommunicator.closeAndDispose();
+//         networkObjectCommunicator = null;
+      }
+      
+      if (behaviorCommunicationBridge != null)
+      {
+         behaviorCommunicationBridge.closeAndDispose();
+//         behaviorCommunicationBridge = null;
+      }
+      
+      super.destroySimulation();
+   }
+   
+   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime) throws SimulationExceededMaximumTimeException
+   {
+      BehaviorRunner behaviorRunner = new BehaviorRunner(behavior);
+      Thread behaviorThread = new Thread(behaviorRunner);
+      behaviorThread.start();
+
+      boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime);
+      behaviorRunner.closeAndDispose();
+
+      return ret;
+   }
+   
+   private class BehaviorRunner implements Runnable
+   {
+      private boolean isRunning = true;
+      private final BehaviorInterface behavior;
+
+      public BehaviorRunner(BehaviorInterface behavior)
+      {
+         this.behavior = behavior;
+      }
+
+      public void run()
+      {
+         while (isRunning)
+         {
+            behavior.doControl();
+         }
+      }
+
+      public void closeAndDispose()
+      {
+         isRunning = false;
+      }
+   }
+
 }
