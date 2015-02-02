@@ -18,7 +18,7 @@ import us.ihmc.utilities.test.JUnitTools;
 
 public class JMEGPULidarTest implements LidarTestListener
 {
-   private static final boolean TEST_MANUALLY = true;
+   private static final boolean TEST_MANUALLY = false;
    private JMEGPULidarTestEnviroment lidarTest;
    private LidarTestParameters parameters;
    private boolean stop = false;
