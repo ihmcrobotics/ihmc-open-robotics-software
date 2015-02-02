@@ -202,7 +202,7 @@ public class DRCSimulationFactory
 
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
-         System.err.println("Warning! Initializing Estimator to Actual!");
+         System.err.println(this.getClass().getSimpleName() + ": Warning! Initializing Estimator to Actual!");
          initializeEstimatorToActual(drcEstimatorThread, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap());
       }
 
