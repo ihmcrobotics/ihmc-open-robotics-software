@@ -89,4 +89,10 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
       }
       packetPassthrough.set(activate);
    }
+   
+   public void closeAndDispose()
+   {
+      networkProcessorToControllerRelay.closeAndDispose();
+      controllerToNetworkProcessorRelay.closeAndDispose();
+   }
 }
