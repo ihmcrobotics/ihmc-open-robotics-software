@@ -198,7 +198,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-
       handPoseBehavior.consumeObjectFromNetworkProcessor(object);
       wholeBodyIKBehavior.consumeObjectFromNetworkProcessor(object);
    }
