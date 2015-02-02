@@ -98,14 +98,14 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private final double POSITION_THRESHOLD = 0.1;
    private final double ORIENTATION_THRESHOLD = 0.05;
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
    private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCHandPoseBehaviorTestControllerCommunicator");
+         "DRCControllerCommunicator");
    private final PacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
          "DRCJunkyCommunicator");
    private final BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, controllerCommunicator, registry);
@@ -206,6 +206,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       networkObjectCommunicator.send(requestWalkToObjectBehaviorPacket);
+      SysoutTool.println("Requesting WalkToLocationBehavior", DEBUG);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -214,6 +215,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
+      SysoutTool.println("Setting WalkToLocationBehavior Target", DEBUG);
 
       while (!walkToLocationBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
@@ -221,6 +223,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
          assertTrue(success);
       }
 
+      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
       assertTrue(walkToLocationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
