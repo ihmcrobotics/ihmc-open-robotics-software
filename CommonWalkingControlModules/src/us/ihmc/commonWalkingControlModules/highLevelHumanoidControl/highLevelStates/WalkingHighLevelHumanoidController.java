@@ -142,8 +142,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
    private final TransferTimeCalculationProvider transferTimeCalculationProvider;
 
-   private final DoubleYoVariable additionalSwingTimeForICP = new DoubleYoVariable("additionalSwingTimeForICP", registry);
-
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
    private final EnumYoVariable<RobotSide> previousSupportSide = new EnumYoVariable<RobotSide>("previousSupportSide", registry, RobotSide.class);
@@ -304,7 +302,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stopInDoubleSupporTrajectoryTime.set(0.5);
 
-      additionalSwingTimeForICP.set(0.1);
       minimumSwingFraction.set(0.5); // 0.8);
 
       upcomingSupportLeg.set(RobotSide.RIGHT); // TODO: stairs hack, so that the following lines use the correct leading leg
@@ -659,8 +656,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
          }
 
-         double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getValue() + additionalSwingTimeForICP.getDoubleValue();
-
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
          transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
          transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
@@ -668,10 +663,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToAndNextFootstepsData.setTransferToSide(transferToSide);
          transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
          transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
-         transferToAndNextFootstepsData.setEstimatedStepTime(timeAllottedForSingleSupportForICP + transferTimeCalculationProvider.getValue());
+         transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeCalculationProvider.getValue());
          transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
          transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getValue());
-         transferToAndNextFootstepsData.setSingleSupportDuration(timeAllottedForSingleSupportForICP);
+         transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
          double doubleSupportInitialTransferDuration = 0.4; // TODO: Magic Number
          transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration);
          boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); // TODO: Magic Number
@@ -1350,16 +1345,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
 
-      double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getValue() + additionalSwingTimeForICP.getDoubleValue();
-
       transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
       transferToAndNextFootstepsData.setNextFootstep(upcomingFootstepList.getNextNextFootstep());
       transferToAndNextFootstepsData.setNextNextFootstep(upcomingFootstepList.getNextNextNextFootstep());
-      transferToAndNextFootstepsData.setEstimatedStepTime(timeAllottedForSingleSupportForICP + transferTimeCalculationProvider.getValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeCalculationProvider.getValue());
       transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
       transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getValue());
-      transferToAndNextFootstepsData.setSingleSupportDuration(timeAllottedForSingleSupportForICP);
+      transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
       double doubleSupportInitialTransferDuration = 0.4; // TODO: Magic Number
       transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration);
       boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); // TODO: Magic Number

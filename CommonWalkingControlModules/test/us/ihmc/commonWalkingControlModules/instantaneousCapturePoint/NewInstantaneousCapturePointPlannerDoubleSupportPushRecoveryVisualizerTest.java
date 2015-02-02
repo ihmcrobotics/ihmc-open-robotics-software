@@ -106,6 +106,12 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
 
       @Override
+      public double getAdditionalTimeForSingleSupport()
+      {
+         return 0.0;
+      }
+
+      @Override
       public int getNumberOfFootstepsToStop()
       {
          return 2;

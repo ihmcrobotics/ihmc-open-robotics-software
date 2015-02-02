@@ -23,6 +23,12 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 		return runningOnRealRobot ? 1.5 : 0.25;
 	}
 
+   @Override
+   public double getAdditionalTimeForSingleSupport()
+   {
+      return 0.1;
+   }
+
 	@Override
 	public double getSingleSupportDuration()
 	{

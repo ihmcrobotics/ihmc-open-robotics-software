@@ -94,6 +94,12 @@ public class NewInstantaneousCapturePointPlannerTest
 			return 0.2;
 		}
 
+	   @Override
+	   public double getAdditionalTimeForSingleSupport()
+	   {
+	      return 0.0;
+	   }
+
 		@Override
 		public int getNumberOfFootstepsToStop()
 		{
