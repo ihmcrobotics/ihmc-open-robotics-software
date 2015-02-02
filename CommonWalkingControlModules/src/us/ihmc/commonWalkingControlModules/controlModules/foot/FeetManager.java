@@ -304,25 +304,14 @@ public class FeetManager
       return walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide);
    }
 
-   public void requestToeOffBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP, double predictedToeOffDuration)
-   {
-      walkOnTheEdgesManager.updateToeOffStatusBasedOnICP(trailingLeg, desiredICP, finalDesiredICP);
-      
-      if (doToeOff())
-      {
-         footControlModules.get(trailingLeg).setPredictedToeOffDuration(predictedToeOffDuration);
-         setOnToesContactState(trailingLeg);
-      }
-   }
-
    public boolean doToeOff()
    {
       return walkOnTheEdgesManager.doToeOff();
    }
 
-   public void requestToeOffBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP, double predictedToeOffDuration)
+   public void requestToeOff(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP, double predictedToeOffDuration)
    {
-      walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP, desiredICP, currentICP);
+      walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, desiredECMP, desiredICP, currentICP);
       if (doToeOff())
       {
          footControlModules.get(trailingLeg).setPredictedToeOffDuration(predictedToeOffDuration);
@@ -360,19 +349,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getToeTouchdownInitialAngle();
    }
 
-   public void updateOnToesTriangle(FramePoint2d finalDesiredICP, RobotSide supportSide)
-   {
-      walkOnTheEdgesManager.updateOnToesTriangle(finalDesiredICP, supportSide);
-   }
-
    public boolean doToeOffIfPossible()
    {
       return walkOnTheEdgesManager.doToeOffIfPossible();
-   }
-
-   public boolean isOnToesTriangleLargeEnough()
-   {
-      return walkOnTheEdgesManager.isOnToesTriangleLargeEnough();
    }
 
    public void lockKnee(RobotSide robotSide)
