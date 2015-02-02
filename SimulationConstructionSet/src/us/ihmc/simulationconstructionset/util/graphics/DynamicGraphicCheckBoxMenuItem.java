@@ -10,9 +10,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements ItemListener
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -1641762511153430886L;
    private ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
@@ -21,8 +18,6 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
       super(label, true);
       this.yoGraphics = yoGraphics;
       this.addItemListener(this);
-
-      // System.out.println("created checkbox for " + label + " with elements=" + yoGraphics.size());
    }
 
    public void addDynamicGraphicObjects(ArrayList<YoGraphic> yoGraphics)
@@ -34,12 +29,10 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
    {
       if (ie.getStateChange() == ItemEvent.SELECTED)
       {
-         System.out.println("showing " + super.getText());
          showDynamicGraphicObjects();
       }
       else
       {
-         System.out.println("hiding " + super.getText());
          hideDynamicGraphicObjects();
       }
    }
