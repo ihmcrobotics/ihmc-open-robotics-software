@@ -1,5 +1,6 @@
+
 <GraphGroup>
-	<Cols>3</Cols>
+	<Cols>4</Cols>
 	<Graph>
 		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
 		<GraphConfiguration>
@@ -180,60 +181,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-<Entry Boxes Tab Pane>
-<EntryBoxTab>
-<Title>
-diag
-</Title>
-<Entry Boxes>ditherAmplitude,ditherFrequency,diagnosticsPDMasterGain,startDiagnostics,masterMotorDamping</Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-General
-</Title>
-<Entry Boxes>enableOutput,startStandprep,selectedJointPair,requestedHighLevelState,manualModeICPOffset,jointVelocityAlphaFilter</Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-UserStep
-</Title>
-<Entry Boxes>kpPelvisOrientation,kpXYLinearSwingFoot,kpZLinearSwingFoot,kpXYAngularSwingFoot,kpZAngularSwingFoot,swingTime,kpChestOrientation,captureKpParallel,captureKpOrthogonal,zetaPelvisOrientation,transferTime,r_leg_knymotorDamping,enableOutput,startStandprep,selectedJointPair,requestedHighLevelState,manualModeICPOffset,jointVelocityAlphaFilter,kpCoMHeight,zetaCoMHeight</Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-Stiffness
-</Title>
-<Entry Boxes>l_leg_lhystiffness,r_leg_lhystiffness,l_leg_knystiffness,r_leg_knystiffness</Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-motorDamping
-</Title>
-<Entry Boxes>l_leg_mhxmotorDamping,r_leg_mhxmotorDamping,l_leg_lhymotorDamping,r_leg_lhymotorDamping,l_leg_knymotorDamping,r_leg_knymotorDamping,r_leg_uaymotorDamping,r_leg_laxmotorDamping</Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-ToeOff
-</Title>
-<Entry Boxes>l_footToeOffFinalAngle,r_footToeOffFinalAngle,kpXYAngularSwingFoot</Entry Boxes>
-</EntryBoxTab>
-</Entry Boxes Tab Pane>
-
-<Number of ViewPorts>1</Number of ViewPorts>
- <Main Viewport> 
-<Visible> true</Visible>
-</Main Viewport>
-
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>3944.0, 0.0</WindowLocation>
-<WindowSize>1918.0, 1165.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce0</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.CommonHumanoidReferenceFramesVisualizer.pelvisRoll</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -245,7 +194,7 @@ ToeOff
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce1</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.DiagnosticsState</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -257,7 +206,7 @@ ToeOff
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce2</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.HumanoidJointPoseList.desiredLegPose</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -268,68 +217,4 @@ ToeOff
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce3</Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch.l_footStateEstimatorFootForceMag</Variables>
-		<GraphConfiguration>
-			<Name>config20</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
-</Graph Array Window1>
-
-<Extra Panels>
-<Main Viewport>
-Dashboard,
-</Main Viewport></Extra Panels>
-
-<Current View>Normal View</Current View>
- <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
- <Dolly data> 
- <Position X>2.0</Position X>
- <Position Y>12.0</Position Y>
- <Position Z>0.0</Position Z>
-<Dolly Booleans>
-<Dolly>false</Dolly>
-<Dolly X>true</Dolly X>
-<Dolly Y>true</Dolly Y>
-<Dolly Z>true</Dolly Z>
-</Dolly Booleans>
-</Dolly data>
- <Track data> 
- <Position X>0.0</Position X>
- <Position Y>0.0</Position Y>
- <Position Z>0.0</Position Z>
- <Track Booleans>
-<Track>false</Track>
-<Track X>true</Track X>
-<Track Y>true</Track Y>
-<Track Z>false</Track Z>
-</Track Booleans>
-</Track data>
-<Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
-</Fix Position>
-</Canvas 1>
