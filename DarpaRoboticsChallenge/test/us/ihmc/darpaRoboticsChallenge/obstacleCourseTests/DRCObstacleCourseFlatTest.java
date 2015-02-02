@@ -34,10 +34,8 @@ import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -58,7 +56,6 @@ import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepP
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
@@ -136,6 +133,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
+   @SuppressWarnings("deprecation")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
@@ -158,7 +156,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       final PoseReferenceFrame pelvisFrame = new PoseReferenceFrame("pelvisFrame", worldFrame);
       final ZUpFrame pelvisZUpFrame = new ZUpFrame(worldFrame, pelvisFrame, "pelvisZUpFrame");
       
-      @SuppressWarnings("deprecation")
       DoubleYoVariable q_x = (DoubleYoVariable) scs.getVariable("q_x");
       DoubleYoVariable q_y = (DoubleYoVariable) scs.getVariable("q_y");
       DoubleYoVariable q_z = (DoubleYoVariable) scs.getVariable("q_z");
@@ -204,7 +201,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DoubleYoVariable chestAxisAngleErrorZ = (DoubleYoVariable) scs.getVariable("chestElevatorAxisAngleOrientationController", "chestElevatorAxisAngleErrorInBody" + "Z");
       YoFrameVector chestAxisAngleError = new YoFrameVector(chestAxisAngleErrorX, chestAxisAngleErrorY, chestAxisAngleErrorZ, worldFrame);
       
-      desiredChestFrameOrientation.setIncludingFrame(pelvisFrame, Math.toRadians(40.0), Math.toRadians(20.0), Math.toRadians(20.0));
+      desiredChestFrameOrientation.setIncludingFrame(pelvisFrame, Math.toRadians(40.0), Math.toRadians(20.0), Math.toRadians(10.0));
       desiredChestFrameOrientation.changeFrame(worldFrame);
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
