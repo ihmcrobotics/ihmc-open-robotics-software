@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -28,22 +27,18 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -60,20 +55,19 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (blockingSimulationRunner != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
-      
+      robotModel = null;
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
    
+   
    private DRCRobotModel robotModel;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
 
    @Before
    public void getRobotModelBeforeTests()
@@ -113,8 +107,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, robotInitialSetup);
-
-      drcSimulation = track.getDrcSimulation();
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       scs.setGroundVisible(false);
@@ -195,8 +187,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, robotInitialSetup);
-
-      drcSimulation = track.getDrcSimulation();
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       scs.setGroundVisible(false);
@@ -320,7 +310,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, null, drawGroundProfile,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
-      drcSimulation = track.getDrcSimulation();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);

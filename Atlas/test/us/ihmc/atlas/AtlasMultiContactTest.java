@@ -8,27 +8,22 @@ import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class AtlasMultiContactTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -45,20 +40,15 @@ public class AtlasMultiContactTest
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (blockingSimulationRunner != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
-      
-      GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
-   private BlockingSimulationRunner blockingSimulationRunner;
+   
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 
@@ -67,11 +57,6 @@ public class AtlasMultiContactTest
    public void destroyOtherStuff()
    {
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
-      {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
 
       if (drcSimulation != null)
       {

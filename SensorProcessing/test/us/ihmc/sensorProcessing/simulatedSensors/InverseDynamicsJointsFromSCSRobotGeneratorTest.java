@@ -53,8 +53,9 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -82,8 +83,6 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
-   private BlockingSimulationRunner blockingSimulationRunner;
    
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;

@@ -21,7 +21,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -44,12 +43,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@SuppressWarnings("deprecation")
 public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -66,18 +63,20 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (blockingSimulationRunner != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
       
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
    private DRCRobotModel robotModel;
-
-   private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
 
    @Before
@@ -89,18 +88,12 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
    @After
    public void tearDown()
    {
-      // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
-      {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
-
       if (drcSimulation != null)
       {
          drcSimulation.dispose();
          drcSimulation = null;
       }
+      robotModel = null;
    }
 
    //   @Test(timeout=300000)
