@@ -27,14 +27,11 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 {
@@ -175,12 +172,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       networkObjectCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
-         public void receivedPacket(HandPoseStatus object)
+         public void receivedPacket(HandPoseStatus status)
          {
-            if (object.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
+            if (status.getStatus() == HandPoseStatus.Status.STARTED && hasSimulationBeenInitialized)
                statusStartedCounter++;
 
-            if (object.getStatus() == HandPoseStatus.Status.COMPLETED && hasSimulationBeenInitialized)
+            if (status.getStatus() == HandPoseStatus.Status.COMPLETED && hasSimulationBeenInitialized)
                statusCompletedCounter++;
          }
       });
@@ -188,25 +185,36 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
       hasSimulationBeenInitialized = true;
+      
+      Vector3d startTranslation = new Vector3d();
+      drcSimulationTestHelper.getRobot().getJoint("l_arm_wrx").getTranslationToWorld(startTranslation);
 
+      Vector3d desiredTranslation = new Vector3d(startTranslation);
+      desiredTranslation.add(new Vector3d(0.3,0.3,0.8));
+      
       HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket();
-      outgoingHandPosePacket.position.x = 0.3;
-      outgoingHandPosePacket.position.y = 0.3;
-      outgoingHandPosePacket.position.z = 0.8;
-      outgoingHandPosePacket.trajectoryTime = 3;
+      outgoingHandPosePacket.position.x = desiredTranslation.getX();
+      outgoingHandPosePacket.position.y = desiredTranslation.getY();
+      outgoingHandPosePacket.position.z = desiredTranslation.getZ();
+      int trajectoryTime = 3;
+      outgoingHandPosePacket.trajectoryTime = trajectoryTime;
       outgoingHandPosePacket.robotSide = RobotSide.LEFT;
       sendHandPosePacket(outgoingHandPosePacket);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      double timeToSimulateHandMotion = 1.0;
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToSimulateHandMotion);
       sendHandPausePacket(RobotSide.LEFT);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
-      Vector3d translation = new Vector3d();
-      drcSimulationTestHelper.getRobot().getJoint("l_arm_wrx").getTranslationToWorld(translation);
-
+      Vector3d endTranslation = new Vector3d();
+      drcSimulationTestHelper.getRobot().getJoint("l_arm_wrx").getTranslationToWorld(endTranslation);
+      
+      Vector3d expectedTranslation = new Vector3d();
+      expectedTranslation.interpolate(startTranslation, desiredTranslation, timeToSimulateHandMotion / trajectoryTime);
+      
       assertTrue((statusStartedCounter == 2) && (statusCompletedCounter == 1));
-      assertTrue(Math.abs(translation.getX() - 0.2891406582001399) < 0.005);
-      assertTrue(Math.abs(translation.getY() - 0.34701296179764957) < 0.005);
-      assertTrue(Math.abs(translation.getZ() - 0.7988289858957343) < 0.005);
+      assertTrue(Math.abs(endTranslation.getX() - expectedTranslation.getX()) < 0.1);
+      assertTrue(Math.abs(endTranslation.getY() - expectedTranslation.getY()) < 0.1);
+      assertTrue(Math.abs(endTranslation.getZ() - expectedTranslation.getZ()) < 0.1);
 
       BambooTools.reportTestFinishedMessage();
    }
