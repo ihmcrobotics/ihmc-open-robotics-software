@@ -11,6 +11,7 @@ import java.util.HashSet;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPose;
+import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -242,21 +243,20 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       weights_jointpose.set(lleg_hpz, 0.2);
 
       //elbows
-      weights_jointpose.set(larm_elx, 0.1);
+    /*  weights_jointpose.set(larm_elx, 0.1);
       weights_jointpose.set(rarm_elx, 0.1);
       preferedJointPose.set(larm_elx, 1.0);
       preferedJointPose.set(rarm_elx, -1.0);
-      
-
-    /*  RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
-     * for ( int index = 0; index< weights_jointpose.getNumElements(); index++ )
+*/
+      RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
+      for ( int index = 0; index< weights_jointpose.getNumElements(); index++ )
       {
-         if( Math.abs( weights_jointpose.get(index)) < 0.000001 )
+         if( Math.abs( weights_jointpose.get(index)) < 0.0001 )
          {
-            weights_jointpose.set(index, 0.25 );
+            weights_jointpose.set(index, 0.1 );
             preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
          }
-      }*/
+      }
 
       taskJointsPose.setWeightsTaskSpace(weights_jointpose);
       taskJointsPose.setWeightsJointSpace(joint_weights);

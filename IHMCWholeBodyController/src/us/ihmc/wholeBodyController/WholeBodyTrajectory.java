@@ -23,6 +23,16 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 public class WholeBodyTrajectory
 {
+   private double maxJointVelocity;
+   private double maxJointAcceleration;
+   private double maxDistanceInTaskSpaceBetweenWaypoints;
+   
+   public WholeBodyTrajectory(double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
+   {
+      this.maxJointVelocity = maxJointVelocity;
+      this.maxJointAcceleration = maxJointAcceleration;
+      this.maxDistanceInTaskSpaceBetweenWaypoints = maxDistanceInTaskSpaceBetweenWaypoints;
+   }
 /*   static public TrajectoryND createJointSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
          final OneDoFJoint[] initialState, 
@@ -67,7 +77,7 @@ public class WholeBodyTrajectory
    }
 
 */
-   static public TrajectoryND createTaskSpaceTrajectory(
+   public TrajectoryND createTaskSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
          final SDFFullRobotModel actualRobotModel,
          final SDFFullRobotModel finalRobotModel
@@ -124,8 +134,8 @@ public class WholeBodyTrajectory
       int segmentsPos = 1;
       int segmentsRot = 1;
 
-      double maxDeltaPos = 0.025;
-      double maxDeltaRot = 0.1;
+      double maxDeltaPos = maxDistanceInTaskSpaceBetweenWaypoints;
+      double maxDeltaRot = maxDistanceInTaskSpaceBetweenWaypoints;
 
       for (RobotSide side: RobotSide.values)
       {
@@ -164,7 +174,7 @@ public class WholeBodyTrajectory
       }
 
 
-      TrajectoryND wb_trajectory = new TrajectoryND(N, 2.0, 15.0 );
+      TrajectoryND wb_trajectory = new TrajectoryND(N, maxJointVelocity,  maxJointAcceleration );
       
       wb_trajectory.addNames( jointNames );
 

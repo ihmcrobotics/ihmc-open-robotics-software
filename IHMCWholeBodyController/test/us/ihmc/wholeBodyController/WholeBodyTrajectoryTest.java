@@ -60,20 +60,6 @@ public abstract class WholeBodyTrajectoryTest
       actualRobotModel.getRootJoint().setPosition( rootPosition );   
    }    
 
-   private TrajectoryND buildTrajectory(SDFFullRobotModel initialModel, SDFFullRobotModel finalModel) throws Exception
-   {
-     /* if( false )
-      {
-         return WholeBodyTrajectory.createJointSpaceTrajectory(wbSolver, 
-               initialModel.getOneDoFJoints(), 
-               finalModel.getOneDoFJoints());
-      }
-      else*/{
-
-         return  WholeBodyTrajectory.createTaskSpaceTrajectory( wbSolver,  initialModel,  finalModel );
-      }
-   }
-
   
 	@AverageDuration
 	@Test
@@ -95,7 +81,6 @@ public abstract class WholeBodyTrajectoryTest
       targetListRight.add( new Point3d( 0.4, -0.6, 0.8 ));
       targetListRight.add( new Point3d( 0.5, 0.6,  1.0 ));
       targetListRight.add( new Point3d( 0.5, -0.0,  1.0 ));
-      targetListRight.add( new Point3d( 0.5, 0.6,  1.4 ));
       targetListRight.add( new Point3d( 0.5, -0.4,  1.4 ));
       targetListRight.add( new Point3d( 0.5, -0.2,  0.6 ));
 
@@ -111,7 +96,11 @@ public abstract class WholeBodyTrajectoryTest
          }
          
          FramePose targetR = new FramePose(ReferenceFrame.getWorldFrame(), rightTarget, new Quat4d() );
-         visualizePoint(0.04, YoAppearance.Green(),targetR);
+         
+         if( getSimulationConstructionSet() != null )
+         {
+            visualizePoint(0.04, YoAppearance.Green(),targetR);
+         }
 
        //  wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.LEFT,  targetL );
          wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
@@ -120,7 +109,8 @@ public abstract class WholeBodyTrajectoryTest
 
          if( ret >=0 )
          {
-            TrajectoryND trajectory = buildTrajectory(actualRobotModel, desiredRobotModel);
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory( 1.5, 15, 0.05);
+            TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
             Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
 
@@ -180,8 +170,6 @@ public abstract class WholeBodyTrajectoryTest
       RigidBodyTransform transform = new RigidBodyTransform( );    
       pose.changeFrame( ReferenceFrame.getWorldFrame());
       pose.getRigidBodyTransform(transform);
-      
-      System.out.println(transform);
       
       yoGraphicsShape.setTransformToWorld( transform );
       
