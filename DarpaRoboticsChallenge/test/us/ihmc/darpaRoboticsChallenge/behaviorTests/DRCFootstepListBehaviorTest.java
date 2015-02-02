@@ -1,45 +1,57 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -56,165 +68,141 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (drcBehaviorTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         drcBehaviorTestHelper.destroySimulation();
+         drcBehaviorTestHelper = null;
       }
-      
+
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    private static final boolean DEBUG = false;
-
-   private final double POSITION_THRESHOLD = 0.007;
-   private final double ORIENTATION_THRESHOLD = 0.007;
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
+   private final double POSITION_THRESHOLD = 0.1;
+   private final double ORIENTATION_THRESHOLD = 0.05;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCHandPoseBehaviorTestControllerCommunicator");
 
-   private final RobotSide robotSideToTest = RobotSide.LEFT;
+   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+         "DRCControllerCommunicator");
+   private final PacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+         "DRCJunkyCommunicator");
 
-   private DoubleYoVariable yoTime;
-
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
-
-   private BehaviorCommunicationBridge communicationBridge;
-
+   private SDFRobot robot;
    private FullRobotModel fullRobotModel;
 
-   private WalkingControllerParameters walkingControllerParameters;
-   
-   private boolean returnValue = true;
-   
    @Before
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-              DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
-
-
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      yoTime = robotToTest.getYoTime();
-
       fullRobotModel = getRobotModel().createFullRobotModel();
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), fullRobotModel, controllerCommunicator);
 
-      walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      robot = drcBehaviorTestHelper.getRobot();
 
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
+      robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCHandPoseBehaviorTestJunkyCommunicator");
-
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
-
-
-      // setupCameraForHandstepsOnWalls();
    }
 
- 
-
-	@AverageDuration
-	@Test(timeout=300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testSimpleFootstepList() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
-      final FootstepListBehavior footstepListBehavior = new FootstepListBehavior(communicationBridge);
+      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(communicationBridge);
 
-      communicationBridge.attachGlobalListenerToController(footstepListBehavior.getControllerGlobalPacketConsumer());
+      drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
-      fullRobotModel.updateFrames();
+      ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
+      SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
 
-      FootstepDataList footstepDataList = getFootstepDataList(walkingControllerParameters);
-      footstepListBehavior.set(footstepDataList);
-      
-      // ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSideToTest);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose2d desiredFootPose = getRobotFootPose2d(robot, robotSide);
+         desiredFootPose.setX(desiredFootPose.getX() + 0.1);
+         desiredFootPoses.set(robotSide, desiredFootPose);
 
-      FramePose handPoseStart = new FramePose();
-      handPoseStart.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+         Footstep footStep = generateFootstep(desiredFootPoses.get(robotSide), fullRobotModel.getFoot(robotSide), fullRobotModel.getSoleFrame(robotSide),
+               robotSide, 0.0, new Vector3d(0.0, 0.0, 1.0));
+         desiredFootsteps.add(footStep);
+      }
 
-      handPoseStart.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepListBehavior.initialize();
+      footstepListBehavior.set(desiredFootsteps);
+      assertTrue(footstepListBehavior.hasInputBeenSet());
 
-      FramePose handPoseTarget = new FramePose(handPoseStart);
-      handPoseTarget.setZ(handPoseTarget.getZ() + 0.2);
-      handPoseTarget.setOrientation(new double[] {0.0, 0.0, 0.6});
+      while (!footstepListBehavior.isDone())
+      {
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+         assertTrue(success);
+      }
+      assertTrue(footstepListBehavior.isDone());
+      assertTrue(!footstepListBehavior.hasInputBeenSet());
 
-      RigidBodyTransform pose = new RigidBodyTransform();    // handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      handPoseTarget.getPose(pose);
-
-      double swingTrajectoryTime = 2.0;
-
-//      handPoseBehavior.setInput(Frame.WORLD, pose, robotSideToTest, swingTrajectoryTime);
-//
-//      final double simulationRunTime = swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-//
-//      Thread behaviorThread = new Thread()
-//      {
-//         public void run()
-//         {
-//            {
-//               double startTime = Double.NaN;
-//               boolean simStillRunning = true;
-//               boolean initalized = false;
-//
-//               while (simStillRunning)
-//               {
-//                  if (!initalized)
-//                  {
-//                     startTime = yoTime.getDoubleValue();
-//                     initalized = true;
-//                  }
-//
-//                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-//                  simStillRunning = timeSpentSimulating < simulationRunTime;
-//
-//                  handPoseBehavior.doControl();
-//               }
-//            }
-//         }
-//      };
-//
-//      behaviorThread.start();
-//
-//      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-//
-//      fullRobotModel.updateFrames();
-//      FramePose handPoseEnd = new FramePose();
-//      handPoseEnd.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
-//      handPoseEnd.changeFrame(ReferenceFrame.getWorldFrame());
-//
-//      assertPosesAreWithinThresholds(handPoseEnd, handPoseTarget);
-//
-//      assertTrue(success);
-//      assertTrue(handPoseBehavior.isDone());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose2d finalFootPose = getRobotFootPose2d(robot, robotSide);
+         assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
+      }
 
       BambooTools.reportTestFinishedMessage();
    }
 
-   private static FootstepDataList getFootstepDataList(WalkingControllerParameters walkingControllerParameters)
+   private Footstep generateFootstep(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3d planeNormal)
    {
-      SimplePathParameters simplePathParameters = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(), 0.0,
-            Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
-//      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
-//
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         feet.put(robotSide, fullRobotModel.getFoot(robotSide));
-//         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
-//      }
-      
-      return null;
+      double yaw = footPose2d.getYaw();
+      Point3d position = new Point3d(footPose2d.getX(), footPose2d.getY(), height);
+      Quat4d orientation = new Quat4d();
+      RotationFunctions.getQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
+
+      Footstep footstep = new Footstep(foot, robotSide, soleFrame);
+      footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));
+
+      return footstep;
    }
 
+   private FramePose2d getRobotFootPose2d(SDFRobot robot, RobotSide robotSide)
+   {
+      List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
+      Joint ankleJoint = gcPoints.get(0).getParentJoint();
+      RigidBodyTransform ankleTransformToWorld = new RigidBodyTransform();
+      ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
+      FramePose2d ret = new FramePose2d();
+      ret.setPose(ankleTransformToWorld);
+
+      return ret;
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose2d framePose1, FramePose2d framePose2)
+   {
+      double positionDistance = framePose1.getPositionDistance(framePose2);
+      double orientationDistance = framePose1.getOrientationDistance(framePose2);
+
+      if (DEBUG)
+      {
+         SysoutTool.println(" desired Midfeet Pose :\n" + framePose1 + "\n");
+         SysoutTool.println(" actual Midfeet Pose :\n" + framePose2 + "\n");
+
+         SysoutTool.println(" positionDistance = " + positionDistance);
+         SysoutTool.println(" orientationDistance = " + orientationDistance);
+      }
+
+      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
+      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+   }
 
 }
