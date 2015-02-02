@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.JUnitTestSuiteGenerator;
+import us.ihmc.utilities.code.unitTesting.generator.JUnitTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
@@ -21,6 +21,6 @@ public class DRCObstacleCourseBambooTestSuite
    public static void main(String[] args)
    {
       String packageName = "us.ihmc.darpaRoboticsChallenge.obstacleCourseTests";
-      System.out.println(JUnitTestSuiteGenerator.createTestSuite("DRCObstacleCourseBambooTestSuite", packageName, "test/"));
+//      System.out.println(JUnitTestSuiteGenerator.createTestSuite("DRCObstacleCourseBambooTestSuite", packageName, "test/"));
    }
 }
