@@ -114,16 +114,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
    @AverageDuration
    @Test(timeout = 300000)
-   public void testSimpleFootstepList() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(communicationBridge);
-
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
@@ -142,6 +140,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      assertTrue(success);
       assertTrue(footstepListBehavior.hasInputBeenSet());
 
       while (!footstepListBehavior.isDone())
@@ -150,7 +150,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          assertTrue(success);
       }
       assertTrue(footstepListBehavior.isDone());
-      assertTrue(!footstepListBehavior.hasInputBeenSet());
 
       for (RobotSide robotSide : RobotSide.values)
       {
