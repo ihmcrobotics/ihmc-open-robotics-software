@@ -32,11 +32,9 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -47,12 +45,11 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -75,15 +72,14 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   
+
    private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 8.0;
-   
+
    private static final boolean DEBUG = true;
- 
+
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private final double valveX = 2.0 * TurnValveBehavior.howFarToStandBackFromValve;
@@ -149,8 +145,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testWalkAndTurnValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -173,25 +169,27 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
             yoTippingDetected, getRobotModel().getWalkingControllerParameters());
       communicationBridge.attachGlobalListenerToController(turnValveBehavior.getControllerGlobalPacketConsumer());
 
-//      String scriptName = "testTurnValveNoScript";
+      //      String scriptName = "testTurnValveNoScript";
       String scriptName = null;
 
       ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(scriptName, valveTransformToWorld);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
+      assertTrue( turnValveBehavior.hasInputBeenSet() );
 
       double initialValveClosePercentage = valveRobot.getClosePercentage();
       success = executeBehavior(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
       assertTrue(success);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
-      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage, DEBUG);
+      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
+            DEBUG);
 
       assertTrue(turnValveBehavior.isDone());
       assertTrue(finalValveClosePercentage > initialValveClosePercentage);
       assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
-      
+
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 

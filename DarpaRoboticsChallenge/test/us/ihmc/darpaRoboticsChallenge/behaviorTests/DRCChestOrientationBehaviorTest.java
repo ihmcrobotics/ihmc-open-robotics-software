@@ -220,7 +220,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       chestOrientBehavior.initialize();
       chestOrientBehavior.setInput(chestOrientationPacket);
-
+      assertTrue( chestOrientBehavior.hasInputBeenSet() );
+      
       FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
       success = success && executeBehavior(chestOrientBehavior, chestOrientationPacket.getTrajectoryTime());
       FramePose finalChestPose = getCurrentChestPose(fullRobotModel);

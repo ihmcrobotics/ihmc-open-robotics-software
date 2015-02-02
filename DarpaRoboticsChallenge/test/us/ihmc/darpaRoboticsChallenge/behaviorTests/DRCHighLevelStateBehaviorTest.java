@@ -33,11 +33,9 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -46,12 +44,11 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -74,15 +71,12 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private static final boolean DEBUG = false;
 
-   private final double MAX_ANGLE_TO_TEST_RAD = 30.0 * Math.PI / 180.0;
-   private final double POSITION_THRESHOLD = 0.05;
-   private final double ORIENTATION_THRESHOLD = 0.007;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
@@ -92,16 +86,11 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    private DoubleYoVariable yoTime;
 
    private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
 
    private BehaviorCommunicationBridge communicationBridge;
 
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
-   private ReferenceFrames referenceFrames;
-
-   private CapturePointUpdatable capturePointUpdatable;
-   private BooleanYoVariable yoDoubleSupport;
 
    @Before
    public void setUp()
@@ -120,26 +109,19 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       robot = drcSimulationTestHelper.getRobot();
       fullRobotModel = getRobotModel().createFullRobotModel();
 
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
 
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-      referenceFrames = robotDataReceiver.getReferenceFrames();
 
       PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
             "DRCComHeightBehaviorTestJunkyCommunicator");
 
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
-
-      CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
-      capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(), robot.getRobotsYoVariableRegistry());
-      yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
    }
 
-
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -154,29 +136,30 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       HighLevelStatePacket highLevelStatePacket = new HighLevelStatePacket(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelStateBehavior.initialize();
       highLevelStateBehavior.setInput(highLevelStatePacket);
+      assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
       success = executeBehavior(highLevelStateBehavior, trajectoryTime);
       assertTrue(success);
 
       assertTrue(highLevelStateBehavior.isDone());
-      
+
       OneDegreeOfFreedomJoint[] oneDofJoints = robot.getOneDoFJoints();
-      
+
       for (OneDegreeOfFreedomJoint joint : oneDofJoints)
       {
          String jointName = joint.getName();
          double tau = joint.getTau().getDoubleValue();
          SysoutTool.println(joint.getName() + " tau : " + tau, DEBUG);
-         
-         if ( !jointName.contains("hokuyo") )
+
+         if (!jointName.contains("hokuyo"))
          {
-            assertTrue(tau == 0.0);           
+            assertTrue(tau == 0.0);
          }
       }
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
@@ -204,8 +187,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
                   simStillRunning = timeSpentSimulating < simulationRunTime;
 
                   behavior.doControl();
-
-                  capturePointUpdatable.update(yoTime.getDoubleValue());
                }
             }
          }
@@ -218,20 +199,5 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
 
       return ret;
-   }
-
-   private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
-   {
-      double positionDistance = framePose1.getPositionDistance(framePose2);
-      double orientationDistance = framePose1.getOrientationDistance(framePose2);
-
-      if (DEBUG)
-      {
-         System.out.println("testSimpleHandPoseMove: positionDistance=" + positionDistance);
-         System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
-      }
-
-      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
 }

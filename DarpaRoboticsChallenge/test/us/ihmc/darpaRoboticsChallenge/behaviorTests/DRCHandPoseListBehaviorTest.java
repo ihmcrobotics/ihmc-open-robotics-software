@@ -30,12 +30,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -44,7 +42,6 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInterface
 {
@@ -162,7 +159,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.initialize();
       handPoseListBehavior.setInput(handPoseListPacket);
-
+      assertTrue( handPoseListBehavior.hasInputBeenSet() );
+      
       success &= executeBehavior(handPoseListBehavior, swingTrajectoryTime);
 
       assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
@@ -192,6 +190,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.initialize();
       handPoseListBehavior.setInput(handPoseListPacket);
+      assertTrue( handPoseListBehavior.hasInputBeenSet() );
 
       success &= executeBehavior(handPoseListBehavior, swingTrajectoryTime);
 
@@ -224,7 +223,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
          handPoseListBehavior.initialize();
          handPoseListBehavior.setInput(handPoseListPacket);
-         
+         assertTrue( handPoseListBehavior.hasInputBeenSet() );
+
          armPosesLeftAndRightSide.put(robotSide, armPoses);
          behaviors.add(handPoseListBehavior);
       }

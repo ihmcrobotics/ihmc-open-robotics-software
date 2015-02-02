@@ -31,23 +31,20 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -73,9 +70,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private static final boolean DEBUG = false;
-   
 
    public static final double POSITION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
@@ -136,7 +132,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       Point3d nominalComPosition = new Point3d();
       robot.computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
-      
+
       double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
       double desiredHeightOffset = createValidComHeightOffset(RandomTools.generateRandomDouble(new Random(), 0.0, 1.0));
 
@@ -147,9 +143,9 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
 
       BambooTools.reportTestFinishedMessage();
    }
-   
-	@AverageDuration
-	@Test(timeout = 300000)
+
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testMoveToMinHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -159,7 +155,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       Point3d nominalComPosition = new Point3d();
       robot.computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
-      
+
       double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
       double desiredHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
 
@@ -170,32 +166,32 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
 
       BambooTools.reportTestFinishedMessage();
    }
-	
-	  @AverageDuration
-	   @Test(timeout = 300000)
-	   public void testMoveToMaxHeight() throws SimulationExceededMaximumTimeException
-	   {
-	      BambooTools.reportTestStartedMessage();
 
-	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-	      assertTrue(success);
-	      Point3d nominalComPosition = new Point3d();
-	      robot.computeCenterOfMass(nominalComPosition);
-	      nominalComHeightAboveGround = nominalComPosition.getZ();
-	      
-	      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
-	      double desiredHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testMoveToMaxHeight() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
 
-	      final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(communicationBridge, yoTime);
-	      communicationBridge.attachGlobalListenerToController(comHeightBehavior.getControllerGlobalPacketConsumer());
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      Point3d nominalComPosition = new Point3d();
+      robot.computeCenterOfMass(nominalComPosition);
+      nominalComHeightAboveGround = nominalComPosition.getZ();
 
-	      testComHeightBehavior(comHeightBehavior, desiredHeightOffset, trajectoryTime);
+      double trajectoryTime = RandomTools.generateRandomDouble(new Random(), 1.0, 3.0);
+      double desiredHeightOffset = ComHeightPacket.MAX_COM_HEIGHT;
 
-	      BambooTools.reportTestFinishedMessage();
-	   }
+      final ComHeightBehavior comHeightBehavior = new ComHeightBehavior(communicationBridge, yoTime);
+      communicationBridge.attachGlobalListenerToController(comHeightBehavior.getControllerGlobalPacketConsumer());
 
-	@AverageDuration
-	@Test(timeout = 300000)
+      testComHeightBehavior(comHeightBehavior, desiredHeightOffset, trajectoryTime);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testTwoComHeightMovesUsingOneBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -219,8 +215,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testTwoComHeightMovesUsingTwoBehaviors() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -251,10 +247,10 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    {
       double alpha = MathTools.clipToMinMax(relativeOffsetBetweenZeroAndOne, 0.0, 1.0);
       double ret = (ComHeightPacket.MIN_COM_HEIGHT + (ComHeightPacket.MAX_COM_HEIGHT - ComHeightPacket.MIN_COM_HEIGHT) * alpha);
-      
+
       return ret;
    }
-	
+
    private void testComHeightBehavior(final ComHeightBehavior comHeightBehavior, double desiredHeightOffset, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
@@ -263,6 +259,7 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
 
       ComHeightPacket comHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime);
       comHeightBehavior.setInput(comHeightPacket);
+      assertTrue(comHeightBehavior.hasInputBeenSet());
 
       boolean success = executeBehavior(comHeightBehavior, trajectoryTime);
       assertTrue(success);
