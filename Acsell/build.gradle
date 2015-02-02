@@ -64,6 +64,18 @@ task deploy(dependsOn: assemble) {
 		scriptDirCollection.each
 		{
 			wagon.put(it, it.name)
+		}
+
+		def configDir = new File("Configurations")
+		def configFileCollection = files { configDir.listFiles() }
+		configFileCollection.each
+		{
+			if(it.name.contains(".ini"))
+			{
+				
+				System.out.println(it.name)
+				wagon.put(it, "Configurations/" + it.name)
+			}
 		}	
 		
 		wagon.put(jar.archivePath, "StepprController.jar")
