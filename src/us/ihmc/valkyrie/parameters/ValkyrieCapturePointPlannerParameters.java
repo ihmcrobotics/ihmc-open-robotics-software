@@ -24,6 +24,12 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
 	}
 
 	@Override
+	public double getAdditionalTimeForSingleSupport()
+	{
+	   return 0.1;
+	}
+
+	@Override
 	public double getSingleSupportDuration()
 	{
 		return runningOnRealRobot ? 1.5 : 0.7;
