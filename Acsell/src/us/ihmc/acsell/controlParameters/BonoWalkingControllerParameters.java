@@ -49,6 +49,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public boolean checkECMPLocationToTriggerToeOff()
+   {
+      return false;
+   }
+
+   @Override
    public double getMinStepLengthForToeOff()
    {
       return 0.20;
