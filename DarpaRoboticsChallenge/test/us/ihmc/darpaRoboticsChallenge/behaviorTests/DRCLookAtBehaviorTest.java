@@ -33,24 +33,21 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -76,6 +73,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+
    private static final boolean DEBUG = false;
 
    private final double MAX_ANGLE_TO_TEST_RAD = 15.0 * Math.PI / 180.0;
@@ -124,11 +122,10 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
-
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testLookAtPitch() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -141,7 +138,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
       assertTrue(lookAtBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -158,7 +155,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
       assertTrue(lookAtBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -175,7 +172,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
       assertTrue(lookAtBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -190,7 +187,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
       assertTrue(lookAtBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -206,10 +203,10 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       finalHeadPose.getOrientation(finalHeadQuat);
 
       assertAxesParallel(desiredHeadQuat, finalHeadQuat);
-      
+
       return lookAtBehavior;
    }
-   
+
    private LookAtBehavior testLookAtBehavior(Point3d pointToLookAt, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -218,11 +215,12 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       communicationBridge.attachGlobalListenerToController(lookAtBehavior.getControllerGlobalPacketConsumer());
 
       lookAtBehavior.setLookAtLocation(pointToLookAt);
-
+      assertTrue( lookAtBehavior.hasInputBeenSet() );
+      
       success = success && executeBehavior(lookAtBehavior, trajectoryTime);
 
       assertTrue(success);
-      
+
       return lookAtBehavior;
    }
 

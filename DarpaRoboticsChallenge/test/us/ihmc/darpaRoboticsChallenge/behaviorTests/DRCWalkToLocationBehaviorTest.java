@@ -34,12 +34,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -50,12 +48,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -78,10 +75,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private static final boolean DEBUG = false;
 
    private final double ASSUMED_WALKING_SPEED_mPerSec = 0.2;
@@ -137,7 +134,6 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
-
 
    @AverageDuration
    @Test(timeout = 300000)
@@ -289,6 +285,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(desiredMidFeetPose);
+      assertTrue( walkToLocationBehavior.hasInputBeenSet() );
 
       return walkToLocationBehavior;
    }

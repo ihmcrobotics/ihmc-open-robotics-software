@@ -33,24 +33,21 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -73,10 +70,10 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private static final boolean DEBUG = false;
 
    private final double MAX_ANGLE_TO_TEST_RAD = 15.0 * Math.PI / 180.0;
@@ -128,11 +125,10 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
-
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testHeadPitch() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -198,7 +194,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       HeadOrientationBehavior headOrientationBehavior = testHeadOrientationBehavior(headOrientationPacket, trajectoryTime);
 
       assertTrue(headOrientationBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -213,7 +209,8 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       return headOrientationPacket;
    }
 
-   private HeadOrientationBehavior testHeadOrientationBehavior(HeadOrientationPacket headOrientationPacket, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   private HeadOrientationBehavior testHeadOrientationBehavior(HeadOrientationPacket headOrientationPacket, double trajectoryTime)
+         throws SimulationExceededMaximumTimeException
    {
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
@@ -222,6 +219,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       headOrientBehavior.initialize();
       headOrientBehavior.setInput(headOrientationPacket);
+      assertTrue( headOrientBehavior.hasInputBeenSet() );
 
       FramePose initialHeadPose = getCurrentHeadPose(fullRobotModel);
       success = success && executeBehavior(headOrientBehavior, trajectoryTime);
@@ -237,7 +235,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
 
       assertTrue(success);
-      
+
       return headOrientBehavior;
    }
 

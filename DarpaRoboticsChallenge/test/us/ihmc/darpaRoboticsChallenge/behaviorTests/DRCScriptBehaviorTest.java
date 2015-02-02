@@ -59,12 +59,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -87,12 +85,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -115,14 +112,14 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private final double POSITION_THRESHOLD = 0.007;
    private final double ORIENTATION_THRESHOLD = 0.007;
    private static final boolean DEBUG = false;
-  
+
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
@@ -493,7 +490,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       scriptBehavior.initialize();
       scriptBehavior.importChildInputPackets(inputStream.toString(), inputStream, scriptTransformToWorld);
-
+      assertTrue( scriptBehavior.hasInputBeenSet() );
+      
       return scriptBehavior;
    }
 

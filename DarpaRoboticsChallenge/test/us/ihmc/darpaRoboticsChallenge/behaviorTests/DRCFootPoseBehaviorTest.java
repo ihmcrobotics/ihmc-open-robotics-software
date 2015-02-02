@@ -161,7 +161,8 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       FootPosePacket desiredFootPosePacket = createFootPosePacket(robotSide, desiredFootPose, trajectoryTime);
       footPoseBehavior.initialize();
       footPoseBehavior.setInput(desiredFootPosePacket);
-
+      assertTrue( footPoseBehavior.hasInputBeenSet() );
+      
       ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
       behaviors.add(footPoseBehavior);
 
@@ -207,6 +208,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
          FootPosePacket desiredFootPosePacket = createFootPosePacket(robotSide, desiredFootPose, trajectoryTime);
          footPoseBehavior.initialize();
          footPoseBehavior.setInput(desiredFootPosePacket);
+         assertTrue( footPoseBehavior.hasInputBeenSet() );
 
          footPoseBehaviors.put(robotSide, footPoseBehavior);
          desiredFootPoses.put(footPoseBehavior, desiredFootPose);

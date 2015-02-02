@@ -196,6 +196,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
 
       fingerStateBehavior.initialize();
       fingerStateBehavior.setInput(fingerStatePacket);
+      assertTrue( fingerStateBehavior.hasInputBeenSet() );
 
       success = success && executeBehavior(fingerStateBehavior, trajectoryTime);
 
