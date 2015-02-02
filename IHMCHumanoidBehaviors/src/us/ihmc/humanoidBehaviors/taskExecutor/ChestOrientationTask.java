@@ -35,6 +35,14 @@ public class ChestOrientationTask implements Task
       chestOrientationPacket = new ChestOrientationPacket(chestOrientation, false, trajectoryTime);
    }
 
+   public ChestOrientationTask(ChestOrientationPacket chestOrientationPacket, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior)
+   {
+      this.chestOrientationBehavior = chestOrientationBehavior;
+      this.yoTime = yoTime;
+      this.sleepTime = 0.0;
+      this.chestOrientationPacket = chestOrientationPacket;
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
