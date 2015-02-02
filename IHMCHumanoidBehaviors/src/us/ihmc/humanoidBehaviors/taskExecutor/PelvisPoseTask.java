@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -53,6 +52,14 @@ public class PelvisPoseTask implements Task
       desiredPelvisPose.getOrientation(pelvisOrientation);
       desiredPelvisPose.getPosition(pelvisPosition);
       pelvisPosePacket = PacketControllerTools.createPelvisPosePacketForPositionAndOrientation(pelvisPosition, pelvisOrientation, trajectoryTime);
+   }
+
+   public PelvisPoseTask(PelvisPosePacket pelvisPosePacket, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior)
+   {
+      this.pelvisPoseBehavior = pelvisPoseBehavior;
+      this.yoTime = yoTime;
+      this.sleepTime = 0.0;
+      this.pelvisPosePacket = pelvisPosePacket;
    }
 
    @Override
