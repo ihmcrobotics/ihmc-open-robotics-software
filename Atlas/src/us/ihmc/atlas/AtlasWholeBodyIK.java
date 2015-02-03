@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -264,57 +265,37 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       taskJointsPose.setTarget(preferedJointPose, 3);
    }
+   
+   private HashMap<String,Double> suggestedAnglesForReseed = new HashMap<String,Double>();
+   
+
+   
 
    @Override
-   public void reseedCachedModel()
+   public HashMap<String,Double> getSuggestedAnglesForReseed()
    {
-      Vector64F randQ = getHierarchicalSolver().getRandomQ();
+      suggestedAnglesForReseed.put("l_leg_akx", 0.0);
+      suggestedAnglesForReseed.put("r_leg_akx", 0.0);
+      
+      suggestedAnglesForReseed.put("l_leg_aky", -1.1);
+      suggestedAnglesForReseed.put("r_leg_aky", -1.1);
+      
+      suggestedAnglesForReseed.put("l_leg_kny", 2.2);
+      suggestedAnglesForReseed.put("r_leg_kny", 2.2);
+      
+      suggestedAnglesForReseed.put("l_leg_hpy", -1.1);
+      suggestedAnglesForReseed.put("r_leg_hpy", -1.1);
+      
+      suggestedAnglesForReseed.put("l_leg_hpx", 0.0);
+      suggestedAnglesForReseed.put("r_leg_hpx", 0.0);
 
-      for (int i = 0; i < getNumberOfJoints(); i++)
-      {
-         boolean partOfQuietArm = false;
+      suggestedAnglesForReseed.put("l_leg_hpz", 0.0);
+      suggestedAnglesForReseed.put("r_leg_hpz", 0.0);
+      
+      suggestedAnglesForReseed.put("l_arm_elx", 1.0);
+      suggestedAnglesForReseed.put("r_arm_elx", -1.0);
 
-         for(RobotSide robotSide: RobotSide.values())
-         {
-            if( keepArmQuiet.get(robotSide).isTrue())
-            {
-               for(int j=0; j< getNumberDoFperArm(); j++){
-                  if ( armJointIds.get(robotSide)[j] == i){
-                     partOfQuietArm = true;
-                     break;
-                  }
-               }
-            }
-         }           
-
-         if( !partOfQuietArm ) {
-            cachedAnglesQ.set(i, randQ.get(i));
-         }
-      }
-      
-      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_akx"), 0.0);
-      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_akx"), 0.0);
-      
-      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_aky"), -1.1);
-      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_aky"), -1.1);
-      
-      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_kny"), 2.2);
-      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_kny"), 2.2);
-      
-      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpy"), -1.1);
-      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpy"), -1.1);
-      
-      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpx"), 0.0);
-      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpx"), 0.0);
-
-      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpz"), 0.0);
-      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpz"), 0.0);
-      
-      if( keepArmQuiet.get(RobotSide.LEFT).isFalse())
-         cachedAnglesQ.set(jointNamesToIndex.get("l_arm_elx"), 1.0);
-      if( keepArmQuiet.get(RobotSide.RIGHT).isFalse())
-         cachedAnglesQ.set(jointNamesToIndex.get("r_arm_elx"), -1.0);
-      
+      return suggestedAnglesForReseed;
    }
    
 }

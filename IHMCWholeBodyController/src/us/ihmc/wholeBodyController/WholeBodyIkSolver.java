@@ -38,7 +38,7 @@ abstract public class WholeBodyIkSolver
       NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
    }
-   
+
    public enum ComputeResult { FAILED_INVALID, FAILED_NOT_CONVERGED, SUCCEEDED };
 
    ///--------------- Constants -----------------------------------------
@@ -130,7 +130,7 @@ abstract public class WholeBodyIkSolver
     * 1: show a resume of the errors.
     * 2: Lot of data...
     */
-   
+
    public void setVerbosityLevel(int level)
    {
       hierarchicalSolver.setVerbosityLevel(level);
@@ -296,7 +296,7 @@ abstract public class WholeBodyIkSolver
       }
 
       taskJointsPose = new HierarchicalTask_JointsPose(fk);
-      
+
       taskLegPose.setName( "left Leg Pose");
       taskComPosition.setName( "COM Position");
       taskEndEffectorPose.get(RIGHT).setName( "Right Hand Pose" );
@@ -357,7 +357,7 @@ abstract public class WholeBodyIkSolver
       }
 
       double preferedKneeAngle = 2.6 - Math.min(zL , zR);
-      
+
       if( preferedKneeAngle < 0.4) preferedKneeAngle = 0.4;
 
       preferedJointPose.set(jointNamesToIndex.get("l_leg_kny"), preferedKneeAngle);
@@ -373,10 +373,10 @@ abstract public class WholeBodyIkSolver
    {
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
       taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
-      
+
       setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
    }
-   
+
    /*
     * We call "GripperPalm" the location where grasping shall be made.
     * Its position corresponds with the blue cylinder of the ModifiafleCylinderGrabber.
@@ -424,7 +424,7 @@ abstract public class WholeBodyIkSolver
          case DOF_NONE:
             handTask.setEnabled(false);
             break;
-            
+
          case DOF_3P:
             handTask.setEnabled(true);
 
@@ -439,12 +439,12 @@ abstract public class WholeBodyIkSolver
          case DOF_3P2R:
             handTask.setEnabled(true);
             handTask.setWeightError( new Vector64F(6, 1,1,1,  1,1,1 ) );
-            
+
             Vector64F target = handTask.getTarget();
             Matrix3d rot = new Matrix3d();
             rot.set( new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) ) );
             handTask.disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m02, rot.m12, rot.m22)); 
-            
+
             break;
          case DOF_3P3R:
             handTask.setEnabled(true);
@@ -539,9 +539,58 @@ abstract public class WholeBodyIkSolver
       }
       return ret;
    }
-   
-   public abstract void reseedCachedModel();
-   
+
+   public abstract HashMap<String,Double> getSuggestedAnglesForReseed();
+
+
+   public void reseedCachedModel()
+   {
+      Vector64F newQ = getHierarchicalSolver().getRandomQ();
+
+      HashMap<String,Double> suggestedQ = getSuggestedAnglesForReseed();
+
+      for( Map.Entry<String,Double> entry: suggestedQ.entrySet())
+      {
+         int index = jointNamesToIndex.get(entry.getKey());
+         newQ.set( index,  entry.getValue() );
+      }
+
+      for (int i = 0; i < getNumberOfJoints(); i++)
+      {
+         boolean partOfQuietArm = false;
+         boolean partOfQuietLeg = false;
+
+         for(RobotSide robotSide: RobotSide.values())
+         {
+            if( keepArmQuiet.get(robotSide).isTrue())
+            {
+               for(int j=0; j< getNumberDoFperArm(); j++){
+                  if ( armJointIds.get(robotSide)[j] == i){
+                     partOfQuietArm = true;
+                     break;
+                  }
+               }
+            }
+         }
+         if( lockLegs )
+         {
+            for(RobotSide robotSide: RobotSide.values())
+            {
+               for(int j=0; j< getNumberDoFperLeg(); j++){
+                  if ( legJointIds.get(robotSide)[j] == i){
+                     partOfQuietLeg = true;
+                     break;
+                  }
+               }
+            }
+         }
+
+         if( !partOfQuietArm && ! partOfQuietLeg) {
+            cachedAnglesQ.set(i, newQ.get(i));
+         }
+      }
+   }
+
 
    public ComputeResult compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
    {
@@ -553,7 +602,7 @@ abstract public class WholeBodyIkSolver
       switch(opt)
       {
       case RESEED:
-         
+
          reseedCachedModel();         
 
          break;
@@ -579,20 +628,20 @@ abstract public class WholeBodyIkSolver
       ComputeResult ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
 
       int reseedLeft = maxNumberOfAutomaticReseeds;
-      
+
       while( reseedLeft > 0 && ret != ComputeResult.SUCCEEDED)
       {
          reseedCachedModel();
          ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
          reseedLeft--;
       }
-    
+
       if(opt != ComputeOption.RESEED)
       {
          keepArmQuiet.get(LEFT).setValue(true);
          keepArmQuiet.get(RIGHT).setValue(true);
       }
-      
+
       return ret;
    }
 
@@ -644,19 +693,19 @@ abstract public class WholeBodyIkSolver
          adjustOtherFoot(actualSdfModel);
 
          checkIfArmShallStayQuiet(cachedAnglesQ);
-         
+
          q_out.set(cachedAnglesQ);
          ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
-         
+
       }
       catch (Exception e)
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      
+
       ComputeResult result ;
-      
+
       if( ret == -2) 
          result = ComputeResult.FAILED_INVALID;
       else if( ret == -1)
@@ -751,7 +800,7 @@ abstract public class WholeBodyIkSolver
    {
       return getDesiredBodyFrame(getGripperAttachmentLinkName(handSide), parentFrame);
    }
-   
+
    public ReferenceFrame getDesiredGripperPalmFrame(RobotSide handSide, ReferenceFrame parentFrame)
    {
       return getDesiredBodyFrame(getGripperPalmLinkName(handSide), parentFrame);

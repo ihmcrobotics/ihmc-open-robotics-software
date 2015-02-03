@@ -77,7 +77,7 @@ public class AtlasWholeBodyIkSolverTest
    {
       initializeFullRobotModelJointAngles(actualRobotModel);
       
-      wholeBodySolver.maxNumberOfAutomaticReseeds = 20; // "I am not Feeling Lucky"" (TM Davide Ffaconti)
+      wholeBodySolver.maxNumberOfAutomaticReseeds = 20; // "I am NOT Feeling Lucky"" (© Davide Faconti)
       
       wholeBodyTest = new WholeBodyIkSolverTestFactory(atlasRobotModel, actualRobotModel, wholeBodySolver);
      
