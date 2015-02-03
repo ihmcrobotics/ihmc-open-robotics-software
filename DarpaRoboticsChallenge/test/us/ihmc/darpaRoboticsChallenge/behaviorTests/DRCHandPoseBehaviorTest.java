@@ -67,6 +67,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       {
          drcBehaviorTestHelper.closeAndDispose();
          drcBehaviorTestHelper = null;
+         armJointNames = null;
+         armJointIndices = null;
       }
 
       GlobalTimer.clearTimers();
@@ -93,9 +95,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private ArmJointName[] armJointNames;
    private int numberOfArmJoints;
-   private final LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
-
-   private boolean returnValue = true;
+   private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
 
    @Before
    public void setUp()
