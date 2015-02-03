@@ -25,6 +25,7 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.DateTools;
+import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.code.unitTesting.youtube.YouTubeCredentials;
 import us.ihmc.utilities.code.unitTesting.youtube.YouTubeUploader;
 import us.ihmc.utilities.gui.GUIMessageFrame;
@@ -189,8 +190,8 @@ public class BambooTools
          // the other specified directories don't exist
          System.out.println("Saving movies to tmp dir before uploading..");
 
-         String tmpDir = System.getProperty("java.io.tmpdir");
-         File movieDir = new File(tmpDir, "atlas-movies");
+         String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
+         File movieDir = new File(temporaryDirectoryPathName, "atlas-movies");
          if (movieDir.exists() || movieDir.mkdirs())
          {
             System.out.println("Using " + movieDir.getAbsolutePath());
