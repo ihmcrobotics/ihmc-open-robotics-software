@@ -69,7 +69,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcBehaviorTestHelper != null)
       {
-         drcBehaviorTestHelper.destroySimulation();
+         drcBehaviorTestHelper.closeAndDispose();
          drcBehaviorTestHelper = null;
       }
 
@@ -84,13 +84,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private final double POSITION_THRESHOLD = 0.1;
    private final double ORIENTATION_THRESHOLD = 0.05;
 
-   private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-
-   private final KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCControllerCommunicator");
-   private final KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCJunkyCommunicator");
-
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private RobotDataReceiver robotDataReceiver;
    private SDFRobot robot;
@@ -101,9 +94,17 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      fullRobotModel = getRobotModel().createFullRobotModel();
+      DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
+      
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+            "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+            "DRCJunkyCommunicator");
+      
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), fullRobotModel, controllerCommunicator);
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
+
+      fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
 
       robot = drcBehaviorTestHelper.getRobot();
 
