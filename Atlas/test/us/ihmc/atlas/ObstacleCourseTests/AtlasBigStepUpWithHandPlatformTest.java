@@ -6,7 +6,10 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCBigStepUpWithHandPlatformTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 
+@CustomJob(job = CustomJobType.FlatAndPlatform)
 public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlatformTest
 {
    private final AtlasRobotModel robotModel;

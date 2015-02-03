@@ -34,6 +34,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVe
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -41,6 +43,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 /**
  * Created by dstephen on 2/11/14.
  */
+@CustomJob(job = CustomJobType.Utilities)
 public class AtlasSDFVerificationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   

@@ -16,6 +16,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -25,6 +27,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolverTestFactory;
 
+@CustomJob(job = CustomJobType.WholeBody)
 public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
 {
    static private final AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
@@ -36,10 +39,10 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTestFactory
    static private boolean VISUALIZE_GUI = false;   
 
    static FullRobotModelVisualizer modelVisualizer;
-   private ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
-   private ArrayList<Matrix4d> LeftHandToWorldArray = new ArrayList<Matrix4d>();
-   private ArrayList<Matrix4d> RightHandToFootArray = new ArrayList<Matrix4d>();
-   private ArrayList<Matrix4d> LeftHandToFootArray = new ArrayList<Matrix4d>();
+   private final ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
+   private final ArrayList<Matrix4d> LeftHandToWorldArray = new ArrayList<Matrix4d>();
+   private final ArrayList<Matrix4d> RightHandToFootArray = new ArrayList<Matrix4d>();
+   private final ArrayList<Matrix4d> LeftHandToFootArray = new ArrayList<Matrix4d>();
 
    public AtlasWholeBodyIkSolverTest() throws InterruptedException
    {
