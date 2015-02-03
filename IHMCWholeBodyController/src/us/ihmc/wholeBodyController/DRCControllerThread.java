@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.CommonHumanoidReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
+import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -28,7 +29,9 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -46,30 +49,29 @@ import us.ihmc.yoUtilities.time.ExecutionTimer;
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
-   private static final boolean SHOW_INERTIA_GRAPHICS =false;
+   private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
    private static final boolean SHOW_WRIST_SENSOR_WRENCHES = true;
+   private static final boolean SHOW_LEG_COM = false;
 
- 
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
    private static final boolean ALLOW_MODEL_CORRUPTION = false;
-   
+
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
    private final RobotVisualizer robotVisualizer;
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
    private final long estimatorTicksPerControlTick;
-   
+
    private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
-   
 
    private final SDFFullRobotModel controllerFullRobotModel;
    private final OutputProcessor outputProcessor;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
-   
+
    private final ReferenceFrames controllerReferenceFrames;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -77,16 +79,16 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
    private final DRCOutputWriter outputWriter;
-   
+
    private final RobotController robotController;
-   
+
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
    private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
    private final LongYoVariable totalDelay = new LongYoVariable("totalDelay", registry);
    private final LongYoVariable expectedEstimatorTick = new LongYoVariable("expectedEstimatorTick", registry);
    private final LongYoVariable controllerLeadsEstimatorTicks = new LongYoVariable("controllerLeadsEstimatorTicks", registry);
    private final LongYoVariable controllerLagsEstimatorTicks = new LongYoVariable("controllerLagsEstimatorTicks", registry);
-   
+
    /*
     * Debug variables
     */
@@ -98,13 +100,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final LongYoVariable actualControlDT = new LongYoVariable("actualControlDT", registry);
    private final LongYoVariable timePassedSinceEstimator = new LongYoVariable("timePassedSinceEstimator", registry);
    private final LongYoVariable timePassedBetweenEstimatorTicks = new LongYoVariable("timePassedBetweenEstimatorTicks", registry);
-   
-   
+
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
-   
-   public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
-         ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
-         double gravity, double estimatorDT)
+
+   public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
+         MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter,
+         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
@@ -114,7 +115,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
-      
+
       if (ALLOW_MODEL_CORRUPTION)
       {
          fullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
@@ -123,16 +124,16 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          fullRobotModelCorruptor = null;
       }
-      
+
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
 
       outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
 
       ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
-      
+
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
-      if(lidarParameters != null)
+      if (lidarParameters != null)
       {
          listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
       }
@@ -149,22 +150,22 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor, controllerReferenceFrames, sensorInformation,
-            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, yoGraphicsListRegistry,
-            registry, dataProducer, listOfJointsToIgnore.toArray(new InverseDynamicsJoint[]{}));
-      
+            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, yoGraphicsListRegistry, registry,
+            dataProducer, listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {}));
+
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());
       registry.addChild(outputWriter.getControllerYoVariableRegistry());
-      
+
       lastEstimatorStartTime.set(Long.MIN_VALUE);
       expectedEstimatorTick.set(estimatorDTInNS);
-      
-      if(robotVisualizer != null)
+
+      if (robotVisualizer != null)
       {
          robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
       }
    }
-   
+
    public FullRobotModelCorruptor getFullRobotModelCorruptor()
    {
       return fullRobotModelCorruptor;
@@ -172,8 +173,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, OutputProcessor outputProcessor, ReferenceFrames referenceFramesForController,
          DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
-         double gravity, ForceSensorDataHolder forceSensorDataHolderForController, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         double gravity, ForceSensorDataHolder forceSensorDataHolderForController,final  YoGraphicsListRegistry yoGraphicsListRegistry,
+         final YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 
@@ -202,7 +203,17 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
           controllerFactory.addUpdatable(forceSensorDataVisualizer);
       }
       
-      
+      if (SHOW_LEG_COM)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            String name = side.name() + "Leg";
+            CenterOfMassVisualizer comVisualizer = new CenterOfMassVisualizer(name, controllerModel.getLegJoint(side, LegJointName.HIP_PITCH), twistCalculator, registry,
+                  yoGraphicsListRegistry);
+            controllerFactory.addUpdatable(comVisualizer);
+         }
+      }
+           
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
             yoGraphicsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
             dataProducer, jointsToIgnore);
@@ -285,28 +296,27 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       runController.set(threadDataSynchronizer.receiveEstimatorStateForController());
       
       
-      
-      if(runController.getBooleanValue())
+      if (runController.getBooleanValue())
       {
          // Skip the first estimatorTicksPerControlTick estimator ticks
-         if(threadDataSynchronizer.getEstimatorTick() < estimatorTicksPerControlTick)
+         if (threadDataSynchronizer.getEstimatorTick() < estimatorTicksPerControlTick)
          {
             runController.set(false);
          }
          else
-         {         
+         {
             long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
             long timestamp = threadDataSynchronizer.getTimestamp();
             controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
             actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
-            
-            if(expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
+
+            if (expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
             {
-               if(expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
+               if (expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
                {
                   controllerLeadsEstimatorTicks.increment();
                }
-               else if(expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
+               else if (expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
                {
                   controllerLagsEstimatorTicks.increment();
                }
@@ -315,16 +325,16 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                lastEstimatorTick.set(threadDataSynchronizer.getEstimatorTick());
                lastEstimatorClockStartTime.set(threadDataSynchronizer.getEstimatorClockStartTime());
                lastControllerClockTime.set(currentClockTime);
-               timePassedSinceEstimator.set(currentClockTime - lastEstimatorStartTime.getLongValue()) ; 
+               timePassedSinceEstimator.set(currentClockTime - lastEstimatorStartTime.getLongValue());
                timePassedBetweenEstimatorTicks.set(estimatorStartTime - lastEstimatorStartTime.getLongValue());
             }
-            
+
             expectedEstimatorTick.set(threadDataSynchronizer.getEstimatorTick() + estimatorTicksPerControlTick);
             controllerStartTime.set(currentClockTime);
             lastEstimatorStartTime.set(estimatorStartTime);
          }
       }
-      
+
    }
 
    @Override
@@ -353,12 +363,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
          
          //TODO: Do something with the points
-         threadDataSynchronizer.publishControllerData(new Point3d(), new Point3d());
-         if(robotVisualizer != null)
+         threadDataSynchronizer.publishControllerData(new Point3d(), new Point3d());         
+         if (robotVisualizer != null)
          {
             robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
          }
-      }      
+      }
    }
 
    @Override
@@ -388,17 +398,17 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
       else
       {
-         return lastEstimatorStartTime.getLongValue()  + controlDTInNS + estimatorDTInNS;
+         return lastEstimatorStartTime.getLongValue() + controlDTInNS + estimatorDTInNS;
       }
    }
-   
+
    public RobotController getRobotController()
    {
-	   return robotController;
+      return robotController;
    }
-   
+
    public FullRobotModel getFullRobotModel()
    {
-	   return controllerFullRobotModel;
+      return controllerFullRobotModel;
    }
 }

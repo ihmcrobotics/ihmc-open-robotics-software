@@ -1025,8 +1025,25 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       // Paint vertical index line (but only once):
 
       paintVerticalIndexLines(graphics, graphWidth, graphHeight, index, inPoint, outPoint, leftPlotIndex, rightPlotIndex);
+      paintVerticalTimeGrids(graphics, graphWidth,graphHeight);
       paintVariableNamesAndValues(graphics, false);
    }
+   
+   
+
+   private void paintVerticalTimeGrids(Graphics graphics, int graphWidth, int graphHeight)
+   {
+      Graphics2D g2d = (Graphics2D) graphics;
+      graphics.setColor(Color.green);
+      g2d.setStroke(wideStroke);
+      
+      double[] times = this.timeDataHolder.getTimeData();
+      //graphics.drawLine(linex, 0, linex, graphTopYValue);
+
+      graphics.setColor(Color.red);
+      g2d.setStroke(normalStroke);
+   }
+
 
    private void paintVerticalIndexLines(Graphics graphics, int graphWidth, int graphHeight, int index, int inPoint, int outPoint, int leftPlotIndex,
            int rightPlotIndex)
