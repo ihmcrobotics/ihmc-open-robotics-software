@@ -3,11 +3,14 @@ package us.ihmc.valkyrie;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseEveryBuildTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 
+@CustomJob(job = CustomJobType.ObstacleCourse)
 public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
 {
 
-   private DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
    @Override
    public DRCRobotModel getRobotModel()
    {
