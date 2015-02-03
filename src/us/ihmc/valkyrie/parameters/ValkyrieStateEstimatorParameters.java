@@ -226,6 +226,12 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
+   public boolean useControllerDesiredCenterOfPressure()
+   {
+      return false;
+   }
+
+   @Override
    public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
