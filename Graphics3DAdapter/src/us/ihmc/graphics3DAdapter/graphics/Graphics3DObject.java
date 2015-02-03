@@ -1090,7 +1090,7 @@ public class Graphics3DObject
 
    public Graphics3DInstruction addTeaPot(AppearanceDefinition appearance)
    {
-      return addModelFile("Models/Teapot.obj", appearance);
+      return addModelFile("models/Teapot.obj", appearance);
    }
 
    public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance)
