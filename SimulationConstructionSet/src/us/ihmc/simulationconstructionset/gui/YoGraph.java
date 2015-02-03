@@ -1037,7 +1037,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       graphics.setColor(Color.green);
       g2d.setStroke(wideStroke);
       
-      double[] times = this.timeDataHolder.getTimeData();
+//      double[] times = this.timeDataHolder.getTimeData();
       //graphics.drawLine(linex, 0, linex, graphTopYValue);
 
       graphics.setColor(Color.red);
