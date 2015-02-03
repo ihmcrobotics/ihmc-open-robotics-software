@@ -220,6 +220,12 @@ public class ComposableStateEstimatorEvaluator
             return true;
          }
 
+         @Override
+         public boolean useControllerDesiredCenterOfPressure()
+         {
+            return false;
+         }
+
          public boolean useTwistForPelvisLinearStateEstimation()
          {
             return true;

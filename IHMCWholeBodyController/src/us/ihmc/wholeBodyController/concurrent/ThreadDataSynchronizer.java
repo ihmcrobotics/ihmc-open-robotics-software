@@ -2,29 +2,30 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
-import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
- 
+
 public class ThreadDataSynchronizer
 {
    private final SDFFullRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
+   private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
 
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
+   private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
 
    private final ConcurrentCopier<IntermediateEstimatorStateHolder> estimatorStateCopier;
-   
+
    private final ConcurrentCopier<ControllerDataForEstimatorHolder> controllerStateCopier;
-   
+
    private long timestamp;
    private long estimatorClockStartTime;
    private long estimatorTick;
@@ -34,18 +35,21 @@ public class ThreadDataSynchronizer
       estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
+      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFullRobotModel.getSoleFrames());
 
       controllerFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
       controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
+      controllerCenterOfPressureDataHolder =  new CenterOfPressureDataHolder(controllerFullRobotModel.getSoleFrames());
 
       IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(wholeBodyControlParameters,
             estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder,
             estimatorRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
       estimatorStateCopier = new ConcurrentCopier<IntermediateEstimatorStateHolder>(stateCopierBuilder);
-      
-      controllerStateCopier = new ConcurrentCopier<>(new ControllerDataForEstimatorHolder.Builder());
 
+      ControllerDataForEstimatorHolder.Builder controllerStateCopierBuilder = new ControllerDataForEstimatorHolder.Builder(estimatorCenterOfPressureDataHolder,
+            controllerCenterOfPressureDataHolder);
+      controllerStateCopier = new ConcurrentCopier<>(controllerStateCopierBuilder);
    }
 
    public boolean receiveEstimatorStateForController()
@@ -102,6 +106,16 @@ public class ThreadDataSynchronizer
       return controllerRawJointSensorDataHolderMap;
    }
 
+   public CenterOfPressureDataHolder getEstimatorCenterOfPressureDataHolder()
+   {
+      return estimatorCenterOfPressureDataHolder;
+   }
+
+   public CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder()
+   {
+      return controllerCenterOfPressureDataHolder;
+   }
+
    public long getTimestamp()
    {
       return timestamp;
@@ -117,24 +131,22 @@ public class ThreadDataSynchronizer
       return estimatorTick;
    }
 
-   public void publishControllerData(Point3d left, Point3d right)
+   public void publishControllerData()
    {
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForWriting();
-      if(holder != null)
+      if (holder != null)
       {
-         holder.setCenterOfPressureInSoleFrame(RobotSide.LEFT, left);
-         holder.setCenterOfPressureInSoleFrame(RobotSide.RIGHT, right);
+         holder.getCenterOfPressureInSoleFrame();
          controllerStateCopier.commit();
       }
    }
-   
-   public boolean receiveControllerDataForEstimator(Point3d leftCoPToPack, Point3d rightCoPToPack)
+
+   public boolean receiveControllerDataForEstimator()
    {
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForReading();
-      if(holder != null)
+      if (holder != null)
       {
-         holder.packCenterOfPressureInSoleFrame(leftCoPToPack, RobotSide.LEFT);
-         holder.packCenterOfPressureInSoleFrame(rightCoPToPack, RobotSide.RIGHT);
+         holder.setCenterOfPressureInSoleFrame();
          return true;
       }
       else
@@ -142,6 +154,5 @@ public class ThreadDataSynchronizer
          return false;
       }
    }
-   
 
 }

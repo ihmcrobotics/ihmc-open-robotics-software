@@ -11,6 +11,8 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    
    public abstract boolean trustCoPAsNonSlippingContactPoint();
 
+   public abstract boolean useControllerDesiredCenterOfPressure();
+
    public boolean useIMUsForSpineJointVelocityEstimation();
    public double getAlphaIMUsForSpineJointVelocityEstimation();
    public abstract Pair<String, String> getIMUsForSpineJointVelocityEstimation();

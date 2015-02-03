@@ -8,9 +8,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
@@ -28,8 +33,10 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final DesiredHighLevelStateProvider highLevelStateProvider;
 
+   private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
+
    public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
-         MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders)
+         MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
    {
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry);
@@ -46,6 +53,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       }
       this.initialBehavior = initialBehavior;
       this.momentumBasedController = momentumBasedController;
+      this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.registry.addChild(momentumBasedController.getYoVariableRegistry());
    }
 
@@ -100,8 +108,19 @@ public class HighLevelHumanoidControllerManager implements RobotController
       
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+      reportDesiredCenterOfPressureForEstimator();
    }
    
+   private void reportDesiredCenterOfPressureForEstimator()
+   {
+      SideDependentList<ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFeet.get(robotSide));
+         centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredCoP, robotSide);
+      }
+   }
+
    public void addHighLevelBehavior(HighLevelBehavior highLevelBehavior, boolean transitionRequested)
    {
       // Enable transition between every existing state of the state machine

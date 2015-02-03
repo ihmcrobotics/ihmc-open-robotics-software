@@ -612,6 +612,11 @@ public class SDFFullRobotModel implements FullRobotModel
       return soleFrames.get(robotSide);
    }
 
+   public SideDependentList<ReferenceFrame> getSoleFrames()
+   {
+      return soleFrames;
+   }
+
    /** {@inheritDoc} */
    @Override
    public ReferenceFrame getHandControlFrame(RobotSide robotSide)
