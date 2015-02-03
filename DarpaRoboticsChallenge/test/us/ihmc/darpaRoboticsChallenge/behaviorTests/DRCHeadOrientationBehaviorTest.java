@@ -74,7 +74,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHeadOrientationBehaviorTest.class + " after class.");
    }
 
    private static final boolean DEBUG = false;
