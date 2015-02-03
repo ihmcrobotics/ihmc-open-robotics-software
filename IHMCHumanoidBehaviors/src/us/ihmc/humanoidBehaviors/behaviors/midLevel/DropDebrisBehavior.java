@@ -43,8 +43,7 @@ public class DropDebrisBehavior extends BehaviorInterface
 
    private final DoubleYoVariable yoTime;
 
-   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime)
+   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
@@ -96,8 +95,7 @@ public class DropDebrisBehavior extends BehaviorInterface
       tempPosition.set(0.5, side.negateIfRightSide(0.25), 0.6);
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, Math.toRadians(20.0), 0.0);
       submitSingleTaskStageHandPose(armCloseToHomePose, side, tempPosition, tempOrientation);
-      
-      
+
       //put the robot in its default position (arm, pelvis and chest)
       submitGoToDefaultPositionTasks(side);
 
@@ -105,8 +103,8 @@ public class DropDebrisBehavior extends BehaviorInterface
 
    private void submitGoToDefaultPositionTasks(RobotSide side)
    {
-      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
-            new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, trajectoryTime), handPoseBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, trajectoryTime),
+            handPoseBehavior, yoTime));
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
             new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side.getOppositeSide(), trajectoryTime), handPoseBehavior, yoTime));
 
