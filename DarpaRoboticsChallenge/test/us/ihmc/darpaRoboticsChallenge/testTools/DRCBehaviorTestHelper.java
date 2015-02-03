@@ -2,30 +2,39 @@ package us.ihmc.darpaRoboticsChallenge.testTools;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
+import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -33,66 +42,81 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private DoubleYoVariable yoTimeRobot;
-   private DoubleYoVariable yoTimeBehaviorDispatcher;
+   private final DoubleYoVariable yoTimeRobot;
+   private final DoubleYoVariable yoTimeBehaviorDispatcher;
+   private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
+
+   private final DRCRobotModel drcRobotModel;
+   private final FullRobotModel fullRobotModel;
 
    private final KryoPacketCommunicator networkObjectCommunicator;
    private final KryoPacketCommunicator controllerCommunicator;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
    private final RobotDataReceiver robotDataReceiver;
-   private final BehaviorDisptacher behaviorDispatcher;
    private final ReferenceFrames referenceFrames;
-   private final FullRobotModel fullRobotModel;
-   
-   private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
-   
-   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, KryoPacketCommunicator networkObjectCommunicator,
+
+   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+   private final CapturePointUpdatable capturePointUpdatable;
+   private final SideDependentList<WristForceSensorFilteredUpdatable> wristForceSensorUpdatables;
+
+   private final BehaviorDisptacher behaviorDispatcher;
+
+   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation,
+         SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, KryoPacketCommunicator networkObjectCommunicator,
          KryoPacketCommunicator controllerCommunicator)
    {
-      this(new DRCDemo01NavigationEnvironment(), networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
-            false, robotModel, controllerCommunicator);
+      this(new DRCDemo01NavigationEnvironment(), networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, false,
+            robotModel, controllerCommunicator);
    }
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
          KryoPacketCommunicator networkObjectCommunicator, KryoPacketCommunicator controllerCommunicator)
    {
-      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
-            false, robotModel, controllerCommunicator);
+      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, false, robotModel,
+            controllerCommunicator);
    }
 
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, KryoPacketCommunicator networkObjectCommunicator, String name,
-         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, boolean startNetworkProcessor, DRCRobotModel robotModel, KryoPacketCommunicator controllerCommunicator)
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, KryoPacketCommunicator networkObjectCommunicator,
+         String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+         boolean startNetworkProcessor, DRCRobotModel robotModel, KryoPacketCommunicator controllerCommunicator)
    {
       super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
             startNetworkProcessor, robotModel);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
-      
+
+      this.drcRobotModel = robotModel;
       this.fullRobotModel = robotModel.createFullRobotModel();
       yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
-      
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      this.networkObjectCommunicator = networkObjectCommunicator;
+      this.controllerCommunicator = controllerCommunicator;
+      behaviorCommunicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, controllerCommunicator, registry);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      behaviorCommunicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, controllerCommunicator, registry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      this.networkObjectCommunicator = networkObjectCommunicator;
-      this.controllerCommunicator = controllerCommunicator;
+      capturePointUpdatable = createCapturePointUpdateable(yoGraphicsListRegistry);
+      wristForceSensorUpdatables = createWristForceSensorUpdateables();
+      updatables.add(capturePointUpdatable);
+      updatables.add(wristForceSensorUpdatables.get(RobotSide.LEFT));
+      updatables.add(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, networkObjectCommunicator, controllerCommunicator, robotDataReceiver, yoGraphicsListRegistry);
-      
+
       referenceFrames = robotDataReceiver.getReferenceFrames();
    }
-   
+
    public FullRobotModel getFullRobotModel()
    {
       boolean robotModelIsUpToDate = yoTimeRobot.getDoubleValue() == yoTimeLastFullRobotModelUpdate.getDoubleValue();
-      
-      if ( !robotModelIsUpToDate )
+
+      if (!robotModelIsUpToDate)
       {
          updateRobotModel();
       }
@@ -104,7 +128,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       return referenceFrames;
    }
-   
+
    public BehaviorDisptacher getBehaviorDisptacher()
    {
       return behaviorDispatcher;
@@ -114,17 +138,27 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       return robotDataReceiver;
    }
-   
+
    public DoubleYoVariable getYoTime()
    {
       return yoTimeRobot;
+   }
+
+   public CapturePointUpdatable getCapturePointUpdatable()
+   {
+      return capturePointUpdatable;
+   }
+
+   public WristForceSensorFilteredUpdatable getWristForceSensorUpdatable(RobotSide robotSide)
+   {
+      return wristForceSensorUpdatables.get(robotSide);
    }
 
    public BehaviorCommunicationBridge getBehaviorCommunicationBridge()
    {
       return behaviorCommunicationBridge;
    }
-   
+
    public void updateRobotModel()
    {
       yoTimeLastFullRobotModelUpdate.set(yoTimeRobot.getDoubleValue());
@@ -138,7 +172,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       Thread dispatcherThread = new Thread(behaviorDispatcher, "BehaviorDispatcher");
       dispatcherThread.start();
-      
+
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = new HumanoidBehaviorTypePacket(testBehaviorType);
       networkObjectCommunicator.send(requestTestBehaviorPacket);
 
@@ -161,6 +195,36 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       BehaviorDisptacher ret = new BehaviorDisptacher(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
             behaviorCommunicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
 
+      ret.addUpdatable(capturePointUpdatable);
+      ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.LEFT));
+      ret.addUpdatable(wristForceSensorUpdatables.get(RobotSide.RIGHT));
+
+      return ret;
+   }
+
+   private SideDependentList<WristForceSensorFilteredUpdatable> createWristForceSensorUpdateables()
+   {
+      SideDependentList<WristForceSensorFilteredUpdatable> ret = new SideDependentList<WristForceSensorFilteredUpdatable>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel,
+               drcRobotModel.getSensorInformation(), robotDataReceiver.getForceSensorDataHolder(), IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT,
+               controllerCommunicator, registry);
+
+         ret.put(robotSide, wristSensorUpdatable);
+      }
+
+      return ret;
+   }
+
+   private CapturePointUpdatable createCapturePointUpdateable(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
+      controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
+
+      CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
+
       return ret;
    }
 
@@ -170,7 +234,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          behaviorDispatcher.closeAndDispose();
       }
-      
+
       if (networkObjectCommunicator != null)
       {
          networkObjectCommunicator.close();
@@ -190,21 +254,62 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       super.destroySimulation();
    }
-   
-   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime) throws SimulationExceededMaximumTimeException
-   {
-      behaviorCommunicationBridge.attachGlobalListenerToController(behavior.getControllerGlobalPacketConsumer());
 
-      BehaviorRunner behaviorRunner = new BehaviorRunner(behavior);
-      Thread behaviorThread = new Thread(behaviorRunner);
-      behaviorThread.start();
+   public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final SideDependentList<BehaviorInterface> behaviors, double simulationRunTime)
+         throws SimulationExceededMaximumTimeException
+   {
+      ArrayList<BehaviorInterface> behaviorArrayList = new ArrayList<BehaviorInterface>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         behaviorArrayList.add(behaviors.get(robotSide));
+      }
+
+      boolean ret = executeBehaviorsSimulateAndBlockAndCatchExceptions(behaviorArrayList, simulationRunTime);
+      return ret;
+   }
+
+   public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final ArrayList<BehaviorInterface> behaviors, double simulationRunTime)
+         throws SimulationExceededMaximumTimeException
+   {
+      ArrayList<BehaviorRunner> behaviorRunners = new ArrayList<DRCBehaviorTestHelper.BehaviorRunner>();
+
+      for (BehaviorInterface behavior : behaviors)
+      {
+         BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
+         behaviorRunners.add(behaviorRunner);
+      }
+
+      boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime);
+
+      for (BehaviorRunner behaviorRunner : behaviorRunners)
+      {
+         behaviorRunner.closeAndDispose();
+      }
+
+      return ret;
+   }
+
+   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime)
+         throws SimulationExceededMaximumTimeException
+   {
+      BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
       boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime);
       behaviorRunner.closeAndDispose();
 
       return ret;
    }
-   
+
+   private BehaviorRunner startNewBehaviorRunnerThread(final BehaviorInterface behavior)
+   {
+      BehaviorRunner behaviorRunner = new BehaviorRunner(behavior);
+      Thread behaviorThread = new Thread(behaviorRunner);
+      behaviorThread.start();
+
+      return behaviorRunner;
+   }
+
    private class BehaviorRunner implements Runnable
    {
       private boolean isRunning = true;
@@ -213,6 +318,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       public BehaviorRunner(BehaviorInterface behavior)
       {
          this.behavior = behavior;
+         behaviorCommunicationBridge.attachGlobalListenerToController(behavior.getControllerGlobalPacketConsumer());
       }
 
       public void run()
@@ -220,6 +326,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          while (isRunning)
          {
             behavior.doControl();
+
+            for (Updatable updatable : updatables)
+            {
+               updatable.update(yoTimeRobot.getDoubleValue());
+            }
          }
       }
 
