@@ -8,11 +8,14 @@ import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 
+@CustomJob(job = CustomJobType.Utilities)
 public class InefficientPushRodTransmissionTest
 {
    private static final boolean DEBUG = false;
