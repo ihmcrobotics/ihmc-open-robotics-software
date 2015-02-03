@@ -70,7 +70,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    }
    
    @AfterClass
-   public void printMemoryUsageAfterClass()
+   public static void printMemoryUsageAfterClass()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
    }
