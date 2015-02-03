@@ -210,7 +210,9 @@ public class RobotTest
       Vector3d linearMomentum0 = computeLinearMomentum(robot);
 
       double dt = 1e-8;
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.setDT(1e-10, 10);
       scs.setGroundVisible(false);
       Thread simThread = new Thread(scs, "sim thread");
@@ -974,7 +976,7 @@ public class RobotTest
       SimulationConstructionSet scs = null;
       if (SHOW_GUI)
       {
-         scs = new SimulationConstructionSet(robot, SHOW_GUI);
+         scs = new SimulationConstructionSet(robot);
          int recordFrequency = 1;
          scs.setDT(simulateDT, recordFrequency);
          scs.startOnAThread();

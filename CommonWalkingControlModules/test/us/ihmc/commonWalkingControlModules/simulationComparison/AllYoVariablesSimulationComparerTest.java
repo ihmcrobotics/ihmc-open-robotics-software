@@ -165,8 +165,10 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		AllYoVariablesSimulationComparer comparerWithLowEpsilon = new AllYoVariablesSimulationComparer(0.01);
 
-		SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, false);
-		SimulationConstructionSet scs2 = new SimulationConstructionSet(robot2, false);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(false);
+		SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, parameters);
+		SimulationConstructionSet scs2 = new SimulationConstructionSet(robot2, parameters);
 		scs1.getRootRegistry().addChild(rootRegistry1);
 		scs2.getRootRegistry().addChild(rootRegistry2);
 		
@@ -190,11 +192,14 @@ public class AllYoVariablesSimulationComparerTest
 	@Test(timeout=300000)
 	public void testWithHighEpsilon()
 	{
-		AllYoVariablesSimulationComparer comparerWithLargeEpsilon = new AllYoVariablesSimulationComparer(5.0);
+	   AllYoVariablesSimulationComparer comparerWithLargeEpsilon = new AllYoVariablesSimulationComparer(5.0);
 
-		SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, false);
-		SimulationConstructionSet scs2 = new SimulationConstructionSet(robot2, false);
-		scs1.getRootRegistry().addChild(rootRegistry1);
+	   SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+	   parameters.setCreateGUI(false);
+
+	   SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, parameters);
+	   SimulationConstructionSet scs2 = new SimulationConstructionSet(robot2, parameters);
+	   scs1.getRootRegistry().addChild(rootRegistry1);
 		scs2.getRootRegistry().addChild(rootRegistry2);
 		
 		doubleYoVariable1.set(98.56);

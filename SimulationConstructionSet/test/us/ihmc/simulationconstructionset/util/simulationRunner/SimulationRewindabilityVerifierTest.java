@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
@@ -155,7 +156,9 @@ public class SimulationRewindabilityVerifierTest
    
    private SimulationConstructionSet constructSimulationConstructionSet(Robot robot, RobotController controller)
    {
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI); 
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters); 
       scs.setDT(DT, 1);
       
       Thread thread = new Thread(scs);

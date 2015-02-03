@@ -28,7 +28,9 @@ public class DataProcessingFunctionTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.setDT(0.001, 1);
 
       scs.startOnAThread();
