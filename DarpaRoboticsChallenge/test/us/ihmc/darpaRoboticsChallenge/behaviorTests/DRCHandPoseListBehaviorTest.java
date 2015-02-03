@@ -75,7 +75,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHandPoseListBehaviorTest.class + " after class.");
    }
 
    private static final boolean DEBUG = false;
@@ -164,8 +164,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       SideDependentList<double[][]> armPosesLeftAndRightSide = new SideDependentList<double[][]>();
       ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
-      double swingTrajectoryTime = 10.0;
-      int numberOfArmPoses = 10;
+      double swingTrajectoryTime = 20.0;
+      int numberOfArmPoses = 3;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -182,9 +182,19 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          behaviors.add(handPoseListBehavior);
       }
 
-      //TODO: Check that each pose executes properly, not just the last pose
-      success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(behaviors, swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      assertTrue(success);
+      //TODO: Check that each pose executes properly, not just the last pose (tricky, unless motion is very very slow)
+      
+      for (int poseNumber = 0; poseNumber < numberOfArmPoses; poseNumber ++)
+      {
+         success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(behaviors, swingTrajectoryTime / numberOfArmPoses);
+         assertTrue(success);
+         
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            assertRobotAchievedDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide, poseNumber, 10.0 * JOINT_POSITION_THRESHOLD);           
+         }
+      }
+
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -322,9 +332,9 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
-   private void assertRobotAchievedFinalDesiredArmPose(double[][] armPoses, RobotSide robotSide)
+   private void assertRobotAchievedDesiredArmPose(double[][] armPoses, RobotSide robotSide, int poseNumber, double jointPositionThreshold)
    {
-      double[] desiredArmPose = getFinalDesiredArmPose(armPoses);
+      double[] desiredArmPose = getDesiredArmPose(armPoses, poseNumber);
       double[] actualArmPose = getCurrentArmPose(robotSide);
 
       for (int i = 0; i < numberOfArmJoints; i++)
@@ -339,7 +349,13 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
             SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
 
-         assertEquals(q_desired, q_actual, JOINT_POSITION_THRESHOLD);
+         assertEquals(q_desired, q_actual, jointPositionThreshold);
       }
+   }
+   
+   private void assertRobotAchievedFinalDesiredArmPose(double[][] armPoses, RobotSide robotSide)
+   {
+      int lastPoseIndex = armPoses[0].length - 1;
+      assertRobotAchievedDesiredArmPose(armPoses, robotSide, lastPoseIndex, JOINT_POSITION_THRESHOLD);
    }
 }
