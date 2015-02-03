@@ -38,7 +38,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class TurnValveBehavior extends BehaviorInterface
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final boolean graspValveRim = true;
    private static final ValveType valveType = ValveType.BIG_VALVE;
