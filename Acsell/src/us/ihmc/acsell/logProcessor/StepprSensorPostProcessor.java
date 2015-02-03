@@ -30,6 +30,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -176,7 +177,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
    }
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, DRCRobotModel robotModel,
-         LogDataProcessorHelper logDataProcessorHelper, SensorOutputMapReadOnly postProcessedSensors)
+         final LogDataProcessorHelper logDataProcessorHelper, SensorOutputMapReadOnly postProcessedSensors)
    {
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
       String[] imuSensorsToUseInStateEstimator = robotModel.getSensorInformation().getIMUSensorsToUseInStateEstimator();
@@ -187,8 +188,16 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       SideDependentList<FootSwitchInterface> footSwitches = createStateEstimatorFootSwitches(logDataProcessorHelper, bipedFeet);
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // no viz for now
 
+      CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder(referenceFrames.getSoleFrames())
+      {
+         @Override
+         public void getCenterOfPressure(FramePoint2d centerOfPressureToPack, RobotSide robotSide)
+         {
+            logDataProcessorHelper.getDesiredCoP(robotSide, centerOfPressureToPack);
+         }
+      };
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            postProcessedSensors, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, bipedFeet, yoGraphicsListRegistry);
+            postProcessedSensors, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, centerOfPressureDataHolder, bipedFeet, yoGraphicsListRegistry);
       return stateEstimator;
    }
 

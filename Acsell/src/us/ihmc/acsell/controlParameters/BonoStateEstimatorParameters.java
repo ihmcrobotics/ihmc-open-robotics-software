@@ -197,7 +197,13 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
    {
-      return false;
+      return true;
+   }
+
+   @Override
+   public boolean useControllerDesiredCenterOfPressure()
+   {
+      return true;
    }
 
    @Override
