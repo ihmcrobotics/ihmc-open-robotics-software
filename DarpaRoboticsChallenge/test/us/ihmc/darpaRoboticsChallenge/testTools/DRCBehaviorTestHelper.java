@@ -9,6 +9,7 @@ import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -32,7 +33,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
+   private DoubleYoVariable yoTimeRobot;
+   private DoubleYoVariable yoTimeBehaviorDispatcher;
 
    private final KryoPacketCommunicator networkObjectCommunicator;
    private final KryoPacketCommunicator controllerCommunicator;
@@ -41,6 +43,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final BehaviorDisptacher behaviorDispatcher;
    private final ReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
+   
+   private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
    
    public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, KryoPacketCommunicator networkObjectCommunicator,
          KryoPacketCommunicator controllerCommunicator)
@@ -63,11 +67,18 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
             startNetworkProcessor, robotModel);
 
+      yoTimeRobot = getRobot().getYoTime();
+      yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
+      
       this.fullRobotModel = robotModel.createFullRobotModel();
+      yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
+      
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
+      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+
       behaviorCommunicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, controllerCommunicator, registry);
 
       this.networkObjectCommunicator = networkObjectCommunicator;
@@ -79,6 +90,13 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    
    public FullRobotModel getFullRobotModel()
    {
+      boolean robotModelIsUpToDate = yoTimeRobot.getDoubleValue() == yoTimeLastFullRobotModelUpdate.getDoubleValue();
+      
+      if ( !robotModelIsUpToDate )
+      {
+         updateRobotModel();
+      }
+
       return fullRobotModel;
    }
 
@@ -96,6 +114,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       return robotDataReceiver;
    }
+   
+   public DoubleYoVariable getYoTime()
+   {
+      return yoTimeRobot;
+   }
 
    public BehaviorCommunicationBridge getBehaviorCommunicationBridge()
    {
@@ -104,6 +127,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    
    public void updateRobotModel()
    {
+      yoTimeLastFullRobotModelUpdate.set(yoTimeRobot.getDoubleValue());
       robotDataReceiver.updateRobotModel();
    }
 
@@ -134,7 +158,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDisptacher ret = new BehaviorDisptacher(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
+      BehaviorDisptacher ret = new BehaviorDisptacher(yoTimeBehaviorDispatcher, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
             behaviorCommunicationBridge, yoVariableServer, registry, yoGraphicsListRegistry);
 
       return ret;
@@ -169,6 +193,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    
    public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime) throws SimulationExceededMaximumTimeException
    {
+      behaviorCommunicationBridge.attachGlobalListenerToController(behavior.getControllerGlobalPacketConsumer());
+
       BehaviorRunner behaviorRunner = new BehaviorRunner(behavior);
       Thread behaviorThread = new Thread(behaviorRunner);
       behaviorThread.start();
