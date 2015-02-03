@@ -331,6 +331,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       private void startCaptureOfVideoFrame()
       {
+         if (alreadyClosing) return;
+         
          synchronized (syncObject)
          {
             captureFrame = true;
@@ -340,9 +342,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             fov = cameraStreamer.getFieldOfView();
          }
       }
-
-
-
    }
 
 
@@ -379,6 +378,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public BufferedImage exportSnapshotAsBufferedImage()
    {
+      if (alreadyClosing) return bufferedImage;
+      
       synchronized (captureHolder)
       {
          synchronized (syncObject)
@@ -395,7 +396,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
                {
                }
             }
-            while (captureFrame);
+            while (captureFrame &!alreadyClosing);
          }
 
          convertScreenShot();
@@ -465,7 +466,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       {
          syncObject.notifyAll();
       }
-      syncObject = null;
+//      syncObject = null;
 
       renderer = null;
       renderManager = null;
