@@ -27,6 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
@@ -99,7 +100,6 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private final double ORIENTATION_THRESHOLD = 0.05;
 
    private static final boolean DEBUG = false;
-   public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -150,7 +150,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       for (RobotSide robotSide : RobotSide.values)
       {
          WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo,
-               robotDataReceiver.getForceSensorDataHolder(), BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
+               robotDataReceiver.getForceSensorDataHolder(), IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
          behaviorDispatcher.addUpdatable(wristSensorUpdatable);
       }
 
