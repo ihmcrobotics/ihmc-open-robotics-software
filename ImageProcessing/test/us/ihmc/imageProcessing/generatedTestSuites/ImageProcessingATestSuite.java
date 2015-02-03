@@ -20,11 +20,11 @@ import org.junit.runners.Suite;
    us.ihmc.imageProcessing.sfm.ImageToGroundMapTest.class
 })
 
-public class ImageProcessingDockerTestSuite
+public class ImageProcessingATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(ImageProcessingDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(ImageProcessingATestSuite.class);
    }
 }
 

@@ -12,11 +12,11 @@ import org.junit.runners.Suite;
    us.ihmc.SdfLoader.SDFLinkHolderTest.class
 })
 
-public class SDFLoaderDockerTestSuite
+public class SDFLoaderATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(SDFLoaderDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(SDFLoaderATestSuite.class);
    }
 }
 

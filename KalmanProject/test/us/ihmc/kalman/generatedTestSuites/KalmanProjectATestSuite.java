@@ -12,11 +12,11 @@ import org.junit.runners.Suite;
    us.ihmc.kalman.YoKalmanFilterTest.class
 })
 
-public class KalmanProjectDockerTestSuite
+public class KalmanProjectATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(KalmanProjectDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(KalmanProjectATestSuite.class);
    }
 }
 

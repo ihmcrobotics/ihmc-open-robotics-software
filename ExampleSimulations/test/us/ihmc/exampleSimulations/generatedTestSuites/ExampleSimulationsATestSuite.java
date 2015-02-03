@@ -12,11 +12,11 @@ import org.junit.runners.Suite;
    us.ihmc.exampleSimulations.springflamingo.SpringFlamingoSimulationTest.class
 })
 
-public class ExampleSimulationsDockerTestSuite
+public class ExampleSimulationsATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(ExampleSimulationsDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(ExampleSimulationsATestSuite.class);
    }
 }
 

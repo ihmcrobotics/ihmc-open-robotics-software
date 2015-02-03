@@ -32,11 +32,11 @@ import org.junit.runners.Suite;
    us.ihmc.sensorProcessing.stateEstimation.YoPointPositionDataObjectListOutputPortTest.class
 })
 
-public class SensorProcessingDockerTestSuite
+public class SensorProcessingATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(SensorProcessingDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(SensorProcessingATestSuite.class);
    }
 }
 
