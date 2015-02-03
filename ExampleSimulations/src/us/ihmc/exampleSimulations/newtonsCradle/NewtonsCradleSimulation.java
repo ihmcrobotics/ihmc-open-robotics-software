@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
@@ -98,7 +99,10 @@ public class NewtonsCradleSimulation
       Robot[] robotArray = new Robot[robots.size()];
       robots.toArray(robotArray);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, showGUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(showGUI);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
       scs.setDT(0.0001, 100);
       scs.setGroundVisible(false);
       scs.startOnAThread();

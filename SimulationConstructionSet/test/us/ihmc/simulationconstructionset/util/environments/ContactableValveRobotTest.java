@@ -18,6 +18,7 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -58,7 +59,10 @@ public class ContactableValveRobotTest
 
       createContactPoints(robots[0]);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robots, showGUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(showGUI);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robots, parameters);
 
       scs.addYoVariableRegistry(valveTestRegistry);
 

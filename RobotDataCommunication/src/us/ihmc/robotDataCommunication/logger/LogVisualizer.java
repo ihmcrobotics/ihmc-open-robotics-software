@@ -22,6 +22,7 @@ import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -47,7 +48,12 @@ public class LogVisualizer
       if (logFile != null)
       {
          System.out.println("loading log from folder:" + logFile);
-         scs = new SimulationConstructionSet(true, bufferSize);
+         
+         SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+         parameters.setCreateGUI(true);
+         parameters.setDataBufferSize(bufferSize);
+         scs = new SimulationConstructionSet(parameters);
+ 
          scs.setFastSimulate(true, 50);
          readLogFile(logFile, showOverheadView);
       }

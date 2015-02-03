@@ -550,11 +550,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       throw new RuntimeException("Not sure if this is all we have to do for jApplet. Problably not. We need to test and debug this constructor...");
    }
 
-   public SimulationConstructionSet(boolean createGUI, int bufferSize)
-   {
-      this(new SimulationConstructionSetParameters(createGUI, bufferSize));
-   }
-
    public SimulationConstructionSet(Robot robot, int bufferSize)
    {
       this(robot, new SimulationConstructionSetParameters(bufferSize));
@@ -570,26 +565,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this(robot, new SimulationConstructionSetParameters(createGUI, bufferSize));
    }
 
-   public SimulationConstructionSet(Robot robot, JMEGraphics3DAdapter graphicsAdapter, int initialBufferSize)
-   {
-      this(robot, graphicsAdapter, new SimulationConstructionSetParameters(initialBufferSize));
-   }
-
-   public SimulationConstructionSet(Robot[] robots, boolean showGUI, int initialBufferSize)
-   {
-      this(robots, new SimulationConstructionSetParameters(showGUI, initialBufferSize));
-   }
-
-   public SimulationConstructionSet(Robot[] robots, boolean showGUI)
-   {
-      this(robots, new SimulationConstructionSetParameters(showGUI));
-   }
-
-   public SimulationConstructionSet(Robot[] robots, Graphics3DAdapter graphics3dAdapter, int simulationDataBufferSize)
-   {
-      this(robots, graphics3dAdapter, new SimulationConstructionSetParameters(simulationDataBufferSize));
-   }
-
    public SimulationConstructionSet(Robot[] robots, int simulationDataBufferSize)
    {
       this(robots, new SimulationConstructionSetParameters(simulationDataBufferSize));
@@ -598,11 +573,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public SimulationConstructionSet(Simulation simulation, boolean showGUI)
    {
       this(simulation, new SimulationConstructionSetParameters(showGUI));
-   }
-
-   public SimulationConstructionSet(Robot robot, Graphics3DAdapter graphicsAdapter, int simulationDataBufferSize)
-   {
-      this(robot, new SimulationConstructionSetParameters(simulationDataBufferSize));
    }
 
    /**
