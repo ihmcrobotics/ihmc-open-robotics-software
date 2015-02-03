@@ -25,7 +25,9 @@ public class SimulationConstructionSetRootRegistryTest
       robot.getRobotsYoVariableRegistry().addChild(registryOne);
       DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registryOne);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       sleep(1000);
       scs.startOnAThread();
       
@@ -71,7 +73,9 @@ public class SimulationConstructionSetRootRegistryTest
       robot.getRobotsYoVariableRegistry().addChild(registryOne);
       robot.getRobotsYoVariableRegistry().addChild(registryTwo);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.setupVarGroup("VarGroupToTest", new String[]{"variableOneA", "variableTwoB"});
       
       scs.startOnAThread();
@@ -112,7 +116,9 @@ public class SimulationConstructionSetRootRegistryTest
       registryBeforeConstructionOne.addChild(registryBeforeConstructionOneOne);
       DoubleYoVariable variableBeforeConstructionOneOne = new DoubleYoVariable("variableBeforeConstructionOneOne", registryBeforeConstructionOneOne);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
       DoubleYoVariable variableAfterConstructionZero = new DoubleYoVariable("variableAfterConstructionZero", registryBeforeConstructionOne);
 

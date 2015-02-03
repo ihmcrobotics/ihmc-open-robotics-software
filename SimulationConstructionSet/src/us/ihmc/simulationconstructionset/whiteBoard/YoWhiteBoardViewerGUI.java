@@ -38,7 +38,7 @@ public class YoWhiteBoardViewerGUI
       whiteBoard.connect();
 
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, true);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.addYoVariableRegistry(registry);
       
 //      scs.addVarList(registry.createVarList());

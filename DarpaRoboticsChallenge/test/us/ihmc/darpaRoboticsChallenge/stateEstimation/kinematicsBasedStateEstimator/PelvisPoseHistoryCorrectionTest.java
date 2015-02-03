@@ -39,6 +39,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -485,7 +486,10 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    public void createSCS()
    {
       Robot robot = new PointMassRobot();
-      simulationConstructionSet = new SimulationConstructionSet(robot, true);
+      
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(true);
+      simulationConstructionSet = new SimulationConstructionSet(robot, parameters);
 
       Thread myThread = new Thread(simulationConstructionSet);
       myThread.start();

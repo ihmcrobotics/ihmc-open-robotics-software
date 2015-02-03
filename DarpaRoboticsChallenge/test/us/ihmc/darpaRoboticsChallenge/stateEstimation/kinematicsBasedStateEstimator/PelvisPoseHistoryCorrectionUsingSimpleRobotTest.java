@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -213,7 +214,10 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
    private void setupSim()
    {
-      simulationConstructionSet = new SimulationConstructionSet(robot, showGUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(showGUI);
+      
+      simulationConstructionSet = new SimulationConstructionSet(robot, parameters);
       simulationConstructionSet.setDT(0.001, 1);
       bsr = new BlockingSimulationRunner(simulationConstructionSet, 60.0 * 10.0);
       Thread simThread = new Thread(simulationConstructionSet);
