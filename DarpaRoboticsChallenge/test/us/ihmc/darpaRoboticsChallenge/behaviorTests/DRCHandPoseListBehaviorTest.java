@@ -4,50 +4,45 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -64,13 +59,23 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (drcBehaviorTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         drcBehaviorTestHelper.closeAndDispose();
+         drcBehaviorTestHelper = null;
       }
-      
+
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   @AfterClass
+   public static void printMemoryUsageAfterClass()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
    }
 
    private static final boolean DEBUG = false;
@@ -78,19 +83,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    private final double JOINT_POSITION_THRESHOLD = 0.007;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
 
-
-   private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCHandPoseBehaviorTestControllerCommunicator");
-
-   private DoubleYoVariable yoTime;
-
-   private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
-
-   private BehaviorCommunicationBridge communicationBridge;
-
-   private FullRobotModel fullRobotModel;
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    private ArmJointName[] armJointNames;
    private int numberOfArmJoints;
@@ -104,15 +97,15 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
 
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCJunkyCommunicator");
 
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      yoTime = robotToTest.getYoTime();
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
 
-      fullRobotModel = getRobotModel().createFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
 
       armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
@@ -121,29 +114,18 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       {
          armJointIndices.put(armJointNames[i], i);
       }
-
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCHandPoseBehaviorTestJunkyCommunicator");
-
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
-
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testMoveOneRandomJoint90Deg() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(handPoseListBehavior.getControllerGlobalPacketConsumer());
+      final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
 
       double swingTrajectoryTime = 2.0;
       int numberOfArmPoses = 2;
@@ -159,9 +141,11 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.initialize();
       handPoseListBehavior.setInput(handPoseListPacket);
-      assertTrue( handPoseListBehavior.hasInputBeenSet() );
-      
-      success &= executeBehavior(handPoseListBehavior, swingTrajectoryTime);
+      assertTrue(handPoseListBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper
+            .executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseListBehavior, swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
 
       assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
       assertTrue(success);
@@ -170,66 +154,37 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
-   public void testDoNothing() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(handPoseListBehavior.getControllerGlobalPacketConsumer());
-
-      double swingTrajectoryTime = 2.0;
-      int numberOfArmPoses = 2;
-      RobotSide robotSide = RobotSide.LEFT;
-
-      double[][] armPoses = createArmPosesInitializedToRobot(numberOfArmPoses, robotSide);
-
-      HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
-      handPoseListBehavior.initialize();
-      handPoseListBehavior.setInput(handPoseListPacket);
-      assertTrue( handPoseListBehavior.hasInputBeenSet() );
-
-      success &= executeBehavior(handPoseListBehavior, swingTrajectoryTime);
-
-      assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
-      assertTrue(success);
-      assertTrue(handPoseListBehavior.isDone());
-
-      BambooTools.reportTestFinishedMessage();
-   }
-
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testWackyInflatableArmFlailingTubeManDance() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      SideDependentList<double [][]> armPosesLeftAndRightSide = new SideDependentList<double[][]>();
+      SideDependentList<double[][]> armPosesLeftAndRightSide = new SideDependentList<double[][]>();
       ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
       double swingTrajectoryTime = 10.0;
       int numberOfArmPoses = 10;
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(communicationBridge, yoTime);
-         communicationBridge.attachGlobalListenerToController(handPoseListBehavior.getControllerGlobalPacketConsumer());
-         
+         final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+               drcBehaviorTestHelper.getYoTime());
+
          double[][] armPoses = createRandomArmPoses(numberOfArmPoses, robotSide);
          HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
          handPoseListBehavior.initialize();
          handPoseListBehavior.setInput(handPoseListPacket);
-         assertTrue( handPoseListBehavior.hasInputBeenSet() );
+         assertTrue(handPoseListBehavior.hasInputBeenSet());
 
          armPosesLeftAndRightSide.put(robotSide, armPoses);
          behaviors.add(handPoseListBehavior);
       }
 
-      success &= executeBehaviors(behaviors, swingTrajectoryTime);
+      //TODO: Check that each pose executes properly, not just the last pose
+      success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(behaviors, swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -266,6 +221,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    private double clipDesiredToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
       double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
@@ -288,7 +244,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
       {
          ArmJointName jointName = armJointNames[jointNum];
-         double currentAngle = fullRobotModel.getArmJoint(robotSide, jointName).getQ();
+         double currentAngle = drcBehaviorTestHelper.getFullRobotModel().getArmJoint(robotSide, jointName).getQ();
          armPose[jointNum] = currentAngle;
       }
 
@@ -323,7 +279,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       for (int poseNumber = 0; poseNumber < numberOfPoses; poseNumber++)
       {
          double[] desiredArmPose = createRandomArmPose(robotSide);
-         
+
          setArmPose(armPoses, poseNumber, desiredArmPose);
       }
 
@@ -364,73 +320,6 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          int jointNum = armJointIndices.get(jointName);
          armPosesToPack[jointNum][poseNumber] = armPose[jointNum];
       }
-   }
-
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
-      behaviors.add(behavior);
-
-      return executeBehaviors(behaviors, trajectoryTime);
-   }
-
-   private boolean executeBehaviors(final ArrayList<BehaviorInterface> behaviors, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-
-      for (BehaviorInterface behavior : behaviors)
-      {
-         if (DEBUG)
-         {
-            System.out.println("\n");
-            SysoutTool.println("starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-         }
-
-         spawnBehaviorThread(behavior, simulationRunTime);
-
-      }
-
-      boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-
-      for (BehaviorInterface behavior : behaviors)
-      {
-         if (DEBUG)
-         {
-            SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-         }
-      }
-      return ret;
-   }
-
-   private void spawnBehaviorThread(final BehaviorInterface behavior, final double simulationRunTime)
-   {
-      Thread behaviorThread = new Thread()
-      {
-         public void run()
-         {
-            {
-               double startTime = Double.NaN;
-               boolean simStillRunning = true;
-               boolean initalized = false;
-
-               while (simStillRunning)
-               {
-                  if (!initalized)
-                  {
-                     startTime = yoTime.getDoubleValue();
-                     initalized = true;
-                  }
-
-                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-                  simStillRunning = timeSpentSimulating < simulationRunTime;
-
-                  behavior.doControl();
-               }
-            }
-         }
-      };
-
-      behaviorThread.start();
    }
 
    private void assertRobotAchievedFinalDesiredArmPose(double[][] armPoses, RobotSide robotSide)
