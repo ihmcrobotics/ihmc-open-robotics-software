@@ -121,7 +121,11 @@ public class SpringFlamingoSimulation
 
       if (!SHOW_GUI)
       {
-         sim = new SimulationConstructionSet(springFlamingos, false, 512);
+         SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+         parameters.setCreateGUI(false);
+         parameters.setDataBufferSize(512);
+         
+         sim = new SimulationConstructionSet(springFlamingos, parameters);
       }
       else
       {

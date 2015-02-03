@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -107,7 +108,10 @@ public class ExampleRockContactSimulation
       Robot[] robotsArray = new Robot[robots.size()];
       robots.toArray(robotsArray);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotsArray, new JMEGraphics3DAdapter(), 16000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(16000);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotsArray, new JMEGraphics3DAdapter(), parameters);
       scs.setSimulateDuration(3.0);
 //      double tics = 100;
 //      scs.setDT(1e-4 / tics, (int)(5*tics));

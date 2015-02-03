@@ -8,6 +8,7 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
@@ -60,7 +61,11 @@ public class DRCDemo01EnvironmentViewer
     robot.setDynamicIntegrationMethod(DynamicIntegrationMethod.EULER_DOUBLE_STEPS);
 //      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
        JMEGraphics3DAdapter graphicsAdapter=new JMEGraphics3DAdapter();
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, initialBufferSize);
+       
+       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+       parameters.setDataBufferSize(initialBufferSize);
+       
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, parameters);
 
       scs.setDT(simulateDT, 16342);
 

@@ -38,6 +38,7 @@ import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.utilities.SwingUtils;
@@ -308,7 +309,11 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       if (logFile != null)
       {
          System.out.println("loading log from folder:" + logFile);
-         scs = new SimulationConstructionSet(showGUI, bufferSize);
+         
+         SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+         parameters.setCreateGUI(showGUI);
+         parameters.setDataBufferSize(bufferSize);
+         scs = new SimulationConstructionSet(parameters);
          readLogFile(logFile, robotModel);
       }
       else
