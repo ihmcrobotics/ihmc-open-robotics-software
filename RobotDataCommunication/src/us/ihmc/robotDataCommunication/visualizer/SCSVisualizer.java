@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -188,7 +189,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          this.robot = logModelLoader.createRobot();
       }
 
-      this.scs = new SimulationConstructionSet(robot, showGUI, this.bufferSize);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(showGUI);
+      parameters.setDataBufferSize(bufferSize);
+      this.scs = new SimulationConstructionSet(robot, parameters);
       if (hideViewport)
          scs.hideViewport();
       this.registry = scs.getRootRegistry();

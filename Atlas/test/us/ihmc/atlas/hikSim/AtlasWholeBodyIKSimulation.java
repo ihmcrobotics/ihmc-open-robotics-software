@@ -10,6 +10,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIKSimController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 //import us.ihmc.wholeBodyController.WholeBodyControlParameters;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -44,7 +45,10 @@ public class AtlasWholeBodyIKSimulation
 
       scsRobot.setGravity(-9.81);
       
-      scs = new SimulationConstructionSet(scsRobot, showGUI, BufferSize);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(showGUI);
+      parameters.setDataBufferSize(BufferSize);
+      scs = new SimulationConstructionSet(scsRobot, parameters);
 
       if (showGUI)
       {

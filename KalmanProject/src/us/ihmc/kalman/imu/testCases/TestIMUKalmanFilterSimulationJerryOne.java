@@ -33,7 +33,10 @@ public class TestIMUKalmanFilterSimulationJerryOne
       SimulationConstructionSet scs;
       if (PROFILING)
       {
-         scs = new SimulationConstructionSet(rob, false, 4096);
+         SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+         parameters.setCreateGUI(false);
+         parameters.setDataBufferSize(4096);
+         scs = new SimulationConstructionSet(rob, parameters);
       }
       else
       {

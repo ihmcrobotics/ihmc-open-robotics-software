@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -352,7 +353,10 @@ public class ComposableStateEstimatorEvaluator
          // orientationEstimator.setState(x, orientationEstimator.getCovariance());
       }
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI, 32000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(SHOW_GUI);
+      parameters.setDataBufferSize(32000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.addYoVariableRegistry(registry);
 
       scs.setDT(simDT, simTicksPerRecord);

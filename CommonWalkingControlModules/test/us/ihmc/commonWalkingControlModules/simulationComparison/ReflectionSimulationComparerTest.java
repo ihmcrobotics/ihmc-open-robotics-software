@@ -18,6 +18,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
@@ -52,8 +53,11 @@ public class ReflectionSimulationComparerTest
       comparer.addFieldToIgnore(getStackTraceAtInitializationField());
 
       
-      SimulationConstructionSet scs0 = new SimulationConstructionSet(new Robot("Null"), false, 100);
-      SimulationConstructionSet scs1 = new SimulationConstructionSet(new Robot("Null"), false, 100);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(100);
+      SimulationConstructionSet scs0 = new SimulationConstructionSet(new Robot("Null"), parameters);
+      SimulationConstructionSet scs1 = new SimulationConstructionSet(new Robot("Null"), parameters);
       
       boolean simulationsAreTheSame = comparer.compare(scs0, scs1);
       assertFalse(simulationsAreTheSame);
@@ -99,14 +103,17 @@ public class ReflectionSimulationComparerTest
       Robot robot0 = createSimpleRobot();
       RobotController rewindableController0 = new RewindableOrNotRewindableController(true);
       robot0.setController(rewindableController0);
-      SimulationConstructionSet scs0 = new SimulationConstructionSet(robot0, false, 100);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(100);
+      SimulationConstructionSet scs0 = new SimulationConstructionSet(robot0, parameters);
       scs0.setDT(0.0001, 11);
       scs0.startOnAThread();
 
       Robot robot1 = createSimpleRobot();
       RobotController rewindableController1 = new RewindableOrNotRewindableController(true);
       robot1.setController(rewindableController1);
-      SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, false, 100);
+      SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, parameters);
       scs1.setDT(0.0001, 11);
       scs1.startOnAThread();
 
@@ -137,14 +144,18 @@ public class ReflectionSimulationComparerTest
       Robot robot0 = new Robot("robot");
       RobotController rewindableController0 = new RewindableOrNotRewindableController(false);
       robot0.setController(rewindableController0);
-      SimulationConstructionSet scs0 = new SimulationConstructionSet(robot0, false, 100);
+      
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(100);
+      SimulationConstructionSet scs0 = new SimulationConstructionSet(robot0, parameters);
       scs0.setDT(0.0001, 10);
       scs0.startOnAThread();
 
       Robot robot1 = new Robot("robot");
       RobotController rewindableController1 = new RewindableOrNotRewindableController(false);
       robot1.setController(rewindableController1);
-      SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, false, 100);
+      SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, parameters);
       scs1.setDT(0.0001, 10);
       scs1.startOnAThread();
 

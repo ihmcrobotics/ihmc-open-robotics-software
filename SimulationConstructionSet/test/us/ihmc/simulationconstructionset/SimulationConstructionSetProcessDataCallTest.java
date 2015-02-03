@@ -17,7 +17,10 @@ public class SimulationConstructionSetProcessDataCallTest
    public void testForwardCount()
    {
       Robot robot = new Robot("testRobot");
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false, 8192);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(8192);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
       registry = new YoVariableRegistry("testRegustry");
       DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
@@ -70,7 +73,10 @@ public class SimulationConstructionSetProcessDataCallTest
    public void testBackwardCount()
    {
       Robot robot = new Robot("testRobot");
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false, 8192);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(8192);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
       registry = new YoVariableRegistry("testRegustry");
       DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
@@ -123,7 +129,10 @@ public class SimulationConstructionSetProcessDataCallTest
    public void testForwardCopy()
    {
       Robot robot = new Robot("testRobot");
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false, 8192);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(8192);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
       registry = new YoVariableRegistry("testRegustry");
       DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
@@ -176,7 +185,10 @@ public class SimulationConstructionSetProcessDataCallTest
    public void testBackwardCopy()
    {
       Robot robot = new Robot("testRobot");
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false, 8192);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(false);
+      parameters.setDataBufferSize(8192);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
       registry = new YoVariableRegistry("testRegustry");
       DoubleYoVariable dataSet = new DoubleYoVariable("dataSet", registry);
