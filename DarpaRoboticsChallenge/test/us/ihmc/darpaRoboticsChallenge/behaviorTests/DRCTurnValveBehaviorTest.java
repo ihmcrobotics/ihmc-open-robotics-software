@@ -5,77 +5,53 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCValveEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
- 
-   @Before
-   public void setUp()
-   {
-      if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
 
-      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCHandPoseBehaviorTestControllerCommunicator");
-
-      testEnvironment = createTestEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
-      
-      
-      Robot robot = drcBehaviorTestHelper.getRobot();
-      yoTime = robot.getYoTime();
-
-      CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
-      
-      CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(), robot.getRobotsYoVariableRegistry());
-      yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
-      yoTippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
-   }
-   
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -90,11 +66,41 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
          drcBehaviorTestHelper.closeAndDispose();
          drcBehaviorTestHelper = null;
       }
-      
+
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   
+
+   @AfterClass
+   public static void printMemoryUsageAfterClass()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+   }
+
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
+
+   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 8.0;
+
+   private static final boolean DEBUG = false;
+
+   @Before
+   public void setUp()
+   {
+      if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
+      {
+         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
+      }
+
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCJunkyCommunicator");
+
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(createTestEnvironment(), networkObjectCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
+   }
+
    private static DRCValveEnvironment createTestEnvironment()
    {
       double valveX = 2.0 * TurnValveBehavior.howFarToStandBackFromValve;
@@ -104,28 +110,19 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       return new DRCValveEnvironment(valveX, valveY, valveZ, valveYaw_degrees);
    }
-   
-   private DRCValveEnvironment testEnvironment;
-   private DoubleYoVariable yoTime;
-   
-   private BooleanYoVariable yoDoubleSupport;
-   private BooleanYoVariable yoTippingDetected;
 
-   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 8.0;
-   private static final boolean DEBUG = true;
-
-   
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testWalkAndTurnValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
-       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
+      CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
 
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
@@ -137,13 +134,18 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       double elapsedTimeToWalkAndTurnValve = 20.0;
 
-      final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getFullRobotModel(), drcBehaviorTestHelper.getReferenceFrames(), yoTime, yoDoubleSupport,
-            yoTippingDetected, getRobotModel().getWalkingControllerParameters());
-      
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      communicationBridge.attachGlobalListenerToController(turnValveBehavior.getControllerGlobalPacketConsumer());
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
+      DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
+      CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();
+      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      BooleanYoVariable yoTippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
+      WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
 
-//      String scriptName = "testTurnValveNoScript";
+      final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
+            yoTippingDetected, walkingControllerParams);
+
       String scriptName = null;
 
       ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(scriptName, valveTransformToWorld);
@@ -154,7 +156,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double initialValveClosePercentage = valveRobot.getClosePercentage();
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
-      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage, DEBUG);
+      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
+            DEBUG);
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
@@ -163,10 +166,9 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       success = success & turnValveBehavior.isDone();
       assertTrue(finalValveClosePercentage > initialValveClosePercentage);
       assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
-      
+
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
-      
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -185,5 +187,4 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       return ret;
    }
 
-  
 }
