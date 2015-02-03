@@ -22,6 +22,7 @@ import java.util.Random;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.gui.GUICaptureStreamer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.utilities.FileTools;
 
 public class LogSessionBroadcaster extends Thread
 {
@@ -253,7 +254,7 @@ public class LogSessionBroadcaster extends Thread
    private static long createTempSessionID() throws IOException
    {
       String prefix = "LogSession";
-      String tmpDir = System.getProperty("java.io.tmpdir");
+      String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
 
       SecureRandom random = new SecureRandom();
 
@@ -262,7 +263,7 @@ public class LogSessionBroadcaster extends Thread
       do
       {
          sessionID = random.nextInt(65535);
-         sessionFile = new File(tmpDir, prefix + sessionID);
+         sessionFile = new File(temporaryDirectoryPathName, prefix + sessionID);
       }
       while (!sessionFile.createNewFile());
       sessionFile.deleteOnExit();
