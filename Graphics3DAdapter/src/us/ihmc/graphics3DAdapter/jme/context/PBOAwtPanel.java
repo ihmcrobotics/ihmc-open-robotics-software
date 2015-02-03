@@ -47,6 +47,8 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
 {
    private static final long serialVersionUID = -8871753166643132265L;
 
+   private static final boolean DEBUG = false;
+
    private boolean attachAsMain = false;
 
    private BufferedImage bufferedImage;
@@ -105,7 +107,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
       synchronized (lock)
       {
          hasNativePeer.set(true);
-         System.out.println("EDT: addNotify");
+         printIfDebug("EDT: addNotify");
       }
 
       requestFocusInWindow();
@@ -117,7 +119,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
       synchronized (lock)
       {
          hasNativePeer.set(false);
-         System.out.println("EDT: removeNotify");
+         printIfDebug("EDT: removeNotify");
       }
 
       super.removeNotify();
@@ -131,7 +133,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
          {
 //          strategy.dispose();
             strategy = null;
-            System.out.println(getClass().getSimpleName() + ": Not visible. Destroy strategy.");
+            printIfDebug(getClass().getSimpleName() + ": Not visible. Destroy strategy.");
          }
 
          return false;
@@ -142,7 +144,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
       {
          if (currentShowing)
          {
-            System.out.println(getClass().getSimpleName() + ": Enter showing state.");
+            printIfDebug(getClass().getSimpleName() + ": Enter showing state.");
 
             for (PBOAwtPanelListener listener : pboAwtPanelListeners)
             {
@@ -151,7 +153,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
          }
          else
          {
-            System.out.println(getClass().getSimpleName() + ": Exit showing state.");
+            printIfDebug(getClass().getSimpleName() + ": Exit showing state.");
          }
       }
 
@@ -227,7 +229,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
             }
 
             strategy = getBufferStrategy();
-            System.out.println(getClass().getSimpleName() + ": Visible. Create strategy.");
+            printIfDebug(getClass().getSimpleName() + ": Visible. Create strategy.");
          }
 
          // Draw screenshot.
@@ -238,7 +240,7 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
                Graphics2D g2d = (Graphics2D) strategy.getDrawGraphics();
                if (g2d == null)
                {
-                  System.out.println(getClass().getSimpleName() + ": DrawGraphics was null.");
+                  printIfDebug(getClass().getSimpleName() + ": DrawGraphics was null.");
 
                   return;
                }
@@ -254,6 +256,11 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
          }
          while (strategy.contentsLost());
       }
+   }
+
+   private void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);      
    }
 
    public boolean isActiveDrawing()
