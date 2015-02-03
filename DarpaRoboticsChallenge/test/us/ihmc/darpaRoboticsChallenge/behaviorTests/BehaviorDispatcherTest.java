@@ -325,7 +325,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorControlModePacket resumeModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.RESUME);
       networkObjectCommunicator.send(resumeModePacket);
-      SysoutTool.println("Sending Pause Request", DEBUG);
+      SysoutTool.println("Sending Resume Request", DEBUG);
 
       while (!walkToLocationBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
