@@ -45,11 +45,11 @@ import org.junit.runners.Suite;
    us.ihmc.communication.util.NetworkConfigParametersTest.class
 })
 
-public class IHMCCommunicationDockerTestSuite
+public class IHMCCommunicationATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(IHMCCommunicationDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(IHMCCommunicationATestSuite.class);
    }
 }
 

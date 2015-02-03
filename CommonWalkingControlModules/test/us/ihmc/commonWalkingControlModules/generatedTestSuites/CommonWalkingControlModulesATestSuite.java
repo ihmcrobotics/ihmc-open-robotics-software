@@ -71,11 +71,11 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class
 })
 
-public class CommonWalkingControlModulesDockerTestSuite
+public class CommonWalkingControlModulesATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(CommonWalkingControlModulesDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(CommonWalkingControlModulesATestSuite.class);
    }
 }
 

@@ -27,11 +27,11 @@ import org.junit.runners.Suite;
    us.ihmc.graphics3DAdapter.utils.GraphicsDemoToolsTest.class
 })
 
-public class Graphics3DAdapterDockerTestSuite
+public class Graphics3DAdapterATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(Graphics3DAdapterDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(Graphics3DAdapterATestSuite.class);
    }
 }
 

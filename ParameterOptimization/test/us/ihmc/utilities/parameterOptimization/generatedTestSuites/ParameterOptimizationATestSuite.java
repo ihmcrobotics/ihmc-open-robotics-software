@@ -16,11 +16,11 @@ import org.junit.runners.Suite;
    us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimizeTest.class
 })
 
-public class ParameterOptimizationDockerTestSuite
+public class ParameterOptimizationATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(ParameterOptimizationDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(ParameterOptimizationATestSuite.class);
    }
 }
 

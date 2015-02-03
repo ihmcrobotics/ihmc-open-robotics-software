@@ -71,11 +71,11 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.utilities.screwTheory.InverseDynamicsCalculatorTest.class
 })
 
-public class SimulationConstructionSetADockerTestSuite
+public class SimulationConstructionSetATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(SimulationConstructionSetADockerTestSuite.class);
+      //new JUnitTestSuiteRunner(SimulationConstructionSetATestSuite.class);
    }
 }
 
