@@ -83,7 +83,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       {
          ContactableSelectableBoxRobot debrisRobot = debrisRobots.get(i);
          GroundContactModel groundContactModel = createGroundContactModel(debrisRobot, groundProfile);
-         debrisRobot.createAvailableContactPoints(1, 15, forceVectorScale, false);
+         debrisRobot.createAvailableContactPoints(1, 20, forceVectorScale, false);
          debrisRobot.setGroundContactModel(groundContactModel);
       }
    }
