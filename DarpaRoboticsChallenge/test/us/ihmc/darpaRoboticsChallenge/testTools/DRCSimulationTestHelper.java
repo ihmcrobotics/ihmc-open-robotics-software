@@ -51,6 +51,7 @@ public class DRCSimulationTestHelper
    private final SDFRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
    private final PacketCommunicator networkObjectCommunicator;
+   private final CommonAvatarEnvironmentInterface testEnvironment;
 
    private final SimulationTestingParameters simulationTestingParameters;
 
@@ -81,6 +82,8 @@ public class DRCSimulationTestHelper
          String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
    {
       this.networkObjectCommunicator = networkObjectCommunicator;
+      this.testEnvironment = commonAvatarEnvironmentInterface;
+
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
 
       this.simulationTestingParameters = simulationTestingParameters;
@@ -127,6 +130,11 @@ public class DRCSimulationTestHelper
    public DRCSimulationFactory getDRCSimulationFactory()
    {
       return drcSimulationFactory;
+   }
+   
+   public CommonAvatarEnvironmentInterface getTestEnviroment()
+   {
+      return testEnvironment;
    }
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
