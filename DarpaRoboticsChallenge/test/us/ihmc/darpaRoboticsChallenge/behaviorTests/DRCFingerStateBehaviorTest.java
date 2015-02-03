@@ -3,51 +3,44 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.FingerStateBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -64,32 +57,30 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (drcBehaviorTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         drcBehaviorTestHelper.closeAndDispose();
+         drcBehaviorTestHelper = null;
       }
-      
+
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
+   @AfterClass
+   public static void printMemoryUsageAfterClass()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCFingerStateBehaviorTest.class + " after class.");
+   }
+
    private static final boolean DEBUG = false;
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCHandPoseBehaviorTestControllerCommunicator");
-
-   private DoubleYoVariable yoTime;
-
-   private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
-
-   private BehaviorCommunicationBridge communicationBridge;
-
-   private SDFRobot robot;
-   private FullRobotModel fullRobotModel;
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    @Before
    public void setUp()
@@ -99,31 +90,17 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
 
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCJunkyCommunicator");
 
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      yoTime = robotToTest.getYoTime();
-
-      robot = drcSimulationTestHelper.getRobot();
-      fullRobotModel = getRobotModel().createFullRobotModel();
-
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCComHeightBehaviorTestJunkyCommunicator");
-
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testRandomCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -146,8 +123,9 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       }
       double trajectoryTime = 3.0;
 
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
       SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
-      Joint wristJoint = robot.getJoint(jointNameMap.getJointBeforeHandName(robotSide));
+      Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
 
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
@@ -189,67 +167,21 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
    private FingerStateBehavior testFingerStateBehavior(FingerStatePacket fingerStatePacket, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
-      final FingerStateBehavior fingerStateBehavior = new FingerStateBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(fingerStateBehavior.getControllerGlobalPacketConsumer());
+      final FingerStateBehavior fingerStateBehavior = new FingerStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
 
       fingerStateBehavior.initialize();
       fingerStateBehavior.setInput(fingerStatePacket);
-      assertTrue( fingerStateBehavior.hasInputBeenSet() );
+      assertTrue(fingerStateBehavior.hasInputBeenSet());
 
-      success = success && executeBehavior(fingerStateBehavior, trajectoryTime);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(fingerStateBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
 
       assertTrue(success);
 
       return fingerStateBehavior;
-   }
-
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-
-      if (DEBUG)
-      {
-         System.out.println("\n");
-         SysoutTool.println("starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
-
-      Thread behaviorThread = new Thread()
-      {
-         public void run()
-         {
-            {
-               double startTime = Double.NaN;
-               boolean simStillRunning = true;
-               boolean initalized = false;
-
-               while (simStillRunning)
-               {
-                  if (!initalized)
-                  {
-                     startTime = yoTime.getDoubleValue();
-                     initalized = true;
-                  }
-
-                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-                  simStillRunning = timeSpentSimulating < simulationRunTime;
-
-                  behavior.doControl();
-               }
-            }
-         }
-      };
-
-      behaviorThread.start();
-
-      boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-
-      if (DEBUG)
-      {
-         SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
-
-      return ret;
    }
 }
