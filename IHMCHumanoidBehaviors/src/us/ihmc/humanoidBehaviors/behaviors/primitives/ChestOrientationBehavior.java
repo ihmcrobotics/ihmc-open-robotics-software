@@ -5,18 +5,21 @@ import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ChestOrientationBehavior extends BehaviorInterface
 {
+   private final boolean DEBUG = false;
+   
    private ChestOrientationPacket outgoingChestOrientationPacket;
 
    private final BooleanYoVariable hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
-   private final BooleanYoVariable trajectoryTimeElapsed;
+   private final BooleanYoVariable trajectoryTimeHasElapsed;
 
    public ChestOrientationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -29,7 +32,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeHasElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
    }
 
    public void setInput(ChestOrientationPacket chestOrientationPacket)
@@ -98,12 +101,19 @@ public class ChestOrientationBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
-         trajectoryTimeElapsed.set(false);
-      else
-         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
+      boolean startTimeUndefined = Double.isNaN(startTime.getDoubleValue());
+      boolean trajectoryTimeUndefined = Double.isNaN(trajectoryTime.getDoubleValue());
+      double trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue();
+      
+      SysoutTool.println("StartTimeUndefined: " + startTimeUndefined + ".  TrajectoryTimeUndefined: " + trajectoryTimeUndefined, DEBUG);
+      SysoutTool.println("TrajectoryTimeElapsed: " + trajectoryTimeElapsed, DEBUG);
 
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+      if ( startTimeUndefined || trajectoryTimeUndefined )
+         trajectoryTimeHasElapsed.set(false);
+      else
+         trajectoryTimeHasElapsed.set( trajectoryTimeElapsed > trajectoryTime.getDoubleValue());
+
+      return trajectoryTimeHasElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    @Override
