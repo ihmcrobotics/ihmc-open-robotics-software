@@ -1,6 +1,7 @@
 package us.ihmc.atlas.velocityControlEvaluation;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class VelocityControlEvaluationSimulation
 {
@@ -18,7 +19,9 @@ public class VelocityControlEvaluationSimulation
       VelocityControlEvaluationController controller = new VelocityControlEvaluationController(robot, controlDT);
       robot.setController(controller, ticksPerControl);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, 32768);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(32768);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.setDT(simDT, 1);
       scs.setSimulateDuration(1.5);
       

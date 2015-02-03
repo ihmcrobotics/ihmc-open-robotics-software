@@ -6,6 +6,7 @@ import us.ihmc.kalman.imu.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -36,7 +37,9 @@ public class TestIMUKalmanFilterSimulationJerryOne
       }
       else
       {
-         scs = new SimulationConstructionSet(rob, 4096);
+         SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+         parameters.setDataBufferSize(4096);
+         scs = new SimulationConstructionSet(rob, parameters);
       }
 
       scs.setDT(SIMULATION_DT, (int) (WINDOW / SIMULATION_DT));

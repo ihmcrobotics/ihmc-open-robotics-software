@@ -550,11 +550,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       throw new RuntimeException("Not sure if this is all we have to do for jApplet. Problably not. We need to test and debug this constructor...");
    }
 
-   public SimulationConstructionSet(Robot robot, int bufferSize)
-   {
-      this(robot, new SimulationConstructionSetParameters(bufferSize));
-   }
-
    public SimulationConstructionSet(Robot robot, boolean createGUI)
    {
       this(robot, new SimulationConstructionSetParameters(createGUI));

@@ -8,6 +8,7 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 
 public class MultilevelGroundExampleSimulation
@@ -74,8 +75,9 @@ public class MultilevelGroundExampleSimulation
       MarbleRunGround marbleRunGround = new MarbleRunGround("marbleRun");
       groundContactModel.setGroundProfile3D(marbleRunGround);
 
-
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, 16384);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(16384);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.setGroundVisible(false);
 
       scs.addStaticLinkGraphics(marbleRunGround.getLinkGraphics());

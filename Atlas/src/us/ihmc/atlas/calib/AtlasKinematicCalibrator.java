@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -53,7 +54,9 @@ public class AtlasKinematicCalibrator
 
    protected void createDisplay(int bufferSize)
    {
-      scs = new SimulationConstructionSet(robot, bufferSize);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(bufferSize);
+      scs = new SimulationConstructionSet(robot, parameters);
       visualizer = new FullRobotModelVisualizer(scs, fullRobotModel, 0.01); //100hz sample rate
       
       scs.setGroundVisible(false);
