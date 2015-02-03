@@ -43,6 +43,7 @@ import us.ihmc.graphics3DAdapter.jme.util.JMENodeTools;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.loaders.jme.STLLoader;
+import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
@@ -78,7 +79,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    static
    {
-      String tempDir = System.getProperty("java.io.tmpdir") + File.separator + "SCSCache";
+      String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
+      String tempDir = temporaryDirectoryPathName + File.separator + "SCSCache";
       File tempDirFile = new File(tempDir);
       if (!tempDirFile.exists())
       {
