@@ -13,6 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -123,12 +124,12 @@ public class PelvisLinearStateUpdater
    private final FrameVector tempFrameVector = new FrameVector();
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempVelocity = new FrameVector();
-   
+
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration,
-         DoubleYoVariable yoTime, StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
-   {      
+         SideDependentList<FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
+         SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, DoubleYoVariable yoTime,
+         StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
@@ -171,12 +172,14 @@ public class PelvisLinearStateUpdater
       stateMachine = new StateMachine<EstimationState>("LinearEstimationStateMachine", "switchTime", EstimationState.class, yoTime, registry);
       setupStateMachine();
       
-      kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, bipedFeet, estimatorDT, yoGraphicsListRegistry, registry);
+      kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, bipedFeet, footSwitches,
+            centerOfPressureDataHolderFromController, estimatorDT, yoGraphicsListRegistry, registry);
       kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz(), estimatorDT));
       double alphaFilter = computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisLinearVelocityFilterFreqInHertz(), estimatorDT);
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityAlphaNewTwist(stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(alphaFilter, stateEstimatorParameters.getPelvisVelocityBacklashSlopTime());
       kinematicsBasedLinearStateCalculator.setTrustCoPAsNonSlippingContactPoint(stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
+      kinematicsBasedLinearStateCalculator.useControllerDesiredCoP(stateEstimatorParameters.useControllerDesiredCenterOfPressure());
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
       kinematicsBasedLinearStateCalculator.enableTwistEstimation(stateEstimatorParameters.useTwistForPelvisLinearStateEstimation());
 
@@ -466,7 +469,7 @@ public class PelvisLinearStateUpdater
       @Override
       public void doAction()
       {
-         kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForDoubleSupport(footSwitches);
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForDoubleSupport();
          imuDriftCompensator.esimtateDriftIfPossible(null);
       }
 
@@ -495,7 +498,7 @@ public class PelvisLinearStateUpdater
       @Override
       public void doAction()
       {
-         kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(rootJointPosition, footSwitches, trustedSide);
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(rootJointPosition, trustedSide);
          imuDriftCompensator.esimtateDriftIfPossible(trustedSide);
       }
       

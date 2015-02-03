@@ -2,7 +2,6 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
@@ -27,6 +26,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -76,6 +76,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ForceSensorDataHolder forceSensorDataHolderForController;
+   private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
    private final DRCOutputWriter outputWriter;
@@ -126,6 +127,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
+      centerOfPressureDataHolderForEstimator = threadDataSynchronizer.getControllerCenterOfPressureDataHolder();
 
       outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
@@ -146,12 +148,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(jointToIgnore));
          }
       }
+      InverseDynamicsJoint[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {});
 
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor, controllerReferenceFrames, sensorInformation,
-            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, yoGraphicsListRegistry, registry,
-            dataProducer, listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {}));
+            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController,
+            centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, dataProducer, arrayOfJointsToIgnore);
 
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());
@@ -171,10 +174,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, OutputProcessor outputProcessor, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
-         double gravity, ForceSensorDataHolder forceSensorDataHolderForController,final  YoGraphicsListRegistry yoGraphicsListRegistry,
-         final YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+   public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, OutputProcessor outputProcessor,
+         ReferenceFrames referenceFramesForController, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
+         DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController,
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
+         GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 
@@ -202,7 +206,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
           ForceSensorDataVisualizer forceSensorDataVisualizer = new ForceSensorDataVisualizer(controllerModel, forceSensorDataHolderForController, includeOnlySensorsContainingThisName, forceVizScaling, yoGraphicsListRegistry, registry);
           controllerFactory.addUpdatable(forceSensorDataVisualizer);
       }
-      
+
       if (SHOW_LEG_COM)
       {
          for (RobotSide side : RobotSide.values)
@@ -213,9 +217,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             controllerFactory.addUpdatable(comVisualizer);
          }
       }
-           
+
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
-            yoGraphicsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
+            yoGraphicsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator,
             dataProducer, jointsToIgnore);
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
@@ -362,8 +366,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
          totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
          
-         //TODO: Do something with the points
-         threadDataSynchronizer.publishControllerData(new Point3d(), new Point3d());         
+         threadDataSynchronizer.publishControllerData();         
          if (robotVisualizer != null)
          {
             robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);

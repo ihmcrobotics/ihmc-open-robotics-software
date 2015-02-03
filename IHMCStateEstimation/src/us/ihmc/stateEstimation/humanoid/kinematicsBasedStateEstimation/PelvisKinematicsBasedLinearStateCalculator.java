@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -84,6 +85,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final SideDependentList<FrameLineSegment2d> footCenterCoPLineSegments = new SideDependentList<FrameLineSegment2d>();
 
    private final BooleanYoVariable kinematicsIsUpToDate = new BooleanYoVariable("kinematicsIsUpToDate", registry);
+   private final BooleanYoVariable useControllerDesiredCoP = new BooleanYoVariable("useControllerDesiredCoP", registry);
    private final BooleanYoVariable trustCoPAsNonSlippingContactPoint = new BooleanYoVariable("trustCoPAsNonSlippingContactPoint", registry);
 
    // temporary variables
@@ -94,13 +96,19 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final FrameVector tempCoPOffset = new FrameVector();
    private final RobotSide[] singleElementRobotSideArray = new RobotSide[1];
 
+   private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
+
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<ContactablePlaneBody> bipedFeet,
-         double estimatorDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         SideDependentList<FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.rootBody = inverseDynamicsStructure.getRootJoint().getSuccessor();
       this.bipedFeet = bipedFeet;
       this.rootJointFrame = inverseDynamicsStructure.getRootJoint().getFrameAfterJoint();
       this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      this.footSwitches = footSwitches;
+      this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
 
       rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin", "", 
             alphaRootJointLinearVelocityBacklashKinematics, estimatorDT, slopTimeRootJointLinearVelocityBacklashKinematics, registry, rootJointPosition);
@@ -168,6 +176,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
    public void setTrustCoPAsNonSlippingContactPoint(boolean trustCoP)
    {
       trustCoPAsNonSlippingContactPoint.set(trustCoP);
+   }
+
+   public void useControllerDesiredCoP(boolean useControllerDesiredCoP)
+   {
+      this.useControllerDesiredCoP.set(useControllerDesiredCoP);
    }
 
    public void setAlphaPelvisPosition(double alphaFilter)
@@ -262,12 +275,15 @@ public class PelvisKinematicsBasedLinearStateCalculator
     * @param trustedSide
     * @param footSwitch
     */
-   private void updateCoPPosition(RobotSide trustedSide, FootSwitchInterface footSwitch)
+   private void updateCoPPosition(RobotSide trustedSide)
    {
       AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
       ReferenceFrame footFrame = footFrames.get(trustedSide);
 
-      footSwitch.computeAndPackCoP(tempCoP);
+      if (useControllerDesiredCoP.getBooleanValue())
+         centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP, trustedSide);
+      else
+         footSwitches.get(trustedSide).computeAndPackCoP(tempCoP);
       
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
@@ -382,31 +398,31 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
    }
 
-   public void estimatePelvisLinearStateForDoubleSupport(SideDependentList<FootSwitchInterface> footSwitches)
+   public void estimatePelvisLinearStateForDoubleSupport()
    {
-      estimatePelvisLinearState(footSwitches, RobotSide.values);
+      estimatePelvisLinearState(RobotSide.values);
    }
 
-   public void estimatePelvisLinearStateForSingleSupport(FramePoint pelvisPosition, SideDependentList<FootSwitchInterface> footSwitches, RobotSide trustedSide)
+   public void estimatePelvisLinearStateForSingleSupport(FramePoint pelvisPosition, RobotSide trustedSide)
    {
-      estimatePelvisLinearState(footSwitches, trustedSide);
+      estimatePelvisLinearState(trustedSide);
       updateFootPosition(trustedSide.getOppositeSide(), pelvisPosition);
    }
 
-   private void estimatePelvisLinearState(SideDependentList<FootSwitchInterface> footSwitches, RobotSide trustedSide)
+   private void estimatePelvisLinearState(RobotSide trustedSide)
    {
       singleElementRobotSideArray[0] = trustedSide;
-      estimatePelvisLinearState(footSwitches, singleElementRobotSideArray);
+      estimatePelvisLinearState(singleElementRobotSideArray);
    }
    
-   private void estimatePelvisLinearState(SideDependentList<FootSwitchInterface> footSwitches, RobotSide[] listOfTrustedSides)
+   private void estimatePelvisLinearState(RobotSide[] listOfTrustedSides)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
 
       for(RobotSide trustedSide : listOfTrustedSides)
       {
-         updateCoPPosition(trustedSide, footSwitches.get(trustedSide));
+         updateCoPPosition(trustedSide);
          correctFootPositionsUsingCoP(trustedSide);
          updatePelvisWithKinematics(trustedSide, listOfTrustedSides.length);
       }

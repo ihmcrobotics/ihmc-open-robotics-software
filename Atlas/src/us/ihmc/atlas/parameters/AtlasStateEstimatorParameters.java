@@ -199,6 +199,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
+   public boolean useControllerDesiredCenterOfPressure()
+   {
+      return false;
+   }
+
+   @Override
    public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
