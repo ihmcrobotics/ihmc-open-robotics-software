@@ -3,32 +3,26 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -39,19 +33,13 @@ import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -68,12 +56,12 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (drcBehaviorTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         drcBehaviorTestHelper.closeAndDispose();
+         drcBehaviorTestHelper = null;
       }
-      
+
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
@@ -81,28 +69,19 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   private static final boolean DEBUG = false;
+   @AfterClass
+   public void printMemoryUsageAfterClass()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+   }
 
+   private static final boolean DEBUG = false;
 
    private final double MAX_ANGLE_TO_TEST_RAD = 30.0 * Math.PI / 180.0;
    private final double POSITION_THRESHOLD = Double.NaN;
    private final double ORIENTATION_THRESHOLD = 0.007;
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCHandPoseBehaviorTestControllerCommunicator");
-
-   private DoubleYoVariable yoTime;
-
-   private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
-
-   private BehaviorCommunicationBridge communicationBridge;
-
-   private SDFRobot robot;
-   private FullRobotModel fullRobotModel;
-   private ReferenceFrames referenceFrames;
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    @Before
    public void setUp()
@@ -114,45 +93,33 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
+      DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      yoTime = robotToTest.getYoTime();
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCJunkyCommunicator");
 
-      robot = drcSimulationTestHelper.getRobot();
-      fullRobotModel = getRobotModel().createFullRobotModel();
-
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-      referenceFrames = robotDataReceiver.getReferenceFrames();
-
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCComHeightBehaviorTestJunkyCommunicator");
-
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
-      
+
       ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
 
       assertTrue(chestOrientationBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testSingleChestPitchOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -171,8 +138,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testSingleChestRollOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -191,8 +158,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testSingleChestYawOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -213,22 +180,26 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
    private ChestOrientationBehavior testChestOrientationBehavior(ChestOrientationPacket chestOrientationPacket) throws SimulationExceededMaximumTimeException
    {
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(communicationBridge, yoTime);
-      communicationBridge.attachGlobalListenerToController(chestOrientBehavior.getControllerGlobalPacketConsumer());
+      final ChestOrientationBehavior chestOrientBehavior = new ChestOrientationBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
 
       chestOrientBehavior.initialize();
       chestOrientBehavior.setInput(chestOrientationPacket);
-      assertTrue( chestOrientBehavior.hasInputBeenSet() );
-      
-      FramePose initialChestPose = getCurrentChestPose(fullRobotModel);
-      success = success && executeBehavior(chestOrientBehavior, chestOrientationPacket.getTrajectoryTime());
-      FramePose finalChestPose = getCurrentChestPose(fullRobotModel);
+      assertTrue(chestOrientBehavior.hasInputBeenSet());
+
+      double totalSimTime = chestOrientationPacket.getTrajectoryTime();
+      totalSimTime += 1.0;
+
+      FramePose initialChestPose = getCurrentChestPose();
+      success = success && drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(chestOrientBehavior, totalSimTime);
+      FramePose finalChestPose = getCurrentChestPose();
 
       if (DEBUG)
       {
          SysoutTool.println(" initial Chest Pose :\n" + initialChestPose);
+         SysoutTool.println(" final Chest Pose :\n" + finalChestPose);
       }
       FramePose desiredChestPose = new FramePose();
       desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestOrientationPacket.orientation);
@@ -239,60 +210,13 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       return chestOrientBehavior;
    }
 
-   private FramePose getCurrentChestPose(FullRobotModel fullRobotModel)
+   private FramePose getCurrentChestPose()
    {
-      fullRobotModel.updateFrames();
+      drcBehaviorTestHelper.updateRobotModel();
+
       FramePose ret = new FramePose();
-      ret.setToZero(fullRobotModel.getChest().getBodyFixedFrame());
+      ret.setToZero(drcBehaviorTestHelper.getFullRobotModel().getChest().getBodyFixedFrame());
       ret.changeFrame(ReferenceFrame.getWorldFrame());
-
-      return ret;
-   }
-
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-
-      if (DEBUG)
-      {
-         System.out.println("\n");
-         SysoutTool.println("starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
-
-      Thread behaviorThread = new Thread()
-      {
-         public void run()
-         {
-            {
-               double startTime = Double.NaN;
-               boolean simStillRunning = true;
-               boolean initalized = false;
-
-               while (simStillRunning)
-               {
-                  if (!initalized)
-                  {
-                     startTime = yoTime.getDoubleValue();
-                     initalized = true;
-                  }
-
-                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-                  simStillRunning = timeSpentSimulating < simulationRunTime;
-
-                  behavior.doControl();
-               }
-            }
-         }
-      };
-
-      behaviorThread.start();
-
-      boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-
-      if (DEBUG)
-      {
-         SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
-      }
 
       return ret;
    }
