@@ -144,7 +144,10 @@ public class SimulationConstructionSetMemoryReclamationTest
       }
       else
       {
-         scs = new SimulationConstructionSet(true, 5000);
+         SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+         parameters.setCreateGUI(true);
+         parameters.setDataBufferSize(5000);
+         scs = new SimulationConstructionSet(parameters);
       }
       
       scs.setDT(0.0001, 100);
