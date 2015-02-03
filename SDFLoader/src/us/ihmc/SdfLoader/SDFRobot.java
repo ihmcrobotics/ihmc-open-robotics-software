@@ -90,7 +90,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       super(generalizedSDFRobotModel.getName());
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
-      System.out.println("Creating root joints for root links");
+//      System.out.println("Creating root joints for root links");
 
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
 
