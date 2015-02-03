@@ -59,7 +59,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       return actualSdfModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
    }
 
-   static private String modelLocationPathString;
+   static private String modelLocationPathString = null;
 
    @Override 
    public String getURDFConfigurationFileName() throws IOException
@@ -217,8 +217,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       coupledJointWeights.zero();
 
       // these are the joints to be knees
-      weights_jointpose.set(rleg_kny, 0.75);
-      weights_jointpose.set(lleg_kny, 0.75);
+      weights_jointpose.set(rleg_kny, 0.4);
+      weights_jointpose.set(lleg_kny, 0.4);
 
       // this is used to keep the pelvis straight
       // what you want is:
@@ -253,8 +253,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       {
          if( Math.abs( weights_jointpose.get(index)) < 0.0001 )
          {
-            weights_jointpose.set(index, 0.1 );
-            preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
+           //  weights_jointpose.set(index, 0.01 );
+          //  preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
          }
       }
 
@@ -265,4 +265,56 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       taskJointsPose.setTarget(preferedJointPose, 3);
    }
 
+   @Override
+   public void reseedCachedModel()
+   {
+      Vector64F randQ = getHierarchicalSolver().getRandomQ();
+
+      for (int i = 0; i < getNumberOfJoints(); i++)
+      {
+         boolean partOfQuietArm = false;
+
+         for(RobotSide robotSide: RobotSide.values())
+         {
+            if( keepArmQuiet.get(robotSide).isTrue())
+            {
+               for(int j=0; j< getNumberDoFperArm(); j++){
+                  if ( armJointIds.get(robotSide)[j] == i){
+                     partOfQuietArm = true;
+                     break;
+                  }
+               }
+            }
+         }           
+
+         if( !partOfQuietArm ) {
+            cachedAnglesQ.set(i, randQ.get(i));
+         }
+      }
+      
+      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_akx"), 0.0);
+      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_akx"), 0.0);
+      
+      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_aky"), -1.1);
+      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_aky"), -1.1);
+      
+      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_kny"), 2.2);
+      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_kny"), 2.2);
+      
+      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpy"), -1.1);
+      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpy"), -1.1);
+      
+      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpx"), 0.0);
+      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpx"), 0.0);
+
+      cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpz"), 0.0);
+      cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpz"), 0.0);
+      
+      if( keepArmQuiet.get(RobotSide.LEFT).isFalse())
+         cachedAnglesQ.set(jointNamesToIndex.get("l_arm_elx"), 1.0);
+      if( keepArmQuiet.get(RobotSide.RIGHT).isFalse())
+         cachedAnglesQ.set(jointNamesToIndex.get("r_arm_elx"), -1.0);
+      
+   }
+   
 }

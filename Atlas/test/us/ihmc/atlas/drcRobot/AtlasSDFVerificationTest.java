@@ -181,8 +181,8 @@ public class AtlasSDFVerificationTest
 
          while ((line = reader.readLine()) != null)
          {
-            String name = line.substring(0, line.indexOf(":"));
-            double value = Double.parseDouble(line.substring(line.indexOf(":") + 1));
+            String name = line.substring(0, line.indexOf(':'));
+            double value = Double.parseDouble(line.substring(line.indexOf(':') + 1));
 
             if (hasVariableChangedSignificantly(yoVariables, name, value))
             {

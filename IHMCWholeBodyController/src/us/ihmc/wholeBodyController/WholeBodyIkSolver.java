@@ -38,6 +38,8 @@ abstract public class WholeBodyIkSolver
       NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
    }
+   
+   public enum ComputeResult { FAILED_INVALID, FAILED_NOT_CONVERGED, SUCCEEDED };
 
    ///--------------- Constants -----------------------------------------
    static public final double IGNORE = -66666.666;
@@ -71,7 +73,7 @@ abstract public class WholeBodyIkSolver
 
    // ------------- Parameters that change the overall behavior ----------------------
 
-   private final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
+   protected final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
    private final SideDependentList<ControlledDoF>  controlledDoF = new SideDependentList<ControlledDoF>();
    private boolean lockLegs = false;
    private boolean suggestKneeAngle = true;
@@ -85,10 +87,11 @@ abstract public class WholeBodyIkSolver
    protected final DenseMatrix64F coupledJointWeights;
    protected final Vector64F      preferedJointPose;
 
-   private final Vector64F cachedAnglesQ;
+   protected final Vector64F cachedAnglesQ;
 
    final private int numOfJoints;
    private HashSet<String> listOfVisibleAndEnableColliders;
+   public int maxNumberOfAutomaticReseeds = 3;
 
    //------- Abstract method that provide robot-specific information and configuration  -------------
 
@@ -353,7 +356,8 @@ abstract public class WholeBodyIkSolver
          zR = 1;
       }
 
-      double preferedKneeAngle = 2.4 - (zL +  zR)*0.5;
+      double preferedKneeAngle = 2.6 - Math.min(zL , zR);
+      
       if( preferedKneeAngle < 0.4) preferedKneeAngle = 0.4;
 
       preferedJointPose.set(jointNamesToIndex.get("l_leg_kny"), preferedKneeAngle);
@@ -370,7 +374,6 @@ abstract public class WholeBodyIkSolver
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
       taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
       
-      System.out.println( taskEndEffectorPose.get(endEffectorSide).jacobianPointOffset );
       setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
    }
    
@@ -511,7 +514,7 @@ abstract public class WholeBodyIkSolver
    }
 
 
-   public int compute(SDFFullRobotModel actualSdfModel,  Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
+   public ComputeResult compute(SDFFullRobotModel actualSdfModel,  Map<String, Double> anglesToUseAsInitialState,  Map<String, Double> outputAngles) throws Exception
    {
       for (int i = 0; i < numOfJoints; i++)
       { 
@@ -523,9 +526,9 @@ abstract public class WholeBodyIkSolver
          }
       }
 
-      int ret = compute(actualSdfModel, null,  ComputeOption.USE_JOINTS_CACHE);
+      ComputeResult ret = compute(actualSdfModel, null,  ComputeOption.USE_JOINTS_CACHE);
 
-      if( ret > -2)
+      if( ret != ComputeResult.FAILED_INVALID)
       {
          for (int i = 0; i < numOfJoints; i++)
          {
@@ -536,8 +539,11 @@ abstract public class WholeBodyIkSolver
       }
       return ret;
    }
+   
+   public abstract void reseedCachedModel();
+   
 
-   public int compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
+   public ComputeResult compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
    {
       if( desiredRobotModelToPack == actualSdfModel)
       {
@@ -547,53 +553,8 @@ abstract public class WholeBodyIkSolver
       switch(opt)
       {
       case RESEED:
-         Vector64F randQ = getHierarchicalSolver().getRandomQ();
-
-         for (int i = 0; i < numOfJoints; i++)
-         {
-            boolean partOfQuietArm = false;
-
-            for(RobotSide robotSide: RobotSide.values())
-            {
-               if( keepArmQuiet.get(robotSide).isFalse())
-               {
-                  for(int j=0; j< getNumberDoFperArm(); j++){
-                     if ( armJointIds.get(robotSide)[j] == i){
-                        partOfQuietArm = true;
-                        break;
-                     }
-                  }
-               }
-            }           
-
-            if( !partOfQuietArm ) {
-               cachedAnglesQ.set(i, randQ.get(i));
-            }
-         }
-
-         // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_akx"), 0.0);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_akx"), 0.0);
          
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_aky"), -0.8);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_aky"), -0.8);
-         
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_kny"), 1.6);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_kny"), 1.6);
-         
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpy"), -0.8);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpy"), -0.8);
-         
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpx"), 0.0);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpx"), 0.0);
-
-         cachedAnglesQ.set(jointNamesToIndex.get("l_leg_hpz"), 0.0);
-         cachedAnglesQ.set(jointNamesToIndex.get("r_leg_hpz"), 0.0);
-         
-         if( keepArmQuiet.get(LEFT).isFalse())
-            cachedAnglesQ.set(jointNamesToIndex.get("l_arm_elx"), 0.7);
-         if( keepArmQuiet.get(RIGHT).isFalse())
-            cachedAnglesQ.set(jointNamesToIndex.get("r_arm_elx"), -0.7);
+         reseedCachedModel();         
 
          break;
       case USE_ACTUAL_MODEL_JOINTS:
@@ -615,13 +576,23 @@ abstract public class WholeBodyIkSolver
 
       enforceControlledDoF( opt );
 
-      int ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
+      ComputeResult ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
 
+      int reseedLeft = maxNumberOfAutomaticReseeds;
+      
+      while( reseedLeft > 0 && ret != ComputeResult.SUCCEEDED)
+      {
+         reseedCachedModel();
+         ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
+         reseedLeft--;
+      }
+    
       if(opt != ComputeOption.RESEED)
       {
          keepArmQuiet.get(LEFT).setValue(true);
          keepArmQuiet.get(RIGHT).setValue(true);
       }
+      
       return ret;
    }
 
@@ -659,7 +630,7 @@ abstract public class WholeBodyIkSolver
    }
 
 
-   synchronized private int computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
+   synchronized private ComputeResult computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
    {    
       movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
 
@@ -683,8 +654,18 @@ abstract public class WholeBodyIkSolver
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
+      
+      ComputeResult result ;
+      
+      if( ret == -2) 
+         result = ComputeResult.FAILED_INVALID;
+      else if( ret == -1)
+         result = ComputeResult.FAILED_NOT_CONVERGED;
+      else 
+         result = ComputeResult.SUCCEEDED;
 
-      if (ret != -2)
+      //------------------------------------------
+      if (result !=ComputeResult.FAILED_INVALID )
       {
          cachedAnglesQ.set(q_out);
 
@@ -719,7 +700,7 @@ abstract public class WholeBodyIkSolver
          movePelvisToHaveOverlappingFeet( actualSdfModel, desiredRobotModelToPack );
       }
 
-      return ret;
+      return result;
    }
 
    public double getDesiredJointAngle(String jointName)

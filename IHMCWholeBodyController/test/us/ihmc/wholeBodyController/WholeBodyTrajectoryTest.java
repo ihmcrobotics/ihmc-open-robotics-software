@@ -28,6 +28,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
@@ -105,11 +106,11 @@ public abstract class WholeBodyTrajectoryTest
        //  wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.LEFT,  targetL );
          wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT,  targetR );
 
-         int ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS );
+         ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS );
 
-         if( ret >=0 )
+         if( ret == ComputeResult.SUCCEEDED )
          {
-            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory( 1.5, 15, 0.05);
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory( 1.5, 15, 0.15);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
             Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);

@@ -28,6 +28,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -56,7 +57,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private YoFramePoint framePoint2;
    private YoFrameOrientation frameOrientation2;
    private final double trajectoryTime = 2.0;
-   private int successInt;
+   private ComputeResult success;
 
    public AtlasWholeBodyIKIngressEgressCtrlSim() throws Exception
    {
@@ -152,7 +153,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       wholeBodyIKSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT, desiredPose);
       try
       {
-        successInt = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+         success = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
       }
       catch (Exception e)
       {
@@ -260,7 +261,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
 
       if (vector.length() > ERROR_DISTANCE_TOLERANCE)
       {
-         System.out.println(this.getClass().getName() + ": " + (successInt>0 ? "HIK REPORTS POSSIBLE BUT" : "HIK REPORTS IMPOSSIBLE THUS") + " FAILED TO REACH DESIRED POINT " );
+         System.out.println(this.getClass().getName() + ": " + (success == ComputeResult.SUCCEEDED ? "HIK REPORTS POSSIBLE BUT" : "HIK REPORTS IMPOSSIBLE THUS") + " FAILED TO REACH DESIRED POINT " );
       }
       else{
          System.out.println(this.getClass().getName() + ": SUCCESFULLY REACHED POINT");
@@ -273,7 +274,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       boolean bool = false;
       for (YoVariable<?> yoVariable : yoVariables)
       {
-         if (yoVariable.getName() == "highLevelState")
+         if (yoVariable.getName().equals("highLevelState"))
          {
             @SuppressWarnings("unchecked")
             EnumYoVariable<HighLevelState> enumYoVariable = (EnumYoVariable<HighLevelState>) yoVariable;
