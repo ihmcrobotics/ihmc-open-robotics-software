@@ -135,7 +135,10 @@ public class RobotTest
       assertEquals(pin1.getQDD().getDoubleValue(), pin1.getQDD().getDoubleValue(), 1e-8);
 
       double simulateTime = 1.0;
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {robot1, robot2}, SHOW_GUI);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(SHOW_GUI);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {robot1, robot2}, parameters);
       scs.setDT(1e-4, 10);
       scs.setGroundVisible(false);
       Thread simThread = new Thread(scs, "sim thread");
