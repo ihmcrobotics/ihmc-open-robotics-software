@@ -6,8 +6,10 @@
         <pose>1 -5 1 0 0 1.571</pose>
       </camera>
     </gui>
-    <!-- <physics type="ode">
+
+   <physics type="ode">
       <gravity>0 0 -9.81</gravity>
+
       <simbody>
         <accuracy>0.005</accuracy>
         <max_transient_velocity>0.005</max_transient_velocity>
@@ -16,10 +18,11 @@
           <dissipation>20.0</dissipation>
         </contact>
       </simbody>
+
       <ode>
         <solver>
           <type>quick</type>
-          <iters>50</iters>
+          <iters>150</iters>
           <sor>1.4</sor>
         </solver>
         <constraints>
@@ -29,9 +32,11 @@
           <contact_surface_layer>0.0</contact_surface_layer>
         </constraints>
       </ode>
+
       <real_time_update_rate>1000</real_time_update_rate>
       <max_step_size>0.001</max_step_size>
-    </physics> -->
+
+    </physics>
     <!-- A global light source -->
     <include>
       <uri>model://sun</uri>
