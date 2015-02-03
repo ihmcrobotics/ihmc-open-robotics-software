@@ -215,10 +215,12 @@ public class BehaviorDisptacher implements Runnable
       }
    }
 
+   boolean runningBehavior = true;
+ 
    @Override
    public void run()
    {
-      while (true)
+      while (runningBehavior)
       {
          if (!hasBeenInitialized.getBooleanValue())
          {
@@ -276,5 +278,10 @@ public class BehaviorDisptacher implements Runnable
          System.out.println("detach listeners to: " + behavior.getName());
       communicationBridge.detachGlobalListenerFromController(behavior.getControllerGlobalPacketConsumer());
       communicationBridge.detachGlobalListenerFromNetworkProcessor(behavior.getNetworkProcessorGlobalObjectConsumer());
+   }
+   
+   public void closeAndDispose()
+   {
+      this.runningBehavior = false;
    }
 }

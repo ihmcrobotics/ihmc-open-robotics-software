@@ -35,34 +35,35 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
 
    private final KryoPacketCommunicator networkObjectCommunicator;
+   private final KryoPacketCommunicator controllerCommunicator;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
    private final RobotDataReceiver robotDataReceiver;
    private final BehaviorDisptacher behaviorDispatcher;
    private final ReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
    
-   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, FullRobotModel fullRobotModel, KryoPacketCommunicator networkObjectCommunicator,
-         PacketCommunicator controllerCommunicator)
+   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, KryoPacketCommunicator networkObjectCommunicator,
+         KryoPacketCommunicator controllerCommunicator)
    {
       this(new DRCDemo01NavigationEnvironment(), networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
-            false, robotModel, fullRobotModel, controllerCommunicator);
+            false, robotModel, controllerCommunicator);
    }
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-         FullRobotModel fullRobotModel, KryoPacketCommunicator networkObjectCommunicator, PacketCommunicator controllerCommunicator)
+         KryoPacketCommunicator networkObjectCommunicator, KryoPacketCommunicator controllerCommunicator)
    {
       this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
-            false, robotModel, fullRobotModel, controllerCommunicator);
+            false, robotModel, controllerCommunicator);
    }
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, KryoPacketCommunicator networkObjectCommunicator, String name,
-         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, boolean startNetworkProcessor, DRCRobotModel robotModel, FullRobotModel fullRobotModel, PacketCommunicator controllerCommunicator)
+         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, boolean startNetworkProcessor, DRCRobotModel robotModel, KryoPacketCommunicator controllerCommunicator)
    {
       super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters,
             startNetworkProcessor, robotModel);
 
-      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModel = robotModel.createFullRobotModel();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -70,6 +71,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorCommunicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, controllerCommunicator, registry);
 
       this.networkObjectCommunicator = networkObjectCommunicator;
+      this.controllerCommunicator = controllerCommunicator;
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, networkObjectCommunicator, controllerCommunicator, robotDataReceiver, yoGraphicsListRegistry);
       
       referenceFrames = robotDataReceiver.getReferenceFrames();
@@ -140,19 +142,28 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    public void closeAndDispose()
    {
+      if (behaviorDispatcher != null)
+      {
+         behaviorDispatcher.closeAndDispose();
+      }
+      
       if (networkObjectCommunicator != null)
       {
          networkObjectCommunicator.close();
          networkObjectCommunicator.closeAndDispose();
-//         networkObjectCommunicator = null;
       }
-      
+
       if (behaviorCommunicationBridge != null)
       {
          behaviorCommunicationBridge.closeAndDispose();
-//         behaviorCommunicationBridge = null;
       }
-      
+
+      if (controllerCommunicator != null)
+      {
+         controllerCommunicator.close();
+         controllerCommunicator.closeAndDispose();
+      }
+
       super.destroySimulation();
    }
    

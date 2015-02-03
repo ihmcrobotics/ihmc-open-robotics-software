@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
@@ -32,7 +31,6 @@ import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -43,17 +41,13 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
-   private DRCBehaviorTestHelper humanoidBehaviorTestHelper;
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-
-   private DRCValveEnvironment testEnvironment;
-   private DoubleYoVariable yoTime;
  
    @Before
    public void setUp()
@@ -63,19 +57,15 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
 
-      final KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
             "DRCHandPoseBehaviorTestControllerCommunicator");
-      
+
       testEnvironment = createTestEnvironment();
-//      humanoidBehaviorTestHelper = new HumanoidBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-//            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
-            
-      FullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
-      humanoidBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), fullRobotModel, controllerCommunicator);
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
       
       
-      Robot robot = humanoidBehaviorTestHelper.getRobot();
+      Robot robot = drcBehaviorTestHelper.getRobot();
       yoTime = robot.getYoTime();
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
@@ -95,10 +85,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (humanoidBehaviorTestHelper != null)
+      if (drcBehaviorTestHelper != null)
       {
-         humanoidBehaviorTestHelper.closeAndDispose();
-         humanoidBehaviorTestHelper = null;
+         drcBehaviorTestHelper.closeAndDispose();
+         drcBehaviorTestHelper = null;
       }
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -115,6 +105,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       return new DRCValveEnvironment(valveX, valveY, valveZ, valveYaw_degrees);
    }
    
+   private DRCValveEnvironment testEnvironment;
+   private DoubleYoVariable yoTime;
    
    private BooleanYoVariable yoDoubleSupport;
    private BooleanYoVariable yoTippingDetected;
@@ -131,7 +123,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
        ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      boolean success = humanoidBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
@@ -141,14 +133,14 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       FramePose valvePose = new FramePose(worldFrame, valveTransformToWorld);
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(humanoidBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
       double elapsedTimeToWalkAndTurnValve = 20.0;
 
-      final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(humanoidBehaviorTestHelper.getBehaviorCommunicationBridge(), humanoidBehaviorTestHelper.getFullRobotModel(), humanoidBehaviorTestHelper.getReferenceFrames(), yoTime, yoDoubleSupport,
+      final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getFullRobotModel(), drcBehaviorTestHelper.getReferenceFrames(), yoTime, yoDoubleSupport,
             yoTippingDetected, getRobotModel().getWalkingControllerParameters());
       
-      BehaviorCommunicationBridge communicationBridge = humanoidBehaviorTestHelper.getBehaviorCommunicationBridge();
+      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       communicationBridge.attachGlobalListenerToController(turnValveBehavior.getControllerGlobalPacketConsumer());
 
 //      String scriptName = "testTurnValveNoScript";
@@ -157,19 +149,23 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       ScriptBehaviorInputPacket scriptBehaviorInput = new ScriptBehaviorInputPacket(scriptName, valveTransformToWorld);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
-      assertTrue( turnValveBehavior.hasInputBeenSet());
+      assertTrue(turnValveBehavior.hasInputBeenSet());
 
       double initialValveClosePercentage = valveRobot.getClosePercentage();
-      success = humanoidBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
-      assertTrue(success);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage, DEBUG);
 
-      assertTrue(turnValveBehavior.isDone());
+      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+
+      assertTrue(success);
+
+      success = success & turnValveBehavior.isDone();
       assertTrue(finalValveClosePercentage > initialValveClosePercentage);
       assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
       
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
+      
       
       BambooTools.reportTestFinishedMessage();
    }
@@ -180,7 +176,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       FramePose ret = new FramePose();
 
-      humanoidBehaviorTestHelper.updateRobotModel();
+      drcBehaviorTestHelper.updateRobotModel();
       ReferenceFrame midFeetFrame = referenceFrames.getMidFeetZUpFrame();
 
       ret.setToZero(midFeetFrame);
