@@ -12,6 +12,7 @@ import us.ihmc.acsell.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
+import us.ihmc.acsell.network.StepprSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -258,7 +259,7 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
-      return null;
+      return new StepprSensorSuiteManager();
    }
 
    @Override
