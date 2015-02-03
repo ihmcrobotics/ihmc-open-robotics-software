@@ -96,21 +96,11 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
 
-      boolean doesRobotHaveLidar = robotModel.getSensorInformation().getLidarParameters().length > 0;
+      drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
+      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel.getDRCHandType(), fullRobotModel);
+      lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
 
-      if (doesRobotHaveLidar)
-      {
-         drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
-         RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel.getDRCHandType(), fullRobotModel);
-         lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
-
-         this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
-      }
-      else
-      {
-         drcRobotDataReceiver = null;
-         lidarFilter = null;
-      }
+      this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
 
       this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
       {
