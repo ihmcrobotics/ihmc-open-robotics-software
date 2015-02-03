@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.fallingBrick;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 
 public class FallingBrickSimulation
@@ -18,7 +19,10 @@ public class FallingBrickSimulation
       GROUND_APPEARANCE appearance = GROUND_APPEARANCE.EARTH;
       FallingBrickRobot FallingBrick = new FallingBrickRobot();
       //      sim = new SimulationConstructionSet(FallingBrick, new JMEGraphics3dAdapter(), 16342);
-      sim = new SimulationConstructionSet(FallingBrick, 16342);
+      
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(16342);
+      sim = new SimulationConstructionSet(FallingBrick, parameters);
 
       sim.setDT(0.001, 20);
 

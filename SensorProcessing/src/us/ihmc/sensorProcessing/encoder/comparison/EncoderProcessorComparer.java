@@ -16,6 +16,7 @@ import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcess
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -76,7 +77,9 @@ public class EncoderProcessorComparer
          processedRates.put(encoderProcessor, new DoubleYoVariable("pd_" + encoderProcessors.get(encoderProcessor), registry));
       }
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot, (int) Math.ceil(maxTime * jointTrajectories.size() / dt) + 1);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize((int) Math.ceil(maxTime * jointTrajectories.size() / dt) + 1);
+      SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot, parameters);
       scs.hideViewport();
       dataBuffer = scs.getDataBuffer();
       dataBuffer.setWrapBuffer(false);

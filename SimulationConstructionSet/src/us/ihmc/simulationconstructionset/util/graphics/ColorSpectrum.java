@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 /**
  * <p>Title: ColorSpectrum </p>
@@ -500,7 +501,9 @@ public class ColorSpectrum
       double cubeSize = 0.03;
       double cubeY = 0.3;    // 0.5; for reverse maps
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("NullBot"), 32000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(32000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("NullBot"), parameters);
 
       // Print all maps and print their reverse maps.
       boolean reverseMap = true;
