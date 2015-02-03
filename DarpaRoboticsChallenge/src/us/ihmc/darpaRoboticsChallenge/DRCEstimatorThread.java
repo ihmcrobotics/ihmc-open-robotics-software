@@ -147,6 +147,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
       startClockTime.set(currentClockTime);
       sensorReader.read();
+      
+      //TODO: Do something with the points
+      threadDataSynchronizer.receiveControllerDataForEstimator(new Point3d(), new Point3d());
       estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
    }
 
