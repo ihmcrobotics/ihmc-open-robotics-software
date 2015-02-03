@@ -3,6 +3,7 @@ package us.ihmc.graphics3DAdapter.jme;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import javax.vecmath.Color3f;
@@ -18,6 +19,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.utilities.ClassLoaderUtils;
+import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
@@ -206,7 +208,13 @@ public class JMEAppearanceMaterial
          }
          else
          {
-            updateOgreMaterials(new File(ogreShaderDir + path), materials, contentMan);
+            String pathname = ogreShaderDir + path;
+            File file = new File(pathname);
+            if (!file.exists())
+            {
+               System.err.println("createMaterialFromSDFAppearance(): Can't find material file " + pathname);
+            }
+            updateOgreMaterials(file, materials, contentMan);
          }
       }
 
@@ -244,8 +252,9 @@ public class JMEAppearanceMaterial
       }
       else
       {
-
-         File cacheDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "SCSCache" + File.separator + "ogre_materials");
+         String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
+        
+         File cacheDir = new File(temporaryDirectoryPathName + File.separator + "SCSCache" + File.separator + "ogre_materials");
          if (!cacheDir.exists())
          {
             cacheDir.mkdir();
@@ -253,7 +262,8 @@ public class JMEAppearanceMaterial
 
          try
          {
-            ClassLoaderUtils.copyToFileSystem(cacheDir.toPath(), "models/gazebo/media/materials");
+            Path path = cacheDir.toPath();
+            ClassLoaderUtils.copyToFileSystem(path, "models/gazebo/media/materials");
             GAZEBO_MATERIAL_CACHE = cacheDir.getAbsolutePath() + File.separator + "models" + File.separator + "gazebo" + File.separator + "media" + File.separator + "materials";
          }
          catch (IOException e)
