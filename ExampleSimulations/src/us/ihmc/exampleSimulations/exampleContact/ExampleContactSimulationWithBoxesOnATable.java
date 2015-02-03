@@ -9,6 +9,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
@@ -98,7 +99,10 @@ public class ExampleContactSimulationWithBoxesOnATable
       Robot[] robotsArray = new Robot[robots.size()];
       robots.toArray(robotsArray);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotsArray, 36000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(36000);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotsArray, parameters);
       scs.setDT(0.001, 1);
       scs.setSimulateDuration(8.0);
              

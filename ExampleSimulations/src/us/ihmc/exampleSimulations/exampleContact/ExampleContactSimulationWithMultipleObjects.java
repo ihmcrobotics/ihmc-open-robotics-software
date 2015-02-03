@@ -12,6 +12,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSphereRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
@@ -45,7 +46,9 @@ public class ExampleContactSimulationWithMultipleObjects
    {
       Robot[] robotsArray = generateRobots();
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotsArray, 36000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(36000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotsArray, parameters);
       scs.setDT(0.001, 1);
       scs.setSimulateDuration(8.0);
 
