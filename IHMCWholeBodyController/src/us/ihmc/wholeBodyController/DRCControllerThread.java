@@ -2,6 +2,8 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -280,7 +282,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void read(long currentClockTime)
    {
-      runController.set(threadDataSynchronizer.receiveControllerState());
+      runController.set(threadDataSynchronizer.receiveEstimatorStateForController());
       
       
       
@@ -348,7 +350,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       if (runController.getBooleanValue())
       {
          outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
-         totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());         
+         totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
+         
+         //TODO: Do something with the points
+         threadDataSynchronizer.publishControllerData(new Point3d(), new Point3d());
          if(robotVisualizer != null)
          {
             robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
