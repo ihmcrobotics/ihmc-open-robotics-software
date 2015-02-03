@@ -16,6 +16,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
@@ -128,8 +129,11 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		AllYoVariablesSimulationComparer comparerWithZeroEpsilon = new AllYoVariablesSimulationComparer(0.0);
 		
-		SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, false);
-		SimulationConstructionSet scs2 = new SimulationConstructionSet(robot2, false);
+		SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
+		scsParameters.setCreateGUI(false);
+		
+		SimulationConstructionSet scs1 = new SimulationConstructionSet(robot1, scsParameters);
+		SimulationConstructionSet scs2 = new SimulationConstructionSet(robot2, scsParameters);
 		scs1.getRootRegistry().addChild(rootRegistry1);
 		scs2.getRootRegistry().addChild(rootRegistry2);
 		
