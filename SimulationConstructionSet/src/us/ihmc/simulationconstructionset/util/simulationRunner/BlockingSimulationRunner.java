@@ -141,7 +141,6 @@ public class BlockingSimulationRunner
       }
       catch (InterruptedException ex)
       {
-         ex.printStackTrace();
       }
    }
 
