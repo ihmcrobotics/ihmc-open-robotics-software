@@ -7,11 +7,14 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;
 
+@CustomJob(job = CustomJobType.WholeBody)
 public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
 {
    static private final AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);

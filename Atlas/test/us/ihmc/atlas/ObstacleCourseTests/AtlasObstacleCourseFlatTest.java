@@ -8,12 +8,15 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
+@CustomJob(job = CustomJobType.FlatAndPlatform)
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
 
-   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    @Override
    public DRCRobotModel getRobotModel()
    {
