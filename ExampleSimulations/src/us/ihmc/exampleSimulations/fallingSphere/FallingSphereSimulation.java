@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.fallingSphere;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class FallingSphereSimulation
 {
@@ -19,7 +20,10 @@ public class FallingSphereSimulation
       fallingSphereSpringDamper.setController(controller);
 
       Robot[] robots = new Robot[] {fallingSphereImpulse, fallingSphereSpringDamper};
-      sim = new SimulationConstructionSet(robots, 16000);
+      
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(16000);
+      sim = new SimulationConstructionSet(robots, parameters);
 
       sim.setDT(0.001, 1);
 

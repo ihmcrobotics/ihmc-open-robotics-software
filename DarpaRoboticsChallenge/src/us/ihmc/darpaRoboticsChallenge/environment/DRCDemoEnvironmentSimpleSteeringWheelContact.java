@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
@@ -140,7 +141,9 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       Robot[] robotArray = new Robot[robots.size()];
       robots.toArray(robotArray);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, 36000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(36000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
       scs.setDT(1e-4, 20);
 
       TerrainObject3D terrainObject = env.getTerrainObject3D();

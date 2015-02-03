@@ -565,16 +565,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this(robot, new SimulationConstructionSetParameters(createGUI, bufferSize));
    }
 
-   public SimulationConstructionSet(Robot[] robots, int simulationDataBufferSize)
-   {
-      this(robots, new SimulationConstructionSetParameters(simulationDataBufferSize));
-   }
-
-   public SimulationConstructionSet(Simulation simulation, boolean showGUI)
-   {
-      this(simulation, new SimulationConstructionSetParameters(showGUI));
-   }
-
    /**
     * Get the simulation step size in seconds.
     *

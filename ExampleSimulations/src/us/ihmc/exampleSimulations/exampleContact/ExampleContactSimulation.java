@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.exampleContact;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 
@@ -35,7 +36,10 @@ public class ExampleContactSimulation
       
       Robot[] robots = new Robot[]{contactableRobot, pointMassRobot};
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robots, 36000);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(36000);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robots, parameters);
       scs.setDT(0.001, 1);
       scs.setSimulateDuration(8.0);
       
