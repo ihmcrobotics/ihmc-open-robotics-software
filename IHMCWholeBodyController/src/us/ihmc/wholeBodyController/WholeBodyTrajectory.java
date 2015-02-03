@@ -18,6 +18,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 
@@ -84,6 +85,9 @@ public class WholeBodyTrajectory
          ) throws Exception
    {
       int N = wbSolver.getNumberOfJoints();
+      
+      int oldMaxReseed = wbSolver.maxNumberOfAutomaticReseeds;
+      wbSolver.maxNumberOfAutomaticReseeds = 0;
 
       HashMap<String,Integer> nameToIndex = new HashMap<String,Integer>();
   
@@ -223,10 +227,11 @@ public class WholeBodyTrajectory
             if( s< numSegments )
             {
                //---------------------------------
-               int ret =  wbSolver.compute(actualRobotModel,  anglesToUseAsInitialState, outputAngles);
+               ComputeResult ret =  wbSolver.compute(actualRobotModel,  anglesToUseAsInitialState, outputAngles);
                //---------------------------------
 
-               if( ret > -2)
+               // note: use also the failed one that didn't converge... better than nothing.
+               if( ret != ComputeResult.FAILED_INVALID)
                {
                   for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
@@ -248,6 +253,7 @@ public class WholeBodyTrajectory
 
       wb_trajectory.buildTrajectory();
 
+      wbSolver.maxNumberOfAutomaticReseeds = oldMaxReseed;
       return wb_trajectory;
    }
 

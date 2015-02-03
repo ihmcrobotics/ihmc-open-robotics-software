@@ -60,7 +60,7 @@ public class AtlasRobotModelFactory
       st = st.toUpperCase();
       for (int i = 0; i < AvailableRobotModels.length; i++)
       {
-         if (st == AvailableRobotModels[i].toUpperCase())
+         if (st.equals( AvailableRobotModels[i].toUpperCase() ) )
          {
             return i;
          }
