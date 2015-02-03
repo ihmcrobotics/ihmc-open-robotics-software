@@ -75,7 +75,18 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      checkForHandPoseStatus();
+      if (inputListeningQueue.isNewPacketAvailable())
+      {
+         consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
+      }
+
+      double trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue();
+      if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue()
+            && trajectoryTimeElapsed > trajectoryTime.getDoubleValue())
+      {
+         SysoutTool.println("setting isDone = true", DEBUG);
+         isDone.set(true);
+      }
 
       if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandPosePacket != null))
       {
@@ -95,8 +106,10 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          outgoingHandPosePacket.setDestination(PacketDestination.UI);
 
+         SysoutTool.println("sending handPose packet to controller and network processor", DEBUG);
          sendPacketToController(outgoingHandPosePacket);
          sendPacketToNetworkProcessor(outgoingHandPosePacket);
+
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());
@@ -162,32 +175,40 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
-      stopArmMotion();
-      isPaused.set(true);
+      if (isPaused.getBooleanValue())
+      {
+         return;
+      }
+      else
+      {
+         stopArmMotion();
+         status = null;
+         isPaused.set(true);
+      }
    }
 
    @Override
    public void resume()
    {
-      isPaused.set(false);
-      hasPacketBeenSent.set(false);
-
-      if (hasInputBeenSet())
+      if (!isPaused.getBooleanValue())
       {
-         sendHandPoseToController();
+         return;
+      }
+      else
+      {
+         status = null;
+         isPaused.set(false);
+
+         if (hasInputBeenSet())
+         {
+            sendHandPoseToController();
+         }
       }
    }
 
    @Override
    public boolean isDone()
    {
-      checkForHandPoseStatus();
-
-      if (status == Status.COMPLETED && hasInputBeenSet())
-      {
-         isDone.set(true);
-      }
-
       return isDone.getBooleanValue();
 
       // if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
@@ -198,13 +219,12 @@ public class HandPoseBehavior extends BehaviorInterface
       // return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   private void checkForHandPoseStatus()
+   private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
    {
-      HandPoseStatus newestPacket = inputListeningQueue.getNewestPacket();
-      if ((newestPacket != null) && (newestPacket.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
+      if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
       {
-         SysoutTool.println("Received a hand pose status: " + newestPacket.getStatus() + ", " + newestPacket.getRobotSide(), DEBUG);
-         status = newestPacket.getStatus();
+         SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide(), DEBUG);
+         status = handPoseStatus.getStatus();
          hasStatusBeenReceived.set(true);
       }
    }
