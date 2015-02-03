@@ -13,11 +13,11 @@ import org.junit.runners.Suite;
    us.ihmc.acsell.BonoFlatGroundWalkingTest.class
 })
 
-public class AcsellDockerTestSuite
+public class AcsellATestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(AcsellDockerTestSuite.class);
+      //new JUnitTestSuiteRunner(AcsellATestSuite.class);
    }
 }
 
