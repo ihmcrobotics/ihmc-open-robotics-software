@@ -41,7 +41,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
 
    private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
-   private final BooleanYoVariable hasFootstepsBeenGenerated = new BooleanYoVariable("hasFootstepsBeenGenerated", registry);
+   private final BooleanYoVariable haveFootstepsBeenGenerated = new BooleanYoVariable("haveFootstepsBeenGenerated", registry);
 
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
@@ -90,6 +90,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       this.targetLocation.set(targetLocation);
       this.targetOrientation.set(targetOrientation);
       hasTargetBeenProvided.set(true);
+      generateFootsteps();
    }
 
    public void setTarget(FramePose2d targetPose2dInWorld)
@@ -98,6 +99,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       this.targetLocation.set(targetPose2dInWorld.getX(), targetPose2dInWorld.getY(), 0.0);
       this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0, 0.0);
       hasTargetBeenProvided.set(true);
+      generateFootsteps();
    }
 
    public void setwalkingYawOrientationAngle(double walkingYawOrientationAngle)
@@ -109,7 +111,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    public void initialize()
    {
       hasTargetBeenProvided.set(false);
-      hasFootstepsBeenGenerated.set(false);
+      haveFootstepsBeenGenerated.set(false);
       footstepListBehavior.initialize();
 
       robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -148,7 +150,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       }
 
       footstepListBehavior.set(footsteps);
-      hasFootstepsBeenGenerated.set(true);
+      haveFootstepsBeenGenerated.set(true);
    }
 
    @Override
@@ -156,7 +158,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       if (!hasTargetBeenProvided.getBooleanValue())
          return;
-      if (!hasFootstepsBeenGenerated.getBooleanValue())
+      if (!haveFootstepsBeenGenerated.getBooleanValue())
          generateFootsteps();
       footstepListBehavior.doControl();
    }
@@ -207,7 +209,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      if (!hasFootstepsBeenGenerated.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
+      if (!haveFootstepsBeenGenerated.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
          return false;
       return footstepListBehavior.isDone();
    }
@@ -218,13 +220,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
       isPaused.set(false);
       isStopped.set(false);
       hasTargetBeenProvided.set(false);
-      hasFootstepsBeenGenerated.set(false);
+      haveFootstepsBeenGenerated.set(false);
       footstepListBehavior.finalize();
    }
 
    public boolean hasInputBeenSet()
    {
-      if (hasFootstepsBeenGenerated.getBooleanValue())
+      if (haveFootstepsBeenGenerated.getBooleanValue())
          return true;
       else
          return false;
