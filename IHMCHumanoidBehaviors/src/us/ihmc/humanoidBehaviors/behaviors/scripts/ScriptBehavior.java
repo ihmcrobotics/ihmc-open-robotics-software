@@ -59,7 +59,7 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class ScriptBehavior extends BehaviorInterface
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final BooleanYoVariable scriptImported = new BooleanYoVariable("scriptImported", registry);
    private final BooleanYoVariable scriptFinished = new BooleanYoVariable("scriptFinished", registry);
@@ -592,6 +592,13 @@ public class ScriptBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      return stateMachine.getCurrentState().getBehavior().hasInputBeenSet();
+      boolean ret = scriptImported.getBooleanValue();
+      
+      PrimitiveBehaviorType currentBehaviorState = stateMachine.getCurrentState().getStateEnum();
+      if ( currentBehaviorState != PrimitiveBehaviorType.IDLE )
+      {
+         ret &= stateMachine.getCurrentState().getBehavior().hasInputBeenSet();
+      }
+      return ret;
    }
 }

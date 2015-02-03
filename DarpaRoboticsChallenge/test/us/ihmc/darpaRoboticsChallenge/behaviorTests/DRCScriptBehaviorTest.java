@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
@@ -21,52 +20,46 @@ import javax.vecmath.Vector3d;
 
 import org.fest.util.Files;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.CommandRecorder;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
@@ -79,18 +72,15 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-
-   private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -107,13 +97,23 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (drcBehaviorTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         drcBehaviorTestHelper.closeAndDispose();
+         drcBehaviorTestHelper = null;
       }
 
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   @AfterClass
+   public static void printMemoryUsageAfterClass()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCScriptBehaviorTest.class + " after class.");
    }
 
    private final double POSITION_THRESHOLD = 0.007;
@@ -122,29 +122,13 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
 
-   private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCHandPoseBehaviorTestControllerCommunicator");
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private ReferenceFrame recordFrame;
    String fileName = "1_ScriptBehaviorTest";
    TimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private static File file;
-
-   private DoubleYoVariable yoTime;
-
-   private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
-
-   private BehaviorCommunicationBridge communicationBridge;
-
-   private SDFRobot robot;
-   private FullRobotModel fullRobotModel;
-   private ReferenceFrames referenceFrames;
-
-   private CapturePointUpdatable capturePointUpdatable;
-   private BooleanYoVariable yoDoubleSupport;
 
    private double nominalComHeightAboveGround;
 
@@ -160,40 +144,18 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
 
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCJunkyCommunicator");
 
-      Robot robotToTest = drcSimulationTestHelper.getRobot();
-      yoTime = robotToTest.getYoTime();
-
-      robot = drcSimulationTestHelper.getRobot();
-      fullRobotModel = getRobotModel().createFullRobotModel();
-
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
-      referenceFrames = robotDataReceiver.getReferenceFrames();
-
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCComHeightBehaviorTestJunkyCommunicator");
-
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, new YoVariableRegistry(
-            "communicationBridgeRegistry"));
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
 
       file = new File(ScriptEngineSettings.scriptSavingDirectory + fileName + ScriptEngineSettings.extension);
       System.out.println(file.getAbsolutePath());
 
-      CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      controllerCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
-      capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, new YoGraphicsListRegistry(), new YoVariableRegistry(
-            "capturePointUpdatableRegistry"));
-      yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
-
-      armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+      armJointNames = drcBehaviorTestHelper.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
 
       for (int i = 0; i < numberOfArmJoints; i++)
@@ -214,11 +176,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       Point3d nominalComPosition = new Point3d();
-      robot.computeCenterOfMass(nominalComPosition);
+      drcBehaviorTestHelper.getRobot().computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
       double trajectoryTime = 2.0;
@@ -240,11 +202,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       Point3d nominalComPosition = new Point3d();
-      robot.computeCenterOfMass(nominalComPosition);
+      drcBehaviorTestHelper.getRobot().computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
       double trajectoryTime = 3.0; //FIXME: Test fails if trajectory time is too short
@@ -260,13 +222,13 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       recordScriptFile(scriptPackets, fileName);
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      boolean addExtraSimTimeForSettling = false;
-      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
+      assertTrue(success);
       assertProperHeightOffset(desiredIntermediateHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
-      addExtraSimTimeForSettling = true;
-      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
       assertProperHeightOffset(desiredFinalHeightOffset);
       assertTrue(scriptBehavior.isDone());
 
@@ -279,11 +241,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       Point3d nominalComPosition = new Point3d();
-      robot.computeCenterOfMass(nominalComPosition);
+      drcBehaviorTestHelper.getRobot().computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
       double trajectoryTime = 4.0;
@@ -299,13 +261,14 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       recordScriptFile(scriptPackets, fileName);
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      boolean addExtraSimTimeForSettling = false;
-      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
+      assertTrue(success);
 
       scriptBehavior.stop();
       assertProperHeightOffset(desiredIntermediateHeightOffset);
 
-      executeBehavior(scriptBehavior, trajectoryTime);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
       assertProperHeightOffset(desiredIntermediateHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
@@ -318,11 +281,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       Point3d nominalComPosition = new Point3d();
-      robot.computeCenterOfMass(nominalComPosition);
+      drcBehaviorTestHelper.getRobot().computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
       double trajectoryTime = 2.0;
@@ -338,18 +301,20 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       recordScriptFile(scriptPackets, fileName);
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      boolean addExtraSimTimeForSettling = false;
-      executeBehavior(scriptBehavior, trajectoryTime, addExtraSimTimeForSettling);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
+      assertTrue(success);
 
       scriptBehavior.pause();
       assertProperHeightOffset(desiredIntermediateHeightOffset);
 
-      executeBehavior(scriptBehavior, trajectoryTime);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
+      assertTrue(success);
       assertProperHeightOffset(desiredIntermediateHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
       scriptBehavior.resume();
-      executeBehavior(scriptBehavior, trajectoryTime);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
       assertProperHeightOffset(desiredFinalHeightOffset);
       assertTrue(scriptBehavior.isDone());
 
@@ -362,7 +327,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
@@ -390,7 +355,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
@@ -409,14 +374,14 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       recordScriptFile(scriptPackets, fileName);
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      boolean addExtraSimTimeForSettling = false;
-      executeBehavior(scriptBehavior, trajectoryTime1, addExtraSimTimeForSettling);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime1);
+      assertTrue(success);
       double[] armPoseAfterFirstHandPosePacket = getCurrentArmPose(robotSide);
       assertRobotAchievedDesiredArmPose(desiredArmPose1, armPoseAfterFirstHandPosePacket, robotSide);
       assertTrue(!scriptBehavior.isDone());
 
-      addExtraSimTimeForSettling = true;
-      executeBehavior(scriptBehavior, trajectoryTime2, addExtraSimTimeForSettling);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime2 + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
       double[] armPoseAfterSecondHandPosePacket = getCurrentArmPose(robotSide);
       assertRobotAchievedDesiredArmPose(desiredArmPose2, armPoseAfterSecondHandPosePacket, robotSide);
       assertTrue(scriptBehavior.isDone());
@@ -456,7 +421,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private FramePose getCurrentHandPose(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
-      robotDataReceiver.updateRobotModel();
+      drcBehaviorTestHelper.updateRobotModel();
       fullRobotModel.updateFrames();
 
       ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotSide);
@@ -482,16 +447,20 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private ScriptBehavior setupNewScriptBehavior(File filePath) throws FileNotFoundException
    {
+      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
+      BooleanYoVariable yoDoubleSupport = drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport();
+
       final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
-      communicationBridge.attachGlobalListenerToController(scriptBehavior.getControllerGlobalPacketConsumer());
 
       InputStream inputStream = new FileInputStream(new File(filePath.getAbsolutePath()));
       RigidBodyTransform scriptTransformToWorld = recordFrame.getTransformToDesiredFrame(worldFrame);
 
       scriptBehavior.initialize();
       scriptBehavior.importChildInputPackets(inputStream.toString(), inputStream, scriptTransformToWorld);
-      assertTrue( scriptBehavior.hasInputBeenSet() );
-      
+      assertTrue(scriptBehavior.hasInputBeenSet());
+
       return scriptBehavior;
    }
 
@@ -500,74 +469,10 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(filePath);
 
-      boolean success = executeBehavior(scriptBehavior, trajectoryTime);
+      boolean success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
 
       return scriptBehavior;
-   }
-
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      boolean addExtraSimTimeForSettling = true;
-
-      boolean success = executeBehavior(behavior, trajectoryTime, addExtraSimTimeForSettling);
-
-      return success;
-   }
-
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime, boolean addExtraSimTimeForSettling)
-         throws SimulationExceededMaximumTimeException
-   {
-      final double simulationRunTime;
-
-      if (addExtraSimTimeForSettling)
-      {
-         simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-      }
-      else
-      {
-         simulationRunTime = trajectoryTime;
-      }
-
-      SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-      Thread behaviorThread = createBehaviorThread(behavior, simulationRunTime);
-      behaviorThread.start();
-      boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-
-      return ret;
-   }
-
-   private Thread createBehaviorThread(final BehaviorInterface behavior, final double simulationRunTime)
-   {
-      Thread behaviorThread = new Thread()
-      {
-         public void run()
-         {
-            {
-               double startTime = Double.NaN;
-               boolean simStillRunning = true;
-               boolean initalized = false;
-
-               while (simStillRunning)
-               {
-                  if (!initalized)
-                  {
-                     startTime = yoTime.getDoubleValue();
-                     initalized = true;
-                  }
-
-                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-                  simStillRunning = timeSpentSimulating < simulationRunTime;
-
-                  behavior.doControl();
-                  capturePointUpdatable.update(yoTime.getDoubleValue());
-                  ThreadTools.sleep(1);
-               }
-            }
-         }
-      };
-      return behaviorThread;
    }
 
    private Quat4d createQuat4d(Vector3d axis, double rotationAngle)
@@ -583,11 +488,12 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private HandPosePacket createHandPosePacket(RobotSide robotside)
    {
-      robotDataReceiver.updateRobotModel();
+      drcBehaviorTestHelper.updateRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+
       ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotside);
       FramePose currentHandPose = new FramePose();
       currentHandPose.setToZero(handFrame);
-
       currentHandPose.changeFrame(worldFrame);
 
       Point3d desiredHandPosition = new Point3d();
@@ -605,6 +511,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, ReferenceFrames referenceFrames)
    {
+      drcBehaviorTestHelper.updateRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+
       FootstepDataList footsepDataList = new FootstepDataList();
 
       SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
@@ -663,8 +572,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private double getTotalFingerJointQ(RobotSide robotSide)
    {
+      drcBehaviorTestHelper.updateRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+
       SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
-      Joint wristJoint = robot.getJoint(jointNameMap.getJointBeforeHandName(robotSide));
+      Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
 
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
@@ -682,6 +594,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private double[] getCurrentArmPose(RobotSide robotSide)
    {
+      drcBehaviorTestHelper.updateRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+
       double[] armPose = new double[numberOfArmJoints];
 
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
@@ -727,6 +642,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
+      drcBehaviorTestHelper.updateRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
       double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
@@ -742,11 +660,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       return q;
    }
 
-   private void assertProperHeightOffset(double desiredIntermediateHeightOffset)
+   private void assertProperHeightOffset(double desiredHeightOffset)
    {
-      Point3d comPointAfterPause = new Point3d();
-      robot.computeCenterOfMass(comPointAfterPause);
-      assertProperComHeightOffsetFromGround(desiredIntermediateHeightOffset, comPointAfterPause);
+      Point3d comPoint = new Point3d();
+      drcBehaviorTestHelper.getRobot().computeCenterOfMass(comPoint);
+      assertProperComHeightOffsetFromGround(desiredHeightOffset, comPoint);
    }
 
    private void assertProperComHeightOffsetFromGround(double desiredHeightOffset, Point3d finalComPoint)
@@ -764,7 +682,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
    {
-      fullRobotModel.updateFrames();
+      drcBehaviorTestHelper.updateRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+
       FramePose framePose = new FramePose();
       framePose.setToZero(frameToCheck);
       framePose.changeFrame(worldFrame);

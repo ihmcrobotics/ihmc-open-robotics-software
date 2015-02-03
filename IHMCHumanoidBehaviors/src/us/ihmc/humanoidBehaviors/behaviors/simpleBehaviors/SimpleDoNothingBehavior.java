@@ -77,6 +77,6 @@ public class SimpleDoNothingBehavior extends BehaviorInterface
 
    public boolean hasInputBeenSet()
    {
-      return false;
+      return true;
    }
 }
