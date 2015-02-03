@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -193,7 +194,11 @@ public class YoEntryBoxTest
       controller.attachRobot(robot);
       assertFalse(controller.getYoVariableRegistry() == null);
       robot.setController(controller);
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, showGUI, 2000);
+      
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      parameters.setCreateGUI(showGUI);
+      parameters.setDataBufferSize(2000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       scs.setFrameMaximized();
       scs.startOnAThread();
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);

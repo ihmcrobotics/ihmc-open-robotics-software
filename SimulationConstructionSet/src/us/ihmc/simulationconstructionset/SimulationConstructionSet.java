@@ -347,8 +347,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
-    * Creates a SimulationConstructionSet with the specified Robot and DataBuffer size.
-    * If showGUI is true, the GUI will be displayed. If it is false, the GUI will not be displayed.
+    * Creates a SimulationConstructionSet with the specified Robot and SimulationConstructionSetParameters parameters.
+    * If parameters createGUI is true, the GUI will be displayed. If it is false, the GUI will not be displayed.
     * It is possible to run simulations without displaying the GUI, which can be useful when attempting to run
     * several simulations as a batch.
     *
@@ -548,12 +548,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this.jApplet = jApplet;
 
       throw new RuntimeException("Not sure if this is all we have to do for jApplet. Problably not. We need to test and debug this constructor...");
-   }
-
-
-   public SimulationConstructionSet(Robot robot, boolean createGUI, int bufferSize)
-   {
-      this(robot, new SimulationConstructionSetParameters(createGUI, bufferSize));
    }
 
    /**
