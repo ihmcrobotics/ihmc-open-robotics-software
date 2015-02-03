@@ -1,128 +1,137 @@
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class DropDebrisBehavior extends BehaviorInterface
 {
-   private final FullRobotModel fullRobotModel;
-
-   //   private final TaskExecutor taskExecutor = new TaskExecutor();
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private final HandPoseBehavior handPoseBehavior;
    private final FingerStateBehavior fingerStateBehavior;
+   private final PelvisPoseBehavior pelvisPoseBehavior;
+   private final ChestOrientationBehavior chestOrientationBehavior;
 
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable haveInputsBeenSet;
-   private final IntegerYoVariable behaviorIndex;
-   private final DoubleYoVariable zHeightOffsetFromChestFrameForMidPoint;
 
-   private final SideDependentList<ReferenceFrame> handReferenceFrames = new SideDependentList<ReferenceFrame>();
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final ReferenceFrame midFeetZUpFrame;
 
-   private final ReferenceFrame chestFrame;
-   private RobotSide robotSide;
+   private double trajectoryTime = 2.5;
 
-   private double trajectoryTime = 3.5;
-
-   private final FramePose midPose = new FramePose();
-   private final FramePose dropLocationPose = new FramePose();
-
-   private final ReferenceFrames referenceFrames;
    private final DoubleYoVariable yoTime;
 
-   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
+   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames,
          DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
-      this.fullRobotModel = fullRobotModel;
-      this.referenceFrames = referenceFrames;
       this.yoTime = yoTime;
+
+      midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
-
-      zHeightOffsetFromChestFrameForMidPoint = new DoubleYoVariable("zHeightOffsetFromChestFrameForMidPoint", registry);
-      zHeightOffsetFromChestFrameForMidPoint.set(0.27);
+      pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
+      chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
-      behaviorIndex = new IntegerYoVariable("behaviorIndex", registry);
       isDone = new BooleanYoVariable("isDone", registry);
-
-      handReferenceFrames.put(RobotSide.LEFT, fullRobotModel.getHandControlFrame(RobotSide.LEFT));
-      handReferenceFrames.put(RobotSide.RIGHT, fullRobotModel.getHandControlFrame(RobotSide.RIGHT));
-
-      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-   }
-
-   private void getMidPose()
-   {
-      midPose.translate(0.0, 0.0, zHeightOffsetFromChestFrameForMidPoint.getDoubleValue());
-      midPose.changeFrame(ReferenceFrame.getWorldFrame());
-   }
-
-   private void getDropLocation(RobotSide side)
-   {
-      Quat4d dropRotation = new Quat4d();
-      if (side == RobotSide.LEFT)
-      {
-         dropLocationPose.translate(0.3, 0.7, -0.1);
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(dropRotation, -Math.PI / 2, Math.PI / 2, 0);
-      }
-      else
-      {
-         dropLocationPose.translate(0.3, -0.7, -0.1);
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(dropRotation, Math.PI / 2, Math.PI / 2, 0);
-      }
-      dropLocationPose.setOrientation(dropRotation);
-      dropLocationPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    private void setPoses(RobotSide side)
    {
-      RigidBodyTransform tempPose = new RigidBodyTransform();
+      FramePose turnHandPoseToCarryDebris = new FramePose(midFeetZUpFrame);
+      FramePose armOutPose = new FramePose(midFeetZUpFrame);
+      FramePose turnHandPoseToDropDebris = new FramePose(midFeetZUpFrame);
+      FramePose armInFrontOfRobotPose = new FramePose(midFeetZUpFrame);
+      FramePose armCloseToHomePose = new FramePose(midFeetZUpFrame);
 
-      initializePoses(side);
+      Point3d tempPosition = new Point3d();
+      Quat4d tempOrientation = new Quat4d();
 
-      getMidPose();
-      midPose.getPose(tempPose);
-      pipeLine.submitSingleTaskStage(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
+      // turn the hand to lock the debris
+      tempPosition.set(0.55, side.negateIfRightSide(0.1), 1.2);
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, 0.0, side.negateIfRightSide((Math.toRadians(90.0))));
+      submitSingleTaskStageHandPose(turnHandPoseToCarryDebris, side, tempPosition, tempOrientation);
 
-      getDropLocation(side);
-      dropLocationPose.getPose(tempPose);
-      pipeLine.submitSingleTaskStage(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, tempPose, trajectoryTime));
+      // put the arm at the outside
+      tempPosition.set(0.2, side.negateIfRightSide(0.8), 1.2);
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, side.negateIfRightSide(Math.toRadians(80.0)), 0.0,
+            side.negateIfRightSide(Math.toRadians(90.0)));
+      submitSingleTaskStageHandPose(armOutPose, side, tempPosition, tempOrientation);
 
-      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
+      // drop debris by opening hand and turning the hand
+      tempPosition.set(0.2, side.negateIfRightSide(0.8), 1.2);
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, side.negateIfRightSide(Math.toRadians(80.0)), 0.0, 0.0);
+      submitReleaseDebrisParallellTasks(turnHandPoseToDropDebris, side, tempPosition, tempOrientation);
 
-      pipeLine.submitSingleTaskStage(new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, 3.0), handPoseBehavior, yoTime));
+      //put the arm back in front of the robot
+      tempPosition.set(0.55, side.negateIfRightSide(0.1), 1.2);
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, 0.0, 0.0);
+      submitSingleTaskStageHandPose(armInFrontOfRobotPose, side, tempPosition, tempOrientation);
+
+      //put the arm close to home configuration
+      tempPosition.set(0.5, side.negateIfRightSide(0.25), 0.6);
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, Math.toRadians(20.0), 0.0);
+      submitSingleTaskStageHandPose(armCloseToHomePose, side, tempPosition, tempOrientation);
+      
+      
+      //put the robot in its default position (arm, pelvis and chest)
+      submitGoToDefaultPositionTasks(side);
 
    }
 
-   private void initializePoses(RobotSide side)
+   private void submitGoToDefaultPositionTasks(RobotSide side)
    {
-      midPose.setToZero(fullRobotModel.getHandControlFrame(side));
-      midPose.changeFrame(chestFrame);
-      dropLocationPose.changeFrame(chestFrame);
-      dropLocationPose.setToZero(chestFrame);
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
+            new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, trajectoryTime), handPoseBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
+            new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side.getOppositeSide(), trajectoryTime), handPoseBehavior, yoTime));
+
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.RESET, fingerStateBehavior));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side.getOppositeSide(), FingerState.RESET, fingerStateBehavior));
+
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime),
+            yoTime, pelvisPoseBehavior));
+      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior,
+            new ChestOrientationTask(PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime), yoTime, chestOrientationBehavior));
+   }
+
+   private void submitReleaseDebrisParallellTasks(FramePose handPoseToPack, RobotSide side, Point3d tempPosition, Quat4d tempOrientation)
+   {
+      handPoseToPack.setPose(tempPosition, tempOrientation);
+      handPoseToPack.changeFrame(worldFrame);
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new FingerStateTask(side, FingerState.OPEN, fingerStateBehavior)));
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, handPoseToPack, trajectoryTime));
+   }
+
+   private void submitSingleTaskStageHandPose(FramePose handPoseToPack, RobotSide side, Point3d tempPosition, Quat4d tempOrientation)
+   {
+      handPoseToPack.setPose(tempPosition, tempOrientation);
+      handPoseToPack.changeFrame(worldFrame);
+      pipeLine.submitSingleTaskStage(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, handPoseToPack, trajectoryTime));
    }
 
    @Override
@@ -133,7 +142,6 @@ public class DropDebrisBehavior extends BehaviorInterface
 
    public void setInputs(RobotSide side)
    {
-      robotSide = side;
       setPoses(side);
       haveInputsBeenSet.set(true);
    }
@@ -187,7 +195,6 @@ public class DropDebrisBehavior extends BehaviorInterface
    {
       haveInputsBeenSet.set(false);
       isDone.set(false);
-      behaviorIndex.set(-1);
    }
 
    @Override
@@ -195,7 +202,6 @@ public class DropDebrisBehavior extends BehaviorInterface
    {
       haveInputsBeenSet.set(false);
       isDone.set(false);
-      behaviorIndex.set(0);
    }
 
    @Override
