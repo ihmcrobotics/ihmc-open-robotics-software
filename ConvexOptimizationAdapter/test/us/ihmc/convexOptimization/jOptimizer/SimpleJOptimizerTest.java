@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
@@ -23,7 +24,8 @@ public class SimpleJOptimizerTest
 {
    private static final boolean VERBOSE = true;
 
-   @Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testReallyReallySimpleOptimizationProblem() throws Exception
@@ -46,7 +48,8 @@ public class SimpleJOptimizerTest
    }
    
 
-	@Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testASimpleRedundantEqualityCase() throws Exception
@@ -67,8 +70,8 @@ public class SimpleJOptimizerTest
    }
    
 
-	@Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@Test(timeout=300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
@@ -131,7 +134,8 @@ public class SimpleJOptimizerTest
       assertEquals(Math.sqrt(2.0), solution[1], 1e-5);
    }
 	
-	@Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem() throws Exception
@@ -197,7 +201,8 @@ public class SimpleJOptimizerTest
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
    }
 
-	@Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testQuadraticCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
@@ -276,7 +281,8 @@ public class SimpleJOptimizerTest
       return solution;
    }
 
-   @Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSquaring() throws Exception
@@ -348,7 +354,8 @@ public class SimpleJOptimizerTest
    }
    
    
-   @Ignore("Quarantined. JOptimizer has not been properly implemented and very simple tests fail")
+   @Ignore
+   @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
