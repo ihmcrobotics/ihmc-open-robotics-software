@@ -20,11 +20,11 @@ import org.junit.runners.Suite;
    us.ihmc.ihmcPerception.footstepSnapper.QuickHull3DTest.class
 })
 
-public class IHMCPerceptionATestSuite
+public class IHMCPerceptionAFastTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(IHMCPerceptionATestSuite.class);
+      //new JUnitTestSuiteRunner(IHMCPerceptionAFastTestSuite.class);
    }
 }
 

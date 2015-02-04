@@ -19,11 +19,11 @@ import org.junit.runners.Suite;
    us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.PelvisRotationalStateUpdaterTest.class
 })
 
-public class DarpaRoboticsChallengeATestSuite
+public class DarpaRoboticsChallengeAFastTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(DarpaRoboticsChallengeATestSuite.class);
+      //new JUnitTestSuiteRunner(DarpaRoboticsChallengeAFastTestSuite.class);
    }
 }
 

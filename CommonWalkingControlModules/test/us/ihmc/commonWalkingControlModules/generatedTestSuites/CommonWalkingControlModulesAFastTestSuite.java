@@ -35,9 +35,11 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerWithSmootherTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensationTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjectorTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointToolsTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.NewDoubleSupportICPComputerTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputerTest.class,
    us.ihmc.commonWalkingControlModules.kinematics.DampedLeastSquaresJacobianSolverTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumBenchmarkTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumRateADotVTermTest.class,
@@ -71,11 +73,11 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class
 })
 
-public class CommonWalkingControlModulesATestSuite
+public class CommonWalkingControlModulesAFastTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(CommonWalkingControlModulesATestSuite.class);
+      //new JUnitTestSuiteRunner(CommonWalkingControlModulesAFastTestSuite.class);
    }
 }
 

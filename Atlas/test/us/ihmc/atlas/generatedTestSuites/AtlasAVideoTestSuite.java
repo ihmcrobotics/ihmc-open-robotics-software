@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader.generatedTestSuites;
+package us.ihmc.atlas.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -9,14 +9,14 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.SdfLoader.SDFLinkHolderTest.class
+   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class
 })
 
-public class SDFLoaderATestSuite
+public class AtlasAVideoTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(SDFLoaderATestSuite.class);
+      //new JUnitTestSuiteRunner(AtlasAVideoTestSuite.class);
    }
 }
 
