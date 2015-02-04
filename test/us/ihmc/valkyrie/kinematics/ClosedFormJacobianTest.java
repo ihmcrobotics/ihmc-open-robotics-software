@@ -65,8 +65,8 @@ public class ClosedFormJacobianTest
         0.051849035209403, 0.044875400766635
     };
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
     public void testJacobianMatchesMATLABAnkle() 
     {
         for (int i = 0; i < 7; i++) 
@@ -83,8 +83,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
     public void testJacobianMatchesMATLABWaist() 
     {
         for (int i = 0; i < 7; i++) 
@@ -101,8 +101,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
     public void testEfficientMatchesInefficientJacobianAnkle() 
     {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
@@ -148,8 +148,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
     public void testEfficientMatchesInefficientJacobianWaist() 
     {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
@@ -170,8 +170,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.9)
+	@Test(timeout = 3000)
     public void testEfficentMatchesInterpolatedJacobianAnkle() 
     {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
@@ -194,8 +194,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.6)
+	@Test(timeout = 3000)
     public void testEfficentMatchesInterpolatedJacobianWaist() 
     {
         closedFormJacobianWaistRenishaws.useFuteks(false);
@@ -219,8 +219,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
     public void cosineTestAnkles() 
     {
 
@@ -257,8 +257,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
     public void consineTestWaist() 
     {
 //      A Test to ensure Renishaw and Futek Jacobians are in agreement with each other

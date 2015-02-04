@@ -26,8 +26,8 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
    private static final boolean VISUALIZE = false;
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.1)
+	@Test(timeout = 3000)
    public void testCompareInefficientToEfficientAnkle()
    {
       Random random = new Random(1255L);
@@ -72,8 +72,8 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testCompareInefficientToEfficientWaist()
    {
       Random random = new Random(1255L);
