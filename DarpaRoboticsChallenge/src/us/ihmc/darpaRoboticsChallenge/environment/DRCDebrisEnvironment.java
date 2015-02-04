@@ -19,11 +19,13 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableSelectable
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -49,7 +51,6 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
    public DRCDebrisEnvironment()
    {
       this(new Vector3d(0.0, 0.0, 0.0), 0.0);
-
    }
 
    public DRCDebrisEnvironment(Tuple3d robotInitialPosition, double robotInitialYaw)
@@ -63,7 +64,6 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       FramePose robotInitialPose = new FramePose(constructionWorldFrame, robotPosition, robotInitialOrientation);
 
       this.robotInitialPoseReferenceFrame = new PoseReferenceFrame("robotInitialPoseReferenceFrame", robotInitialPose);
-
    }
 
    public void addStandingDebris(double xRelativeToRobot, double yRelativeToRobot, double debrisYaw)
@@ -86,9 +86,10 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       FramePose debrisPose = generateDebrisPose(positionOfCenterOfDebrisWithRespectToRobot, debrisYaw, 0.0, debrisRollRelativeToHorizontal + Math.PI / 2.0);
       debrisRobots.add(createDebrisRobot(debrisPose));
 
-      Quat4d tempOrientation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, debrisYaw, 0.0, 0.0);
-      debrisPose.setOrientation(tempOrientation);
+      RigidBodyTransform debrisTransform = new RigidBodyTransform();
+      debrisPose.getPose(debrisTransform );
+      TransformTools.rotate(debrisTransform, -debrisRollRelativeToHorizontal -Math.PI/2.0, Axis.X);
+      debrisPose.setPose(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
 
@@ -117,7 +118,6 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       RigidBodyTransform secondSupportTransform = new RigidBodyTransform();
       secondSupportPose.getPose(secondSupportTransform);
       combinedTerrainObject.addRotatableBox(secondSupportTransform, supportLength, supportWidth, supportHeight, YoAppearance.AliceBlue());
-
    }
 
    public void addVerticalDebrisLeaningAgainstAWall(double xRelativeToRobot, double yRelativeToRobot, double debrisYaw, double debrisPitch)
@@ -130,10 +130,10 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       double supportLength = 0.2;
       double supportHeight = 1.05*debrisLength;
 
-      
-      Quat4d tempOrientation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, debrisYaw, 0.0, 0.0);
-      debrisPose.setOrientation(tempOrientation);
+      RigidBodyTransform debrisTransform = new RigidBodyTransform();
+      debrisPose.getPose(debrisTransform );
+      TransformTools.rotate(debrisTransform, -debrisPitch, Axis.Y);
+      debrisPose.setPose(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
       
@@ -149,7 +149,6 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       RigidBodyTransform supportTransform = new RigidBodyTransform();
       supportPose.getPose(supportTransform);
       combinedTerrainObject.addRotatableBox(supportTransform, supportWidth, supportLength, supportHeight, YoAppearance.AliceBlue());
-      
    }
 
    private FramePose generateDebrisPose(Point3d positionWithRespectToRobot, double debrisYaw, double debrisPitch, double debrisRoll)
