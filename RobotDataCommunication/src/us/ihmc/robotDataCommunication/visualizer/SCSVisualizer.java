@@ -191,7 +191,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
       parameters.setCreateGUI(showGUI);
-      parameters.setDataBufferSize(bufferSize);
+      parameters.setDataBufferSize(this.bufferSize);
       this.scs = new SimulationConstructionSet(robot, parameters);
       if (hideViewport)
          scs.hideViewport();
