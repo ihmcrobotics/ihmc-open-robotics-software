@@ -3,8 +3,6 @@ package us.ihmc.valkyrie;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.generator.JUnitTestSuiteGenerator;
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
@@ -22,6 +20,5 @@ public class ValkyrieBambooValkyrieTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteGenerator.generateTestSuite(ValkyrieBambooValkyrieTestSuite.class);
    }
 }
