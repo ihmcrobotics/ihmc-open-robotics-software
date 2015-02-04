@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -210,12 +209,14 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       double timeIncrement = 1.0;
       boolean done = false;
+      boolean success = true;
       while (!done)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
 
          if (Math.abs(comError.getDoubleValue()) > 0.09)
          {
+            success = false;
             fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
 
@@ -226,6 +227,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       createMovie(scs);
+      assertTrue(success);
    }
    
    private Pair<CombinedTerrainObject3D, Double> createRamp()
