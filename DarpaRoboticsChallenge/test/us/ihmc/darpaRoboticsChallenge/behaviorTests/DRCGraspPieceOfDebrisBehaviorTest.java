@@ -147,7 +147,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
    @AverageDuration
    @Test(timeout = 300000)
-   	@Ignore
+   @Ignore
    public void testGraspingDebris() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -194,7 +194,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       DoubleYoVariable fingerJoint1 = (DoubleYoVariable) robot.getVariable("q_r_finger_1_joint_1");
       DoubleYoVariable fingerJoint2 = (DoubleYoVariable) robot.getVariable("q_r_finger_2_joint_1");
-      DoubleYoVariable palmJoint = (DoubleYoVariable) robot.getVariable("q_r_palm_finger_1");
+      DoubleYoVariable palmJoint = (DoubleYoVariable) robot.getVariable("q_r_palm_finger_1_joint");
 
       success = success & Math.abs(fingerJoint1.getDoubleValue() - FINGER_JOINT_1_EXPECTED_RADIANS) < FINGER_JOINT_1_ERROR_MARGIN_RADIANS;
       success = success & Math.abs(fingerJoint2.getDoubleValue() - FINGER_JOINT_2_EXPECTED_RADIANS) < FINGER_JOINT_2_ERROR_MARGIN_RADIANS;
