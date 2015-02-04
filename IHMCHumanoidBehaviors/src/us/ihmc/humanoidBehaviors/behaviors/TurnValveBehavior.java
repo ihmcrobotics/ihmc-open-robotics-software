@@ -113,13 +113,6 @@ public class TurnValveBehavior extends BehaviorInterface
       else
       {
          checkForNewInputs();
-         //
-         //         taskExecutor.doControl();
-         //         
-         //         if (taskExecutor.isDone())
-         //         {
-         //            isDone.set(true);
-         //         }
 
          //      if (!currentBehavior.equals(walkToLocationBehavior))
          //      {
@@ -219,7 +212,7 @@ public class TurnValveBehavior extends BehaviorInterface
       TransformTools.rotate(yawTransform, valvePose.getYaw(), Axis.Z);
 
       double valveYaw = valvePose.getYaw();
-      SysoutTool.println("Valve Pose Yaw : " + valveYaw);
+      SysoutTool.println("Valve Pose Yaw : " + valveYaw, DEBUG);
 
       Vector3d desiredRobotPosFromValve = new Vector3d(-howFarToStandBackFromValve, -howFarToStandToTheRightOfValve, 0.0);
       Vector3d desiredRobotPosFromValveInWorld = TransformTools.getTransformedVector(desiredRobotPosFromValve, yawTransform);
@@ -268,22 +261,22 @@ public class TurnValveBehavior extends BehaviorInterface
    private FramePose createHandPosePacketToTurnValve(ValveType valveType, FramePose handPoseBeforeTurn, RigidBodyTransform valveTransformToWorld,
          double turnAngle, double trajectoryTime)
    {
-      SysoutTool.println("Hand Pose before valve turn in world frame: " + handPoseBeforeTurn);
+      SysoutTool.println("Hand Pose before valve turn in world frame: " + handPoseBeforeTurn, DEBUG);
 
       FramePose handPoseInValveFrame = new FramePose(handPoseBeforeTurn);
       ReferenceFrame valveFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("valve", world, valveTransformToWorld);
       handPoseInValveFrame.changeFrame(valveFrame);
-      SysoutTool.println("Hand Pose before valve turn in valve frame: " + handPoseInValveFrame);
+      SysoutTool.println("Hand Pose before valve turn in valve frame: " + handPoseInValveFrame, DEBUG);
 
       RigidBodyTransform handTransformToValve = new RigidBodyTransform();
       handPoseInValveFrame.getPose(handTransformToValve);
-      SysoutTool.println("Hand transform to valve before valve turn: " + handTransformToValve);
+      SysoutTool.println("Hand transform to valve before valve turn: " + handTransformToValve, DEBUG);
 
       RigidBodyTransform xRotation = new RigidBodyTransform();
       xRotation.rotX(turnAngle);
 
       handTransformToValve.multiply(xRotation);
-      SysoutTool.println("Hand transform to valve after valve turn: " + handTransformToValve);
+      SysoutTool.println("Hand transform to valve after valve turn: " + handTransformToValve, DEBUG);
 
       Point3d handInValve = new Point3d();
       handPoseInValveFrame.getPosition(handInValve);
@@ -291,10 +284,10 @@ public class TurnValveBehavior extends BehaviorInterface
 
       FramePose desiredHandPoseAfterTurn = new FramePose(valveFrame, handTransformToValve);
       desiredHandPoseAfterTurn.setPosition(handInValve);
-      SysoutTool.println("Hand Pose after valve turn in valve frame: " + desiredHandPoseAfterTurn);
+      SysoutTool.println("Hand Pose after valve turn in valve frame: " + desiredHandPoseAfterTurn, DEBUG);
 
       desiredHandPoseAfterTurn.changeFrame(world);
-      SysoutTool.println("Hand Pose after turn in world frame: " + desiredHandPoseAfterTurn + "\n");
+      SysoutTool.println("Hand Pose after turn in world frame: " + desiredHandPoseAfterTurn + "\n", DEBUG);
 
       return desiredHandPoseAfterTurn;
    }
