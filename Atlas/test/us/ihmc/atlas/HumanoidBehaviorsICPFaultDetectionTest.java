@@ -4,10 +4,7 @@ package us.ihmc.atlas;
 import us.ihmc.darpaRoboticsChallenge.DRCHumanoidBehaviorICPFaultDetectionTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 
-@CustomJob(job = CustomJobType.Utilities)
 public class HumanoidBehaviorsICPFaultDetectionTest extends DRCHumanoidBehaviorICPFaultDetectionTest
 {  
    public DRCRobotModel getRobotModel()

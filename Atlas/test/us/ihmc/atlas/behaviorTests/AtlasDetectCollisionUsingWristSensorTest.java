@@ -6,10 +6,7 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCDetectCollisionUsingWristSensorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 
-@CustomJob(job = CustomJobType.BehaviorsA)
 public class AtlasDetectCollisionUsingWristSensorTest extends DRCDetectCollisionUsingWristSensorTest
 {
    private final AtlasRobotModel robotModel;
