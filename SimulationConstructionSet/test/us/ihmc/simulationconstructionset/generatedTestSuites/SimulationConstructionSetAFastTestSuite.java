@@ -21,6 +21,7 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.JointWrenchSensorTest.class,
    us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListenerTest.class,
    us.ihmc.simulationconstructionset.KinematicPointTest.class,
+   us.ihmc.simulationconstructionset.LinkGraphicsTest.class,
    us.ihmc.simulationconstructionset.LinkTest.class,
    us.ihmc.simulationconstructionset.matrixtest.MatrixTest.class,
    us.ihmc.simulationconstructionset.optimization.SimpleSimulationTest.class,
@@ -32,8 +33,11 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.SimulatedLIDARSensorTest.class,
    us.ihmc.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReaderTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetFestTest.class,
+   us.ihmc.simulationconstructionset.SimulationConstructionSetMemoryReclamationTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetProcessDataCallTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetRootRegistryTest.class,
+   us.ihmc.simulationconstructionset.SimulationConstructionSetSetupTest.class,
+   us.ihmc.simulationconstructionset.SimulationConstructionSetUsingDirectCallsTest.class,
    us.ihmc.simulationconstructionset.SimulationRewoundListenerTest.class,
    us.ihmc.simulationconstructionset.torqueSpeedCurve.TypicalTorqueSpeedCurveTest.class,
    us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobotTest.class,
@@ -58,24 +62,14 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.StairGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.WavyGroundProfileTest.class,
-   us.ihmc.simulationconstructionset.util.IndexOrderCheckerTest.class,
-   us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoardTest.class,
-   us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardUtilsTest.class,
-   us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModelTest.class,
-   us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorTest.class,
-   us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierTest.class,
-   us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparerTest.class,
-   us.ihmc.simulationconstructionset.util.simulationRunner.VariablesThatShouldMatchListTest.class,
-   us.ihmc.simulationconstructionset.utilities.math.geometry.FindTentativeListOfPolygonsIntersectingTargetPolygonTest.class,
-   us.ihmc.simulationconstructionset.utilities.screwTheory.CentroidalMomentumMatrixTest.class,
-   us.ihmc.simulationconstructionset.utilities.screwTheory.InverseDynamicsCalculatorTest.class
+   us.ihmc.simulationconstructionset.util.IndexOrderCheckerTest.class
 })
 
-public class SimulationConstructionSetATestSuite
+public class SimulationConstructionSetAFastTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(SimulationConstructionSetATestSuite.class);
+      //new JUnitTestSuiteRunner(SimulationConstructionSetAFastTestSuite.class);
    }
 }
 

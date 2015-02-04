@@ -17,11 +17,11 @@ import org.junit.runners.Suite;
    us.ihmc.convexOptimization.randomSearch.RandomSearchConvexOptimizationAdapterTest.class
 })
 
-public class ConvexOptimizationAdapterATestSuite
+public class ConvexOptimizationAdapterAFastTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(ConvexOptimizationAdapterATestSuite.class);
+      //new JUnitTestSuiteRunner(ConvexOptimizationAdapterAFastTestSuite.class);
    }
 }
 

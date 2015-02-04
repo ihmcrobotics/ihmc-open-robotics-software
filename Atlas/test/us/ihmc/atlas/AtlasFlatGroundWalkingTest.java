@@ -9,13 +9,15 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.Video})
 @CustomJob(job = CustomJobType.SimpleWalking)
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
-
    private DRCRobotModel robotModel;
 
 	@AverageDuration

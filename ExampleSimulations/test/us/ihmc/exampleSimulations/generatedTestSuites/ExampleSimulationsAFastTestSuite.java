@@ -1,4 +1,4 @@
-package us.ihmc.kalman.generatedTestSuites;
+package us.ihmc.exampleSimulations.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -9,14 +9,14 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.kalman.YoKalmanFilterTest.class
+   us.ihmc.exampleSimulations.springflamingo.SpringFlamingoSimulationTest.class
 })
 
-public class KalmanProjectATestSuite
+public class ExampleSimulationsAFastTestSuite
 {
    public static void main(String[] args)
    {
-      //new JUnitTestSuiteRunner(KalmanProjectATestSuite.class);
+      //new JUnitTestSuiteRunner(ExampleSimulationsAFastTestSuite.class);
    }
 }
 
