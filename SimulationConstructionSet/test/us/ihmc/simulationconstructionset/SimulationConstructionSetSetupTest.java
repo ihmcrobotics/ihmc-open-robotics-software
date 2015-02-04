@@ -6,9 +6,10 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.gui.SplashPanel;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UITest;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
-@UITest
+@BambooPlan(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetSetupTest
 {
    private static final int pauseTimeForGUIs = 5000;

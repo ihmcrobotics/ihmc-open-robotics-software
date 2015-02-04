@@ -60,7 +60,8 @@ import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisua
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UITest;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -73,7 +74,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-@UITest
+@BambooPlan(planType = {BambooPlanType.UI})
 public class SimulationConstructionSetUsingDirectCallsTest
 {
    // Note: some of the tests assume that:
