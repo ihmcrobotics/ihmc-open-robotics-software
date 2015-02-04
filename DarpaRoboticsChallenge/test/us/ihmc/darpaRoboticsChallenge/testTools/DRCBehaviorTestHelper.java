@@ -301,10 +301,14 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       Thread behaviorThread = new Thread(behaviorRunner);
       behaviorThread.start();
 
-      boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime * percentOfTrajectoryToComplete / 100.0);
+      boolean success = true;
+      while (trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted() <= percentOfTrajectoryToComplete )
+      {
+         success &= simulateAndBlockAndCatchExceptions(1.0);
+      }
       behaviorRunner.closeAndDispose();
 
-      return ret;
+      return success;
    }
 
    public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime)
