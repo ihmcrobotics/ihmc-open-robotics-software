@@ -21,8 +21,8 @@ public class InefficientPushrodTransmissionJacobianTest
    private final boolean DEBUG = false;
    private final boolean visualizeAndKeepUp = false;
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionJacobianForAnklesAtZero()
    {
       Robot robot = new Robot("testPushrodTransmission");
@@ -43,8 +43,8 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
    {
       Robot robot = new Robot("testPushrodTransmission");
@@ -64,8 +64,8 @@ public class InefficientPushrodTransmissionJacobianTest
       assertJacobianEquals(jacobian, -0.04520035766057378, 0.04520035766057378, -0.06336787027660956, -0.06336787027660956); // Regression. Need to double check with Solid Works numbers.
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionForAnkles()
    {
       Robot robot = new ValkyrieAnkleRobot();
@@ -164,8 +164,8 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionForWaist()
    {
       Robot robot = new ValkyrieWaistRobot();      
