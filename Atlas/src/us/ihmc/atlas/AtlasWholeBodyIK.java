@@ -168,10 +168,13 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       joint_weights.zero();
 
       // use only the joints of legs to achieve this task. Ignore torso and arms
-      for (int i = 0; i < getNumberDoFperLeg(); i++)
+      for (int legJointIndex: legJointIds.get(LEFT))
       {
-         joint_weights.set(legJointIds.get(LEFT)[i], 1);
-         joint_weights.set(legJointIds.get(RIGHT)[i], 1);
+         joint_weights.set(legJointIndex, 1);
+      }
+      for (int legJointIndex: legJointIds.get(RIGHT))
+      {
+         joint_weights.set(legJointIndex, 1);
       }
 
       taskLegPose.setWeightsJointSpace(joint_weights);
@@ -194,21 +197,21 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
 
-      for (int i = 0; i < getNumberDoFperArm(); i++)
-      {
-         int index = armJointIds.get(RobotSide.LEFT)[i];
-         joint_weights.set(index, 1);
-      }
+      for (int armJointIndex: armJointIds.get(RobotSide.LEFT)) 
+         joint_weights.set(armJointIndex, 1 );
+
+      for (int armJointIndex: armJointIds.get(RobotSide.RIGHT))
+         joint_weights.set(armJointIndex, 0 );
+      
       task_ee_pose_L.setWeightsJointSpace(joint_weights);
+      
+    //-------------------
+      for (int armJointIndex: armJointIds.get(RobotSide.LEFT)) 
+         joint_weights.set(armJointIndex, 0 );
 
-
-      for (int i = 0; i < getNumberDoFperArm(); i++)
-      {
-         int index = armJointIds.get(RobotSide.LEFT)[i];
-         joint_weights.set(index, 0);
-         index = armJointIds.get(RobotSide.RIGHT)[i];
-         joint_weights.set(index, 1);
-      }
+      for (int armJointIndex: armJointIds.get(RobotSide.RIGHT))
+         joint_weights.set(armJointIndex, 1 );
+      
       task_ee_pose_R.setWeightsJointSpace(joint_weights);
 
       //--------------------------------------------------
@@ -254,8 +257,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       {
          if( Math.abs( weights_jointpose.get(index)) < 0.0001 )
          {
-           //  weights_jointpose.set(index, 0.01 );
-          //  preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
+             weights_jointpose.set(index, 0.02 );
+             preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
          }
       }
 
