@@ -267,7 +267,7 @@ public class BehaviorDisptacher implements Runnable
    private void attachListeners(BehaviorInterface behavior)
    {
       if (DEBUG)
-         System.out.println("attach listeners to: " + behavior.getName());
+         System.out.println(this.getClass().getSimpleName() + ": attach listeners to: " + behavior.getName());
       communicationBridge.attachGlobalListenerToController(behavior.getControllerGlobalPacketConsumer());
       communicationBridge.attachGlobalListenerToNetworkProcessor(behavior.getNetworkProcessorGlobalObjectConsumer());
    }
@@ -275,7 +275,7 @@ public class BehaviorDisptacher implements Runnable
    private void detachListeners(BehaviorInterface behavior)
    {
       if (DEBUG)
-         System.out.println("detach listeners to: " + behavior.getName());
+         System.out.println(this.getClass().getSimpleName() + ": detach listeners to: " + behavior.getName());
       communicationBridge.detachGlobalListenerFromController(behavior.getControllerGlobalPacketConsumer());
       communicationBridge.detachGlobalListenerFromNetworkProcessor(behavior.getNetworkProcessorGlobalObjectConsumer());
    }
