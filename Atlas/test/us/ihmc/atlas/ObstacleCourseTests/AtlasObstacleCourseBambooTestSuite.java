@@ -3,7 +3,7 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.generator.JUnitTestSuiteGenerator;
+import us.ihmc.utilities.code.unitTesting.generator.BambooTestSuiteGenerator;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses(

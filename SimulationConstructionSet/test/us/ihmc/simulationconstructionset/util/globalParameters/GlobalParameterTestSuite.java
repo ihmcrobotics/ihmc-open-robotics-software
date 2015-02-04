@@ -3,8 +3,6 @@ package us.ihmc.simulationconstructionset.util.globalParameters;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.generator.JUnitTestSuiteGenerator;
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
@@ -20,6 +18,5 @@ public class GlobalParameterTestSuite
 {
    public static void main(String[] args)
    {
-      JUnitTestSuiteGenerator.generateTestSuite(GlobalParameterTestSuite.class);
    }
 }
