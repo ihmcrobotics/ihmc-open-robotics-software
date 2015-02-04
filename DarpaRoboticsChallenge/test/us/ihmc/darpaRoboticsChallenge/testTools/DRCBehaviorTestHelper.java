@@ -373,15 +373,15 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       private final BehaviorExecutionMethod executionMethod;
       private final TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable;
-      private final double percentOfBehaviorToComplete;
+      private final double percentOfTrajectoryToComplete;
 
       public StoppableBehaviorRunner(BehaviorInterface behavior, BehaviorExecutionMethod executionMethod,
-            TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable, double percentOfBehaviorToComplete)
+            TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable, double percentOfTrajectoryToComplete)
       {
          super(behavior);
          this.executionMethod = executionMethod;
          this.trajectoryPercentCompletedUpdatable = trajectoryPercentCompletedUpdatable;
-         this.percentOfBehaviorToComplete = percentOfBehaviorToComplete;
+         this.percentOfTrajectoryToComplete = percentOfTrajectoryToComplete;
       }
 
       public void run()
@@ -396,7 +396,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             {
                double percentCompleted = trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted();
 
-               if (percentCompleted > percentOfBehaviorToComplete)
+               if (percentCompleted > percentOfTrajectoryToComplete)
                {
                   if (executionMethod.equals(BehaviorExecutionMethod.stop) && !behaviorIsStopped)
                   {
