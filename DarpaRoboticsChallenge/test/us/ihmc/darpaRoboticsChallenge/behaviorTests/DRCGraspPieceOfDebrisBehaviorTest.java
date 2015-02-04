@@ -120,6 +120,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 			}
 		};
 
+		testEnvironment.addStandingDebris(0.65, -0.3, 0.0);
+		testEnvironment.createDebrisContactController();
+		
 		drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
 				startingLocation, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
 		
