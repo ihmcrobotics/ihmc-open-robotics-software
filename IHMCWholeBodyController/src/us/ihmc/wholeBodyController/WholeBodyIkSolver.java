@@ -81,8 +81,8 @@ abstract public class WholeBodyIkSolver
    // --------------------- Miscellaneous -------------------------------------
    protected final HashMap<String, Integer> jointNamesToIndex = new HashMap<String, Integer>();
    protected final OneDoFJoint[] workingJointsInUrdfOrder;
-   protected final SideDependentList<int[]> armJointIds = new SideDependentList<int[]>();
-   protected final SideDependentList<int[]> legJointIds = new SideDependentList<int[]>();
+   protected final SideDependentList<HashSet<Integer>> armJointIds = new SideDependentList<HashSet<Integer>>();
+   protected final SideDependentList<HashSet<Integer>> legJointIds = new SideDependentList<HashSet<Integer>>();
 
    protected final DenseMatrix64F coupledJointWeights;
    protected final Vector64F      preferedJointPose;
@@ -238,8 +238,8 @@ abstract public class WholeBodyIkSolver
 
       workingJointsInUrdfOrder = new OneDoFJoint[numOfJoints];
 
-      double EpsilonInRadiansForVerySmallAngles = 0.001;
-      int NumberOfIterations = 50;
+      double EpsilonInRadiansForVerySmallAngles = 0.01;
+      int NumberOfIterations = 60;
 
       hierarchicalSolver = new HierarchicalKinematicSolver(urdfModel, NumberOfIterations, EpsilonInRadiansForVerySmallAngles);
       hierarchicalSolver.setVerbosityLevel(0);
@@ -249,8 +249,8 @@ abstract public class WholeBodyIkSolver
       for (RobotSide robotSide : RobotSide.values())
       {
          workingSoleFrames.set(robotSide, workingFrames.getSoleFrame(robotSide));
-         armJointIds.set(robotSide, new int[ getNumberDoFperArm() ]);
-         legJointIds.set(robotSide, new int[ getNumberDoFperLeg() ]);
+         armJointIds.set(robotSide, new HashSet<Integer>());
+         legJointIds.set(robotSide, new HashSet<Integer>());
          controlledDoF.set(robotSide, ControlledDoF.DOF_NONE );
          keepArmQuiet.set(robotSide, new MutableBoolean(true));
       }
@@ -281,18 +281,30 @@ abstract public class WholeBodyIkSolver
          int currentHandId = urdfModel.getBodyId(getGripperPalmLinkName(robotSide));
 
          taskEndEffectorPose.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
-         urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , armJointIds.get(robotSide));
+         int [] indexes = new  int[ getNumberDoFperArm()];
+         urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , indexes);
+         for (int i: indexes)
+         {
+            armJointIds.get(robotSide).add( i );
+         }
       }     
 
-      RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
-      int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
-      taskLegPose = new HierarchicalTask_BodyPose(fk,urdfModel,  getFootLinkName(otherFootSide ));
+      {
+         RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
+         int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
+         taskLegPose = new HierarchicalTask_BodyPose(fk,urdfModel,  getFootLinkName(otherFootSide ));
 
-      urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), legJointIds.get( otherFootSide ) );
+         int [] indexes = new  int[ getNumberDoFperArm()];
+         urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), indexes );
+         for (int i: indexes)
+         {
+            legJointIds.get(otherFootSide).add( i );
+         }
+      }
 
       for (int i = 0; i < getNumberDoFperLeg(); i++)
       {
-         legJointIds.get( getSideOfTheFootRoot() )[i] = i;
+         legJointIds.get( getSideOfTheFootRoot()).add(i);
       }
 
       taskJointsPose = new HierarchicalTask_JointsPose(fk);
@@ -411,7 +423,7 @@ abstract public class WholeBodyIkSolver
       handTask.setTarget( quat, pos,  0.001); 
    }
 
-   private void enforceControlledDoF( ComputeOption opt  )
+   private void enforceControlledDoF( ComputeOption opt )
    {
       double rotationWeight = 0.5;
 
@@ -428,7 +440,7 @@ abstract public class WholeBodyIkSolver
          case DOF_3P:
             handTask.setEnabled(true);
 
-            if( opt != ComputeOption.RESEED)
+            if( opt == null || opt != ComputeOption.RESEED)
                handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.05, 0.05, 0.05) );
             else
                handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.0, 0.0, 0.0) );
@@ -469,21 +481,21 @@ abstract public class WholeBodyIkSolver
 
       for( RobotSide side: RobotSide.values())
       {
-         for (int J = 0; J < armJointIds.get(side).length; J++)
+         for (int jointId: armJointIds.get(side))
          {
-            int jointId = armJointIds.get(side)[J];
             if ( keepArmQuiet.get(side).isTrue() )
             {
-               if (J <= 3)
-                  weights_joint.set(jointId, 0.4);
-               else
-                  weights_joint.set(jointId, 0.3);
+               weights_joint.set(jointId, 0.3);
                preferedJointPose.set(jointId, q_init.get(jointId));
             }
             else
             {
-               weights_joint.set(jointId, 0.1);
-               preferedJointPose.set(jointId, q_init.get(jointId));
+             //  RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
+             //  double preferredAngle = 0.5*(model.q_min(jointId)+ model.q_max(jointId));
+               double preferredAngle = q_init.get(jointId);
+               
+               weights_joint.set(jointId, 0.05);
+               preferedJointPose.set(jointId,preferredAngle);
             }
          }
       }
@@ -496,21 +508,23 @@ abstract public class WholeBodyIkSolver
       taskComPosition.setEnabled(!lockLegs);
       taskLegPose.setEnabled(!lockLegs);
 
+      double val = lockLegs ? 0 : 1;
+      
+      Vector64F weightsJoints    =  taskJointsPose.getWeightsJointSpace();
+      Vector64F weightsCollision =  getHierarchicalSolver().collisionAvoidance.getJointWeights();
+      Vector64F weightsEE_Left   =  taskEndEffectorPose.get(LEFT).getWeightsJointSpace();
+      Vector64F weightsEE_Right  =  taskEndEffectorPose.get(RIGHT).getWeightsJointSpace();
+      
       for (RobotSide side: RobotSide.values)
       {
-         Vector64F weightsEE        =  taskEndEffectorPose.get(side).getWeightsJointSpace();
-         Vector64F weightsJoints    =  taskJointsPose.getWeightsJointSpace();
-         Vector64F weightsCollision = getHierarchicalSolver().collisionAvoidance.getJointWeights();
-
-         double val = lockLegs ? 0 : 1;
-
-         for (int i = 0; i < getNumberDoFperLeg(); i++)
+         for (int index : legJointIds.get(side) )
          {
-            weightsEE.set(legJointIds.get(side)[i], val);
-            weightsJoints.set(legJointIds.get(side)[i], val);
-            weightsCollision.set(legJointIds.get(side)[i], val);
+            weightsEE_Left.set(index, val);
+            weightsEE_Right.set(index, val);
+            weightsJoints.set(index, val);
+            weightsCollision.set(index, val);
          }
-      }
+      }     
    }
 
 
@@ -562,30 +576,17 @@ abstract public class WholeBodyIkSolver
 
          for(RobotSide robotSide: RobotSide.values())
          {
-            if( keepArmQuiet.get(robotSide).isTrue())
+            if( keepArmQuiet.get(robotSide).isTrue() &&  armJointIds.get(robotSide).contains(i))
             {
-               for(int j=0; j< getNumberDoFperArm(); j++){
-                  if ( armJointIds.get(robotSide)[j] == i){
-                     partOfQuietArm = true;
-                     break;
-                  }
-               }
+               partOfQuietArm = true;
             }
-         }
-         if( lockLegs )
-         {
-            for(RobotSide robotSide: RobotSide.values())
+            if( lockLegs &&  legJointIds.get(robotSide).contains(i))
             {
-               for(int j=0; j< getNumberDoFperLeg(); j++){
-                  if ( legJointIds.get(robotSide)[j] == i){
-                     partOfQuietLeg = true;
-                     break;
-                  }
-               }
+               partOfQuietLeg = true;
             }
          }
 
-         if( !partOfQuietArm && ! partOfQuietLeg) {
+         if( !partOfQuietArm && !partOfQuietLeg) {
             cachedAnglesQ.set(i, newQ.get(i));
          }
       }
@@ -828,6 +829,7 @@ abstract public class WholeBodyIkSolver
    public void setNumberOfControlledDoF(RobotSide side, ControlledDoF dof)
    {
       controlledDoF.set(side, dof );
+      enforceControlledDoF( null );
    }
 
    public boolean isLowerBodyLocked()
