@@ -4,8 +4,6 @@ import us.ihmc.acsell.operatorInterface.StepprOperatorInterface;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemoStarter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class StepprObstacleCourseDemo extends DRCObstacleCourseDemoStarter
@@ -19,8 +17,7 @@ public class StepprObstacleCourseDemo extends DRCObstacleCourseDemoStarter
       boolean startDRCNetworkProcessor = true; // set to false to use slider board instead.
       boolean initializeEstimatorToActual = false;
       
-      CommonAvatarEnvironmentInterface environment = new DRCDemo01NavigationEnvironment();
-      stepprObstacleCourseDemo.obstacleCourseStarter(environment, robotModel, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor);
+      stepprObstacleCourseDemo.obstacleCourseStarter(robotModel, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor);
    }
 
    @Override
