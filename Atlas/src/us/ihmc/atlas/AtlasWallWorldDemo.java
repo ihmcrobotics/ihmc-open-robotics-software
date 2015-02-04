@@ -27,8 +27,7 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();
       
-      atlasDemo.obstacleCourseStarter(environment, robotModel, initializeEstimatorToActual, automaticallyStartSimulation,
-            startDRCNetworkProcessor);
+      atlasDemo.obstacleCourseStarter(environment, robotModel, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor);
    }
 
    @Override
