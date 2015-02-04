@@ -100,9 +100,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, swingTimeProvider, registry);
 
+      WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       if (!USE_NEW_CONTINUOUS_TRAJECTORY)
       {
-         WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
          swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
                initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
                registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
@@ -124,6 +124,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       {
          continuousTrajectory = new TwoViaPointTrajectoryGenerator(namePrefix + "Swing", worldFrame, registry, visualizeSwingTrajectory,
                yoGraphicsListRegistry);
+         continuousTrajectory.setFinalVelocity(Math.abs(walkingControllerParameters.getDesiredTouchdownVelocity()));
          swingTrajectoryGenerator = continuousTrajectory;
 
          // Needs to be implemented
@@ -133,11 +134,11 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       if (USE_NEW_CONTINUOUS_TRAJECTORY)
       {
          swingClearanceAngle = new DoubleYoVariable(namePrefix + "SwingClearanceAngle", registry);
-         swingClearanceAngle.set(3.0*0.1);
+         swingClearanceAngle.set(0.1);
          swingLandingAngle = new DoubleYoVariable(namePrefix + "SwingLandingAngle", registry);
          swingLandingAngle.set(1.0);
          defaultHeightClearance = new DoubleYoVariable(namePrefix + "DefaultHeightClearance", registry);
-         defaultHeightClearance.set(0.04);
+         defaultHeightClearance.set(0.01);
       }
       else
       {
@@ -272,7 +273,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
          
          continuousTrajectory.setTrajectoryTime(swingTimeProvider.getValue());
          continuousTrajectory.setInitialLeadOut(initialSwingPosition, initialSwingDirection, defaultHeightClearance.getDoubleValue());
-         continuousTrajectory.setFinalVelocity(0.3);
+         //continuousTrajectory.setFinalVelocity(0.1);
          continuousTrajectory.setFinalLeadIn(finalSwingPosition, finalSwingDirection, defaultHeightClearance.getDoubleValue());
       }
    }
