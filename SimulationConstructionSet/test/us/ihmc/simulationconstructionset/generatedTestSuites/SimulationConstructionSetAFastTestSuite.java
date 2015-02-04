@@ -63,12 +63,7 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
    us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardUtilsTest.class,
    us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModelTest.class,
    us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorTest.class,
-   us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierTest.class,
-   us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparerTest.class,
-   us.ihmc.simulationconstructionset.util.simulationRunner.VariablesThatShouldMatchListTest.class,
-   us.ihmc.simulationconstructionset.utilities.math.geometry.FindTentativeListOfPolygonsIntersectingTargetPolygonTest.class,
-   us.ihmc.simulationconstructionset.utilities.screwTheory.CentroidalMomentumMatrixTest.class,
-   us.ihmc.simulationconstructionset.utilities.screwTheory.InverseDynamicsCalculatorTest.class
+   us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierTest.class
 })
 
 public class SimulationConstructionSetAFastTestSuite
