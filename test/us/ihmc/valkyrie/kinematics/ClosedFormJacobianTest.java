@@ -8,14 +8,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 
-@CustomJob(job = CustomJobType.Utilities)
 public class ClosedFormJacobianTest 
 {
     private static final boolean DEBUG                                     = false;
