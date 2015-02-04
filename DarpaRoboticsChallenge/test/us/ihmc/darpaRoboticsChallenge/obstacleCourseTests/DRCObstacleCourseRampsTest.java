@@ -60,8 +60,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
 
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 36.0)
+	@Test(timeout = 107914)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -75,8 +75,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 40.4)
+	@Test(timeout = 121061)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -111,8 +111,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 35.3)
+	@Test(timeout = 105956)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -126,8 +126,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 35.7)
+	@Test(timeout = 107046)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -147,8 +147,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 35.8)
+	@Test(timeout = 107263)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
