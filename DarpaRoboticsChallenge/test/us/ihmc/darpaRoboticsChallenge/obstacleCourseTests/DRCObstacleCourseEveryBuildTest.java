@@ -56,8 +56,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    }
 
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 39.0)
+	@Test(timeout = 116893)
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

@@ -99,8 +99,8 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       }
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 31.6)
+	@Test(timeout = 94857)
    public void TestMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
