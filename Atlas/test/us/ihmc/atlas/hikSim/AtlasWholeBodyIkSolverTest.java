@@ -19,8 +19,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -31,7 +29,6 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolverTestFactory;
 
-@CustomJob(job = CustomJobType.WholeBody)
 public class AtlasWholeBodyIkSolverTest 
 
 {

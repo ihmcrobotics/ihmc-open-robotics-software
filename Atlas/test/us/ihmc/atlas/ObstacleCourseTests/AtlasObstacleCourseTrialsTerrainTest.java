@@ -5,10 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJob;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.CustomJobType;
 
-@CustomJob(job = CustomJobType.Terrain)
 public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
 
