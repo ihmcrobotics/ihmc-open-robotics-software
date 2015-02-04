@@ -241,13 +241,13 @@ public class AtlasWholeBodyIkSolverTest
    }
    
   // FAILS
-/*	@AverageDuration
-	@Test(timeout = 15000)
-   public void testBothHandsIn3P3RMode()
-   {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
-      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
-   }*/
+//   @AverageDuration
+//	@Test(timeout = 15000)
+//   public void testBothHandsIn3P3RMode()
+//   {
+//      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+//      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
+//   }
   
 
    public void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize)
