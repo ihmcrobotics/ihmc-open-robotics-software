@@ -38,208 +38,212 @@ import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface {
+public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface
+{
 
-	private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-	private DRCBehaviorTestHelper drcBehaviorTestHelper;
+   private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
-	@Before
-	public void showMemoryUsageBeforeTest()
-	{
-		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-	}
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
 
-	@After
-	public void destroySimulationAndRecycleMemory()
-	{
-		if (simulationTestingParameters.getKeepSCSUp())
-		{
-			ThreadTools.sleepForever();
-		}
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
 
-		// Do this here in case a test fails. That way the memory will be recycled.
-		if (drcBehaviorTestHelper != null)
-		{
-			drcBehaviorTestHelper.destroySimulation();
-			drcBehaviorTestHelper = null;
-		}
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcBehaviorTestHelper != null)
+      {
+         drcBehaviorTestHelper.destroySimulation();
+         drcBehaviorTestHelper = null;
+      }
 
-		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-	}
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
 
-	private static final boolean DEBUG = false;
+   private static final boolean DEBUG = false;
 
-	private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
-	
-	private final double FINGER_JOINT_1_EXPECTED_RADIANS = 0.22;
-	private final double FINGER_JOINT_2_EXPECTED_RADIANS = 0.22;
-	private final double PALM_JOINT_EXPECTED_RADIANS = 0.04;
-	
-	private final double FINGER_JOINT_1_ERROR_MARGIN_RADIANS = 0.05;
-	private final double FINGER_JOINT_2_ERROR_MARGIN_RADIANS = 0.05;
-	private final double PALM_JOINT_ERROR_MARGIN_RADIANS = 0.02;
+   private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-	private final DRCDebrisEnvironment testEnvironment = new DRCDebrisEnvironment();
-	private final KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCGraspPieceOfDebrisBehaviorTestControllerCommunicator");
+   private final double FINGER_JOINT_1_EXPECTED_RADIANS = 0.22;
+   private final double FINGER_JOINT_2_EXPECTED_RADIANS = 0.22;
+   private final double PALM_JOINT_EXPECTED_RADIANS = 0.04;
 
-	private DoubleYoVariable yoTime;
+   private final double FINGER_JOINT_1_ERROR_MARGIN_RADIANS = 0.05;
+   private final double FINGER_JOINT_2_ERROR_MARGIN_RADIANS = 0.05;
+   private final double PALM_JOINT_ERROR_MARGIN_RADIANS = 0.02;
 
-	private RobotDataReceiver robotDataReceiver;
-	private ForceSensorDataHolder forceSensorDataHolder;
+   private final DRCDebrisEnvironment testEnvironment = new DRCDebrisEnvironment();
+   private final KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+         "DRCGraspPieceOfDebrisBehaviorTestControllerCommunicator");
 
-	private BehaviorCommunicationBridge communicationBridge;
+   private DoubleYoVariable yoTime;
 
-	private SDFRobot robot;
-	private SDFFullRobotModel fullRobotModel;
+   private RobotDataReceiver robotDataReceiver;
+   private ForceSensorDataHolder forceSensorDataHolder;
 
-	@Before
-	public void setUp()
-	{
-		if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-		{
-			throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-		}
+   private BehaviorCommunicationBridge communicationBridge;
 
-		DRCStartingLocation startingLocation =  new DRCStartingLocation()
-		{
-			@Override
-			public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-			{
-	            Vector3d additionalOffset = new Vector3d(0.0, 0.0, 0.0);
-	            double yaw = 0.0;
-	            OffsetAndYawRobotInitialSetup offsetAndYawRobotInitialSetup = new OffsetAndYawRobotInitialSetup(additionalOffset, yaw);
-	            return offsetAndYawRobotInitialSetup;
-			}
-		};
+   private SDFRobot robot;
+   private SDFFullRobotModel fullRobotModel;
 
-		testEnvironment.addStandingDebris(0.65, -0.3, 0.0);
-		testEnvironment.createDebrisContactController();
-		
-		drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-				startingLocation, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
-		
-		Robot robotToTest = drcBehaviorTestHelper.getRobot();
-		yoTime = robotToTest.getYoTime();
+   @Before
+   public void setUp()
+   {
+      if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
+      {
+         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
+      }
 
-		robot = drcBehaviorTestHelper.getRobot();
-		fullRobotModel = getRobotModel().createFullRobotModel();
+      DRCStartingLocation startingLocation = new DRCStartingLocation()
+      {
+         @Override
+         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
+         {
+            Vector3d additionalOffset = new Vector3d(0.0, 0.0, 0.0);
+            double yaw = 0.0;
+            OffsetAndYawRobotInitialSetup offsetAndYawRobotInitialSetup = new OffsetAndYawRobotInitialSetup(additionalOffset, yaw);
+            return offsetAndYawRobotInitialSetup;
+         }
+      };
 
-		forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      testEnvironment.addStandingDebris(0.65, -0.3, 0.0);
+      testEnvironment.createDebrisContactController();
 
-		robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-		controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null, startingLocation,
+            simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
 
-		PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-				"DRCComHeightBehaviorTestJunkyCommunicator");
+      Robot robotToTest = drcBehaviorTestHelper.getRobot();
+      yoTime = robotToTest.getYoTime();
 
-		communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
-	}
+      robot = drcBehaviorTestHelper.getRobot();
+      fullRobotModel = getRobotModel().createFullRobotModel();
 
-	@AverageDuration
-	@Test(timeout = 300000)
-	@Ignore
-	public void testGraspingDebris() throws SimulationExceededMaximumTimeException
-	{		
-		BambooTools.reportTestStartedMessage();
-		
-		boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-		assertTrue(success);
-		
-		final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, getRobotModel().createFullRobotModel(), 
-				getRobotModel(), yoTime, true);
-		communicationBridge.attachGlobalListenerToController(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
-								
-		graspPieceOfDebrisBehavior.initialize();
-		
-		// from DebrisTaskBehaviorPanel.storeDebrisDataInList
-		ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
-		
-		RigidBodyTransform graspVectorTransform = new RigidBodyTransform();
-		debrisRobot.getBodyTransformToWorld(graspVectorTransform);
-		
-		FrameVector tempGraspVector = new FrameVector(ReferenceFrame.getWorldFrame());
-		tempGraspVector.set(-1.0, 0.0,0.0);
-		tempGraspVector.applyTransform(graspVectorTransform);
+      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
 
-		Vector3d tempGraspVectorPosition = new Vector3d(); 
-		graspVectorTransform.getTranslation(tempGraspVectorPosition);
-		Point3d graspVectorPosition = new Point3d(tempGraspVectorPosition);
-		Vector3d graspVector = tempGraspVector.getVector();
-		
-		graspVector.setZ(graspVector.z + 0.3);
-		graspVectorPosition.setZ(graspVectorPosition.z + 0.3);
-		
-		graspPieceOfDebrisBehavior.setGraspPose(graspVectorTransform, graspVectorPosition, graspVector, RobotSide.RIGHT);
-		
-		assertTrue(graspPieceOfDebrisBehavior.hasInputBeenSet());
-		
-		double graspTime = 20.0;
-		executeBehavior(graspPieceOfDebrisBehavior, graspTime);
-		success = success & graspPieceOfDebrisBehavior.isDone();
-		
-		drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
-		
-		DoubleYoVariable fingerJoint1 = (DoubleYoVariable) robot.getVariable("q_r_finger_1_joint_1");
-		DoubleYoVariable fingerJoint2 = (DoubleYoVariable) robot.getVariable("q_r_finger_2_joint_1");
-		DoubleYoVariable palmJoint = (DoubleYoVariable) robot.getVariable("q_r_palm_finger_1");
-		
-		success = success & Math.abs(fingerJoint1.getDoubleValue() - FINGER_JOINT_1_EXPECTED_RADIANS) < FINGER_JOINT_1_ERROR_MARGIN_RADIANS;
-		success = success & Math.abs(fingerJoint2.getDoubleValue() - FINGER_JOINT_2_EXPECTED_RADIANS) < FINGER_JOINT_2_ERROR_MARGIN_RADIANS;
-		success = success & Math.abs(palmJoint.getDoubleValue() - PALM_JOINT_EXPECTED_RADIANS) < PALM_JOINT_ERROR_MARGIN_RADIANS;
-		
-		assertTrue(success);
+      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
+      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-		BambooTools.reportTestFinishedMessage();
-	}
+      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+            "DRCComHeightBehaviorTestJunkyCommunicator");
 
-	private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-	{
-		final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
+      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
+   }
 
-		SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
+   @AverageDuration
+   @Test(timeout = 300000)
+   	@Ignore
+   public void testGraspingDebris() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
 
-		Thread behaviorThread = new Thread()
-		{
-			public void run()
-			{
-				{
-					double startTime = Double.NaN;
-					boolean simStillRunning = true;
-					boolean initalized = false;
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
-					while (simStillRunning)
-					{
-						if (!initalized)
-						{
-							startTime = yoTime.getDoubleValue();
-							initalized = true;
-						}
+      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, getRobotModel().createFullRobotModel(),
+            getRobotModel(), yoTime, true);
+      communicationBridge.attachGlobalListenerToController(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
 
-						double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-						simStillRunning = timeSpentSimulating < simulationRunTime;
+      graspPieceOfDebrisBehavior.initialize();
 
-						behavior.doControl();
-					}
-				}
-			}
-		};
+      // from DebrisTaskBehaviorPanel.storeDebrisDataInList
+      //here the rigidBodyTransform is of with respect to the center of the debris, whereas in the UI, it is with respect to the corner of the debris
+      ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
 
-		behaviorThread.start();
+      RigidBodyTransform debrisTransform = new RigidBodyTransform();
+      debrisRobot.getBodyTransformToWorld(debrisTransform);
+      debrisTransform.applyTranslation(new Vector3d(-testEnvironment.getDebrisDepth() / 2.0, -testEnvironment.getDebrisWidth() / 2.0, -testEnvironment
+            .getDebrisLength() / 2.0));
 
-		boolean ret = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+      FrameVector tempGraspVector = new FrameVector(ReferenceFrame.getWorldFrame());
+      tempGraspVector.set(-1.0, 0.0, 0.0);
+      tempGraspVector.applyTransform(debrisTransform);
+      Vector3d graspVector = new Vector3d();
+      tempGraspVector.get(graspVector);
 
-		SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
+      FramePoint tempGraspVectorPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      tempGraspVectorPosition.setZ(0.5);
+      tempGraspVectorPosition.applyTransform(debrisTransform);
+      Point3d graspVectorPosition = new Point3d();
+      tempGraspVectorPosition.get(graspVectorPosition);
 
-		return ret;
-	}	
+      graspPieceOfDebrisBehavior.setGraspPose(debrisTransform, graspVectorPosition, graspVector, RobotSide.RIGHT);
+
+      assertTrue(graspPieceOfDebrisBehavior.hasInputBeenSet());
+
+      double graspTime = 20.0;
+      executeBehavior(graspPieceOfDebrisBehavior, graspTime);
+      success = success & graspPieceOfDebrisBehavior.isDone();
+
+      drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
+
+      DoubleYoVariable fingerJoint1 = (DoubleYoVariable) robot.getVariable("q_r_finger_1_joint_1");
+      DoubleYoVariable fingerJoint2 = (DoubleYoVariable) robot.getVariable("q_r_finger_2_joint_1");
+      DoubleYoVariable palmJoint = (DoubleYoVariable) robot.getVariable("q_r_palm_finger_1");
+
+      success = success & Math.abs(fingerJoint1.getDoubleValue() - FINGER_JOINT_1_EXPECTED_RADIANS) < FINGER_JOINT_1_ERROR_MARGIN_RADIANS;
+      success = success & Math.abs(fingerJoint2.getDoubleValue() - FINGER_JOINT_2_EXPECTED_RADIANS) < FINGER_JOINT_2_ERROR_MARGIN_RADIANS;
+      success = success & Math.abs(palmJoint.getDoubleValue() - PALM_JOINT_EXPECTED_RADIANS) < PALM_JOINT_ERROR_MARGIN_RADIANS;
+
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
+
+      SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
+
+      Thread behaviorThread = new Thread()
+      {
+         public void run()
+         {
+            {
+               double startTime = Double.NaN;
+               boolean simStillRunning = true;
+               boolean initalized = false;
+
+               while (simStillRunning)
+               {
+                  if (!initalized)
+                  {
+                     startTime = yoTime.getDoubleValue();
+                     initalized = true;
+                  }
+
+                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
+                  simStillRunning = timeSpentSimulating < simulationRunTime;
+
+                  behavior.doControl();
+               }
+            }
+         }
+      };
+
+      behaviorThread.start();
+
+      boolean ret = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
+
+      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
+
+      return ret;
+   }
 
 }
-
