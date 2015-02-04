@@ -60,7 +60,6 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       RigidBodyTransform configuration = new RigidBodyTransform(quat, vector);
       combinedTerrainObject3D.addRotatableBox(configuration , 0.2, 0.6, 1.2, YoAppearance.Brown());
       
-      
       return combinedTerrainObject3D;
    }
 
@@ -75,7 +74,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 
    private void createBoxes(double forceVectorScale, GroundProfile3D groundProfile)
    {
-      debrisRobots.add(createDebris(1.0, -0.4, debrisLength / 2.0, 0.0, 0.0, 0.0));
+      debrisRobots.add(createDebris(0.63, -0.2, debrisLength/2.0, 0.0, 0.0, 0.0)); // 1.0, -0.4, debrisLength / 2.0, 0.0, 0.0, 0.0));
 //      debrisRobots.add(createDebris(2.0, 0.0, 0.7, Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(10.0)));
       debrisRobots.add(createDebris(3.0, 0.3, debrisLength / 2.0 - 0.02, Math.toRadians(12.0), Math.toRadians(20.0), 0.0));
 
