@@ -132,6 +132,7 @@ public class SegmentedDatagramClient extends Thread
       SelectionKey key;
       try
       {
+         System.out.println("Binding to " + receiveAddress + " on " + iface);
          receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(receiveAddress);
          receiveChannel.configureBlocking(false);
          receiveKey = receiveChannel.join(group, iface);

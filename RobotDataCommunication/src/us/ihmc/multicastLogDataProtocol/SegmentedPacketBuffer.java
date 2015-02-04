@@ -22,19 +22,22 @@ public class SegmentedPacketBuffer
    
    public void addSegment(int segmentID, ByteBuffer data)
    {
-      dataBuffer[segmentID] = ByteBuffer.allocate(data.remaining());
-      dataBuffer[segmentID].put(data);
-      dataBuffer[segmentID].flip();
-      
-      boolean complete = true;
-      for(int i = 0; i < dataBuffer.length; i++)
+      if(segmentID < dataBuffer.length)
       {
-         if(dataBuffer[i] == null)
+         dataBuffer[segmentID] = ByteBuffer.allocate(data.remaining());
+         dataBuffer[segmentID].put(data);
+         dataBuffer[segmentID].flip();
+         
+         boolean complete = true;
+         for(int i = 0; i < dataBuffer.length; i++)
          {
-            complete = false;
+            if(dataBuffer[i] == null)
+            {
+               complete = false;
+            }
          }
+         this.complete = complete;
       }
-      this.complete = complete;
    }
    
    public ByteBuffer getBuffer()
