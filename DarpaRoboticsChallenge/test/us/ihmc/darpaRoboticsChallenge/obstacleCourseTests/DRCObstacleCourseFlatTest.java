@@ -90,7 +90,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    @Ignore("Invoked manually to test memory & thread leaks")
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -599,7 +599,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
    @Ignore
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -644,7 +644,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    
    @Ignore("Added for fixing DRC-866. Does not work for fast walking")
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
