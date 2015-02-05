@@ -380,7 +380,7 @@ public class DesiredFootstepVisualizer
       Vector3d trans = new Vector3d();
       transformFromFootBodyFrameToFootPlaneFrame.get(trans);
       double ankleHeight = trans.getZ();
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight,
+      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight, null,
             desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(), desiredFootstepVisualizer.getContactableFeet(),
             desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
       desiredFootstepCalculator.setInPlaceWidth(0.4);

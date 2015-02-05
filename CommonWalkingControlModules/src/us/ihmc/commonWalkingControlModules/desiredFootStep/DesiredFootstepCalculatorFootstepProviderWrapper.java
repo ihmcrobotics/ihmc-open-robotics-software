@@ -2,9 +2,11 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
 
@@ -16,10 +18,20 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private Footstep lastPolledFootstep;
 
-   public DesiredFootstepCalculatorFootstepProviderWrapper(DesiredFootstepCalculator desiredFootstepCalculator, YoVariableRegistry parentRegistry)
+   public DesiredFootstepCalculatorFootstepProviderWrapper(final DesiredFootstepCalculator desiredFootstepCalculator, YoVariableRegistry parentRegistry)
    {
       this.desiredFootstepCalculator = desiredFootstepCalculator;
       parentRegistry.addChild(registry);
+
+      walk.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (walk.getBooleanValue())
+               desiredFootstepCalculator.initialize();
+         }
+      });
    }
 
    public void setNextSwingLeg(RobotSide nextSwingLeg)

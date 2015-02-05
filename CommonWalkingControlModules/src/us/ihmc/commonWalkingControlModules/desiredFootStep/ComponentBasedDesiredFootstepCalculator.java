@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -42,8 +43,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
-   private SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
-   private SideDependentList<? extends ReferenceFrame> ankleFrames;
+   private final ReferenceFrame pelvisZUpFrame;
+   private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> ankleFrames;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
@@ -52,13 +54,16 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
    private final double ankleHeight;
 
-   public ComponentBasedDesiredFootstepCalculator(double ankleHeight, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+   private final FrameOrientation2d pelvisOrientation2d = new FrameOrientation2d();
+
+   public ComponentBasedDesiredFootstepCalculator(double ankleHeight, ReferenceFrame pelvisZUpFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
          SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);
 
       this.ankleHeight = ankleHeight;
+      this.pelvisZUpFrame = pelvisZUpFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       this.ankleFrames = ankleFrames;
 
@@ -68,11 +73,23 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       matchSupportFootPlane.set(false);
    }
 
+   @Override
+   public void initialize()
+   {
+      if (pelvisZUpFrame != null)
+      {
+         pelvisOrientation2d.set(pelvisZUpFrame);
+         pelvisOrientation2d.changeFrame(ReferenceFrame.getWorldFrame());
+         desiredHeadingControlModule.resetHeadingAngle(pelvisOrientation2d.getYaw());
+      }
+   }
+
    public void setGroundProfile(HeightMap heightMap)
    {
       this.heightMap = heightMap;
    }
 
+   @Override
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
@@ -235,24 +252,24 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       {
          /*
           * Assume that the ground height is constant.
-          * 
+          *
           * Specifically, if we assume that: 1) the lowest contact point on the
           * upcoming swing foot is in contact with the ground 2) the ground
           * height at the lowest upcoming swing foot contact point is the same
           * as the ground height at the lowest swing foot contact point
-          * 
+          *
           * then the following holds:
-          * 
+          *
           * let upcomingSwingMinZ be the z coordinate of the vector (expressed
           * in world frame) from upcoming swing ankle to the lowest contact
           * point on the stance foot (compared in world frame). Current foot
           * orientation is used to determine this value.
-          * 
+          *
           * let footstepMinZ be the z coordinate of the vector (expressed in
           * world frame) from planned swing ankle to the lowest contact point on
           * the planned swing foot (compared in world frame). Planned foot
           * orientation is used to determine this value
-          * 
+          *
           * let zUpcomingSwing be the z coordinate of the upcoming swing ankle,
           * expressed in world frame. let zFootstep be the z coordinate of the
           * footstep, expressed in world frame (this is what we're after) let
@@ -326,6 +343,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
    }
 
+   @Override
    protected List<FramePoint> getContactPoints(RobotSide swingSide)
    {
       double stepPitch = this.stepPitch.getDoubleValue();
@@ -346,6 +364,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       }
    }
 
+   @Override
    public boolean isDone()
    {
       return false;

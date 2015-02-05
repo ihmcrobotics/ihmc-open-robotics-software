@@ -126,4 +126,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    {
       return false;
    }
+
+   @Override
+   public void initialize()
+   {
+   }
 }

@@ -300,4 +300,9 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    {
       return false;
    }
+
+   @Override
+   public void initialize()
+   {
+   }
 }

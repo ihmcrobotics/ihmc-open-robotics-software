@@ -127,4 +127,9 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
    {
       return false;
    }
+
+   @Override
+   public void initialize()
+   {
+   }
 }
