@@ -46,6 +46,11 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       parentRegistry.addChild(registry);
    }
 
+   public void initialize()
+   {
+   }
+
+   @Override
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
@@ -89,6 +94,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       return desiredFootstep;
    }
 
+   @Override
    public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
       return null;

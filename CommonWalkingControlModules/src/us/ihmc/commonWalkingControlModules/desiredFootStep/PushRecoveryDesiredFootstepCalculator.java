@@ -125,4 +125,9 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
    {
       return false;
    }
+
+   @Override
+   public void initialize()
+   {
+   }
 }
