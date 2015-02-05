@@ -48,6 +48,7 @@ import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
+import us.ihmc.communication.packets.walking.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -102,6 +103,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(fullRobotModel.getChest().getBodyFixedFrame());
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider();
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
+      PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryConsumer = pelvisPoseProvider.getWholeBodyTrajectoryConsumer();
       DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(ReferenceFrame.getWorldFrame(), walkingControllerParameters.getTrajectoryTimeHeadOrientation());
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime());
    
@@ -130,6 +132,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
+      
+      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, wholeBodyTrajectoryConsumer);
 
       
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
