@@ -24,8 +24,6 @@ import us.ihmc.robotDataCommunication.logger.LogSettings;
 
 public class GUICaptureViewer
 {
-   public static String host = "10.66.171.41";
-
    public static void main(String[] args)
    {
       new GUICaptureViewer();
@@ -50,7 +48,7 @@ public class GUICaptureViewer
       {
          if (setting.getVideoStream() != null)
          {
-            SegmentedDatagramClient client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, LogUtils.getMyInterface(host),
+            SegmentedDatagramClient client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, LogUtils.getMyInterface(setting.getHost()),
                   setting.getVideoStream(), GUICaptureStreamer.PORT, new Handler());
 
             client.start();
