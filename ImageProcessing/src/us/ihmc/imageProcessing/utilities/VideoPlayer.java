@@ -9,7 +9,8 @@ import java.io.IOException;
 import javax.swing.JFrame;
 
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
-import us.ihmc.codecs.yuv.YUVPicture;
+import us.ihmc.codecs.generated.YUVPicture;
+import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.utilities.camera.ImageViewer;
 import us.ihmc.utilities.camera.VideoListener;
 
@@ -23,7 +24,8 @@ public class VideoPlayer
    private VideoListener videoListener;
    private boolean LOOP_CONTINUOUSLY = false;
    private MP4VideoDemuxer demuxer;
-
+   private final YUVPictureConverter converter = new YUVPictureConverter();
+   
    public VideoPlayer(String filename, VideoListener videoListener, boolean loopContinuously)
    {
       this.filename = filename;
@@ -60,7 +62,7 @@ public class VideoPlayer
       {
          while ((frame = demuxer.getNextFrame()) != null)
          {
-            videoListener.updateImage(frame.getImage());
+            videoListener.updateImage(converter.toBufferedImage(frame));
             frame.delete();
          }
       }

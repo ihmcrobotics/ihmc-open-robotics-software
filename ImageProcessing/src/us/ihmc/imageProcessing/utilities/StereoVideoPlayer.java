@@ -9,7 +9,8 @@ import java.io.IOException;
 import javax.swing.JFrame;
 
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
-import us.ihmc.codecs.yuv.YUVPicture;
+import us.ihmc.codecs.generated.YUVPicture;
+import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.utilities.camera.StereoImageViewer;
 import us.ihmc.utilities.camera.StereoVideoListener;
 
@@ -26,6 +27,7 @@ public class StereoVideoPlayer
 
    private StereoVideoListener videoListener;
    private boolean LOOP_CONTINUOUSLY = false;
+   private final YUVPictureConverter converter = new YUVPictureConverter();
 
    public StereoVideoPlayer(String leftEyeFilename, String rightEyeFilename, StereoVideoListener videoListener, boolean loopContinuously)
    {
@@ -85,7 +87,7 @@ public class StereoVideoPlayer
       {
          while ((leftEye = leftEyeDemuxer.getNextFrame()) != null && (rightEye = rightEyeDemuxer.getNextFrame()) != null)
          {
-            videoListener.updateImage(leftEye.getImage(), rightEye.getImage());
+            videoListener.updateImage(converter.toBufferedImage(leftEye), converter.toBufferedImage(rightEye));
             leftEye.delete();
             rightEye.delete();
             //TODO: Insert eait loop
