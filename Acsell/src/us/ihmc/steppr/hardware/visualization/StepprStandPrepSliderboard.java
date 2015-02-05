@@ -2,6 +2,8 @@ package us.ihmc.steppr.hardware.visualization;
 
 import java.util.EnumMap;
 
+import net.java.games.input.Component;
+import net.java.games.input.Controller;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
@@ -9,6 +11,9 @@ import us.ihmc.simulationconstructionset.IndexChangedListener;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
+import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
+import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -128,6 +133,43 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
       StepprDashboard.createDashboard(scs, registry);
       scs.getDataBuffer().attachIndexChangedListener(this);
+
+      setupJoyStick(registry);
+   }
+   
+   private static void setupJoyStick(YoVariableHolder registry)
+   {
+      final JoystickUpdater joystickUpdater = new JoystickUpdater();
+      Thread thread = new Thread(joystickUpdater);
+      thread.start();
+
+      double deadZone = 0.02;
+
+      DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.3,
+            0.3, deadZone, true));
+      final double minVelocityX = -0.1;
+      desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
+      {
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (v.getValueAsDouble() < minVelocityX)
+               v.setValueFromDouble(minVelocityX, false);
+         }
+      });
+
+      DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.1,
+            0.1, deadZone, true));
+
+      DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
+            -0.1, 0.1, deadZone, true));
+      
+      BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
+      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.BASE), false));
 
    }
 
