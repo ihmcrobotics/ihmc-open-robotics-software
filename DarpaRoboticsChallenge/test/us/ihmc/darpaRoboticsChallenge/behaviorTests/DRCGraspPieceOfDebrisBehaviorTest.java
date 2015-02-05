@@ -154,8 +154,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, getRobotModel().createFullRobotModel(),
+      
+//TODO remove the elevatorFrame and replace it by the midFeetZupFrame
+      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, getRobotModel().createFullRobotModel(), fullRobotModel.getElevatorFrame(),
             getRobotModel(), yoTime, true);
       communicationBridge.attachGlobalListenerToController(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
 
