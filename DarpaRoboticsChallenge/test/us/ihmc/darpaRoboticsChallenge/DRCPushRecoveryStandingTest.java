@@ -40,6 +40,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
+         
          ThreadTools.sleepForever();
       }
 
@@ -85,8 +86,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       }
    }
 
-	@AverageDuration(duration = 20.2)
-	@Test(timeout = 60667)
+	@AverageDuration(duration = 24.5)
+	@Test(timeout = 73374)
    public void TestPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -115,8 +116,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 23.5)
-	@Test(timeout = 70618)
+	@AverageDuration(duration = 27.2)
+	@Test(timeout = 81715)
    public void TestPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -149,8 +150,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 19.9)
+	@Test(timeout = 59592)
    public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -189,8 +190,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 30.0)
-	@Test(timeout = 90146)
+	@AverageDuration(duration = 28.1)
+	@Test(timeout = 84378)
    public void TestPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -223,8 +224,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 27.7)
+	@Test(timeout = 83067)
    public void TestPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
