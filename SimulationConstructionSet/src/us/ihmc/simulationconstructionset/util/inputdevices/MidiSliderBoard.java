@@ -153,11 +153,11 @@ public class MidiSliderBoard implements ExitActionListener
 
          addListener(new SliderListener()
          {
-            public void valueChanged(MidiControl ctrl)
+            public void valueChanged(MidiControl midiControl)
             {
                if (DEBUG)
-                  System.out.println("EVL::valueChanged [" + ctrl.mapping + "] value to : " + ctrl.var.getValueAsDouble() + " YoVal:"
-                        + ctrl.var.getValueAsDouble());
+                  System.out.println("EVL::valueChanged [" + midiControl.mapping + "] value to : " + midiControl.var.getValueAsDouble() + " YoVal:"
+                        + midiControl.var.getValueAsDouble());
             }
          });
       }
@@ -169,6 +169,7 @@ public class MidiSliderBoard implements ExitActionListener
 
       if (scs != null)
       {
+         printIfDebug("Attaching exit action listener " + getClass().getSimpleName() + " to SCS");
          scs.attachExitActionListener(this);
       }
 
@@ -201,6 +202,8 @@ public class MidiSliderBoard implements ExitActionListener
             System.err.println("Exception when trying to close midiOut in MidiSliderBoard.closeAndDispose()");
          }
       }
+      
+      transmitter.closeAndDispose();
 
       virtualSliderBoard = null;
       inDevice = null;
@@ -562,23 +565,21 @@ public class MidiSliderBoard implements ExitActionListener
             exponent = 1.0;
          }
 
-         MidiControl ctrl = null;
-
-         ctrl = new MidiControl(channel, var, max, min, exponent, hires);
-         ctrl.sliderType = sliderType;
-         ctrl.controlType = controlType;
+         MidiControl midiControl = new MidiControl(channel, var, max, min, exponent, hires);
+         midiControl.sliderType = sliderType;
+         midiControl.controlType = controlType;
 
          if (listener != null)
          {
             var.addVariableChangedListener(listener);
          }
 
-         setControl(ctrl);
-         setToInitialPosition(ctrl);
+         setControl(midiControl);
+         setToInitialPosition(midiControl);
 
          for (SliderBoardControlAddedListener listener : controlAddedListeners)
          {
-            listener.controlAdded(ctrl);
+            listener.controlAdded(midiControl);
          }
       }
    }
@@ -616,9 +617,9 @@ public class MidiSliderBoard implements ExitActionListener
       control.exponent = exponent;
    }
 
-   private synchronized void setControl(MidiControl ctrl)
+   private synchronized void setControl(MidiControl midiControl)
    {
-      controlsHashTable.put(ctrl.mapping, ctrl);
+      controlsHashTable.put(midiControl.mapping, midiControl);
    }
 
    public synchronized void clearControls()
@@ -635,88 +636,87 @@ public class MidiSliderBoard implements ExitActionListener
       controlsHashTable.clear();
    }
 
-   protected void moveControl(MidiControl ctrl)
+   protected void moveControl(MidiControl midiControl)
    {
       if (transmitter != null)
       {
-         transmitter.moveControl(ctrl);
+         transmitter.moveControl(midiControl);
       }
    }
 
-   protected void moveControl(MidiControl ctrl, int sliderValue)
+   protected void moveControl(MidiControl midiControl, int sliderValue)
    {
       if (transmitter != null)
       {
-         transmitter.moveControl(ctrl, sliderValue);
+         transmitter.moveControl(midiControl, sliderValue);
       }
    }
 
-   public void setToInitialPosition(MidiControl ctrl)
+   public void setToInitialPosition(MidiControl midiControl)
    {
       // ctrl.var.setValueFromDouble(ctrl.reset);
 
       for (SliderListener listener : internalListeners)
       {
-         listener.valueChanged(ctrl);
+         listener.valueChanged(midiControl);
       }
 
-      moveControl(ctrl);
+      moveControl(midiControl);
    }
 
    public void reset()
    {
-      // ShortMessage sm = null;
-      MidiControl ctrl = null;
-      Enumeration<MidiControl> enctrls = controlsHashTable.elements();
-      while (enctrls.hasMoreElements())
+      MidiControl midiControl = null;
+      Enumeration<MidiControl> midiControllers = controlsHashTable.elements();
+      while (midiControllers.hasMoreElements())
       {
-         ctrl = enctrls.nextElement();
-         ctrl.var.setValueFromDouble(ctrl.reset);
+         midiControl = midiControllers.nextElement();
+         midiControl.var.setValueFromDouble(midiControl.reset);
 
          for (SliderListener listener : internalListeners)
          {
-            listener.valueChanged(ctrl);
+            listener.valueChanged(midiControl);
          }
 
-         moveControl(ctrl);
+         moveControl(midiControl);
       }
    }
 
    public double getValue(int mapping)
    {
-      MidiControl ctrl = controlsHashTable.get(mapping);
-      if (ctrl != null)
-         return ctrl.var.getValueAsDouble();
+      MidiControl midiControl = controlsHashTable.get(mapping);
+      if (midiControl != null)
+         return midiControl.var.getValueAsDouble();
 
       return -1;
    }
 
    public void setValue(int mapping, double value) throws InvalidParameterException
    {
-      MidiControl ctrl = controlsHashTable.get(mapping);
-      if (ctrl == null)
+      MidiControl midiControl = controlsHashTable.get(mapping);
+      if (midiControl == null)
          throw new InvalidParameterException("name does not map to a control");
 
-      if (ctrl.currentVal == value)
+      if (midiControl.currentVal == value)
          return;
 
-      ctrl.currentVal = value;
+      midiControl.currentVal = value;
 
       for (SliderListener listener : internalListeners)
       {
-         listener.valueChanged(ctrl);
+         listener.valueChanged(midiControl);
       }
 
-      moveControl(ctrl);
+      moveControl(midiControl);
    }
 
    public void yoVariableChanged(int mapping, double value) throws InvalidParameterException
    {
-      MidiControl ctrl = controlsHashTable.get(mapping);
-      if (ctrl == null)
+      MidiControl midiControl = controlsHashTable.get(mapping);
+      if (midiControl == null)
          throw new InvalidParameterException("name does not map to a control");
 
-      moveControl(ctrl);
+      moveControl(midiControl);
    }
 
    public void addListener(SliderListener listener)
@@ -751,16 +751,23 @@ public class MidiSliderBoard implements ExitActionListener
 
    public void exitActionPerformed()
    {
+      printIfDebug("Exit Action was performed. Closing and disposing " + getClass().getSimpleName());
+      
       this.closeAndDispose();
    }
 
    public interface SliderListener
    {
-      public void valueChanged(MidiControl ctrl);
+      public void valueChanged(MidiControl midiControl);
    }
 
    public void setVirtualSliderBoardFrameLocation(int x, int y)
    {
       virtualSliderBoard.setFrameLocation(x, y);
+   }
+   
+   private void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);
    }
 }

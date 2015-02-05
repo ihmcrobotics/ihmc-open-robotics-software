@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 /*
  * GUI Initial Setup
@@ -17,4 +18,6 @@ public interface GuiInitialSetup
    public abstract Graphics3DAdapter getGraphics3DAdapter();
 
    public abstract boolean isGuiShown();
+
+   public abstract SimulationConstructionSetParameters getSimulationConstructionSetParameters();
 }

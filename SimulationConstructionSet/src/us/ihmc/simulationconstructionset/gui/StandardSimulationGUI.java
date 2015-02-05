@@ -2761,12 +2761,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          System.out.println("Clearing Exit Action Listeners");
       System.out.flush();
 
-      if (exitActionListeners != null)
-      {
-         exitActionListeners.clear();
-         exitActionListeners = null;
-      }
-
       if (DEBUG_CLOSE_AND_DISPOSE)
          System.out.println("Clearing Default Var Lists");
       System.out.flush();
