@@ -16,7 +16,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 {
    private SimpleDesiredHeadingControlModuleVisualizer simpleDesiredHeadingControlModuleVisualizer;
    
-   private final YoVariableRegistry registry = new YoVariableRegistry("DesiredHeadingControlModule");
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable desiredHeadingFinal = new DoubleYoVariable("desiredHeadingFinal",
                                                            "Yaw of the desired heading frame with respect to the world.", registry);
    private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);

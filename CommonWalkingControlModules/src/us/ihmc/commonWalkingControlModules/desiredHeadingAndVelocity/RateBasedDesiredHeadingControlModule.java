@@ -11,7 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class RateBasedDesiredHeadingControlModule implements DesiredHeadingControlModule
 {  
-   private final YoVariableRegistry registry = new YoVariableRegistry("DesiredHeadingControlModule");
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
    private final DoubleYoVariable desiredHeadingDot = new DoubleYoVariable("desiredHeadingDot", registry);
 
@@ -57,7 +57,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    }
 
    public double getDesiredHeadingAngle()
-   {
+   {      
       return desiredHeading.getDoubleValue();
    }
    

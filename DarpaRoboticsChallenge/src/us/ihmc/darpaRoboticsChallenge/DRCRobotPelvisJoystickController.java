@@ -6,9 +6,13 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.jinput.JInputLibraryLoader;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 
 public class DRCRobotPelvisJoystickController
@@ -23,18 +27,10 @@ public class DRCRobotPelvisJoystickController
    private final int pollIntervalMillis = 20;
 
    private final JoystickUpdater joystickUpdater;
-   private final Controller joystickController;
 
    public DRCRobotPelvisJoystickController(YoVariableHolder holder)
    {
-      joystickController = findController();
-
-      if (joystickController == null)
-      {
-         throw new RuntimeException("joystick not found");
-      }
-
-      joystickUpdater = new JoystickUpdater(joystickController);
+      joystickUpdater = new JoystickUpdater();
       joystickUpdater.setPollInterval(pollIntervalMillis);
 
       Thread thread = new Thread(joystickUpdater);
@@ -42,49 +38,46 @@ public class DRCRobotPelvisJoystickController
       thread.start();
 
       DoubleYoVariable desiredCenterOfMassHeight = (DoubleYoVariable) holder.getVariable("desiredCenterOfMassHeight");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredCenterOfMassHeight, findComponent(Component.Identifier.Axis.SLIDER),
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredCenterOfMassHeight, joystickUpdater.findComponent(Component.Identifier.Axis.SLIDER),
               minHeight, maxHeight, deadZone, true));
 
       DoubleYoVariable desiredPelvisRoll = (DoubleYoVariable) holder.getVariable("desiredPelvisRoll");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisRoll, findComponent(Component.Identifier.Axis.X), -maxRoll, maxRoll,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisRoll, joystickUpdater.findComponent(Component.Identifier.Axis.X), -maxRoll, maxRoll,
               deadZone, false));
 
       DoubleYoVariable desiredPelvisPitch = (DoubleYoVariable) holder.getVariable("desiredPelvisPitch");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisPitch, findComponent(Component.Identifier.Axis.Y), -maxPitch,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisPitch, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -maxPitch,
               maxPitch, deadZone, true));
 
       DoubleYoVariable desiredHeadingFinal = (DoubleYoVariable) holder.getVariable("desiredHeadingFinal");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingFinal, findComponent(Component.Identifier.Axis.RZ), -maxYaw, maxYaw,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingFinal, joystickUpdater.findComponent(Component.Identifier.Axis.RZ), -maxYaw, maxYaw,
               deadZone, true));
    }
 
-   /**
-    * Just return the first stick you find
-    */
-   private Controller findController()
-   {
-      JInputLibraryLoader.loadLibraries();
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
-      for (Controller controller : controllers)
+
+  
+   
+   public static void main(String[] arg)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      VariableChangedListener listener = new VariableChangedListener()
       {
-         if (controller.getType() == Controller.Type.STICK)
+         
+         @Override
+         public void variableChanged(YoVariable<?> v)
          {
-            return controller;
+            System.out.println("Change: " + v.getShortName() + " -> " + v.getValueAsDouble());            
          }
-      }
-
-      return null;
-   }
-
-   private Component findComponent(Identifier identifier)
-   {
-      for (Component component : joystickController.getComponents())
-      {
-         if (component.getIdentifier().equals(identifier))
-            return component;
-      }
-
-      throw new RuntimeException("component with identifier " + identifier + " not found");
+      };
+      DoubleYoVariable desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry);
+      desiredCenterOfMassHeight.addVariableChangedListener(listener);
+      DoubleYoVariable desiredPelvisRoll = new DoubleYoVariable("desiredPelvisRoll", registry);
+      desiredPelvisRoll.addVariableChangedListener(listener);
+      DoubleYoVariable desiredPelvisPitch = new DoubleYoVariable("desiredPelvisPitch", registry);
+      desiredPelvisPitch.addVariableChangedListener(listener);
+      DoubleYoVariable desiredHeadingFinal = new DoubleYoVariable("desiredHeadingFinal", registry);
+      desiredHeadingFinal.addVariableChangedListener(listener);
+      new DRCRobotPelvisJoystickController(registry);
    }
 }

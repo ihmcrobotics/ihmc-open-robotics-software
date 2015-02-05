@@ -2,9 +2,13 @@ package us.ihmc.simulationconstructionset.joystick;
 
 import java.util.ArrayList;
 
+import net.java.games.input.Component;
+import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+import us.ihmc.utilities.jinput.JInputLibraryLoader;
 
 public class JoystickUpdater implements Runnable
 {
@@ -12,10 +16,48 @@ public class JoystickUpdater implements Runnable
    private long pollIntervalMillis = 20;
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
 
+   public JoystickUpdater()
+   {
+      this(findFirstController());
+   }
+
+   
    public JoystickUpdater(Controller joystickController)
    {
       this.joystickController = joystickController;
    }
+   
+   
+   /**
+    * Just return the first stick you find
+    */
+   private static Controller findFirstController()
+   {
+      JInputLibraryLoader.loadLibraries();
+      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+
+      for (Controller controller : controllers)
+      {
+         if (controller.getType() == Controller.Type.STICK)
+         {
+            return controller;
+         }
+      }
+      throw new RuntimeException("joystick not found");
+   }
+   
+   
+   public Component findComponent(Identifier identifier)
+   {
+      for (Component component : joystickController.getComponents())
+      {
+         if (component.getIdentifier().equals(identifier))
+            return component;
+      }
+
+      throw new RuntimeException("component with identifier " + identifier + " not found");
+   }
+   
 
    public void setPollInterval(long pollIntervalMillis)
    {
