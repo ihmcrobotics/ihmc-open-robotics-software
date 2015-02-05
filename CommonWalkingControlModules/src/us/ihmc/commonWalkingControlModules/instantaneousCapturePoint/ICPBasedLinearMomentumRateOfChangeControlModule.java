@@ -13,7 +13,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -31,7 +30,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
-   private final SideDependentList<ReferenceFrame> soleFrames;
 
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
    private final YoFrameVector controlledCoMAcceleration;
@@ -62,7 +60,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      soleFrames = referenceFrames.getSoleFrames();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -93,12 +90,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
 
-      ReferenceFrame swingSoleFrame = null;
-      if (supportSide != null)
-         swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
-
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
-            desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon, swingSoleFrame);
+            desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon);
 
       desiredCMP.changeFrame(controlledCMP.getReferenceFrame());
       controlledCMP.set(desiredCMP);
