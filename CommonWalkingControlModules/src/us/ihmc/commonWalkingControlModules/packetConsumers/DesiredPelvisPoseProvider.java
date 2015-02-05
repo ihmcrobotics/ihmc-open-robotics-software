@@ -4,7 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.communication.packets.walking.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -20,12 +22,40 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
    private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint(ReferenceFrame.getWorldFrame()));
-   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(
-         ReferenceFrame.getWorldFrame()));
+   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(ReferenceFrame.getWorldFrame()));
    private double trajectoryTime = Double.NaN;
+
+   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
+   AtomicReference<FramePoint[]> pelvisPositions = new AtomicReference<FramePoint[]>();
+   AtomicReference<FrameOrientation[]> pelvisOrientations = new AtomicReference<FrameOrientation[]>();
 
    public DesiredPelvisPoseProvider()
    {
+      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
+      {
+         @Override
+         public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket packet)
+         {
+            if (packet == null)
+            {
+               return;
+            }
+            if (packet.pelvisPosition != null){
+               pelvisPositions.set(packet.pelvisPosition);
+            }
+            else
+            {
+               pelvisPositions.set(null);
+            }
+            if (packet.pelvisPosition != null){
+               pelvisOrientations.set(packet.pelvisOrientation);
+            }
+            else
+            {
+               pelvisOrientations.set(null);
+            }
+         }
+      };
    }
 
    @Override
@@ -63,7 +93,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    {
       FrameOrientation ret = desiredPelvisOrientation.getAndSet(null);
 
-      if (ret == null) return null;
+      if (ret == null)
+         return null;
 
       ret.changeFrame(desiredPelvisFrame);
       return ret;
@@ -101,4 +132,36 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       else
          desiredPelvisOrientation.set(null);
    }
+
+   @Override
+   public boolean checkForNewWholeBodyTrajectory()
+   {
+      return (pelvisPositions.get() != null & pelvisOrientations.get() != null);
+   }
+
+   @Override
+   public FramePoint[] getDesiredPelvisPositionTrajectoryArray(ReferenceFrame supportFrame)
+   {
+      return pelvisPositions.getAndSet(null);
+   }
+
+   @Override
+   public FrameOrientation[] getDesiredPelvisOrientationTrajectoryArray(ReferenceFrame desiredPelvisFrame)
+   {
+      FrameOrientation[] ret = pelvisOrientations.getAndSet(null);
+
+      if (ret == null)
+         return null;
+
+      for(int i = 0; i<ret.length; i++){
+         ret[i].changeFrame(desiredPelvisFrame);
+      }
+      return ret;
+   }
+   
+   public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryConsumer()
+   {
+      return wholeBodyTrajectoryPacketConsumer;
+   }
+   
 }

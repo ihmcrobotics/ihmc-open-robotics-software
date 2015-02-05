@@ -145,4 +145,25 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       }
       return false;
    }
+
+   @Override
+   public boolean checkForNewWholeBodyTrajectory()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public FramePoint[] getDesiredPelvisPositionTrajectoryArray(ReferenceFrame supportFrame)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public FrameOrientation[] getDesiredPelvisOrientationTrajectoryArray(ReferenceFrame desiredPelvisFrame)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }

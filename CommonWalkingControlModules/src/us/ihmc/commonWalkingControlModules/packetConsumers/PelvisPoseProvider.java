@@ -13,10 +13,17 @@ public interface PelvisPoseProvider
    public abstract boolean checkForHomePosition();
 
    public abstract boolean checkForHomeOrientation();
+   
+   public abstract boolean checkForNewWholeBodyTrajectory();
 
    public abstract FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame);
+   
+   public abstract FramePoint[] getDesiredPelvisPositionTrajectoryArray(ReferenceFrame supportFrame);
 
    public abstract FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame);
+   
+   public abstract FrameOrientation[] getDesiredPelvisOrientationTrajectoryArray(ReferenceFrame desiredPelvisFrame);
 
    public abstract double getTrajectoryTime();
+   
 }
