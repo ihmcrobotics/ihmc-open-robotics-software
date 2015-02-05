@@ -24,7 +24,7 @@ import com.martiansoftware.jsap.JSAPResult;
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
    public static final int BUFFER_SIZE = 16384;
-   public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
+   public static final String defaultHost = ValkyrieNetworkParameters.VAL_CONTROLLER_LOGGER_IP;
    public static final int defaultPort = Integer.MAX_VALUE;
    
    private ValkyrieSliderBoardType valkyrieSliderBoardType;
