@@ -132,19 +132,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
-      double elapsedTimeToWalkAndTurnValve = 20.0;
-
-      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
-      ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
-      DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
-      CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();
-      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
-      BooleanYoVariable yoTippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
-      WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
-
-      final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
-            yoTippingDetected, walkingControllerParams);
+      final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
       String scriptName = null;
 
@@ -152,6 +140,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(scriptBehaviorInput);
       assertTrue(turnValveBehavior.hasInputBeenSet());
+
+      double elapsedTimeToWalkAndTurnValve = 20.0;
 
       double initialValveClosePercentage = valveRobot.getClosePercentage();
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
@@ -170,6 +160,22 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
 
       BambooTools.reportTestFinishedMessage();
+   }
+
+   private TurnValveBehavior createNewTurnValveBehavior()
+   {
+      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
+      DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
+      CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();
+      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      BooleanYoVariable yoTippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
+      WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
+
+      final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
+            yoTippingDetected, walkingControllerParams);
+      return turnValveBehavior;
    }
 
    private FramePose getRobotPose(ReferenceFrames referenceFrames)
