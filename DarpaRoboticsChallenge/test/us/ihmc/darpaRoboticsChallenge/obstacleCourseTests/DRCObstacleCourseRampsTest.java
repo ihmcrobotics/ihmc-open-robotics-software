@@ -60,8 +60,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
 
 
-	@AverageDuration(duration = 36.0)
-	@Test(timeout = 107914)
+	@AverageDuration(duration = 29.5)
+	@Test(timeout = 88491)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -75,8 +75,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 40.4)
-	@Test(timeout = 121061)
+	@AverageDuration(duration = 31.9)
+	@Test(timeout = 95578)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -111,8 +111,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 35.3)
-	@Test(timeout = 105956)
+	@AverageDuration(duration = 29.6)
+	@Test(timeout = 88864)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -147,8 +147,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 35.8)
-	@Test(timeout = 107263)
+	@AverageDuration(duration = 30.3)
+	@Test(timeout = 90923)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
