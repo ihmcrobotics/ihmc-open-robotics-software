@@ -250,6 +250,56 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testWalkPauseLateAndResumeBehavior() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      double walkDistance = 3.0;
+      Vector2d walkDirection = new Vector2d(1, 0);
+
+      FramePose2d desiredMidFeetPose = createDesiredPose2d(walkDistance, walkDirection);
+      WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose);
+
+      TrajectoryPercentCompletedUpdatable percentTrajectoryCompletedUpdatable = createTrajectoryPercentCompletedUpdatable(desiredMidFeetPose);
+
+      double percentDistanceToWalkBeforePause = 50.0;
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(walkToLocationBehavior, percentTrajectoryCompletedUpdatable, percentDistanceToWalkBeforePause);
+      assertTrue(success);
+      assertTrue(!walkToLocationBehavior.isDone());
+
+      walkToLocationBehavior.pause();
+      SysoutTool.println("Pausing Behavior", DEBUG);
+
+      FramePose2d midFeetPoseAfterPause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly();
+
+      double simulateForThisLongAfterPause = 2.0;
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(walkToLocationBehavior, simulateForThisLongAfterPause);
+      assertTrue(success);
+      assertTrue(!walkToLocationBehavior.isDone());
+
+      FramePose2d midFeetPoseAfterPauseAndWait = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly();
+
+      double maxStepLength = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      assertPosesAreWithinThresholds(midFeetPoseAfterPause, midFeetPoseAfterPauseAndWait, maxStepLength); 
+      assertEquals(percentDistanceToWalkBeforePause, percentTrajectoryCompletedUpdatable.getPercentTrajectoryCompleted(), 30.0);
+
+      walkToLocationBehavior.resume();
+      SysoutTool.println("Resuming Behavior", DEBUG);
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
+      assertTrue(success);
+
+      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly();
+      assertTrue(walkToLocationBehavior.isDone());
+      assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
+
+      BambooTools.reportTestFinishedMessage();
+   }
 
    private TrajectoryPercentCompletedUpdatable createTrajectoryPercentCompletedUpdatable(FramePose2d desiredMidFeetPose)
    {
