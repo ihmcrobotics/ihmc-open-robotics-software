@@ -22,11 +22,12 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class EntryBoxArrayTabbedPanel extends JTabbedPane
 {
+   private static final long serialVersionUID = 5184442227844655562L;
+   
    private ArrayList<EntryBoxArrayPanel> entryBoxArrayPanels = new ArrayList<EntryBoxArrayPanel>();
    private final Container parentContainer;
    private final SelectedVariableHolder selectedVariableHolder;
@@ -43,6 +44,7 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
    public void addEntryBoxArrayPanel(String name, EntryBoxArrayPanel panelToAdd)
    {
       this.add(name, panelToAdd);
+      entryBoxArrayPanels.add(panelToAdd);
       this.setSelectedComponent(panelToAdd);
    }
 
@@ -61,14 +63,16 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
    }
 
    public void closeAndDispose()
-   {
-      for (int i = getTabCount() - 1; i >= 0; i--)
+   {   
+      this.removeAll();
+//      for (int i = getTabCount() - 1; i >= 0; i--)
+//      {
+//         remove(getTabComponentAt(i));
+//      }
+      
+      for(EntryBoxArrayPanel panel : entryBoxArrayPanels)
       {
-         if (getTabComponentAt(i) instanceof EntryBoxArrayPanel)
-         {
-            ((EntryBoxArrayPanel) getTabComponentAt(i)).closeAndDispose();
-            remove(getTabComponentAt(i));
-         }
+         panel.closeAndDispose();
       }
    }
 
@@ -210,9 +214,7 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
 
    public void addEmptyTab()
    {
-      DoubleYoVariable[] varsToEnter = new DoubleYoVariable[0];
-
-      EntryBoxArrayPanel tmpEntryBoxArrayPanel = new EntryBoxArrayPanel(parentContainer, selectedVariableHolder, varsToEnter);
+      EntryBoxArrayPanel tmpEntryBoxArrayPanel = new EntryBoxArrayPanel(parentContainer, selectedVariableHolder, null);
       addEntryBoxArrayPanel("Tab"+getTabCount(), tmpEntryBoxArrayPanel);
    }
 

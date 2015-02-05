@@ -22,8 +22,8 @@ public class EntryBoxArrayPanel extends JPanel
    public static final int MAXIMUM_PIXELS_PER_ENTRY_BOX = 400;
 
    public static final int MAX_ENTRY_BOXES = 100; // 40;
+   private static final boolean DEBUG = false;
 
-  
    private ArrayList<YoEntryBox> entryBoxesOnThisPanel;
    private SelectedVariableHolder selectedVariableHolder;
    private final FlowLayout layout;
@@ -31,48 +31,11 @@ public class EntryBoxArrayPanel extends JPanel
    private Timer alertChangeListenersTimer;
    private TimerTask alertChangeListenersTask;
    private final long OBSERVER_NOTIFICATION_PERIOD = 250;
-
-   public EntryBoxArrayPanel(Container frame, SelectedVariableHolder holder, DoubleYoVariable[] varsToEnter)
-   {
-      this.setName("EntryBoxArrayPanel");
-
-
-     
-
-      layout = new FlowLayout(FlowLayout.LEFT, 0, 0);
-      this.setLayout(layout);
-
-      this.selectedVariableHolder = holder;
-      this.setBackground(Color.lightGray);
-
-      this.setOpaque(true);
-      this.entryBoxesOnThisPanel = new ArrayList<YoEntryBox>();
-
-      this.addEntryBox(new YoEntryBox(this, selectedVariableHolder));
-
-      for (int i = 0; i < varsToEnter.length; i++)
-      {
-         if (varsToEnter[i] != null)
-         {
-            YoEntryBox e = new YoEntryBox(this, selectedVariableHolder);
-            e.addVariable(varsToEnter[i]);
-            this.addEntryBox(e);
-         }
-      }
-
-      createAndStartPeriodicUIUpdateThread();
-
-      this.validate();
-   }
-   
    
    public EntryBoxArrayPanel(Container frame, SelectedVariableHolder holder, ArrayList<YoVariable<?>> varsToEnter)
    {
       this.setName("EntryBoxArrayPanel");
 
-
-     
-
       layout = new FlowLayout(FlowLayout.LEFT, 0, 0);
       this.setLayout(layout);
 
@@ -84,16 +47,18 @@ public class EntryBoxArrayPanel extends JPanel
 
       this.addEntryBox(new YoEntryBox(this, selectedVariableHolder));
 
-      for (int i = 0; i < varsToEnter.size(); i++)
+      if (varsToEnter != null)
       {
-         if (varsToEnter.get(i) != null)
+         for (int i = 0; i < varsToEnter.size(); i++)
          {
-            addEntryBox(varsToEnter.get(i));
+            if (varsToEnter.get(i) != null)
+            {
+               addEntryBox(varsToEnter.get(i));
+            }
          }
       }
 
       createAndStartPeriodicUIUpdateThread();
-
       this.validate();
    }
    
@@ -127,9 +92,9 @@ public class EntryBoxArrayPanel extends JPanel
 
    public void closeAndDispose()
    {
+      printIfDebug("Closing and Disposing " + getClass().getSimpleName());
+      
       this.removeAll();
-
-  
 
       if (entryBoxesOnThisPanel != null)
       {
@@ -139,15 +104,28 @@ public class EntryBoxArrayPanel extends JPanel
 
       selectedVariableHolder = null;
 
+      if (alertChangeListenersTask != null)
+      {
+         alertChangeListenersTask.cancel();
+         alertChangeListenersTask = null;
+      }
+      
       if (alertChangeListenersTimer != null)
       {
          alertChangeListenersTimer.cancel();
+         alertChangeListenersTimer.purge();
+
          alertChangeListenersTimer = null;
       }
 
-      alertChangeListenersTask = null;
 
    }
+
+   private void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);
+   }
+
 
    public boolean isHoldingVariable(YoVariable v)
    {

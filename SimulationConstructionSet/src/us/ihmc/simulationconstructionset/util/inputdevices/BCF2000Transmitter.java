@@ -7,7 +7,7 @@ import javax.sound.midi.ShortMessage;
 public class BCF2000Transmitter implements SliderBoardTransmitterInterface
 {
    private MessageSender[] senderPool = new MessageSender[127];
-   
+
    private Receiver midiOut;
    private static final boolean DEBUG = false;
    private int sliderBoardMax;
@@ -17,85 +17,106 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
    {
       this.midiOut = midiOut;
       this.sliderBoardMax = sliderBoardMax;
-//      Thread lightSHow = new Thread(new LightShow());
-      //lightSHow.start();
-      
+
+//    Thread lightSHow = new Thread(new LightShow());
+      // lightSHow.start();
+
    }
-   
-   public MessageSender getOrStartSender(MidiControl ctrl)
+
+   public MessageSender getOrStartSender(MidiControl midiControl)
    {
       synchronized (senderPool)
       {
-         if(senderPool[80 + ctrl.mapping] == null)
+         if (senderPool[80 + midiControl.mapping] == null)
          {
-            senderPool[80 + ctrl.mapping] = new MessageSender();
-            new Thread(senderPool[80 + ctrl.mapping]).start();
+            senderPool[80 + midiControl.mapping] = new MessageSender();
+            new Thread(senderPool[80 + midiControl.mapping]).start();
          }
-         return senderPool[80 + ctrl.mapping];
+
+         return senderPool[80 + midiControl.mapping];
       }
    }
 
-   public void moveControl(MidiControl ctrl)
+   public void moveControl(MidiControl midiControl)
    {
       if (midiOut != null)
       {
-         if (DEBUG)
-            System.out.println("ASetting control [" + ctrl.mapping + "] to " + ctrl.var.getValueAsDouble());
-         getOrStartSender(ctrl).set(ctrl);
+         printIfDebug("ASetting control [" + midiControl.mapping + "] to " + midiControl.var.getValueAsDouble());
+         getOrStartSender(midiControl).set(midiControl);
 
       }
    }
 
-   public void moveControl(MidiControl ctrl, int sliderValue)
+   public void moveControl(MidiControl midiControl, int sliderValue)
    {
       if (midiOut != null)
       {
-         if (DEBUG)
-            System.out.println("ASetting control [" + ctrl.mapping + "] to " + ctrl.var.getValueAsDouble());
-         getOrStartSender(ctrl).set(ctrl, sliderValue);
+         printIfDebug("ASetting control [" + midiControl.mapping + "] to " + midiControl.var.getValueAsDouble());
+         getOrStartSender(midiControl).set(midiControl, sliderValue);
 
+      }
+   }
+   
+   public void closeAndDispose()
+   {
+      printIfDebug("Closing and Disposing Message Senders!");
+      for (MessageSender messageSender : senderPool)
+      {
+         if (messageSender != null) messageSender.closeAndDispose();
       }
    }
 
    private class MessageSender implements Runnable
    {
       private Object lock = new Object();
-      
-      MidiControl ctrl;
-      int sliderValue;
-      boolean moveBySliderValue = false;
 
+      private MidiControl midiControl;
+      private int sliderValue;
+      private boolean moveBySliderValue = false;
 
-      public void set(MidiControl ctrl, int sliderValue)
+      public void set(MidiControl midiControl, int sliderValue)
       {
          synchronized (lock)
          {
             moveBySliderValue = true;
             this.sliderValue = sliderValue;
-            this.ctrl = ctrl;
+            this.midiControl = midiControl;
             lock.notify();
          }
       }
 
-      public void set(MidiControl ctrl)
+      public void set(MidiControl midiControl)
       {
          synchronized (lock)
          {
-            this.ctrl = ctrl;
+            this.midiControl = midiControl;
             lock.notify();
          }
       }
 
+      private boolean isRunning = true;
+      
+      public void closeAndDispose()
+      {
+         isRunning = false;
+         
+         synchronized(lock)
+         {
+            lock.notifyAll();
+         }
+      }
+      
       public void run()
       {
-         while(true)
+         while (isRunning)
          {
-            MidiControl ctrl;
+            MidiControl midiControl;
             int sliderValue;
             boolean moveBySliderValue;
-            synchronized(lock)
+
+            synchronized (lock)
             {
-               while(this.ctrl == null)
+               while ((isRunning) && (this.midiControl == null))
                {
                   try
                   {
@@ -105,15 +126,18 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
                   {
                   }
                }
-               ctrl = this.ctrl;
+
+               if (!isRunning) return;
+               
+               midiControl = this.midiControl;
                sliderValue = this.sliderValue;
                moveBySliderValue = this.moveBySliderValue;
-               
-               this.ctrl = null;
+
+               this.midiControl = null;
                this.sliderValue = -1;
                this.moveBySliderValue = false;
             }
-            
+
             ShortMessage shortMesssage = new ShortMessage();
             try
             {
@@ -122,32 +146,37 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
                if (moveBySliderValue)
                   valueToMoveTo = sliderValue;
                else
-                  valueToMoveTo = SliderBoardUtils.valueRatioConvertToIntWithExponents(ctrl, sliderBoardMax);
+                  valueToMoveTo = SliderBoardUtils.valueRatioConvertToIntWithExponents(midiControl, sliderBoardMax);
                if (valueToMoveTo < 0)
                   valueToMoveTo = 0;
                if (valueToMoveTo > 127)
                   valueToMoveTo = 127;
-               shortMesssage.setMessage(176, 0, ctrl.mapping + SLIDER_OFFSET, valueToMoveTo);
+               shortMesssage.setMessage(176, 0, midiControl.mapping + SLIDER_OFFSET, valueToMoveTo);
                midiOut.send(shortMesssage, -1);
                Thread.sleep(100);
                if (moveBySliderValue)
                   valueToMoveTo = sliderValue;
                else
-                  valueToMoveTo = SliderBoardUtils.valueRatioConvertToIntWithExponents(ctrl, sliderBoardMax);
-               shortMesssage.setMessage(176, 0, ctrl.mapping + SLIDER_OFFSET, valueToMoveTo);
+                  valueToMoveTo = SliderBoardUtils.valueRatioConvertToIntWithExponents(midiControl, sliderBoardMax);
+               shortMesssage.setMessage(176, 0, midiControl.mapping + SLIDER_OFFSET, valueToMoveTo);
                midiOut.send(shortMesssage, -1);
             }
             catch (Exception e1)
             {
                e1.printStackTrace();
-            }   
+            }
          }
          
+         printIfDebug("Gracefully exiting run method in " + getClass().getSimpleName());
 
       }
-
    }
 
+   
+   private void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);
+   }
 
    public class LightShow implements Runnable
    {
@@ -159,12 +188,14 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
 
          while (true)
          {
-        	 try {
-				Thread.sleep(100);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+            try
+            {
+               Thread.sleep(100);
+            }
+            catch (InterruptedException e1)
+            {
+            }
+
             for (int i = 1; i < 9; i++)
             {
                if (i % 2 == 0)
@@ -189,12 +220,13 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
 
                if (tick == 127)
                {
-            	   tick = 0;
+                  tick = 0;
                }
-//               else if (tick == 0)
-//               {
-//            	   direction = 1;
-//               }
+
+//             else if (tick == 0)
+//             {
+//               direction = 1;
+//             }
 
             }
          }
