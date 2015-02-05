@@ -30,7 +30,7 @@ public class YoRandomPulseGenerator
    private final DoubleYoVariable value;
    private final DoubleYoVariable randomNumber;
 
-   private final Random random = new Random(1776L);
+   private final Random random = new Random();//(1776L);
 
    public YoRandomPulseGenerator(String name, YoVariableRegistry parentRegistry)
    {
