@@ -6,7 +6,7 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 
 public enum LogSettings
 {
-   ATLAS_IAN("192.168.0.1", true, "239.255.25.1", 4, 5),
+   ATLAS_IAN("10.66.171.20", true, "239.255.25.1", 4, 5),
    VALKYRIE_IHMC("139.169.44.20", true, "239.255.25.2", 0, 1),
    STEPPR_IHMC("10.66.171.20", true, "239.255.25.3", 2, 3),
    SIMULATION("localhost", false, "239.255.25.4"),

@@ -12,7 +12,7 @@ setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
 
-
-mainClassName = "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher"
+mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher"
+	
 
 
