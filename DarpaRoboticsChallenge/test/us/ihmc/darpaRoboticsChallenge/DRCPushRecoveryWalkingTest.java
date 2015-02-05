@@ -95,7 +95,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    // cropped to 1.5 - 6.3 seconds
    @Ignore
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException
    {
