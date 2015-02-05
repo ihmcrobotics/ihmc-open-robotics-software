@@ -9,7 +9,6 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieObstacleCourseEveryBuildTest.class,
    us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class
 })
 
