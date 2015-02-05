@@ -24,6 +24,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
 {
@@ -59,88 +60,14 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
    public static void garbageCollectAndPauseForYourKitToSeeWhatIsStillAllocated()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("DRCObstacleCourseDoNothingTest after class.");
-      
-//      ThreadTools.sleepForever();
    }
 
-   //@AverageDuration
-   @Test //(timeout = 300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {
       doATest();
    }
-   
-  // @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing2() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing3() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing4() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing5() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing6() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing7() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing8() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing9() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//   
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testDoNothing10() throws SimulationExceededMaximumTimeException
-//   {
-//      doATest();
-//   }
-//
-//
-//   @AverageDuration
-//   @Test(timeout = 300000)
-//   public void testRecovery() throws SimulationExceededMaximumTimeException
-//   {
-//      // Do Nothing.
-//   }
-
    
    private void doATest() throws SimulationExceededMaximumTimeException
    {
@@ -199,7 +126,6 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       ThreadTools.sleep(4000);
       scs.closeAndDispose();
 
-//      ThreadTools.sleepForever();
 //      BambooTools.reportTestFinishedMessage();
    }
 
