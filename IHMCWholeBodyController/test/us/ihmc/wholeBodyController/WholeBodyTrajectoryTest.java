@@ -9,7 +9,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
@@ -62,8 +61,8 @@ public abstract class WholeBodyTrajectoryTest
    }    
 
   
-	@AverageDuration
-	@Test
+	@AverageDuration(duration = 3.3)
+	@Test(timeout = 10000)
    public void testTrajectory() throws Exception
    {
    

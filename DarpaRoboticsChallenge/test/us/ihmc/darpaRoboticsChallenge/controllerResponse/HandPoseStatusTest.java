@@ -122,8 +122,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       return handPosePacket;
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 11.8)
+	@Test(timeout = 35449)
    public void testStartedAndCompletedStatusAreSentAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -158,8 +158,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 21.5)
+	@Test(timeout = 64372)
    public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -219,8 +219,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 11.4)
+	@Test(timeout = 34250)
    public void testWhenTwoHandPosesAreSentInARow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -270,8 +270,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 11.7)
+	@Test(timeout = 35190)
    public void testEachArmReceiveOneHandPoseAtTheSameTime() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

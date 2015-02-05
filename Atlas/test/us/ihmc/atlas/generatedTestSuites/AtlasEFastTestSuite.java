@@ -9,12 +9,16 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRocksTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseStandingYawedTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsTerrainTest.class
+   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
+   us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
+   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
+   us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
+   us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class,
+   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
 })
 
 public class AtlasEFastTestSuite

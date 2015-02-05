@@ -89,8 +89,8 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 21.5)
+   @Test(timeout = 64580)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

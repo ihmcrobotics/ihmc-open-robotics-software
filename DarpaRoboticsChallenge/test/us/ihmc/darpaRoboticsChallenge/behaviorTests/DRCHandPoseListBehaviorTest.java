@@ -116,8 +116,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 30.0)
+   @Test(timeout = 90137)
    public void testMoveOneRandomJoint90Deg() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -154,8 +154,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 65.4)
+   @Test(timeout = 196338)
    public void testWackyInflatableArmFlailingTubeManDance() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
