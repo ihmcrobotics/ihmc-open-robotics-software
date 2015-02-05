@@ -97,8 +97,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 16.6)
+   @Test(timeout = 49739)
    public void testMoveToMinHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -111,8 +111,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 20.7)
+   @Test(timeout = 62084)
    public void testMoveToMaxHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -125,8 +125,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 17.7)
+   @Test(timeout = 52952)
    public void testRandomComHeight() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

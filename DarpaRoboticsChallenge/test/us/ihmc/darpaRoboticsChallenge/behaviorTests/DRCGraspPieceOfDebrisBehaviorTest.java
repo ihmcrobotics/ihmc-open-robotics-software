@@ -37,6 +37,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UnfinishedTest;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -45,6 +46,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
+@UnfinishedTest
 public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface
 {
 
@@ -147,7 +149,6 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
    @AverageDuration
    @Test(timeout = 300000)
-   @Ignore
    public void testGraspingDebris() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

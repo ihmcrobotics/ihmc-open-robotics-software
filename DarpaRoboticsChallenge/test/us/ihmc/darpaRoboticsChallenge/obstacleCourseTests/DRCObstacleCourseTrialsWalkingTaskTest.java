@@ -53,8 +53,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 26.2)
+	@Test(timeout = 78650)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

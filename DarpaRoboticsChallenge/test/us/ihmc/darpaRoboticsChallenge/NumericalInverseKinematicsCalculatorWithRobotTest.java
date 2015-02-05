@@ -91,8 +91,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 17.0)
+	@Test(timeout = 51041)
    public void generateRandomFeasibleRobotPoses()
    {
       int nTests = 10;
@@ -141,8 +141,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return equal;
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void generateRandomDoubleInRangeTest()
    {
       double min = -randomNumberGenerator.nextDouble();
