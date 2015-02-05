@@ -126,8 +126,8 @@ public class ClosedFormJacobianTest
     // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
     @Ignore
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout=3000)
     public void testEfficientKindaMatchesInefficientJacobianAnkle() {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
 
@@ -170,7 +170,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.9)
+	@AverageDuration(duration = 1.0)
 	@Test(timeout = 3000)
     public void testEfficentMatchesInterpolatedJacobianAnkle() 
     {
@@ -194,7 +194,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.6)
+	@AverageDuration(duration = 0.5)
 	@Test(timeout = 3000)
     public void testEfficentMatchesInterpolatedJacobianWaist() 
     {

@@ -13,8 +13,8 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
    private DRCRobotModel robotModel;
 
-	@AverageDuration(duration = 143.1)
-	@Test(timeout = 429241)
+	@AverageDuration(duration = 144.4)
+	@Test(timeout = 433159)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

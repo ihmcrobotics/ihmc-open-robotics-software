@@ -19,8 +19,8 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
 {
    private DRCRobotModel robotModel;
 
-	@AverageDuration(duration = 149.1)
-	@Test(timeout = 447203)
+	@AverageDuration(duration = 50.3)
+	@Test(timeout = 150919)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
