@@ -5,6 +5,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -15,6 +16,7 @@ public class SmartCMPProjectorTwo
 {
    private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardSwingFoot, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
+   private final FrameVector2d swingSoleToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());   
    private final FrameLine2d swingSoleToICPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
    private final FramePoint2d swingSoleLocation = new FramePoint2d();
 
@@ -81,15 +83,30 @@ public class SmartCMPProjectorTwo
          swingSoleLocation.changeFrameAndProjectToXYPlane(supportPolygon.getReferenceFrame());
          swingSoleToICPLine.setIncludingFrame(swingSoleLocation, capturePoint);
 
+         swingSoleToICPDirection.setIncludingFrame(capturePoint);
+         swingSoleToICPDirection.sub(swingSoleLocation);
+         swingSoleToICPLine.setIncludingFrame(capturePoint, swingSoleToICPDirection);
+
          FramePoint2d[] swingSoleToICPIntersections = supportPolygon.intersectionWith(swingSoleToICPLine);
 
-         if ((swingSoleToICPIntersections != null) && (swingSoleToICPIntersections.length >= 0))
+         if (swingSoleToICPIntersections != null)
          {
             cmpProjectedToPushTowardSwingFoot.set(true);
 
-            FramePoint2d closestIntersection = findClosestIntersection(swingSoleToICPIntersections, capturePoint);
-            desiredCMP.set(closestIntersection);
-            return;
+            if (swingSoleToICPIntersections.length == 1)
+            {
+               cmpProjectedToVertex.set(true);
+               FramePoint2d closestVertex = supportPolygon.getClosestVertexWithRayCopy(swingSoleToICPLine, true);
+               desiredCMP.set(closestVertex);
+               return;
+            }
+
+            if (swingSoleToICPIntersections.length > 1)
+            {
+               FramePoint2d closestIntersection = findClosestIntersection(swingSoleToICPIntersections, capturePoint);
+               desiredCMP.set(closestIntersection);
+               return;
+            }
          }
 
          FramePoint2d closestVertex = supportPolygon.getClosestVertexCopy(swingSoleToICPLine);
