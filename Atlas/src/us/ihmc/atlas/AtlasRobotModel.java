@@ -57,6 +57,7 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.defaultConfigurations.ArmDefaultConfigurations;
 
 import com.jme3.math.Transform;
 
@@ -396,6 +397,13 @@ public class AtlasRobotModel implements DRCRobotModel
 
       }
 
+   }
+
+   @Override
+   public double[] getArmDefaultConfigurationJointAngles(ArmDefaultConfigurations armDefaultConfiguration, RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 
 
