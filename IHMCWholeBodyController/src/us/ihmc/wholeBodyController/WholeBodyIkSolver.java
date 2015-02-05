@@ -238,7 +238,7 @@ abstract public class WholeBodyIkSolver
 
       workingJointsInUrdfOrder = new OneDoFJoint[numOfJoints];
 
-      double EpsilonInRadiansForVerySmallAngles = 0.01;
+      double EpsilonInRadiansForVerySmallAngles = 0.001;
       int NumberOfIterations = 60;
 
       hierarchicalSolver = new HierarchicalKinematicSolver(urdfModel, NumberOfIterations, EpsilonInRadiansForVerySmallAngles);
