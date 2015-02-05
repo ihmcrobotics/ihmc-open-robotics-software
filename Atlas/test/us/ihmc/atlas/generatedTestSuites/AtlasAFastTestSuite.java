@@ -11,8 +11,7 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 ({
    us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
    us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
-   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class,
-   us.ihmc.atlas.AtlasMultiContactTest.class
+   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class
 })
 
 public class AtlasAFastTestSuite
