@@ -10,6 +10,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -29,18 +30,14 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    {
       super(actualRobotModel, wbSolver);
       
-      
       for (RobotSide robotSide : RobotSide.values)
       {
          actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0.500); //arm_shy
-         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(
-               robotSide.negateIfRightSide(-1.0)); //arm_shx
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(-1.0)); //arm_shx
          actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(2.00); //arm_ely
-         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(
-               robotSide.negateIfRightSide(0.6)); //arm_elx
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(robotSide.negateIfRightSide(0.6)); //arm_elx
          actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000); //arm_wry
-         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(
-               robotSide.negateIfRightSide(0)); //arm_wrx
+         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(robotSide.negateIfRightSide(0)); //arm_wrx
       }
       
       if( scs == null && VISUALIZE_GUI )
@@ -84,12 +81,10 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    }
 
    @Ignore
-  @Test(timeout = 300000)
+   @AverageDuration(duration = 0.0)
+   @Test(timeout = 300000)
    public void test()
    {
-    
+
    }
-
-
-
 }
