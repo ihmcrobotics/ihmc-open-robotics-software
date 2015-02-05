@@ -8,7 +8,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class ManualDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredVelocityControlModule");
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameVector2d desiredVelocity;
    
    public ManualDesiredVelocityControlModule(ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
