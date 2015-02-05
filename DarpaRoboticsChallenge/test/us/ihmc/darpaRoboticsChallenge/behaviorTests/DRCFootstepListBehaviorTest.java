@@ -95,12 +95,10 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-      
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCJunkyCommunicator");
-      
+
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10, "DRCJunkyCommunicator");
+
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
 
@@ -112,44 +110,49 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
    }
 
-	@AverageDuration(duration = 31.9)
+   @AverageDuration(duration = 31.9)
    @Test(timeout = 95822)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
+      SysoutTool.println("Initializing Sim", DEBUG);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
+      SysoutTool.println("Dispatching Behavior", DEBUG);
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
-      ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
       SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
+      ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
+      double xOffset = 0.1;
+      
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d desiredFootPose = getRobotFootPose2d(robot, robotSide);
-         desiredFootPose.setX(desiredFootPose.getX() + 0.1);
+         FramePose2d desiredFootPose = createFootstepOffsetFromCurrent(robotSide, xOffset);
+         Footstep desiredFootStep = generateFootstepOnFlatGround(robotSide, desiredFootPose);
+         
          desiredFootPoses.set(robotSide, desiredFootPose);
-
-         Footstep footStep = generateFootstep(desiredFootPoses.get(robotSide), fullRobotModel.getFoot(robotSide), fullRobotModel.getSoleFrame(robotSide),
-               robotSide, 0.0, new Vector3d(0.0, 0.0, 1.0));
-         desiredFootsteps.add(footStep);
+         desiredFootsteps.add(desiredFootStep);
       }
 
+      SysoutTool.println("Initializing Behavior", DEBUG);
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
       assertTrue(success);
       assertTrue(footstepListBehavior.hasInputBeenSet());
 
+      SysoutTool.println("Begin Executing Behavior", DEBUG);
       while (!footstepListBehavior.isDone())
       {
          success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
          assertTrue(success);
       }
       assertTrue(footstepListBehavior.isDone());
+      SysoutTool.println("Behavior should be done", DEBUG);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -158,6 +161,22 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
 
       BambooTools.reportTestFinishedMessage();
+   }
+
+   private FramePose2d createFootstepOffsetFromCurrent(RobotSide robotSide, double xOffset)
+   {
+      FramePose2d desiredFootPose = getRobotFootPose2d(robot, robotSide);
+      desiredFootPose.setX(desiredFootPose.getX() + xOffset);
+      
+      return desiredFootPose;
+   }
+   
+   private Footstep generateFootstepOnFlatGround(RobotSide robotSide, FramePose2d desiredFootPose2d)
+   {
+      Footstep ret = generateFootstep(desiredFootPose2d, fullRobotModel.getFoot(robotSide), fullRobotModel.getSoleFrame(robotSide),
+            robotSide, 0.0, new Vector3d(0.0, 0.0, 1.0));
+      
+      return ret;
    }
 
    private Footstep generateFootstep(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3d planeNormal)
