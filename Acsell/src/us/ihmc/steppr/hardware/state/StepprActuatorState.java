@@ -264,7 +264,6 @@ public class StepprActuatorState
    public void updateCanonicalAngle(double angle, double clocking)
    {
       double delta = angle - (motorEncoderPosition.getDoubleValue() - motorAngleOffset.getDoubleValue());
-
       double offset = Math.round(delta / clocking) * clocking;
       motorAngleOffset.set(offset);
 
