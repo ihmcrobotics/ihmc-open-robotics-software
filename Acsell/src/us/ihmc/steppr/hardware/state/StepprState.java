@@ -23,7 +23,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class StepprState
 {
-   private static final int[] leftFootForceSensorsToUse = { 0, 1, 2, 3 };
+   private static final int[] leftFootForceSensorsToUse = { 1, 1, 2, 3 }; //leftMost sensor0 is broken
    private static final int[] rightFootForceSensorsToUse = { 0, 1, 2, 3 };
    private static final boolean USE_STRAIN_GAUGES_FOR_Z_FORCE = false;
 
@@ -145,31 +145,6 @@ public class StepprState
       powerDistributionState.update(buffer);
       xsens.update(buffer);
 
-      double leftFootForce = 0;
-      double rightFootForce = 0;
-
-      StepprActuatorState leftFootSensorState = actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT);
-      StepprActuatorState rightFootSensorState = actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT);
-      if (USE_STRAIN_GAUGES_FOR_Z_FORCE)
-      {
-         rightFootForce = rightFootStrainGauge.getCalibratedValue();
-         leftFootForce = leftFootStrainGauge.getCalibratedValue();
-
-      }
-      else
-      {
-         for (int sensor : leftFootForceSensorsToUse)
-         {
-            leftFootForce += ((PressureSensor) leftFootSensorState.getPressureSensor(sensor)).getValue();
-         }
-         
-         for (int sensor : rightFootForceSensorsToUse)
-         {
-            rightFootForce += ((PressureSensor) rightFootSensorState.getPressureSensor(sensor)).getValue();
-         }         
-      }
-      footWrenches.get(RobotSide.LEFT).set(5, leftFootForce);
-      footWrenches.get(RobotSide.RIGHT).set(5, rightFootForce);
 
       stepprUpperBodyOffsetCalculator.update();
 
@@ -188,7 +163,16 @@ public class StepprState
 
          updateOffsets.set(false);
       }
+      
+      updateFootForceSensor();
+    
+      updateMotorPower();
+      
+   }
 
+   private void updateFootForceSensor()
+   {
+      
       if(tareSensors.getBooleanValue())
       {
          tarePressureSensors();
@@ -196,8 +180,47 @@ public class StepprState
          rightFootStrainGauge.tare();
          tareSensors.set(false);
       }
-    
-      updateMotorPower();
+
+      
+      double leftFootForce = 0;
+      double rightFootForce = 0;
+   
+      StepprActuatorState leftFootSensorState = actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT);
+      StepprActuatorState rightFootSensorState = actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT);
+      if (USE_STRAIN_GAUGES_FOR_Z_FORCE)
+      {
+         rightFootForce = rightFootStrainGauge.getCalibratedValue();
+         leftFootForce = leftFootStrainGauge.getCalibratedValue();
+   
+      }
+      else
+      {
+         double leftHeelForce = 0.0, rightHeelForce = 0.0;
+         for (int sensor : leftFootForceSensorsToUse)
+         {
+            leftHeelForce += ((PressureSensor) leftFootSensorState.getPressureSensor(sensor)).getValue();
+         }
+         
+         for (int sensor : rightFootForceSensorsToUse)
+         {
+            rightHeelForce += ((PressureSensor) rightFootSensorState.getPressureSensor(sensor)).getValue();
+         }
+         
+         //calculate toe Z force based on ankle
+         final double distHeelFromAnkle = 0.035;
+         final double distToeFromAnkle = 0.16;        
+         double leftAnkleYTau = jointStates.get(StepprJoint.LEFT_ANKLE_Y).getTau();
+         double leftToeForce = leftHeelForce*distHeelFromAnkle + leftAnkleYTau / distToeFromAnkle;         
+         double rightAnkleYTau = jointStates.get(StepprJoint.RIGHT_ANKLE_Y).getTau();
+         double rightToeForce = rightHeelForce*distHeelFromAnkle + rightAnkleYTau / distToeFromAnkle;
+         
+         leftFootForce = leftHeelForce + leftToeForce;
+         rightFootForce = rightHeelForce + rightToeForce;
+      }
+      
+      
+      footWrenches.get(RobotSide.LEFT).set(5, leftFootForce);
+      footWrenches.get(RobotSide.RIGHT).set(5, rightFootForce);
       
    }
    
