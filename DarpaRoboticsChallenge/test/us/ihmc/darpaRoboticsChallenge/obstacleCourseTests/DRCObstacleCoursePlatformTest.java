@@ -57,8 +57,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 26.0)
+	@Test(timeout = 78091)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -102,8 +102,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 16.0)
+	@Test(timeout = 48040)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -138,8 +138,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 14.8)
+	@Test(timeout = 44385)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
