@@ -58,7 +58,7 @@ public class ChestOrientationManager
          
          simpleOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("chest", true, chestOrientationExpressedInFrame, parentRegistry);
          simpleOrientationTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
-         simpleOrientationTrajectoryGenerator.registerNewTrajectoryFrame(pelvisZUpFrame);
+         simpleOrientationTrajectoryGenerator.registerAndSwitchFrame(pelvisZUpFrame);
          simpleOrientationTrajectoryGenerator.initialize();
 
          parentRegistry.addChild(registry);
