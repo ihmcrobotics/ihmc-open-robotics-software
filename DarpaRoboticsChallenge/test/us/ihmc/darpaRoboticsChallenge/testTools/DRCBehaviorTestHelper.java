@@ -31,7 +31,6 @@ import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -292,17 +291,16 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return ret;
    }
 
-   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime,
-         BehaviorExecutionMethod executionMethod, TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable, double percentOfTrajectoryToComplete)
+   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior,
+         TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable, double percentOfTrajectoryToComplete)
          throws SimulationExceededMaximumTimeException
    {
-      StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, executionMethod, trajectoryPercentCompletedUpdatable,
-            percentOfTrajectoryToComplete);
+      StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, trajectoryPercentCompletedUpdatable, percentOfTrajectoryToComplete);
       Thread behaviorThread = new Thread(behaviorRunner);
       behaviorThread.start();
 
       boolean success = true;
-      while (trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted() <= percentOfTrajectoryToComplete )
+      while (trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted() <= percentOfTrajectoryToComplete)
       {
          success &= simulateAndBlockAndCatchExceptions(1.0);
       }
@@ -317,6 +315,21 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
       boolean ret = simulateAndBlockAndCatchExceptions(simulationRunTime);
+      behaviorRunner.closeAndDispose();
+
+      return ret;
+   }
+
+   public boolean executeBehaviorUntilDone(final BehaviorInterface behavior) throws SimulationExceededMaximumTimeException
+   {
+      BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
+
+      boolean ret = true;
+      while (!behavior.isDone())
+      {
+         ret = simulateAndBlockAndCatchExceptions(1.0);
+      }
+
       behaviorRunner.closeAndDispose();
 
       return ret;
@@ -361,25 +374,15 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       }
    }
 
-   public enum BehaviorExecutionMethod
-   {
-      stop, pause, doNotInterrupt
-   }
-   
    private class StoppableBehaviorRunner extends BehaviorRunner
    {
-      private boolean behaviorIsStopped;
-      private boolean behaviorIsPaused;
-
-      private final BehaviorExecutionMethod executionMethod;
       private final TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable;
       private final double percentOfTrajectoryToComplete;
 
-      public StoppableBehaviorRunner(BehaviorInterface behavior, BehaviorExecutionMethod executionMethod,
-            TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable, double percentOfTrajectoryToComplete)
+      public StoppableBehaviorRunner(BehaviorInterface behavior, TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable,
+            double percentOfTrajectoryToComplete)
       {
          super(behavior);
-         this.executionMethod = executionMethod;
          this.trajectoryPercentCompletedUpdatable = trajectoryPercentCompletedUpdatable;
          this.percentOfTrajectoryToComplete = percentOfTrajectoryToComplete;
       }
@@ -388,29 +391,14 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          while (isRunning)
          {
-            trajectoryPercentCompletedUpdatable.update(yoTimeRobot.getDoubleValue());
-
             behavior.doControl();
 
-            if (!executionMethod.equals(BehaviorExecutionMethod.doNotInterrupt))
-            {
-               double percentCompleted = trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted();
+            trajectoryPercentCompletedUpdatable.update(yoTimeRobot.getDoubleValue());
+            double percentCompleted = trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted();
 
-               if (percentCompleted > percentOfTrajectoryToComplete)
-               {
-                  if (executionMethod.equals(BehaviorExecutionMethod.stop) && !behaviorIsStopped)
-                  {
-                     behavior.stop();
-                     behaviorIsStopped = true;
-                     SysoutTool.println("Stopping Behavior.  Percent of behavior completed = " + percentCompleted);
-                  }
-                  else if (executionMethod.equals(BehaviorExecutionMethod.pause) && !behaviorIsPaused)
-                  {
-                     behavior.pause();
-                     behaviorIsPaused = true;
-                     SysoutTool.println("Pausing Behavior.  Percent of behavior completed = " + percentCompleted);
-                  }
-               }
+            if (isRunning && percentCompleted >= percentOfTrajectoryToComplete)
+            {
+               isRunning = false;
             }
          }
       }
