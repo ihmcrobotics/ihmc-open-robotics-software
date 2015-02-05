@@ -186,9 +186,9 @@ public class ExportMovie implements ExportMovieCommandExecutor
       {
       }
 
+      dataBufferCommandsExecutor.gotoInPoint();
       BufferedImage bufferedImage = captureDevice.exportSnapshotAsBufferedImage();
-
-      int bitrate = bufferedImage.getWidth() * bufferedImage.getHeight() * 5; // Heuristic bitrate
+      int bitrate = bufferedImage.getWidth() * bufferedImage.getHeight() / 100; // Heuristic bitrate in kbit/s
       
       MP4H264MovieBuilder movieBuilder = null;
       try
@@ -198,7 +198,6 @@ public class ExportMovie implements ExportMovieCommandExecutor
    
          movieBuilder.encodeFrame(bufferedImage);
    
-         dataBufferCommandsExecutor.gotoInPoint();
          boolean reachedEndPoint = false; // This keeps track of what the previous index was to stop the playback when it starts to loop back.
    
          while (!reachedEndPoint)
