@@ -106,7 +106,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testSingleRandomPelvisRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -124,7 +124,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -143,7 +143,8 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-      @Test(timeout = 300000)
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
    public void testPelvisRollRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -161,7 +162,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -180,7 +181,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisXTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -199,7 +200,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisYTranslation() throws SimulationExceededMaximumTimeException
    {

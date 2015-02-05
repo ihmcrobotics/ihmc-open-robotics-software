@@ -122,7 +122,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       }
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testJointSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
    {
@@ -150,7 +150,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testSimpleTaskSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
    {
@@ -183,7 +183,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
 
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testUnreachableHandPoseMove() throws SimulationExceededMaximumTimeException
    {
@@ -218,7 +218,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testTwoSimultaneousHandPoseBehaviors() throws SimulationExceededMaximumTimeException
    {
@@ -261,7 +261,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    }
 
    
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testHandPosePauseAndResume() throws SimulationExceededMaximumTimeException
    {
@@ -310,7 +310,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testHandPoseMoveStopMidTrajectory() throws SimulationExceededMaximumTimeException
    {

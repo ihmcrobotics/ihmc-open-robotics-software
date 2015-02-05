@@ -84,7 +84,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE.setRotation(rotFull);
    }
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -129,7 +129,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * Pass it into an optimization function and see if it works
     */
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -178,7 +178,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * Pass it into an optimization function and see if it works
     */
 
-	@AverageDuration
+	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {
