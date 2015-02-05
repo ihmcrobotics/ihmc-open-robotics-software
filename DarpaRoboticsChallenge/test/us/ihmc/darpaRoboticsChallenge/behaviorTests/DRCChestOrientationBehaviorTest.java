@@ -100,8 +100,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 16.4)
+   @Test(timeout = 49112)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -116,8 +116,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 16.1)
+   @Test(timeout = 48244)
    public void testSingleChestPitchOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -136,8 +136,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 16.6)
+   @Test(timeout = 49935)
    public void testSingleChestRollOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -156,8 +156,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 16.9)
+   @Test(timeout = 50793)
    public void testSingleChestYawOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

@@ -99,8 +99,8 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 27.7)
+   @Test(timeout = 83115)
    public void testRandomCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

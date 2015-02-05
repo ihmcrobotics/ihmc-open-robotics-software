@@ -185,8 +185,8 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 15.9)
+	@Test(timeout = 47679)
    public void testImpactDetectionUsingHandPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

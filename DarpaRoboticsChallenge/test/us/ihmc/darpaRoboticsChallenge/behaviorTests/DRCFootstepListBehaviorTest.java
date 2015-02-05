@@ -112,8 +112,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+	@AverageDuration(duration = 31.9)
+   @Test(timeout = 95822)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

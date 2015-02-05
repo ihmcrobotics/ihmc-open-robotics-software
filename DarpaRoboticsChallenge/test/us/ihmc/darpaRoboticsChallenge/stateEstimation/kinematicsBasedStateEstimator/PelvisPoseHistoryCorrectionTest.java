@@ -248,8 +248,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 28.3)
+	@Test(timeout = 84780)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -290,8 +290,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 42.4)
+	@Test(timeout = 127292)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
