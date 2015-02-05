@@ -9,7 +9,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -147,8 +146,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
-   @AverageDuration
-   @Test(timeout = 300000)
+   @AverageDuration(duration = 300.0)
+   @Test(timeout = 900000)
    public void testGraspingDebris() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

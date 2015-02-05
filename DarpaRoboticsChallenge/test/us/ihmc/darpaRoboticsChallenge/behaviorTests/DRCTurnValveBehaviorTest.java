@@ -111,7 +111,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       return new DRCValveEnvironment(valveX, valveY, valveZ, valveYaw_degrees);
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkAndTurnValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

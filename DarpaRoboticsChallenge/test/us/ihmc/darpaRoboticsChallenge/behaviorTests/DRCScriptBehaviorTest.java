@@ -170,7 +170,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       Files.delete(file);
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithSingleComHeightScriptPacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -196,7 +196,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -235,7 +235,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testStopScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -275,7 +275,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -321,7 +321,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -349,7 +349,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

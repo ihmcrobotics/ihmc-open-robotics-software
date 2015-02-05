@@ -9,14 +9,16 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class,
+   us.ihmc.atlas.WholeBodyIkSolverTest.class
 })
 
-public class AtlasDFastTestSuite
+public class AtlasNFastTestSuite
 {
    public static void main(String[] args)
    {
-      new JUnitTestSuiteRunner(AtlasDFastTestSuite.class);
+      new JUnitTestSuiteRunner(AtlasNFastTestSuite.class);
    }
 }
 

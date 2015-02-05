@@ -107,7 +107,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
-   @AverageDuration
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testHeadPitch() throws SimulationExceededMaximumTimeException
    {
