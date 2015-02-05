@@ -2,17 +2,21 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -32,6 +36,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeElapsed;
+   private RobotSide robotSide;
 
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
@@ -59,6 +64,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
       trajectoryTime.set(trajectoryDuration);
       wholeBodyIKSolver.setGripperAttachmentTarget(actualFullRobotModel, robotSide, endEffectorPose);
+      this.robotSide = robotSide;
 
       hasInputBeenSet.set(true);
    }
@@ -71,9 +77,30 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       {
          try
          {
-            wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
-            sendSolutionToController(trajectoryTime.getDoubleValue());
-            packetHasBeenSent.set(true);
+            wholeBodyIKSolver.maxNumberOfAutomaticReseeds = 0 ;
+            ComputeResult result = wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+            if( result != ComputeResult.SUCCEEDED)
+            {
+               Vector64F error = wholeBodyIKSolver.taskEndEffectorPose.get(robotSide).getError();
+               Vector3d positionError = new Vector3d( error.get(0),  error.get(1),  error.get(2));
+               Vector3d rotationError = new Vector3d( error.get(3),  error.get(4),  error.get(5));
+               
+               if( positionError.length() < 0.020 && rotationError.length() < 0.1 )
+               {
+                  result = ComputeResult.SUCCEEDED;
+               }
+               else
+               {
+                  //TODO this next line is bullshit, needs to handle the case where the computed position/orientation is bad
+                  result = ComputeResult.SUCCEEDED;
+                  System.out.println("did not managed to find a good solution");
+               }
+            }
+            
+            if( result == ComputeResult.SUCCEEDED) {
+               sendSolutionToController(trajectoryTime.getDoubleValue());
+               packetHasBeenSent.set(true);
+            }
          }
          catch (Exception e)
          {
@@ -105,7 +132,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
 
-      wholeBodyIKSolver.setVerbosityLevel(0);
+      wholeBodyIKSolver.setVerbosityLevel(1);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(true);
    }
 

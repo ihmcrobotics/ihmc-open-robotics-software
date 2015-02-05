@@ -13,6 +13,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.DropDebrisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspPieceOfDebrisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
@@ -60,7 +61,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
       this.fullRobotModel = fullRobotModel;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime, useWholeBodyIK);
+      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames.getMidFeetZUpFrame(), wholeBodyControllerParameters, yoTime, useWholeBodyIK);
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, referenceFrames,yoTime);
       walkCloseToObjectBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
 
@@ -120,6 +121,9 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
       targetPose2dInWorld.changeFrame(midZupFrame);
       targetPose2dInWorld.setX(graspPositionInChestFame.getX() - OPTIMAL_DISTANCE_TO_GRAB_OBJECT);
       targetPose2dInWorld.setY(0.0);
+      FrameOrientation2d frameOrientation2d = new FrameOrientation2d(midZupFrame);
+      frameOrientation2d.setYaw(0.0);
+      targetPose2dInWorld.setOrientation(frameOrientation2d);
       targetPose2dInWorld.changeFrame(worldFrame);
    }
 

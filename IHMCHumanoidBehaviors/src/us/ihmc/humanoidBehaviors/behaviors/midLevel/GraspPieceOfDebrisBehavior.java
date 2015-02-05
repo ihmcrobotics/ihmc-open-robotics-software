@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
@@ -19,7 +20,6 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -34,9 +34,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 {
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
-   private FramePose homePelvisPose;
-   private FrameOrientation homeChestOrientation;
-
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
    private final FingerStateBehavior fingerStateBehavior;
@@ -49,8 +46,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final DoubleYoVariable offsetToThePointOfGrabbing;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame pelvisFrame;
-   private final ReferenceFrame chestFrame;
 
    private RobotSide robotSide;
    private double trajectoryTime = 2.5;
@@ -63,22 +58,22 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 
    private Quat4d rotationToBePerformedInWorldFrame = new Quat4d();
 
+   private final ReferenceFrame midFeetZUpFrame;
+
    public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime, Boolean useWholeBodyIK)
+         ReferenceFrame midFeetZUpFrame, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime, Boolean useWholeBodyIK)
    {
       super(outgoingCommunicationBridge);
 
       this.fullRobotModel = fullRobotModel;
       this.yoTime = yoTime;
+      this.midFeetZUpFrame = midFeetZUpFrame;
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
-
-      pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet" + behaviorName, registry);
       this.useWholeBodyIK = new BooleanYoVariable("useWholeBodyIK" + behaviorName, registry);
@@ -125,19 +120,21 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 
       pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
 
-      FramePose prepareToDropPose = new FramePose(chestFrame);
-      prepareToDropPose.setOrientation(rotationToBePerformedInWorldFrame);
-      prepareToDropPose.setPosition(0.7, robotSide.negateIfRightSide(0.1), -0.2);
+      FramePose prepareToDropPose = new FramePose(midFeetZUpFrame);
+      prepareToDropPose.setPosition(0.55, robotSide.negateIfRightSide(0.1), 1.2);
       prepareToDropPose.changeFrame(worldFrame);
+      prepareToDropPose.setOrientation(rotationToBePerformedInWorldFrame);
 
       if (useWholeBodyIK.getBooleanValue())
       {
          pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyIKBehavior, prepareToDropPose, trajectoryTime));
-         
+
          pipeLine.requestNewStage();
 
-         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(homePelvisPose, yoTime, pelvisPoseBehavior, trajectoryTime));
-         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(homeChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime));
+         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime),
+               yoTime, pelvisPoseBehavior));
+         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior,
+               new ChestOrientationTask(PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime), yoTime, chestOrientationBehavior));
       }
    }
 
@@ -254,20 +251,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    public void initialize()
    {
       haveInputsBeenSet.set(false);
-
-      if (homePelvisPose == null)
-         homePelvisPose = new FramePose(pelvisFrame);
-      else
-         homePelvisPose.setToZero(pelvisFrame);
-
-      homePelvisPose.changeFrame(worldFrame);
-
-      if (homeChestOrientation == null)
-         homeChestOrientation = new FrameOrientation(chestFrame);
-      else
-         homeChestOrientation.setToZero(chestFrame);
-
-      homeChestOrientation.changeFrame(worldFrame);
    }
 
    @Override
