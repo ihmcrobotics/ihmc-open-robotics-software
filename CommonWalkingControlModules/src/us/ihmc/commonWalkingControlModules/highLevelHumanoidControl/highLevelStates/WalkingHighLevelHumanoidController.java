@@ -976,6 +976,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
             instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+            finalDesiredICPInWorld.setAndMatchFrame(instantaneousCapturePointPlanner.getFinalDesiredICP());
          }
          else
          {
@@ -1026,6 +1027,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionOutOfAction()
       {
+         finalDesiredICPInWorld.setToNaN();
+
          if (DEBUG)
             System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
 
