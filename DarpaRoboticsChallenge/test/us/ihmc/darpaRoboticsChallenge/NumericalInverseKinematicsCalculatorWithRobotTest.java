@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
-
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
    private static final long seed = 1391092L;
@@ -61,8 +58,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL;
    }
-
-   ;;
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
