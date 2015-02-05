@@ -14,18 +14,18 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SmartCMPProjectorTwo
 {
-   private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardSwingFoot, cmpProjectedToVertex;
+   private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
-   private final FrameVector2d swingSoleToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());   
-   private final FrameLine2d swingSoleToICPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
-   private final FramePoint2d swingSoleLocation = new FramePoint2d();
+   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());   
+   private final FrameLine2d rayFromICPAwayFromFinalDesiredICP = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
+   private final FramePoint2d finalDesiredICPLocation = new FramePoint2d();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       cmpProjectedAlongRay = new BooleanYoVariable("cmpProjectedAlongRay", registry);
-      cmpProjectedToPushTowardSwingFoot = new BooleanYoVariable("cmpProjectedToPushTowardSwingFoot", registry);
+      cmpProjectedToPushTowardFinalDesiredICP = new BooleanYoVariable("cmpProjectedToPushTowardFinalDesiredICP", registry);
       cmpProjectedToVertex = new BooleanYoVariable("cmpProjectedToVertex", registry);
 
       if (parentRegistry != null)
@@ -39,16 +39,17 @@ public class SmartCMPProjectorTwo
     * push the ICP in the same direction as before, just with a different velocity.
     * If there is no intersection, then that means that both ICP and CMP are outside the support polygon
     * and we can no longer push the ICP in the originally intended direction.
-    * Therefore the best to do without thinking about where to step is to just project the CMP into the foot polygon.
+    * Therefore we try to direct the ICP towards the final desired ICP location (almost equivalent to the next footstep location).
     */
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, ReferenceFrame swingSoleFrame, FramePoint2d desiredCMP)
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
       desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
+      finalDesiredCapturePoint.changeFrame(supportPolygon.getReferenceFrame());
       capturePoint.changeFrame(supportPolygon.getReferenceFrame());
 
-      projectCMPIntoSupportPolygonIfOutsideLocal(capturePoint, supportPolygon, swingSoleFrame, desiredCMP);
+      projectCMPIntoSupportPolygonIfOutsideLocal(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
 
       desiredCMP.changeFrame(returnFrame);
       capturePoint.changeFrame(returnFrame);
@@ -56,10 +57,10 @@ public class SmartCMPProjectorTwo
 
    
    
-   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, ReferenceFrame swingSoleFrame, FramePoint2d desiredCMP)
+   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
    {
       cmpProjectedAlongRay.set(false);
-      cmpProjectedToPushTowardSwingFoot.set(false);
+      cmpProjectedToPushTowardFinalDesiredICP.set(false);
       cmpProjectedToVertex.set(false);
 
       if (supportPolygon.isPointInside(desiredCMP))
@@ -77,39 +78,38 @@ public class SmartCMPProjectorTwo
          return;
       }
 
-      if (swingSoleFrame != null)
+      if (finalDesiredCapturePoint != null)
       {
-         swingSoleLocation.setToZero(swingSoleFrame);
-         swingSoleLocation.changeFrameAndProjectToXYPlane(supportPolygon.getReferenceFrame());
-         swingSoleToICPLine.setIncludingFrame(swingSoleLocation, capturePoint);
+         finalDesiredICPLocation.setIncludingFrame(finalDesiredCapturePoint);
+         rayFromICPAwayFromFinalDesiredICP.setIncludingFrame(finalDesiredICPLocation, capturePoint);
 
-         swingSoleToICPDirection.setIncludingFrame(capturePoint);
-         swingSoleToICPDirection.sub(swingSoleLocation);
-         swingSoleToICPLine.setIncludingFrame(capturePoint, swingSoleToICPDirection);
+         finalDesiredICPToICPDirection.setIncludingFrame(capturePoint);
+         finalDesiredICPToICPDirection.sub(finalDesiredICPLocation);
+         rayFromICPAwayFromFinalDesiredICP.setIncludingFrame(capturePoint, finalDesiredICPToICPDirection);
 
-         FramePoint2d[] swingSoleToICPIntersections = supportPolygon.intersectionWith(swingSoleToICPLine);
+         FramePoint2d[] finalDesiredICPToICPIntersections = supportPolygon.intersectionWith(rayFromICPAwayFromFinalDesiredICP);
 
-         if (swingSoleToICPIntersections != null)
+         if (finalDesiredICPToICPIntersections != null)
          {
-            cmpProjectedToPushTowardSwingFoot.set(true);
+            cmpProjectedToPushTowardFinalDesiredICP.set(true);
 
-            if (swingSoleToICPIntersections.length == 1)
+            if (finalDesiredICPToICPIntersections.length == 1)
             {
                cmpProjectedToVertex.set(true);
-               FramePoint2d closestVertex = supportPolygon.getClosestVertexWithRayCopy(swingSoleToICPLine, true);
+               FramePoint2d closestVertex = supportPolygon.getClosestVertexWithRayCopy(rayFromICPAwayFromFinalDesiredICP, true);
                desiredCMP.set(closestVertex);
                return;
             }
 
-            if (swingSoleToICPIntersections.length > 1)
+            if (finalDesiredICPToICPIntersections.length > 1)
             {
-               FramePoint2d closestIntersection = findClosestIntersection(swingSoleToICPIntersections, capturePoint);
+               FramePoint2d closestIntersection = findClosestIntersection(finalDesiredICPToICPIntersections, capturePoint);
                desiredCMP.set(closestIntersection);
                return;
             }
          }
 
-         FramePoint2d closestVertex = supportPolygon.getClosestVertexCopy(swingSoleToICPLine);
+         FramePoint2d closestVertex = supportPolygon.getClosestVertexCopy(rayFromICPAwayFromFinalDesiredICP);
          desiredCMP.set(closestVertex);
 
          cmpProjectedToVertex.set(true);

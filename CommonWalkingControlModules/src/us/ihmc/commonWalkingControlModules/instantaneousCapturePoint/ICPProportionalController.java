@@ -96,7 +96,7 @@ public class ICPProportionalController
    private final FramePoint2d icpProjected = new FramePoint2d();
       
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
-           double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon, ReferenceFrame swingSoleFrame)
+           double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
    {      
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -182,7 +182,7 @@ public class ICPProportionalController
       
       if (projectIntoSupportPolygon)
       {
-         smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, swingSoleFrame, desiredCMP);
+         smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
          capturePoint.changeFrame(worldFrame);
          desiredCMP.changeFrame(worldFrame);
          

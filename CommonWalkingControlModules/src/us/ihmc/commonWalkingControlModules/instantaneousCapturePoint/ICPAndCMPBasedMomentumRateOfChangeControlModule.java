@@ -19,7 +19,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.MomentumCalculator;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -47,7 +46,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
-   private final SideDependentList<ReferenceFrame> soleFrames;
 
    private final YoFramePoint2d controlledCoP = new YoFramePoint2d("controlledCoP", "", worldFrame, registry);
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
@@ -83,7 +81,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       this.pelvisFrame = referenceFrames.getPelvisFrame();
       this.centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      this.soleFrames = referenceFrames.getSoleFrames();
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -108,12 +105,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
 
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
 
-      ReferenceFrame swingSoleFrame = null;
-      if (supportSide != null)
-         swingSoleFrame = soleFrames.get(supportSide.getOppositeSide());
-
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, finalDesiredCapturePoint, desiredCapturePoint,
-            desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon, swingSoleFrame);
+            desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon);
 
       controlledCMP.set(desiredCMP);
 
