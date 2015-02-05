@@ -81,7 +81,7 @@ public class HandPoseBehavior extends BehaviorInterface
       }
 
       double trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue();
-      if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue()
+      if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
             && trajectoryTimeElapsed > trajectoryTime.getDoubleValue())
       {
          SysoutTool.println("setting isDone = true", DEBUG);
