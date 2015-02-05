@@ -71,8 +71,8 @@ public abstract class DRCPushRecoveryTest
    
    protected abstract DRCRobotModel getRobotModel();
 
-	@AverageDuration(duration = 21.5)
-	@Test(timeout = 64501)
+	@AverageDuration(duration = 20.4)
+	@Test(timeout = 61054)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -95,8 +95,8 @@ public abstract class DRCPushRecoveryTest
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 21.1)
-	@Test(timeout = 63297)
+	@AverageDuration(duration = 18.1)
+	@Test(timeout = 54247)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -119,8 +119,8 @@ public abstract class DRCPushRecoveryTest
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 21.5)
-	@Test(timeout = 64465)
+	@AverageDuration(duration = 17.9)
+	@Test(timeout = 53703)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
