@@ -9,7 +9,13 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class
+   us.ihmc.atlas.AtlasScriptingTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasFingerStateBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasFootPoseBehaviorTest.class
 })
 
 public class AtlasDFastTestSuite

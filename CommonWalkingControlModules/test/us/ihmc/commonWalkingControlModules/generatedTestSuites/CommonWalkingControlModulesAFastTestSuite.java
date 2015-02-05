@@ -58,17 +58,7 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
    us.ihmc.commonWalkingControlModules.trajectories.EndPointConstrainedCubicTrajectoryTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.MinJerkXYConstrained5thOrderPolyZTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SmoothenedConstantCoPICPTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.SplineBasedCoMHeightTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.StraightUpThenParabolicCartesianTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.TakeoffLandingCartesianTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines1DTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines2DTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGeneratorWithPushRecoveryTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ZeroToOneParabolicVelocityTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class
+   us.ihmc.commonWalkingControlModules.trajectories.SplineBasedCoMHeightTrajectoryGeneratorTest.class
 })
 
 public class CommonWalkingControlModulesAFastTestSuite

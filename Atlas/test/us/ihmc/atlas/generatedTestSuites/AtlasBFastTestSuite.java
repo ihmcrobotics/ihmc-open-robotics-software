@@ -9,10 +9,9 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.atlas.AtlasMultiContactTest.class,
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryStandingTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryWalkingTest.class
+   us.ihmc.atlas.AtlasPushRecoveryStandingTest.class
 })
 
 public class AtlasBFastTestSuite

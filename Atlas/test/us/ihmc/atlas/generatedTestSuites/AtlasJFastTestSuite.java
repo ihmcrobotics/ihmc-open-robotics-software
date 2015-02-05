@@ -9,12 +9,9 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class,
-   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
+   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class
 })
 
 public class AtlasJFastTestSuite
