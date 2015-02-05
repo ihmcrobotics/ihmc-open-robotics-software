@@ -72,6 +72,7 @@ public class SimpleJOptimizerTest
 
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
+   @AverageDuration
 	@Test(timeout=300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
@@ -89,8 +90,8 @@ public class SimpleJOptimizerTest
       assertEquals(2.0, solution[0], 1e-5);
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testReallySimpleOptimizationProblem() throws Exception
    {
       // Minimize -x subject to x <= 5
@@ -109,8 +110,8 @@ public class SimpleJOptimizerTest
       assertEquals(5.0, solution[0], 1e-5);
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testLinearCostQuadraticInequalityOptimizationProblem() throws Exception
    {
       // Minimize -x-y subject to x^2 + y^2 <= 4  (1/2 [x y] [I] [x y]^T - 2 <= 0)
@@ -155,8 +156,8 @@ public class SimpleJOptimizerTest
       assertEquals(1.0, solution[1], 1e-5);
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
       // Minimize 0 subject to x+y=4. Should return any feasible solution.
@@ -173,8 +174,8 @@ public class SimpleJOptimizerTest
       assertEquals(4.0, solution[0] + solution[1], 1e-5);
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.0)
+	@Test(timeout = 3000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
       // Minimize x subject to x+y=4 and y >= x^2. Answer should be ((-1-sqrt(17))/2, (9+sqrt(17))/2))
