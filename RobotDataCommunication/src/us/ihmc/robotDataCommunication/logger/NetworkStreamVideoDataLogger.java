@@ -122,7 +122,7 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
                return;
             }
             File videoFileFile = new File(videoFile);
-            builder = new MP4MJPEGMovieBuilder(videoFileFile, img.getWidth(), img.getHeight(), 10, 0.9f);
+            builder = new MP4MJPEGMovieBuilder(videoFileFile, img.getWidth(), img.getHeight(), 10, 90);
             File timestampFile = new File(timestampData);
             timestampStream = new PrintStream(timestampFile);
             timestampStream.println("1");

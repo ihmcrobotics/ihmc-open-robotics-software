@@ -1,13 +1,14 @@
 package us.ihmc.communication.producers;
 
-import java.io.IOException;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.h264.OpenH264Decoder;
-import us.ihmc.codecs.yuv.YUVPicture;
+import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
@@ -19,18 +20,14 @@ public class CompressedVideoDataClient implements NetStateListener
    private final VideoStreamer videoStreamer;
    private final OpenH264Decoder decoder;
    private final ByteBuffer nalBuffer = ByteBuffer.allocateDirect(1048576);   // Decoder cannot handle frames > 1mb anyway
-
+   private final YUVPictureConverter converter = new YUVPictureConverter();
+   
+   private BufferedImage image;
+   
    public CompressedVideoDataClient(VideoStreamer videoStreamer)
    {
       this.videoStreamer = videoStreamer;
-      try
-      {
-         this.decoder = new OpenH264Decoder();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      this.decoder = new OpenH264Decoder();
    }
 
    public synchronized void consumeObject(byte[] data, Point3d position, Quat4d orientation, double fov)
@@ -39,18 +36,12 @@ public class CompressedVideoDataClient implements NetStateListener
       nalBuffer.put(data);
       nalBuffer.clear();
       
-      YUVPicture frame;
-      try
+      YUVPicture frame = decoder.decodeFrame(nalBuffer);
+      if(frame != null)
       {
-         frame = decoder.decodeFrame(nalBuffer);
-         if(frame != null)
-         {
-            videoStreamer.updateImage(frame.getImage(), position, orientation, fov);
-         }
-      }
-      catch (IOException e)
-      {
-         System.err.println(e.getMessage());
+         image = converter.toBufferedImage(frame, image);
+         videoStreamer.updateImage(image, position, orientation, fov);
+         frame.delete();
       }
       
       

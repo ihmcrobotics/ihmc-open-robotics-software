@@ -6,9 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
-import org.openh264.EUsageType;
-
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
+import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraController;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
@@ -37,7 +36,6 @@ public class ExportMovie implements ExportMovieCommandExecutor
    private final GUIEnablerAndDisabler guiEnablerAndDisabler;
    private final RunCommandsExecutor runCommandsExecutor;
 
-   private ActiveCanvas3DHolder captureDeviceHolder;
 
    public ExportMovie(TimeHolder timeHolder, StandardSimulationGUI standardSimulationGUI, DataBufferCommandsExecutor dataBufferCommandsExecutor,
          RunCommandsExecutor runCommandsExecutor, GUIEnablerAndDisabler guiEnablerAndDisabler, ActiveCanvas3DHolder activeCanvas3DHolder,
@@ -50,7 +48,6 @@ public class ExportMovie implements ExportMovieCommandExecutor
       this.dataBufferCommandsExecutor = dataBufferCommandsExecutor;
       this.runCommandsExecutor = runCommandsExecutor;
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
-      this.captureDeviceHolder = activeCanvas3DHolder;
    }
 
    public void createMovie(File selectedFile)
