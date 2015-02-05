@@ -1,5 +1,8 @@
 package us.ihmc.atlas.hikSim;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -80,11 +83,12 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
       return scs;
    }
 
-  /* @Test(timeout = 300000)
+   @Ignore
+  @Test(timeout = 300000)
    public void test()
    {
     
-   }*/
+   }
 
 
 
