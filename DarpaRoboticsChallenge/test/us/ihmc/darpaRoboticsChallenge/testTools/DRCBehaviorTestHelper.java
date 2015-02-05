@@ -26,6 +26,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDisptacher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryPercentCompletedUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -292,15 +293,15 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    }
 
    public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior,
-         TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable, double percentOfTrajectoryToComplete)
+         TrajectoryPercentCompletedUpdatable stopThreadUpdatable, double percentOfTrajectoryToComplete)
          throws SimulationExceededMaximumTimeException
    {
-      StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, trajectoryPercentCompletedUpdatable, percentOfTrajectoryToComplete);
+      StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, stopThreadUpdatable);
       Thread behaviorThread = new Thread(behaviorRunner);
       behaviorThread.start();
 
       boolean success = true;
-      while (trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted() <= percentOfTrajectoryToComplete)
+      while ( !stopThreadUpdatable.stopThread() )
       {
          success &= simulateAndBlockAndCatchExceptions(1.0);
       }
@@ -376,15 +377,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    private class StoppableBehaviorRunner extends BehaviorRunner
    {
-      private final TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable;
-      private final double percentOfTrajectoryToComplete;
+      private final StopThreadUpdatable stopThreadUpdatable;
 
-      public StoppableBehaviorRunner(BehaviorInterface behavior, TrajectoryPercentCompletedUpdatable trajectoryPercentCompletedUpdatable,
-            double percentOfTrajectoryToComplete)
+      public StoppableBehaviorRunner(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
       {
          super(behavior);
-         this.trajectoryPercentCompletedUpdatable = trajectoryPercentCompletedUpdatable;
-         this.percentOfTrajectoryToComplete = percentOfTrajectoryToComplete;
+         this.stopThreadUpdatable = stopThreadUpdatable;
       }
 
       public void run()
@@ -392,16 +390,13 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          while (isRunning)
          {
             behavior.doControl();
-
-            trajectoryPercentCompletedUpdatable.update(yoTimeRobot.getDoubleValue());
-            double percentCompleted = trajectoryPercentCompletedUpdatable.getPercentTrajectoryCompleted();
-
-            if (isRunning && percentCompleted >= percentOfTrajectoryToComplete)
+            stopThreadUpdatable.update(yoTimeRobot.getDoubleValue());
+            
+            if (stopThreadUpdatable.stopThread())
             {
                isRunning = false;
             }
          }
       }
-
    }
 }
