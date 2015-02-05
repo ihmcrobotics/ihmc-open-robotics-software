@@ -10,10 +10,12 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
@@ -49,7 +51,7 @@ public class StepprControllerFactory
 {
    private static final double gravity = -9.80; // From xsens
 
-   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false;
+   private static final WalkingProvider walkingProvider = WalkingProvider.VELOCITY_HEADING_COMPONENT;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {
@@ -182,11 +184,20 @@ public class StepprControllerFactory
       controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
       
       VariousWalkingProviderFactory variousWalkingProviderFactory;
-      if (CREATE_YOVARIABLE_WALKING_PROVIDERS)
-         variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-      else
-         variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
-
+      switch(walkingProvider)
+      {
+         case YOVARIABLE:
+            variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
+            break;
+         case DATA_PRODUCER:
+            variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
+            break;
+         case VELOCITY_HEADING_COMPONENT:
+            variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(false, null, robotModel.getControllerDT());
+            break;
+         default:
+               throw new RuntimeException("no such walkingProvider");
+      }
       controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
       return controllerFactory;
    }
