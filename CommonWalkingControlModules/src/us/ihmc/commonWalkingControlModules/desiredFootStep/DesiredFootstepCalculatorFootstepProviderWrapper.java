@@ -22,14 +22,17 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       this.desiredFootstepCalculator = desiredFootstepCalculator;
       parentRegistry.addChild(registry);
-
+         
       walk.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
             if (walk.getBooleanValue())
-               desiredFootstepCalculator.initialize();
+            {
+               if (desiredFootstepCalculator != null)
+                  desiredFootstepCalculator.initialize();
+            }
          }
       });
    }
