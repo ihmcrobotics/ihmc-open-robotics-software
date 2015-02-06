@@ -1,29 +1,29 @@
 package us.ihmc.kalman.imu.testCases;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
-public class KalmanFilterComparison extends TestCase
+public class KalmanFilterComparison
 {
    @SuppressWarnings("unused")
    private static final double DT = 0.001;
 
-   public KalmanFilterComparison(String name)
+   @Before
+   public void setUp() throws Exception
    {
-      super(name);
    }
 
-   protected void setUp() throws Exception
-   {
-      super.setUp();
-   }
-
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testRepeatability()
    {
       @SuppressWarnings("unused") QuaternionBasedJamaFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilter = null;
       @SuppressWarnings("unused") QuaternionBasedArrayFullIMUKalmanFilter fastQuaternionBasedFullIMUKalmanFilter = null;
-
    }
 
 // private QuaternionBasedFullIMUKalmanFilter createAndInitSlowKalman()
@@ -58,11 +58,8 @@ public class KalmanFilterComparison extends TestCase
    {
    }
 
-
-
-   protected void tearDown() throws Exception
+   @After
+   public void tearDown() throws Exception
    {
-      super.tearDown();
    }
-
 }
