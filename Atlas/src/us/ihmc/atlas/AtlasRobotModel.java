@@ -10,6 +10,7 @@ import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
 import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -57,7 +58,7 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.wholeBodyController.defaultConfigurations.ArmDefaultConfigurations;
+import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 import com.jme3.math.Transform;
 
@@ -92,8 +93,8 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final RobotNetworkParameters networkParameters;
-   
-   
+   private final AtlasDefaultArmConfigurations defaultArmConfigurations;
+
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
    {
@@ -129,8 +130,7 @@ public class AtlasRobotModel implements DRCRobotModel
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
       drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
       networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
-      
-      
+      defaultArmConfigurations = new AtlasDefaultArmConfigurations();
    }
 
    @Override
@@ -173,19 +173,18 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion;
    }
 
-
    @Override
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
-	   return selectedVersion.getOffsetFromAttachmentPlate(side);
+      return selectedVersion.getOffsetFromAttachmentPlate(side);
    }
-   
+
    @Override
    public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
    {
-	   return JMEGeometryUtils.transformFromJMECoordinatesToZup( getJmeTransformWristToHand(side) );
+      return JMEGeometryUtils.transformFromJMECoordinatesToZup(getJmeTransformWristToHand(side));
    }
-   
+
    @Override
    public String toString()
    {
@@ -394,18 +393,12 @@ public class AtlasRobotModel implements DRCRobotModel
       case SIM:
       default:
          return LogSettings.SIMULATION;
-
       }
-
    }
 
    @Override
-   public double[] getArmDefaultConfigurationJointAngles(ArmDefaultConfigurations armDefaultConfiguration, RobotSide robotSide)
+   public DefaultArmConfigurations getDefaultArmConfigurations()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return defaultArmConfigurations;
    }
-
-
 }
-
