@@ -21,6 +21,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -41,11 +43,13 @@ public class DropDebrisBehavior extends BehaviorInterface
 
    private double trajectoryTime = 2.5;
 
+   private final WholeBodyControllerParameters wholeBodyControllerParameters;
    private final DoubleYoVariable yoTime;
 
-   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, DoubleYoVariable yoTime)
+   public DropDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
+      this.wholeBodyControllerParameters = wholeBodyControllerParameters;
       this.yoTime = yoTime;
 
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
@@ -103,10 +107,19 @@ public class DropDebrisBehavior extends BehaviorInterface
 
    private void submitGoToDefaultPositionTasks(RobotSide side)
    {
-      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, trajectoryTime),
-            handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
-            new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side.getOppositeSide(), trajectoryTime), handPoseBehavior, yoTime));
+      RobotSide robotSide = RobotSide.LEFT;
+      double[] desiredArmJointAngles = wholeBodyControllerParameters.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME, robotSide);
+      
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime));
+      
+      robotSide = RobotSide.RIGHT;
+      desiredArmJointAngles = wholeBodyControllerParameters.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME, robotSide);
+
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime));
+//      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side, trajectoryTime),
+//            handPoseBehavior, yoTime));
+//      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,
+//            new HandPoseTask(PacketControllerTools.createGoToHomeHandPosePacket(side.getOppositeSide(), trajectoryTime), handPoseBehavior, yoTime));
 
       pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.RESET, fingerStateBehavior));
       pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side.getOppositeSide(), FingerState.RESET, fingerStateBehavior));
