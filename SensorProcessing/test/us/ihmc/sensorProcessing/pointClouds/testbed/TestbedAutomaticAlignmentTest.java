@@ -13,9 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ejml.ops.MatrixFeatures;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -28,6 +30,8 @@ public class TestbedAutomaticAlignmentTest {
    Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(this.getClass().
            getResourceAsStream("/testbed/estimatedToModel.xml"));
 
+   @Ignore
+   @QuarantinedTest("Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void expectedSolution() {
@@ -55,6 +59,8 @@ public class TestbedAutomaticAlignmentTest {
     * Should produce the approximately the solution when run multiple times
     */
 
+	@Ignore
+	@QuarantinedTest("Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void multipleRuns() {
