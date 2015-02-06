@@ -5,7 +5,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.BehaviorDispatcherTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
+@BambooPlan(planType = {BambooPlanType.Slow})
 public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
