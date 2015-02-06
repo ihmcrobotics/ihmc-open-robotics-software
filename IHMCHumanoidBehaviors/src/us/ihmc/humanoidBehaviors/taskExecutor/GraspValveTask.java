@@ -11,20 +11,32 @@ import us.ihmc.utilities.taskExecutor.Task;
 public class GraspValveTask implements Task
 {
    private final GraspValveBehavior graspValveBehavior;
+   private final ValveType valveType;
+   private final RigidBodyTransform valveTransformToWorld;
+   private final Vector3d approachDirection;
+   private final boolean graspValveRim;
 
+   private final boolean DEBUG = false;
+   
    public GraspValveTask(GraspValveBehavior graspValveBehavior, ValveType valveType, RigidBodyTransform valveTransformToWorld,
          Vector3d approachDirection, boolean graspValveRim)
    {
       this.graspValveBehavior = graspValveBehavior;
+      this.valveType = valveType;
+      this.valveTransformToWorld = valveTransformToWorld;
+      this.approachDirection = approachDirection;
+      this.graspValveRim = graspValveRim;
       
       graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);
+      graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);  // Must do this here, otherwise grasp pose may not be computed before other behaviors reference it
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      SysoutTool.println("entering graspValveBehavior");
+//      graspValveBehavior.initialize();
+//      graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);  //FIXME:  For some reason this causes next handPose to be start of approach grasp vector
+      SysoutTool.println("entering graspValveTask", DEBUG);
    }
 
    @Override
@@ -36,7 +48,7 @@ public class GraspValveTask implements Task
    @Override
    public void doTransitionOutOfAction()
    {
-      System.out.println("exiting walkToLocationTask");
+      SysoutTool.println("exiting graspValveTask", DEBUG);
       graspValveBehavior.finalize();
    }
 
