@@ -1,42 +1,35 @@
 package us.ihmc.kalman.imu;
 
+import static org.junit.Assert.*;
+
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 import Jama.Matrix;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2004</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
-public class TestQuaternionTools extends TestCase
+public class TestQuaternionTools
 {
    @SuppressWarnings("unused")
    private static final java.text.DecimalFormat decimalFormat = new java.text.DecimalFormat();
 
-   public TestQuaternionTools(String name)
+   @Before
+   public void setUp() throws Exception
    {
-      super(name);
    }
 
-   protected void setUp() throws Exception
+   @After
+   public void tearDown() throws Exception
    {
-      super.setUp();
    }
 
-   protected void tearDown() throws Exception
-   {
-      super.tearDown();
-   }
-
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testEuler2quat()
    {
 //    double[][] eulerArray = new double[][]{{-1.782}, {-2.762}, {-2.629}};
@@ -52,6 +45,8 @@ public class TestQuaternionTools extends TestCase
 //    }
    }
 
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testQuat2euler()
    {
 //    Matrix quat = null;
@@ -61,6 +56,10 @@ public class TestQuaternionTools extends TestCase
 //    /**@todo fill in the test code*/
    }
 
+   @Ignore
+   @QuarantinedTest("Pretty old and uses Roll Pitch Yaw which is always flaky.")
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testBackAndForthOne()
    {
       Random random = new Random(1776L);
@@ -121,9 +120,10 @@ public class TestQuaternionTools extends TestCase
       }
    }
 
-
-
-
+   @Ignore
+   @QuarantinedTest("Pretty old and uses Roll Pitch Yaw which is always flaky.")
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testBackAndForthTwo()
    {
       Random random = new Random(1776L);
@@ -196,5 +196,4 @@ public class TestQuaternionTools extends TestCase
    {
       return (Math.abs(a - b) <= epsilon);
    }
-
 }
