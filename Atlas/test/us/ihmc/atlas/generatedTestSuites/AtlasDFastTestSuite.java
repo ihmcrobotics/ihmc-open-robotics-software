@@ -3,7 +3,7 @@ package us.ihmc.atlas.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
+import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(Suite.class)
@@ -18,7 +18,7 @@ public class AtlasDFastTestSuite
 {
    public static void main(String[] args)
    {
-      new JUnitTestSuiteRunner(AtlasDFastTestSuite.class);
+      new BambooTestSuiteRunner(AtlasDFastTestSuite.class);
    }
 }
 

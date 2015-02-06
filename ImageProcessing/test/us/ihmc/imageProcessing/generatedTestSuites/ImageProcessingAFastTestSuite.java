@@ -3,7 +3,7 @@ package us.ihmc.imageProcessing.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
+import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(Suite.class)
@@ -24,7 +24,7 @@ public class ImageProcessingAFastTestSuite
 {
    public static void main(String[] args)
    {
-      new JUnitTestSuiteRunner(ImageProcessingAFastTestSuite.class);
+      new BambooTestSuiteRunner(ImageProcessingAFastTestSuite.class);
    }
 }
 
