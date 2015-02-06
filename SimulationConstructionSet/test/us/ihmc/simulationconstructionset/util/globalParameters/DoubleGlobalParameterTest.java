@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
-public class DoubleGlobalParameterTest    // extends TestCase
+public class DoubleGlobalParameterTest
 {
    private static final boolean VERBOSE = false;
    private final double DEFAULT_VALUE = 11.99;
