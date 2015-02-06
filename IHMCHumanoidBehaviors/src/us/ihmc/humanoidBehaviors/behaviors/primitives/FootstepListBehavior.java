@@ -100,11 +100,13 @@ public class FootstepListBehavior extends BehaviorInterface
          boolean isLastFootstep = lastFootstepStatus.getFootstepIndex() >= numberOfFootsteps.getIntegerValue() - 1;
 
          if (isLastFootstep)
+         {
             hasLastStepBeenReached.set(true);
-         
-         if (DEBUG)
-            SysoutTool.println("isLastFootstep returning: " + isLastFootstep + ", total nb of footsteps: " + numberOfFootsteps + ", current footstep: "
-                  + lastFootstepStatus.getFootstepIndex());
+            SysoutTool.println("FootstepListBehavior is Done.", DEBUG);
+         }
+
+         SysoutTool.println("isLastFootstep: " + isLastFootstep + ", total nb of footsteps: " + numberOfFootsteps + ", current footstep: "
+               + lastFootstepStatus.getFootstepIndex(), DEBUG);
       }
    }
 
@@ -157,6 +159,7 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       sendPacketToController(new PauseCommand(false));
       isPaused.set(false);
+      isStopped.set(false);
    }
 
    @Override
@@ -165,16 +168,7 @@ public class FootstepListBehavior extends BehaviorInterface
       if (lastFootstepStatus == null)
          return false;
 
-      if (DEBUG)
-         System.out.println("FootstepStatus isn't null");
-
-      boolean isCompleted = lastFootstepStatus.isDoneWalking();
-      if (DEBUG)
-         System.out.println("isCompleted returning: " + isCompleted);
-
-      boolean isDone = hasLastStepBeenReached.getBooleanValue() && isCompleted && !isPaused.getBooleanValue();
-      if (DEBUG)
-         System.out.println("isDone() returning: " + isDone);
+      boolean isDone = lastFootstepStatus.isDoneWalking() && hasLastStepBeenReached.getBooleanValue() && !isPaused.getBooleanValue();
 
       return isDone;
    }
