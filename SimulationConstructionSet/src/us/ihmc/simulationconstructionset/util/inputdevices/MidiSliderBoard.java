@@ -180,6 +180,7 @@ public class MidiSliderBoard implements ExitActionListener
       if (DEBUG_CLOSE_AND_DISPOSE) System.out.println("Closing And Disposing virtualSliderBoard");
       if (virtualSliderBoard != null)
          virtualSliderBoard.closeAndDispose();
+      
       if (inDevice != null)
       {
          try
@@ -191,6 +192,7 @@ public class MidiSliderBoard implements ExitActionListener
             System.err.println("Exception when trying to close inDevice in MidiSliderBoard.closeAndDispose()");
          }
       }
+      
       if (midiOut != null)
       {
          try
@@ -202,8 +204,11 @@ public class MidiSliderBoard implements ExitActionListener
             System.err.println("Exception when trying to close midiOut in MidiSliderBoard.closeAndDispose()");
          }
       }
-      
-      transmitter.closeAndDispose();
+
+      if (transmitter != null)
+      {
+         transmitter.closeAndDispose();
+      }
 
       virtualSliderBoard = null;
       inDevice = null;
