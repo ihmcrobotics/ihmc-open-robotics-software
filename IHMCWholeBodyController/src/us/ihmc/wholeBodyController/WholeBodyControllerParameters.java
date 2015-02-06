@@ -8,8 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.defaultConfigurations.ArmDefaultConfigurations;
+import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public interface WholeBodyControllerParameters
 {
@@ -35,5 +34,5 @@ public interface WholeBodyControllerParameters
 	
 	public abstract WholeBodyIkSolver createWholeBodyIkSolver();
 	
-	public double[] getArmDefaultConfigurationJointAngles(ArmDefaultConfigurations armDefaultConfiguration, RobotSide robotSide);
+	public DefaultArmConfigurations getDefaultArmConfigurations();
 }
