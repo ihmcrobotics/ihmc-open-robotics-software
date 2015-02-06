@@ -46,7 +46,7 @@ import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.wholeBodyController.defaultConfigurations.ArmDefaultConfigurations;
+import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 import com.jme3.math.Transform;
 
@@ -326,7 +326,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public double[] getArmDefaultConfigurationJointAngles(ArmDefaultConfigurations armDefaultConfiguration, RobotSide robotSide)
+   public DefaultArmConfigurations getDefaultArmConfigurations()
    {
       // TODO Auto-generated method stub
       return null;
