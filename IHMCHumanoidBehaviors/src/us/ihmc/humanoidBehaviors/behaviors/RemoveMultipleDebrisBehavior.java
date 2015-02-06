@@ -46,7 +46,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
    private final WholeBodyControllerParameters wholeBodyControllerParameters;
    private final SideDependentList<WristForceSensorFilteredUpdatable> wristSensors;
-   
+
    public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters, WalkingControllerParameters walkingControllerParameters)
@@ -71,7 +71,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    {
       if (!isDone.getBooleanValue() && !haveInputsBeenSet.getBooleanValue())
          checkForNewInputs();
-      if(haveInputsBeenSet.getBooleanValue())
+      if (haveInputsBeenSet.getBooleanValue())
          pipeLine.doControl();
    }
 
@@ -92,20 +92,23 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    private void submitArmsSafePosition()
    {
       RobotSide robotSide = RobotSide.LEFT;
-      double[] desiredArmJointAngles = wholeBodyControllerParameters.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME, robotSide);
-      
-      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime));
-      
-      robotSide = RobotSide.RIGHT;
-      desiredArmJointAngles = wholeBodyControllerParameters.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME, robotSide);
+      double[] desiredArmJointAngles = wholeBodyControllerParameters.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
+            ArmConfigurations.COMPACT_HOME, robotSide);
 
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime));
-      
+
+      robotSide = RobotSide.RIGHT;
+      desiredArmJointAngles = wholeBodyControllerParameters.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME,
+            robotSide);
+
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime));
+
    }
 
    private void submitRemoveDebrisTasks(DebrisData debrisData)
    {
-      pipeLine.submitSingleTaskStage(new RemovePieceOfDebrisTask(removePieceOfDebrisBehavior, debrisData.getDebrisTransform(), debrisData.getGraspVectorPosition(), debrisData.getGraspVector()));
+      pipeLine.submitSingleTaskStage(new RemovePieceOfDebrisTask(removePieceOfDebrisBehavior, debrisData.getDebrisTransform(), debrisData
+            .getGraspVectorPosition(), debrisData.getGraspVector()));
    }
 
    private void sortDebrisFromCloserToFarther()
@@ -115,7 +118,6 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
       for (int i = 0; i < debrisDataList.size(); i++)
       {
-
          DebrisData currentDebrisData = debrisDataList.get(i);
          currentObjectPosition.changeFrame(ReferenceFrame.getWorldFrame());
          currentObjectPosition.set(currentDebrisData.getGraspVectorPosition());
@@ -174,7 +176,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      if(pipeLine.isDone())
+      if (pipeLine.isDone())
          isDone.set(true);
       return isDone.getBooleanValue();
    }
@@ -202,5 +204,4 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    {
       return haveInputsBeenSet.getBooleanValue();
    }
-
 }
