@@ -9,7 +9,10 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class
 })
 
 public class AtlasFFastTestSuite

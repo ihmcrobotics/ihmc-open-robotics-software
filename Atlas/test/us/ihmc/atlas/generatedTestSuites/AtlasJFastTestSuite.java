@@ -9,9 +9,9 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class
+   us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class,
+   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
+   us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class
 })
 
 public class AtlasJFastTestSuite

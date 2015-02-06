@@ -9,7 +9,7 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
 })
 
 public class AtlasHFastTestSuite
