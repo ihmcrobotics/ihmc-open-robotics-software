@@ -61,8 +61,9 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
       this.fullRobotModel = fullRobotModel;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames.getMidFeetZUpFrame(), wholeBodyControllerParameters, yoTime, useWholeBodyIK);
-      dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, referenceFrames, wholeBodyControllerParameters,yoTime);
+      graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames.getMidFeetZUpFrame(),
+            wholeBodyControllerParameters, yoTime, useWholeBodyIK);
+      dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, referenceFrames, wholeBodyControllerParameters, yoTime);
       walkCloseToObjectBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
 
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
