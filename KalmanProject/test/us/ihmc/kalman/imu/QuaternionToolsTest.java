@@ -13,7 +13,7 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 import Jama.Matrix;
 
-public class TestQuaternionTools
+public class QuaternionToolsTest
 {
    @SuppressWarnings("unused")
    private static final java.text.DecimalFormat decimalFormat = new java.text.DecimalFormat();

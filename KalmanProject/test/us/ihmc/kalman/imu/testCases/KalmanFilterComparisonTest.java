@@ -8,7 +8,7 @@ import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
-public class KalmanFilterComparison
+public class KalmanFilterComparisonTest
 {
    @SuppressWarnings("unused")
    private static final double DT = 0.001;
@@ -34,7 +34,7 @@ public class KalmanFilterComparison
 //    ret.reset();
 //    return ret;
 // }
-//
+   
 // private FastQuaternionBasedFullIMUKalmanFilter createAndInitFastKalman()
 //{
 // FastQuaternionBasedFullIMUKalmanFilter ret = new FastQuaternionBasedFullIMUKalmanFilter(DT);
@@ -52,7 +52,6 @@ public class KalmanFilterComparison
 //
 // return ret;
 //}
-
 
    protected void compareFilters(QuaternionBasedJamaFullIMUKalmanFilter filterOne, QuaternionBasedJamaFullIMUKalmanFilter filterTwo)
    {
