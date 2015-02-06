@@ -18,6 +18,7 @@ import org.junit.Test;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
@@ -115,7 +116,7 @@ public class SmoothICPComputerTest
 
       int maxNumberOfConsideredFootsteps = 4;
 
-      createVisualizers(maxNumberOfConsideredFootsteps);
+      createVisualizers(maxNumberOfConsideredFootsteps, visualize);
 
       double doubleSupportFirstStepFraction = 0.5;
 
@@ -213,7 +214,7 @@ public class SmoothICPComputerTest
 
          if (USE_ASSERTS)
          {
-            JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 1e-3);
+            JUnitTools.assertTuple3dEquals(icpPosition, initialICPPosition, 3e-3);
             JUnitTools.assertTuple3dEquals(icpVelocity, initialICPVelocity, 1e-2);
             JUnitTools.assertTuple3dEquals(ecmpPosition, initialECMPPosition, 3e-3);
          }
@@ -274,7 +275,7 @@ public class SmoothICPComputerTest
 
       int maxNumberOfConsideredFootsteps = 4;
 
-      createVisualizers(maxNumberOfConsideredFootsteps);
+      createVisualizers(maxNumberOfConsideredFootsteps, visualize);
 
       double doubleSupportFirstStepFraction = 0.5;
 
@@ -730,13 +731,18 @@ public class SmoothICPComputerTest
    }
 
 
-   private void createVisualizers(int maxNumberOfConsideredFootsteps)
+   private void createVisualizers(int maxNumberOfConsideredFootsteps, boolean visualize)
    {
 //      visualize = true;
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       Robot robot = new Robot("TestRobot");
-      scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(true);
+      parameters.setShowSplashScreen(visualize);
+      parameters.setShowWindows(visualize);
+      
+      scs = new SimulationConstructionSet(robot, parameters);
 
       scs.setDT(1e-3, 1);
       scs.changeBufferSize(16000);
