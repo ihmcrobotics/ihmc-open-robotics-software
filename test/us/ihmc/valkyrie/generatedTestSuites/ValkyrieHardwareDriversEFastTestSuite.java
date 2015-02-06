@@ -9,8 +9,8 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class,
-   us.ihmc.valkyrie.ValkyriePushRecoveryWalkingTest.class
+   us.ihmc.valkyrie.ValkyriePushRecoveryMultiStepTest.class,
+   us.ihmc.valkyrie.ValkyriePushRecoveryStandingTest.class
 })
 
 public class ValkyrieHardwareDriversEFastTestSuite
