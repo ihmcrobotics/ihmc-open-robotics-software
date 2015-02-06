@@ -45,7 +45,7 @@ public class BambooVideosSpy
 
    public static void spyOnEraseableBambooDataAndVideosDirectory()
    {
-      int numberOfRowsOfVideo = 4;
+      int numberOfRowsOfVideo = 3;
       int numberOfColumnsOfVideo = 2;
       MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker = new MultipleVideoDecoderAndPlaybacker(numberOfRowsOfVideo, numberOfColumnsOfVideo);
 
