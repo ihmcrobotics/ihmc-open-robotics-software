@@ -29,6 +29,7 @@ public class BambooVideosSpy
          }
 
          File mostRecentDirectory = BambooTools.getSVNDirectoryWithMostRecentBambooDataAndVideos();
+         
          System.out.println("Most recent directory = " + mostRecentDirectory);
 
          showMostRecentMovies(mostRecentDirectory, multipleVideoDecoderAndPlaybacker);
@@ -45,13 +46,15 @@ public class BambooVideosSpy
 
    public static void spyOnEraseableBambooDataAndVideosDirectory()
    {
-      int numberOfRowsOfVideo = 3;
-      int numberOfColumnsOfVideo = 2;
+      int numberOfRowsOfVideo = 4;
+      int numberOfColumnsOfVideo = 11;
       MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker = new MultipleVideoDecoderAndPlaybacker(numberOfRowsOfVideo, numberOfColumnsOfVideo);
 
       while (true)
       {
          File mostRecentDirectory = BambooTools.getEraseableDirectoryWithMostRecentBambooDataAndVideos();
+//         File mostRecentDirectory = new File("V:/20150204");
+
          System.out.println("Most recent directory = " + mostRecentDirectory);
 
          showMostRecentMovies(mostRecentDirectory, multipleVideoDecoderAndPlaybacker);
@@ -69,9 +72,6 @@ public class BambooVideosSpy
    public static void showMostRecentMovies(File movieDirectory, MultipleVideoDecoderAndPlaybacker multipleVideoDecoderAndPlaybacker)
    {
       BambooTools.reportOutMessage("Showing Most Recent Movie in " + movieDirectory);
-
-//    String javaLibraryPath = System.getProperty("java.library.path");
-//    System.out.println("java.library.path = " + javaLibraryPath);
 
       FileFilter filter = new FileFilter()
       {
@@ -130,12 +130,13 @@ public class BambooVideosSpy
 
          try
          {
-          multipleVideoDecoderAndPlaybacker.playVideo(i, movieToPlay.getAbsolutePath());
+            multipleVideoDecoderAndPlaybacker.playVideo(i, movieToPlay.getAbsolutePath());
          }
-         catch(Exception e)
+         catch (Exception e)
          {
-          System.err.println("Could not play movie " + movieToPlay.getAbsolutePath());
+            System.err.println("Could not play movie " + movieToPlay.getAbsolutePath());
          }
+
          BambooTools.reportOutMessage("Done Playing Movie " + movieToPlay);
 
       }
