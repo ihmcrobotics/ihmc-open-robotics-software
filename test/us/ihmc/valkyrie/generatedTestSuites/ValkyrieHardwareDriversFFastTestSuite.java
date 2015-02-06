@@ -9,14 +9,15 @@ import us.ihmc.utilities.code.unitTesting.runner.JUnitTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieObstacleCourseTrialsTerrainTest.class
+   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class,
+   us.ihmc.valkyrie.ValkyriePushRecoveryWalkingTest.class
 })
 
-public class ValkyrieHardwareDriversDFastTestSuite
+public class ValkyrieHardwareDriversFFastTestSuite
 {
    public static void main(String[] args)
    {
-      new JUnitTestSuiteRunner(ValkyrieHardwareDriversDFastTestSuite.class);
+      new JUnitTestSuiteRunner(ValkyrieHardwareDriversFFastTestSuite.class);
    }
 }
 
