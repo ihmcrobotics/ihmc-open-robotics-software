@@ -47,7 +47,7 @@ public class GraspValveBehavior extends BehaviorInterface
    private FullRobotModel fullRobotModel;
 
    private static final double MIDPOSE_OFFSET_FROM_FINALPOSE = 0.3;
-   private static final double WRIST_OFFSET_FROM_HAND = 0.05; // 0.14 //0.11 , wrist to hand 0.11
+   private static final double WRIST_OFFSET_FROM_HAND = 0.1; // 0.05
 
    private DoubleYoVariable yoTime;
 
