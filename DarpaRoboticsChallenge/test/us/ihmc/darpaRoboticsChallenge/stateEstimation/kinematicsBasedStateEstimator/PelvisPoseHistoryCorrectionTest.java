@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -50,6 +51,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -317,6 +319,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
+	@Ignore
+	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
@@ -342,6 +346,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
+	@Ignore
+	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
@@ -368,6 +374,9 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
+	
+	@Ignore
+	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
@@ -422,6 +431,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
    }
 
+   @Ignore
+   @QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException
