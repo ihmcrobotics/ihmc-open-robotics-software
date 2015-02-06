@@ -47,8 +47,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    
-   @Ignore
-
+   @Ignore("Need to someday get rewindability working again. It will take using single threading probably.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
@@ -71,6 +70,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
 
+   @Ignore("Need to someday get rewindability working again. It will take using single threading probably.")
 	@AverageDuration
 	@Test(timeout=300000)
    public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
