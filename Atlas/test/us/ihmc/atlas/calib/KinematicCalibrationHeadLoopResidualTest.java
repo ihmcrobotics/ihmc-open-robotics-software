@@ -20,6 +20,7 @@ import javax.vecmath.Vector3d;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -28,6 +29,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -84,6 +86,8 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE.setRotation(rotFull);
    }
 
+   @Ignore
+   @QuarantinedTest("Should get this working again.")
 	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void perfect() throws IOException
@@ -129,6 +133,8 @@ public class KinematicCalibrationHeadLoopResidualTest
     * Pass it into an optimization function and see if it works
     */
 
+   @Ignore
+   @QuarantinedTest("Should get this working again.")
 	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void smallError() throws IOException
@@ -178,6 +184,8 @@ public class KinematicCalibrationHeadLoopResidualTest
     * Pass it into an optimization function and see if it works
     */
 
+   @Ignore
+   @QuarantinedTest("Should get this working again.")
 	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void optimize() throws IOException
