@@ -28,7 +28,8 @@ public abstract class ConvexOptimizationAdapterTest
    
    @SuppressWarnings("unchecked")
    @Ignore
-   @Test
+   @AverageDuration
+   @Test(timeout = 300000)
    public void qpsFileTest() throws IOException
    {
 
