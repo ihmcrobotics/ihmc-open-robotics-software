@@ -17,6 +17,8 @@ import com.jme3.system.Timer;
 
 public class PBOAwtPanelsContext implements JmeContext
 {
+   private static final boolean DEBUG = false;
+   
    protected JmeContext actualContext;
    protected AppSettings settings = new AppSettings(true);
    protected SystemListener listener;
@@ -197,11 +199,11 @@ public class PBOAwtPanelsContext implements JmeContext
 
          if (lastThrottleState)
          {
-            System.out.println(getClass().getSimpleName() + ": Throttling update loop.");
+        	 printIfDebug(getClass().getSimpleName() + ": Throttling update loop.");
          }
          else
          {
-            System.out.println(getClass().getSimpleName() + ": Ceased throttling update loop.");
+        	 printIfDebug(getClass().getSimpleName() + ": Ceased throttling update loop.");
          }
       }
 
@@ -219,7 +221,7 @@ public class PBOAwtPanelsContext implements JmeContext
       listener.update();
    }
 
-   boolean alreadyDestroying = false;
+boolean alreadyDestroying = false;
    
    private void destroyInThread()
    {
@@ -298,6 +300,11 @@ public class PBOAwtPanelsContext implements JmeContext
    public void restart()
    {
       // only relevant if changing pixel format.
+   }
+   
+   private void printIfDebug(String string) 
+   {
+	   if (DEBUG) System.out.println(string);
    }
 
 }
