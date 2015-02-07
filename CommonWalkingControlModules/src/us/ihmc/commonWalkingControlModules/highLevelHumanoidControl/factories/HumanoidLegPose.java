@@ -46,7 +46,7 @@ public enum HumanoidLegPose
          case HIPS_OUT_A_BIT_ROTATED_OUT:
             return new double[]{-0.15, -0.2, -0.5, -0.8, 0.0, 0.0};
          case LEGS_STRAIGHT_KNEES_FULLY_BENT:
-           return new double[]{0.0, -0.2, -0.5, -1.7, 0.0, 0.0};
+           return new double[]{0.0, -0.2, -0.5, -1.5, 0.0, 0.0};
          case STAND_PREP_LEGS_OUT_AND_FORWARD:
            return new double[]{0.0, -0.2, -0.5, -0.7, 0.0, 0.0};
          case LEGS_OUT_FORWARD_WITH_BENT_KNEES:
