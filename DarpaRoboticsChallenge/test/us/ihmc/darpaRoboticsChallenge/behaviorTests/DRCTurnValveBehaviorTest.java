@@ -151,9 +151,9 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
-      assertTrue(success);
-
       success = success & turnValveBehavior.isDone();
+      
+      assertTrue(success);
       assertTrue(finalValveClosePercentage > initialValveClosePercentage);
       assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
 
