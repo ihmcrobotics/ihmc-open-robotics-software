@@ -31,7 +31,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    }
 
 	@AverageDuration(duration = 0.7)
-	@Test(timeout = 3000)
+	@Test(timeout = 300000)
    public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException
    {
       try
