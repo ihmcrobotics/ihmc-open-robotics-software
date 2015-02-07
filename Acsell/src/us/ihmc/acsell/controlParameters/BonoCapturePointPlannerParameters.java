@@ -105,12 +105,12 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	@Override
 	public double getCapturePointInFromFootCenterDistance()
 	{
-		return 0.01;
+		return 0.005;
 	}
 	
 	@Override
 	public double getCapturePointForwardFromFootCenterDistance()
 	{
-		return 0.02;
+		return 0.01;
 	}
 }

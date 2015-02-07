@@ -17,9 +17,17 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
+import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class StepprDashboard extends JPanel implements PlaybackListener
@@ -51,6 +59,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       });
       
       scs.addButton(showDashboard);
+      scs.getStandardSimulationGUI().selectPanel("Dashboard");
    }
    
    private StepprDashboard(YoVariableHolder yoVariableHolder)
@@ -60,8 +69,8 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       createLogicButtons(yoVariableHolder);
       createMotorButtons(yoVariableHolder);
       createCalibrationButtons(yoVariableHolder);
-
       createTable(yoVariableHolder);
+      createInitializationButtons(yoVariableHolder);
 
    }
 
@@ -94,6 +103,78 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       });
       calibrationPanel.add(tareSensors);
       add(calibrationPanel);
+   }
+   
+   
+   private void createInitializationButtons(YoVariableHolder yoVariableHolder)
+   {
+      JPanel initializationPanel = new JPanel();
+      initializationPanel.setLayout(new BoxLayout(initializationPanel, BoxLayout.X_AXIS));
+      final BooleanYoVariable enabledOutput = (BooleanYoVariable)yoVariableHolder.getVariable("StepprOutputWriter","enableOutput");
+      final BooleanYoVariable startStandPrep = (BooleanYoVariable)yoVariableHolder.getVariable("StepprStandPrep","startStandPrep");
+      final EnumYoVariable<HighLevelState>  requestedHighLevelState = (EnumYoVariable<HighLevelState>)yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
+      final DoubleYoVariable controlRatio = (DoubleYoVariable) yoVariableHolder.getVariable("StepprOutputWriter","controlRatio");
+      
+      final DoubleYoVariable leftFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
+      final DoubleYoVariable rightFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("r_footStateEstimatorWrenchBasedFootSwitch","r_footStateEstimatorFootForceMag");
+            
+      JButton enabledOutputButton = new JButton("Enable torque output");
+      enabledOutputButton.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            enabledOutput.set(true);
+         }
+      });
+      initializationPanel.add(enabledOutputButton);
+      JButton startStandPrepButton = new JButton("Start StandPrep");
+      startStandPrepButton.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            startStandPrep.set(true);;
+         }
+      });
+      initializationPanel.add(startStandPrepButton);
+      
+      final JButton switchToWalk = new JButton("Switch to Walk");
+      switchToWalk.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            requestedHighLevelState.set(HighLevelState.WALKING);
+            ThreadTools.sleep(500);
+            requestedHighLevelState.set(HighLevelState.WALKING);
+            ThreadTools.sleep(500);
+            controlRatio.set(1.0);
+         }
+      });
+      initializationPanel.add(switchToWalk);
+      
+      VariableChangedListener robotOnGroundChecker = new VariableChangedListener()
+      {
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if((leftFootForce.getDoubleValue() + rightFootForce.getDoubleValue()) > 600.0)
+               switchToWalk.setBackground(Color.GREEN);
+         else
+               switchToWalk.setBackground(Color.RED);            
+         }
+      };
+      leftFootForce.addVariableChangedListener(robotOnGroundChecker);
+      rightFootForce.addVariableChangedListener(robotOnGroundChecker);
+
+      add(initializationPanel);
+      
+      
    }
 
    private void createLogicButtons(YoVariableHolder yoVariableHolder)

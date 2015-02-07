@@ -51,7 +51,7 @@ public class StepprControllerFactory
 {
    private static final double gravity = -9.80; // From xsens
 
-   private static final WalkingProvider walkingProvider = WalkingProvider.VELOCITY_HEADING_COMPONENT;
+   private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {
