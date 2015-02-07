@@ -36,6 +36,7 @@ import com.jme3.texture.plugins.AWTLoader;
 
 public class JMEAppearanceMaterial
 {
+   private static final boolean DEBUG = false;
 
    private static final int alphaMapSize = 512;
    private static final String PHONG_ILLUMINATED_JME_MAT = "Common/MatDefs/Light/Lighting.j3md";
@@ -160,6 +161,7 @@ public class JMEAppearanceMaterial
       try
       {
          matPath = file.getCanonicalPath();
+         printIfDebug("updateOgreMaterials: matPath = " + matPath);
       }
       catch (IOException e)
       {
@@ -199,16 +201,15 @@ public class JMEAppearanceMaterial
 
       String ogreShaderDir = updateGazeboMaterialCache();
 
-      for (String path : appearanceDefinition.getUrls())
+      for (String appearanceDefinitionURL : appearanceDefinition.getUrls())
       {
-         if (path.contains("axl"))
+         if (appearanceDefinitionURL.contains("axl"))
          {
-            //TODO Fix this, I'm just too tired to do it tonight.
-            updateOgreMaterials(new File(JMEAppearanceMaterial.class.getClassLoader().getResource(path).getFile()), materials, contentMan);
+            updateOgreMaterials(new File(JMEAppearanceMaterial.class.getClassLoader().getResource(appearanceDefinitionURL).getFile()), materials, contentMan);
          }
          else
          {
-            String pathname = ogreShaderDir + path;
+            String pathname = ogreShaderDir + appearanceDefinitionURL;
             File file = new File(pathname);
             if (!file.exists())
             {
@@ -254,7 +255,13 @@ public class JMEAppearanceMaterial
       {
          String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
         
-         File cacheDir = new File(temporaryDirectoryPathName + File.separator + "SCSCache" + File.separator + "ogre_materials");
+         printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPathName);
+         
+         String ogreCacheDirectoryName = temporaryDirectoryPathName + File.separator + "SCSCache" + File.separator + "ogre_materials";
+         
+         printIfDebug("ogreCacheDirectoryName = " + ogreCacheDirectoryName);
+
+         File cacheDir = new File(ogreCacheDirectoryName);
          if (!cacheDir.exists())
          {
             cacheDir.mkdir();
@@ -274,6 +281,11 @@ public class JMEAppearanceMaterial
          return GAZEBO_MATERIAL_CACHE;
 
       }
+   }
+
+   private static void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);
    }
 
    public static Material createMaterialFromBufferedImage(JMEAssetLocator contentMan, BufferedImage bufferedImage)
