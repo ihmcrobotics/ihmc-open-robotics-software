@@ -46,6 +46,13 @@ public class JoystickUpdater implements Runnable
       throw new RuntimeException("joystick not found");
    }
    
+   public void listComponents()
+   {
+      for(Component component: joystickController.getComponents())
+      {
+         System.out.println(component.getIdentifier().getName());
+      }
+   }
    
    public Component findComponent(Identifier identifier)
    {
@@ -54,7 +61,7 @@ public class JoystickUpdater implements Runnable
          if (component.getIdentifier().equals(identifier))
             return component;
       }
-
+      
       throw new RuntimeException("component with identifier " + identifier + " not found");
    }
    
