@@ -137,7 +137,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       setupJoyStick(registry);
    }
    
-   private static void setupJoyStick(YoVariableHolder registry)
+  public static void setupJoyStick(YoVariableHolder registry)
    {
       final JoystickUpdater joystickUpdater = new JoystickUpdater();
       Thread thread = new Thread(joystickUpdater);
@@ -146,9 +146,11 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       double deadZone = 0.02;
 
       DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.3,
-            0.3, deadZone, true));
-      final double minVelocityX = -0.1;
+      if(desiredVelocityX==null || joystickUpdater==null)
+         return;
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.4,
+            0.4, deadZone, true));
+      final double minVelocityX = -0.10;
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
 
@@ -161,16 +163,17 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       });
 
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.1,
-            0.1, deadZone, true));
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.2,
+            0.2, deadZone, true));
 
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
-            -0.1, 0.1, deadZone, true));
+            -0.2, 0.2, deadZone, true));
+      joystickUpdater.listComponents();
       
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
-      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.BASE), false));
-
+      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
+      
    }
 
    private class StandPrepVariables
