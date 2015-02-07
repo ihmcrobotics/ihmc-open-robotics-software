@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
@@ -46,8 +47,8 @@ public class GraspValveBehavior extends BehaviorInterface
 
    private FullRobotModel fullRobotModel;
 
-   private static final double MIDPOSE_OFFSET_FROM_FINALPOSE = 0.3;
-   private static final double WRIST_OFFSET_FROM_HAND = 0.1; // 0.05
+   private final double MIDPOSE_OFFSET_FROM_FINALPOSE = 0.3;
+   private final double WRIST_OFFSET_FROM_HAND = 0.1; // 0.05
 
    private DoubleYoVariable yoTime;
 

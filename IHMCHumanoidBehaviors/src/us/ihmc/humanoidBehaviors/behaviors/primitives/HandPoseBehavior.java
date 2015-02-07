@@ -19,7 +19,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandPoseBehavior extends BehaviorInterface
 {
-   private static final boolean DEBUG = false;
+   private final boolean DEBUG = false;
 
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private Status status;

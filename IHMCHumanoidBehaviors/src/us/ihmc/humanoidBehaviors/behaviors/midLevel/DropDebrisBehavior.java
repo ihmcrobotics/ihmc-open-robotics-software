@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
