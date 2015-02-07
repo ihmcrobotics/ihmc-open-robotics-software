@@ -75,8 +75,8 @@ public class AtlasSDFVerificationTest
    private static final double SIM_DURATION = 5.0;
 
 
-	@AverageDuration(duration = 7.2)
-	@Test(timeout = 21637)
+	@AverageDuration(duration = 10.4)
+	@Test(timeout = 41302)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage();
