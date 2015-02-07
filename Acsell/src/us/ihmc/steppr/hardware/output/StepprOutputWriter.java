@@ -22,6 +22,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprOutputWriter implements DRCOutputWriter
 {
+   boolean USE_SPRING = false;
+
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprOutputWriter");
 
    private final StepprCommand command = new StepprCommand(registry);
@@ -174,7 +176,6 @@ public class StepprOutputWriter implements DRCOutputWriter
 
 
             tauControllerOutput.get(joint).set(tau);
-            boolean USE_SPRING = false;
             if(USE_SPRING)
             {
                double tauSpring = 0;
@@ -238,8 +239,8 @@ public class StepprOutputWriter implements DRCOutputWriter
 
    private double calcSpringTorque(StepprJoint joint, double q)
    {
-      final double springConstant = 350; //400.0;
-      final double springEngageJointAngle = 0.085; //0.05;
+      final double springConstant = 300.0;//350; //400.0;
+      final double springEngageJointAngle = 0.0;//0.085; //0.05;
       switch (joint)
       {
       case LEFT_HIP_X:

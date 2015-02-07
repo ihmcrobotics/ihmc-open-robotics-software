@@ -190,7 +190,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getLegLength()
    {
-      return 1.01 * BonoPhysicalProperties.legLength;
+      return BonoPhysicalProperties.legLength;
    }
 
    @Override
@@ -209,7 +209,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getInPlaceWidth()
    {
-      return 0.30;
+      return 0.35;
    }
 
    @Override
@@ -227,7 +227,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMinStepWidth()
    {
-      return 0.3;
+      return 0.35;
    }
 
    @Override
@@ -414,12 +414,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-      double kpXY = 100.0;
+      double kpXY = 75.0;
       double kpZ = 100.0; // 200.0 Trying to smash the ground there
-      double zetaXYZ = 0.7;
+      double zetaXYZ = 0.3;
       double kpXYOrientation = 100.0; // 300 not working
       double kpZOrientation = 100.0;
-      double zetaXYOrientation = 0.7;
+      double zetaXYOrientation = 0.3;
       double zetaZOrientation = runningOnRealRobot ? 0.3 : 0.7;
       double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
@@ -520,15 +520,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public YoSE3PIDGains createSupportFootControlGains(YoVariableRegistry registry)
    {
-      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SupportFoot", registry);
-
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      gains.setOrientationDerivativeGains(5.0, 0.0, 0.0);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
-
-      return gains;
+      return null;
    }
 
    @Override
@@ -553,7 +545,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getDefaultTransferTime()
    {
       if (runningOnRealRobot)
-         return 0.3;////1.0; //.5;
+         return 0.15;//0.3;////1.0; //.5;
       return 0.25; // 1.5; //
    }
 
@@ -561,7 +553,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getDefaultSwingTime()
    {
       if (runningOnRealRobot)
-         return 0.7; //1.0
+         return 1.0;//0.7; //1.0
       return 0.6; // 1.5; //
    }
 
@@ -661,7 +653,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getContactThresholdForce()
    {
-      return 30.0;
+      return 90.0;
    }
 
    @Override

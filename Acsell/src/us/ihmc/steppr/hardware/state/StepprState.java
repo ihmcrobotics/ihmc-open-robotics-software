@@ -24,7 +24,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 public class StepprState
 {
    private static final int[] leftFootForceSensorsToUse = { 1, 1, 2, 3 }; //leftMost sensor0 is broken
-   private static final int[] rightFootForceSensorsToUse = { 0, 1, 2, 3 };
+   private static final int[] rightFootForceSensorsToUse = { 0, 1, 2, 2 }; //rightMost sensor3 is broken
    private static final boolean USE_STRAIN_GAUGES_FOR_Z_FORCE = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("Steppr");
