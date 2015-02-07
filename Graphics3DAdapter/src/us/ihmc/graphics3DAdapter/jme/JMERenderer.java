@@ -459,6 +459,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       
       synchronized (graphicsConch)
       {
+         if (alreadyClosing) return;
+
          for (JMEGraphics3DNode jmeGraphicsNode : jmeGraphicsNodesListView)
          {
             jmeGraphicsNode.update();

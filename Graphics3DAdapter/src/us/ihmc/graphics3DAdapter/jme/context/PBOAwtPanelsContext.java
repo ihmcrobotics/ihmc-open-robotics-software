@@ -218,7 +218,7 @@ public class PBOAwtPanelsContext implements JmeContext
          }
       }
 
-      listener.update();
+      if (!alreadyDestroying) listener.update();
    }
 
 boolean alreadyDestroying = false;
