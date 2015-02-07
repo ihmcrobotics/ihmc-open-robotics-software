@@ -151,32 +151,32 @@ public class AtlasWholeBodyIkSolverTest
 
    }
 
-	@AverageDuration(duration = 0.2)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.6)
+	@Test(timeout = 11715)
    public void testRightHandIn3PModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
    }
 	
-	@AverageDuration(duration = 1.2)
-   @Test(timeout = 3498)
+	@AverageDuration(duration = 2.3)
+   @Test(timeout = 16751)
    public void testRightHandIn3PMode()
    {
      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
    }
 
-	@AverageDuration(duration = 0.2)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.5)
+	@Test(timeout = 11563)
    public void testLeftHandIn3PModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
    }
 	
-	@AverageDuration(duration = 1.6)
-   @Test(timeout = 4818)
+	@AverageDuration(duration = 2.5)
+   @Test(timeout = 17630)
    public void testLeftHandIn3PMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray =  createHalfCylinderOfTargetPoints(RobotSide.LEFT);
@@ -185,8 +185,8 @@ public class AtlasWholeBodyIkSolverTest
 	
 
    // PASS
-	@AverageDuration(duration = 0.3)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.7)
+	@Test(timeout = 11977)
    public void testRightHandIn3P2RMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
@@ -194,8 +194,8 @@ public class AtlasWholeBodyIkSolverTest
    }
 
    // PASS
-	@AverageDuration(duration = 0.3)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.6)
+	@Test(timeout = 11707)
    public void testLeftHandIn3P2RMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
@@ -204,8 +204,8 @@ public class AtlasWholeBodyIkSolverTest
 
 
 // PASS
-	@AverageDuration(duration = 0.2)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.5)
+	@Test(timeout = 11462)
    public void testRightHandIn3P3RMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
@@ -213,8 +213,8 @@ public class AtlasWholeBodyIkSolverTest
    }
 	
 	// PASS
-	@AverageDuration(duration = 0.4)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.7)
+	@Test(timeout = 12128)
    public void testLeftHandIn3P3RMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
@@ -222,8 +222,8 @@ public class AtlasWholeBodyIkSolverTest
    }
  
 	  //PASS 
-	@AverageDuration(duration = 1.0)
-   @Test(timeout = 3002)
+	@AverageDuration(duration = 0.9)
+   @Test(timeout = 12820)
    public void testBothHandsIn3PMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
@@ -232,8 +232,8 @@ public class AtlasWholeBodyIkSolverTest
    
  
    // May FAIL
-	@AverageDuration(duration = 0.7)
-   @Test(timeout = 3000)
+	@AverageDuration(duration = 1.8)
+   @Test(timeout = 15368)
    public void testBothHandsIn3P2RMode()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);

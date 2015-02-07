@@ -62,8 +62,8 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 24.9)
+	@Test(timeout = 84623)
    public void testBigStepUpWithHandPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

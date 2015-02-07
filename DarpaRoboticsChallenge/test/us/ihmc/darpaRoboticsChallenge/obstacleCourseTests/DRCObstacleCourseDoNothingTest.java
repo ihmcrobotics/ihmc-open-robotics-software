@@ -62,8 +62,8 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("DRCObstacleCourseDoNothingTest after class.");
    }
 
-	@AverageDuration(duration = 14.6)
-   @Test(timeout = 43832)
+	@AverageDuration(duration = 15.0)
+   @Test(timeout = 55056)
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {
       doATest();

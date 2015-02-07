@@ -71,8 +71,8 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 public abstract class DRCOptimizationMomentumControlModuleTest implements MultiRobotTestInterface
 {
 
-	@AverageDuration(duration = 0.8)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.6)
+	@Test(timeout = 11824)
    public void testAllJointAccelerationsZero() throws IOException, JAXBException
    {
       Random random = new Random(1252515L);
@@ -166,8 +166,8 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-	@AverageDuration(duration = 0.3)
-	@Test(timeout = 3000)
+	@AverageDuration(duration = 0.6)
+	@Test(timeout = 11724)
    public void testStandingInDoubleSupport() throws NoConvergenceException
    {
       Random random = new Random(1252515L);
