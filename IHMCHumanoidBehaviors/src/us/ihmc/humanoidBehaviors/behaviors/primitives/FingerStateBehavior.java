@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.midLevel;
+package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.FingerState;
