@@ -29,7 +29,7 @@ import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private static final ReferenceFrame constructionWorldFrame = ReferenceFrame.constructAWorldFrame("constructionFrame");
+   private final ReferenceFrame constructionWorldFrame = ReferenceFrame.constructAWorldFrame("constructionFrame");
 
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -38,9 +38,9 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
    private final String debrisName = "Debris";
    private int id = 0;
 
-   private static final double debrisDepth = 0.0508;
-   private static final double debrisWidth = 0.1016;
-   private static final double debrisLength = 0.9144;
+   private final double debrisDepth = 0.0508;
+   private final double debrisWidth = 0.1016;
+   private final double debrisLength = 0.9144;
 
    private final double debrisMass = 1.0;
 
