@@ -97,6 +97,11 @@ public class AngleBuffer implements PendableBuffer
    {
       return timestamp > newestTimestamp;
    }
+   
+   public synchronized boolean isOlderThanOldestTimestamp(long timestamp)
+   {
+	   return timestamp > newestTimestamp;
+   }
 
    @Override
    public long newestTimestamp()
