@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Slow})
+@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.Video})
 public class AtlasChestOrientationBehaviorTest extends DRCChestOrientationBehaviorTest
 {
    private final AtlasRobotModel robotModel;

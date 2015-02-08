@@ -5,7 +5,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseStandingYawedTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
 
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.Video})
 public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStandingYawedTest
 {
 

@@ -10,6 +10,7 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampSnapFootstepTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class
 })
 
