@@ -9,15 +9,17 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
-   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class
+   us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class
 })
 
-public class AtlasAVideoTestSuite
+public class AtlasCVideoTestSuite
 {
    public static void main(String[] args)
    {
-      new BambooTestSuiteRunner(AtlasAVideoTestSuite.class);
+      new BambooTestSuiteRunner(AtlasCVideoTestSuite.class);
    }
 }
 
