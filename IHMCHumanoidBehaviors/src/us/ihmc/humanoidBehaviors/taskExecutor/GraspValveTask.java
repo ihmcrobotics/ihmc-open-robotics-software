@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
-import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.taskExecutor.Task;
 

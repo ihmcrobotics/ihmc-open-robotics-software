@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
-import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.taskExecutor.Task;
 
 public class ScriptTask implements Task
