@@ -52,7 +52,7 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    @Override
    public SideDependentList<String> getWristForceSensorNames()
    {
-      return new SideDependentList<String>();
+      return new SideDependentList<String>(null, null);
    }
 
    @Override
