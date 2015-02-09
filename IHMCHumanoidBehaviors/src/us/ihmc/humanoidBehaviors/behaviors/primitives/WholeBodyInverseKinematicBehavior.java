@@ -132,7 +132,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
 
-      wholeBodyIKSolver.setVerbosityLevel(1);
+      wholeBodyIKSolver.setVerbosityLevel(0);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(true);
    }
 
