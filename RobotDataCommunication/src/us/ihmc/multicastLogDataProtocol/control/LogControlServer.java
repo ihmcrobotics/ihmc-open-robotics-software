@@ -80,6 +80,10 @@ public class LogControlServer
          handshake.model = logModelProvider.getModel();
          handshake.resourceDirectories = logModelProvider.getResourceDirectories();
          handshake.resourceZip = logModelProvider.getResourceZip();
+         if(handshake.resourceZip.length > RESOURCE_FOLDER_SIZE)
+         {
+            throw new RuntimeException("Resource folder takes more than " + RESOURCE_FOLDER_SIZE + ". Delete duplicate/unused textures and models from the resource folder. Increasing the maximum size will slow down visualizer startup.");
+         }
       }
       server.attachListener(HandshakeRequest.class, new HandshakeRequestListener());
       server.attachListener(VariableChangeRequest.class, new VariableChangeRequestListener());
