@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -77,8 +76,8 @@ public class SimulatedRobotiqHandJointAngleProducer
             for (int i = 0; i < this.thumbJoints.get(robotSide).size(); i++)
                thumbJoints[i] = this.thumbJoints.get(robotSide).get(i).getQ().getDoubleValue();
 
-            HandJointAnglePacket handJointAnglePacket = new HandJointAnglePacket(robotSide, true, indexJoints, middleJoints, thumbJoints);
-            dataProducer.sendPacket(handJointAnglePacket);
+//            HandJointAnglePacket handJointAnglePacket = new HandJointAnglePacket(robotSide, true, indexJoints, middleJoints, thumbJoints);
+//            dataProducer.sendPacket(handJointAnglePacket);
          }
       }
    }

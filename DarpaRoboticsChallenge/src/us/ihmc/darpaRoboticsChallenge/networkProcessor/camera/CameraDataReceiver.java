@@ -8,26 +8,27 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
-import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.communication.packets.sensing.VideoPacket;
-import us.ihmc.communication.producers.CompressedVideoDataServer;
+import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.utilities.VideoDataServer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 public abstract class CameraDataReceiver
 {
    private final RobotPoseBuffer robotPoseBuffer;
-   private final CompressedVideoDataServer compressedVideoDataServer; 
+   private final VideoDataServer compressedVideoDataServer;
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
 
    private final Point3d cameraPosition = new Point3d();
    private final Quat4d cameraOrientation = new Quat4d();
    private final Vector3d cameraPositionVector = new Vector3d();
-   
+
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RigidBodyTransform cameraPose;
 
@@ -38,10 +39,10 @@ public abstract class CameraDataReceiver
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.cameraPose = new RigidBodyTransform();
 
-      compressedVideoDataServer = new CompressedVideoDataServer(new VideoPacketHandler(networkingManager));
-      networkingManager.getControllerCommandHandler().attachListener(VideoControlPacket.class, compressedVideoDataServer);
+      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(networkingManager.getControllerCommandHandler(),
+            new VideoPacketHandler(networkingManager));
    }
-   
+
    protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
    {
       RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timeStamp));
@@ -59,17 +60,17 @@ public abstract class CameraDataReceiver
       cameraPosition.set(cameraPositionVector);
       updateLeftEyeImage(cameraPosition, cameraOrientation, bufferedImage, timeStamp, fov);
    }
-   
+
    private void updateLeftEyeImage(Point3d position, Quat4d rotation, BufferedImage bufferedImage, long timeStamp, double fov)
    {
       for (int i = 0; i < stereoListeners.size(); i++)
       {
          stereoListeners.get(i).leftImage(bufferedImage, timeStamp, fov);
       }
-      
+
       compressedVideoDataServer.updateImage(bufferedImage, timeStamp, position, rotation, fov);
    }
-   
+
    protected void updateRightEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
    {
       for (int i = 0; i < stereoListeners.size(); i++)
@@ -83,7 +84,6 @@ public abstract class CameraDataReceiver
       stereoListeners.add(drcStereoListener);
    }
 
-
    private class VideoPacketHandler implements CompressedVideoHandler
    {
       private final AbstractNetworkProcessorNetworkingManager networkingManager;
@@ -95,11 +95,10 @@ public abstract class CameraDataReceiver
 
       public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView)
       {
-         networkingManager.getControllerStateHandler().sendPacket(
-               new VideoPacket(timeStamp, data, position, orientation, fieldOfView));
+         networkingManager.getControllerStateHandler().sendPacket(new VideoPacket(timeStamp, data, position, orientation, fieldOfView));
       }
 
-      public void addNetStateListener(CompressedVideoDataServer compressedVideoDataServer)
+      public void addNetStateListener(NetStateListener compressedVideoDataServer)
       {
          networkingManager.attachStateListener(compressedVideoDataServer);
       }
@@ -109,7 +108,6 @@ public abstract class CameraDataReceiver
          return networkingManager.isConnected();
       }
 
-     
    }
 
 }
