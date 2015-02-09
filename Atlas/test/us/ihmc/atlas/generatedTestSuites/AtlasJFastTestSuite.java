@@ -9,9 +9,17 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class,
-   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
-   us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class
+   us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class,
+   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
+   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
+   us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
+   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
+   us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
+   us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class,
+   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
 })
 
 public class AtlasJFastTestSuite

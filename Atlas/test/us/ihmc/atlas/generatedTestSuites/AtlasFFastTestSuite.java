@@ -9,10 +9,7 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class
 })
 
 public class AtlasFFastTestSuite

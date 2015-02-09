@@ -9,7 +9,9 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampSnapFootstepTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class
 })
 
 public class AtlasLFastTestSuite

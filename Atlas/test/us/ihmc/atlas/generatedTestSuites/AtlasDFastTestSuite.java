@@ -11,7 +11,8 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 ({
    us.ihmc.atlas.AtlasScriptingTest.class,
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class
 })
 
 public class AtlasDFastTestSuite
