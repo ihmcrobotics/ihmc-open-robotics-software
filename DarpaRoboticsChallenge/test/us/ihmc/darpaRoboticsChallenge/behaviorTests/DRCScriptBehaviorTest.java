@@ -31,6 +31,7 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
@@ -45,6 +46,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -172,7 +174,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testScriptWithSingleComHeightScriptPacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testSimpleScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -261,7 +263,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       recordScriptFile(scriptPackets, fileName);
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, 0.9 * trajectoryTime);
       assertTrue(success);
 
       scriptBehavior.stop();
@@ -301,7 +303,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       recordScriptFile(scriptPackets, fileName);
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, 0.9 * trajectoryTime);
       assertTrue(success);
 
       scriptBehavior.pause();
