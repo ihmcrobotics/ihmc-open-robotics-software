@@ -159,8 +159,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
-   @AverageDuration(duration = 300.0)
-   @Test(timeout = 900000)
+   @AverageDuration(duration = 90.0)
+   @Test(timeout = 300)
    public void testGraspingDebris() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
