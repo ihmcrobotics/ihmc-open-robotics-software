@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 /**
@@ -22,6 +23,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
  */
 public abstract class BehaviorInterface implements RobotController
 {
+   public static enum BehaviorStatus
+   {
+      INITIALIZED, PAUSED, STOPPED, DONE, FINALIZED
+   }
+   
    protected final OutgoingCommunicationBridgeInterface outgoingCommunicationBridge;
    private final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningControllerQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
    private final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkProcessorQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
@@ -34,6 +40,8 @@ public abstract class BehaviorInterface implements RobotController
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
     */
    protected final YoVariableRegistry registry;
+   
+   protected final EnumYoVariable<BehaviorStatus> yoBehaviorStatus;
    protected final BooleanYoVariable hasBeenInitialized;
    protected final BooleanYoVariable isPaused;
    protected final BooleanYoVariable isStopped;
@@ -51,6 +59,8 @@ public abstract class BehaviorInterface implements RobotController
       
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
+      
+      yoBehaviorStatus = new EnumYoVariable<BehaviorInterface.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
@@ -164,6 +174,12 @@ public abstract class BehaviorInterface implements RobotController
     */
    public abstract void resume();
 
+   
+   public BehaviorStatus getBehaviorStatus()
+   {
+      return yoBehaviorStatus.getEnumValue();
+   }
+   
    /**
     * Only method to check if the behavior is done.
     * @return
