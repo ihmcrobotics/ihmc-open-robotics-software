@@ -13,6 +13,7 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
 
    private double startTime = Double.NaN;
    private double doneTime = Double.NaN;
+   private double elapsedTime = 0.0;
    private double elapsedTimeOld = 0.0;
    private final double pauseTime;
    private final double resumeTime;
@@ -36,21 +37,21 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
          startTime = time;
       }
 
-      double elapsedTime = time - startTime;
+      elapsedTime = time - startTime;
 
-      if (elapsedTimeOld < pauseTime && elapsedTime >= pauseTime)
+      if (hasThresholdBeenCrossed(pauseTime))
       {
          SysoutTool.println("Requesting Pause", DEBUG);
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.PAUSE);
       }
-      else if (elapsedTimeOld < resumeTime && elapsedTime >= resumeTime)
+      else if (hasThresholdBeenCrossed(resumeTime))
       {
          assertTrue(!behavior.isDone());
 
          SysoutTool.println("Requesting Resume", DEBUG);
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.RESUME);
       }
-      else if (elapsedTimeOld < stopTime && elapsedTime >= stopTime)
+      else if (hasThresholdBeenCrossed(stopTime))
       {
          SysoutTool.println("Requesting Stop", DEBUG);
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.STOP);
@@ -73,5 +74,11 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
       }
 
       elapsedTimeOld = elapsedTime;
+   }
+
+   private boolean hasThresholdBeenCrossed(double elapsedTimeThreshold)
+   {
+      boolean ret = elapsedTimeOld < elapsedTimeThreshold && elapsedTime >= elapsedTimeThreshold;
+      return ret;
    }
 }

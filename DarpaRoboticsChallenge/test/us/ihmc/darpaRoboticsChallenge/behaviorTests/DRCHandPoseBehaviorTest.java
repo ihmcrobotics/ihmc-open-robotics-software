@@ -255,7 +255,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
-
+   
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResume() throws SimulationExceededMaximumTimeException
@@ -314,12 +314,13 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
 
       final double simTimeBeforeStop = swingTrajectoryTime / 2.0;
-      
+
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
-      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
+      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, Double.POSITIVE_INFINITY,
+            Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
 
       FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.STOP);
-      FramePose handPoseAfterResting = stopThreadUpdatable.getCurrentTestFramePose();
+      FramePose handPoseAfterResting = stopThreadUpdatable.getCurrentTestFramePoseCopy();
       assertPosesAreWithinThresholds(handPoseJustAfterStop, handPoseAfterResting, 3.0 * POSITION_THRESHOLD, 3.0 * ORIENTATION_THRESHOLD);
       assertTrue(!handPoseBehavior.isDone());
 

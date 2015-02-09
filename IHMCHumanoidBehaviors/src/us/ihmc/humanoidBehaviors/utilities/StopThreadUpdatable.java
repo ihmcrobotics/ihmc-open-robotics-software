@@ -7,7 +7,9 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
@@ -56,6 +58,7 @@ public abstract class StopThreadUpdatable implements Updatable
 
    protected void captureTransformToWorld(HumanoidBehaviorControlModeEnum newControlMode)
    {
+      SysoutTool.println("" + getCurrentTestFramePose2dCopy());
       testFrameTransformToWorld.get(newControlMode).set(getCurrentTestFrameTransformToWorld());
    }
 
@@ -77,9 +80,34 @@ public abstract class StopThreadUpdatable implements Updatable
       return ret;
    }
 
-   public FramePose getCurrentTestFramePose()
+   public FramePose getCurrentTestFramePoseCopy()
    {
-      FramePose ret = new FramePose(ReferenceFrame.getWorldFrame(), getCurrentTestFrameTransformToWorld());
+      FramePose ret = new FramePose();
+      getCurrentTestFramePose(ret);
+      return ret;
+   }
+
+   public void getCurrentTestFramePose(FramePose poseToPack)
+   {
+      poseToPack.setPoseIncludingFrame(worldFrame, getCurrentTestFrameTransformToWorld());
+   }
+
+   public FramePose2d getTestFramePose2dAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   {
+      FramePose2d ret = new FramePose2d();
+      ret.setPose(getTestFrameTransformToWorldAtTransition(controlMode));
+      return ret;
+   }
+
+   public FramePose2d getCurrentTestFramePose2dCopy()
+   {
+      return getTestFramePose2dCopy(getCurrentTestFrameTransformToWorld());
+   }
+
+   public FramePose2d getTestFramePose2dCopy(RigidBodyTransform testFrameTransformToWorld)
+   {
+      FramePose2d ret = new FramePose2d(ReferenceFrame.getWorldFrame());
+      ret.setPose(testFrameTransformToWorld);
       return ret;
    }
 
