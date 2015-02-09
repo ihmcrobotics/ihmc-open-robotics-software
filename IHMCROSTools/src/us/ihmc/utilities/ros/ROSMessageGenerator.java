@@ -13,8 +13,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.ClassAnnotation;
-import us.ihmc.communication.packetAnnotations.FieldAnnotation;
+import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
 
 public class ROSMessageGenerator
@@ -63,7 +63,7 @@ public class ROSMessageGenerator
             PrintStream fileStream = new PrintStream(messageFile);
 
             String outBuffer = "## " + messageName + System.lineSeparator();
-            ClassAnnotation annotation = (ClassAnnotation) clazz.getAnnotation(ClassAnnotation.class);
+            ClassDocumentation annotation = (ClassDocumentation) clazz.getAnnotation(ClassDocumentation.class);
             if (annotation != null)
             {
             	String[] annotationString = annotation.documentation().split("\r?\n|\r");
@@ -100,10 +100,10 @@ public class ROSMessageGenerator
    private String printType(Field field)
    {
 	   String buffer = "";
-	   FieldAnnotation fieldAnnotation = field.getAnnotation(FieldAnnotation.class);
+	   FieldDocumentation fieldAnnotation = field.getAnnotation(FieldDocumentation.class);
 	   if(fieldAnnotation != null)
 	   {
-		   String[] annotationString = fieldAnnotation.fieldDocumentation().split("\r?\n|\r");
+		   String[] annotationString = fieldAnnotation.documentation().split("\r?\n|\r");
 		   for(String line : annotationString)
 		   {
 			   buffer += "# " + line + System.lineSeparator();

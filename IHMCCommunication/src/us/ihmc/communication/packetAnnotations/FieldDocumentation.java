@@ -5,13 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Created by agrabertilton on 10/15/14.
- */
-
-
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface ClassAnnotation {
-   String documentation() default "No Documentation For This Class Is Recorded.";
+@Target(ElementType.FIELD)
+public @interface FieldDocumentation
+{
+	String documentation();
 }
