@@ -19,10 +19,9 @@ import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -93,17 +92,21 @@ public class DRCSimulationTestHelper
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 
-      boolean automaticallyStartSimulation = false;
-      boolean initializeEstimatorToActual = true;
-
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
-      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(commonAvatarEnvironmentInterface, scriptFileName, selectedLocation, guiInitialSetup,
-            initializeEstimatorToActual, automaticallyStartSimulation, startNetworkProcessor, robotModel, networkObjectCommunicator);
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
+      simulationStarter.setScriptFile(scriptFileName);
+      simulationStarter.setStartingLocation(selectedLocation);
+      simulationStarter.setGuiInitialSetup(guiInitialSetup);
+      simulationStarter.setInitializeEstimatorToActual(true);
+      if (startNetworkProcessor)
+         simulationStarter.setNetworkProcessorOutputPacketCommunicator(networkObjectCommunicator);
+      simulationStarter.setControllerInputPacketCommunicator(networkObjectCommunicator);
+      simulationStarter.startSimulation(startNetworkProcessor, false);
 
-      scs = drcSimulation.getSimulationConstructionSet();
-      sdfRobot = drcSimulation.getRobot();
-      drcSimulationFactory = drcSimulation.getSimulation();
+      scs = simulationStarter.getSimulationConstructionSet();
+      sdfRobot = simulationStarter.getSDFRobot();
+      drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())

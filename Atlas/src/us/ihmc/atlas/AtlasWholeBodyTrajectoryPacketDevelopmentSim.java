@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -10,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
@@ -18,20 +17,14 @@ import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -46,7 +39,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
    private final SDFFullRobotModel actualRobotModel;
-   private final KryoLocalPacketCommunicator fieldObjectCommunicator;
+   private final PacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredPelvisFrameList = new ArrayList<FramePose>();
    private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
@@ -69,7 +62,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
-      this.registry = hikIngEgCtrlSim.getControllerFactory().getRegistry();
+      this.registry = hikIngEgCtrlSim.getSimulationConstructionSet().getRootRegistry();
       Graphics3DObject linkGraphicsDesired = new Graphics3DObject();
 //      URL fileURL = new URL(null);
 //      linkGraphicsDesired.addModelFile(fileURL);
@@ -80,7 +73,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeDesired);
       hikIngEgCtrlSim.getDRCSimulation().start();
       this.actualRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
-      this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
+      this.fieldObjectCommunicator = hikIngEgCtrlSim.getControllerPacketCommunicator();
       this.wholeBodyIKSolver = robotModel.createWholeBodyIkSolver();
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
