@@ -36,7 +36,6 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -93,17 +92,21 @@ public class IHMCHumanoidBehaviorManager
       //      DoubleYoVariable minIcpDistanceToSupportPolygon = capturePointUpdatable.getMinIcpDistanceToSupportPolygon();
       //      DoubleYoVariable icpError = capturePointUpdatable.getIcpError();
 
-      SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = new SideDependentList<WristForceSensorFilteredUpdatable>();
-      for (RobotSide robotSide : RobotSide.values)
+      SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = null;
+      if (sensorInfo.getWristForceSensorNames() != null && !sensorInfo.getWristForceSensorNames().containsValue(null))
       {
-         WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo,
-               forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
-         wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
-         dispatcher.addUpdatable(wristSensorUpdatable);
+         wristSensorUpdatables = new SideDependentList<WristForceSensorFilteredUpdatable>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo,
+                  forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, controllerCommunicator, registry);
+            wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
+            dispatcher.addUpdatable(wristSensorUpdatable);
+         }
       }
 
       createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
-            capturePointUpdatable,wholeBodyControllerParameters ,walkingControllerParameters);
+            capturePointUpdatable, wholeBodyControllerParameters, walkingControllerParameters);
 
       networkProcessorCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       networkProcessorCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
