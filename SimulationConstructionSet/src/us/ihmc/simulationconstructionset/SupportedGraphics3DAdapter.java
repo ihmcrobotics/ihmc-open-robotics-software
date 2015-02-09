@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.utilities.LogTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 
 public enum SupportedGraphics3DAdapter
 {
@@ -35,14 +35,14 @@ public enum SupportedGraphics3DAdapter
       try
       {
          Graphics3DAdapter graphics3dAdapter = (Graphics3DAdapter) Class.forName(graphicsAdapter).newInstance();
-         System.out.println(LogTools.INFO + "Found graphics adapter: " + graphicsAdapter);
+         System.out.println(PrintTools.INFO + "Found graphics adapter: " + graphicsAdapter);
 
          return graphics3dAdapter;
 
       }
       catch (Exception e)
       {
-         System.err.println(LogTools.WARN + "Cannot find graphics adapter" + graphicsAdapter);
+         System.err.println(PrintTools.WARN + "Cannot find graphics adapter" + graphicsAdapter);
 
          return null;
       }
@@ -65,7 +65,7 @@ public enum SupportedGraphics3DAdapter
 
       }
 
-      throw new RuntimeException(LogTools.ERROR + "No supported Graphics3DAdapter found");
+      throw new RuntimeException(PrintTools.ERROR + "No supported Graphics3DAdapter found");
    }
 
 }

@@ -6,7 +6,7 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
-import us.ihmc.utilities.SysoutTool;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.jinput.JInputLibraryLoader;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;

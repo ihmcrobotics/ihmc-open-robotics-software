@@ -45,7 +45,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.loaders.jme.STLLoader;
 import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.LogTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.time.Timer;
 
@@ -318,14 +318,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       {
          if (DEBUG_GPU_LIDAR_PARALLEL_SCENE)
          {
-            System.out.println(LogTools.DEBUG + "Adding " + PBOAwtPanelsContext.class.getSimpleName() + " listener.");
+            System.out.println(PrintTools.DEBUG + "Adding " + PBOAwtPanelsContext.class.getSimpleName() + " listener.");
          }
          ((PBOAwtPanelsContext) getContext()).addPBOAwtPanelListener(this);
          pboAwtPanels = ((PBOAwtPanelsContext) getContext()).getPanelList();
       }
       else
       {
-         System.out.println(LogTools.DEBUG + "Context is not of type " + PBOAwtPanelsContext.class.getSimpleName());
+         System.out.println(PrintTools.DEBUG + "Context is not of type " + PBOAwtPanelsContext.class.getSimpleName());
       }
    }
 
@@ -584,7 +584,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public void isShowing(PBOAwtPanel pboAwtPanel)
    {
-      System.out.println(LogTools.INFO + "A " + pboAwtPanel.getClass().getSimpleName() + " showed on screen.");
+      System.out.println(PrintTools.INFO + "A " + pboAwtPanel.getClass().getSimpleName() + " showed on screen.");
       
       if (!gpuLidars.isEmpty())
       {
@@ -597,7 +597,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (DEBUG_GPU_LIDAR_PARALLEL_SCENE)
       {
-         System.out.println(LogTools.DEBUG + "Creating " + pboAwtPanel.getClass().getSimpleName());
+         System.out.println(PrintTools.DEBUG + "Creating " + pboAwtPanel.getClass().getSimpleName());
       }
    }
    
@@ -605,7 +605,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (!pboAwtPanels.isEmpty())
       {
-         System.out.print(LogTools.INFO + "Updating GPULidar scenes...");
+         System.out.print(PrintTools.INFO + "Updating GPULidar scenes...");
 
          Timer timer = new Timer().start();
 

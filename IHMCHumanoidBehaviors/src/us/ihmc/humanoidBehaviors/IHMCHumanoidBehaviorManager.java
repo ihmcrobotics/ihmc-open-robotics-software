@@ -30,9 +30,9 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.utilities.LogTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -57,7 +57,7 @@ public class IHMCHumanoidBehaviorManager
    public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
          DRCRobotSensorInformation sensorInfo, PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator)
    {
-      System.out.println(LogTools.INFO + getClass().getSimpleName() + ": Initializing");
+      System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
 
       if (ENABLE_BEHAVIOR_VISUALIZATION)
       {
