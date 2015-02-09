@@ -37,7 +37,6 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UnfinishedTest;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -80,7 +79,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
