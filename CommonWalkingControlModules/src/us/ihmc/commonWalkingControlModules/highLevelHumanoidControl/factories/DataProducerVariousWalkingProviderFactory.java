@@ -48,7 +48,7 @@ import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
-import us.ihmc.communication.packets.walking.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

@@ -1,15 +1,22 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.packets.walking.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.Twist;
 
 /**
  * User: Matt
@@ -25,9 +32,15 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(ReferenceFrame.getWorldFrame()));
    private double trajectoryTime = Double.NaN;
 
-   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
+   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;  
    AtomicReference<FramePoint[]> pelvisPositions = new AtomicReference<FramePoint[]>();
    AtomicReference<FrameOrientation[]> pelvisOrientations = new AtomicReference<FrameOrientation[]>();
+   
+   AtomicReference<double[]> pelvisWaypointsTime = new AtomicReference<double[]>();
+   AtomicReference<FrameVector[]> pelvisVelocity = new AtomicReference<FrameVector[]>();
+   AtomicReference<Twist[]> pelvisTwist = new AtomicReference<Twist[]>();
+   
+   WholeBodyTrajectoryDevelopmentPacket lastWholeBodyPacket;
 
    public DesiredPelvisPoseProvider()
    {
@@ -36,23 +49,10 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
          @Override
          public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket packet)
          {
-            if (packet == null)
+            if (packet != null)
             {
-               return;
-            }
-            if (packet.pelvisPosition != null){
-               pelvisPositions.set(packet.pelvisPosition);
-            }
-            else
-            {
-               pelvisPositions.set(null);
-            }
-            if (packet.pelvisPosition != null){
-               pelvisOrientations.set(packet.pelvisOrientation);
-            }
-            else
-            {
-               pelvisOrientations.set(null);
+               lastWholeBodyPacket = packet;
+               System.out.println(" PACKET RECEIVED ");
             }
          }
       };
@@ -134,34 +134,44 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    }
 
    @Override
-   public boolean checkForNewWholeBodyTrajectory()
+   public boolean checkForNewTrajectory()
    {
-      return (pelvisPositions.get() != null & pelvisOrientations.get() != null);
+      return (lastWholeBodyPacket != null);
    }
 
    @Override
-   public FramePoint[] getDesiredPelvisPositionTrajectoryArray(ReferenceFrame supportFrame)
-   {
-      return pelvisPositions.getAndSet(null);
-   }
-
-   @Override
-   public FrameOrientation[] getDesiredPelvisOrientationTrajectoryArray(ReferenceFrame desiredPelvisFrame)
-   {
-      FrameOrientation[] ret = pelvisOrientations.getAndSet(null);
-
-      if (ret == null)
-         return null;
-
-      for(int i = 0; i<ret.length; i++){
-         ret[i].changeFrame(desiredPelvisFrame);
+   public ReferenceFrame getDesiredPelvisPositionTrajectory(
+         ArrayList<Double> time,
+         ArrayList<Point3d> position, 
+         ArrayList<Vector3d> velocity ) 
+   {     
+      int N = lastWholeBodyPacket.getNumberOfWaypoints();
+        
+      for(int i=0; i<N; i++)
+      {
+         time.add( lastWholeBodyPacket.absTime[i] );
+         position.add( lastWholeBodyPacket.pelvisWorldPosition[i] );
+         velocity.add( lastWholeBodyPacket.pelvisWorldVelocity[i] );
       }
-      return ret;
+      return ReferenceFrame.getWorldFrame();
+   }
+
+   @Override
+   public ReferenceFrame getDesiredPelvisOrientationTrajectory(double[] time, Point3d[] position, Vector3d[] velocity)
+   {
+      // TODO
+      return null;
    }
    
    public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryConsumer()
    {
       return wholeBodyTrajectoryPacketConsumer;
+   }
+
+   @Override
+   public void removeLastTrajectory()
+   {
+      lastWholeBodyPacket = null;
    }
    
 }

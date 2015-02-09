@@ -13,7 +13,7 @@ import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.packets.walking.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
