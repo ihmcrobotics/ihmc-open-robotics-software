@@ -25,7 +25,7 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
    public UserDesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, YoVariableRegistry parentRegistry)
    {
       this.chestOrientationFrame = chestOrientationFrame;
-      userChest = new YoFrameOrientation("userChest", chestOrientationFrame, registry);
+      userChest = new YoFrameOrientation("userDesiredChest", chestOrientationFrame, registry);
 
       VariableChangedListener variableChangedListener = new VariableChangedListener()
       {
