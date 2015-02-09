@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.packetProducers;
 
-import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -17,7 +16,7 @@ public class CapturabilityBasedStatusProducer
 
    public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FrameConvexPolygon2d supportPolygon, RobotSide supportLeg)
    {
-      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon, supportLeg);
-      objectCommunicator.sendPacket(capturabilityBasedStatus);
+//      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon, supportLeg);
+//      objectCommunicator.sendPacket(capturabilityBasedStatus);
    }
 }
