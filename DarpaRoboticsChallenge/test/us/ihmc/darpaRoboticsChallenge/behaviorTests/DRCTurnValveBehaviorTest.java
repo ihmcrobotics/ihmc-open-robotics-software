@@ -113,7 +113,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testWalkAndTurnValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testWalkAndTurnValveNoScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -141,10 +141,9 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       turnValveBehavior.setInput(scriptBehaviorInput);
       assertTrue(turnValveBehavior.hasInputBeenSet());
 
-      double elapsedTimeToWalkAndTurnValve = 20.0;
 
       double initialValveClosePercentage = valveRobot.getClosePercentage();
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(turnValveBehavior, elapsedTimeToWalkAndTurnValve);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
             DEBUG);
