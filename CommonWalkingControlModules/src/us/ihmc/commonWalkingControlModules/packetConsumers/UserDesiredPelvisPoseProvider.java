@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -147,23 +150,35 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    }
 
    @Override
-   public boolean checkForNewWholeBodyTrajectory()
+   public boolean checkForNewTrajectory()
    {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public FramePoint[] getDesiredPelvisPositionTrajectoryArray(ReferenceFrame supportFrame)
+   public void removeLastTrajectory()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public ReferenceFrame getDesiredPelvisPositionTrajectory( 
+         ArrayList<Double> time,
+         ArrayList<Point3d> position, 
+         ArrayList<Vector3d> velocity )
    {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public FrameOrientation[] getDesiredPelvisOrientationTrajectoryArray(ReferenceFrame desiredPelvisFrame)
+   public ReferenceFrame getDesiredPelvisOrientationTrajectory(double[] time, Point3d[] position, Vector3d[] velocity)
    {
       // TODO Auto-generated method stub
       return null;
    }
+
+
 }

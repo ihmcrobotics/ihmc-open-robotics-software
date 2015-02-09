@@ -61,6 +61,7 @@ public abstract class WholeBodyTrajectoryTest
    }    
 
   
+
 	@AverageDuration(duration = 4.1)
 	@Test(timeout = 22445)
    public void testTrajectory() throws Exception

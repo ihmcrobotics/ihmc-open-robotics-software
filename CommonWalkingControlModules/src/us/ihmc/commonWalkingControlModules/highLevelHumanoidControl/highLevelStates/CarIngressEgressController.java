@@ -5,6 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -34,6 +37,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.trajectory.Waypoint1D;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -42,6 +46,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -66,7 +71,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final TaskspaceConstraintData pelvisTaskspaceConstraintData = new TaskspaceConstraintData();
    private final YoFramePoint initialDesiredPelvisPosition;
    private final YoFramePoint finalDesiredPelvisPosition;
-   private final StraightLinePositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
+
+   // private final StraightLinePositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
+   MultipleWaypointsPositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
+
+
    private double pelvisTrajectoryStartTime = 0.0;
 
    private final ChestOrientationProvider chestOrientationProvider;
@@ -110,8 +119,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final YoFrameVector yoPelvisLinearAcceleration = new YoFrameVector("pelvisLinearAcceleration", worldFrame, registry);
 
-   private final ArrayList<FramePoint> desiredPelvisPositionsArray = new ArrayList<FramePoint>();
-   
+   // private final ArrayList<FramePoint> desiredPelvisPositionsArray = new ArrayList<FramePoint>();
+
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters)
    {
@@ -156,7 +165,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       PositionProvider initialPelvisPositionProvider = new YoPositionProvider(initialDesiredPelvisPosition);
       PositionProvider finalPelvisPositionProvider = new YoPositionProvider(finalDesiredPelvisPosition);
-      pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider, initialPelvisPositionProvider, finalPelvisPositionProvider, registry);
+
+      //// pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider, initialPelvisPositionProvider, finalPelvisPositionProvider, registry);
+
+      pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 
+            trajectoryTimeProvider,
+            initialPelvisPositionProvider, registry);
 
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
@@ -342,54 +356,46 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    protected void doPelvisControl()
    {
       super.doPelvisControl();
-      
-      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewWholeBodyTrajectory()){
-         System.out.println(getClass().getSimpleName() + ": trajectory packet received.");
-         FramePoint[] desiredPelvisPositions = pelvisPoseProvider.getDesiredPelvisPositionTrajectoryArray(ReferenceFrame.getWorldFrame());
-         for(int i =0; i<desiredPelvisPositions.length; i++){
-            desiredPelvisPositionsArray.add(desiredPelvisPositions[i]);
-         }
-      }
-      
-      PositionTrajectoryGenerator PositionTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
-      
-      if (desiredPelvisPositionsArray.size()>0 & (yoTime.getDoubleValue() - pelvisTrajectoryStartTime)>3.0)
+
+      //   System.out.println(getClass().getSimpleName() );
+
+      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewTrajectory() )
       {
-         System.out.println(getClass().getSimpleName() + ": array size is " + desiredPelvisPositionsArray.size() );
-         double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
-         PositionTrajectoryGenerator.compute(time);
+         System.out.println(getClass().getSimpleName() + ": trajectory packet received. <<<<<<<<<<<");
 
-         FramePoint previousDesiredPosition = new FramePoint(pelvisPositionControlFrame);
-         PositionTrajectoryGenerator.get(previousDesiredPosition);
-         initialDesiredPelvisPosition.setAndMatchFrame(previousDesiredPosition);
+         ArrayList<Double> time = new ArrayList<Double>();
+         ArrayList<Point3d> position = new ArrayList<Point3d>();  
+         ArrayList<Vector3d> velocity = new ArrayList<Vector3d>();  
 
-//         finalDesiredPelvisPosition.setAndMatchFrame(pelvisPoseProvider.getDesiredPelvisPosition(ReferenceFrame.getWorldFrame()));
-         finalDesiredPelvisPosition.setAndMatchFrame(desiredPelvisPositionsArray.remove(0));
+         //read from here
+         ReferenceFrame frame = pelvisPoseProvider.getDesiredPelvisPositionTrajectory(time, position, velocity);
+
+         //write here
+         pelvisPositionTrajectoryGenerator.initializeTrajectory(frame, time, position, velocity );
+         // once you copied it, delete it
+         pelvisPoseProvider.removeLastTrajectory();
+
          pelvisTrajectoryStartTime = yoTime.getDoubleValue();
-
-         PositionTrajectoryGenerator.initialize();
       }
 
       double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
-      PositionTrajectoryGenerator.compute(time);
 
-      FramePoint desiredPosition = new FramePoint(pelvisPositionControlFrame);
-      FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
-      FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
+      pelvisPositionTrajectoryGenerator.compute(time);
 
-      /**
-      TODO: This is where to insert the desireds from the whole body IK packets.
-      @WillRifenburgh
-      **/
-      
-      PositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
+      FramePoint desiredPosition = new FramePoint();
+      FrameVector desiredVelocity = new FrameVector();
+      FrameVector desiredPelvisAcceleration = new FrameVector();
+
+      pelvisPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
 
       FrameVector pelvisLinearAcceleration = new FrameVector();
       pelvisController.doPositionControl(pelvisLinearAcceleration, desiredPosition, desiredVelocity, desiredPelvisAcceleration, fullRobotModel.getElevator());
 
-      yoPelvisLinearAcceleration.setAndMatchFrame(pelvisLinearAcceleration);
-      
+      yoPelvisLinearAcceleration.setAndMatchFrame(pelvisLinearAcceleration);      
       pelvisLinearAcceleration.changeFrame(pelvis.getBodyFixedFrame());
+
+
+      System.out.println();
 
       if (!requestedPelvisLoadBearing.getBooleanValue())
       {
@@ -423,7 +429,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
             chestOrientationTrajectoryGenerator.initialize();
          } else if(true){
-            
+
          }
       }
 
