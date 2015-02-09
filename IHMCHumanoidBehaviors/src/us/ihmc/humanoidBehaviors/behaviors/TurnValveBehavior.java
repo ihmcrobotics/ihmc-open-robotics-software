@@ -68,7 +68,6 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable tippingDetected;
-   private final BooleanYoVariable isDone;
    private final BooleanYoVariable hasInputBeenSet;
 
    private ReferenceFrame valveFrame;
@@ -95,7 +94,6 @@ public class TurnValveBehavior extends BehaviorInterface
 
       this.tippingDetected = tippingDetectedBoolean;
       this.yoTime = yoTime;
-      this.isDone = new BooleanYoVariable("isDone", registry);
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
 
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
@@ -110,6 +108,7 @@ public class TurnValveBehavior extends BehaviorInterface
       }
 
       pipeLine.doControl();
+
 
       //      if (!currentBehavior.equals(walkToLocationBehavior))
       //      {
@@ -315,21 +314,19 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return isDone.getBooleanValue();
+      return pipeLine.isDone();
    }
 
    @Override
    public void finalize()
    {
       //      currentBehavior.finalize();
-      isDone.set(false);
       hasInputBeenSet.set(false);
    }
 
    @Override
    public void initialize()
    {
-      isDone.set(false);
       hasInputBeenSet.set(false);
 
       handPoseBehavior.initialize();
