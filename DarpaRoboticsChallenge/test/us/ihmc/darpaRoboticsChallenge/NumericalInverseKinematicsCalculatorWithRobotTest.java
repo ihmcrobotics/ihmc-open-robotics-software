@@ -79,7 +79,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       switch (inverseKinameticSolverToUse)
       {
       case PETER_SOLVER:
-         inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, 1, maxIterations, true, 0.02, 0.02, 0.02);
+         inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, 1, maxIterations, true, 0.02, 0.02, 0.02, 0.1);
          break;
 
       case TWAN_SOLVER:
