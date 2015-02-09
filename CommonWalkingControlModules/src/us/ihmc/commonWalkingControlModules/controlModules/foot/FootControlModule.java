@@ -36,7 +36,6 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 public class FootControlModule
 {
    private static final boolean USE_HEURISTIC_SWING_STATE = false;
-   private static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
 
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
@@ -54,8 +53,6 @@ public class FootControlModule
    private final MomentumBasedController momentumBasedController;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
-
-   private final BooleanYoVariable requestHoldPosition;
 
    private final BooleanYoVariable doFancyOnToesControl;
 
@@ -90,7 +87,6 @@ public class FootControlModule
 
       this.momentumBasedController = momentumBasedController;
 
-      this.requestHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
@@ -180,10 +176,7 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
-            if (!USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
-               return false;
-            updateRequestHoldPosition();
-            if (requestHoldPosition.getBooleanValue())
+            if (isFootBarelyLoaded())
                return true;
             if (!doFancyOnToesControl.getBooleanValue())
                return false;
@@ -196,10 +189,7 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
-            if (!USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
-               return true;
-            updateRequestHoldPosition();
-            if (requestHoldPosition.getBooleanValue())
+            if (isFootBarelyLoaded())
                return false;
             return !footControlHelper.isCoPOnEdge();
          }
@@ -260,14 +250,8 @@ public class FootControlModule
          if (constraintType == ConstraintType.HOLD_POSITION)
             System.out.println("Warning: HOLD_POSITION state is handled internally.");
 
-         if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
-         {
-            updateRequestHoldPosition();
-            if (requestHoldPosition.getBooleanValue())
-               constraintType = ConstraintType.HOLD_POSITION;
-            else
-               constraintType = ConstraintType.FULL;
-         }
+         if (isFootBarelyLoaded())
+            constraintType = ConstraintType.HOLD_POSITION;
          else
             constraintType = ConstraintType.FULL;
 
@@ -282,9 +266,9 @@ public class FootControlModule
       footControlHelper.requestState(constraintType);
    }
 
-   private void updateRequestHoldPosition()
+   private boolean isFootBarelyLoaded()
    {
-      requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
+      return footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue();
    }
 
    public ConstraintType getCurrentConstraintType()
@@ -295,7 +279,7 @@ public class FootControlModule
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
-      footControlHelper.computeNullspaceMultipliers();
+      footControlHelper.update();
 
       stateMachine.checkTransitionConditions();
 
