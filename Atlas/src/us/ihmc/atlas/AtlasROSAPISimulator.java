@@ -3,23 +3,15 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.util.NetworkConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
-import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -34,43 +26,23 @@ public class AtlasROSAPISimulator
    
    public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
-      boolean initializeEstimatorToActual = false;
-      String scriptToLoad = null;
-      CommonAvatarEnvironmentInterface environment = new DRCDemo01NavigationEnvironment();
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
-      
-      PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 0, "AtlasROSAPISimulatorLocalCommunicator");
-      GlobalDataProducer dataProducer = new GlobalDataProducer(controllerCommunicator);
+      PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BROADCAST.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
 
-      DRCObstacleCourseSimulation simulation = new DRCObstacleCourseSimulation(environment, scriptToLoad, dataProducer, robotInitialSetup,
-            guiInitialSetup, robotModel.getControllerDT(), initializeEstimatorToActual, robotModel);
-
-      simulation.getSimulation().simulate();
+      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
+      simulationStarter.setControllerInputPacketCommunicator(controllerCommunicator);
+      if (startUI)
+         simulationStarter.setNetworkProcessorOutputPacketCommunicator(controllerCommunicator);
+      boolean startNetworkProcessor = startUI;
+      simulationStarter.startSimulation(startNetworkProcessor, true);
 
       URI rosUri = robotModel.getNetworkParameters().getRosURI();
 
-      PacketCommunicator sensorCommunicator = simulation.getLocalObjectCommunicator();
+      PacketCommunicator sensorCommunicator = simulationStarter.getSCSSensorOutputPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
       if (startUI)
-      {
-         KryoObjectServer drcNetworkProcessorServer = new KryoObjectServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-               new IHMCCommunicationKryoNetClassList());
-         drcNetworkProcessorServer.setMaximumNumberOfConnections(1);
-         drcNetworkProcessorServer.connect();
-
-         new DRCNetworkProcessor(null, simulation.getLocalObjectCommunicator(), controllerCommunicator, robotModel,
-               NetworkConfigParameters.ENABLE_TESTBED_ALIGNMENT);
-
-         AtlasRobotModel atlasRobotModel = (AtlasRobotModel) robotModel;
-         JavaProcessSpawner spawner = new JavaProcessSpawner(true);
-         String[] args = { "-m " + atlasRobotModel.getAtlasVersion().name() };
-         spawner.spawn(AtlasOperatorUserInterface.class, args);
-      }
-
+         simulationStarter.startOpertorInterface();
    }
    
    public static void main(String[] args) throws JSAPException, IOException

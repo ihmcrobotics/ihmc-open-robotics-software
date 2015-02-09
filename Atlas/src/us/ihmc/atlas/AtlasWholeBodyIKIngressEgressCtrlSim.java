@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -19,9 +19,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -41,7 +39,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
    private final SDFFullRobotModel actualRobotModel;
-   private final KryoLocalPacketCommunicator fieldObjectCommunicator;
+   private final PacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredReferenceFrameList = new ArrayList<FramePose>();
    private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
@@ -64,7 +62,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
-      this.registry = hikIngEgCtrlSim.getControllerFactory().getRegistry();
+      this.registry = hikIngEgCtrlSim.getSimulationConstructionSet().getRootRegistry();
       Graphics3DObject linkGraphicsDesired= new Graphics3DObject();
       Graphics3DObject linkGraphicsActual = new Graphics3DObject();
       linkGraphicsDesired.addSphere(0.05, YoAppearance.Blue());
@@ -79,7 +77,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeActual);
       hikIngEgCtrlSim.getDRCSimulation().start();
       this.actualRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
-      this.fieldObjectCommunicator = hikIngEgCtrlSim.getKryoLocalObjectCommunicator();
+      this.fieldObjectCommunicator = hikIngEgCtrlSim.getControllerPacketCommunicator();
       this.wholeBodyIKSolver = robotModel.createWholeBodyIkSolver();
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);

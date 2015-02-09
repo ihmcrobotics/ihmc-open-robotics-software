@@ -11,8 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -261,20 +259,14 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
       DRCSimulationFactory.RUN_MULTI_THREADED = false;
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
-      CommonAvatarEnvironmentInterface environment = new DRCDemo01NavigationEnvironment();
-      boolean automaticallyStartSimulation = true;
-      boolean startDRCNetworkProcessor = true;
-      boolean initializeEstimatorToActual = false;
-      DRCObstacleCourseSimulation track = DRCObstacleCourseDemo.startSimulationAndKryoObjectServer(environment, null,
-            DRCObstacleCourseStartingLocation.DEFAULT, guiInitialSetup, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor,
-            robotModel);
+      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
+      simulationStarter.startSimulation(true, true);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      pushRobotController = new DRCPushRobotController(track.getRobot(), fullRobotModel);
+      pushRobotController = new DRCPushRobotController(simulationStarter.getSDFRobot(), fullRobotModel);
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      SimulationConstructionSet scs = simulationStarter.getSimulationConstructionSet();
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
       cameraConfiguration.setCameraFix(0.6, 0.0, 0.6);
       cameraConfiguration.setCameraPosition(10.0, 3.0, 3.0);
