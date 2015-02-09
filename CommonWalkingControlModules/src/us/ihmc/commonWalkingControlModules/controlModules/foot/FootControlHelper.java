@@ -32,7 +32,7 @@ import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBo
 
 public class FootControlHelper
 {
-   private static final double EPSILON_POINT_ON_EDGE = 1e-2;
+   private static final double EPSILON_POINT_ON_EDGE = 5e-3;
    private static final double minJacobianDeterminant = 0.035;
 
    private final RobotSide robotSide;
@@ -48,6 +48,7 @@ public class FootControlHelper
    private final GeometricJacobian jacobian;
    private final EnumYoVariable<ConstraintType> requestedState;
    private final FrameVector fullyConstrainedNormalContactVector;
+   private final BooleanYoVariable isDesiredCoPOnEdge;
 
    private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
 
@@ -100,6 +101,8 @@ public class FootControlHelper
 
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
 
+      isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
+
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       contactPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
@@ -123,14 +126,21 @@ public class FootControlHelper
       taskspaceConstraintData.set(rootBody, contactableFoot.getRigidBody());
    }
 
-   public boolean isCoPOnEdge()
+   public void update()
    {
       FramePoint2d cop = momentumBasedController.getDesiredCoP(contactableFoot);
 
       if (cop == null || cop.containsNaN())
-         return false;
+         isDesiredCoPOnEdge.set(false);
       else
-         return !contactPolygon.isPointInside(cop, EPSILON_POINT_ON_EDGE);
+         isDesiredCoPOnEdge.set(!contactPolygon.isPointInside(cop, -EPSILON_POINT_ON_EDGE)); // Minus means that the check is done with a smaller polygon
+   
+      computeNullspaceMultipliers();
+   }
+
+   public boolean isCoPOnEdge()
+   {
+      return isDesiredCoPOnEdge.getBooleanValue();
    }
 
    public void computeNullspaceMultipliers()
