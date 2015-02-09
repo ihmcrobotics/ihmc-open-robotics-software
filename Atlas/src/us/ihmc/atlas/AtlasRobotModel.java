@@ -50,6 +50,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -400,5 +401,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public DefaultArmConfigurations getDefaultArmConfigurations()
    {
       return defaultArmConfigurations;
+   }
+
+   @Override
+   public Pair<Class<?>, String[]> getOperatorInterfaceStarter()
+   {
+      String[] args = { "-m " + getAtlasVersion().name() };
+      return new Pair<Class<?>, String[]>(AtlasOperatorUserInterface.class, args);
    }
 }
