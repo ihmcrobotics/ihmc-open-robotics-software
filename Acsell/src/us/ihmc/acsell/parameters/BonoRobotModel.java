@@ -13,6 +13,7 @@ import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.acsell.network.StepprSensorSuiteManager;
+import us.ihmc.acsell.operatorInterface.StepprOperatorInterface;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -38,6 +39,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -330,5 +332,12 @@ public class BonoRobotModel implements DRCRobotModel
    {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public Pair<Class<?>, String[]> getOperatorInterfaceStarter()
+   {
+      String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
+      return new Pair<Class<?>, String[]>(StepprOperatorInterface.class, args);
    }
 }
