@@ -492,6 +492,7 @@ public class ScriptBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      SysoutTool.println("Initializing", DEBUG);
       scriptImported.set(false);
       scriptFinished.set(false);
       behaviorOriginTransformToWorld = null;
@@ -506,18 +507,22 @@ public class ScriptBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
+      SysoutTool.println("Pausing", DEBUG);
       stateMachine.pause();
    }
 
    @Override
    public void resume()
    {
+      SysoutTool.println("Resuming", DEBUG);
       stateMachine.resume();
    }
 
    @Override
    public void stop()
    {
+      SysoutTool.println("Stopping", DEBUG);
+      stateMachine.stop();
       scriptFinished.set(true);
       finalize();
       if (childInputPackets != null)
@@ -529,6 +534,7 @@ public class ScriptBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
+      SysoutTool.println("Finalizing", DEBUG);
       scriptImported.set(false);
       scriptFinished.set(false);
       behaviorOriginTransformToWorld = null;
