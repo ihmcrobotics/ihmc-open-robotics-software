@@ -160,7 +160,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    }
 
    @AverageDuration(duration = 90.0)
-   @Test(timeout = 300)
+   @Test(timeout = 300000)
    public void testGraspingDebris() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
