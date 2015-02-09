@@ -58,6 +58,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
    private final CurrentConfigurationProvider initialConfigurationProvider;
+   private final VectorProvider initialVelocityProvider;
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final DoubleProvider swingTimeProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
@@ -70,6 +71,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
    private final BooleanYoVariable hasInitialAngularConfigurationBeenProvided;
 
+   // TODO Clean+extract the z adjust
+   private final DoubleYoVariable finalFootStepZAdjust;
+
    public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
@@ -79,6 +83,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
 
       finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "SwingFinal", worldFrame, registry);
+      finalFootStepZAdjust = new DoubleYoVariable(namePrefix + "FinalFootStepZAdjust", registry);
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
 
@@ -89,7 +94,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
-      VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
+      initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
@@ -136,9 +141,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
          swingClearanceAngle = new DoubleYoVariable(namePrefix + "SwingClearanceAngle", registry);
          swingClearanceAngle.set(0.1);
          swingLandingAngle = new DoubleYoVariable(namePrefix + "SwingLandingAngle", registry);
-         swingLandingAngle.set(1.0);
+         swingLandingAngle.set(0.1);
          defaultHeightClearance = new DoubleYoVariable(namePrefix + "DefaultHeightClearance", registry);
-         defaultHeightClearance.set(0.01);
+         defaultHeightClearance.set(0.010);
       }
       else
       {
@@ -221,6 +226,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    {
       footstep.getPose(newFootstepPose);
       newFootstepPose.changeFrame(worldFrame);
+
+      // TODO Clean+extract the z adjust
+      newFootstepPose.setZ(newFootstepPose.getZ()+finalFootStepZAdjust.getDoubleValue());
       finalConfigurationProvider.setPose(newFootstepPose);
       initialConfigurationProvider.get(oldFootstepPosition);
 
@@ -262,14 +270,24 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
          AxisAngle4d axisAngle4d = new AxisAngle4d(swingTranslation.getX(), swingTranslation.getY(), swingTranslation.getZ(), angle);
          rotationMatrix.set(axisAngle4d);
          
-         initialSwingDirection.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-         rotationMatrix.transform(initialSwingDirection.getVector());
+         final boolean USE_INITIAL_VELOCITY_PROVIDER=false;
+         if(USE_INITIAL_VELOCITY_PROVIDER)
+         {
+            initialVelocityProvider.get(initialSwingDirection);
+            initialSwingDirection.changeFrame(worldFrame);
+         }
+         else
+         {
+            initialSwingDirection.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
+            rotationMatrix.transform(initialSwingDirection.getVector());
+         }
          
          angle = swingLandingAngle.getDoubleValue() * stepLength;
          axisAngle4d.set(swingTranslation.getX(), swingTranslation.getY(), swingTranslation.getZ(), -angle);
          rotationMatrix.set(axisAngle4d);
          finalSwingDirection.setIncludingFrame(worldFrame, 0.0, 0.0, -1.0);
          rotationMatrix.transform(finalSwingDirection.getVector());
+         
          
          continuousTrajectory.setTrajectoryTime(swingTimeProvider.getValue());
          continuousTrajectory.setInitialLeadOut(initialSwingPosition, initialSwingDirection, defaultHeightClearance.getDoubleValue());
