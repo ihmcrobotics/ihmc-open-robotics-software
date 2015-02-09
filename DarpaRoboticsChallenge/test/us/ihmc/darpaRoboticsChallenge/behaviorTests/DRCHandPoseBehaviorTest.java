@@ -256,6 +256,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
+   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResume() throws SimulationExceededMaximumTimeException
    {
