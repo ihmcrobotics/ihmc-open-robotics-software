@@ -95,7 +95,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.25;
 
    private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.05;
-   
+
    private final double POSE_ERROR_MARGIN = 0.01;
 
    private final DRCDebrisEnvironment testEnvironment = new DRCDebrisEnvironment();
@@ -167,7 +167,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertTrue(success);
 
       final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, fullRobotModel, midFeetZUpFrame,
-            getRobotModel(), yoTime, true);
+            getRobotModel(), yoTime);
       communicationBridge.attachGlobalListenerToController(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
 
       graspPieceOfDebrisBehavior.initialize();
@@ -200,7 +200,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       success = success & graspPieceOfDebrisBehavior.isDone();
 
       assertTrue(success);
-      
+
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
       DoubleYoVariable finger1_Joint1 = (DoubleYoVariable) robot.getVariable("q_r_finger_1_joint_1");
@@ -236,11 +236,11 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println("right hand pose");
          System.out.println(rightHandPose);
       }
-      FramePose rightHandExpectedPose = new FramePose(worldFrame); 
+      FramePose rightHandExpectedPose = new FramePose(worldFrame);
       rightHandExpectedPose.setPosition(0.45, -0.28, 1.21);
       rightHandExpectedPose.setOrientation(1.27, 0.07, 0.06);
       assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSE_ERROR_MARGIN));
-      
+
       //Left wrist Position
       ReferenceFrame leftHandReferenceFrame = fullRobotModel.getEndEffector(RobotSide.LEFT, LimbName.ARM).getBodyFixedFrame();
       FramePose leftHandPose = new FramePose(leftHandReferenceFrame);
@@ -250,11 +250,11 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println("left hand pose");
          System.out.println(leftHandPose);
       }
-      FramePose leftHandExpectedPose = new FramePose(worldFrame); 
+      FramePose leftHandExpectedPose = new FramePose(worldFrame);
       leftHandExpectedPose.setPosition(0.33, 0.33, 0.74);
       leftHandExpectedPose.setOrientation(-1.85, 0.25, -0.53);
       assertTrue(leftHandPose.epsilonEquals(leftHandExpectedPose, POSE_ERROR_MARGIN));
-      
+
       //Chest orientation
       ReferenceFrame chestReferenceFrame = fullRobotModel.getChest().getBodyFixedFrame();
       FramePose chestPose = new FramePose(chestReferenceFrame);
@@ -264,8 +264,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println("chest pose");
          System.out.println(chestPose);
       }
-      FramePose chestExpectedPose = new FramePose(worldFrame); 
-      chestExpectedPose.setPosition(-0.17,-0.01, 1.29);
+      FramePose chestExpectedPose = new FramePose(worldFrame);
+      chestExpectedPose.setPosition(-0.17, -0.01, 1.29);
       chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
       assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSE_ERROR_MARGIN));
 
@@ -279,12 +279,11 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(pelvisPose);
       }
 
-      FramePose pelvisExpectedPose = new FramePose(worldFrame); 
-      pelvisExpectedPose.setPosition(-0.09,-0.01, 0.79);
+      FramePose pelvisExpectedPose = new FramePose(worldFrame);
+      pelvisExpectedPose.setPosition(-0.09, -0.01, 0.79);
       pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
       assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSE_ERROR_MARGIN));
-      
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
