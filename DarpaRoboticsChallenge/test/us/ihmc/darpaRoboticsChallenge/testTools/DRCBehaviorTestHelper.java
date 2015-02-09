@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -27,14 +28,18 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorControlModeSubscribe
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
-import us.ihmc.humanoidBehaviors.utilities.TrajectoryPercentCompletedUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.TimeBasedStopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.SysoutTool;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -292,8 +297,31 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return ret;
    }
 
-   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior,
-         TrajectoryPercentCompletedUpdatable stopThreadUpdatable, double percentOfTrajectoryToComplete)
+   public StopThreadUpdatable executeBehaviorUntilPartiallyComplete(final BehaviorInterface behavior, double pausePercent, double resumePercent, double stopPercent,
+         FramePose poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
+   {
+      StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, behavior, pausePercent, resumePercent, stopPercent,
+            poseAtTrajectoryEnd, frameToKeepTrackOf);
+
+      boolean success = executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopThreadUpdatable);
+      assertTrue(success);
+      
+      return stopThreadUpdatable;
+   }
+
+   public StopThreadUpdatable executeBehaviorPauseAndResumeUntilDone(final BehaviorInterface behavior, double pauseTime, double resumeTime, double stopTime,
+         ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
+   {
+      StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver, behavior, pauseTime, resumeTime, stopTime,
+            frameToKeepTrackOf);
+
+      boolean success = executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopThreadUpdatable);
+      assertTrue(success);
+
+      return stopThreadUpdatable;
+   }
+
+   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
          throws SimulationExceededMaximumTimeException
    {
       StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, stopThreadUpdatable);
@@ -301,11 +329,13 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorThread.start();
 
       boolean success = true;
-      while ( !stopThreadUpdatable.stopThread() )
+      while (!stopThreadUpdatable.shouldBehaviorRunnerBeStopped())
       {
          success &= simulateAndBlockAndCatchExceptions(1.0);
       }
       behaviorRunner.closeAndDispose();
+
+      assertTrue(success);
 
       return success;
    }
@@ -379,6 +409,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       private final StopThreadUpdatable stopThreadUpdatable;
 
+      private HumanoidBehaviorControlModeEnum currentControlMode = HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS;
+
       public StoppableBehaviorRunner(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
       {
          super(behavior);
@@ -391,10 +423,28 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          {
             behavior.doControl();
             stopThreadUpdatable.update(yoTimeRobot.getDoubleValue());
-            
-            if (stopThreadUpdatable.stopThread())
+
+            HumanoidBehaviorControlModeEnum requestedControlMode = stopThreadUpdatable.getRequestedBehaviorControlMode();
+
+            if (stopThreadUpdatable.shouldBehaviorRunnerBeStopped())
             {
+               SysoutTool.println("Stopping Thread!");
                isRunning = false;
+            }
+            else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.PAUSE) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.PAUSE))
+            {
+               behavior.pause();
+               currentControlMode = HumanoidBehaviorControlModeEnum.PAUSE;
+            }
+            else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.STOP) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.STOP))
+            {
+               behavior.stop();
+               currentControlMode = HumanoidBehaviorControlModeEnum.STOP;
+            }
+            else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.RESUME) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.RESUME))
+            {
+               behavior.resume();
+               currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
             }
          }
       }

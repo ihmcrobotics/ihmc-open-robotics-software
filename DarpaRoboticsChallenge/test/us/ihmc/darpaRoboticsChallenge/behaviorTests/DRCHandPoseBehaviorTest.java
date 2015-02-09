@@ -9,14 +9,15 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -24,6 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -211,6 +213,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
+   @Ignore
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testTwoSimultaneousHandPoseBehaviors() throws SimulationExceededMaximumTimeException
@@ -253,9 +256,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testHandPosePauseAndResume() throws SimulationExceededMaximumTimeException
+   public void testPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -264,36 +266,27 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       SysoutTool.println("Initializing Behavior", DEBUG);
-      final double swingTrajectoryTime = 4.0;
-      RobotSide robotSide = RobotSide.LEFT;
+      final RobotSide robotSide = RobotSide.LEFT;
       FramePose handPoseStart = getCurrentHandPose(robotSide);
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.3);
       handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
+      double swingTrajectoryTime = 2.0;
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
 
+      ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
+      double pauseTime = 1.0;
+      double resumeTime = 2.0;
+      double stopTime = Double.POSITIVE_INFINITY;
+
       SysoutTool.println("Starting Behavior", DEBUG);
-      final double simTimeBeforePause = swingTrajectoryTime / 2.0;
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseBehavior, simTimeBeforePause);
-      assertTrue(success);
-      SysoutTool.println("Sending Pause Request", DEBUG);
-      handPoseBehavior.pause();
-      FramePose handPoseAtPauseStart = getCurrentHandPose(robotSide);
-
-      SysoutTool.println("Waiting in Paused Mode", DEBUG);
-      double secondsToWaitAfterSettlingBeforeResume = 2.0;
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseBehavior, secondsToWaitAfterSettlingBeforeResume);
-      assertTrue(success);
-      FramePose handPoseAtPauseEnd = getCurrentHandPose(robotSide);
-      assertPosesAreWithinThresholds(handPoseAtPauseStart, handPoseAtPauseEnd, 3.0 * POSITION_THRESHOLD, 3.0 * ORIENTATION_THRESHOLD);
-      assertTrue(!handPoseBehavior.isDone());
-
-      SysoutTool.println("Sending Resume Request", DEBUG);
-      handPoseBehavior.resume();
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      assertTrue(success);
+      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, pauseTime, resumeTime, stopTime,
+            frameToKeepTrackOf);
       SysoutTool.println("Behavior Should Be Done", DEBUG);
 
+      FramePose handPoseAtPauseStart = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.PAUSE);
+      FramePose handPoseAtPauseEnd = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.RESUME);
+      assertPosesAreWithinThresholds(handPoseAtPauseStart, handPoseAtPauseEnd, 3.0 * POSITION_THRESHOLD, 3.0 * ORIENTATION_THRESHOLD);
       assertCurrentHandPoseIsWithinThresholds(robotSide, handPoseTarget);
       assertTrue(handPoseBehavior.isDone());
 
@@ -320,24 +313,12 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
 
       final double simTimeBeforeStop = swingTrajectoryTime / 2.0;
-      final double simTimeAfterStop = swingTrajectoryTime - simTimeBeforeStop;
+      
+      ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
+      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseBehavior, simTimeBeforeStop);
-      assertTrue(success);
-      SysoutTool.println("Sending Stop Request", DEBUG);
-      handPoseBehavior.stop();
-      FramePose handPoseJustAfterStop = getCurrentHandPose(robotSide);
-
-      SysoutTool.println("Waiting in Stopped Mode", DEBUG);
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseBehavior, simTimeAfterStop);
-      assertTrue(success);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
-
-      handPoseBehavior.doControl();
-      HandPoseStatus.Status status = handPoseBehavior.getStatus();
-      assertTrue(status.equals(HandPoseStatus.Status.COMPLETED));
-      FramePose handPoseAfterResting = getCurrentHandPose(robotSide);
+      FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.STOP);
+      FramePose handPoseAfterResting = stopThreadUpdatable.getCurrentTestFramePose();
       assertPosesAreWithinThresholds(handPoseJustAfterStop, handPoseAfterResting, 3.0 * POSITION_THRESHOLD, 3.0 * ORIENTATION_THRESHOLD);
       assertTrue(!handPoseBehavior.isDone());
 
