@@ -6,7 +6,9 @@ import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
 {
@@ -19,15 +21,28 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
 
    private double trajectoryLength;
 
+   private double elapsedTime = 0.0;
+   private double elapsedTimeOld = 0.0;
    private double startTime = Double.NaN;
+   private double pauseStartTime = Double.NaN;
    private double doneTime = Double.NaN;
    private double percentTrajectoryCompleted = 0.0;
    private double percentTrajectoryCompletedOld = 0.0;
    private final double pausePercent;
-   private final double resumePercent;
+   private final double pauseDuration;
    private final double stopPercent;
 
-   public TrajectoryBasedStopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pausePercent, double resumePercent,
+   public TrajectoryBasedStopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pausePercent, double pauseDuration,
+         double stopPercent, FramePose2d pose2dAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
+   {
+      this(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent, new FramePose(), frameToKeepTrackOf);
+
+      RigidBodyTransform transformToWorldAtTrajectoryEnd = new RigidBodyTransform();
+      pose2dAtTrajectoryEnd.getPose(transformToWorldAtTrajectoryEnd);
+      poseAtTrajectoryEnd.setPoseIncludingFrame(worldFrame, transformToWorldAtTrajectoryEnd);
+   }
+
+   public TrajectoryBasedStopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pausePercent, double pauseDuration,
          double stopPercent, FramePose poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
    {
       super(robotDataReceiver, behavior, frameToKeepTrackOf);
@@ -35,9 +50,9 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       this.initialPose = new FramePose();
       this.currentPose = new FramePose();
       this.poseAtTrajectoryEnd = poseAtTrajectoryEnd;
-      
+
       this.pausePercent = pausePercent;
-      this.resumePercent = resumePercent;
+      this.pauseDuration = pauseDuration;
       this.stopPercent = stopPercent;
    }
 
@@ -48,33 +63,34 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       {
          startTime = time;
       }
-      double elapsedTime = time - startTime;
+      elapsedTime = time - startTime;
 
       if (!initialPoseHasBeenSet)
       {
-         getCurrentFramePose(initialPose);
+         getCurrentTestFramePose(initialPose);
 
          this.trajectoryLength = initialPose.getPositionDistance(poseAtTrajectoryEnd);
          initialPoseHasBeenSet = true;
       }
-      
-      getCurrentFramePose(currentPose);
+
+      getCurrentTestFramePose(currentPose);
       double trajectoryLengthCompleted = initialPose.getPositionDistance(currentPose);
       percentTrajectoryCompleted = 100.0 * trajectoryLengthCompleted / trajectoryLength;
 
-      if (percentTrajectoryCompletedOld < pausePercent && percentTrajectoryCompleted >= pausePercent)
+      if (hasThresholdBeenCrossed(pausePercent))
       {
          SysoutTool.println("Requesting Pause", DEBUG);
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.PAUSE);
+         pauseStartTime = elapsedTime;
       }
-      else if (percentTrajectoryCompletedOld < resumePercent && percentTrajectoryCompleted >= resumePercent)
+      else if ((elapsedTimeOld - pauseStartTime) < pauseDuration && (elapsedTime - pauseStartTime) >= pauseDuration)
       {
          assertTrue(!behavior.isDone());
 
          SysoutTool.println("Requesting Resume", DEBUG);
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.RESUME);
       }
-      else if (percentTrajectoryCompletedOld < stopPercent && percentTrajectoryCompleted >= stopPercent)
+      else if (hasThresholdBeenCrossed(stopPercent))
       {
          SysoutTool.println("Requesting Stop", DEBUG);
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.STOP);
@@ -95,16 +111,18 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
             setShouldBehaviorRunnerBeStopped(true);
          }
       }
+      elapsedTimeOld = elapsedTime;
       percentTrajectoryCompletedOld = percentTrajectoryCompleted;
+   }
+
+   private boolean hasThresholdBeenCrossed(double percentageThreshold)
+   {
+      boolean ret = percentTrajectoryCompletedOld < percentageThreshold && percentTrajectoryCompleted >= percentageThreshold;
+      return ret;
    }
 
    public double getPercentTrajectoryCompleted()
    {
       return percentTrajectoryCompleted;
-   }
-
-   protected void getCurrentFramePose(FramePose poseToPack)
-   {
-      poseToPack.setPoseIncludingFrame(worldFrame, frameToKeepTrackOf.getTransformToWorldFrame());
    }
 }
