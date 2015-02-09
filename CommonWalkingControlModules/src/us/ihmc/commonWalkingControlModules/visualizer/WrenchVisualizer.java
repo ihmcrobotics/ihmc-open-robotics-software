@@ -109,17 +109,12 @@ public class WrenchVisualizer
             tempPoint.setToZero(wrench.getBodyFrame());
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
             pointOfApplication.set(tempPoint);
-            
-            forceVisualizers.get(rigidBody).showGraphicObject();
-            torqueVisualizers.get(rigidBody).showGraphicObject();
          }
          else
          {
             forces.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
             torques.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
-            pointsOfApplication.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
-            forceVisualizers.get(rigidBody).hideGraphicObject();
-            torqueVisualizers.get(rigidBody).hideGraphicObject();            
+            pointsOfApplication.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);        
          }
       }
    }
