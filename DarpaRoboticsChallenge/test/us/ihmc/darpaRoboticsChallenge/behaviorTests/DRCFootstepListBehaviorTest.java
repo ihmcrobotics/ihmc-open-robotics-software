@@ -144,6 +144,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
       assertTrue(success);
       assertTrue(footstepListBehavior.hasInputBeenSet());
+      assertTrue(footstepListBehavior.isWalking());
 
       SysoutTool.println("Begin Executing Behavior", DEBUG);
       while (!footstepListBehavior.isDone())
@@ -151,6 +152,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
          assertTrue(success);
       }
+      assertTrue(!footstepListBehavior.isWalking());      
       assertTrue(footstepListBehavior.isDone());
       SysoutTool.println("Behavior should be done", DEBUG);
 
