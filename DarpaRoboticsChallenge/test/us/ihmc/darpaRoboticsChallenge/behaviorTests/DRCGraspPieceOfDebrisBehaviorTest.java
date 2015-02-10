@@ -49,6 +49,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface
 {
+   private final boolean DEBUG = false;
+   
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -79,21 +81,20 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private final boolean DEBUG = false;
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.37;
-   private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 1.05;
-   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.24;
+   private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.21;
+   private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 0.89;
+   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.61;
 
-   private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.37;
-   private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 1.05;
-   private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.24;
+   private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.21;
+   private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 0.91;
+   private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.57;
 
-   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.48;
-   private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 1.02;
-   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.25;
+   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.37;
+   private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 1.0;
+   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.35;
 
    private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.05;
 
@@ -182,9 +183,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       jointAngles[5] = 0.55;
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1));
-      
+
       controllerCommunicator.send(new HandPosePacket(RobotSide.RIGHT, jointAngles));
-      
+
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, fullRobotModel, midFeetZUpFrame,
@@ -207,7 +208,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       tempGraspVector.get(graspVector);
 
       FramePoint tempGraspVectorPosition = new FramePoint(worldFrame);
-      tempGraspVectorPosition.setZ(0.5);
+      tempGraspVectorPosition.setZ(0.6);
       tempGraspVectorPosition.applyTransform(debrisTransform);
       Point3d graspVectorPosition = new Point3d();
       tempGraspVectorPosition.get(graspVectorPosition);
@@ -234,6 +235,20 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       DoubleYoVariable fingerMiddle_Joint2 = (DoubleYoVariable) robot.getVariable("q_r_finger_middle_joint_2");
       DoubleYoVariable fingerMiddle_Joint3 = (DoubleYoVariable) robot.getVariable("q_r_finger_middle_joint_3");
 
+      if (DEBUG)
+      {
+         System.out.println(finger1_Joint1);
+         System.out.println(finger1_Joint2);
+         System.out.println(finger1_Joint3);
+
+         System.out.println(finger2_Joint1);
+         System.out.println(finger2_Joint2);
+         System.out.println(finger2_Joint3);
+
+         System.out.println(fingerMiddle_Joint1);
+         System.out.println(fingerMiddle_Joint2);
+         System.out.println(fingerMiddle_Joint3);
+      }
       assertTrue(Math.abs(finger1_Joint1.getDoubleValue() - FINGER1_JOINT_1_EXPECTED_RADIANS) < FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS);
       assertTrue(Math.abs(finger1_Joint2.getDoubleValue() - FINGER1_JOINT_2_EXPECTED_RADIANS) < FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS);
       assertTrue(Math.abs(finger1_Joint3.getDoubleValue() - FINGER1_JOINT_3_EXPECTED_RADIANS) < FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS);

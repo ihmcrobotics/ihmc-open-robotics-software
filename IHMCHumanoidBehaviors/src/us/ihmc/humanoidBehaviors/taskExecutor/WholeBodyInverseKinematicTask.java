@@ -35,6 +35,7 @@ public class WholeBodyInverseKinematicTask implements Task
    {
       wholeBodyIKBehavior.initialize();
       wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime);
+      wholeBodyIKBehavior.computeSolution();
    }
 
    @Override
@@ -59,5 +60,4 @@ public class WholeBodyInverseKinematicTask implements Task
       boolean sleepTimeAchieved = yoTime.getDoubleValue() > behaviorDoneTime;
       return wholeBodyIKBehavior.isDone() && sleepTimeAchieved;
    }
-
 }
