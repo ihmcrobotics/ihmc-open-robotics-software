@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
@@ -213,7 +214,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testTwoSimultaneousHandPoseBehaviors() throws SimulationExceededMaximumTimeException
@@ -247,7 +247,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       {
          double[] desiredArmPose = desiredArmPoses.get(robotSide);
          BehaviorInterface handPoseBehavior = handPoseBehaviors.get(robotSide);
-         assertTrue(handPoseBehavior.isDone());
 
          assertCurrentHandPoseIsWithinThresholds(robotSide, desiredArmPose);
          assertTrue(handPoseBehavior.isDone());
@@ -296,7 +295,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testHandPoseMoveStop() throws SimulationExceededMaximumTimeException
+   public void testStop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 

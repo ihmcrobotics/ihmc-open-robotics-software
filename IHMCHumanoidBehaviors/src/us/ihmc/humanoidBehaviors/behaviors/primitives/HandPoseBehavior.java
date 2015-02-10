@@ -84,7 +84,7 @@ public class HandPoseBehavior extends BehaviorInterface
       if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
             && trajectoryTimeElapsed > trajectoryTime.getDoubleValue())
       {
-         SysoutTool.println("setting isDone = true", DEBUG);
+         SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true", DEBUG);
          isDone.set(true);
       }
 
