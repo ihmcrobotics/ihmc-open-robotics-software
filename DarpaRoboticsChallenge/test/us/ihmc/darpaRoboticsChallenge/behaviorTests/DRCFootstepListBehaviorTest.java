@@ -212,14 +212,30 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(footstepListBehavior, stopThreadUpdatable);
       SysoutTool.println("Behavior should be done", DEBUG);
 
-      FramePose2d footPoseAtStop = stopThreadUpdatable.getTestFramePose2dAtTransition(HumanoidBehaviorControlModeEnum.STOP);
-      FramePose2d footPoseFinal = stopThreadUpdatable.getCurrentTestFramePose2dCopy();
+      
+      SideDependentList<FramePose2d> footPosesAtStop = new SideDependentList<FramePose2d>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame footFrame = stopThreadUpdatable.getReferenceFramesAtTransition(HumanoidBehaviorControlModeEnum.STOP).getFootFrame(robotSide);
+         footPosesAtStop.put(robotSide, stopThreadUpdatable.getTestFramePose2dCopy(footFrame.getTransformToWorldFrame()));
+      }
+      
+      SideDependentList<FramePose2d> footPosesFinal = new SideDependentList<FramePose2d>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         drcBehaviorTestHelper.updateRobotModel();
+         ReferenceFrame footFrame = drcBehaviorTestHelper.getReferenceFrames().getFootFrame(robotSide);
+         footPosesFinal.put(robotSide, stopThreadUpdatable.getTestFramePose2dCopy(footFrame.getTransformToWorldFrame()));
+      }
 
       // Foot position and orientation may change after stop command if the robot is currently in single support, 
       // since the robot will complete the current step (to get back into double support) before actually stopping
       double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
-      assertPosesAreWithinThresholds(footPoseAtStop, footPoseFinal, positionThreshold, orientationThreshold);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         assertPosesAreWithinThresholds(footPosesAtStop.get(robotSide), footPosesFinal.get(robotSide), positionThreshold, orientationThreshold);
+      }
       assertTrue(!footstepListBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
