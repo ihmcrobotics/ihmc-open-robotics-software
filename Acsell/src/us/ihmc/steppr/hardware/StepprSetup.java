@@ -11,6 +11,8 @@ import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 import java.util.EnumMap;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.PriorityParameters;
@@ -87,7 +89,7 @@ public class StepprSetup extends RealtimeThread
    {
       try
       {
-         NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(StepprNetworkParameters.CONTROL_COMPUTER_HOST));
+         NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.robotController)));
          System.out.println("Binding setup to interface: " + iface);
 
          InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
@@ -422,7 +424,7 @@ public class StepprSetup extends RealtimeThread
    {
       try
       {
-         NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(StepprNetworkParameters.CONTROL_COMPUTER_HOST));
+         NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.robotController)));
          InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
          InetSocketAddress streamAddress = new InetSocketAddress(group, StepprNetworkParameters.UDP_MULTICAST_STREAM_COMMAND_PORT);
          

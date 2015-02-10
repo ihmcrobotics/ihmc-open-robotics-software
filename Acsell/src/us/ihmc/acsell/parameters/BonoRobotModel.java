@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -60,9 +59,6 @@ public class BonoRobotModel implements DRCRobotModel
 
    private final String[] resourceDirectories = new String[] { "models/axl/", "models/axl/axl_description/", "models/axl/axl_description/bono/", };
 
-   private static final String STEPPR_NETWORK_CONFIG = "Configurations/steppr_network_config.ini";
-   private static final String DEFAULT_NETWORK_CONFIG = "Configurations/localhost_network_config.ini";
-
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
    private final BonoJointMap jointMap = new BonoJointMap();
@@ -71,7 +67,6 @@ public class BonoRobotModel implements DRCRobotModel
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
    private final BonoWalkingControllerParameters multiContactControllerParameters;
-   private final RobotNetworkParameters networkParameters;
    
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()  {
@@ -101,7 +96,6 @@ public class BonoRobotModel implements DRCRobotModel
       armControlParameters = new BonoArmControlParameters(runningOnRealRobot);
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
       multiContactControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
-      networkParameters = new RobotNetworkParameters(runningOnRealRobot ? STEPPR_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
    }
 
    @Override
@@ -263,12 +257,6 @@ public class BonoRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
       return new StepprSensorSuiteManager();
-   }
-
-   @Override
-   public RobotNetworkParameters getNetworkParameters()
-   {
-      return networkParameters;
    }
 
    @Override
