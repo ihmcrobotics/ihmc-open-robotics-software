@@ -18,6 +18,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.MomentumCalculator;
@@ -196,7 +197,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
       desiredPelvisOrientation.getMatrix3d(desiredPelvisToPelvis);
 
       AxisAngle4d desiredPelvisToPelvisAxisAngle = new AxisAngle4d();
-      desiredPelvisToPelvisAxisAngle.set(desiredPelvisToPelvis);
+//      desiredPelvisToPelvisAxisAngle.set(desiredPelvisToPelvis);
+      RotationFunctions.axisAngleFromMatrix(desiredPelvisToPelvis, desiredPelvisToPelvisAxisAngle);
       FrameVector proportionalPart = new FrameVector(pelvisFrame, desiredPelvisToPelvisAxisAngle.getX(), desiredPelvisToPelvisAxisAngle.getY(), 0.0);
       proportionalPart.scale(desiredPelvisToPelvisAxisAngle.getAngle());
       proportionalPart.changeFrame(frame);
