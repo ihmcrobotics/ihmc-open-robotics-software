@@ -8,7 +8,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
 {
    private boolean createSCSMovies = false;
    private boolean checkNothingChangedInSimulation = false;
-   private boolean keepSCSUp = false;
+   private boolean keepSCSUp = true;
    
    public SimulationTestingParameters()
    {

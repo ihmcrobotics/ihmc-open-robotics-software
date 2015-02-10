@@ -14,6 +14,7 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
@@ -191,7 +192,8 @@ public class SimulatedIMURawSensorReaderTest
       differenceMatrix.mulTransposeLeft(expected, actual);
       
       AxisAngle4d differenceAxisAngle = new AxisAngle4d();
-      differenceAxisAngle.set(differenceMatrix);
+//      differenceAxisAngle.set(differenceMatrix);
+      RotationFunctions.axisAngleFromMatrix(differenceMatrix, differenceAxisAngle);
       
       double differenceAngle = differenceAxisAngle.getAngle();
       

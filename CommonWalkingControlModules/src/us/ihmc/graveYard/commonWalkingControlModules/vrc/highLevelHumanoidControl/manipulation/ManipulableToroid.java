@@ -124,7 +124,8 @@ public class ManipulableToroid
       copy.changeFrame(toroidBeforeJointFrame);
       copy.getOrientation(rotationMatrix);
       AxisAngle4d axisAngle = new AxisAngle4d();
-      axisAngle.set(rotationMatrix);
+//      axisAngle.set(rotationMatrix);
+      RotationFunctions.axisAngleFromMatrix(rotationMatrix, axisAngle);
       setQ(axisAngle.getAngle());
 
       updateVisualizers();
