@@ -43,6 +43,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -491,7 +492,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
                yoTime.getDoubleValue());
-
+         
          if (transferToSide != null)
          {
             stanceFootLocation.setToZero(referenceFrames.getAnkleZUpFrame(transferToSide));
@@ -686,9 +687,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          pelvisICPBasedTranslationManager.enable();
 
-         if (supportLeg.getEnumValue() == null) // Mean we are in double support (not transfer to side)
+         boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
+         if (isInDoubleSupport && !upcomingFootstepList.hasNextFootsteps() && !upcomingFootstepList.isPaused())
+         {
+            SysoutTool.println("WALKING COMPLETE", DEBUG);
             upcomingFootstepList.notifyWalkingComplete();
-
+         }
+         
          desiredECMPinSupportPolygon.set(false);
          ecmpBasedToeOffHasBeenInitialized.set(false);
          trailingLeg.set(transferToSide); // FIXME
