@@ -185,4 +185,9 @@ public class UpcomingFootstepList
    {
       return (nextFootstepList.size() > 0);
    }
+   
+   public boolean isPaused()
+   {
+      return footstepProvider.isPaused();
+   }
 }

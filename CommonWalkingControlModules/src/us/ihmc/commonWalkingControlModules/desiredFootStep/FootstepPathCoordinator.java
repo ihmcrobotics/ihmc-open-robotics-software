@@ -321,6 +321,12 @@ public class FootstepPathCoordinator implements FootstepProvider
          System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);
       }
    }
+   
+   @Override
+   public boolean isPaused()
+   {
+      return isPaused.getBooleanValue();
+   }
 
    public void setWalkMethod(WalkMethod walkMethod)
    {
@@ -481,5 +487,4 @@ public class FootstepPathCoordinator implements FootstepProvider
          return true;
       return false;
    }
-
 }

@@ -88,4 +88,10 @@ public class SwitchableFootstepProvider implements FootstepProvider
       FootstepProvider footstepProviderInUse = getFootstepProviderInUse();
       return footstepProviderInUse.isBlindWalking();
    }
+
+   @Override
+   public boolean isPaused()
+   {
+      return false;
+   }
 }

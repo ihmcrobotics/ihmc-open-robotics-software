@@ -286,4 +286,10 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    {
       return true;
    }
+
+   @Override
+   public boolean isPaused()
+   {
+      return false;
+   }
 }

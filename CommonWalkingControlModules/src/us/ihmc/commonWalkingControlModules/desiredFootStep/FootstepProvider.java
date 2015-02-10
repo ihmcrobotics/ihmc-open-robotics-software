@@ -20,4 +20,6 @@ public interface FootstepProvider
    public abstract int getNumberOfFootstepsToProvide();
    
    public abstract boolean isBlindWalking();
+   
+   public abstract boolean isPaused();
 }
