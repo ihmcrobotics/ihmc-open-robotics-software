@@ -130,4 +130,10 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       // TODO Auto-generated method stub
    }
+
+   @Override
+   public boolean isPaused()
+   {
+      return false;
+   }
 }

@@ -111,4 +111,10 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       return true;
    }
+
+   @Override
+   public boolean isPaused()
+   {
+      return false;
+   }
 }
