@@ -4,6 +4,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -22,10 +24,6 @@ public class AtlasNetworkProcessor
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
-      FlaggedOption scsIPFlag = new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
-            .setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption rosURIFlag = new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
-            .setStringParser(JSAP.STRING_PARSER);
       Switch simulateController = new Switch("simulate-controller").setShortFlag('d').setLongFlag(JSAP.NO_LONGFLAG);
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
@@ -39,8 +37,6 @@ public class AtlasNetworkProcessor
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       jsap.registerParameter(robotModel);
 
-      jsap.registerParameter(scsIPFlag);
-      jsap.registerParameter(rosURIFlag);
       jsap.registerParameter(simulateController);
       jsap.registerParameter(runningOnRealRobot);
       jsap.registerParameter(runningOnGazebo);
@@ -79,15 +75,7 @@ public class AtlasNetworkProcessor
     	  
     	  System.out.println("Using the " + model + " model");
     	  
-    	  URI rosMasterURI;
-    	  if (config.getString(rosURIFlag.getID()) != null)
-    	  {
-    	     rosMasterURI = new URI(config.getString(rosURIFlag.getID()));
-    	  }
-    	  else
-    	  {
-    	     rosMasterURI = model.getNetworkParameters().getRosURI();
-    	  }
+    	  URI rosMasterURI = NetworkParameters.getROSURI();
 
     	  if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
     	  {

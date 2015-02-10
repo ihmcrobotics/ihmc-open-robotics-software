@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogBroadcastListener;
@@ -13,8 +15,6 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class YoVariableLoggerDispatcher implements LogBroadcastListener
 {
-   private static final String host = "10.66.171.46";
-
    private final YoVariableLoggerOptions options;
 
    public YoVariableLoggerDispatcher(YoVariableLoggerOptions options) throws IOException
@@ -22,7 +22,7 @@ public class YoVariableLoggerDispatcher implements LogBroadcastListener
       this.options = options;
       System.out.println("Starting YoVariableLoggerDispatcher");
 
-      InetAddress myIP = LogUtils.getMyIP(host);
+      InetAddress myIP = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
       NetworkInterface iface = NetworkInterface.getByInetAddress(myIP);
 
       System.out.println("Listening on interface " + iface);

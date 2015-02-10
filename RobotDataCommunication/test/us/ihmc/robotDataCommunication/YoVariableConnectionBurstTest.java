@@ -40,7 +40,7 @@ public class YoVariableConnectionBurstTest
       int bufferSize=256;
       SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize, false);      
       scsYoVariablesUpdatedListener.setDisplayOneInNPackets(1);
-      final YoVariableClient client = new YoVariableClient("localhost", scsYoVariablesUpdatedListener, "", false);
+      final YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "", false);
       client.start();
       
       

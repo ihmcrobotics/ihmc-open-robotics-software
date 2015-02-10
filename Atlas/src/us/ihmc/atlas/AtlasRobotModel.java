@@ -26,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -80,9 +79,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
 
-   private static final String ATLAS_NETWORK_CONFIG = "Configurations/atlas_network_config.ini";
-   private static final String DEFAULT_NETWORK_CONFIG = "Configurations/localhost_network_config.ini";
-
    private final JaxbSDFLoader loader;
 
    private final AtlasJointMap jointMap;
@@ -93,7 +89,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
-   private final RobotNetworkParameters networkParameters;
    private final AtlasDefaultArmConfigurations defaultArmConfigurations;
 
    @Override
@@ -130,7 +125,6 @@ public class AtlasRobotModel implements DRCRobotModel
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
       drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
-      networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
    }
 
@@ -309,12 +303,6 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
             getFootstepParameters());
-   }
-
-   @Override
-   public RobotNetworkParameters getNetworkParameters()
-   {
-      return networkParameters;
    }
 
    @Override

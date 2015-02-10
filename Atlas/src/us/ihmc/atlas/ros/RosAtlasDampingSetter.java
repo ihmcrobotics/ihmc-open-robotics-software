@@ -1,13 +1,11 @@
 package us.ihmc.atlas.ros;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.atlas.AtlasDampingParameters;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -25,32 +23,23 @@ public class RosAtlasDampingSetter
          SetJointDamping._TYPE);
    private final RosServiceClient<atlas_msgs.SetJointDampingRequest, atlas_msgs.SetJointDampingResponse> sandiaHandDampingClient = new RosServiceClient<SetJointDampingRequest, SetJointDampingResponse>(
          SetJointDamping._TYPE);
-   
+
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
-   
-   
+
    public RosAtlasDampingSetter(String rosMasterURI, final RosMainNode rosMainNode)
    {
       this.rosMainNode = rosMainNode;
    }
-   
-   public RosAtlasDampingSetter(String rosMasterURI)
-   {
-    try
-    { 
-       rosMainNode = new RosMainNode(new URI(rosMasterURI), "RosAtlasSettingsSetter");
-    }
-    catch (URISyntaxException e)
-    {
-       throw new RuntimeException(e);
-    }
 
-    //rosMainNode.attachPublisher("/atlas/mode", modePublisher);
-    //rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
-   // rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
-    rosMainNode.execute();
+   public RosAtlasDampingSetter()
+   {
+      rosMainNode = new RosMainNode(NetworkParameters.getROSURI(), "RosAtlasSettingsSetter");
+      //rosMainNode.attachPublisher("/atlas/mode", modePublisher);
+      //rosMainNode.attachServiceClient("/atlas/set_joint_damping", atlasDampingClient);
+      // rosMainNode.attachServiceClient("/sandia_hands/set_joint_damping", sandiaHandDampingClient);
+      rosMainNode.execute();
    }
-      
+
    public void setPositionControlDampingParameters()
    {
       atlasDampingClient.waitTillConnected();
@@ -70,7 +59,7 @@ public class RosAtlasDampingSetter
 
          public void onSuccess(SetJointDampingResponse response)
          {
-            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters) + " "  + response.getStatusMessage());
+            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters) + " " + response.getStatusMessage());
          }
 
          public void onFailure(RemoteException e)
@@ -99,7 +88,7 @@ public class RosAtlasDampingSetter
 
          public void onSuccess(SetJointDampingResponse response)
          {
-            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters) + " "  + response.getStatusMessage());
+            System.out.println("Set joint damping for Atlas to " + Arrays.toString(dampingParameters) + " " + response.getStatusMessage());
          }
 
          public void onFailure(RemoteException e)
@@ -108,7 +97,7 @@ public class RosAtlasDampingSetter
          }
       });
    }
-   
+
    public void setSandiaHandDampingParameters()
    {
       sandiaHandDampingClient.waitTillConnected();
@@ -120,7 +109,7 @@ public class RosAtlasDampingSetter
       {
          dampingParameters[i] = AtlasDampingParameters.getSandiaHandDamping(RobotSide.LEFT, i);
       }
-      
+
       for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
       {
          dampingParameters[i + ROSSandiaJointMap.numberOfJointsPerHand] = AtlasDampingParameters.getSandiaHandDamping(RobotSide.RIGHT, i);
@@ -145,7 +134,7 @@ public class RosAtlasDampingSetter
 
    public static void main(String[] args)
    {
-      RosAtlasDampingSetter rosAtlasSettingsSetter = new RosAtlasDampingSetter("http://192.168.130.101:11311");
+      RosAtlasDampingSetter rosAtlasSettingsSetter = new RosAtlasDampingSetter();
       rosAtlasSettingsSetter.setAtlasDampingParameters();
       System.exit(0);
    }

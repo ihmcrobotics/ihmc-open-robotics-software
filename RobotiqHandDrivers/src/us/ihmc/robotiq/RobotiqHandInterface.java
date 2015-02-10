@@ -3,6 +3,8 @@ package us.ihmc.robotiq;
 import java.io.IOException;
 import java.util.Arrays;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
@@ -358,7 +360,7 @@ public final class RobotiqHandInterface
 	
 	public RobotiqHandInterface(RobotSide robotSide)
 	{
-		this.address = robotSide.equals(RobotSide.LEFT) ? RobotiqHandParameters.LEFT_HAND_ADDRESS : RobotiqHandParameters.RIGHT_HAND_ADDRESS;
+		this.address = robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand);
 		
 		if(connect())
 		{

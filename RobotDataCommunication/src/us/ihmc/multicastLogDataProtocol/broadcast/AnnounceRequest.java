@@ -358,9 +358,7 @@ public class AnnounceRequest
    @Override
    public String toString()
    {
-      return "AnnounceRequest [type=" + type + ", sessionID=" + sessionID + ", group=" + Arrays.toString(group) + ", dataPort=" + dataPort + ", controlIP="
-            + Arrays.toString(controlIP) + ", controlPort=" + controlPort + ", videoStream=" + Arrays.toString(videoStream) + ", videoPort=" + videoPort
-            + ", cameras=" + Arrays.toString(cameras) + ", name=" + name + ", log=" + log + "]";
+      return String.valueOf(sessionID);
    }
 
 

@@ -3,6 +3,8 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -35,7 +37,7 @@ public class AtlasROSAPISimulator
       boolean startNetworkProcessor = startUI;
       simulationStarter.startSimulation(startNetworkProcessor, true);
 
-      URI rosUri = robotModel.getNetworkParameters().getRosURI();
+      URI rosUri = NetworkParameters.getROSURI();
 
       PacketCommunicator sensorCommunicator = simulationStarter.getSCSSensorOutputPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();

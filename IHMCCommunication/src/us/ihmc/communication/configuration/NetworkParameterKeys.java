@@ -7,10 +7,15 @@ public enum NetworkParameterKeys
    networkManager(true, "Hostname/IP of the network manager, as seen from the communication shaper."),
    networkManagerForUI(true, "Hostname/IP of the networkmanager, as seen from the UI. In normal operation, this is the same as networkmanager"),
    
-   rosHost(false, "ROS hostname/IP."),
+   rosURI(false, "Fully qualified ROS master URI."),
    head(false, "Hostname/IP of the head."),
    leftHand(false, "Hostname/IP of the left hand."),
-   rightHand(false, "Hostname/IP of the right hand.");
+   rightHand(false, "Hostname/IP of the right hand."),
+   
+   onboard1(false, "IP of first onboard computer"),
+   onboard2(false, "IP of second onboard computer"),
+   onboard3(false, "IP of third onboard computer"),
+   ;
    
    
    private final boolean required;

@@ -29,18 +29,15 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
    private DRCRobotModel drcRobotModel;
    private SCSVisualizer scsVisualizer;
    
-   public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel drcRobotModel)
+   public RemoteAtlasVisualizer(int bufferSize, DRCRobotModel drcRobotModel)
    {
       this.drcRobotModel = drcRobotModel;
-      
-      System.out.println("Connecting to host " + host);
-
       scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("setWristForceSensorsToZero", 1.0);
       
-      YoVariableClient client = new YoVariableClient(host, scsVisualizer, "remote", showOverheadView);
+      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", showOverheadView);
       client.start();
    }
 
@@ -71,17 +68,12 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       int bufferSize = 16384;
       JSAP jsap = new JSAP();
       
-      FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L');
-      FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag('p')
-            .setDefault(String.valueOf(defaultPort));
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
 
       
-      jsap.registerParameter(hostOption);
-      jsap.registerParameter(portOption);
       jsap.registerParameter(robotModel);
       jsap.registerParameter(runningOnRealRobot);
 
@@ -92,16 +84,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
         AtlasTarget target = config.getBoolean(runningOnRealRobot.getID()) ? AtlasTarget.REAL_ROBOT : AtlasTarget.SIM;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
-    	  
-    	  String host;
-    	  if (config.getString("host") != null)
-    		  host = config.getString("host");
-    	  else
-    		  host = model.getNetworkParameters().getRobotControlComputerIP();
-    	  
-         int port = config.getInt("port");
-         
-         new RemoteAtlasVisualizer(host, port, bufferSize, model);         
+         new RemoteAtlasVisualizer(bufferSize, model);         
       }
       else
       {

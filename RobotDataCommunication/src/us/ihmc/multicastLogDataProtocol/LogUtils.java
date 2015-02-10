@@ -133,6 +133,5 @@ public class LogUtils
 
    public static void main(String[] args) throws UnknownHostException
    {
-      System.out.println(getMyIP("10.66.171.20"));
    }
 }

@@ -9,6 +9,8 @@ import multisense_ros.StampedPps;
 import org.zeromq.ZMQ;
 
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSRequestType;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -22,16 +24,16 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    private final AtomicLong currentTimeStampOffset = new AtomicLong(0);
    private ZMQ.Socket requester;
 
-   private final byte[] requestPayload = {PPSRequestType.GET_NEW_PPS_TIMESTAMP};
+   private final byte[] requestPayload = { PPSRequestType.GET_NEW_PPS_TIMESTAMP };
    private final ByteBuffer responseBuffer = ByteBuffer.allocate(8);
-   
+
    private final AtomicBoolean offsetIsDetermined = new AtomicBoolean(false);
 
    public AtlasPPSTimestampOffsetProvider(AtlasSensorInformation sensorInformation)
    {
       ppsPort = sensorInformation.getPPSProviderPort();
-     ppsTopic = sensorInformation.getPPSRosTopic();
-      
+      ppsTopic = sensorInformation.getPPSRosTopic();
+
       setupZMQSocket();
 
       setupPPSSubscriber();
@@ -54,7 +56,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    {
       ZMQ.Context context = ZMQ.context(1);
       requester = context.socket(ZMQ.REQ);
-      requester.connect("tcp://192.168.130.112:" + ppsPort);
+      requester.connect("tcp://" + NetworkParameters.getHost(NetworkParameterKeys.robotController) + ":" + ppsPort);
    }
 
    @Override
@@ -74,14 +76,13 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    {
       return timeStamp + currentTimeStampOffset.get();
    }
-   
+
    @Override
    public long adjustRobotTimeStampToRosClock(long timeStamp)
    {
       return timeStamp - currentTimeStampOffset.get();
    }
 
-   
    @Override
    public long requestNewestRobotTimestamp()
    {

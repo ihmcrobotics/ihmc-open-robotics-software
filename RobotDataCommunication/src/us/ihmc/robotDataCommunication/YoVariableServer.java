@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
@@ -61,7 +63,7 @@ public class YoVariableServer implements RobotVisualizer
    {
       this.dt = dt;
       this.mainClazz = mainClazz;
-      this.bindAddress = LogUtils.getMyIP(logSettings.getHost());
+      this.bindAddress = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
       this.logModelProvider = logModelProvider;
       this.logSettings = logSettings;
    }

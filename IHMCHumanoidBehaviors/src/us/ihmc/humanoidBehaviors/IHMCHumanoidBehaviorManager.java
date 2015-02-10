@@ -44,7 +44,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class IHMCHumanoidBehaviorManager
 {
-   public static final String BEHAVIOR_YO_VARIABLE_SERVER_HOST = "127.0.0.1"; //10.66.171.25
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -52,7 +51,7 @@ public class IHMCHumanoidBehaviorManager
 
    private YoVariableServer yoVariableServer = null;
 
-   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
+   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = true;
 
    public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
          DRCRobotSensorInformation sensorInfo, PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator)
