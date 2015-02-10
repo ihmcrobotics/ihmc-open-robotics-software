@@ -280,7 +280,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double stopTime = Double.POSITIVE_INFINITY;
 
       SysoutTool.println("Starting Behavior", DEBUG);
-      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, pauseTime, resumeTime, stopTime,
+      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(handPoseBehavior, pauseTime, resumeTime, stopTime,
             frameToKeepTrackOf);
       SysoutTool.println("Behavior Should Be Done", DEBUG);
 
@@ -315,7 +315,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       final double simTimeBeforeStop = trajectoryTime / 2.0;
 
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
-      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, Double.POSITIVE_INFINITY,
+      StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(handPoseBehavior, Double.POSITIVE_INFINITY,
             Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
 
       FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.STOP);
