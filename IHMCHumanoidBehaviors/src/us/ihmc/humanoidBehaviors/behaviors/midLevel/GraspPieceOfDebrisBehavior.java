@@ -102,14 +102,14 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       computeDesiredHandPosesWithOffsetAlongGraspVector(midGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector,
             offsetToThePointOfGrabbing.getDoubleValue());
       computeDesiredHandPosesWithOffsetAlongGraspVector(desiredGrabPose, rotationToBePerformedInWorldFrame, graspPosition, graspVector, WRIST_OFFSET);
-      
+
       FramePose firstPositionPose = new FramePose(midFeetZUpFrame);
       firstPositionPose.setPosition(0.15, robotSide.negateIfRightSide(0.33), 0.60);
       firstPositionPose.changeFrame(worldFrame);
       firstPositionPose.setOrientation(rotationToBePerformedInWorldFrame);
-      
-      pipeLine.submitSingleTaskStage(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, firstPositionPose , trajectoryTime));
-      
+
+      pipeLine.submitSingleTaskStage(new HandPoseTask(robotSide, yoTime, handPoseBehavior, Frame.WORLD, firstPositionPose, trajectoryTime));
+
       pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyIKBehavior, midGrabPose, trajectoryTime));
 
       pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
@@ -184,6 +184,13 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      if (pipeLine.getCurrentStage() instanceof WholeBodyInverseKinematicTask)
+      {
+         if(!wholeBodyIKBehavior.hasSolutionBeenFound())
+         {
+            pipeLine.clearAll();
+         }
+      }
       pipeLine.doControl();
    }
 
@@ -210,24 +217,40 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    public void stop()
    {
       handPoseBehavior.stop();
+      wholeBodyIKBehavior.stop();
+      fingerStateBehavior.stop();
+      chestOrientationBehavior.stop();
+      pelvisPoseBehavior.stop();
    }
 
    @Override
    public void enableActions()
    {
       handPoseBehavior.enableActions();
+      wholeBodyIKBehavior.enableActions();
+      fingerStateBehavior.enableActions();
+      chestOrientationBehavior.enableActions();
+      pelvisPoseBehavior.enableActions();
    }
 
    @Override
    public void pause()
    {
       handPoseBehavior.pause();
+      wholeBodyIKBehavior.pause();
+      fingerStateBehavior.pause();
+      chestOrientationBehavior.pause();
+      pelvisPoseBehavior.pause();
    }
 
    @Override
    public void resume()
    {
       handPoseBehavior.resume();
+      wholeBodyIKBehavior.resume();
+      fingerStateBehavior.resume();
+      chestOrientationBehavior.resume();
+      pelvisPoseBehavior.resume();
    }
 
    @Override

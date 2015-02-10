@@ -36,7 +36,11 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeElapsed;
+   private final BooleanYoVariable hasComputationBeenDone;
+   private final BooleanYoVariable hasSolutionBeenFound;
    private RobotSide robotSide;
+
+   private final boolean DEBUG = false;
 
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
@@ -53,6 +57,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      hasComputationBeenDone= new BooleanYoVariable(behaviorNameFirstLowerCase + "hasComputationBeenDone", registry);
+      hasSolutionBeenFound = new BooleanYoVariable(behaviorNameFirstLowerCase + "solutionHaveBeenFound", registry);
 
       this.actualFullRobotModel = actualFullRobotModel;
       this.desiredFullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
@@ -69,42 +75,46 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       hasInputBeenSet.set(true);
    }
 
+   public void computeSolution()
+   {
+      try
+      {
+         wholeBodyIKSolver.maxNumberOfAutomaticReseeds = 0;
+         ComputeResult result = wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+         hasComputationBeenDone.set(true);
+         if (result == ComputeResult.SUCCEEDED)
+            hasSolutionBeenFound.set(true);
+         else
+         {
+            Vector64F error = wholeBodyIKSolver.taskEndEffectorPose.get(robotSide).getError();
+            Vector3d positionError = new Vector3d(error.get(0), error.get(1), error.get(2));
+            Vector3d rotationError = new Vector3d(error.get(3), error.get(4), error.get(5));
+
+            if (positionError.length() < 0.025 && rotationError.length() < 0.2)
+            {
+               hasSolutionBeenFound.set(true);
+            }
+            hasSolutionBeenFound.set(false);
+         }
+         if(DEBUG)
+            System.out.println("solution found = " + hasSolutionBeenFound.getBooleanValue());
+      }
+      catch (Exception e)
+      {
+         System.out.println(e); // TODO: handle exception
+      }   
+   }
+   
    @Override
    public void doControl()
    {
       //TODO check all the status 
-      if (!packetHasBeenSent.getBooleanValue())
+      if (!packetHasBeenSent.getBooleanValue() && hasComputationBeenDone.getBooleanValue())
       {
-         try
+         if (hasSolutionBeenFound.getBooleanValue())
          {
-            wholeBodyIKSolver.maxNumberOfAutomaticReseeds = 0 ;
-            ComputeResult result = wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
-            if( result != ComputeResult.SUCCEEDED)
-            {
-               Vector64F error = wholeBodyIKSolver.taskEndEffectorPose.get(robotSide).getError();
-               Vector3d positionError = new Vector3d( error.get(0),  error.get(1),  error.get(2));
-               Vector3d rotationError = new Vector3d( error.get(3),  error.get(4),  error.get(5));
-               
-               if( positionError.length() < 0.020 && rotationError.length() < 0.1 )
-               {
-                  result = ComputeResult.SUCCEEDED;
-               }
-               else
-               {
-                  //TODO this next line is bullshit, needs to handle the case where the computed position/orientation is bad
-                  result = ComputeResult.SUCCEEDED;
-                  System.out.println("did not managed to find a good solution");
-               }
-            }
-            
-            if( result == ComputeResult.SUCCEEDED) {
-               sendSolutionToController(trajectoryTime.getDoubleValue());
-               packetHasBeenSent.set(true);
-            }
-         }
-         catch (Exception e)
-         {
-            System.out.println(e); // TODO: handle exception
+            sendSolutionToController(trajectoryTime.getDoubleValue());
+            packetHasBeenSent.set(true);
          }
       }
    }
@@ -125,6 +135,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
+      hasSolutionBeenFound.set(false);
+      hasComputationBeenDone.set(false);
 
       isPaused.set(false);
       isStopped.set(false);
@@ -141,6 +153,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
+      hasSolutionBeenFound.set(false);
+      hasComputationBeenDone.set(false);
 
       isPaused.set(false);
       isStopped.set(false);
@@ -175,7 +189,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       else
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+      return (trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() ) || (hasComputationBeenDone.getBooleanValue() && !hasSolutionBeenFound());
    }
 
    @Override
@@ -197,5 +211,11 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
+ 
+   }
+   
+   public boolean hasSolutionBeenFound()
+   {
+      return hasSolutionBeenFound.getBooleanValue();
    }
 }
