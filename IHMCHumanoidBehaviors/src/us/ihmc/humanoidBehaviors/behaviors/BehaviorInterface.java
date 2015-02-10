@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
@@ -45,6 +46,7 @@ public abstract class BehaviorInterface implements RobotController
    protected final BooleanYoVariable hasBeenInitialized;
    protected final BooleanYoVariable isPaused;
    protected final BooleanYoVariable isStopped;
+   protected final DoubleYoVariable percentCompleted;
 
    public BehaviorInterface(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
@@ -64,6 +66,7 @@ public abstract class BehaviorInterface implements RobotController
       hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
+      percentCompleted = new DoubleYoVariable("percentCompleted", registry);
    }
 
    public void sendPacketToController(Packet obj)
