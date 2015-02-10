@@ -51,7 +51,7 @@ public class IHMCHumanoidBehaviorManager
 
    private YoVariableServer yoVariableServer = null;
 
-   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = true;
+   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
 
    public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
          DRCRobotSensorInformation sensorInfo, PacketCommunicator networkProcessorCommunicator, PacketCommunicator controllerCommunicator)
