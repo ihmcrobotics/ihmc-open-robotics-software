@@ -18,6 +18,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
+import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -211,11 +212,15 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(footstepListBehavior, stopThreadUpdatable);
       SysoutTool.println("Behavior should be done", DEBUG);
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FramePose2d finalFootPose = getRobotFootPose2d(robot, robotSide);
-         assertPosesAreWithinThresholds(desiredFinalFootPoses.get(robotSide), finalFootPose);
-      }
+      FramePose2d footPoseAtStop = stopThreadUpdatable.getTestFramePose2dAtTransition(HumanoidBehaviorControlModeEnum.STOP);
+      FramePose2d footPoseFinal = stopThreadUpdatable.getCurrentTestFramePose2dCopy();
+
+      // Foot position and orientation may change after stop command if the robot is currently in single support, 
+      // since the robot will complete the current step (to get back into double support) before actually stopping
+      double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double orientationThreshold = Math.PI;
+      assertPosesAreWithinThresholds(footPoseAtStop, footPoseFinal, positionThreshold, orientationThreshold);
+      assertTrue(!footstepListBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -267,22 +272,32 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d framePose1, FramePose2d framePose2)
+   private void assertPosesAreWithinThresholds(FramePose2d desiredPose, FramePose2d actualPose)
    {
-      double positionDistance = framePose1.getPositionDistance(framePose2);
-      double orientationDistance = framePose1.getOrientationDistance(framePose2);
+      assertPosesAreWithinThresholds(desiredPose, actualPose, POSITION_THRESHOLD);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose2d desiredPose, FramePose2d actualPose, double positionThreshold)
+   {
+      assertPosesAreWithinThresholds(desiredPose, actualPose, positionThreshold, ORIENTATION_THRESHOLD);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose2d desiredPose, FramePose2d actualPose, double positionThreshold, double orientationThreshold)
+   {
+      double positionDistance = desiredPose.getPositionDistance(actualPose);
+      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Midfeet Pose :\n" + framePose1 + "\n");
-         SysoutTool.println(" actual Midfeet Pose :\n" + framePose2 + "\n");
+         SysoutTool.println(" desired Midfeet Pose :\n" + desiredPose + "\n");
+         SysoutTool.println(" actual Midfeet Pose :\n" + actualPose + "\n");
 
          SysoutTool.println(" positionDistance = " + positionDistance);
          SysoutTool.println(" orientationDistance = " + orientationDistance);
       }
 
-      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals(0.0, positionDistance, positionThreshold);
+      assertEquals(0.0, orientationDistance, orientationThreshold);
    }
 
 }

@@ -163,10 +163,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       SysoutTool.println("Stop Simulating Behavior", DEBUG);
 
       FramePose2d midFeetPose2dAtStop = stopThreadUpdatable.getTestFramePose2dAtTransition(HumanoidBehaviorControlModeEnum.STOP);
-      SysoutTool.println("midFeetPose2dAtStop:" + midFeetPose2dAtStop);
-
       FramePose2d midFeetPose2dFinal = stopThreadUpdatable.getCurrentTestFramePose2dCopy();
-      SysoutTool.println("midFeetPose2dFinal:" + midFeetPose2dFinal);
 
       // Position and orientation may change after stop command if the robot is currently in single support, 
       // since the robot will complete the current step (to get back into double support) before actually stopping
