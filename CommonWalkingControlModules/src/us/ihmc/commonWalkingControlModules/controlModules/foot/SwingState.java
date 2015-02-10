@@ -71,10 +71,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
    private final BooleanYoVariable hasInitialAngularConfigurationBeenProvided;
 
-   // TODO Clean+extract the z adjust
-   private final DoubleYoVariable finalFootStepZAdjust;
+   private final DoubleYoVariable finalSwingHeightOffset;
 
-   public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
+         VectorProvider touchdownAccelerationProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
@@ -83,7 +83,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
 
       finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "SwingFinal", worldFrame, registry);
-      finalFootStepZAdjust = new DoubleYoVariable(namePrefix + "FinalFootStepZAdjust", registry);
+      finalSwingHeightOffset = new DoubleYoVariable(namePrefix + "SwingFinalHeightOffset", registry);
+      finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
 
@@ -103,7 +104,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       PositionTrajectoryGenerator swingTrajectoryGenerator;
 
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
-            finalConfigurationProvider, touchdownVelocityProvider, swingTimeProvider, registry);
+            finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       if (!USE_NEW_CONTINUOUS_TRAJECTORY)
@@ -227,8 +228,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       footstep.getPose(newFootstepPose);
       newFootstepPose.changeFrame(worldFrame);
 
-      // TODO Clean+extract the z adjust
-      newFootstepPose.setZ(newFootstepPose.getZ()+finalFootStepZAdjust.getDoubleValue());
+      newFootstepPose.setZ(newFootstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(newFootstepPose);
       initialConfigurationProvider.get(oldFootstepPosition);
 
