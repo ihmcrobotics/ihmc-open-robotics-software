@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.Packet;
 
 public class LidarDataPacket extends Packet<LidarDataPacket>
 {
-   private static final long serialVersionUID = 3102705118506458615L;
    public final ArrayList<Point3d> points = new ArrayList<Point3d>();
    
    public LidarDataPacket()
