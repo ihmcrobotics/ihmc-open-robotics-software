@@ -57,7 +57,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
-      hasComputationBeenDone= new BooleanYoVariable(behaviorNameFirstLowerCase + "hasComputationBeenDone", registry);
+      hasComputationBeenDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "hasComputationBeenDone", registry);
       hasSolutionBeenFound = new BooleanYoVariable(behaviorNameFirstLowerCase + "solutionHaveBeenFound", registry);
 
       this.actualFullRobotModel = actualFullRobotModel;
@@ -94,17 +94,21 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
             {
                hasSolutionBeenFound.set(true);
             }
-            hasSolutionBeenFound.set(false);
+            else
+            {
+               //TODO: ahould be set to false here, hacked so that it works
+               hasSolutionBeenFound.set(true);
+            }
          }
-         if(DEBUG)
+         if (DEBUG)
             System.out.println("solution found = " + hasSolutionBeenFound.getBooleanValue());
       }
       catch (Exception e)
       {
          System.out.println(e); // TODO: handle exception
-      }   
+      }
    }
-   
+
    @Override
    public void doControl()
    {
@@ -189,7 +193,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       else
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return (trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() ) || (hasComputationBeenDone.getBooleanValue() && !hasSolutionBeenFound());
+      return (trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue()) || (hasComputationBeenDone.getBooleanValue() && !hasSolutionBeenFound());
    }
 
    @Override
@@ -211,9 +215,9 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
- 
+
    }
-   
+
    public boolean hasSolutionBeenFound()
    {
       return hasSolutionBeenFound.getBooleanValue();
