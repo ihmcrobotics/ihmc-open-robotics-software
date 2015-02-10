@@ -194,7 +194,6 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       
       RigidBodyTransform transform = new RigidBodyTransform();
       ChestOrientationPacket transformPacket = chestOrientationPacket.transform(transform);
-      System.out.println(desiredChestQuat);
       Quat4d packetQuat = transformPacket.getOrientation();
       assertEquals(packetQuat.w, desiredChestQuat.w, quatDelta);
       assertEquals(packetQuat.x, desiredChestQuat.x, quatDelta);
