@@ -94,8 +94,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean getCoMHeightDriftCompensation();
 
-   public abstract double getTrajectoryTimeHeadOrientation();
-
    public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
    public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);

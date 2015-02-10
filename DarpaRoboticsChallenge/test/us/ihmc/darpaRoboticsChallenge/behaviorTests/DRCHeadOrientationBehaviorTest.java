@@ -117,7 +117,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Vector3d axis = new Vector3d(0, 1, 0);
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
 
-      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle);
+      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
@@ -131,7 +131,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Vector3d axis = new Vector3d(1, 0, 0);
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
 
-      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle);
+      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
@@ -145,7 +145,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Vector3d axis = new Vector3d(0, 0, 1);
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
 
-      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle);
+      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
@@ -157,20 +157,20 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       double trajectoryTime = 4.0;
       Quat4d desiredHeadQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
-      HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat);
+      HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat, trajectoryTime);
 
       testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
 
-   private HeadOrientationPacket createHeadOrientationPacket(Vector3d axis, double rotationAngle)
+   private HeadOrientationPacket createHeadOrientationPacket(Vector3d axis, double rotationAngle, double trajectoryTime)
    {
       AxisAngle4d desiredAxisAngle = new AxisAngle4d();
       desiredAxisAngle.set(axis, rotationAngle);
       Quat4d desiredHeadQuat = new Quat4d();
       desiredHeadQuat.set(desiredAxisAngle);
 
-      HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat);
+      HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat, trajectoryTime);
       return headOrientationPacket;
    }
 

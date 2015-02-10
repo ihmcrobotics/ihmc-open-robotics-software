@@ -137,9 +137,9 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       SysoutTool.println("Initializing Behavior", DEBUG);
       RobotSide robotSide = RobotSide.LEFT;
-      double swingTrajectoryTime = 2.0;
+      double trajectoryTime = 2.0;
       double[] desiredArmPose = createRandomArmPose(robotSide);
-      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, desiredArmPose);
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredArmPose);
 
       SysoutTool.println("Starting Behavior", DEBUG);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
@@ -271,8 +271,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.3);
       handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
-      double swingTrajectoryTime = 2.0;
-      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
+      double trajectoryTime = 2.0;
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, handPoseTarget);
 
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
       double pauseTime = 1.0;
@@ -309,10 +309,10 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setZ(handPoseTarget.getZ() + 0.3);
       handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
-      double swingTrajectoryTime = 2.0;
-      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
+      double trajectoryTime = 2.0;
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, handPoseTarget);
 
-      final double simTimeBeforeStop = swingTrajectoryTime / 2.0;
+      final double simTimeBeforeStop = trajectoryTime / 2.0;
 
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
       StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeUntilDone(handPoseBehavior, Double.POSITIVE_INFINITY,
