@@ -80,7 +80,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    
 
 	@AverageDuration(duration = 39.6)
-	@Test(timeout = 118945)
+	@Test(timeout = 300000)
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -295,7 +295,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
 
 	@AverageDuration(duration = 58.0)
-	@Test(timeout = 173879)
+	@Test(timeout = 300000)
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
