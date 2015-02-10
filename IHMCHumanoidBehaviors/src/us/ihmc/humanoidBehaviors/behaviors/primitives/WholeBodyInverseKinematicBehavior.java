@@ -40,7 +40,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final BooleanYoVariable hasSolutionBeenFound;
    private RobotSide robotSide;
 
-   private final boolean DEBUG = false;
+   private final boolean DEBUG = true;
 
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
