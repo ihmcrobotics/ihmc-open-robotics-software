@@ -19,4 +19,6 @@ public interface HeadOrientationControllerParameters
    public abstract double getHeadYawLimit();
 
    public abstract double getHeadRollLimit();
+   
+   public abstract double getTrajectoryTimeHeadOrientation();
 }

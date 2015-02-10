@@ -4,26 +4,35 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HeadOrientationBehavior extends BehaviorInterface
 {
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
+   private final BooleanYoVariable packetHasBeenSent;
    private HeadOrientationPacket outgoingHeadOrientationPacket;
 
    private final DoubleYoVariable yoTime;
-   private double startTime = Double.NaN;
-   private double currentTime = Double.NaN;
-
-   // TODO: This is just an estimate of the time out. This needs to be dealt with
-   private double behaviorTime = 4.0;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTime;
 
    public HeadOrientationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
-      super(outgoingCommunicationBridge);
-
+      this(null, outgoingCommunicationBridge, yoTime);
+   }
+   
+   public HeadOrientationBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   {
+      super(namePrefix, outgoingCommunicationBridge);
+      
       this.yoTime = yoTime;
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      packetHasBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime.set(Double.NaN);
    }
 
    public void setInput(HeadOrientationPacket headOrientationPacket)
@@ -38,8 +47,6 @@ public class HeadOrientationBehavior extends BehaviorInterface
       {
          sendHeadOrientationPacketToController();
       }
-
-      currentTime = yoTime.getDoubleValue();
    }
 
    private void sendHeadOrientationPacketToController()
@@ -51,7 +58,8 @@ public class HeadOrientationBehavior extends BehaviorInterface
          sendPacketToController(outgoingHeadOrientationPacket);
          
          packetHasBeenSent.set(true);
-         startTime = yoTime.getDoubleValue();
+         startTime.set(yoTime.getDoubleValue());
+         trajectoryTime.set(outgoingHeadOrientationPacket.getTrajectoryTime());
       }
    }
 
@@ -74,6 +82,8 @@ public class HeadOrientationBehavior extends BehaviorInterface
 
       isPaused.set(false);
       isStopped.set(false);
+      
+      trajectoryTime.set(Double.NaN);      
    }
 
    @Override
@@ -97,9 +107,9 @@ public class HeadOrientationBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      boolean trajectoryTimeElapsed = currentTime - startTime > behaviorTime;
+      boolean trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue();
 
-      return trajectoryTimeElapsed &&!isPaused.getBooleanValue();
+      return trajectoryTimeElapsed && !isPaused.getBooleanValue();
    }
 
    @Override
