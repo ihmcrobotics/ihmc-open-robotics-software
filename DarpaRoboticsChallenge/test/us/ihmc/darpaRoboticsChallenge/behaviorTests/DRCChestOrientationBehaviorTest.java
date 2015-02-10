@@ -35,6 +35,7 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestInterface
@@ -175,6 +176,33 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       BambooTools.reportTestFinishedMessage();
    }
+	
+	@AverageDuration(duration = 15)
+	@Test(timeout = 50000)
+	public void testTranformOrientation() throws SimulationExceededMaximumTimeException
+	{
+	   final double quatDelta = 1e-6;
+	   
+      BambooTools.reportTestStartedMessage();
+
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      AxisAngle4d desiredAxisAngle = new AxisAngle4d(0.0, 0.0, 1.0, rotationAngle);
+      Quat4d desiredChestQuat = new Quat4d();
+      desiredChestQuat.set(desiredAxisAngle);
+
+      ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
+      
+      RigidBodyTransform transform = new RigidBodyTransform();
+      ChestOrientationPacket transformPacket = chestOrientationPacket.transform(transform);
+      System.out.println(desiredChestQuat);
+      Quat4d packetQuat = transformPacket.getOrientation();
+      assertEquals(packetQuat.w, desiredChestQuat.w, quatDelta);
+      assertEquals(packetQuat.x, desiredChestQuat.x, quatDelta);
+      assertEquals(packetQuat.y, desiredChestQuat.y, quatDelta);
+      assertEquals(packetQuat.z, desiredChestQuat.z, quatDelta);
+      
+      BambooTools.reportTestFinishedMessage();
+	}
 
    private ChestOrientationBehavior testChestOrientationBehavior(ChestOrientationPacket chestOrientationPacket) throws SimulationExceededMaximumTimeException
    {
