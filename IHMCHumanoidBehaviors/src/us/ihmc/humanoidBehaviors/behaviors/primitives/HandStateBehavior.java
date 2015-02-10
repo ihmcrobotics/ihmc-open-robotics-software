@@ -8,7 +8,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandStateBehavior extends BehaviorInterface
 {
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
+   private final BooleanYoVariable hasPacketBeenSent = new BooleanYoVariable("hasPacketBeenSent" + behaviorName, registry);
    private HandStatePacket outgoingHandStatePacket;
 
    private final DoubleYoVariable yoTime;
@@ -33,7 +33,7 @@ public class HandStateBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingHandStatePacket != null))
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandStatePacket != null))
       {
          sendHandStatePacketToController();
       }
@@ -46,7 +46,7 @@ public class HandStateBehavior extends BehaviorInterface
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
          sendPacketToController(outgoingHandStatePacket);
-         packetHasBeenSent.set(true);
+         hasPacketBeenSent.set(true);
          startTime = yoTime.getDoubleValue();
       }
    }
@@ -54,12 +54,18 @@ public class HandStateBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      hasPacketBeenSent.set(false);
+      
+      isPaused.set(false);
+      isStopped.set(false);      
+
+      hasBeenInitialized.set(true);      
    }
 
    @Override
    public void finalize()
    {
-      packetHasBeenSent.set(false);
+      hasPacketBeenSent.set(false);
       outgoingHandStatePacket = null;
 
       isPaused.set(false);

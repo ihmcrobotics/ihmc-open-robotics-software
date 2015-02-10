@@ -62,6 +62,12 @@ public class PelvisPoseBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      hasPacketBeenSent.set(false);
+
+      isPaused.set(false);
+      isStopped.set(false);
+      
+      hasBeenInitialized.set(true);
    }
 
    @Override

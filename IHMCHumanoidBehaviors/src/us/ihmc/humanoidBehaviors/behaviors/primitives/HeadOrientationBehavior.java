@@ -58,6 +58,12 @@ public class HeadOrientationBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      packetHasBeenSent.set(false);
+      
+      isPaused.set(false);
+      isStopped.set(false);
+      
+      hasBeenInitialized.set(true);
    }
 
    @Override

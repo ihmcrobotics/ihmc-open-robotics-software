@@ -41,6 +41,10 @@ public class HandLoadBearingBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      packetHasBeenSent.set(false);
+      
+      isPaused.set(true);
+      isStopped.set(true);
    }
 
    @Override

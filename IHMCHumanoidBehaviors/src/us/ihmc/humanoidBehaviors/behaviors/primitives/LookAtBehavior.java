@@ -58,15 +58,6 @@ public class LookAtBehavior extends BehaviorInterface
       inputsHaveBeenSupplied.set(true);
    }
 
-   public void reset()
-   {
-      packetToSend = null;
-      inputsHaveBeenSupplied.set(false);
-      isDone.set(false);
-      inputListeningQueue.clear();
-      statusListeningQueue.clear();
-   }
-
    public boolean isLooking()
    {
       return hasInputBeenSet() && !isDone();
@@ -112,20 +103,22 @@ public class LookAtBehavior extends BehaviorInterface
    public boolean isDone()
    {
       // FIXME: LookAtStatus.isFinished() not yet implemented
-//      return isDone.getBooleanValue();
-      return true;
+      return isDone.getBooleanValue();
    }
 
    @Override
    public void finalize()
    {
-      reset();
+      initialize();
    }
 
    @Override
    public void initialize()
    {
-      reset();
+      inputsHaveBeenSupplied.set(false);
+      isDone.set(false);
+      inputListeningQueue.clear();
+      statusListeningQueue.clear();
    }
 
    @Override

@@ -41,6 +41,10 @@ public class BumStateBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      packetHasBeenSent.set(false);
+      
+      isPaused.set(false);
+      isStopped.set(false);
    }
 
    @Override
