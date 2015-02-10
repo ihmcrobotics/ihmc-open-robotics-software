@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -58,7 +57,6 @@ public abstract class StopThreadUpdatable implements Updatable
 
    protected void captureTransformToWorld(HumanoidBehaviorControlModeEnum newControlMode)
    {
-      SysoutTool.println("" + getCurrentTestFramePose2dCopy());
       testFrameTransformToWorld.get(newControlMode).set(getCurrentTestFrameTransformToWorld());
    }
 
