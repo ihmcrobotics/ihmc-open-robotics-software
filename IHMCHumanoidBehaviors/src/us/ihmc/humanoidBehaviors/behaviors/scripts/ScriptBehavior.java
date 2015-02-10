@@ -90,7 +90,7 @@ public class ScriptBehavior extends BehaviorInterface
    private final ThighStateBehavior thighStateBehavior;
    private final HighLevelStateBehavior highLevelStateBehavior;
    public final FingerStateBehavior fingerStateBehavior;
-
+   
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
          BooleanYoVariable doubleSupport)
    {
@@ -340,61 +340,63 @@ public class ScriptBehavior extends BehaviorInterface
    private PrimitiveBehaviorType getPrimitiveBehaviorType(ScriptObject inputPacket)
    {
       PrimitiveBehaviorType ret = PrimitiveBehaviorType.IDLE;
+      
+      Object scriptObject = inputPacket.getScriptObject();
 
-      if (inputPacket.getScriptObject() instanceof FootstepDataList)
+      if (scriptObject instanceof FootstepDataList)
       {
          ret = PrimitiveBehaviorType.FOOTSTEP_LIST;
       }
-      else if (inputPacket.getScriptObject() instanceof HandPosePacket)
+      else if (scriptObject instanceof HandPosePacket)
       {
          ret = PrimitiveBehaviorType.HAND_POSE;
       }
-      else if (inputPacket.getScriptObject() instanceof FootStatePacket)
+      else if (scriptObject instanceof FootStatePacket)
       {
          ret = PrimitiveBehaviorType.FOOT_STATE;
       }
-      else if (inputPacket.getScriptObject() instanceof HandStatePacket)
+      else if (scriptObject instanceof HandStatePacket)
       {
          ret = PrimitiveBehaviorType.HAND_STATE;
       }
-      else if (inputPacket.getScriptObject() instanceof HeadOrientationPacket)
+      else if (scriptObject instanceof HeadOrientationPacket)
       {
          ret = PrimitiveBehaviorType.HEAD_ORIENTATION;
       }
-      else if (inputPacket.getScriptObject() instanceof ComHeightPacket)
+      else if (scriptObject instanceof ComHeightPacket)
       {
          ret = PrimitiveBehaviorType.COM_HEIGHT;
       }
-      else if (inputPacket.getScriptObject() instanceof FootPosePacket)
+      else if (scriptObject instanceof FootPosePacket)
       {
          ret = PrimitiveBehaviorType.FOOT_POSE;
          //         scriptIndex--; //TODO:  <-- Why is this here?  Also, shouldn't scriptStatus != ScriptBehaviorStatusEnum.INDEX_CHANGED?
       }
-      else if (inputPacket.getScriptObject() instanceof PelvisPosePacket)
+      else if (scriptObject instanceof PelvisPosePacket)
       {
          ret = PrimitiveBehaviorType.PELVIS_POSE;
       }
-      else if (inputPacket.getScriptObject() instanceof ChestOrientationPacket)
+      else if (scriptObject instanceof ChestOrientationPacket)
       {
          ret = PrimitiveBehaviorType.CHEST_ORIENTATION;
       }
-      else if (inputPacket.getScriptObject() instanceof HandLoadBearingPacket)
+      else if (scriptObject instanceof HandLoadBearingPacket)
       {
          ret = PrimitiveBehaviorType.HAND_LOAD;
       }
-      else if (inputPacket.getScriptObject() instanceof BumStatePacket)
+      else if (scriptObject instanceof BumStatePacket)
       {
          ret = PrimitiveBehaviorType.BUM_STATE;
       }
-      else if (inputPacket.getScriptObject() instanceof ThighStatePacket)
+      else if (scriptObject instanceof ThighStatePacket)
       {
          ret = PrimitiveBehaviorType.THIGH_STATE;
       }
-      else if (inputPacket.getScriptObject() instanceof HighLevelStatePacket)
+      else if (scriptObject instanceof HighLevelStatePacket)
       {
          ret = PrimitiveBehaviorType.HIGH_LEVEL_STATE;
       }
-      else if (inputPacket.getScriptObject() instanceof FingerStatePacket)
+      else if (scriptObject instanceof FingerStatePacket)
       {
          ret = PrimitiveBehaviorType.FINGER_STATE;
       }
