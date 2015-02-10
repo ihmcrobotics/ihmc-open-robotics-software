@@ -32,6 +32,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
 public class DataFileWriterTest
 {
+   private static final String TEST_DIRECTORY = "testResources/us/ihmc/simulationconstructionset/dataFileWriterTest/";
+   
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
@@ -111,7 +113,7 @@ public class DataFileWriterTest
            boolean spreadsheetFormatted, Robot robot)
            throws IOException
    {
-      String filename = "testFile.data";
+      String filename = TEST_DIRECTORY + "testFile.data";
       if (spreadsheetFormatted)
          filename = filename + ".csv";
       if (compress)
@@ -155,7 +157,7 @@ public class DataFileWriterTest
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
       int testInteger = rng.nextInt();
-      File testFile = new File("shortReadWriteTestFile.txt");
+      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeDouble(testDouble);
@@ -183,7 +185,7 @@ public class DataFileWriterTest
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
       int testInteger = rng.nextInt();
-      File testFile = new File("shortReadWriteTestFile.txt");
+      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeDouble(testDouble);
@@ -217,7 +219,7 @@ public class DataFileWriterTest
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
       int testInteger = rng.nextInt();
-      File testFile = new File("shortReadWriteTestFile.txt");
+      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeDouble(testDouble);
@@ -250,7 +252,7 @@ public class DataFileWriterTest
       String string1 = "This is the first string";
       String string2 = "This is the second string";
       String string3 = "This is the third string";
-      File testFile = new File("shortReadWriteTestFile.txt");
+      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeBytes(string1 + "\n");
@@ -283,7 +285,7 @@ public class DataFileWriterTest
 	@Test(timeout = 5000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
-      File fileOne = new File("fileOne.state");
+      File fileOne = new File(TEST_DIRECTORY + "fileOne.state");
 
       if (fileOne.exists())
          fileOne.delete();
@@ -325,7 +327,7 @@ public class DataFileWriterTest
 	@Test(timeout = 5000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException, RepeatDataBufferEntryException
    {
-      File fileOne = new File("fileOne.data.gz");
+      File fileOne = new File(TEST_DIRECTORY + "fileOne.data.gz");
 
       if (fileOne.exists())
          fileOne.delete();
