@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.util.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -61,9 +60,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
    
-   private static final String VALKYRIE_NETWORK_CONFIG = "Configurations/valkyrie_network_config.ini";
-   private static final String DEFAULT_NETWORK_CONFIG =	"Configurations/localhost_network_config.ini";
-   
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -74,7 +70,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
-   private final RobotNetworkParameters networkParameters;
    private final boolean runningOnRealRobot;
    
    @Override
@@ -126,7 +121,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
-      networkParameters = new RobotNetworkParameters(runningOnRealRobot ? VALKYRIE_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG, runningOnRealRobot);
    }
    
    @Override
@@ -329,12 +323,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
       return new ValkyrieSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation);
-   }
-
-   @Override
-   public RobotNetworkParameters getNetworkParameters()
-   {
-	   return networkParameters;
    }
 
    @Override

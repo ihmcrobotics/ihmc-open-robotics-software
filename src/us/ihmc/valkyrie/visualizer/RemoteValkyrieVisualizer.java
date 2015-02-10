@@ -24,8 +24,6 @@ import com.martiansoftware.jsap.JSAPResult;
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
    public static final int BUFFER_SIZE = 16384;
-   public static final String defaultHost = ValkyrieNetworkParameters.VAL_CONTROLLER_LOGGER_IP;
-   public static final int defaultPort = Integer.MAX_VALUE;
    
    private ValkyrieSliderBoardType valkyrieSliderBoardType;
    
@@ -36,51 +34,17 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    public RemoteValkyrieVisualizer(String[] networkArguments, ValkyrieSliderBoardType valkyrieSliderBoardType)
    {
       this.valkyrieSliderBoardType = valkyrieSliderBoardType;
-      
-      parseNetworkArguments(networkArguments);
-      
+            
       System.out.println("Connecting to host " + host);
       valkyrieRobotModel = new ValkyrieRobotModel(true, false);
 
       scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
       scsVisualizer.addSCSVisualizerStateListener(this);
 
-      YoVariableClient client = new YoVariableClient(host, scsVisualizer, "remote", false);
+      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", false);
       client.start();
    }
    
-   public void parseNetworkArguments(String[] networkArguments)
-   {
-      JSAP jsap = new JSAP();
-
-      FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L')
-            .setDefault(defaultHost);
-      FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag('p')
-            .setDefault(String.valueOf(defaultPort));
-
-      try
-      {
-         jsap.registerParameter(hostOption);
-         jsap.registerParameter(portOption);
-      }
-      catch (JSAPException e)
-      {
-         e.printStackTrace();
-      }
-
-      JSAPResult config = jsap.parse(networkArguments);
-
-      if (!config.success())
-      {
-         System.err.println();
-         System.err.println("Usage: java " + RemoteValkyrieVisualizer.class.getName());
-         System.err.println("                " + jsap.getUsage());
-         System.err.println();
-         System.exit(1);
-      }
-      
-      host = config.getString("host");
-   }
 
    @Override
    public void starting(final SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
