@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector4d;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
@@ -29,7 +31,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolverTestFactory;
 
-public class AtlasWholeBodyIkSolverTest 
+public class AtlasWholeBodyIkSolverTest
 
 {
    static private final AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
@@ -38,14 +40,14 @@ public class AtlasWholeBodyIkSolverTest
 
    static private SimulationConstructionSet scs = null;
 
-   static private boolean VISUALIZE_GUI = false;   
+   static private boolean VISUALIZE_GUI = true;
 
    static private FullRobotModelVisualizer modelVisualizer;
    private final ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> LeftHandToWorldArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> RightHandToFootArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> LeftHandToFootArray = new ArrayList<Matrix4d>();
-   
+
    final private WholeBodyIkSolverTestFactory wholeBodyTest;
 
    @BeforeClass
@@ -55,11 +57,11 @@ public class AtlasWholeBodyIkSolverTest
       {
          scs = new SimulationConstructionSet(atlasRobotModel.createSdfRobot(false));
          modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel, 0.01);
-         scs.startOnAThread();  
-         Thread.sleep(2000);         
+         scs.startOnAThread();
+         Thread.sleep(2000);
       }
    }
-   
+
    @AfterClass
    static public void keepAliveTheGUI()
    {
@@ -68,19 +70,18 @@ public class AtlasWholeBodyIkSolverTest
          ThreadTools.sleepForever();
       }
    }
-   
-   
-   public AtlasWholeBodyIkSolverTest() 
+
+   public AtlasWholeBodyIkSolverTest()
    {
       initializeFullRobotModelJointAngles(actualRobotModel);
-      
+
       wholeBodySolver.maxNumberOfAutomaticReseeds = 20; // "I am NOT Feeling Lucky"" (© Davide Faconti)
-      
+
       wholeBodyTest = new WholeBodyIkSolverTestFactory(atlasRobotModel, actualRobotModel, wholeBodySolver);
-     
+
       createHandTargetArrays();
-      
-      if( scs != null && VISUALIZE_GUI)
+
+      if (scs != null && VISUALIZE_GUI)
       {
          wholeBodyTest.addGraphics(scs, modelVisualizer);
       }
@@ -149,106 +150,119 @@ public class AtlasWholeBodyIkSolverTest
       LeftHandToWorldArray.add(new Matrix4d( 0.823486455317593, 0.49232886183689556, -0.2819261422976824, -0.007874646251496115, -0.10836330916554024, -0.3512870342111075, -0.929975705500879, 0.32460274424062546, -0.5568908790195433, 0.7963728469740484, -0.23592972993518488, 0.8148627051060824,          0.0, 0.0, 0.0, 1.0       ));
       LeftHandToFootArray.add(new Matrix4d( 0.8283646786743211, 0.4855880055235528, -0.27931388797631834, 0.04897374001488973, -0.10793700127829914, -0.3509097362983995, -0.9301677056993733, 0.4886037440387385, -0.5496922437872284, 0.8006663761284385, -0.23826831777959195, 0.7306189091917638,            0.0, 0.0, 0.0, 1.0         ));
 
+      LeftHandToWorldArray.add(new Matrix4d(0.6635982027868647, -0.5100671937079007, -0.547237501603271, 0.3607911297228482, -0.2901262633505084, -0.849734985684714, 0.4402013237345716, 0.09040420478226227, -0.6895391044547906, -0.1333488357892356, -0.7118664983136512, 0.2375291792293439, 0.0, 0.0, 0.0, 1.0));
+      LeftHandToFootArray.add(new Matrix4d(0.6697439727680752, -0.5083861520672547, -0.5412823028024157, 0.4227865544074236, -0.28980876713124304, -0.8500507159930857, 0.43980070342543776, 0.2545605992321128, -0.6837059963425104, -0.13768551349321834, -0.7166511075407636, 0.15654498470648537, 0.0, 0.0, 0.0, 1.0));
+      RightHandToWorldArray.add(new Matrix4d(0.823194411599661, -0.4932174902999908, -0.2812249419473073, 0.18266840049431513, 0.10777841132846068, -0.35056618177740356, 0.9303156272177335, -0.29734898770787843, -0.5574358929622321, -0.7961406028184912, -0.23542592419104594, 0.814853066494472, 0.0, 0.0, 0.0, 1.0));
+      RightHandToFootArray.add(new Matrix4d(0.8279498880794224, -0.48606450333552165, -0.27971464285314945, 0.23987595245209847, 0.1082044672725212, -0.35094386756942986, 0.9301237525607438, -0.13323522676408633, -0.5502642784076958, -0.8003622307509288, -0.23796958523276626, 0.7323411507177763, 0.0, 0.0, 0.0, 1.0));
+
+      LeftHandToWorldArray.add(new Matrix4d(-0.1954745270423668, 0.6925164112007639, 0.6944139467890732, -0.13954474436735317, 0.07529957186430912, -0.6953851043683701, 0.7146814193048838, 0.4075615129009024, 0.9778137265116577, 0.19199108531441184, 0.08378388511628856, 1.9653487170527861, 0.0, 0.0, 0.0, 1.0));
+      LeftHandToFootArray.add(new Matrix4d(-0.20401968416958988, 0.691229776099113, 0.6932368751771009, -0.09275152859181568, 0.07529000286136439, -0.6949549413394579, 0.7151007236585674, 0.5716093998707675, 0.9760673050258761, 0.19808843010595317, 0.08974179582380945, 1.8799095751409198, 0.0, 0.0, 0.0, 1.0));
+      RightHandToWorldArray.add(new Matrix4d(0.9952762651216776, 0.02412085462606394, -0.09403903688124836, 0.23947418142795837, 0.08179912432611047, 0.31335189831110855, 0.9461075473138908, -0.45974412858582314, 0.052288233331467794, -0.949330696963357, 0.3098986422334583, 0.7171664944614163, 0.0, 0.0, 0.0, 1.0));
+      RightHandToFootArray.add(new Matrix4d(0.994735184227021, 0.032195398355457774, -0.09729013097723924, 0.29762536884393437, 0.0823929204243238, 0.3132632245467724, 0.946085386638283, -0.2956073642319861, 0.0609370160476046, -0.9491204393918045, 0.30896127848635363, 0.6351709501009274, 0.0, 0.0, 0.0, 1.0));
+
+      LeftHandToWorldArray.add(new Matrix4d(-0.8201787266112769, -0.3002136421014249, -0.487009882354048, -0.039423477095251305, -0.020255546235174098, 0.8659603623528335, -0.4997022750403131, 0.4226863106303299, 0.5717486941489425, -0.39998052443831245, -0.7163232585984024, 2.0303196519693842, 0.0, 0.0, 0.0, 1.0));
+      LeftHandToFootArray.add(new Matrix4d(-0.8251104918237434, -0.29723282462273326, -0.48046365549245657, 0.00679167016726401, -0.020678282524071615, 0.8657394473941368, -0.5000676132859935, 0.58680040250149, 0.5645928487983506, -0.4026758711327099, -0.7204769655535687, 1.9457474794047422, 0.0, 0.0, 0.0, 1.0));
+      RightHandToWorldArray.add(new Matrix4d(0.1314504264529771, 0.8695241512679164, -0.4760761869145953, 0.05398335115822159, 0.040179126797496675, 0.47517556352477636, 0.8789731631845777, -0.30756239218703796, 0.9905081641032151, -0.13466972262064525, 0.027525309338086293, 1.9163891899988577, 0.0, 0.0, 0.0, 1.0));
+      RightHandToFootArray.add(new Matrix4d(0.12280309837999459, 0.870382519883222, -0.47681617853215386, 0.10161712549564096, 0.0403641365372422, 0.4756747422979106, 0.8786946432188032, -0.1434053142604479, 0.9916098706194271, -0.12715269805061083, 0.023282093303093613, 1.8327169617310168, 0.0, 0.0, 0.0, 1.0));
+      
+      
    }
 
-	@AverageDuration(duration = 0.6)
-	@Test(timeout = 11715)
+   @AverageDuration(duration = 0.6)
+   @Test(timeout = 11715)
    public void testRightHandIn3PModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
    }
-	
-	@AverageDuration(duration = 2.3)
+
+   @AverageDuration(duration = 2.3)
    @Test(timeout = 16751)
    public void testRightHandIn3PMode()
    {
-     ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
-     wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
    }
 
-	@AverageDuration(duration = 0.5)
-	@Test(timeout = 11563)
+   @AverageDuration(duration = 0.5)
+   @Test(timeout = 11563)
    public void testLeftHandIn3PModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
    }
-	
-	@AverageDuration(duration = 2.5)
+
+   @AverageDuration(duration = 2.5)
    @Test(timeout = 17630)
    public void testLeftHandIn3PMode()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray =  createHalfCylinderOfTargetPoints(RobotSide.LEFT);
-      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true); 
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.LEFT);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
    }
-	
 
    // PASS
-	@AverageDuration(duration = 0.7)
-	@Test(timeout = 11977)
-   public void testRightHandIn3P2RMode()
+   @AverageDuration(duration = 0.7)
+   @Test(timeout = 11977)
+   public void testRightHandIn3P2RModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
-       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray, false);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray, false);
    }
 
    // PASS
-	@AverageDuration(duration = 0.6)
-	@Test(timeout = 11707)
-   public void testLeftHandIn3P2RMode()
+   @AverageDuration(duration = 0.6)
+   @Test(timeout = 11707)
+   public void testLeftHandIn3P2RModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
-       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, false);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, false);
    }
 
-
-// PASS
-	@AverageDuration(duration = 0.5)
-	@Test(timeout = 11462)
-   public void testRightHandIn3P3RMode()
+   // PASS
+   @AverageDuration(duration = 0.5)
+   @Test(timeout = 11462)
+   public void testRightHandIn3P3RModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray, false);
    }
-	
-	// PASS
-	@AverageDuration(duration = 0.7)
-	@Test(timeout = 12128)
-   public void testLeftHandIn3P3RMode()
+
+   // PASS
+   @AverageDuration(duration = 0.7)
+   @Test(timeout = 12128)
+   public void testLeftHandIn3P3RModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray, false);
    }
- 
-	  //PASS 
-	@AverageDuration(duration = 0.9)
+
+   //PASS 
+   @AverageDuration(duration = 0.9)
    @Test(timeout = 12820)
-   public void testBothHandsIn3PMode()
+   public void testBothHandsIn3PModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
-       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, true);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, true);
    }
-   
- 
+
    // May FAIL
-	@AverageDuration(duration = 1.8)
+   @AverageDuration(duration = 1.8)
    @Test(timeout = 15368)
-   public void testBothHandsIn3P2RMode()
+   public void testBothHandsIn3P2RModeManual()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
-       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false);
    }
-   
-  // FAILS
-//   @AverageDuration
-//	@Test(timeout = 15000)
-//   public void testBothHandsIn3P3RMode()
-//   {
-//      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
-//      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
-//   }
-  
+
+//    FAILS
+   @Ignore
+   @AverageDuration
+   @Test(timeout = 15000)
+   public void testBothHandsIn3P3RModeManual()
+   {
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
+   }
 
    public void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize)
    {
@@ -274,32 +288,51 @@ public class AtlasWholeBodyIkSolverTest
       }
    }
 
-  /* public void initializeSDFRobotlJointAngles(SDFRobot scsRobot)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(0.0); //leg_hpz
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(
-               robotSide.negateIfRightSide(0.1)); //leg_hpx
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.4); //leg_hpy
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.KNEE)).setQ(0.8); //leg_kny
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.4); //leg_aky
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(
-               robotSide.negateIfRightSide(-0.1)); //leg_akx
-         
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0.300); //arm_shy
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(
-               robotSide.negateIfRightSide(-1.3)); //arm_shx
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(2.00); //arm_ely
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(
-               robotSide.negateIfRightSide( -0.8)); //arm_elx
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000); //arm_wry
-         scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(0.000); //arm_wrx
-      }
-   }*/
-   
-   public ArrayList<Pair<FramePose, FramePose>> createManualReferenceFramesPairArrayList(
-         ArrayList<Matrix4d> leftHandRigidBodyTransformData,
+   /*
+    * public void initializeSDFRobotlJointAngles(SDFRobot scsRobot) { for
+    * (RobotSide robotSide : RobotSide.values) {
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getLegJointName(robotSide,
+    * LegJointName.HIP_YAW)).setQ(0.0); //leg_hpz
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getLegJointName(robotSide,
+    * LegJointName.HIP_ROLL)).setQ( robotSide.negateIfRightSide(0.1)); //leg_hpx
+    * scsRobot
+    * .getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().getLegJointName
+    * (robotSide, LegJointName.HIP_PITCH)).setQ(-0.4); //leg_hpy
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getLegJointName(robotSide,
+    * LegJointName.KNEE)).setQ(0.8); //leg_kny
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getLegJointName(robotSide,
+    * LegJointName.ANKLE_PITCH)).setQ(-0.4); //leg_aky
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getLegJointName(robotSide,
+    * LegJointName.ANKLE_ROLL)).setQ( robotSide.negateIfRightSide(-0.1));
+    * //leg_akx
+    * 
+    * scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap().
+    * getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0.300);
+    * //arm_shy
+    * scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap()
+    * .getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(
+    * robotSide.negateIfRightSide(-1.3)); //arm_shx
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getArmJointName(robotSide,
+    * ArmJointName.ELBOW_PITCH)).setQ(2.00); //arm_ely
+    * scsRobot.getOneDegreeOfFreedomJoint
+    * (atlasRobotModel.getJointMap().getArmJointName(robotSide,
+    * ArmJointName.ELBOW_ROLL)).setQ( robotSide.negateIfRightSide( -0.8));
+    * //arm_elx
+    * scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap()
+    * .getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000);
+    * //arm_wry
+    * scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap()
+    * .getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(0.000);
+    * //arm_wrx } }
+    */
+
+   public ArrayList<Pair<FramePose, FramePose>> createManualReferenceFramesPairArrayList(ArrayList<Matrix4d> leftHandRigidBodyTransformData,
          ArrayList<Matrix4d> rightHandRigidBodyTransformData)
    {
       ArrayList<Pair<FramePose, FramePose>> arrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
@@ -336,14 +369,14 @@ public class AtlasWholeBodyIkSolverTest
          {
             Matrix4d matrix = leftHandRigidBodyTransformData.get(i);
             RigidBodyTransform leftHandToWorldTransform = new RigidBodyTransform(matrix);
-            desiredLeftHandFrame = new FramePose( ReferenceFrame.getWorldFrame(), leftHandToWorldTransform);
+            desiredLeftHandFrame = new FramePose(ReferenceFrame.getWorldFrame(), leftHandToWorldTransform);
 
          }
          if (rightHandRigidBodyTransformData != null)
          {
             Matrix4d matrix = rightHandRigidBodyTransformData.get(i);
             RigidBodyTransform rightHandToWorldTransform = new RigidBodyTransform(matrix);
-            desiredRightHandFrame = new FramePose(  ReferenceFrame.getWorldFrame(), rightHandToWorldTransform);
+            desiredRightHandFrame = new FramePose(ReferenceFrame.getWorldFrame(), rightHandToWorldTransform);
          }
 
          Pair<FramePose, FramePose> pair = new Pair<FramePose, FramePose>(desiredLeftHandFrame, desiredRightHandFrame);
@@ -351,7 +384,7 @@ public class AtlasWholeBodyIkSolverTest
       }
       return arrayListToReturn;
    }
-   
+
    public ArrayList<Pair<FramePose, FramePose>> createHalfCylinderOfTargetPoints(RobotSide robotSide)
    {
       //Creates a half cylinder of points for the robot to try to reach in its (Right/Left) arm workspace.
@@ -362,9 +395,9 @@ public class AtlasWholeBodyIkSolverTest
       int radiusIncrements = 4;
       int heightIncrements = 4;
       int thetaIncrements = 4;
-      
-      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>> ();
-      
+
+      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
+
       for (int z_int = heightIncrements; z_int > 0; z_int--)
       {
          for (int theta_int = 0; theta_int < 4; theta_int++)
@@ -374,15 +407,15 @@ public class AtlasWholeBodyIkSolverTest
                double height = maxHeight * z_int / heightIncrements;
                double reachRadius = maxReachRadius * radius_int / radiusIncrements;
                double theta = sign * maxTheta * theta_int / thetaIncrements;
-               
-               Point3d point = new Point3d( reachRadius * Math.cos(theta), reachRadius * Math.sin(theta), height);
-               Quat4d  noRotation = new Quat4d();
-               
-               FramePose desiredPose = new FramePose( ReferenceFrame.getWorldFrame(), point, noRotation );
-               
-               Pair<FramePose, FramePose> handLeftFramesPair  = new Pair<FramePose, FramePose>(desiredPose, null);
+
+               Point3d point = new Point3d(reachRadius * Math.cos(theta), reachRadius * Math.sin(theta), height);
+               Quat4d noRotation = new Quat4d();
+
+               FramePose desiredPose = new FramePose(ReferenceFrame.getWorldFrame(), point, noRotation);
+
+               Pair<FramePose, FramePose> handLeftFramesPair = new Pair<FramePose, FramePose>(desiredPose, null);
                Pair<FramePose, FramePose> handRightFramesPair = new Pair<FramePose, FramePose>(null, desiredPose);
-              
+
                if (robotSide == RobotSide.RIGHT)
                {
                   handArrayList.add(handRightFramesPair);
@@ -396,8 +429,43 @@ public class AtlasWholeBodyIkSolverTest
       }
       return handArrayList;
    }
+
+   
+   //Insert this code at around line 210 in WholeBodyIkDevelopmentPanel
+   
+   /**
+   boolean willNeedsToCollectSomeManualPointsForIkTests = true;
+   if(willNeedsToCollectSomeManualPointsForIkTests){
+      
+   ReferenceFrame fHandWorld = wholeBodyIK.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame() );
+   ReferenceFrame fHandLocal = wholeBodyIK.getDesiredGripperAttachmentFrame(side, wholeBodyIK.getRootFrame() );
+   
+   RigidBodyTransform rBTWorld = fHandWorld.getTransformToParent();
+   RigidBodyTransform rBTLocal = fHandLocal.getTransformToParent();
+   
+   Matrix4d matrixWorld  = new Matrix4d();
+   Matrix4d matrixLocal  = new Matrix4d();
+   
+   rBTWorld.get(matrixWorld);
+   rBTLocal.get(matrixLocal);
+   
+   Vector4d v1 = new Vector4d(), v2 = new Vector4d(), v3 = new Vector4d(), v4 = new Vector4d();
+   
+   matrixWorld.getRow(0, v1);
+   matrixWorld.getRow(1, v2);
+   matrixWorld.getRow(2, v3);
+   matrixWorld.getRow(3, v4);
+   
+   System.out.println((side==RobotSide.RIGHT ? "RightHand":"LeftHand") +"ToWorldArray.add(new Matrix4d" + v1.toString() + v2.toString() + v3.toString() + v4.toString());
+   
+   matrixLocal.getRow(0, v1);
+   matrixLocal.getRow(1, v2);
+   matrixLocal.getRow(2, v3);
+   matrixLocal.getRow(3, v4);
+   
+   System.out.println((side==RobotSide.RIGHT ? "RightHand":"LeftHand") +"ToFootArray.add(new Matrix4d" + v1.toString() + v2.toString() + v3.toString() + v4.toString());
+   
+   }
+   **/
    
 }
-
-
-
