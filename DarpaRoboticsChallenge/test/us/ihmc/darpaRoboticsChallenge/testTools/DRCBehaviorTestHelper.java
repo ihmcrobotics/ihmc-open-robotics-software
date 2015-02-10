@@ -34,6 +34,7 @@ import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -48,6 +49,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
+   private final boolean DEBUG = false;
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTimeRobot;
    private final DoubleYoVariable yoTimeBehaviorDispatcher;
@@ -394,8 +397,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
             for (Updatable updatable : updatables)
             {
-               updatable.update(yoTimeRobot.getDoubleValue());
+//               updatable.update(yoTimeRobot.getDoubleValue());
             }
+            
+            ThreadTools.sleep(1);
          }
       }
 
@@ -422,13 +427,19 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          while (isRunning)
          {
             behavior.doControl();
+            
+            for (Updatable updatable : updatables)
+            {
+               updatable.update(yoTimeRobot.getDoubleValue());
+            }
+            
             stopThreadUpdatable.update(yoTimeRobot.getDoubleValue());
 
             HumanoidBehaviorControlModeEnum requestedControlMode = stopThreadUpdatable.getRequestedBehaviorControlMode();
 
             if (stopThreadUpdatable.shouldBehaviorRunnerBeStopped())
             {
-               SysoutTool.println("Stopping Thread!");
+               SysoutTool.println("Stopping Thread!", DEBUG);
                isRunning = false;
             }
             else if (requestedControlMode.equals(HumanoidBehaviorControlModeEnum.PAUSE) && !currentControlMode.equals(HumanoidBehaviorControlModeEnum.PAUSE))
@@ -446,6 +457,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                behavior.resume();
                currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
             }
+            
+            ThreadTools.sleep(1);
          }
       }
    }
