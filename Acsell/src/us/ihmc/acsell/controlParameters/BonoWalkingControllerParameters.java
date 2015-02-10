@@ -10,7 +10,6 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoUtilities.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
@@ -645,9 +644,21 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getDesiredTouchdownHeightOffset()
+   {
+      return -0.02;
+   }
+
+   @Override
    public double getDesiredTouchdownVelocity()
    {
       return -0.1;
+   }
+
+   @Override
+   public double getDesiredTouchdownAcceleration()
+   {
+      return 0;
    }
 
    @Override
