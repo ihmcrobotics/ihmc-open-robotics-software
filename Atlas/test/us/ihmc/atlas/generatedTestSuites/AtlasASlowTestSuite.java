@@ -13,8 +13,7 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
    us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFingerStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFootPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasFingerStateBehaviorTest.class
 })
 
 public class AtlasASlowTestSuite
