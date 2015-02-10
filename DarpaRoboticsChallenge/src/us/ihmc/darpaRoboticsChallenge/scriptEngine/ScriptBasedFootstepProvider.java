@@ -267,4 +267,10 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    {
       grabNewScriptEventIfNecessary();
    }
+
+   @Override
+   public boolean isPaused()
+   {
+      return false;
+   }
 }
