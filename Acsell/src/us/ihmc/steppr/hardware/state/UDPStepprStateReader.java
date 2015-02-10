@@ -12,6 +12,8 @@ import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
@@ -60,7 +62,7 @@ public class UDPStepprStateReader
    public void connect() throws IOException
    {
 
-      NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(StepprNetworkParameters.CONTROL_COMPUTER_HOST));
+      NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.robotController)));
       System.out.println("Binding to interface: " + iface);
 
       InetSocketAddress receiveAddress = new InetSocketAddress(StepprNetworkParameters.UDP_MULTICAST_STATE_PORT);

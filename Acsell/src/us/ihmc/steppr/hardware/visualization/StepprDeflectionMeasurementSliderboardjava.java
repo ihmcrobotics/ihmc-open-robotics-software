@@ -10,7 +10,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrepSetpoints;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
@@ -107,11 +106,10 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
 
    public static void main(String[] args)
    {
-      System.out.println("Connecting to host " + StepprNetworkParameters.CONTROL_COMPUTER_HOST);
       SCSVisualizer scsYoVariablesUpdatedListener = new StepprDeflectionMeasurementSliderboardjava(64000);
 
-      YoVariableClient client = new YoVariableClient(StepprNetworkParameters.CONTROL_COMPUTER_HOST, scsYoVariablesUpdatedListener,
-            "remote", false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote",
+            false);
       client.start();
 
    }
