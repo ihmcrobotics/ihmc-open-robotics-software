@@ -3,15 +3,13 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampSnapFootstepTest;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampFootstepSnapperTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.ManualTest;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
-@ManualTest
 @BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.Video})
-public class AtlasObstacleCourseRampSnapFootstepTest extends DRCObstacleCourseRampSnapFootstepTest
+public class AtlasObstacleCourseRampFootstepSnapperTest extends DRCObstacleCourseRampFootstepSnapperTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
