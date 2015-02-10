@@ -28,6 +28,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 
    private final PositionProvider initialPositionSource;
    private final VectorProvider velocitySource;
+   private final VectorProvider accelerationSource;
    
    private final DoubleProvider startTimeProvider;
    
@@ -36,6 +37,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    
    private final FramePoint p0;
    private final FrameVector pd0;
+   private final FrameVector pdd0;
    
    private final double tf = Double.POSITIVE_INFINITY;
    private double t0;
@@ -45,7 +47,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final YoSpline3D trajectory;
 
    public SoftTouchdownPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, PositionProvider initialPositionProvider,
-           VectorProvider velocityProvider, DoubleProvider startTimeProvider, YoVariableRegistry parentRegistry)
+           VectorProvider velocityProvider, VectorProvider accelerationProvider, DoubleProvider startTimeProvider, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
@@ -56,6 +58,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       
       p0 = new FramePoint();
       pd0 = new FrameVector();
+      pdd0 = new FrameVector();
       t0 = 0.0;
       
       this.replanningTrajectory = new BooleanYoVariable(namePrefix + "ReplanningTrajectory", parentRegistry);
@@ -65,6 +68,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 
       initialPositionSource = initialPositionProvider;
       velocitySource = velocityProvider;
+      accelerationSource = accelerationProvider;
       
       this.startTimeProvider = startTimeProvider;
       
@@ -73,14 +77,14 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 
       timeIntoTouchdown = new DoubleYoVariable(namePrefix + "timeIntoTouchdown", registry);
 
-      trajectory = new YoSpline3D(2, 2, referenceFrame, registry, namePrefix + "Trajectory");
+      trajectory = new YoSpline3D(3, 3, referenceFrame, registry, namePrefix + "Trajectory");
    }
 
    public void initialize()
    {
 	  setInitialTimePositionsAndVelocities();
       
-      trajectory.setLinearUsingInitialPositionAndVelocity(t0, tf, p0, pd0);
+      trajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, p0, pd0, pdd0);
    }
 
    public void compute(double time)
@@ -104,6 +108,9 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 	   
 	   velocitySource.get(pd0);
 	   pd0.changeFrame(referenceFrame);
+
+	   accelerationSource.get(pdd0);
+	   pdd0.changeFrame(referenceFrame);
    }
 
    public boolean isDone()

@@ -106,6 +106,9 @@ public class FootControlModule
       YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
       touchdownVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
 
+      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
+      touchdownAccelerationProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
+
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
       touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains, registry);
       states.add(touchdownOnToesState);
@@ -130,7 +133,7 @@ public class FootControlModule
       }
       else
       {
-         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, swingFootControlGains, registry);
+         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
          states.add(swingState);
          this.swingState = swingState;
       }

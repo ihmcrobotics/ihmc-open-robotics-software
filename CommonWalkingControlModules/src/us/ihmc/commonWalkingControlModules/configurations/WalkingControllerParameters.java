@@ -141,7 +141,14 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
 
+   /** Useful to force the swing foot to end up with an height offset with respect to the given footstep. */
+   public abstract double getDesiredTouchdownHeightOffset();
+
+   /** Useful to force the swing foot go towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
    public abstract double getDesiredTouchdownVelocity();
+
+   /** Useful to force the swing foot accelerate towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
+   public abstract double getDesiredTouchdownAcceleration();
 
    public abstract double getContactThresholdForce();
 

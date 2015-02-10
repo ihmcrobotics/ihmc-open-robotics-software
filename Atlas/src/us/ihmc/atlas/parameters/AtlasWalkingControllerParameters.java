@@ -718,9 +718,27 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getDesiredTouchdownHeightOffset()
+   {
+      return 0;
+   }
+
+   @Override
    public double getDesiredTouchdownVelocity()
    {
       return -0.3;
+   }
+
+   @Override
+   public double getDesiredTouchdownAcceleration()
+   {
+      switch (target)
+      {
+         case SIM:
+            return -2.0;
+         default:
+            return -0.0;
+      }
    }
 
    @Override
