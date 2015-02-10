@@ -84,7 +84,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private static final long CLOSING_SLEEP_TIME = 2000;
    private static final long THREAD_SLEEP_TIME = 1000;
    private static final String SCS_VERSION = "12.06.22";
-  
+   private static final String TEST_DIRECTORY = "testResources/us/ihmc/simulationconstructionset/simulationConstructionSetUsingDirectCallsTest/";
    
    private static double epsilon = 1e-10;
 
@@ -1167,19 +1167,19 @@ public class SimulationConstructionSetUsingDirectCallsTest
       BufferedImage bufferedImage2 = scs.exportSnapshotAsBufferedImage();
       assertNotNull(bufferedImage2);
 
-      File file = new File("file.csv");
+      File file = new File(TEST_DIRECTORY + "file.csv");
       scs.writeSpreadsheetFormattedData("all", file);
       assertTheFileContainsTheVariables(file, cameraTrackingXYZVarNames);
       file.delete();
 
-      File file2 = new File("file2.gz");
+      File file2 = new File(TEST_DIRECTORY + "file2.gz");
       scs.writeData(file2);
       SimulationConstructionSet scs2 = createNewSCSWithEmptyRobot("simpleRobot2");
       scs2.readData(file2);
       assertSCSContainsTheVariables(scs2, cameraTrackingXYZVarNames);
       closeGivenSCSAndDeleteFile(scs2, file2);
 
-      File file3 = new File("file3.csv");
+      File file3 = new File(TEST_DIRECTORY + "file3.csv");
       scs.writeSpreadsheetFormattedData("all", file3);
       SimulationConstructionSet scs3 = createNewSCSWithEmptyRobot("simpleRobot3");
       scs3.readData(file3);
@@ -1192,7 +1192,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(cameraTrackingXYZVarNames[0], timeVariableNameFromSCS);
       scs.setTimeVariableName(defaultTimeVariable);
 
-      File file4 = new File("file4.state");
+      File file4 = new File(TEST_DIRECTORY + "file4.state");
       scs.writeState(file4);
       double initialTime = scs.getTime();
       simulateForTime(scs, simulateTime);
@@ -1201,7 +1201,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(initialTime, timeAfterReadState, epsilon);
       file4.delete();
 
-      File file5 = new File("file5.state.gz");
+      File file5 = new File(TEST_DIRECTORY + "file5.state.gz");
       scs.writeState("all", false, true, file5);
       double initialTime2 = scs.getTime();
       simulateForTime(scs, simulateTime);
@@ -1210,18 +1210,18 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(initialTime2, timeAfterReadState2, epsilon);
       file5.delete();
 
-      File file6 = new File("file6.csv");
+      File file6 = new File(TEST_DIRECTORY + "file6.csv");
       scs.writeSpreadsheetFormattedState("all", file6);
       assertTheFileContainsTheVariables(file6, cameraTrackingXYZVarNames);
 
-      scs.writeState("test.state");
+      scs.writeState(TEST_DIRECTORY + "test.state");
       double initialTime3 = scs.getTime();
       simulateForTime(scs, simulateTime);
-      scs.readState("test.state");
+      scs.readState(TEST_DIRECTORY + "test.state");
       double timeAfterReadState3 = scs.getTime();
       assertEquals(initialTime3, timeAfterReadState3, epsilon);
 
-      File file7 = new File("file7.state.gz");
+      File file7 = new File(TEST_DIRECTORY + "file7.state.gz");
       scs.writeState("all", false, true, file7);
       double initialTime4 = scs.getTime();
       simulateForTime(scs, simulateTime);
