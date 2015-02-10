@@ -17,6 +17,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
@@ -39,7 +40,9 @@ public class AtlasWholeBodyIkSolverTest
 
    static private SimulationConstructionSet scs = null;
 
-   static private boolean VISUALIZE_GUI = false; // do not commit this to true! will break bamboo
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   
+   static private boolean VISUALIZE_GUI = simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
 
    static private FullRobotModelVisualizer modelVisualizer;
    private final ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
