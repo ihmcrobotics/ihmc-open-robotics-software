@@ -83,7 +83,7 @@ public class ROSMessageGenerator
             for (Field field : fields)
             {
                outBuffer += printType(field);
-               outBuffer += " " + field.getName() + System.lineSeparator();
+               outBuffer += " " + field.getName() + System.lineSeparator() + System.lineSeparator();
             }
 
             fileStream.println(outBuffer);
@@ -113,18 +113,18 @@ public class ROSMessageGenerator
       if (List.class.isAssignableFrom(field.getType()))
       {
          Class genericType = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
-         buffer += printType(genericType);
+         buffer += printType(genericType, field.getName());
          buffer += "[]";
       }
       else
       {
-         buffer += printType(field.getType());
+         buffer += printType(field.getType(), field.getName());
       }
 
       return buffer;
    }
 
-   private String printType(Class clazz)
+   private String printType(Class clazz, String varName)
    {
       String buffer = "";
       if (clazz == null)
@@ -134,13 +134,13 @@ public class ROSMessageGenerator
 
       if (clazz.isArray())
       {
-         buffer += printType(clazz.getComponentType());
+         buffer += printType(clazz.getComponentType(), varName );
          buffer += "[]";
       }
       else if (clazz.isEnum())
       {
          Object[] enumList = clazz.getEnumConstants();
-         buffer += "#Options for enum" + System.lineSeparator();
+         buffer += "#Options for " + varName + System.lineSeparator();
 
          for (int i = 0; i < enumList.length; i++)
          {
