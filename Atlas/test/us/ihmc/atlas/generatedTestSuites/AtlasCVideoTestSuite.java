@@ -11,8 +11,7 @@ import us.ihmc.utilities.code.unitTesting.runner.BambooTestSuiteRunner;
 ({
    us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class
 })
 
 public class AtlasCVideoTestSuite
