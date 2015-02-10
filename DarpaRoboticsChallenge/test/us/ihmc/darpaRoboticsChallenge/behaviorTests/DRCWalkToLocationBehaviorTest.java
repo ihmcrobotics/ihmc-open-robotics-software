@@ -158,7 +158,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
             walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(walkToLocationBehavior, stopThreadUpdatable);
+      success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
       SysoutTool.println("Stop Simulating Behavior", DEBUG);
 
@@ -204,7 +204,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
             walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(walkToLocationBehavior, stopThreadUpdatable);
+      success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
       SysoutTool.println("Stop Simulating Behavior", DEBUG);
 
@@ -223,7 +223,6 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
@@ -250,7 +249,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
             walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(walkToLocationBehavior, stopThreadUpdatable);
+      success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
       SysoutTool.println("Stop Simulating Behavior", DEBUG);
 

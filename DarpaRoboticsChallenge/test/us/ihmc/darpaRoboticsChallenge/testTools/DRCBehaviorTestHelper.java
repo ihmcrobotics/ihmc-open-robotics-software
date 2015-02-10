@@ -300,31 +300,31 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return ret;
    }
 
-   public StopThreadUpdatable executeBehaviorUntilPartiallyComplete(final BehaviorInterface behavior, double pausePercent, double resumePercent, double stopPercent,
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final BehaviorInterface behavior, double pausePercent, double pauseDuration, double stopPercent,
          FramePose poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
    {
-      StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, behavior, pausePercent, resumePercent, stopPercent,
+      StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent,
             poseAtTrajectoryEnd, frameToKeepTrackOf);
 
-      boolean success = executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopThreadUpdatable);
+      boolean success = executeBehaviorPauseAndResumeOrStop(behavior, stopThreadUpdatable);
       assertTrue(success);
       
       return stopThreadUpdatable;
    }
 
-   public StopThreadUpdatable executeBehaviorPauseAndResumeUntilDone(final BehaviorInterface behavior, double pauseTime, double resumeTime, double stopTime,
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final BehaviorInterface behavior, double pauseTime, double resumeTime, double stopTime,
          ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
    {
       StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver, behavior, pauseTime, resumeTime, stopTime,
             frameToKeepTrackOf);
 
-      boolean success = executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, stopThreadUpdatable);
+      boolean success = executeBehaviorPauseAndResumeOrStop(behavior, stopThreadUpdatable);
       assertTrue(success);
 
       return stopThreadUpdatable;
    }
 
-   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
+   public boolean executeBehaviorPauseAndResumeOrStop(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
          throws SimulationExceededMaximumTimeException
    {
       StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, stopThreadUpdatable);
