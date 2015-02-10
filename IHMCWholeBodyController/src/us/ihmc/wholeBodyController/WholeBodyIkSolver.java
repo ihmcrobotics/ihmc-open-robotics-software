@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -22,6 +23,7 @@ import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.Vector64F;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -29,6 +31,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -655,6 +658,36 @@ abstract public class WholeBodyIkSolver
       rightToLeftFoot.getTranslation(diff); 
 
       taskComPosition.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
+   }
+   
+   private double calculateCenterOfMassError(SDFFullRobotModel actualSdfModel )
+   {
+      ReferenceFrame leftSole = actualSdfModel.getSoleFrame(LEFT);
+      ReferenceFrame rightSole = actualSdfModel.getSoleFrame(RIGHT);
+      
+      Vector3d leftFoot = new Vector3d();
+      Vector3d rightFoot = new Vector3d();
+      
+      leftSole.getTransformToWorldFrame().getTranslation(leftFoot);
+      rightSole.getTransformToWorldFrame().getTranslation(rightFoot);
+      
+      Vector3d desiredCOM =  new Vector3d( 
+            (leftFoot.getX() + rightFoot.getX())*0.5,
+            (leftFoot.getY() + rightFoot.getY())*0.5, 
+            0.0 );
+      
+      CenterOfMassCalculator comCalculator = new CenterOfMassCalculator(actualSdfModel.getElevator(), ReferenceFrame.getWorldFrame() );
+      comCalculator.compute();
+      FramePoint calculatedCOM = comCalculator.getCenterOfMass();
+
+      double x1 = calculatedCOM.getPoint().getX();
+      double y1 = calculatedCOM.getPoint().getY();
+      
+      double x2 = desiredCOM.getX();
+      double y2 = desiredCOM.getY();
+      
+      double dist = Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)  );
+      return dist;
    }
 
    private void movePelvisToHaveOverlappingFeet(SDFFullRobotModel referenceModel, SDFFullRobotModel followerModel)
