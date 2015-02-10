@@ -59,7 +59,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
       return getName();
    }
 
-   public final void doControl()
+   public void doControl()
    {
 
       for (int i = 0; i < controllers.size(); i++)

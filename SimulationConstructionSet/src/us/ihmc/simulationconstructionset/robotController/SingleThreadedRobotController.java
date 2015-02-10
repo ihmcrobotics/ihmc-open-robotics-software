@@ -24,4 +24,16 @@ public class SingleThreadedRobotController extends AbstractThreadedRobotControll
          scs.addYoGraphicsListRegistry(controller.getDynamicGraphicObjectsListRegistry(), true);
       }
    }
+   
+   @Override
+   public void doControl()
+   {
+      for (int i = 0; i < controllers.size(); i++)
+      {
+         controllers.get(i).readData(currentControlTick.getLongValue());
+         controllers.get(i).executeForSimulationTick(currentControlTick.getLongValue());
+         controllers.get(i).waitAndWriteData(currentControlTick.getLongValue());
+      }
+      currentControlTick.increment();
+   }
 }
