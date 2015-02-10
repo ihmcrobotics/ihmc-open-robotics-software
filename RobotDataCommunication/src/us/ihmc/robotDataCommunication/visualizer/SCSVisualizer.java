@@ -262,7 +262,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    public static void main(String[] args)
    {
-      YoVariableClient client = new YoVariableClient("127.0.0.1", new SCSVisualizer(32169, true), "remote", false);
+      YoVariableClient client = new YoVariableClient(new SCSVisualizer(32169, true), "remote", false);
       client.start();
    }
 

@@ -6,31 +6,29 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 
 public enum LogSettings
 {
-   ATLAS_IAN("10.66.171.20", true, "239.255.25.1", 4, 5),
-   VALKYRIE_IHMC("192.168.3.47", true, "239.255.25.2", 0, 0),
-   STEPPR_IHMC("10.66.171.20", true, "239.255.25.3", 2, 3),
-   SIMULATION("localhost", false, "239.255.25.4"),
-   BEHAVIOR("192.168.3.248", false),
-   EXO_X1A("192.168.1.5", false),
-   EXO_HOPPER("192.168.1.5", false),
-   ETHERCAT("192.168.1.5", false),
-   HAND("localhost", false);
+   ATLAS_IAN(true, "239.255.25.1", 4, 5),
+   VALKYRIE_IHMC(true, "239.255.25.2"),
+   STEPPR_IHMC(true, "239.255.25.3", 2, 3),
+   SIMULATION(false, "239.255.25.4"),
+   BEHAVIOR(false),
+   EXO_X1A(false),
+   EXO_HOPPER(false),
+   ETHERCAT(false),
+   HAND(false);
 
    private final boolean log;
    private final int[] cameras;
    private final InetAddress videoStream;
-   private final String hostToBindTo;
 
-   LogSettings(String hostToBindTo, boolean log, int... cameras)
+   LogSettings(boolean log, int... cameras)
    {
-      this(hostToBindTo, log, null, cameras);
+      this(log, null, cameras);
    }
 
-   LogSettings(String hostToBindTo, boolean log, String videoStreamGroup, int... cameras)
+   LogSettings(boolean log, String videoStreamGroup, int... cameras)
    {
       this.log = log;
       this.cameras = cameras;
-      this.hostToBindTo = hostToBindTo;
       if (videoStreamGroup == null)
       {
          this.videoStream = null;
@@ -54,10 +52,5 @@ public enum LogSettings
    public InetAddress getVideoStream()
    {
       return videoStream;
-   }
-
-   public String getHost()
-   {
-      return hostToBindTo;
    }
 }

@@ -3,6 +3,8 @@ package us.ihmc.communication.configuration;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Properties;
 
@@ -59,4 +61,22 @@ public class NetworkParameters
       return getInstance().parameters.get(key);
    }
 
+   public static URI getROSURI()
+   {
+      if(getHost(NetworkParameterKeys.rosURI) == null)
+      {
+         return null;
+      }
+      else
+      {
+         try
+         {
+            return new URI(getHost(NetworkParameterKeys.rosURI));
+         }
+         catch (URISyntaxException e)
+         {
+            throw new RuntimeException("Invalid ROS URI" + getHost(NetworkParameterKeys.rosURI), e);
+         }
+      }
+   }
 }

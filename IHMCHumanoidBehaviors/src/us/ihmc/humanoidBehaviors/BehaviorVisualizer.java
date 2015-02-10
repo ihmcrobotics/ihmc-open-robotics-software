@@ -10,16 +10,13 @@ import com.martiansoftware.jsap.Switch;
 
 public class BehaviorVisualizer extends SCSVisualizer
 {
-   private static final String LOCAL_IP = "127.0.0.1";
-   private static final String CONTROLLER_IP = "192.168.130.112";
-
    private final boolean showOverheadView = false;
 
-   public BehaviorVisualizer(String host, int bufferSize)
+   public BehaviorVisualizer(int bufferSize)
    {
       super(bufferSize, true, false);
 
-      YoVariableClient client = new YoVariableClient(host, this, "behavior", showOverheadView);
+      YoVariableClient client = new YoVariableClient(this, "behavior", showOverheadView);
       client.start();
    }
 
@@ -36,9 +33,7 @@ public class BehaviorVisualizer extends SCSVisualizer
 
          if (config.success())
          {
-            boolean runningOnRealRobot = config.getBoolean(runningOnRealRobotSwitch.getID());
-            String ipAddressToUse = runningOnRealRobot ? CONTROLLER_IP : LOCAL_IP;
-            new BehaviorVisualizer(ipAddressToUse, 1024 * 32);
+            new BehaviorVisualizer(1024 * 32);
          }
       }
       catch (JSAPException e)

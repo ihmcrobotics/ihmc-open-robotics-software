@@ -26,13 +26,11 @@ public class YoVariableClient
    private final boolean showOverheadView;
    private ClientState state = ClientState.WAITING;
 
-   private static AnnounceRequest getRequest(String host)
+   private static AnnounceRequest getRequest()
    {
       try
       {
-         NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(host));
-         System.out.println("Listening to broadcasts on " + iface);
-         AnnounceRequest request = LogSessionDisplay.selectLogSession(iface);
+         AnnounceRequest request = LogSessionDisplay.selectLogSession();
          return request;
       }
       catch (IOException e)
@@ -41,9 +39,9 @@ public class YoVariableClient
       }
    }
 
-   public YoVariableClient(String hostToBindTo, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
    {
-      this(getRequest(hostToBindTo), listener, registryPrefix, showOverheadView);
+      this(getRequest(), listener, registryPrefix, showOverheadView);
    }
 
    public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)

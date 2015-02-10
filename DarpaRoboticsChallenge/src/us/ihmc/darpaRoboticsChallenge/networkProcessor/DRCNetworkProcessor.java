@@ -5,6 +5,8 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.AbstractNetworkProcessor;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
@@ -56,7 +58,7 @@ public class DRCNetworkProcessor extends AbstractNetworkProcessor
    {
       if (controllerCommunicator == null)
       {
-         String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
+         String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
 
          controllerCommunicator = new KryoPacketClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
                new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(), PacketDestination.NETWORK_PROCESSOR.ordinal(),"DRCNetworkProcessor");

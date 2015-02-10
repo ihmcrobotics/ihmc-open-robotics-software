@@ -16,6 +16,8 @@ import us.ihmc.codecs.generated.FilterModeEnum;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.SegmentedDatagramClient;
@@ -48,7 +50,7 @@ public class GUICaptureViewer
       {
          if (setting.getVideoStream() != null)
          {
-            SegmentedDatagramClient client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, LogUtils.getMyInterface(setting.getHost()),
+            SegmentedDatagramClient client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.logger)),
                   setting.getVideoStream(), GUICaptureStreamer.PORT, new Handler());
 
             client.start();

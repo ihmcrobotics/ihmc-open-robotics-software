@@ -39,7 +39,7 @@ public class TestYoVariableConnection
       new ThreadTester(server).start();
       server.start();
       boolean showOverheadView = false;
-      client = new YoVariableClient("localhost", scsYoVariablesUpdatedListener, "", showOverheadView);
+      client = new YoVariableClient(scsYoVariablesUpdatedListener, "", showOverheadView);
       client.start();
       var4.set(5000);
       

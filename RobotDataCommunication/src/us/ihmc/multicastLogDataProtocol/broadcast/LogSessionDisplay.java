@@ -5,6 +5,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.BoxLayout;
@@ -14,34 +16,34 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import us.ihmc.multicastLogDataProtocol.LogUtils;
-
-public class LogSessionDisplay extends JFrame implements LogBroadcastListener
+public class LogSessionDisplay extends JFrame
 {
    private static final long serialVersionUID = -4663925866110757300L;
 
    private final DefaultTableModel model;
-   private final LogSessionBroadcastClient client;
+   private final ArrayList<LogSessionBroadcastClient> clients = new ArrayList<>();
 
-   public LogSessionDisplay(NetworkInterface iface) throws IOException
+   public LogSessionDisplay() throws IOException
    {
-      this(iface, null);
+      this(null);
    }
 
-   public LogSessionDisplay(NetworkInterface iface, MouseAdapter mouseAdapter) throws IOException
+   public LogSessionDisplay(MouseAdapter mouseAdapter) throws IOException
    {
       super("Control sessions");
       setLocationRelativeTo(null);
       setLocationByPlatform(true);
-      if(iface == null)
+
+      Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+      while(networkInterfaces.hasMoreElements())
       {
-         throw new RuntimeException("Cannot connect");
+         NetworkInterface iface = networkInterfaces.nextElement();
+         clients.add(new LogSessionBroadcastClient(iface, new LogSessionCallback(iface)));
       }
-      
-      this.client = new LogSessionBroadcastClient(iface, this);
+
       JScrollPane scroller = new JScrollPane();
 
-      String[] columnNames = { "Controller", "Session ID", "IP", "Port", "Group", "Data port" };
+      String[] columnNames = { "Controller", "Session ID", "Interface", "IP", "Port", "Group", "Data port" };
       model = new DefaultTableModel(columnNames, 0)
       {
          private static final long serialVersionUID = 7807098301637938830L;
@@ -70,72 +72,22 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
 
    }
 
-   @Override
-   public void logSessionCameOnline(final AnnounceRequest description)
-   {
 
-      final String name = description.getName();
-      final long sessionId = description.getSessionID();
-      final String controlIp = ipToString(description.getControlIP());
-      final int port = description.getControlPort();
-      final String group = ipToString(description.getGroup());
-      final int dataPort = description.getDataPort();
-      SwingUtilities.invokeLater(new Runnable()
-      {
-
-         @Override
-         public void run()
-         {
-            for (int i = 0; i < model.getRowCount(); i++)
-            {
-               if (((AnnounceRequest) model.getValueAt(i, 1)).getSessionID() == sessionId)
-               {
-                  System.err.println("Session ID " + sessionId + " already registered");
-                  return;
-               }
-            }
-            System.out.println(description);
-            model.addRow(new Object[] { name, description, controlIp, port, group, dataPort });
-
-         }
-      });
-
-   }
 
    private static String ipToString(byte[] address)
    {
       return (address[0] & 0xFF) + "." + (address[1] & 0xFF) + "." + (address[2] & 0xFF) + "." + (address[3] & 0xFF);
    }
 
-   @Override
-   public void logSessionWentOffline(AnnounceRequest description)
-   {
-      final long sessionId = description.getSessionID();
-      SwingUtilities.invokeLater(new Runnable()
-      {
-
-         @Override
-         public void run()
-         {
-            for (int i = 0; i < model.getRowCount(); i++)
-            {
-               if (((AnnounceRequest) model.getValueAt(i, 1)).getSessionID() == sessionId)
-               {
-                  model.removeRow(i);
-                  return;
-               }
-            }
-
-         }
-      });
-   }
-
    public void start()
    {
-      client.start();
+      for(LogSessionBroadcastClient client : clients)
+      {
+         client.start();
+      }
    }
 
-   public static AnnounceRequest selectLogSession(NetworkInterface iface) throws SocketException, IOException
+   public static AnnounceRequest selectLogSession() throws SocketException, IOException
    {
       final LinkedBlockingQueue<AnnounceRequest> request = new LinkedBlockingQueue<>();
       MouseAdapter adapter = new MouseAdapter()
@@ -147,10 +99,10 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
             {
                JTable target = (JTable) e.getSource();
                int row = target.getSelectedRow();
-               if(row >= 0)
+               if (row >= 0)
                {
                   AnnounceRequest selectedRequest = (AnnounceRequest) target.getModel().getValueAt(row, 1);
-                  if(selectedRequest != null)
+                  if (selectedRequest != null)
                   {
                      try
                      {
@@ -165,10 +117,10 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
          }
       };
 
-      final LogSessionDisplay display = new LogSessionDisplay(iface, adapter);
+      final LogSessionDisplay display = new LogSessionDisplay(adapter);
       SwingUtilities.invokeLater(new Runnable()
       {
-         
+
          @Override
          public void run()
          {
@@ -179,18 +131,18 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
 
          }
       });
-      
+
       synchronized (display)
       {
-         
+
       }
-      
+
       try
       {
          AnnounceRequest take = request.take();
          SwingUtilities.invokeLater(new Runnable()
          {
-            
+
             @Override
             public void run()
             {
@@ -207,8 +159,75 @@ public class LogSessionDisplay extends JFrame implements LogBroadcastListener
 
    }
 
+   private class LogSessionCallback implements LogBroadcastListener
+   {
+      private final NetworkInterface iface;
+      
+      public LogSessionCallback(NetworkInterface iface)
+      {
+         System.out.println(iface);
+         this.iface = iface;
+      }
+
+      @Override
+      public void logSessionCameOnline(final AnnounceRequest description)
+      {
+
+         final String name = description.getName();
+         final long sessionId = description.getSessionID();
+         final String controlIp = ipToString(description.getControlIP());
+         final int port = description.getControlPort();
+         final String group = ipToString(description.getGroup());
+         final int dataPort = description.getDataPort();
+         SwingUtilities.invokeLater(new Runnable()
+         {
+
+            @Override
+            public void run()
+            {
+               for (int i = 0; i < model.getRowCount(); i++)
+               {
+                  if (((AnnounceRequest) model.getValueAt(i, 1)).getSessionID() == sessionId)
+                  {
+                     System.err.println("Session ID " + sessionId + " already registered");
+                     return;
+                  }
+               }
+               System.out.println(description);
+               model.addRow(new Object[] { name, description, iface, controlIp, port, group, dataPort });
+
+            }
+         });
+
+      }
+
+      @Override
+      public void logSessionWentOffline(AnnounceRequest description)
+      {
+         final long sessionId = description.getSessionID();
+         SwingUtilities.invokeLater(new Runnable()
+         {
+
+            @Override
+            public void run()
+            {
+               for (int i = 0; i < model.getRowCount(); i++)
+               {
+                  if (((AnnounceRequest) model.getValueAt(i, 1)).getSessionID() == sessionId)
+                  {
+                     model.removeRow(i);
+                     return;
+                  }
+               }
+
+            }
+         });
+      }
+
+   }
+
    public static void main(String[] args) throws IOException
    {
-      System.out.println(selectLogSession(LogUtils.getMyInterface("10.66.171.41")));
+      System.out.println(selectLogSession());
    }
 }

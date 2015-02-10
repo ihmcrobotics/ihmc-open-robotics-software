@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class NetworkParametersCreator
    public NetworkParametersCreator()
    {
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+      frame.setTitle(getClass().getSimpleName());
       Container content = frame.getContentPane();
       content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
@@ -65,6 +66,10 @@ public class NetworkParametersCreator
       JButton save = new JButton("Save");
       save.addActionListener(new SaveActionListener());
       savePanel.add(save);
+
+      JButton load = new JButton("Load");
+      load.addActionListener(new LoadActionListener());
+      savePanel.add(load);
 
       content.add(savePanel);
 
@@ -100,6 +105,34 @@ public class NetworkParametersCreator
          }
       }
       return true;
+   }
+
+   private void load(File file)
+   {
+      try
+      {
+         FileInputStream in = new FileInputStream(file);
+         Properties properties = new Properties();
+         properties.load(in);
+         for (NetworkParameterKeys key : NetworkParameterKeys.values())
+         {
+            String property = properties.getProperty(key.toString());
+            if(property != null)
+            {
+               entryBoxes.get(key).setText(property);
+            }
+            else
+            {
+               entryBoxes.get(key).setText("");               
+            }
+         }
+         in.close();
+      }
+      catch (IOException e)
+      {
+         JOptionPane.showMessageDialog(frame, "Cannot load " + file, "Read error", JOptionPane.ERROR_MESSAGE);
+
+      }
    }
 
    private void save(File file)
@@ -158,6 +191,28 @@ public class NetworkParametersCreator
 
    }
 
+   private class LoadActionListener implements ActionListener
+   {
+
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+         FileDialog dialog = new FileDialog(frame, "Choose ini file to load", FileDialog.LOAD);
+         dialog.setFilenameFilter(new INIFileFilter());
+         dialog.setVisible(true);
+         String filename = dialog.getFile();
+         if (filename == null)
+         {
+            return;
+         }
+         else
+         {
+            load(new File(dialog.getDirectory(), dialog.getFile()));
+         }
+      }
+
+   }
+
    private class SaveActionListener implements ActionListener
    {
 
@@ -167,22 +222,7 @@ public class NetworkParametersCreator
          if (isValid())
          {
             FileDialog dialog = new FileDialog(frame, "Choose file", FileDialog.SAVE);
-            dialog.setFilenameFilter(new FilenameFilter()
-            {
-
-               @Override
-               public boolean accept(File dir, String name)
-               {
-                  if (name.endsWith(".ini"))
-                  {
-                     return true;
-                  }
-                  else
-                  {
-                     return false;
-                  }
-               }
-            });
+            dialog.setFilenameFilter(new INIFileFilter());
             dialog.setFile(NetworkParameters.defaultParameterFile);
             dialog.setVisible(true);
 
@@ -198,6 +238,22 @@ public class NetworkParametersCreator
          }
       }
 
+   }
+
+   private final class INIFileFilter implements FilenameFilter
+   {
+      @Override
+      public boolean accept(File dir, String name)
+      {
+         if (name.endsWith(".ini"))
+         {
+            return true;
+         }
+         else
+         {
+            return false;
+         }
+      }
    }
 
    public static void main(String[] args)

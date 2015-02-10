@@ -3,6 +3,8 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoPacketClient;
 import us.ihmc.communication.packets.PacketDestination;
@@ -22,12 +24,12 @@ public class AtlasROSAPINetworkProcessor
 
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
-      String kryoIP = robotModel.getNetworkParameters().getRobotControlComputerIP();
+      String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
       
       KryoPacketClient controllerCommunicator = new KryoPacketClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),PacketDestination.NETWORK_PROCESSOR.ordinal(),"AtlasROSAPINetworkProcessor");
       
-      URI rosUri = robotModel.getNetworkParameters().getRosURI();
+      URI rosUri = NetworkParameters.getROSURI();
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, robotModel, nameSpace);
    }
    
