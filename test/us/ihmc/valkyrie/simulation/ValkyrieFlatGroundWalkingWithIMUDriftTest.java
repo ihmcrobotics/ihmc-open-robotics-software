@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.simulation;
 
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
@@ -11,6 +12,7 @@ import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAccelerating
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -19,6 +21,8 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
 {
    private DRCRobotModel robotModel;
 
+   @Ignore
+   @QuarantinedTest("Need to fix the signal corruptors for the simulated sensors.")
 	@AverageDuration(duration = 50.3)
 	@Test(timeout = 150919)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException
