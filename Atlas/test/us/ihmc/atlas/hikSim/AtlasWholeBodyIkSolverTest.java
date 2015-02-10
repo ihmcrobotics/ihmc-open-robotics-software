@@ -39,7 +39,7 @@ public class AtlasWholeBodyIkSolverTest
 
    static private SimulationConstructionSet scs = null;
 
-   static private boolean VISUALIZE_GUI = true;
+   static private boolean VISUALIZE_GUI = false; // do not commit this to true! will break bamboo
 
    static private FullRobotModelVisualizer modelVisualizer;
    private final ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
