@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector4d;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -29,7 +28,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
-import us.ihmc.wholeBodyController.WholeBodyIkSolverTestFactory;
+import us.ihmc.wholeBodyController.WholeBodyIkSolverTestHelper;
 
 public class AtlasWholeBodyIkSolverTest
 
@@ -48,7 +47,7 @@ public class AtlasWholeBodyIkSolverTest
    private final ArrayList<Matrix4d> RightHandToFootArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> LeftHandToFootArray = new ArrayList<Matrix4d>();
 
-   final private WholeBodyIkSolverTestFactory wholeBodyTest;
+   final private WholeBodyIkSolverTestHelper wholeBodyTest;
 
    @BeforeClass
    static public void initializeGraphics() throws InterruptedException
@@ -77,7 +76,7 @@ public class AtlasWholeBodyIkSolverTest
 
       wholeBodySolver.maxNumberOfAutomaticReseeds = 20; // "I am NOT Feeling Lucky"" (© Davide Faconti)
 
-      wholeBodyTest = new WholeBodyIkSolverTestFactory(atlasRobotModel, actualRobotModel, wholeBodySolver);
+      wholeBodyTest = new WholeBodyIkSolverTestHelper(atlasRobotModel, actualRobotModel, wholeBodySolver);
 
       createHandTargetArrays();
 
