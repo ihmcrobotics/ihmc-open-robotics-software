@@ -5,7 +5,9 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCLookAtBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UnfinishedTest;
 
+@UnfinishedTest
 public class AtlasLookAtBehaviorTest extends DRCLookAtBehaviorTest
 {
    private final AtlasRobotModel robotModel;

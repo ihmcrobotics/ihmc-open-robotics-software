@@ -32,7 +32,6 @@ public class FootstepListBehavior extends BehaviorInterface
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped", registry);
    private final BooleanYoVariable hasLastStepBeenReached = new BooleanYoVariable("hasLastStepBeenReached", registry);
-   private boolean isInitialized;
 
    public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
@@ -113,16 +112,12 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      if (!isInitialized)
-      {
-         packetHasBeenSent.set(false);
-         hasLastStepBeenReached.set(false);
+      packetHasBeenSent.set(false);
+      hasLastStepBeenReached.set(false);
 
-         isPaused.set(false);
-         isStopped.set(false);
-         isInitialized = true;
-
-      }
+      isPaused.set(false);
+      isStopped.set(false);
+      hasBeenInitialized.set(true);
    }
 
    @Override
@@ -136,7 +131,7 @@ public class FootstepListBehavior extends BehaviorInterface
       lastFootstepStatus = null;
       isPaused.set(false);
       isStopped.set(false);
-      isInitialized = false;
+      hasBeenInitialized.set(false);
       hasLastStepBeenReached.set(false);
    }
 

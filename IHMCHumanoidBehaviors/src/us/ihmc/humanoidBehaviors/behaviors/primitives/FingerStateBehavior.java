@@ -135,10 +135,10 @@ public class FingerStateBehavior extends BehaviorInterface
       }
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);
-      outgoingFingerStatePacket = null;
+      
       isPaused.set(false);
       isStopped.set(false);
-      trajectoryTime.set(1.0); //hardCoded to be determined
+      trajectoryTime.set(1.0); //TODO hardCoded to be determined
       
       trajectoryTimeElapsed.set(false);
    }

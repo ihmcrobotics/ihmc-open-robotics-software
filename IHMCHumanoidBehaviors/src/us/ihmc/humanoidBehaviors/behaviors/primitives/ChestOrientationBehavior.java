@@ -65,6 +65,12 @@ public class ChestOrientationBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
+      hasPacketBeenSent.set(false);
+      
+      hasBeenInitialized.set(true);
+      
+      isPaused.set(false);
+      isStopped.set(false);
    }
 
    @Override

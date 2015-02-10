@@ -104,7 +104,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
       {
          outgoingFootStepsForSnapping.add(currentFootBeingLookedAt);
          sendPacketToNetworkProcessor(new SnapFootstepPacket(outgoingFootStepsForSnapping, new int[] {}, new byte[] {}));
-         lookAtBehavior.reset();
+         lookAtBehavior.initialize();
       }
 
       if (!lookAtBehavior.isLooking() && !footStepsToLookAt.isEmpty())

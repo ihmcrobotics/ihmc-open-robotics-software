@@ -18,8 +18,6 @@ public class ComHeightBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
 
-   // TODO: This is just an estimate of the time out. This needs to be dealt with
-
    public ComHeightBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
@@ -74,8 +72,14 @@ public class ComHeightBehavior extends BehaviorInterface
    public void initialize()
    {
       packetHasBeenSent.set(false);
+
+      isPaused.set(false);
+      isStopped.set(false);
+      
       hasInputBeenSet.set(false);
       trajectoryTimeElapsed.set(false);
+      
+      hasBeenInitialized.set(true);
    }
 
    @Override

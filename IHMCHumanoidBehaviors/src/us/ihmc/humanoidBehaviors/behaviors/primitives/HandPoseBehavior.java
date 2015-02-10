@@ -144,6 +144,7 @@ public class HandPoseBehavior extends BehaviorInterface
       hasStatusBeenReceived.set(false);
       isPaused.set(false);
       isDone.set(false);
+      hasBeenInitialized.set(true);
    }
 
    @Override
