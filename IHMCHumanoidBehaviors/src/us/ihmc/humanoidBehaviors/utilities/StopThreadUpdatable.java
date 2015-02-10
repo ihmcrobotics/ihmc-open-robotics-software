@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface.BehaviorStatus;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -27,6 +28,7 @@ public abstract class StopThreadUpdatable implements Updatable
 
    protected LinkedHashMap<HumanoidBehaviorControlModeEnum, BehaviorStatus> behaviorStatus = new LinkedHashMap<HumanoidBehaviorControlModeEnum, BehaviorStatus>();
    protected LinkedHashMap<HumanoidBehaviorControlModeEnum, RigidBodyTransform> testFrameTransformToWorld = new LinkedHashMap<HumanoidBehaviorControlModeEnum, RigidBodyTransform>();
+   protected LinkedHashMap<HumanoidBehaviorControlModeEnum, ReferenceFrames> referenceFramesForLogging = new LinkedHashMap<HumanoidBehaviorControlModeEnum, ReferenceFrames>();
 
    public StopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, ReferenceFrame frameToKeepTrackOf)
    {
@@ -51,15 +53,16 @@ public abstract class StopThreadUpdatable implements Updatable
       {
          this.requestedControlMode = newRequestedControlMode;
          behaviorStatus.put(newRequestedControlMode, behavior.getBehaviorStatus());
-         captureTransformToWorld(newRequestedControlMode);
+         testFrameTransformToWorld.get(newRequestedControlMode).set(getCurrentTestFrameTransformToWorld());         
+         referenceFramesForLogging.put(newRequestedControlMode, robotDataReceiver.getUpdatedReferenceFramesCopy());
       }
    }
 
-   protected void captureTransformToWorld(HumanoidBehaviorControlModeEnum newControlMode)
+   public ReferenceFrames getReferenceFramesAtTransition(HumanoidBehaviorControlModeEnum controlMode)
    {
-      testFrameTransformToWorld.get(newControlMode).set(getCurrentTestFrameTransformToWorld());
+      return referenceFramesForLogging.get(controlMode);
    }
-
+   
    public RigidBodyTransform getCurrentTestFrameTransformToWorld()
    {
       robotDataReceiver.updateRobotModel();
