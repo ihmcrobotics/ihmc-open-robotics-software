@@ -36,6 +36,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UnfinishedTest;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.io.printing.SysoutTool;
@@ -47,6 +48,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
+@UnfinishedTest
 public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface
 {
    private final boolean DEBUG = false;
@@ -84,17 +86,17 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.21;
+   private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.22;
    private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 0.89;
-   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.61;
+   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.60;
 
-   private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.21;
-   private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 0.91;
+   private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.22;
+   private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 0.90;
    private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.57;
 
-   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.37;
-   private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 1.0;
-   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.35;
+   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.50;
+   private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 0.99;
+   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.19;
 
    private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.05;
 
@@ -135,7 +137,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          }
       };
 
-      testEnvironment.addStandingDebris(0.65, -0.30, 0.0); //0.65
+      testEnvironment.addStandingDebris(0.65, -0.35, 0.0); //0.65
       testEnvironment.createDebrisContactController();
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null, startingLocation,
@@ -321,6 +323,16 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
 
+   @Test
+   public void testSeveral() throws SimulationExceededMaximumTimeException
+   {
+      for(int i = 0; i<10; i++)
+      {
+         System.out.println(i);
+         testGraspingDebris();
+      }
+   }
+   
    private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
