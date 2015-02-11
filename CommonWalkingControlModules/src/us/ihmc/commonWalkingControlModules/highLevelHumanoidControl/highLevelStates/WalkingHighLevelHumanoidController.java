@@ -1455,21 +1455,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
-      double zCurrent = comPosition.getZ();
-      double zdCurrent = comVelocity.getZ();
-      Footstep nextFootstep;
-
-      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
-      {
-         FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
-         pelvisPosition.changeFrame(worldFrame);
-         zCurrent = pelvisPosition.getZ();
-         Twist pelvisTwist = new Twist();
-         twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
-         pelvisTwist.changeFrame(worldFrame);
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
-      }
-
       centerOfMassHeightInputData
             .setCenterOfMassAndPelvisZUpFrames(momentumBasedController.getCenterOfMassFrame(), momentumBasedController.getPelvisZUpFrame());
 
@@ -1479,6 +1464,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       centerOfMassHeightInputData.setSupportLeg(supportLeg.getEnumValue());
 
+      Footstep nextFootstep;
       if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
       {
          nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
@@ -1497,6 +1483,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
 
+      double zCurrent = comPosition.getZ();
+      double zdCurrent = comVelocity.getZ();
+
+      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
+      {
+         FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
+         pelvisPosition.changeFrame(worldFrame);
+         zCurrent = pelvisPosition.getZ();
+         Twist pelvisTwist = new Twist();
+         twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
+         pelvisTwist.changeFrame(worldFrame);
+         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
+      }
+
+      
       // TODO: use current omega0 instead of previous
       comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
       if (desiredICPVelocity.containsNaN())
