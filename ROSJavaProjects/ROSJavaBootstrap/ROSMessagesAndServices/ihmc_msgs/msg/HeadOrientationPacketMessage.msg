@@ -1,6 +1,9 @@
 ## HeadOrientationPacketMessage
-# This message gives the desired head orientation of the robot.
+# This message gives the desired head orientation of the robot in world coordinates.
 
-# quaternion gives the desired final orientation of the head
 geometry_msgs/Quaternion quaternion
+
+# trajectoryTime specifies how fast or how slow to move to the desired pose
+float64 trajectoryTime
+
 

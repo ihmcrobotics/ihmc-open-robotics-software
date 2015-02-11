@@ -1,8 +1,12 @@
 ## ChestOrientationPacketMessage
-# This message gives the orientation of the robot's chest in world frame.
+# This message sets the orientation of the robot's chest in world coordinates.
 
 geometry_msgs/Quaternion orientation
+
+# trajectoryTime specifies how fast or how slow to move to the desired pose
 float64 trajectoryTime
-# toHomePosition can be used to move the Pelvis back to its starting position
+
+# toHomePosition can be used to move the chest back to its default starting position
 bool toHomeOrientation
+
 
