@@ -106,7 +106,6 @@ public class DRCSimulationTestHelper
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
       if (startNetworkProcessor)
       {
-         networkProcessorParameters.setUseUiModule(startNetworkProcessor);
          networkProcessorParameters.setUseSensorModule(startNetworkProcessor);
          networkProcessorParameters.setUsePerceptionModule(startNetworkProcessor);
          
