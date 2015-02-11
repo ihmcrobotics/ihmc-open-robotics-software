@@ -397,7 +397,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
             for (Updatable updatable : updatables)
             {
-//               updatable.update(yoTimeRobot.getDoubleValue());
+               updatable.update(yoTimeRobot.getDoubleValue());
             }
             
             ThreadTools.sleep(1);
