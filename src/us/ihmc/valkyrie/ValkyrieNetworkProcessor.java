@@ -2,8 +2,15 @@ package us.ihmc.valkyrie;
 
 import java.net.URISyntaxException;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -15,6 +22,20 @@ public class ValkyrieNetworkProcessor
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
-      new DRCNetworkProcessor(NetworkParameters.getROSURI(), model);
+      IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
+      String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
+      int tcpPort = NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
+      int communicatorId = PacketDestination.CONTROLLER.ordinal();
+      
+      KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList,
+            communicatorId, "VAL_Controller_Endpoint");
+      
+      DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
+      
+      networkModuleParams.setControllerCommunicator(realRobotControllerConnection);
+      networkModuleParams.setUseUiModule(true);
+      networkModuleParams.setUseBehaviorModule(true);
+      
+      new DRCNetworkProcessor(model, networkModuleParams);
    }
 }
