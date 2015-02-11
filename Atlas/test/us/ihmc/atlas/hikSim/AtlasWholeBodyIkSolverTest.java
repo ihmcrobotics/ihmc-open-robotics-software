@@ -40,7 +40,7 @@ public class AtlasWholeBodyIkSolverTest
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    
-   static private boolean VISUALIZE_GUI = true; // simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
+   static private boolean VISUALIZE_GUI = false; // simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
 
    static private FullRobotModelVisualizer modelVisualizer;
    private final ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
