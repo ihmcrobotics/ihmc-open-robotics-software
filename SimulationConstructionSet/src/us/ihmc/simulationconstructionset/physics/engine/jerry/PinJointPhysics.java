@@ -134,15 +134,15 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       {
          if (owner.qd.getDoubleValue() > 0.0)
          {
-            owner.tauDamping.set(-owner.f_stiction -owner.b_damp * owner.qd.getDoubleValue());
+            owner.tauDamping.set(-owner.getJointStiction() -owner.getDamping() * owner.qd.getDoubleValue());
          }
          else if (owner.qd.getDoubleValue() < -0.0)
          {
-            owner.tauDamping.set(owner.f_stiction - owner.b_damp * owner.qd.getDoubleValue());
+            owner.tauDamping.set(owner.getJointStiction() - owner.getDamping() * owner.qd.getDoubleValue());
          }
          else
          {
-            owner.tauDamping.set(0.0 -owner.b_damp * owner.qd.getDoubleValue());
+            owner.tauDamping.set(0.0 -owner.getDamping() * owner.qd.getDoubleValue());
          }
 
          Q_i = Q_i + owner.tauDamping.getDoubleValue();

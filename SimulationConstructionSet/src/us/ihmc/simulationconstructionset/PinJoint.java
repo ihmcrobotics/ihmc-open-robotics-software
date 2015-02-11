@@ -31,23 +31,19 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 {
    private static final long serialVersionUID = -8016564065453170730L;
 
-// private boolean hasVelocityLimits = false;
-// private boolean hasTorqueLimits = false;
-// private boolean hasLimitStops = false;
    private AxisAngle4d axisAngle = new AxisAngle4d();
    public DoubleYoVariable q, qd, qdd, tau;
+   
    public DoubleYoVariable tauJointLimit, tauVelocityLimit, tauDamping;
-   public double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit, b_damp = 0.0, f_stiction = 0.0;
+   public double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit;
 
-   // private int axis;
+   private DoubleYoVariable b_damp, f_stiction;
    public DoubleYoVariable qd_max, b_vel_limit;
    public DoubleYoVariable tau_max;
 
    private YoVariableRegistry registry;
 
    public TorqueSpeedCurve torqueSpeedCurve;
-
-// private VarList jointVars;
 
    /**
     * Creates a new pin joint and adds it to the specified robot.  There are three possible axis of rotation
@@ -67,7 +63,6 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       initializeYoVariables(jname, registry);
 
-//    rob.getVars().addVariables(jointVars);
       this.physics.u_i = new Vector3d();
 
       if (jaxis == Axis.X)
@@ -330,8 +325,12 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       {
          tauDamping = new DoubleYoVariable("tau_damp_" + this.name, "PinJoint damping torque", registry);
       }
-
-      this.b_damp = b_damp;
+      
+      if (this.b_damp == null)
+      {
+         this.b_damp = new DoubleYoVariable("b_damp_" + this.name, "PinJoint damping parameter", registry);
+         this.b_damp.set(b_damp);
+      }
    }
    
    public void setStiction(double f_stiction)
@@ -340,8 +339,11 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       {
          tauDamping = new DoubleYoVariable("tau_damp_" + this.name, "PinJoint damping torque", registry);
       }
-
-      this.f_stiction = f_stiction;
+      if (this.f_stiction == null)
+      {
+         this.f_stiction = new DoubleYoVariable("f_stiction_" + this.name, "PinJoint stiction force", registry);
+         this.f_stiction.set(f_stiction);
+      }
    }
 
    /**
@@ -384,18 +386,19 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    
    public void setDampingParameterOnly(double b_damp) // Hack for Gazebo
    {
-      this.b_damp = b_damp;
+      this.b_damp.set(b_damp);
    }
    
    public void setStictionParameterOnly(double f_stiction) // Hack for Gazebo
    {
-      this.f_stiction = f_stiction;
+      this.f_stiction.set(f_stiction);
    }
 
    @Override
    public double getDamping()
    {
-      return b_damp;
+      if (b_damp == null) return 0.0;
+      return b_damp.getDoubleValue();
    }
 
    @Override
@@ -439,6 +442,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    @Override
    public double getJointStiction()
    {
-      return f_stiction;
+      if (f_stiction == null) return 0.0;
+      return f_stiction.getDoubleValue();
    }
 }
