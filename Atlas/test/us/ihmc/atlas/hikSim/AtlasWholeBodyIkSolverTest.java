@@ -24,8 +24,6 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
@@ -42,7 +40,7 @@ public class AtlasWholeBodyIkSolverTest
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    
-   static private boolean VISUALIZE_GUI = simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
+   static private boolean VISUALIZE_GUI = true; // simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
 
    static private FullRobotModelVisualizer modelVisualizer;
    private final ArrayList<Matrix4d> RightHandToWorldArray = new ArrayList<Matrix4d>();
@@ -167,14 +165,13 @@ public class AtlasWholeBodyIkSolverTest
       RightHandToWorldArray.add(new Matrix4d(0.1314504264529771, 0.8695241512679164, -0.4760761869145953, 0.05398335115822159, 0.040179126797496675, 0.47517556352477636, 0.8789731631845777, -0.30756239218703796, 0.9905081641032151, -0.13466972262064525, 0.027525309338086293, 1.9163891899988577, 0.0, 0.0, 0.0, 1.0));
       RightHandToFootArray.add(new Matrix4d(0.12280309837999459, 0.870382519883222, -0.47681617853215386, 0.10161712549564096, 0.0403641365372422, 0.4756747422979106, 0.8786946432188032, -0.1434053142604479, 0.9916098706194271, -0.12715269805061083, 0.023282093303093613, 1.8327169617310168, 0.0, 0.0, 0.0, 1.0));
       
-      
    }
 
    @AverageDuration(duration = 0.6)
    @Test(timeout = 11715)
    public void testRightHandIn3PModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(null, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
    }
 
@@ -182,7 +179,13 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 16751)
    public void testRightHandIn3PMode()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
+      double maxReachRadius = 0.8;
+      double maxHeight = 1.5;
+      double maxTheta = Math.PI * 3 / 4;
+      int radiusIncrements = 4;
+      int heightIncrements = 4;
+      int thetaIncrements = 4;
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createHalfCylinderOfTargetPoints(RobotSide.RIGHT, maxReachRadius, maxHeight, maxTheta, radiusIncrements, heightIncrements, thetaIncrements);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
    }
 
@@ -190,7 +193,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 11563)
    public void testLeftHandIn3PModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(LeftHandToWorldArray, null);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
    }
 
@@ -198,7 +201,13 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 17630)
    public void testLeftHandIn3PMode()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createHalfCylinderOfTargetPoints(RobotSide.LEFT);
+      double maxReachRadius = 0.8;
+      double maxHeight = 1.5;
+      double maxTheta = Math.PI * 3 / 4;
+      int radiusIncrements = 4;
+      int heightIncrements = 4;
+      int thetaIncrements = 4;
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createHalfCylinderOfTargetPoints(RobotSide.LEFT, maxReachRadius, maxHeight, maxTheta, radiusIncrements, heightIncrements, thetaIncrements);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
    }
 
@@ -207,7 +216,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 11977)
    public void testRightHandIn3P2RModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(null, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray, false);
    }
 
@@ -216,7 +225,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 11707)
    public void testLeftHandIn3P2RModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(LeftHandToWorldArray, null);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, false);
    }
 
@@ -225,7 +234,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 11462)
    public void testRightHandIn3P3RModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(null, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(null, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray, false);
    }
 
@@ -234,7 +243,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 12128)
    public void testLeftHandIn3P3RModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, null);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(LeftHandToWorldArray, null);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray, false);
    }
 
@@ -243,7 +252,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 12820)
    public void testBothHandsIn3PModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, true);
    }
 
@@ -252,7 +261,7 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 15368)
    public void testBothHandsIn3P2RModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false);
    }
 
@@ -262,9 +271,18 @@ public class AtlasWholeBodyIkSolverTest
    @Test(timeout = 15000)
    public void testBothHandsIn3P3RModeManual()
    {
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = createManualReferenceFramesPairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.createManualFramePosePairArrayList(LeftHandToWorldArray, RightHandToWorldArray);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
    }
+   
+   @Ignore
+   @AverageDuration
+   @Test(timeout=15000)
+   public void testRegression(){
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTest.generatePointsForRegression(5);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
+   }
+      
 
    public void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize)
    {
@@ -333,141 +351,5 @@ public class AtlasWholeBodyIkSolverTest
     * .getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(0.000);
     * //arm_wrx } }
     */
-
-   public ArrayList<Pair<FramePose, FramePose>> createManualReferenceFramesPairArrayList(ArrayList<Matrix4d> leftHandRigidBodyTransformData,
-         ArrayList<Matrix4d> rightHandRigidBodyTransformData)
-   {
-      ArrayList<Pair<FramePose, FramePose>> arrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
-      try
-      {
-         if (leftHandRigidBodyTransformData != null && rightHandRigidBodyTransformData != null)
-         {
-            if (leftHandRigidBodyTransformData.size() != rightHandRigidBodyTransformData.size())
-            {
-               throw new Exception(getClass().getSimpleName() + ": left and right hand double arrays must be same length");
-            }
-         }
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-      int maxi = -1;
-      if (leftHandRigidBodyTransformData != null)
-      {
-         maxi = leftHandRigidBodyTransformData.size();
-      }
-      else
-      {
-         maxi = rightHandRigidBodyTransformData.size();
-      }
-
-      FramePose desiredLeftHandFrame = null;
-      FramePose desiredRightHandFrame = null;
-
-      for (int i = 0; i < maxi; i++)
-      {
-         if (leftHandRigidBodyTransformData != null)
-         {
-            Matrix4d matrix = leftHandRigidBodyTransformData.get(i);
-            RigidBodyTransform leftHandToWorldTransform = new RigidBodyTransform(matrix);
-            desiredLeftHandFrame = new FramePose(ReferenceFrame.getWorldFrame(), leftHandToWorldTransform);
-
-         }
-         if (rightHandRigidBodyTransformData != null)
-         {
-            Matrix4d matrix = rightHandRigidBodyTransformData.get(i);
-            RigidBodyTransform rightHandToWorldTransform = new RigidBodyTransform(matrix);
-            desiredRightHandFrame = new FramePose(ReferenceFrame.getWorldFrame(), rightHandToWorldTransform);
-         }
-
-         Pair<FramePose, FramePose> pair = new Pair<FramePose, FramePose>(desiredLeftHandFrame, desiredRightHandFrame);
-         arrayListToReturn.add(pair);
-      }
-      return arrayListToReturn;
-   }
-
-   public ArrayList<Pair<FramePose, FramePose>> createHalfCylinderOfTargetPoints(RobotSide robotSide)
-   {
-      //Creates a half cylinder of points for the robot to try to reach in its (Right/Left) arm workspace.
-      int sign = (robotSide == RobotSide.RIGHT ? -1 : 1);
-      double maxReachRadius = 0.8;
-      double maxHeight = 1.5;
-      double maxTheta = Math.PI * 3 / 4;
-      int radiusIncrements = 4;
-      int heightIncrements = 4;
-      int thetaIncrements = 4;
-
-      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
-
-      for (int z_int = heightIncrements; z_int > 0; z_int--)
-      {
-         for (int theta_int = 0; theta_int < 4; theta_int++)
-         {
-            for (int radius_int = 2; radius_int < (1 + radiusIncrements); radius_int++)
-            {
-               double height = maxHeight * z_int / heightIncrements;
-               double reachRadius = maxReachRadius * radius_int / radiusIncrements;
-               double theta = sign * maxTheta * theta_int / thetaIncrements;
-
-               Point3d point = new Point3d(reachRadius * Math.cos(theta), reachRadius * Math.sin(theta), height);
-               Quat4d noRotation = new Quat4d();
-
-               FramePose desiredPose = new FramePose(ReferenceFrame.getWorldFrame(), point, noRotation);
-
-               Pair<FramePose, FramePose> handLeftFramesPair = new Pair<FramePose, FramePose>(desiredPose, null);
-               Pair<FramePose, FramePose> handRightFramesPair = new Pair<FramePose, FramePose>(null, desiredPose);
-
-               if (robotSide == RobotSide.RIGHT)
-               {
-                  handArrayList.add(handRightFramesPair);
-               }
-               else
-               {
-                  handArrayList.add(handLeftFramesPair);
-               }
-            }
-         }
-      }
-      return handArrayList;
-   }
-
-   
-   //Insert this code at around line 210 in WholeBodyIkDevelopmentPanel
-   
-   /**
-   boolean willNeedsToCollectSomeManualPointsForIkTests = true;
-   if(willNeedsToCollectSomeManualPointsForIkTests){
-      
-   ReferenceFrame fHandWorld = wholeBodyIK.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame() );
-   ReferenceFrame fHandLocal = wholeBodyIK.getDesiredGripperAttachmentFrame(side, wholeBodyIK.getRootFrame() );
-   
-   RigidBodyTransform rBTWorld = fHandWorld.getTransformToParent();
-   RigidBodyTransform rBTLocal = fHandLocal.getTransformToParent();
-   
-   Matrix4d matrixWorld  = new Matrix4d();
-   Matrix4d matrixLocal  = new Matrix4d();
-   
-   rBTWorld.get(matrixWorld);
-   rBTLocal.get(matrixLocal);
-   
-   Vector4d v1 = new Vector4d(), v2 = new Vector4d(), v3 = new Vector4d(), v4 = new Vector4d();
-   
-   matrixWorld.getRow(0, v1);
-   matrixWorld.getRow(1, v2);
-   matrixWorld.getRow(2, v3);
-   matrixWorld.getRow(3, v4);
-   
-   System.out.println((side==RobotSide.RIGHT ? "RightHand":"LeftHand") +"ToWorldArray.add(new Matrix4d" + v1.toString() + v2.toString() + v3.toString() + v4.toString());
-   
-   matrixLocal.getRow(0, v1);
-   matrixLocal.getRow(1, v2);
-   matrixLocal.getRow(2, v3);
-   matrixLocal.getRow(3, v4);
-   
-   System.out.println((side==RobotSide.RIGHT ? "RightHand":"LeftHand") +"ToFootArray.add(new Matrix4d" + v1.toString() + v2.toString() + v3.toString() + v4.toString());
-   
-   }
-   **/
    
 }
