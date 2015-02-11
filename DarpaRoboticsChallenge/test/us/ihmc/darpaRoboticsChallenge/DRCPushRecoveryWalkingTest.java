@@ -58,6 +58,21 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          blockingSimulationRunner = null;
       }
 
+      if (drcSimulation != null)
+      {
+         drcSimulation.dispose();
+         drcSimulation = null;
+      }
+
+      if (robotVisualizer != null)
+      {
+         robotVisualizer.close();
+         robotVisualizer = null;
+      }
+      
+      if (pushRobotController != null)
+         pushRobotController = null;
+   
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
@@ -72,29 +87,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 
-  
-
-   @After
-   public void tearDown()
-   {
-      if (drcSimulation != null)
-      {
-         drcSimulation.dispose();
-         drcSimulation = null;
-      }
-
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.close();
-         robotVisualizer = null;
-      }
-      
-      pushRobotController = null;
-   }
-
    // cropped to 1.5 - 6.3 seconds
    @Ignore
-
 	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException

@@ -51,10 +51,8 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.trajectories.CirclePositionAndOrientationTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CirclePositionTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmootherTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ConnectableMinJerkTrajectoryTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.Constrained5thOrderPolyForSwingTrajectoryTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.EndPointConstrainedCubicTrajectoryTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.MinJerkXYConstrained5thOrderPolyZTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SmoothenedConstantCoPICPTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SplineBasedCoMHeightTrajectoryGeneratorTest.class
 })

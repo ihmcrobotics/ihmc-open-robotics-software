@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGeneratorWithPushRecovery;
+import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGenerator;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -95,9 +95,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
-      initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
+      initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
@@ -113,10 +113,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
                initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
                registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
-         PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(
-               namePrefix + "SwingPushRecovery", worldFrame, swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider,
-               finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry, yoGraphicsListRegistry, swingTrajectoryGenerator,
-               walkingControllerParameters, visualizeSwingTrajectory);
+         PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new PushRecoveryTrajectoryGenerator(namePrefix + "SwingPushRecovery", worldFrame,
+               swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, registry,
+               yoGraphicsListRegistry, swingTrajectoryGenerator);
 
          pushRecoveryPositionTrajectoryGenerators.add(pushRecoverySwingTrajectoryGenerator);
          pushRecoveryPositionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
