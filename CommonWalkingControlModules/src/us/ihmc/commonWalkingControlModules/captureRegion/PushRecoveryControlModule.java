@@ -232,15 +232,15 @@ public class PushRecoveryControlModule
                      if (side == RobotSide.LEFT)
                      {
                         leftFootSupportWithOpposite = projectedCapturePoint.getY() + DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE > 0;
-                        closestEdge = footPolygon.getClosestEdge(projectedCapturePoint2d).getLineSegment2d();
-                        closestPointOnEdge = closestEdge.getClosestPointOnLineSegment(projectedCapturePoint2d.getPoint());
+                        closestEdge = footPolygon.getClosestEdgeCopy(projectedCapturePoint2d).getLineSegment2d();
+                        closestPointOnEdge = closestEdge.getClosestPointOnLineSegmentCopy(projectedCapturePoint2d.getPoint());
                         capturePointDistanceFromLeftFoot = closestPointOnEdge.distance(projectedCapturePoint2d.getPoint());
                      }
                      else
                      {
                         rightFootSupportWithOpposite = projectedCapturePoint.getY() - DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE < 0;
-                        closestEdge = footPolygon.getClosestEdge(projectedCapturePoint2d).getLineSegment2d();
-                        closestPointOnEdge = closestEdge.getClosestPointOnLineSegment(projectedCapturePoint2d.getPoint());
+                        closestEdge = footPolygon.getClosestEdgeCopy(projectedCapturePoint2d).getLineSegment2d();
+                        closestPointOnEdge = closestEdge.getClosestPointOnLineSegmentCopy(projectedCapturePoint2d.getPoint());
                         capturePointDistanceFromRightFoot = closestPointOnEdge.distance(projectedCapturePoint2d.getPoint());
                      }
                   }

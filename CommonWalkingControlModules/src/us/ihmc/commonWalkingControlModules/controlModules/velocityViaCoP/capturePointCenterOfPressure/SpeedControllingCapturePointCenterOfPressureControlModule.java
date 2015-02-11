@@ -174,7 +174,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
 
-      FrameLineSegment2d closestEdge = supportPolygon.getClosestEdge(currentCapturePoint2d);
+      FrameLineSegment2d closestEdge = supportPolygon.getClosestEdgeCopy(currentCapturePoint2d);
 
       perimeterDistance.set(closestEdge.distance(currentCapturePoint2d));
 
