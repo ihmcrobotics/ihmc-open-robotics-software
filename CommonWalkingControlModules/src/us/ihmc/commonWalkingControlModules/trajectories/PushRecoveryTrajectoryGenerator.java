@@ -1,26 +1,21 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
-
+import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 /** 
  * 
@@ -29,21 +24,19 @@ import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
  * the soft TouchdownTrajectoryGenerator included rather than the two being combined in an ArrayList of position trajectory generators. When 
  * the robot is pushed, the XY portion of the trajectory are replanned so the robot can recover from the push.
  */
-public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionTrajectoryGenerator
+public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private static final boolean VISUALIZE = true;
 
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final BooleanYoVariable visualize;
-   
+
    private final int numberOfBallsInBag = 30;
    private final BagOfBalls bagOfBalls;
    private double t0ForViz;
    private double tfForViz;
    private double tForViz;
-
-   protected final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
 
    private final DoubleProvider swingTimeRemainingProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
@@ -51,9 +44,6 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    private final DoubleYoVariable swingTime;
    private final DoubleYoVariable timeIntoStep;
-   private final DoubleYoVariable defaultGroundClearance;
-
-   private final BooleanYoVariable setInitialSwingVelocityToZero;
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
@@ -61,54 +51,37 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    protected TwoWaypointTrajectoryParameters trajectoryParameters;
 
-   private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
-   private final BooleanYoVariable hasReplanned;
-   private final double initialTime = 0.0;
+   private final YoPolynomial xPolynomial, yPolynomial;
    private final PositionTrajectoryGenerator nominalTrajectoryGenerator;
    private final DoubleProvider swingTimeProvider;
 
-   private FramePoint nominalTrajectoryPosition;
-   private FrameVector nominalTrajectoryVelocity;
-   private FrameVector nominalTrajectoryAcceleration;
+   private FramePoint nominalTrajectoryPosition = new FramePoint();
+   private FrameVector nominalTrajectoryVelocity = new FrameVector();
+   private FrameVector nominalTrajectoryAcceleration = new FrameVector();
 
-   public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider, DoubleProvider swingTimeRemainingProvider,
-         PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
-         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
-         WalkingControllerParameters walkingControllerParameters, boolean visualize)
+   public PushRecoveryTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider,
+         DoubleProvider swingTimeRemainingProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
+         PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
+         PositionTrajectoryGenerator nominalTrajectoryGenerator)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
-      setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
-      setInitialSwingVelocityToZero.set(false);
-
-      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
-            TrajectoryWaypointGenerationMethod.class);
-
       this.swingTimeRemainingProvider = swingTimeRemainingProvider;
       this.swingTimeProvider = swingTimeProvider;
-
-      this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
-      this.hasReplanned.set(false);
-
-      this.nominalTrajectoryPosition = new FramePoint();
-      this.nominalTrajectoryVelocity = new FrameVector();
-      this.nominalTrajectoryAcceleration = new FrameVector();
 
       positionSources[0] = initialPositionProvider;
       positionSources[1] = finalPositionProvider;
 
       velocitySources[0] = initialVelocityProvider;
-      velocitySources[1] = finalDesiredVelocityProvider;
+
+      xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 3, registry);
+      yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 3, registry);
 
       swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
       swingTime.set(swingTimeProvider.getValue());
 
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
-
-      defaultGroundClearance = new DoubleYoVariable(namePrefix + "DefaultGroundClearance", registry);
-      defaultGroundClearance.set(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
 
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
@@ -119,22 +92,37 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
       this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;
 
-      this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame,
-            initialTime, swingTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
-            yoGraphicsListRegistry, walkingControllerParameters);
-      
-      this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry,
-            yoGraphicsListRegistry);
+      this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry, yoGraphicsListRegistry);
    }
+
+   private final FrameVector tempVector = new FrameVector();
+   private final FramePoint tempPosition = new FramePoint();
 
    public void initialize()
    {
       swingTime.set(swingTimeProvider.getValue());
       timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getValue());
-      pushRecoveryTrajectoryGenerator.setTimeIntoStep(timeIntoStep.getDoubleValue());
-      pushRecoveryTrajectoryGenerator.initialize();
+
       
-      if(VISUALIZE)
+      positionSources[0].get(tempPosition);
+      tempPosition.changeFrame(desiredPosition.getReferenceFrame());
+      double x0 = tempPosition.getX();
+      double y0 = tempPosition.getY();
+      
+      velocitySources[0].get(tempVector);
+      tempVector.changeFrame(desiredPosition.getReferenceFrame());
+      double xd0 = tempVector.getX();
+      double yd0 = tempVector.getY();
+      
+      positionSources[1].get(tempPosition);
+      tempPosition.changeFrame(desiredPosition.getReferenceFrame());
+      double xFinal = tempPosition.getX();
+      double yFinal = tempPosition.getY();
+      
+      xPolynomial.setQuadratic(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), x0, xd0, xFinal);
+      yPolynomial.setQuadratic(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), y0, yd0, yFinal);
+
+      if (VISUALIZE)
       {
          visualizeTrajectory();
       }
@@ -142,34 +130,28 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    public void compute(double time)
    {
-	   if(timeIntoStep.getDoubleValue()-time > 0.01)
-	   {
-		   throw new RuntimeException("The time going into the push recovery trajectory generator experienced a large jump.");
-	   }
-	   
       timeIntoStep.set(time);
 
       nominalTrajectoryGenerator.compute(time);
-      pushRecoveryTrajectoryGenerator.compute(time);
 
-      nominalTrajectoryGenerator.get(nominalTrajectoryPosition);
-      nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
-      nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
+      nominalTrajectoryGenerator.packLinearData(nominalTrajectoryPosition, nominalTrajectoryVelocity, nominalTrajectoryAcceleration);
 
-      desiredPosition.setX(pushRecoveryTrajectoryGenerator.getDesiredPosition().getX());
-      desiredPosition.setY(pushRecoveryTrajectoryGenerator.getDesiredPosition().getY());
+      xPolynomial.compute(time);
+      yPolynomial.compute(time);
+
+      desiredPosition.setX(xPolynomial.getPosition());
+      desiredPosition.setY(yPolynomial.getPosition());
       desiredPosition.setZ(nominalTrajectoryPosition.getZ());
 
-      desiredVelocity.setX(pushRecoveryTrajectoryGenerator.getDesiredVelocity().getX());
-      desiredVelocity.setY(pushRecoveryTrajectoryGenerator.getDesiredVelocity().getY());
+      desiredVelocity.setX(xPolynomial.getVelocity());
+      desiredVelocity.setY(yPolynomial.getVelocity());
       desiredVelocity.setZ(nominalTrajectoryVelocity.getZ());
 
-      desiredAcceleration.setX(pushRecoveryTrajectoryGenerator.getDesiredAcceleration().getX());
-      desiredAcceleration.setY(pushRecoveryTrajectoryGenerator.getDesiredAcceleration().getY());
+      desiredAcceleration.setX(xPolynomial.getAcceleration());
+      desiredAcceleration.setY(yPolynomial.getAcceleration());
       desiredAcceleration.setZ(nominalTrajectoryAcceleration.getZ());
-
    }
-   
+
    private void visualizeTrajectory()
    {
       t0ForViz = timeIntoStep.getDoubleValue();
@@ -182,18 +164,20 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
          bagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
    }
-   
+
    public void computePositionsForVis(double time)
-   { 
+   {
       nominalTrajectoryGenerator.compute(time);
-      pushRecoveryTrajectoryGenerator.compute(time);
+
+      xPolynomial.compute(time);
+      yPolynomial.compute(time);
 
       nominalTrajectoryGenerator.get(nominalTrajectoryPosition);
       nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
       nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
 
-      desiredPosition.setX(pushRecoveryTrajectoryGenerator.getDesiredPosition().getX());
-      desiredPosition.setY(pushRecoveryTrajectoryGenerator.getDesiredPosition().getY());
+      desiredPosition.setX(xPolynomial.getPosition());
+      desiredPosition.setY(yPolynomial.getPosition());
       desiredPosition.setZ(nominalTrajectoryPosition.getZ());
    }
 

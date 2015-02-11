@@ -43,6 +43,19 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
+   private final static boolean VISUALIZE_FORCE = false;
+   private final static double PUSH_DELAY = 0.5;
+
+   protected DRCPushRobotController pushRobotController;
+   protected BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
+   protected double forceMagnitude;
+   protected double forceDuration;
+
+   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
+   StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -57,46 +70,8 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+     
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-   }
-
-   
-   
-   private final static boolean VISUALIZE_FORCE = false;
-   private final static double PUSH_DELAY = 0.5;
-
-   protected DRCPushRobotController pushRobotController;
-   protected BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-   protected double forceMagnitude;
-   protected double forceDuration;
-
-   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-   StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
-
-
-   @After
-   public void destroyOtherStuff()
-   {
-      if (blockingSimulationRunner != null)
-      {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
-
-      if (drcSimulation != null)
-      {
-         drcSimulation.dispose();
-         drcSimulation = null;
-      }
-
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.close();
-         robotVisualizer = null;
-      }
    }
 
 	@AverageDuration(duration = 36.6)
