@@ -675,7 +675,7 @@ abstract public class WholeBodyIkSolver
       taskComPosition.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
    }
    
-   private double calculateCenterOfMassError(SDFFullRobotModel actualSdfModel )
+   public double calculateCenterOfMassError(SDFFullRobotModel actualSdfModel )
    {
       ReferenceFrame leftSole = actualSdfModel.getSoleFrame(LEFT);
       ReferenceFrame rightSole = actualSdfModel.getSoleFrame(RIGHT);
