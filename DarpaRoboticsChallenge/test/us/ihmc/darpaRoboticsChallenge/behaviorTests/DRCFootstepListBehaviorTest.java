@@ -19,8 +19,6 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -88,9 +86,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private final double ORIENTATION_THRESHOLD = 0.05;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
-   private RobotDataReceiver robotDataReceiver;
-   private SDFRobot robot;
-   private FullRobotModel fullRobotModel;
 
    @Before
    public void setUp()
@@ -104,13 +99,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
-
-      fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
-
-      robot = drcBehaviorTestHelper.getRobot();
-
-      robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
    }
 
    @AverageDuration(duration = 31.9)
@@ -161,7 +149,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d finalFootPose = getRobotFootPose2d(robot, robotSide);
+         FramePose2d finalFootPose = getRobotFootPose2d(drcBehaviorTestHelper.getRobot(), robotSide);
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
@@ -183,6 +171,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       xOffsets.add(0.2);
       xOffsets.add(0.3);
 
+      SysoutTool.println("Instantiating Behavior", DEBUG);
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
       SideDependentList<FramePose2d> desiredFinalFootPoses = new SideDependentList<FramePose2d>();
 
@@ -201,14 +190,15 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
 
-      SysoutTool.println("Begin Executing Behavior", DEBUG);
       double pausePercent = Double.POSITIVE_INFINITY;
       double pauseDuration = Double.POSITIVE_INFINITY;
       double stepNumberToStopOn = desiredFootsteps.size() - 1.0;
       double stopPercent = 100.0 * stepNumberToStopOn / desiredFootsteps.size();
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getReferenceFrames().getFootFrame(RobotSide.LEFT);
-      StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, footstepListBehavior, pausePercent, pauseDuration,
+      StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(), footstepListBehavior, pausePercent, pauseDuration,
             stopPercent, desiredFinalFootPoses.get(RobotSide.LEFT), frameToKeepTrackOf);
+
+      SysoutTool.println("Begin Executing Behavior", DEBUG);
       drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(footstepListBehavior, stopThreadUpdatable);
       SysoutTool.println("Behavior should be done", DEBUG);
 
@@ -250,12 +240,13 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
    private FramePose2d createFootPoseOffsetFromCurrent(RobotSide robotSide, double xOffset)
    {
-      FramePose2d currentFootPose = getRobotFootPose2d(robot, robotSide);
+      FramePose2d currentFootPose = getRobotFootPose2d(drcBehaviorTestHelper.getRobot(), robotSide);
       return createFootPoseOffsetFromExisting(robotSide, xOffset, currentFootPose);
    }
 
    private Footstep generateFootstepOnFlatGround(RobotSide robotSide, FramePose2d desiredFootPose2d)
    {
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
       Footstep ret = generateFootstep(desiredFootPose2d, fullRobotModel.getFoot(robotSide), fullRobotModel.getSoleFrame(robotSide), robotSide, 0.0,
             new Vector3d(0.0, 0.0, 1.0));
 
