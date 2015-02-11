@@ -420,9 +420,9 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
             for (Updatable updatable : updatables)
             {
-               //               updatable.update(yoTimeRobot.getDoubleValue());
+               updatable.update(yoTimeRobot.getDoubleValue());
             }
-
+            
             ThreadTools.sleep(1);
          }
       }
@@ -437,7 +437,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       private final StopThreadUpdatable stopThreadUpdatable;
 
-      private HumanoidBehaviorControlModeEnum currentControlMode = HumanoidBehaviorControlModeEnum.ENABLE_ACTIONS;
+      private HumanoidBehaviorControlModeEnum currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
 
       public StoppableBehaviorRunner(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
       {
@@ -450,12 +450,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          while (isRunning)
          {
             behavior.doControl();
-
+            
             for (Updatable updatable : updatables)
             {
                updatable.update(yoTimeRobot.getDoubleValue());
             }
-
+            
             stopThreadUpdatable.update(yoTimeRobot.getDoubleValue());
 
             HumanoidBehaviorControlModeEnum requestedControlMode = stopThreadUpdatable.getRequestedBehaviorControlMode();
@@ -480,7 +480,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                behavior.resume();
                currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
             }
-
+            
             ThreadTools.sleep(1);
          }
       }
