@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -13,7 +15,9 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -84,7 +88,7 @@ public class FootstepListBehavior extends BehaviorInterface
       {
          outgoingFootstepDataList.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingFootstepDataList);
-         
+
          outgoingFootstepDataList.setDestination(PacketDestination.CONTROLLER);
          sendPacketToController(outgoingFootstepDataList);
          packetHasBeenSent.set(true);
@@ -96,7 +100,7 @@ public class FootstepListBehavior extends BehaviorInterface
       if (footstepStatusQueue.isNewPacketAvailable())
       {
          lastFootstepStatus = footstepStatusQueue.getNewestPacket();
-         
+
          boolean isLastFootstep = lastFootstepStatus.getFootstepIndex() >= numberOfFootsteps.getIntegerValue() - 1;
 
          if (isLastFootstep)
@@ -105,8 +109,9 @@ public class FootstepListBehavior extends BehaviorInterface
             SysoutTool.println("FootstepListBehavior is Done.", DEBUG);
          }
 
-         SysoutTool.println("isLastFootstep: " + isLastFootstep + ", total nb of footsteps: " + numberOfFootsteps + ", current footstep: "
-               + lastFootstepStatus.getFootstepIndex(), DEBUG);
+         SysoutTool.println(
+               "isLastFootstep: " + isLastFootstep + ", total nb of footsteps: " + numberOfFootsteps + ", current footstep: "
+                     + lastFootstepStatus.getFootstepIndex(), DEBUG);
       }
    }
 
@@ -173,7 +178,7 @@ public class FootstepListBehavior extends BehaviorInterface
    public void enableActions()
    {
    }
-
+   
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
@@ -197,6 +202,54 @@ public class FootstepListBehavior extends BehaviorInterface
    public boolean isWalking()
    {
       return hasInputBeenSet() && !isDone();
+   }
+
+   private final ArrayList<FootstepData> footstepDataList = new ArrayList<FootstepData>();
+   private final Vector3d firstSingleSupportFootTranslationFromWorld = new Vector3d();
+   private final Point3d previousFootStepLocation = new Point3d();
+   private final Point3d nextFootStepLocation = new Point3d();
+
+   public ArrayList<Double> getFootstepLengths(FootstepDataList footStepList, FullRobotModel fullRobotModel,
+         WalkingControllerParameters walkingControllerParameters)
+   {
+      ArrayList<Double> footStepLengths = new ArrayList<Double>();
+      footstepDataList.addAll(footStepList.getDataList());
+
+      FootstepData firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
+
+      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(firstStepData.getRobotSide().getOppositeSide()).getBodyFixedFrame()
+            .getTransformToWorldFrame();
+      firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
+
+      previousFootStepLocation.set(firstSingleSupportFootTranslationFromWorld);
+      firstStepData.getLocation(nextFootStepLocation);
+
+      while (!footstepDataList.isEmpty())
+      {
+         footStepLengths.add(previousFootStepLocation.distance(nextFootStepLocation));
+         previousFootStepLocation.set(nextFootStepLocation);
+         footstepDataList.remove(footstepDataList.size() - 1).getLocation(nextFootStepLocation);
+      }
+
+      double lastStepLength = previousFootStepLocation.distance(nextFootStepLocation);
+      footStepLengths.add(lastStepLength);
+
+      return footStepLengths;
+   }
+
+   public boolean areFootstepsTooFarApart(FootstepDataList footStepList, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
+   {
+      for (double stepLength : getFootstepLengths(footStepList, fullRobotModel, walkingControllerParameters))
+      {
+         if (DEBUG)
+            SysoutTool.println("step length : " + stepLength + " max step length : " + walkingControllerParameters.getMaxStepLength());
+         if (stepLength > walkingControllerParameters.getMaxStepLength())
+         {
+            return true;
+         }
+      }
+
+      return false;
    }
 
 }
