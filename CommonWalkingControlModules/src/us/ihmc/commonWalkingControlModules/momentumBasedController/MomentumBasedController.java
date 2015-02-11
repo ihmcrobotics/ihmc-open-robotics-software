@@ -600,7 +600,7 @@ public class MomentumBasedController
          ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
          AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
 
-         FramePoint2d cop = planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
+         FramePoint2d cop = planeContactWrenchProcessor.getCoP(contactablePlaneBody);
 
          if (cop == null || cop.containsNaN())
          {
@@ -877,7 +877,7 @@ public class MomentumBasedController
 
    public FramePoint2d getDesiredCoP(ContactablePlaneBody contactablePlaneBody)
    {
-      return planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
+      return planeContactWrenchProcessor.getCoP(contactablePlaneBody);
    }
    
    public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
