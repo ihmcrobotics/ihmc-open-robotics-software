@@ -2,14 +2,11 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -38,9 +35,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final BooleanYoVariable trajectoryTimeElapsed;
    private final BooleanYoVariable hasComputationBeenDone;
    private final BooleanYoVariable hasSolutionBeenFound;
-   private RobotSide robotSide;
 
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
@@ -70,7 +66,6 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
       trajectoryTime.set(trajectoryDuration);
       wholeBodyIKSolver.setGripperAttachmentTarget(actualFullRobotModel, robotSide, endEffectorPose);
-      this.robotSide = robotSide;
 
       hasInputBeenSet.set(true);
    }
@@ -83,22 +78,13 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
          ComputeResult result = wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
          hasComputationBeenDone.set(true);
          if (result == ComputeResult.SUCCEEDED)
+         {
             hasSolutionBeenFound.set(true);
+         }
          else
          {
-            Vector64F error = wholeBodyIKSolver.taskEndEffectorPose.get(robotSide).getError();
-            Vector3d positionError = new Vector3d(error.get(0), error.get(1), error.get(2));
-            Vector3d rotationError = new Vector3d(error.get(3), error.get(4), error.get(5));
-
-            if (positionError.length() < 0.025 && rotationError.length() < 0.2)
-            {
-               hasSolutionBeenFound.set(true);
-            }
-            else
-            {
-               //TODO: ahould be set to false here, hacked so that it works
-               hasSolutionBeenFound.set(true);
-            }
+            //TODO: ahould be set to false here, hacked so that it works
+            hasSolutionBeenFound.set(false);
          }
          if (DEBUG)
             System.out.println("solution found = " + hasSolutionBeenFound.getBooleanValue());
@@ -150,6 +136,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
       wholeBodyIKSolver.setVerbosityLevel(0);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(true);
+      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.RIGHT).setErrorTolerance( 0.02, 0.2);
+      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.LEFT).setErrorTolerance( 0.02, 0.2);
    }
 
    @Override
