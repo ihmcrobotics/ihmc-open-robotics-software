@@ -119,7 +119,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
 
       FramePose prepareToDropPose = new FramePose(midFeetZUpFrame);
-      prepareToDropPose.setPosition(0.55, robotSide.negateIfRightSide(0.1), 1.2);
+      prepareToDropPose.setPosition(0.55, robotSide.negateIfRightSide(0.2), 1.2);
       prepareToDropPose.changeFrame(worldFrame);
       prepareToDropPose.setOrientation(rotationToBePerformedInWorldFrame);
 

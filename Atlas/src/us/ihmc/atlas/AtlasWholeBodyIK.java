@@ -181,7 +181,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       //TODO
       Vector64F target_left_foot = new Vector64F(7, 0, 2 * 0.11, 0, 0, 0, 0, 1);
-      taskLegPose.setTarget(target_left_foot, 0.001);
+      taskLegPose.setTarget(target_left_foot);
 
       //--------------------------------------------------
       // Don't move the arm to keep the balance. But torso need to be activated
@@ -193,7 +193,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       // this value shall be overwritten later
       Vector64F target_com = new Vector64F(3, 0, 0, 0);    
-      taskComPosition.setTarget(target_com, 0.01);
+      taskComPosition.setErrorTolerance( 0.01);
+      taskComPosition.setTarget(target_com);
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
 
@@ -266,7 +267,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       taskJointsPose.setWeightsJointSpace(joint_weights);
       taskJointsPose.setCoupledJointWeights(coupledJointWeights);
 
-      taskJointsPose.setTarget(preferedJointPose, 3);
+      taskJointsPose.setErrorTolerance( 3 );
+      taskJointsPose.setTarget(preferedJointPose);
    }
    
    private HashMap<String,Double> suggestedAnglesForReseed = new HashMap<String,Double>();

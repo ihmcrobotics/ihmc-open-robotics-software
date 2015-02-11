@@ -392,7 +392,7 @@ abstract public class WholeBodyIkSolver
 
       preferedJointPose.set(jointNamesToIndex.get("l_leg_kny"), preferedKneeAngle);
       preferedJointPose.set(jointNamesToIndex.get("r_leg_kny"), preferedKneeAngle);
-      taskJointsPose.setTarget(preferedJointPose, 3);
+      taskJointsPose.setTarget(preferedJointPose);
    }
 
    /*
@@ -438,7 +438,7 @@ abstract public class WholeBodyIkSolver
       Vector3d pos = new Vector3d();
       ee_transform.get(quat, pos);
 
-      handTask.setTarget( quat, pos,  0.001); 
+      handTask.setTarget( quat, pos); 
    }
 
    private void enforceControlledDoF( ComputeOption opt )
@@ -490,7 +490,7 @@ abstract public class WholeBodyIkSolver
    {
       int index = jointNamesToIndex.get(joint_name);
       preferedJointPose.set(index, q);
-      taskJointsPose.setTarget(preferedJointPose, 3);
+      taskJointsPose.setTarget(preferedJointPose );
    }
 
    private void checkIfArmShallStayQuiet(Vector64F q_init)
@@ -518,7 +518,7 @@ abstract public class WholeBodyIkSolver
          }
       }
       taskJointsPose.setWeightsTaskSpace(weights_joint);
-      taskJointsPose.setTarget(preferedJointPose, 3);
+      taskJointsPose.setTarget(preferedJointPose);
    }
 
    private void checkIfLegsNeedToBeLocked()
@@ -672,7 +672,7 @@ abstract public class WholeBodyIkSolver
       Vector3d diff = new Vector3d();
       rightToLeftFoot.getTranslation(diff); 
 
-      taskComPosition.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0), 0.01 );
+      taskComPosition.setTarget( new Vector64F(3, diff.x/2, diff.y/2, 0) );
    }
    
    public double calculateCenterOfMassError(SDFFullRobotModel actualSdfModel )
@@ -819,7 +819,7 @@ abstract public class WholeBodyIkSolver
       Vector3d pos = new Vector3d();
 
       foot_other_transform.get(quat, pos);
-      taskLegPose.setTarget(quat, pos, 0.0005);
+      taskLegPose.setTarget(quat, pos);
    }
 
 
