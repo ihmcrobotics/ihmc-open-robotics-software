@@ -109,7 +109,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
 
       // setup solvers
-      momentumOptimizers.put(QPSolverFlavor.CVX_NULL, new CVXMomentumOptimizerAdapter(nDoF));
+      momentumOptimizers.put(QPSolverFlavor.CVX_NULL, new CVXMomentumOptimizerAdapter(nDoF, registry));
       
       final boolean ENABLE_EIGEN_ACTIVESET_QP = false;
       if(ENABLE_EIGEN_ACTIVESET_QP)
