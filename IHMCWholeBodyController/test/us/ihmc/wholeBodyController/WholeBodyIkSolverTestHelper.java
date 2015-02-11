@@ -4,10 +4,18 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+
+import com.jme3.post.Filter.Pass;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -15,7 +23,10 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -37,7 +48,7 @@ public class WholeBodyIkSolverTestHelper
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIkSolverTestFactory_Registry");
 
-//   private final ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
+   //   private final ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
    private final double maxDistanceFromOriginInCartesianDirection = 5.0;
    private double randomRobotPositionX;
    private double randomRobotPositionY;
@@ -46,25 +57,21 @@ public class WholeBodyIkSolverTestHelper
 
    private final double ERROR_TOLERANCE = 0.01;
    private final boolean DEBUG = false;
-   
+
    private SimulationConstructionSet scs;
-   private FullRobotModelVisualizer  modelVisualizer;
+   private FullRobotModelVisualizer modelVisualizer;
    private BagOfBalls bagOfBalls;
-   
-   public void addGraphics(SimulationConstructionSet scs, FullRobotModelVisualizer  modelVisualizer)
+
+   public void addGraphics(SimulationConstructionSet scs, FullRobotModelVisualizer modelVisualizer)
    {
       this.scs = scs;
-      this.modelVisualizer = modelVisualizer; 
+      this.modelVisualizer = modelVisualizer;
       YoGraphicsListRegistry listRegistry = new YoGraphicsListRegistry();
-      bagOfBalls = new BagOfBalls(50, 0.03, "targets", YoAppearance.Transparent(), registry, listRegistry );
-      scs.addYoGraphicsListRegistry( listRegistry );
+      bagOfBalls = new BagOfBalls(50, 0.03, "targets", YoAppearance.Transparent(), registry, listRegistry);
+      scs.addYoGraphicsListRegistry(listRegistry);
    }
 
-
-   public WholeBodyIkSolverTestHelper(
-         WholeBodyControllerParameters robotModel,
-         SDFFullRobotModel actualRobotModel, 
-         WholeBodyIkSolver solver)
+   public WholeBodyIkSolverTestHelper(WholeBodyControllerParameters robotModel, SDFFullRobotModel actualRobotModel, WholeBodyIkSolver solver)
    {
       this.actualRobotModel = actualRobotModel;
       this.desiredRobotModel = robotModel.createFullRobotModel();
@@ -74,13 +81,13 @@ public class WholeBodyIkSolverTestHelper
       randomRobotPositionX = maxDistanceFromOriginInCartesianDirection * random.nextDouble();
       randomRobotPositionY = maxDistanceFromOriginInCartesianDirection * random.nextDouble();
       randomRobotYaw = 2.0 * Math.PI * random.nextDouble();
-      
-    //  randomRobotPositionX = 0;
-     // randomRobotPositionY = 0;
-    //  randomRobotYaw = 0;
-      
+
+      //  randomRobotPositionX = 0;
+      // randomRobotPositionY = 0;
+      //  randomRobotYaw = 0;
+
       Vector3d rootPosition = new Vector3d(randomRobotPositionX, randomRobotPositionY, 0.93);
-      
+
       actualRobotModel.getRootJoint().setPosition(rootPosition);
       actualRobotModel.getRootJoint().setRotation(randomRobotYaw, 0.0, 0.0);
 
@@ -89,7 +96,7 @@ public class WholeBodyIkSolverTestHelper
    public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
          ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased)
    {
-      hikSolver.setVerbosityLevel( scs == null ? 0:1 );
+      hikSolver.setVerbosityLevel(scs == null ? 0 : 1);
       hikSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(false);
 
       double successCount = 0;
@@ -98,20 +105,20 @@ public class WholeBodyIkSolverTestHelper
       SideDependentList<ControlledDoF> dofToControl = new SideDependentList<ControlledDoF>();
       dofToControl.set(RobotSide.LEFT, dofToControlLeft);
       dofToControl.set(RobotSide.RIGHT, dofToControlRight);
-      
+
       for (Pair<FramePose, FramePose> framePair : handTargetPairsArray)
       {
          SideDependentList<FramePose> endEffectorTarget = new SideDependentList<FramePose>();
-                  
-         if ( framePair.first() != null)
+
+         if (framePair.first() != null)
          {
-            endEffectorTarget.set(RobotSide.LEFT, moveDesiredFrameToRobotLocation( framePair.first() ) );
-          //  endEffectorTargetLeft = endEffectorTarget.get(RobotSide.LEFT).getFramePointCopy();
+            endEffectorTarget.set(RobotSide.LEFT, moveDesiredFrameToRobotLocation(framePair.first()));
+            //  endEffectorTargetLeft = endEffectorTarget.get(RobotSide.LEFT).getFramePointCopy();
          }
-                     
-         if ( framePair.second() != null)
+
+         if (framePair.second() != null)
          {
-            endEffectorTarget.set(RobotSide.RIGHT, moveDesiredFrameToRobotLocation( framePair.second() ) );
+            endEffectorTarget.set(RobotSide.RIGHT, moveDesiredFrameToRobotLocation(framePair.second()));
             //endEffectorTargetLeft = endEffectorTarget.get(RobotSide.RIGHT).getFramePointCopy();
          }
 
@@ -137,10 +144,9 @@ public class WholeBodyIkSolverTestHelper
          }
 
          System.out.println(getClass().getSimpleName() + ": ret(" + hikSolutionExists + ") hik solution "
-         + (hikSolutionExists == ComputeResult.SUCCEEDED ? "found" : "not found"));
+               + (hikSolutionExists == ComputeResult.SUCCEEDED ? "found" : "not found"));
 
-
-         actualRobotModel.copyAllJointsButKeepOneFootFixed( desiredRobotModel.getOneDoFJoints(), RobotSide.RIGHT );
+         actualRobotModel.copyAllJointsButKeepOneFootFixed(desiredRobotModel.getOneDoFJoints(), RobotSide.RIGHT);
          actualRobotModel.updateFrames();
 
          if (scs != null)
@@ -150,17 +156,17 @@ public class WholeBodyIkSolverTestHelper
             {
                appearance = YoAppearance.Red();
             }
-            
-            for (RobotSide side: RobotSide.values)
+
+            for (RobotSide side : RobotSide.values)
             {
-               if( endEffectorTarget.get( side ) != null)
+               if (endEffectorTarget.get(side) != null)
                {
-                  bagOfBalls.setBallLoop(endEffectorTarget.get( side ).getFramePointCopy(), appearance );
+                  bagOfBalls.setBallLoop(endEffectorTarget.get(side).getFramePointCopy(), appearance);
                }
             }
-            
+
             modelVisualizer.update(0);
-            
+
             ThreadTools.sleep(100);
          }
 
@@ -169,27 +175,27 @@ public class WholeBodyIkSolverTestHelper
             // you don't need to check if you are not trying to control any DoF
             if (dofToControl.get(side) != ControlledDoF.DOF_NONE && endEffectorTarget.get(side) != null)
             {
-               ReferenceFrame calculatedHandFrame = hikSolver.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame());        
+               ReferenceFrame calculatedHandFrame = hikSolver.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame());
                RigidBodyTransform calculatedAttachmnent = calculatedHandFrame.getTransformToWorldFrame();
 
                calculatedHandFrame = hikSolver.getDesiredGripperPalmFrame(side, ReferenceFrame.getWorldFrame());
                RigidBodyTransform calculatedPalm = calculatedHandFrame.getTransformToWorldFrame();
-               
+
                RigidBodyTransform desiredAttachment = new RigidBodyTransform();
-               endEffectorTarget.get(side).getRigidBodyTransform(desiredAttachment); 
-               
+               endEffectorTarget.get(side).getRigidBodyTransform(desiredAttachment);
+
                RigidBodyTransform actualAttachment = desiredRobotModel.getHandControlFrame(side).getTransformToWorldFrame();
-            
-               Vector3d errorVector = RigidBodyTransform.getTranslationDifference(desiredAttachment , actualAttachment);
-                 
+
+               Vector3d errorVector = RigidBodyTransform.getTranslationDifference(desiredAttachment, actualAttachment);
+
                if (DEBUG)
                {
-                  System.out.println(" actual\n" + actualAttachment); 
-                  System.out.println(" wanted\n" + desiredAttachment);        
+                  System.out.println(" actual\n" + actualAttachment);
+                  System.out.println(" wanted\n" + desiredAttachment);
                   System.out.println(" calculated Att\n" + calculatedAttachmnent);
                   System.out.println(" calculated Palm\n" + calculatedPalm);
-  
-                  System.out.println(" actual sole\n" + actualRobotModel.getSoleFrame(side).getTransformToWorldFrame() );
+
+                  System.out.println(" actual sole\n" + actualRobotModel.getSoleFrame(side).getTransformToWorldFrame());
 
                   System.out.println("\n desired (local B)\n" + hikSolver.taskEndEffectorPose.get(side).getTarget());
                   System.out.println(" calculated (local)\n" + hikSolver.taskEndEffectorPose.get(side).getCurrent() + "\n\n");
@@ -235,9 +241,9 @@ public class WholeBodyIkSolverTestHelper
       }
    }
 
-//   static private int count = 0;
+   //   static private int count = 0;
 
-  /* protected ArrayList<Pair<ReferenceFrame, ReferenceFrame>> createWallOfTargetPoints(RobotSide robotSide)
+   public ArrayList<Pair<FramePose, FramePose>> createWallOfTargetPoints(RobotSide robotSide)
    {
       //Creates a wall of points in the front and center of the robot. The orientation of each target frame is as if the humanoid were performing the DRC wall task with the y-axis always pointing straight into the wall.
       double maxWallDepth = 0.2;
@@ -249,6 +255,7 @@ public class WholeBodyIkSolverTestHelper
       int halfOfWidthIncrements = 10;
       int heightIncrements = 10;
       int sign = (robotSide == RobotSide.RIGHT ? -1 : 1);
+      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
       for (int x = 0; x < depthIncrements; x++)
       {
          for (int y = -halfOfWidthIncrements; y < (halfOfWidthIncrements + 1); y++)
@@ -262,9 +269,10 @@ public class WholeBodyIkSolverTestHelper
                RigidBodyTransform transformToParent = new RigidBodyTransform(matrix, vector);
                ReferenceFrame desiredReferenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("desiredFrame",
                      ReferenceFrame.getWorldFrame(), transformToParent);
-               desiredReferenceFrame = moveDesiredFrameToRobotLocation(desiredReferenceFrame);
-               Pair<ReferenceFrame, ReferenceFrame> handLeftFramesPair = new Pair<ReferenceFrame, ReferenceFrame>(desiredReferenceFrame, null);
-               Pair<ReferenceFrame, ReferenceFrame> handRightFramesPair = new Pair<ReferenceFrame, ReferenceFrame>(null, desiredReferenceFrame);
+               FramePose desiredFramePose = new FramePose(desiredReferenceFrame);
+               desiredFramePose = moveDesiredFrameToRobotLocation(desiredFramePose);
+               Pair<FramePose, FramePose> handLeftFramesPair = new Pair<FramePose, FramePose>(desiredFramePose, null);
+               Pair<FramePose, FramePose> handRightFramesPair = new Pair<FramePose, FramePose>(null, desiredFramePose);
                if (robotSide == RobotSide.RIGHT)
                {
                   handArrayList.add(handRightFramesPair);
@@ -278,31 +286,165 @@ public class WholeBodyIkSolverTestHelper
       }
       return handArrayList;
    }
-*/
-   
 
    private FramePose moveDesiredFrameToRobotLocation(final FramePose desiredPose)
    {
       RigidBodyTransform transformFromDesiredToWorld = new RigidBodyTransform();
       desiredPose.getRigidBodyTransform(transformFromDesiredToWorld);
-      
+
       RigidBodyTransform transformFromRobotBaseToWorld = new RigidBodyTransform();
       transformFromRobotBaseToWorld.setTranslation(randomRobotPositionX, randomRobotPositionY, 0.0);
-      
+
       Quat4d jointRotation = new Quat4d();
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(jointRotation, randomRobotYaw, 0.0, 0.0);
       transformFromRobotBaseToWorld.setRotation(jointRotation);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.multiply( transformFromRobotBaseToWorld, transformFromDesiredToWorld);
+      transform.multiply(transformFromRobotBaseToWorld, transformFromDesiredToWorld);
 
-      FramePose desiredToReturnFrame = new FramePose( ReferenceFrame.getWorldFrame(), transform);
+      FramePose desiredToReturnFrame = new FramePose(ReferenceFrame.getWorldFrame(), transform);
 
       return desiredToReturnFrame;
    }
-   
-   /**
-   public void testForwardKinematicsAndConsistencyOfURDF()
+
+   public ArrayList<Pair<FramePose, FramePose>> createHalfCylinderOfTargetPoints(RobotSide robotSide, double maxReachRadius, double maxHeight, double maxTheta,
+         int radiusIncrements, int heightIncrements, int thetaIncrements)
+   {
+      //Creates a half cylinder of points for the robot to try to reach in its (Right/Left) arm workspace.
+      int sign = (robotSide == RobotSide.RIGHT ? -1 : 1);
+
+      ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
+
+      for (int z_int = heightIncrements; z_int > 0; z_int--)
+      {
+         for (int theta_int = 0; theta_int < 4; theta_int++)
+         {
+            for (int radius_int = 2; radius_int < (1 + radiusIncrements); radius_int++)
+            {
+               double height = maxHeight * z_int / heightIncrements;
+               double reachRadius = maxReachRadius * radius_int / radiusIncrements;
+               double theta = sign * maxTheta * theta_int / thetaIncrements;
+
+               Point3d point = new Point3d(reachRadius * Math.cos(theta), reachRadius * Math.sin(theta), height);
+               Quat4d noRotation = new Quat4d();
+
+               FramePose desiredPose = new FramePose(ReferenceFrame.getWorldFrame(), point, noRotation);
+
+               Pair<FramePose, FramePose> handLeftFramesPair = new Pair<FramePose, FramePose>(desiredPose, null);
+               Pair<FramePose, FramePose> handRightFramesPair = new Pair<FramePose, FramePose>(null, desiredPose);
+
+               if (robotSide == RobotSide.RIGHT)
+               {
+                  handArrayList.add(handRightFramesPair);
+               }
+               else
+               {
+                  handArrayList.add(handLeftFramesPair);
+               }
+            }
+         }
+      }
+      return handArrayList;
+   }
+
+   public ArrayList<Pair<FramePose, FramePose>> createManualFramePosePairArrayList(ArrayList<Matrix4d> leftHandRigidBodyTransformData,
+         ArrayList<Matrix4d> rightHandRigidBodyTransformData)
+   {
+      ArrayList<Pair<FramePose, FramePose>> arrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
+      try
+      {
+         if (leftHandRigidBodyTransformData != null && rightHandRigidBodyTransformData != null)
+         {
+            if (leftHandRigidBodyTransformData.size() != rightHandRigidBodyTransformData.size())
+            {
+               throw new Exception(getClass().getSimpleName() + ": left and right hand double arrays must be same length");
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      int maxi = -1;
+      if (leftHandRigidBodyTransformData != null)
+      {
+         maxi = leftHandRigidBodyTransformData.size();
+      }
+      else
+      {
+         maxi = rightHandRigidBodyTransformData.size();
+      }
+
+      FramePose desiredLeftHandFrame = null;
+      FramePose desiredRightHandFrame = null;
+
+      for (int i = 0; i < maxi; i++)
+      {
+         if (leftHandRigidBodyTransformData != null)
+         {
+            Matrix4d matrix = leftHandRigidBodyTransformData.get(i);
+            RigidBodyTransform leftHandToWorldTransform = new RigidBodyTransform(matrix);
+            desiredLeftHandFrame = new FramePose(ReferenceFrame.getWorldFrame(), leftHandToWorldTransform);
+
+         }
+         if (rightHandRigidBodyTransformData != null)
+         {
+            Matrix4d matrix = rightHandRigidBodyTransformData.get(i);
+            RigidBodyTransform rightHandToWorldTransform = new RigidBodyTransform(matrix);
+            desiredRightHandFrame = new FramePose(ReferenceFrame.getWorldFrame(), rightHandToWorldTransform);
+         }
+
+         Pair<FramePose, FramePose> pair = new Pair<FramePose, FramePose>(desiredLeftHandFrame, desiredRightHandFrame);
+         arrayListToReturn.add(pair);
+      }
+      return arrayListToReturn;
+   }
+
+   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(int pointsDesired)
+   {
+      ArrayList<Pair<FramePose, FramePose>> handTargetArrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
+      Random random = new Random();
+
+      while (handTargetArrayListToReturn.size() < pointsDesired)
+      {
+         VectorXd Q = new VectorXd(hikSolver.getNumberOfJoints());
+
+         // this map will tells us which joint are present both in hikSolver and fullRobotModel.
+         HashMap<String, Integer> activeJoints = hikSolver.getHierarchicalSolver().createListOfActiveJoints();
+
+         // set random position for each joint. Store this value both in hikSolver and fullRobotModel.
+         for (Map.Entry<String, Integer> joint : activeJoints.entrySet())
+         {
+            String jointName = joint.getKey();
+            int jointIndex = joint.getValue();
+            double val = RandomTools.generateRandomDouble(random, -1.0, 1.0);
+            actualRobotModel.getOneDoFJointByName(jointName).setQ(val);
+            Q.set(jointIndex, val);
+         }
+
+         // update the forward kinematics of WB model
+         hikSolver.getHierarchicalSolver().getForwardSolver().updateKinematics(Q);
+
+         // update the forward kinematics of the SDF model.
+         actualRobotModel.updateFrames();
+
+         //verify that the CoM that will result by applying the random joint angles will satisfy the stability requirements of the hikSolver.
+         double error = hikSolver.calculateCenterOfMassError(actualRobotModel);
+         double EPS = 0.01; // 1 cm tolerance
+
+         //if CoM is close enough to stable then accept the proposed pose as feasible and add it to the list of targets to try with the IK solver.
+         if (error < EPS)
+         {
+            FramePose rightHandTarget = new FramePose(actualRobotModel.getHandControlFrame(RobotSide.RIGHT));
+            FramePose leftHandTarget = new FramePose(actualRobotModel.getHandControlFrame(RobotSide.LEFT));
+            Pair<FramePose, FramePose> pairToPack = new Pair<FramePose, FramePose>(leftHandTarget, rightHandTarget);
+            handTargetArrayListToReturn.add(pairToPack);
+         }
+      }
+      return handTargetArrayListToReturn;
+   }
+
+   /** public void testForwardKinematicsAndConsistencyOfURDF()
    {
       Random random = new Random();
       VectorXd Q = new VectorXd(hikSolver.getNumberOfJoints());
@@ -362,9 +504,45 @@ public class WholeBodyIkSolverTestHelper
 
          assertTrue(difference.epsilonEquals(IDENTITY, 0.0001));
       }
+   } **/
+
+   /** Insert this code at around line 210 in WholeBodyIkDevelopmentPanel to collect manual points. Launch the AtlasObstacleCourseDemo in debug mode and hit pause every 
+   time you have a pose that you want to copy paste from the console.
+   **/
+
+   /**
+   boolean willNeedsToCollectSomeManualPointsForIkTests = true;
+   if(willNeedsToCollectSomeManualPointsForIkTests){
+     
+   ReferenceFrame fHandWorld = wholeBodyIK.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame() );
+   ReferenceFrame fHandLocal = wholeBodyIK.getDesiredGripperAttachmentFrame(side, wholeBodyIK.getRootFrame() );
+
+   RigidBodyTransform rBTWorld = fHandWorld.getTransformToParent();
+   RigidBodyTransform rBTLocal = fHandLocal.getTransformToParent();
+
+   Matrix4d matrixWorld  = new Matrix4d();
+   Matrix4d matrixLocal  = new Matrix4d();
+
+   rBTWorld.get(matrixWorld);
+   rBTLocal.get(matrixLocal);
+
+   Vector4d v1 = new Vector4d(), v2 = new Vector4d(), v3 = new Vector4d(), v4 = new Vector4d();
+
+   matrixWorld.getRow(0, v1);
+   matrixWorld.getRow(1, v2);
+   matrixWorld.getRow(2, v3);
+   matrixWorld.getRow(3, v4);
+
+   System.out.println((side==RobotSide.RIGHT ? "RightHand":"LeftHand") +"ToWorldArray.add(new Matrix4d" + v1.toString() + v2.toString() + v3.toString() + v4.toString());
+
+   matrixLocal.getRow(0, v1);
+   matrixLocal.getRow(1, v2);
+   matrixLocal.getRow(2, v3);
+   matrixLocal.getRow(3, v4);
+
+   System.out.println((side==RobotSide.RIGHT ? "RightHand":"LeftHand") +"ToFootArray.add(new Matrix4d" + v1.toString() + v2.toString() + v3.toString() + v4.toString());
+
    }
-  */
+   **/
 
-
- }
-
+}
