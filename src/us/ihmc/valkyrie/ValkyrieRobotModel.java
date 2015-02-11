@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie;
 
 import java.io.InputStream;
-import java.net.URI;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -10,7 +9,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -320,13 +318,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
+   public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation);
+      return new ValkyrieSensorSuiteManager(getPPSTimestampOffsetProvider(), createFullRobotModel(), sensorInformation, runningOnRealRobot);
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
+   public HandCommandManager createHandCommandManager()
    {
 	   return null;
    }
