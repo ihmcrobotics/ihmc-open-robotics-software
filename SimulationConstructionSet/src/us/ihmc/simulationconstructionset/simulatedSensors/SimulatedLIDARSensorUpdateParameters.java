@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 
 public class SimulatedLIDARSensorUpdateParameters
 {

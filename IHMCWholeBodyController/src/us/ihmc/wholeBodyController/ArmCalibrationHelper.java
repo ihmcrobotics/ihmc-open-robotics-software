@@ -9,8 +9,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.imageio.ImageIO;
 
 import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;

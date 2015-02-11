@@ -6,8 +6,8 @@ import java.util.concurrent.Executors;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.TimestampListener;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootstepDataList;

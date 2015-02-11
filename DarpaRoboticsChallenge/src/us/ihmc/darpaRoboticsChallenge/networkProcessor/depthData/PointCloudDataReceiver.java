@@ -4,11 +4,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.NetworkProcessorControllerCommandHandler;
-import us.ihmc.communication.NetworkProcessorControllerStateHandler;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
@@ -18,33 +16,30 @@ import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.communication.producers.RobotPoseBufferListener;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
-public class PointCloudDataReceiver implements RobotPoseBufferListener, NetStateListener
+public class PointCloudDataReceiver implements NetStateListener
 {
 
    protected ConcurrentLinkedQueue<PointCloudPacket> pendingScans = new ConcurrentLinkedQueue<PointCloudPacket>();
    protected volatile AtomicBoolean sendData = new AtomicBoolean(false);
    private final Object commandLock = new Object();
    private final DepthDataFilter lidarDataFilter;
-   private final NetworkProcessorControllerStateHandler controllerStateHandler;
+   private final PacketCommunicator packetCommunicator;
    protected LidarStateCommandListener lidarStateCommandListener;
    private final RobotPoseBuffer robotPoseBuffer;
 
-   public PointCloudDataReceiver(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel fullRobotModel,
+   public PointCloudDataReceiver(RobotPoseBuffer robotPoseBuffer, PacketCommunicator packetCommunicator, SDFFullRobotModel fullRobotModel,
          DepthDataFilter lidarDataFilter)
    {
-      robotPoseBuffer.addListener(this);
-
       this.robotPoseBuffer = robotPoseBuffer;
-      this.controllerStateHandler = networkingManager.getControllerStateHandler();
+      this.packetCommunicator = packetCommunicator;
       this.lidarDataFilter = lidarDataFilter;
       
-      lidarStateCommandListener = new LidarStateCommandListener(networkingManager.getControllerCommandHandler());
+      lidarStateCommandListener = new LidarStateCommandListener(packetCommunicator);
 
-      networkingManager.attachStateListener(this);
+      packetCommunicator.attachStateListener(this);
    }
 
    @Override
@@ -59,8 +54,8 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          lidarDataFilter.clearLidarData(DepthDataTree.QUADTREE);
          lidarDataFilter.clearLidarData(DepthDataTree.OCTREE);
 
-         controllerStateHandler.sendPacket(clearQuadTreeCommand);
-         controllerStateHandler.sendPacket(clearOctTreeCommand);
+         packetCommunicator.send(clearQuadTreeCommand);
+         packetCommunicator.send(clearOctTreeCommand);
       }
    }
 
@@ -71,11 +66,6 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
       {
          sendData.set(false);
       }
-   }
-
-   @Override
-   public void newRobotPoseReceived(RobotPoseData robotPosedata)
-   {
    }
 
    public void setLidarState(LidarState lidarState)
@@ -93,7 +83,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
             sendData.set(false);
          }
 
-         controllerStateHandler.sendPacket(new DepthDataStateCommand(lidarState));
+         packetCommunicator.send(new DepthDataStateCommand(lidarState));
       }
    }
 
@@ -138,7 +128,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
 
                if (rosPointCloud.getNumberOfPoints() > 0)
                {
-                  controllerStateHandler.sendPacket(rosPointCloud);
+                  packetCommunicator.send(rosPointCloud);
                }
             }
          }
@@ -161,9 +151,9 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
 
    public class LidarStateCommandListener implements DepthDataStateCommandListenerInterface
    {
-      public LidarStateCommandListener(NetworkProcessorControllerCommandHandler commandHandler)
+      public LidarStateCommandListener(PacketCommunicator packetCommunicator)
       {
-         commandHandler.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
+         packetCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
          {
             public void receivedPacket(DepthDataStateCommand object)
             {
@@ -171,7 +161,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
             }
          });
          
-         commandHandler.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
+         packetCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
          {
             public void receivedPacket(DepthDataClearCommand object)
             {
@@ -179,7 +169,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
             }
          });
          
-         commandHandler.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
+         packetCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
          {
             public void receivedPacket(DepthDataFilterParameters object)
             {
@@ -201,7 +191,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          synchronized (commandLock)
          {
             lidarDataFilter.clearLidarData(object.getDepthDataTree());
-            controllerStateHandler.sendPacket(object);
+            packetCommunicator.send(object);
          }
       }
 
@@ -210,7 +200,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          synchronized (commandLock)
          {
             lidarDataFilter.setParameters(parameters);
-            controllerStateHandler.sendPacket(parameters);
+            packetCommunicator.send(parameters);
          }
       }
    }

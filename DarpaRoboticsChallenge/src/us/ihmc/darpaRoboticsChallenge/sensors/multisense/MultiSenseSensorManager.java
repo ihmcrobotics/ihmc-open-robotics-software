@@ -4,7 +4,7 @@ import java.net.URI;
 
 import org.ros.node.parameter.ParameterTree;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -29,7 +29,7 @@ public class MultiSenseSensorManager
 
    private final RobotPoseBuffer sharedRobotPoseBuffer;
    private final RosMainNode rosMainNode;
-   private final AbstractNetworkProcessorNetworkingManager networkingManager;
+   private final PacketCommunicator packetCommunicator;
    private final RosNativeNetworkProcessor rosNativeNetworkProcessor;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
@@ -53,7 +53,7 @@ public class MultiSenseSensorManager
    private MultiSenseParamaterSetter multiSenseParamaterSetter;
 
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
-         RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
+         RosMainNode rosMainNode, PacketCommunicator packetCommunicator, RosNativeNetworkProcessor rosNativeNetworkProcessor,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
    {
@@ -64,7 +64,7 @@ public class MultiSenseSensorManager
       this.sharedRobotPoseBuffer = sharedRobotPoseBuffer;
       this.cameraParamaters = cameraParamaters;
       this.rosMainNode = rosMainNode;
-      this.networkingManager = networkingManager;
+      this.packetCommunicator = packetCommunicator;
       this.rosNativeNetworkProcessor = rosNativeNetworkProcessor;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorURI = sensorURI;
@@ -72,7 +72,7 @@ public class MultiSenseSensorManager
       registerLidarReceivers();
       if(setROSParameters)
       {
-         multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, networkingManager);
+         multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, packetCommunicator);
          setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
       }
       else
@@ -120,12 +120,12 @@ public class MultiSenseSensorManager
    private void registerCameraReceivers()
    {
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, rosMainNode, networkingManager,
+      cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, rosMainNode, packetCommunicator,
             ppsTimestampOffsetProvider, logger, sensorURI);
 
-      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(), logger);
+      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, packetCommunicator, logger);
 
-      networkingManager.getControllerCommandHandler().attachListener(CameraInformationPacket.class, cameraInfoServer);
+      packetCommunicator.attachListener(CameraInformationPacket.class, cameraInfoServer);
    }
 
    public void registerCameraListener(ArmCalibrationHelper armCalibrationHelper)

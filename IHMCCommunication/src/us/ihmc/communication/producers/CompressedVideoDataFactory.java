@@ -1,6 +1,6 @@
 package us.ihmc.communication.producers;
 
-import us.ihmc.communication.NetworkProcessorControllerCommandHandler;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.utilities.VideoStreamer;
 
@@ -13,16 +13,16 @@ public class CompressedVideoDataFactory
 
    public static final Algorithm algorithm = Algorithm.JPEG;
 
-   public static CompressedVideoDataServer createCompressedVideoDataServer(NetworkProcessorControllerCommandHandler commandHandler,
+   public static CompressedVideoDataServer createCompressedVideoDataServer(PacketCommunicator packetCommunicator,
          CompressedVideoHandler handler)
    {
       switch (algorithm)
       {
       case H264:
          H264CompressedVideoDataServer h264Server = new H264CompressedVideoDataServer(handler);
-         if (commandHandler != null)
+         if (packetCommunicator != null)
          {
-            commandHandler.attachListener(VideoControlPacket.class, h264Server);
+            packetCommunicator.attachListener(VideoControlPacket.class, h264Server);
          }
          return h264Server;
       case JPEG:

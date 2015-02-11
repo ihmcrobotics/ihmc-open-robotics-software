@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;

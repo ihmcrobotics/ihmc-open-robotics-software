@@ -11,7 +11,7 @@ import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;

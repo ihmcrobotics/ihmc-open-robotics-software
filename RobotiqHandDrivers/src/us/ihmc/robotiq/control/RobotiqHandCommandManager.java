@@ -1,7 +1,10 @@
 package us.ihmc.robotiq.control;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
@@ -9,24 +12,21 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 
 public class RobotiqHandCommandManager extends HandCommandManager
 {
-   private final AbstractNetworkProcessorNetworkingManager networkManager;
+   private final KryoLocalPacketCommunicator handManagerPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+         PacketDestination.HAND_MANAGER.ordinal(), "iRobotHandCommunicator");
    
-	public RobotiqHandCommandManager(final AbstractNetworkProcessorNetworkingManager networkManager)
+   
+	public RobotiqHandCommandManager()
 	{
 		super(RobotiqControlThreadManager.class);
 		
-		this.networkManager = networkManager;
-		
-		if(networkManager != null)
-		{
 			setupOutboundPacketListeners();
 			setupInboundPacketListeners();
-		}
 	}
 
    protected void setupInboundPacketListeners()
    {
-      networkManager.getControllerCommandHandler().attachListener(FingerStatePacket.class, new PacketConsumer<FingerStatePacket>()
+      handManagerPacketCommunicator.attachListener(FingerStatePacket.class, new PacketConsumer<FingerStatePacket>()
       {
          public void receivedPacket(FingerStatePacket object)
          {
@@ -34,7 +34,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
          }
       });
       
-      networkManager.getControllerCommandHandler().attachListener(ManualHandControlPacket.class, new PacketConsumer<ManualHandControlPacket>()
+      handManagerPacketCommunicator.attachListener(ManualHandControlPacket.class, new PacketConsumer<ManualHandControlPacket>()
       {
          public void receivedPacket(ManualHandControlPacket object)
          {
@@ -49,8 +49,14 @@ public class RobotiqHandCommandManager extends HandCommandManager
       {
          public void receivedPacket(HandJointAnglePacket object)
          {
-            networkManager.getControllerStateHandler().sendPacket(object);
+            handManagerPacketCommunicator.send(object);
          }
       });
+   }
+
+   @Override
+   public PacketCommunicator getCommunicator()
+   {
+      return handManagerPacketCommunicator;
    }
 }

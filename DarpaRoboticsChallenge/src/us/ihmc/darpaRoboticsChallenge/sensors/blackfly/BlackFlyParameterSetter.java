@@ -6,8 +6,8 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -23,18 +23,18 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
    private static double frameRate;
    private static double Shutter;
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> blackFlyClient;
-   private RosMainNode rosMainNode;
-   private AbstractNetworkProcessorNetworkingManager networkingManager;
+   private final RosMainNode rosMainNode;
+   private final PacketCommunicator packetCommunicator;
    private ParameterTree params;
 
-   public BlackFlyParameterSetter(RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager)
+   public BlackFlyParameterSetter(RosMainNode rosMainNode, PacketCommunicator packetCommunicator)
    {
       this.rosMainNode = rosMainNode;
-      this.networkingManager = networkingManager;
+      this.packetCommunicator = packetCommunicator;
       blackFlyClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("blackfly/set_parameters", blackFlyClient);
       
-      networkingManager.getControllerCommandHandler().attachListener(BlackFlyParameterPacket.class, this);
+      packetCommunicator.attachListener(BlackFlyParameterPacket.class, this);
    }
 
    public void handleBlackFlyParameters(BlackFlyParameterPacket object)
@@ -61,7 +61,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
          return;
       }
 
-      networkingManager.getControllerStateHandler().sendPacket(
+      packetCommunicator.send(
             new BlackFlyParameterPacket(false, params.getDouble("/blackfly/prop_gain"), params.getDouble("/blackfly/prop_brightness"), params
                   .getDouble("/blackfly/prop_frame_rate"), params.getDouble("/blackfly/prop_shutter")));
    }

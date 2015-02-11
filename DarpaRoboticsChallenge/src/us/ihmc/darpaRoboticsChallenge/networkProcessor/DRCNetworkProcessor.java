@@ -1,154 +1,196 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import java.io.IOException;
-import java.net.URI;
+import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.AbstractNetworkProcessor;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketClient;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.communication.packets.sensing.TestbedClientPacket;
-import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.NetworkProcessor;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
-import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
+import us.ihmc.ihmcPerception.IHMCPerceptionManager;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.io.printing.PrintTools;
 
-public class DRCNetworkProcessor extends AbstractNetworkProcessor
+public class DRCNetworkProcessor
 {
-   private final boolean useSimulatedSensors;
-   private final SDFFullRobotModel fullRobotModel;
-   private final RobotDataReceiver drcRobotDataReceiver;
-   private final RobotPoseBuffer robotPoseBuffer;
-   private final DepthDataFilter lidarFilter;
+   private final NetworkProcessor networkProcessor;
+   private final boolean DEBUG = false;
 
-   /*
-    * This will become a stand-alone application in the final competition. Do
-    * NOT pass in objects shared with the DRC simulation!
-    */
-   public DRCNetworkProcessor(URI rosUri, DRCRobotModel robotModel)
+   public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      this(rosUri, null, null, robotModel, false);
-   }
-
-   public DRCNetworkProcessor(PacketCommunicator objectCommunicator, DRCRobotModel robotModel)
-   {
-      this(null, objectCommunicator, null, robotModel, false);
-   }
-
-   public DRCNetworkProcessor(PacketCommunicator scsCommunicator, PacketCommunicator drcNetworkObjectCommunicator, DRCRobotModel robotModel)
-   {
-      this(null, scsCommunicator, drcNetworkObjectCommunicator, robotModel, false);
-   }
-
-   public DRCNetworkProcessor(URI rosUri, PacketCommunicator scsCommunicator, PacketCommunicator controllerCommunicator, DRCRobotModel robotModel,
-         boolean startTestbedAlignment)
-   {
-      if (controllerCommunicator == null)
+      networkProcessor = new NetworkProcessor();
+      ArrayList<PacketCommunicator> communicators = createRequestedModules(robotModel, params);
+      
+      for (int i = 0; i < communicators.size(); i++)
       {
-         String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-
-         controllerCommunicator = new KryoPacketClient(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-               new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(), PacketDestination.NETWORK_PROCESSOR.ordinal(),"DRCNetworkProcessor");
-
-         if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
+         PacketCommunicator packetCommunicator = communicators.get(i);
+         if(packetCommunicator != null)
          {
-            KryoLocalPacketCommunicator behaviorModuleToNetworkProcessorLocalObjectCommunicator = new KryoLocalPacketCommunicator(
-                  new IHMCCommunicationKryoNetClassList(), PacketDestination.BEHAVIOR_MODULE.ordinal(), "BehaviorCommunicator");
-            
-            new IHMCHumanoidBehaviorManager(robotModel, robotModel.getLogModelProvider(), robotModel.getSensorInformation(),
-                  behaviorModuleToNetworkProcessorLocalObjectCommunicator, controllerCommunicator);
-
-            try
-            {
-               controllerCommunicator.connect();
-            }
-            catch (IOException e)
-            {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-
-            this.fieldComputerClient = behaviorModuleToNetworkProcessorLocalObjectCommunicator;
-         }
-         else
+            networkProcessor.attachPacketCommunicator(packetCommunicator);
+            connect(packetCommunicator);
+         } 
+         else if(DEBUG)
          {
-            this.fieldComputerClient = controllerCommunicator;
+            PrintTools.debug(this, "Null Communicator!");
          }
       }
-      else
-      {
-         this.fieldComputerClient = controllerCommunicator;
-      }
-
-      useSimulatedSensors = scsCommunicator != null;
-      robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 100000, timestampProvider);
-      networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
-      fullRobotModel = robotModel.createFullRobotModel();
-
-      drcRobotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
-      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, robotModel.getDRCHandType(), fullRobotModel);
-      lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
-
-      this.fieldComputerClient.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
-
-      this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
-      {
-         @Override
-         public void receivedPacket(HandJointAnglePacket object)
-         {
-            networkingManager.getControllerStateHandler().sendPacket(object);
-         }
-      });
-
-      if (startTestbedAlignment)
-      {
-         NetworkProcessorTestbedAlignment testbed = new NetworkProcessorTestbedAlignment(networkingManager);
-         networkingManager.getControllerCommandHandler().attachListener(TestbedClientPacket.class, testbed);
-         new Thread(testbed).start();
-      }
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri);
-      connect();
    }
 
-   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, PacketCommunicator localObjectCommunicator, URI sensorURI)
+   private ArrayList<PacketCommunicator> createRequestedModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      if (sensorSuiteManager == null)
-         return;
-
-      if (useSimulatedSensors)
+      ArrayList<PacketCommunicator> communicators = new ArrayList<PacketCommunicator>();
+      
+      if(params.useController())
       {
-         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel,
-               lidarFilter, sensorURI);
+         PacketCommunicator simulatedControllerCommunicator = params.getControllerCommunicator();
+         communicators.add(simulatedControllerCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useSimulatedController" + simulatedControllerCommunicator.getName() + " " + simulatedControllerCommunicator.getId());
+         }
       }
-      else
+      
+      if(params.useUiModule())
       {
-         sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer, networkingManager, fullRobotModel, fieldComputerClient, lidarFilter, sensorURI);
+         PacketCommunicator uiModuleCommunicator = createUiModule(robotModel, params);
+         communicators.add(uiModuleCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useSensorModule" + uiModuleCommunicator.getName() + " " + uiModuleCommunicator.getId());
+         }
       }
+      
+      if(params.useSensorModule())
+      {
+         PacketCommunicator sensorModuleCommunicator = createSensorModule(robotModel, params);
+         communicators.add(sensorModuleCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useSensorModule" + sensorModuleCommunicator.getName() + " " + sensorModuleCommunicator.getId());
+         }
+      }
+      
+      if(params.usePerceptionModule())
+      {
+         PacketCommunicator perceptionModuleCommunicator = createPerceptionModule(robotModel);
+         communicators.add(perceptionModuleCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "usePerceptionModule" + perceptionModuleCommunicator.getName() + " " + perceptionModuleCommunicator.getId());
+         }
+      }
+      
+      if(params.useRosModule())
+      {
+         PacketCommunicator rosModuleCommunicator = createRosModule(robotModel);
+         communicators.add(rosModuleCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useRosModule" + rosModuleCommunicator.getName() + " " + rosModuleCommunicator.getId());
+         }
+      }
+      
+      if(params.useBehaviorModule())
+      {
+         PacketCommunicator behaviorModuleCommunicator = createBehaviorModule(robotModel);
+         communicators.add(behaviorModuleCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useBehaviorModule" + behaviorModuleCommunicator.getName() + " " + behaviorModuleCommunicator.getId());
+         }
+      }
+      
+      if(params.useHandModule())
+      {
+         PacketCommunicator handModuleCommunicator = createHandModule(robotModel);
+         communicators.add(handModuleCommunicator);
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useHandModule" + handModuleCommunicator.getName() + " " + handModuleCommunicator.getId());
+         }
+      }
+      return communicators;
+   }
+   
+   private PacketCommunicator createBehaviorModule(DRCRobotModel robotModel)
+   {
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+      IHMCHumanoidBehaviorManager behaviorManager = new IHMCHumanoidBehaviorManager(robotModel , logModelProvider, sensorInformation);
+      return behaviorManager.getCommunicator();
    }
 
-   protected void connect()
+   private PacketCommunicator createRosModule(DRCRobotModel robotModel)
+   {
+      RosModule rosModule = new RosModule();
+      return rosModule.getCommunicator();
+   }
+
+   private PacketCommunicator createPerceptionModule(DRCRobotModel robotModel)
+   {
+      IHMCPerceptionManager perceptionModule = new IHMCPerceptionManager();
+      return perceptionModule.getPerceptionCommunicator();
+   }
+
+   private PacketCommunicator createSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
+      if(params.useSimulatedSensors())
+      {
+         sensorSuiteManager.initializeSimulatedSensors(params.getSimulatedSensorCommunicator());
+      } 
+      else 
+      {
+         sensorSuiteManager.initializePhysicalSensors(params.getRosUri());
+      }
+      PacketCommunicator sensorModuleCommunicator = sensorSuiteManager.getProcessedSensorsCommunicator();
+      return sensorModuleCommunicator;
+   }
+
+   private PacketCommunicator createUiModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      UiConnectionModule uiConnectionModule = new UiConnectionModule();
+      return uiConnectionModule.getPacketCommunicator();
+   }
+
+   private PacketCommunicator createHandModule(DRCRobotModel robotModel)
+   {
+      HandCommandManager handCommandModule = robotModel.createHandCommandManager();
+      if(handCommandModule != null)
+      {
+         return handCommandModule.getCommunicator();
+      }
+      return null;
+      //      this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
+      //      {
+      //         @Override
+      //         public void receivedPacket(HandJointAnglePacket object)
+      //         {
+      //            networkingManager.getControllerStateHandler().sendPacket(object);
+      //         }
+      //      });
+   }
+
+   protected void connect(PacketCommunicator communicator)
    {
       try
       {
-         this.fieldComputerClient.connect();
+         communicator.connect();
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-      networkingManager.connect();
+   }
+
+   public void addPacketCommunicatorToRouter(PacketCommunicator packetCommunicator)
+   {
+      networkProcessor.attachPacketCommunicator(packetCommunicator);
+      connect(packetCommunicator);
    }
 }

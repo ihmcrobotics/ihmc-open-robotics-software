@@ -9,8 +9,8 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
@@ -35,17 +35,17 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private static boolean autoWhitebalance;
    private static String resolution = new String("2048x1088x64");
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
-   private RosMainNode rosMainNode;
-   private AbstractNetworkProcessorNetworkingManager networkingManager;
+   private final RosMainNode rosMainNode;
+   private PacketCommunicator packetCommunicator;
    private ParameterTree params;
    
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, AbstractNetworkProcessorNetworkingManager networkingManager)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, PacketCommunicator packetCommunicator)
    {
       this.rosMainNode = rosMainNode;
-      this.networkingManager = networkingManager;
+      this.packetCommunicator = packetCommunicator;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);      
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-      networkingManager.getControllerCommandHandler().attachListener(MultisenseParameterPacket.class, this);;
+      packetCommunicator.attachListener(MultisenseParameterPacket.class, this);;
    }
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode2)
@@ -158,7 +158,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          return;
       }
 
-      networkingManager.getControllerStateHandler().sendPacket(
+      packetCommunicator.send(
             new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
                   .getDouble("/multisense/led_duty_cycle"), params.getString("/multisense/resolution"), params.getBoolean("/multisense/lighting"), params
                   .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));

@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 
 import org.ros.message.Time;
 
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.LocalVideoPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;

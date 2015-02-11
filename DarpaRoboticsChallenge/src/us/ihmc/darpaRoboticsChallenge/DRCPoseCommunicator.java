@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.AtlasWristFeetSensorPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;

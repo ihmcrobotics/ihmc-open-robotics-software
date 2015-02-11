@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.LidarScanPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.graphics3DAdapter.GPULidar;

@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -42,18 +42,18 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private final PacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredReferenceFrameList = new ArrayList<FramePose>();
-   private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
-   private boolean USE_INGRESS_ONLY = false;
+   private final WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
+   private final boolean USE_INGRESS_ONLY = false;
    private final YoVariableRegistry registry;
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
    private final YoGraphicShape yoGraphicsShapeDesired;
    private final boolean random = false;
    private final double ERROR_DISTANCE_TOLERANCE = 0.005;
-   private SDFFullRobotModel desiredFullRobotModel;
-   private YoGraphicShape yoGraphicsShapeActual;
-   private YoFramePoint framePoint2;
-   private YoFrameOrientation frameOrientation2;
+   private final SDFFullRobotModel desiredFullRobotModel;
+   private final YoGraphicShape yoGraphicsShapeActual;
+   private final YoFramePoint framePoint2;
+   private final YoFrameOrientation frameOrientation2;
    private final double trajectoryTime = 2.0;
    private ComputeResult success;
 

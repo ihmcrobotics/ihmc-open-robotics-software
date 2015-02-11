@@ -77,7 +77,7 @@ public class SimulatedRobotiqHandJointAngleProducer
                thumbJoints[i] = this.thumbJoints.get(robotSide).get(i).getQ().getDoubleValue();
 
 //            HandJointAnglePacket handJointAnglePacket = new HandJointAnglePacket(robotSide, true, indexJoints, middleJoints, thumbJoints);
-//            dataProducer.sendPacket(handJointAnglePacket);
+//            dataProducer.queueDataToSend(handJointAnglePacket);
          }
       }
    }

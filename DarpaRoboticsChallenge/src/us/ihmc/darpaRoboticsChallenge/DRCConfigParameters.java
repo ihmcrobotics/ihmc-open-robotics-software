@@ -15,7 +15,6 @@ public class DRCConfigParameters
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
 
    // UI
-   public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
 
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;

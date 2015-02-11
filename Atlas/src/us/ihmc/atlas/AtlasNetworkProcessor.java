@@ -8,8 +8,12 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
 
@@ -48,6 +52,14 @@ public class AtlasNetworkProcessor
       if (config.success())
       {
     	  DRCRobotModel model;
+    	  
+    	  int communicatorId = PacketDestination.CONTROLLER.ordinal();
+    	  IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
+    	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
+       
+       networkModuleParams.setUseUiModule(true);
+       networkModuleParams.setUseBehaviorModule(true);
+    	  
     	  try
     	  {
     	     AtlasTarget target;
@@ -81,15 +93,21 @@ public class AtlasNetworkProcessor
     	  {
     	     System.err
     	     .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
-    	     KryoLocalPacketCommunicator objectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "AtlasNetworkProcessorSimulatedControllerCommunicator");
+    	     KryoLocalPacketCommunicator dummyControllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "Atlas_Dummy_Controller_Communicator");
     	     
-    	     new DummyController(rosMasterURI, objectCommunicator, model);
-    	     new DRCNetworkProcessor(objectCommunicator, model);
+    	     new DummyController(rosMasterURI, dummyControllerCommunicator, model);
+    	     networkModuleParams.setControllerCommunicator(dummyControllerCommunicator);
     	  }
     	  else
     	  {
-    	     new DRCNetworkProcessor(rosMasterURI, model);
+    	     
+           String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
+           int tcpPort = NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
+           KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList, communicatorId, "Atlas_Controller_Endpoint");
+           networkModuleParams.setControllerCommunicator(realRobotControllerConnection);
     	  }
+    	  
+    	  new DRCNetworkProcessor(model, networkModuleParams);
       }
       else
       {

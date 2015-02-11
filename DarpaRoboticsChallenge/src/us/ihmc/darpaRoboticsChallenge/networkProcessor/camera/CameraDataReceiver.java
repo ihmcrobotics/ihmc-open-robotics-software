@@ -7,8 +7,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
@@ -21,6 +21,7 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 public abstract class CameraDataReceiver
 {
+   private final boolean DEBUG = false;
    private final RobotPoseBuffer robotPoseBuffer;
    private final VideoDataServer compressedVideoDataServer;
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
@@ -32,15 +33,14 @@ public abstract class CameraDataReceiver
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RigidBodyTransform cameraPose;
 
-   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, final AbstractNetworkProcessorNetworkingManager networkingManager,
+   public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, final PacketCommunicator packetCommunicator,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.robotPoseBuffer = robotPoseBuffer;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.cameraPose = new RigidBodyTransform();
 
-      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(networkingManager.getControllerCommandHandler(),
-            new VideoPacketHandler(networkingManager));
+      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(packetCommunicator, new VideoPacketHandler(packetCommunicator));
    }
 
    protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
@@ -48,6 +48,10 @@ public abstract class CameraDataReceiver
       RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timeStamp));
       if (robotPoseData == null)
       {
+         if(DEBUG)
+         {
+            System.out.println(getClass().getName() + " robot pose data was null! Camera image wont be updated");
+         }
          return;
       }
       updateLeftEyeImage(robotPoseData.getCameraPoses()[0], bufferedImage, timeStamp, fov);
@@ -86,26 +90,30 @@ public abstract class CameraDataReceiver
 
    private class VideoPacketHandler implements CompressedVideoHandler
    {
-      private final AbstractNetworkProcessorNetworkingManager networkingManager;
+      private final PacketCommunicator packetCommunicator;
 
-      public VideoPacketHandler(AbstractNetworkProcessorNetworkingManager networkingManager)
+      public VideoPacketHandler(PacketCommunicator packetCommunicator)
       {
-         this.networkingManager = networkingManager;
+         this.packetCommunicator = packetCommunicator;
       }
 
       public void newVideoPacketAvailable(long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView)
       {
-         networkingManager.getControllerStateHandler().sendPacket(new VideoPacket(timeStamp, data, position, orientation, fieldOfView));
+         if(DEBUG)
+         {
+            System.out.println(getClass().getName() + " sending new VideoPacket");
+         }
+         packetCommunicator.send(new VideoPacket(timeStamp, data, position, orientation, fieldOfView));
       }
 
       public void addNetStateListener(NetStateListener compressedVideoDataServer)
       {
-         networkingManager.attachStateListener(compressedVideoDataServer);
+         packetCommunicator.attachStateListener(compressedVideoDataServer);
       }
 
       public boolean isConnected()
       {
-         return networkingManager.isConnected();
+         return packetCommunicator.isConnected();
       }
 
    }

@@ -24,7 +24,6 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -299,10 +298,10 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
+   public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
-            getFootstepParameters());
+      return new AtlasSensorSuiteManager(getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
+            getFootstepParameters(), createFullRobotModel(), getHandType(), target);
    }
 
    @Override
@@ -312,17 +311,17 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager)
+   public HandCommandManager createHandCommandManager()
    {
       if (target == AtlasTarget.REAL_ROBOT)
       {
          switch (getHandType())
          {
          case IROBOT:
-            return new IRobotHandCommandManager(networkManager);
+            return new IRobotHandCommandManager();
 
          case ROBOTIQ:
-            return new RobotiqHandCommandManager(networkManager);
+            return new RobotiqHandCommandManager();
 
          default:
             break;

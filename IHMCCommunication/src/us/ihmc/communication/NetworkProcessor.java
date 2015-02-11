@@ -3,16 +3,21 @@ package us.ihmc.communication;
 import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 
 public class NetworkProcessor
 {
+   private boolean DEBUG = false;
+   private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
+   private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE;//set to Integer.MIN_VALUE to debug all destinations
+   private Class packetTypeToDebug = null;//set to null to debug all packets
+   
+   private final int BROADCAST = 0;
    private final TIntObjectHashMap<PacketCommunicator> communicators = new TIntObjectHashMap<PacketCommunicator>();
    private final TIntObjectHashMap<PacketConsumer<Packet>> consumers = new TIntObjectHashMap<PacketConsumer<Packet>>();
    private final TIntIntHashMap redirects = new TIntIntHashMap();
-   private final int BROADCAST = 0;
 
    public NetworkProcessor()
    {
@@ -20,6 +25,15 @@ public class NetworkProcessor
 
    public void attachPacketCommunicator(final PacketCommunicator packetCommunicator)
    {
+      if(packetCommunicator.getId() == BROADCAST)
+      {
+         throw new IllegalArgumentException("packetCommunicator cannot have an id of zero hommie, it's reserved for broadcast!!");
+      }
+      
+      if(DEBUG)
+      {
+         System.out.println(getClass().getSimpleName() + " Attaching " + packetCommunicator.getName() + ":" + packetCommunicator.getId() + " to the network processor");
+      }
       PacketConsumer<Packet> packetConsumer = new PacketConsumer<Packet>()
       {
          PacketCommunicator communicator = packetCommunicator;
@@ -27,11 +41,15 @@ public class NetworkProcessor
          @Override
          public void receivedPacket(Packet packet)
          {
+            if(shouldPrintDebugStatement(communicator.getId(), packet.getDestination(), packet.getClass()))
+            {
+                  System.out.println(getClass().getSimpleName() + " NP received " + packet.getClass().getSimpleName() + " heading for " + packet.getDestination() + " from " + communicator.getName());
+            }
             processPacket(communicator,packet);
          }
       };
 
-      packetCommunicator.attacthGlobalListener(packetConsumer);
+      packetCommunicator.attacthGlobalSendListener(packetConsumer);
       
       int id = packetCommunicator.getId();
       consumers.put(id, packetConsumer);
@@ -62,6 +80,10 @@ public class NetworkProcessor
       PacketCommunicator destinationCommunicator = communicators.get(destination);
       if (destinationCommunicator != null && destinationCommunicator.isConnected())
       {
+         if(shouldPrintDebugStatement(source.getId(), destination, packet.getClass()))
+         {
+            System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + source.getName() + " to " + destinationCommunicator.getName());
+         }
          destinationCommunicator.receivedPacket(packet);
       }
       
@@ -86,6 +108,10 @@ public class NetworkProcessor
             PacketCommunicator destinationCommunicator = communicators.get(destinationId);
             if (destinationCommunicator != null && destinationCommunicator.isConnected())
             {
+               if(shouldPrintDebugStatement(source.getId(), destinationCommunicator.getId(), packet.getClass()))
+               {
+                  System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + source.getName() + " to " + destinationCommunicator.getName());
+               }
                destinationCommunicator.receivedPacket(packet);
             }
          }
@@ -109,7 +135,7 @@ public class NetworkProcessor
       PacketCommunicator communicator = communicators.remove(id);
       PacketConsumer<Packet> consumer = consumers.remove(id);
       
-      communicator.detachGlobalListener(consumer);
+      communicator.detachGlobalSendListener(consumer);
       
       redirects.remove(id);
 
@@ -134,5 +160,52 @@ public class NetworkProcessor
    public void removePacketRedirect(int redirectFrom)
    {
       redirects.remove(redirectFrom);
+   }
+   
+   private boolean shouldPrintDebugStatement(int sourceCommunicatorId, int destinationCommunicatorId, Class packetType)
+   {
+      if(!DEBUG)
+      {
+         return false;
+      }
+      
+      if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != sourceCommunicatorId)
+      {
+         return false;
+      }
+      
+      if(destinationCommunicatorIdToDebug != Integer.MIN_VALUE && destinationCommunicatorIdToDebug != destinationCommunicatorId)
+      {
+         return false;
+      }
+      
+      if(packetTypeToDebug != null && packetTypeToDebug != packetType)
+      {
+         return false;
+      }
+      
+      return true;
+   }
+   
+   
+   //Put these here so they aty not final, I can change these debug variables at runtime
+   public void setDEBUG(boolean debug)
+   {
+      DEBUG = debug;
+   }
+
+   public void setSourceCommunicatorIdToDebug(int sourceCommunicatorIdToDebug)
+   {
+      this.sourceCommunicatorIdToDebug = sourceCommunicatorIdToDebug;
+   }
+
+   public void setDestinationCommunicatorIdToDebug(int destinationCommunicatorIdToDebug)
+   {
+      this.destinationCommunicatorIdToDebug = destinationCommunicatorIdToDebug;
+   }
+   
+   public void setPacketTypeToDebug(Class packetTypeToDebug)
+   {
+      this.packetTypeToDebug = packetTypeToDebug;
    }
 }

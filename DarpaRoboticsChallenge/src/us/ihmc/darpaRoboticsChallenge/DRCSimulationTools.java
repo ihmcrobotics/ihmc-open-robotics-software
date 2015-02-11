@@ -22,6 +22,7 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.utilities.FormattingTools;
 
 public abstract class DRCSimulationTools
@@ -54,13 +55,16 @@ public abstract class DRCSimulationTools
       else if (modulesToStart.size() == 1)
          simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
 
-      boolean startNetworkProcessor = modulesToStart.contains(Modules.NETWORK_PROCESSOR);
-
-      if (modulesToStart.contains(Modules.BEHAVIOR_MODULE))
-         simulationStarter.setupBehaviorModule();
-
+      
+      boolean automaticallyStartSimulation = true;
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters.setUseUiModule(modulesToStart.contains(Modules.NETWORK_PROCESSOR));
+      networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+      networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
+      networkProcessorParameters.setUsePerceptionModule(true);
+      
       if (modulesToStart.contains(Modules.SIMULATION))
-         simulationStarter.startSimulation(startNetworkProcessor, true);
+         simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
 
       if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
          simulationStarter.startOpertorInterface();
@@ -184,7 +188,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE;
 
       public String getPropertyName()
       {
@@ -193,7 +197,7 @@ public abstract class DRCSimulationTools
 
       public boolean getDefaultValue()
       {
-         if (this == SIMULATION || this == OPERATOR_INTERFACE || this == NETWORK_PROCESSOR)
+         if (this == SIMULATION || this == OPERATOR_INTERFACE || this == NETWORK_PROCESSOR || this == SENSOR_MODULE)
             return true;
          else
             return false;

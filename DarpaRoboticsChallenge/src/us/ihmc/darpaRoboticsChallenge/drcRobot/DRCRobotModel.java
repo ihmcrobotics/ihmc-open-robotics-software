@@ -1,10 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
-import java.net.URI;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
@@ -64,9 +61,9 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
-   public abstract DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI);
+   public abstract DRCSensorSuiteManager getSensorSuiteManager();
       
-   public abstract HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager);
+   public abstract HandCommandManager createHandCommandManager();
    
    public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
 
