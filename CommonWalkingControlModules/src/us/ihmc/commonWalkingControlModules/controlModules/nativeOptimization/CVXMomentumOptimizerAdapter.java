@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoMatrix;
 
 public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
 {
@@ -15,11 +17,12 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
    private final int nPlanes;
 
    private final DenseMatrix64F rhoPrevious;
-
+   private final YoMatrix rhoPreviousYoMatrix;
+   
    private DenseMatrix64F outputRho, outputJointAccelerations;
    private double outputOptVal;
 
-   public CVXMomentumOptimizerAdapter(int nDoF)
+   public CVXMomentumOptimizerAdapter(int nDoF, YoVariableRegistry registry)
    {
       rhoSize = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize;
       nSupportVectors = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nSupportVectors;
@@ -31,6 +34,8 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
 
       outputRho = new DenseMatrix64F(rhoSize, 1);
       rhoPrevious = new DenseMatrix64F(rhoSize, 1);
+      
+      rhoPreviousYoMatrix = new YoMatrix("rhoPreviousYoMatrix", rhoSize, 1, registry);
    }
 
    public void setRateOfChangeOfGroundReactionForceRegularization(DenseMatrix64F wRhoSmoother)
@@ -99,6 +104,7 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoMin(rhoMin);
       
       //Wrho
+      rhoPreviousYoMatrix.get(rhoPrevious);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPrevious(rhoPrevious);
       
       //QfeetCoP
@@ -109,7 +115,6 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
    public int solve() throws NoConvergenceException
    {
       CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput momentumOptimizerWithGRFPenalizedSmootherNativeOutput;
-      rhoPrevious.set(outputRho);
       int ret=-999;
 
       try
@@ -122,6 +127,8 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
          outputRho = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getRho();
          outputJointAccelerations = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getJointAccelerations();
          outputOptVal = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getOptVal();
+         
+         rhoPreviousYoMatrix.set(outputRho);
       }
       
       if (ret<0)
