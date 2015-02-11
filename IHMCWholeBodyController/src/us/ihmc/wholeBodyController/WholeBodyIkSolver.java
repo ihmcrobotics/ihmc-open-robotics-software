@@ -127,6 +127,21 @@ abstract public class WholeBodyIkSolver
       return (jointNamesToIndex.get(jointName) != null);
    }
 
+   
+   public boolean checkCollisions(SDFFullRobotModel modelToCheck)
+   {
+      HashMap<String,RigidBodyTransform> bodyTransforms = new HashMap<String,RigidBodyTransform>();
+      for( OneDoFJoint joint : modelToCheck.getOneDoFJoints())
+      {
+         String bodyName     = joint.getSuccessor().getName();
+         RigidBodyTransform bodyTransform = joint.getFrameAfterJoint().getTransformToWorldFrame();
+         
+         bodyTransforms.put(bodyName, bodyTransform);
+      }
+      
+      return getHierarchicalSolver().collisionAvoidance.hasCollision( bodyTransforms );
+   }
+   
    /*
     * Verbosity levels:
     * 0: none
