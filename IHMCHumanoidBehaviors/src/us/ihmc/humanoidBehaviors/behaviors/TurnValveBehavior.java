@@ -74,6 +74,9 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private double maxObservedWristForce = 0.0;
    private double maxObservedCapturePointError = 0.0;
+   
+   private final double minDistanceForWalkingBetweenTurns = 0.1;
+   private final double minYawDeltaForWalkingBetweenTurns = Math.toRadians(5.0);
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
@@ -95,6 +98,9 @@ public class TurnValveBehavior extends BehaviorInterface
       this.tippingDetected = tippingDetectedBoolean;
       this.yoTime = yoTime;
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
+      
+      walkToLocationBehavior.setDistanceThreshold(minDistanceForWalkingBetweenTurns);
+      walkToLocationBehavior.setYawAngleThreshold(minYawDeltaForWalkingBetweenTurns);
 
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
    }
@@ -322,6 +328,12 @@ public class TurnValveBehavior extends BehaviorInterface
    {
       //      currentBehavior.finalize();
       hasInputBeenSet.set(false);
+      
+      handPoseBehavior.finalize();
+      walkToLocationBehavior.finalize();
+      comHeightBehavior.finalize();
+      graspValveBehavior.finalize();
+      scriptBehavior.finalize();      
    }
 
    @Override

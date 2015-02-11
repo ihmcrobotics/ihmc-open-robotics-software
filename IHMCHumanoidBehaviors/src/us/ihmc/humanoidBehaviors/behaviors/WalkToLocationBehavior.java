@@ -55,6 +55,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
+   
+   private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
@@ -135,18 +137,22 @@ public class WalkToLocationBehavior extends BehaviorInterface
       FramePose2d endPose = new FramePose2d(worldFrame);
       endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
-
+            
       footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
       footstepGenerator.initialize();
-      footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
-
-      FramePoint midFeetPosition = new FramePoint(referenceFrames.getMidFeetZUpFrame());
-      midFeetPosition.changeFrame(worldFrame);
-
-      for (int i = 0; i < footsteps.size(); i++)
+      
+      if(footstepGenerator.getDistance() > minDistanceThresholdForWalking || Math.abs(footstepGenerator.getSignedInitialTurnDirection()) > minYawThresholdForWalking) 
       {
-         Footstep footstep = footsteps.get(i);
-         footstep.setZ(midFeetPosition.getZ());
+         footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
+
+         FramePoint midFeetPosition = new FramePoint(referenceFrames.getMidFeetZUpFrame());
+         midFeetPosition.changeFrame(worldFrame);
+
+         for (int i = 0; i < footsteps.size(); i++)
+         {
+            Footstep footstep = footsteps.get(i);
+            footstep.setZ(midFeetPosition.getZ());
+         }         
       }
 
       footstepListBehavior.set(footsteps);
@@ -211,6 +217,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       if (!haveFootstepsBeenGenerated.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
          return false;
+      if (haveFootstepsBeenGenerated.getBooleanValue() && footsteps.size() == 0)
+         return true;
       return footstepListBehavior.isDone();
    }
 
@@ -235,6 +243,16 @@ public class WalkToLocationBehavior extends BehaviorInterface
    public void setFootstepLength(double footstepLength)
    {
       pathType.setStepLength(footstepLength);
+   }
+   
+   public void setDistanceThreshold(double minDistanceThresholdForWalking) 
+   {
+      this.minDistanceThresholdForWalking = minDistanceThresholdForWalking;      
+   }
+   
+   public void setYawAngleThreshold(double minYawThresholdForWalking)
+   {
+      this.minYawThresholdForWalking = minYawThresholdForWalking;
    }
 
 }
