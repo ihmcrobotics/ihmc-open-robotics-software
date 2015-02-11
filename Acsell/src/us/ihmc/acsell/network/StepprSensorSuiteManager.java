@@ -3,29 +3,34 @@ package us.ihmc.acsell.network;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.PacketCommunicator;
-import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 
 public class StepprSensorSuiteManager implements DRCSensorSuiteManager
 {
-
-   @Override
-   public void initializeSimulatedSensors(PacketCommunicator scsCommunicator, PacketCommunicator fieldComputerClient, RobotPoseBuffer robotPoseBuffer,
-         AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI)
+   private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.SENSOR_MANAGER.ordinal(), "STEPPR_SENSOR_MANAGER");
+   
+   public StepprSensorSuiteManager(SDFFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
    {
-
+   }
+   
+   @Override
+   public void initializeSimulatedSensors(PacketCommunicator packetCommunicator)
+   {
    }
 
    @Override
-   public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-         SDFFullRobotModel sdfFullRobotModel, PacketCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
+   public void initializePhysicalSensors(URI sensorURI)
    {
-      // Faking the LIDAR
-      new PointCloudDataReceiver(robotPoseBuffer, networkingManager, sdfFullRobotModel, lidarDataFilter);
    }
 
+
+   @Override
+   public PacketCommunicator getProcessedSensorsCommunicator()
+   {
+      return sensorSuitePacketCommunicator;
+   }
 }
