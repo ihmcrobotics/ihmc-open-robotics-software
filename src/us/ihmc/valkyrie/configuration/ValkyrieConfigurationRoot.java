@@ -14,11 +14,13 @@ public class ValkyrieConfigurationRoot
 
    public static final String SCHEDULE_FILE = "main_ihmc.yaml";
    public static final String URDF_FILE = "models/V1_hw_ihmc.urdf";
+//   public static final String URDF_FILE = "models/V1_hw_reduced_polygon_count_ihmc.urdf";
    public static final String SDF_FILE;
    static
    {
       if (VALKYRIE_WITH_ARMS)
          SDF_FILE = "models/V1/sdf/V1_sim_shells.sdf";
+//    	  SDF_FILE = "models/V1/sdf/V1_sim_shells_reduced_polygon_count.sdf";
       else
          SDF_FILE = "models/V1/sdf/V1_sim_shells_no_arms.sdf";
    }
