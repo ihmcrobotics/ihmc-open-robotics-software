@@ -42,7 +42,10 @@ import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
+import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCSimulationFactory
 {
@@ -63,7 +66,7 @@ public class DRCSimulationFactory
    
    private final YoVariableServer yoVariableServer;
 
-   private ThreadDataSynchronizer threadDataSynchronizer;
+   private ThreadDataSynchronizerInterface threadDataSynchronizer;
 
    private GlobalDataProducer globalDataProducer;
    
@@ -146,7 +149,17 @@ public class DRCSimulationFactory
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, stateEstimatorParameters);
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
-      threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
+      if (RUN_MULTI_THREADED)
+      {
+         threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
+      }
+      else
+      {
+         YoVariableRegistry threadDataSynchronizerRegistry = new YoVariableRegistry("ThreadDataSynchronizerRegistry");
+         threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(drcRobotModel, threadDataSynchronizerRegistry);
+         scs.addYoVariableRegistry(threadDataSynchronizerRegistry);
+      }
+
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
  
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
@@ -302,7 +315,7 @@ public class DRCSimulationFactory
       drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externelPelvisCorrectorSubscriber);
    }
    
-   public ThreadDataSynchronizer getThreadDataSynchronizer()
+   public ThreadDataSynchronizerInterface getThreadDataSynchronizer()
    {
       return threadDataSynchronizer;
    }

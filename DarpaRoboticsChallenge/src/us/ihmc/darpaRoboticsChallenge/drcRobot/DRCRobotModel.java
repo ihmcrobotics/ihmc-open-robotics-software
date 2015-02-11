@@ -24,7 +24,7 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 import com.jme3.math.Transform;
 
@@ -68,7 +68,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
       
    public abstract HandCommandManager createHandCommandManager(AbstractNetworkProcessorNetworkingManager networkManager);
    
-   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer, GlobalDataProducer globalDataProducer);
+   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
 
    public abstract DRCHandType getDRCHandType();
    
