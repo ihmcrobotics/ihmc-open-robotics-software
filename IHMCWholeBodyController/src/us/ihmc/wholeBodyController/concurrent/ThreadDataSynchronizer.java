@@ -2,7 +2,6 @@ package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
 
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -10,7 +9,7 @@ import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class ThreadDataSynchronizer
+public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
    private final SDFFullRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
@@ -52,6 +51,7 @@ public class ThreadDataSynchronizer
       controllerStateCopier = new ConcurrentCopier<>(controllerStateCopierBuilder);
    }
 
+   @Override
    public boolean receiveEstimatorStateForController()
    {
       IntermediateEstimatorStateHolder estimatorStateHolder = estimatorStateCopier.getCopyForReading();
@@ -69,68 +69,81 @@ public class ThreadDataSynchronizer
       }
    }
 
+   @Override
    public void publishEstimatorState(long timestamp, long estimatorTick, long estimatorClockStartTime)
-   {
+   {      
       IntermediateEstimatorStateHolder estimatorStateHolder = estimatorStateCopier.getCopyForWriting();
       estimatorStateHolder.setFromEstimatorModel(timestamp, estimatorTick, estimatorClockStartTime);
       estimatorStateCopier.commit();
    }
 
+   @Override
    public SDFFullRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
 
+   @Override
    public ForceSensorDataHolder getEstimatorForceSensorDataHolder()
    {
       return estimatorForceSensorDataHolder;
    }
 
+   @Override
    public SDFFullRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }
 
+   @Override
    public ForceSensorDataHolder getControllerForceSensorDataHolder()
    {
       return controllerForceSensorDataHolder;
    }
 
+   @Override
    public RawJointSensorDataHolderMap getEstimatorRawJointSensorDataHolderMap()
    {
       return estimatorRawJointSensorDataHolderMap;
    }
 
+   @Override
    public RawJointSensorDataHolderMap getControllerRawJointSensorDataHolderMap()
    {
       return controllerRawJointSensorDataHolderMap;
    }
 
+   @Override
    public CenterOfPressureDataHolder getEstimatorCenterOfPressureDataHolder()
    {
       return estimatorCenterOfPressureDataHolder;
    }
 
+   @Override
    public CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder()
    {
       return controllerCenterOfPressureDataHolder;
    }
 
+   @Override
    public long getTimestamp()
    {
       return timestamp;
    }
 
+   @Override
    public long getEstimatorClockStartTime()
    {
       return estimatorClockStartTime;
    }
 
+   @Override
    public long getEstimatorTick()
    {
       return estimatorTick;
    }
 
+   @Override
    public void publishControllerData()
    {
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForWriting();
@@ -141,6 +154,7 @@ public class ThreadDataSynchronizer
       }
    }
 
+   @Override
    public boolean receiveControllerDataForEstimator()
    {
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForReading();

@@ -57,7 +57,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 import com.jme3.math.Transform;
@@ -340,7 +340,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizer threadDataSynchronizer,
+   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
          GlobalDataProducer globalDataProducer)
    {
       switch (getHandType())

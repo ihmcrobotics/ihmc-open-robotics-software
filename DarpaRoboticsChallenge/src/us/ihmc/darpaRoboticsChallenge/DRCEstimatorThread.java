@@ -35,7 +35,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -54,7 +54,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final DRCKinematicsBasedStateEstimator drcStateEstimator;
 
-   private final ThreadDataSynchronizer threadDataSynchronizer;
+   private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final SensorReader sensorReader;
 
    private final LongYoVariable estimatorTime = new LongYoVariable("estimatorTime", estimatorRegistry);
@@ -70,7 +70,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
    
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, StateEstimatorParameters stateEstimatorParameters,
-		   SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
+		   SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;

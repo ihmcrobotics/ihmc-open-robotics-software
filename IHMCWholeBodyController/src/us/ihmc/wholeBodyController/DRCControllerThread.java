@@ -2,7 +2,6 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -37,7 +36,7 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -78,7 +77,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final ForceSensorDataHolder forceSensorDataHolderForController;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
-   private final ThreadDataSynchronizer threadDataSynchronizer;
+   private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final DRCOutputWriter outputWriter;
 
    private final RobotController robotController;
@@ -105,7 +104,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
-         MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter,
+         MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
          GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
