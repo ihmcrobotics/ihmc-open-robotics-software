@@ -20,7 +20,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -44,7 +44,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    private final long controlDTInNS;
    private final long estimatorDTInNS;
 
-   private final ThreadDataSynchronizer threadDataSynchronizer;
+   private final ThreadDataSynchronizerInterface threadDataSynchronizer;
 
    private final SideDependentList<FingerStateProvider> fingerStateProviders = new SideDependentList<>();
 
@@ -58,7 +58,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
-   public SimulatedRobotiqHandsController(SDFRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizer threadDataSynchronizer,
+   public SimulatedRobotiqHandsController(SDFRobot simulatedRobot, DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer,
          GlobalDataProducer globalDataProducer)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
