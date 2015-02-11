@@ -3,9 +3,9 @@ package us.ihmc.communication.configuration;
 public enum NetworkParameterKeys
 {
    robotController(true, "Hostname/IP of the robot controller."),
-   logger(true, "Hostname/IP of the logger."),
-   networkManager(true, "Hostname/IP of the network manager, as seen from the communication shaper."),
-   networkManagerForUI(true, "Hostname/IP of the networkmanager, as seen from the UI. In normal operation, this is the same as networkmanager"),
+   logger(true, "Hostname/IP of the logger or visualizer network."),
+   networkManager(false, "Hostname/IP of the network manager, as seen from the communication shaper."),
+   networkManagerForUI(false, "Hostname/IP of the networkmanager, as seen from the UI. In normal operation, this is the same as networkmanager"),
    
    rosURI(false, "Fully qualified ROS master URI."),
    head(false, "Hostname/IP of the head."),
@@ -14,8 +14,7 @@ public enum NetworkParameterKeys
    
    onboard1(false, "IP of first onboard computer"),
    onboard2(false, "IP of second onboard computer"),
-   onboard3(false, "IP of third onboard computer"),
-   ;
+   onboard3(false, "IP of third onboard computer");
    
    
    private final boolean required;
