@@ -36,6 +36,7 @@ public class PlaneContactWrenchProcessor
    private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
 
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
 
    public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
@@ -63,6 +64,11 @@ public class PlaneContactWrenchProcessor
          footCenter2d.setToNaN();
          cops.put(contactableBody, footCenter2d);
       
+         
+         YoFramePoint2d yoCop = new YoFramePoint2d(contactableBody.getName() + "CoP", contactableBody.getSoleFrame(), registry);
+         yoCop.set(footCenter2d);
+         yoCops.put(contactableBody, yoCop);
+         
          if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
@@ -83,6 +89,9 @@ public class PlaneContactWrenchProcessor
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          FramePoint2d cop = cops.get(contactablePlaneBody);
+         YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
+         yoCop.getFrameTuple2d(cop);
+         
          Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
 
          if (wrench != null)
@@ -104,12 +113,9 @@ public class PlaneContactWrenchProcessor
             centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
             cop.setToNaN();
          }
+         
+         yoCop.set(cop);
       }
-   }
-
-   public Map<ContactablePlaneBody, FramePoint2d> getCops()
-   {
-      return cops;
    }
 
    public void initialize()
@@ -119,5 +125,14 @@ public class PlaneContactWrenchProcessor
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          cops.get(contactablePlaneBody).setToZero((contactablePlaneBody.getSoleFrame()));
       }
+   }
+
+   public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
+   {
+      YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
+      FramePoint2d cop = cops.get(contactablePlaneBody);
+      
+      yoCop.getFrameTuple2d(cop);
+      return cop;
    }
 }
