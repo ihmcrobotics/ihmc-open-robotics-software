@@ -403,21 +403,20 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       comeToStop.set(true);
 
       computeConstantCMPs(this.footstepList);
-      computeCapturePointCornerPoints(doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue());
+      double stepDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
+      computeCapturePointCornerPoints(stepDuration);
 
-      tmp2dFramePoint1.setIncludingFrame(capturePointCornerPoints.get(1).getReferenceFrame(), capturePointCornerPoints.get(1).getX(), capturePointCornerPoints
-            .get(1).getY());
-      tmp2dFramePoint2.setIncludingFrame(footstepList.get(0).getReferenceFrame(), footstepList.get(0).getX(), footstepList.get(0).getY());
+      capturePointCornerPoints.get(1).getFrameTuple2dIncludingFrame(tmp2dFramePoint1);
+      tmp2dFramePoint2.setByProjectionOntoXYPlaneIncludingFrame(footstepList.get(0));
 
       frameLine2d.set(tmp2dFramePoint1, tmp2dFramePoint2);
 
       CapturePointTools.computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(actualCapturePointPosition, frameLine2d, tmp2dFramePoint3);
 
-      capturePointCornerPoints.get(0).set(tmp2dFramePoint3.getX(), tmp2dFramePoint3.getY(), 0);
+      capturePointCornerPoints.get(0).setXY(tmp2dFramePoint3);
 
       CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCentroidalMomentumPivots.get(0), capturePointCornerPoints.get(1),
-            capturePointCornerPoints.get(0), omega0.getDoubleValue(),
-            singleSupportDuration.getDoubleValue() + doubleSupportDuration.getDoubleValue());
+            capturePointCornerPoints.get(0), omega0.getDoubleValue(), stepDuration);
 
       desiredCapturePointPosition.set(capturePointCornerPoints.get(0));
       singleSupportInitialDesiredCapturePointPosition.set(desiredCapturePointPosition);
