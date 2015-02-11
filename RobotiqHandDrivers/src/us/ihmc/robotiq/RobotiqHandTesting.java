@@ -20,17 +20,17 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandTesting
 {
-	private JFrame frame = new JFrame();
-	private JPanel panel = new JPanel(new GridBagLayout());
-	private GridBagConstraints c = new GridBagConstraints();
+	private final JFrame frame = new JFrame();
+	private final JPanel panel = new JPanel(new GridBagLayout());
+	private final GridBagConstraints c = new GridBagConstraints();
 	
-	private SliderWithTwoButtonsPanel finger1Panel = new SliderWithTwoButtonsPanel("Index Finger");
-	private SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel("Middle Finger");
-	private SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel("Thumb");
+	private final SliderWithTwoButtonsPanel finger1Panel = new SliderWithTwoButtonsPanel("Index Finger");
+	private final SliderWithTwoButtonsPanel finger2Panel = new SliderWithTwoButtonsPanel("Middle Finger");
+	private final SliderWithTwoButtonsPanel finger3Panel = new SliderWithTwoButtonsPanel("Thumb");
 	
-	private JPanel buttonPanel = new JPanel(new GridBagLayout());
-	private JButton initializeButton = new JButton("Initialize");
-	private JButton resetButton = new JButton("Reset");
+	private final JPanel buttonPanel = new JPanel(new GridBagLayout());
+	private final JButton initializeButton = new JButton("Initialize");
+	private final JButton resetButton = new JButton("Reset");
 	
 	private RobotiqHandCommandManager manager;
 
@@ -43,7 +43,7 @@ public class RobotiqHandTesting
 	
 	private void init()
 	{
-		manager = new RobotiqHandCommandManager(null);
+		manager = new RobotiqHandCommandManager();
 
 		//		setupSliderListeners();
 		

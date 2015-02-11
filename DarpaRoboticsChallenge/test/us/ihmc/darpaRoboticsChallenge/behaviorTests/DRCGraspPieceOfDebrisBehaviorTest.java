@@ -13,9 +13,11 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.communication.NetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
@@ -141,7 +143,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       testEnvironment.createDebrisContactController();
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null, startingLocation,
-            simulationTestingParameters, false, getRobotModel(), controllerCommunicator);
+            simulationTestingParameters, getRobotModel(), controllerCommunicator);
 
       Robot robotToTest = drcBehaviorTestHelper.getRobot();
       yoTime = robotToTest.getYoTime();
@@ -156,10 +158,18 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+      PacketCommunicator networkProcesor = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
             "DRCComHeightBehaviorTestJunkyCommunicator");
 
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
+      
+      NetworkProcessor networkProcessor = new NetworkProcessor();
+      networkProcessor.attachPacketCommunicator(networkProcesor);
+      networkProcessor.attachPacketCommunicator(controllerCommunicator);
+      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
+      
+      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
    @AverageDuration(duration = 90.0)
@@ -192,7 +202,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, fullRobotModel, midFeetZUpFrame,
             getRobotModel(), yoTime);
-      communicationBridge.attachGlobalListenerToController(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
+      communicationBridge.attachGlobalListener(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
 
       graspPieceOfDebrisBehavior.initialize();
 

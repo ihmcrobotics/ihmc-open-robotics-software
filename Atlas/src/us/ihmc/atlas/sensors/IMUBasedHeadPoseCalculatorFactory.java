@@ -9,9 +9,8 @@ import javax.vecmath.Vector3d;
 import multisense_ros.RawImuData;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.communication.NetworkProcessorControllerStateHandler;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
@@ -29,16 +28,17 @@ public class IMUBasedHeadPoseCalculatorFactory {
 	{
 	}
 	
-	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation, PacketCommunicator scsCommunicator)
+	static IMUBasedHeadPoseCalculator create(PacketCommunicator packetCommunicator, DRCRobotSensorInformation sensorInformation)
 	{
-		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator, sensorInformation);
-		scsCommunicator.attachListener(RawIMUPacket.class, calculator); return calculator;
+		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(packetCommunicator, sensorInformation);
+		packetCommunicator.attachListener(RawIMUPacket.class, calculator); 
+		return calculator;
 	}
 
-	static IMUBasedHeadPoseCalculator create(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation, RosMainNode rosMainNode)
+	static IMUBasedHeadPoseCalculator create(PacketCommunicator packetCommunicator, DRCRobotSensorInformation sensorInformation, RosMainNode rosMainNode)
 	{
 		
-		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(uiCommunicator, sensorInformation);
+		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(packetCommunicator, sensorInformation);
 		rosMainNode.attachSubscriber(AtlasSensorInformation.head_imu_acceleration_topic, calculator);
 		boolean USE_REAL_ROBOT_TRANSFORM=true;
 		if(USE_REAL_ROBOT_TRANSFORM)
@@ -104,16 +104,16 @@ class RunningStatistics
 class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_ros.RawImuData> implements PacketConsumer<RawIMUPacket>
 {
 	
-	NetworkProcessorControllerStateHandler uiCommunicator;
+	PacketCommunicator packetCommunicator;
 	HeadPosePacket headPosePacket=new HeadPosePacket();
 	DRCRobotSensorInformation sensorInformation;
 	ReferenceFrame headIMUFrameWhenLevel;
 	RunningStatistics stat = new RunningStatistics(10);
 	
 
-	public IMUBasedHeadPoseCalculator(NetworkProcessorControllerStateHandler uiCommunicator, DRCRobotSensorInformation sensorInformation) {
+	public IMUBasedHeadPoseCalculator(PacketCommunicator packetCommunicator, DRCRobotSensorInformation sensorInformation) {
 		super(multisense_ros.RawImuData._TYPE);
-		this.uiCommunicator = uiCommunicator;
+		this.packetCommunicator = packetCommunicator;
 		this.sensorInformation = sensorInformation;
 		
 		headIMUFrameWhenLevel = sensorInformation.getHeadIMUFrameWhenLevel();
@@ -148,7 +148,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 				headPosePacket.status = MeasurementStatus.UNSTABLE_WAIT;
 			}
 
-		uiCommunicator.sendPacket(headPosePacket);
+		packetCommunicator.send(headPosePacket);
 	}
 	private static double[] EulerAnglesFromVectors(Vector3d vectorPreTransform, Vector3d vectorPostTransform)
 	{

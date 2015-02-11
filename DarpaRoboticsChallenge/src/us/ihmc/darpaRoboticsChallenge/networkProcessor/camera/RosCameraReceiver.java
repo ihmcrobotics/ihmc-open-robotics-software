@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import org.ros.message.Time;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
@@ -28,14 +28,14 @@ public class RosCameraReceiver extends CameraDataReceiver
    private final ROSNativeTransformTools rosTransformProvider;
    private final DRCRobotCameraParameters cameraParameters;
    private RosPoseStampedPublisher robotPosePublisher;
-   private Vector3d position= new Vector3d();
-   private Quat4d orientation = new Quat4d();
+   private final Vector3d position= new Vector3d();
+   private final Quat4d orientation = new Quat4d();
 
    public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RobotPoseBuffer robotPoseBuffer,
-         final RosMainNode rosMainNode, final AbstractNetworkProcessorNetworkingManager networkingManager,
+         final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
          final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger, URI sensorURI)
    {
-      super(robotPoseBuffer, networkingManager, ppsTimestampOffsetProvider);
+      super(robotPoseBuffer, packetCommunicator, ppsTimestampOffsetProvider);
 
       this.cameraParameters = cameraParameters;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;

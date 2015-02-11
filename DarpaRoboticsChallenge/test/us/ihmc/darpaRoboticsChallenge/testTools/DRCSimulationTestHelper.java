@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
@@ -26,6 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -99,10 +100,21 @@ public class DRCSimulationTestHelper
       simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
+      
+      
+      
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
       if (startNetworkProcessor)
-         simulationStarter.setNetworkProcessorOutputPacketCommunicator(networkObjectCommunicator);
-      simulationStarter.setControllerInputPacketCommunicator(networkObjectCommunicator);
-      simulationStarter.startSimulation(startNetworkProcessor, false);
+      {
+         networkProcessorParameters.setUseUiModule(startNetworkProcessor);
+         networkProcessorParameters.setUseSensorModule(startNetworkProcessor);
+         networkProcessorParameters.setUsePerceptionModule(startNetworkProcessor);
+         
+         simulationStarter.addPacketCommunicatorToNetworkProcessor(networkObjectCommunicator);
+      }
+      
+      simulationStarter.setControllerPacketCommunicator(networkObjectCommunicator);
+      simulationStarter.startSimulation(networkProcessorParameters, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
       sdfRobot = simulationStarter.getSDFRobot();

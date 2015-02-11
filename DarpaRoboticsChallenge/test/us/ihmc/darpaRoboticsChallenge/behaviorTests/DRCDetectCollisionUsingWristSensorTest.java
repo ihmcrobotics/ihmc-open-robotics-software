@@ -13,9 +13,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.communication.NetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -104,12 +105,20 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerObjectCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, true, getRobotModel());
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
 
       robotToTest = drcSimulationTestHelper.getRobot();
       fullRobotModel = getRobotModel().createFullRobotModel();
+      
+      KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
+      
+      NetworkProcessor networkProcessor = new NetworkProcessor();
+      networkProcessor.attachPacketCommunicator(npObjectCommunicator);
+      networkProcessor.attachPacketCommunicator(controllerObjectCommunicator);
+      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
 
-      communicationBridge = new BehaviorCommunicationBridge(npObjectCommunicator, controllerObjectCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, robotToTest.getRobotsYoVariableRegistry());
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);

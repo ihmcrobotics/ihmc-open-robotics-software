@@ -12,9 +12,11 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.NetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
@@ -104,15 +106,18 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(),
          "DRCControllerCommunicator");
-   private final PacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCJunkyCommunicator");
-   private final BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(networkObjectCommunicator, controllerCommunicator, registry);
+   private final PacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(),
+         "networkProcessor");
+   private final KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+         PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
+   
+   private final BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, registry);
 
    final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
+   private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
 
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
@@ -131,6 +136,11 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       {
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
+      
+      NetworkProcessor networkProcessor = new NetworkProcessor();
+      networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
+      networkProcessor.attachPacketCommunicator(controllerCommunicator);
+      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 

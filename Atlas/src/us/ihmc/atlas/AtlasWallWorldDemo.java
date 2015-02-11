@@ -4,6 +4,7 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -23,6 +24,13 @@ public class AtlasWallWorldDemo
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
 
-      simulationStarter.startSimulation(true, true);
+      boolean automaticallyStartSimulation = true;
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);
+      networkProcessorParameters.setUseBehaviorModule(automaticallyStartSimulation);
+      networkProcessorParameters.setUsePerceptionModule(automaticallyStartSimulation);
+      networkProcessorParameters.setUseSensorModule(automaticallyStartSimulation);
+      
+      simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }
 }

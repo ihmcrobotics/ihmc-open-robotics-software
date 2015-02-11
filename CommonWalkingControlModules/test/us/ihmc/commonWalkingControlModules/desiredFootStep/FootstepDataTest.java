@@ -17,10 +17,10 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.KryoPacketClient;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootstepData;

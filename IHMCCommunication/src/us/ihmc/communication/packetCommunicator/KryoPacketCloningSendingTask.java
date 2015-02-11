@@ -19,7 +19,10 @@ public class KryoPacketCloningSendingTask implements Callable<Void>
    private final AtomicBoolean isRunning = new AtomicBoolean();
    private final Kryo kryo = new Kryo();
    private final ArrayList<Class<?>> packetList = new ArrayList<Class<?>>();
+   private final boolean clonePackets = true;
 
+   
+   //should just populate the class list using the passed in classes instead of the whole classlist
    public KryoPacketCloningSendingTask(NetClassList classList, PacketConsumer consumer)
    {
       classList.getPacketClassList(packetList);
@@ -55,7 +58,7 @@ public class KryoPacketCloningSendingTask implements Callable<Void>
       isRunning.set(true);
       while ((packetToSend = packetQueue.poll()) != null)
       {
-         if (packetList.contains(packetToSend.getClass()))
+         if (packetList.contains(packetToSend.getClass()) && clonePackets )
          {
             Packet<?> clonedPacket = kryo.copy(packetToSend);
             consumer.receivedPacket(clonedPacket);

@@ -21,24 +21,24 @@ public class HandPoseStatusProducer
    {
       HandPoseStatus handPoseStatus = new HandPoseStatus(currentPosePosition, currentPoseOrientationInWorldFrame, desiredPosePosition,
             desiredPoseOrientationInWorldFrame, robotSide);
-      objectCommunicator.sendPacket(handPoseStatus);
+      objectCommunicator.queueDataToSend(handPoseStatus);
    }
 
    public void sendCompletedStatus(RobotSide robotSide)
    {
       HandPoseStatus handPoseStatus = HandPoseStatus.createPositionIsReachedPacket(robotSide);
-      objectCommunicator.sendPacket(handPoseStatus);
+      objectCommunicator.queueDataToSend(handPoseStatus);
    }
    
    public void sendStartedStatus(RobotSide robotSide)
    {
       HandPoseStatus handPoseStatus = HandPoseStatus.createHandPoseIsStarted(robotSide);
-      objectCommunicator.sendPacket(handPoseStatus);
+      objectCommunicator.queueDataToSend(handPoseStatus);
    }
 
    public void sendTimeOutIsReachedStatus(RobotSide robotSide)
    {
       HandPoseStatus handPoseStatus = HandPoseStatus.createTimeOutIsReachedPacket(robotSide);
-      objectCommunicator.sendPacket(handPoseStatus);
+      objectCommunicator.queueDataToSend(handPoseStatus);
    }
 }

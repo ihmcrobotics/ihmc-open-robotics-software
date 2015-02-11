@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoPacketClient;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkConfigParameters;
@@ -45,4 +46,5 @@ public abstract class HandCommandManager //implements HandCommandInterface
 	
 	protected abstract void setupInboundPacketListeners();
 	protected abstract void setupOutboundPacketListeners();
+	public abstract PacketCommunicator getCommunicator();
 }

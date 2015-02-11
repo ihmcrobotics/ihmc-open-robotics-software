@@ -14,9 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.communication.NetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -126,10 +128,18 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      PacketCommunicator junkyObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
+      PacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
             "DRCComHeightBehaviorTestJunkyCommunicator");
+      
+      KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
+      
+      NetworkProcessor networkProcessor = new NetworkProcessor();
+      networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
+      networkProcessor.attachPacketCommunicator(controllerCommunicator);
+      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
 
-      communicationBridge = new BehaviorCommunicationBridge(junkyObjectCommunicator, controllerCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
    @AverageDuration(duration = 50.0)
@@ -160,7 +170,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       final WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(communicationBridge, fullRobotModel, yoTime, getRobotModel().getPhysicalProperties()
             .getAnkleHeight());
-      communicationBridge.attachGlobalListenerToController(walkToGoalBehavior.getControllerGlobalPacketConsumer());
+      communicationBridge.attachGlobalListener(walkToGoalBehavior.getControllerGlobalPacketConsumer());
       walkToGoalBehavior.initialize();
 
       WalkToGoalBehaviorPacket requestedGoal = new WalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(),
@@ -172,7 +182,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       WalkToGoalBehaviorPacket walkToGoalExecutePacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.EXECUTE);
       walkToGoalBehavior.consumeObjectFromNetworkProcessor(walkToGoalExecutePacket);
-
+      walkToGoalBehavior.doControl();
       assertTrue( walkToGoalBehavior.hasInputBeenSet() );
       
       boolean success = executeBehavior(walkToGoalBehavior, trajectoryTime);

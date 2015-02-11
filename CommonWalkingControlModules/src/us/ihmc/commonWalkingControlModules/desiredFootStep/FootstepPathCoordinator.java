@@ -232,7 +232,7 @@ public class FootstepPathCoordinator implements FootstepProvider
             footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue());
          }
 
-         footstepStatusDataProducer.sendPacket(footstepStatus);
+         footstepStatusDataProducer.queueDataToSend(footstepStatus);
       }
    }
 
@@ -279,7 +279,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       if (footstepStatusDataProducer != null)
       {
          FootstepStatus footstepStatus = FootstepStatus.createWalkingIsDonePacket();
-         footstepStatusDataProducer.sendPacket(footstepStatus);
+         footstepStatusDataProducer.queueDataToSend(footstepStatus);
       }
    }
 

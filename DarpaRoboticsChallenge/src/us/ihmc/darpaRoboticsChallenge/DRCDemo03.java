@@ -4,6 +4,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemoEnvironmentWithBoxAndSteeringWheel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -51,7 +52,11 @@ public abstract class DRCDemo03
       }
       setUpJoyStick(simulationConstructionSet);
 
-      simulationStarter.startSimulation(true, false);
+      boolean automaticallyStartSimulation = false;
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);
+      
+      simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }
 
    private void setUpJoyStick(SimulationConstructionSet simulationConstructionSet)

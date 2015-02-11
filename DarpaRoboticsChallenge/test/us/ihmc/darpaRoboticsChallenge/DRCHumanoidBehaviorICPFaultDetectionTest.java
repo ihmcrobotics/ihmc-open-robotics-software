@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -60,8 +61,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private final static boolean VISUALIZE_FORCE = true;
 
    private double swingTime, transferTime;
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
+   private final SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
+   private final SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
    private DRCPushRobotController pushRobotController;
    private DRCSimulationFactory drcSimulation;
@@ -260,7 +261,13 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    {
       DRCSimulationFactory.RUN_MULTI_THREADED = false;
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
-      simulationStarter.startSimulation(true, true);
+      
+      boolean automaticallyStartSimulation = true;
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);
+      
+      simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
+      
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();

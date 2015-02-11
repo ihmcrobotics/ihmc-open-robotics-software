@@ -3,16 +3,16 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -31,11 +31,13 @@ public class AtlasROSAPISimulator
       PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BROADCAST.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
 
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
-      simulationStarter.setControllerInputPacketCommunicator(controllerCommunicator);
-      if (startUI)
-         simulationStarter.setNetworkProcessorOutputPacketCommunicator(controllerCommunicator);
-      boolean startNetworkProcessor = startUI;
-      simulationStarter.startSimulation(startNetworkProcessor, true);
+      simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
+      
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters.setUseUiModule(startUI);
+      networkProcessorParameters.setUseRosModule(true);
+      
+      simulationStarter.startSimulation(networkProcessorParameters, true);
 
       URI rosUri = NetworkParameters.getROSURI();
 

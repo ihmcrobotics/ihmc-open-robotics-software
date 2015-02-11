@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.net.PacketCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ThreadTools;
 
@@ -24,13 +24,13 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
    
    public void enableForwarding()
    {
-      communicatorToForwardFrom.attacthGlobalListener(this);
+      communicatorToForwardFrom.attacthGlobalSendListener(this);
       System.out.println("enabled forwarder from " + communicatorToForwardFrom.getClass().getSimpleName());
    }
    
    public void disableForwarding()
    {
-      communicatorToForwardFrom.detachGlobalListener(this);
+      communicatorToForwardFrom.detachGlobalSendListener(this);
       System.out.println("disabled forwarder" + communicatorToForwardFrom.getClass().getSimpleName());
    }
 

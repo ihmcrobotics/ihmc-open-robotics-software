@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.net.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
@@ -42,15 +42,15 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private final PacketCommunicator fieldObjectCommunicator;
    private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredPelvisFrameList = new ArrayList<FramePose>();
-   private WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
-   private boolean USE_INGRESS_ONLY = true;
+   private final WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
+   private final boolean USE_INGRESS_ONLY = true;
    private final YoVariableRegistry registry;
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
    private final YoGraphicShape yoGraphicsShapeDesired;
    private final boolean random = false;
    private final double ERROR_DISTANCE_TOLERANCE = 0.005;
-   private SDFFullRobotModel desiredFullRobotModel;
+   private final SDFFullRobotModel desiredFullRobotModel;
    private YoGraphicShape yoGraphicsShapeActual;
    private YoFramePoint framePoint2;
    private YoFrameOrientation frameOrientation2;

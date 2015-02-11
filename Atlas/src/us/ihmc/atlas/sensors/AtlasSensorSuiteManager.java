@@ -3,33 +3,27 @@ package us.ihmc.atlas.sensors;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
-import us.ihmc.communication.net.PacketCommunicator;
-import us.ihmc.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
-import us.ihmc.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.AtomicSettableTimestampProvider;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
+import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.DRCSensorParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
-import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
-import us.ihmc.ihmcPerception.RosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
+import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
-import us.ihmc.ihmcPerception.footstepPlanner.FootstepPathPlannerService;
-import us.ihmc.ihmcPerception.footstepPlanner.RosFootstepServiceClient;
-import us.ihmc.ihmcPerception.footstepPlanner.aDStar.ADStarPathPlannerService;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -38,123 +32,77 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.wholeBodyController.ArmCalibrationHelper;
+import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
+   private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+         PacketDestination.SENSOR_MANAGER.ordinal(), "ATLAS_SENSOR_MANAGER");
+   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final URI rosCoreURI;
    private final DRCRobotSensorInformation sensorInformation;
-   private final DRCRobotJointMap jointMap;
+   private final SDFFullRobotModel sdfFullRobotModel;
+   private final RobotDataReceiver drcRobotDataReceiver;
+   private final DepthDataFilter lidarDataFilter;
+   private final RobotBoundingBoxes robotBoundingBoxes;
+   private final AtlasTarget targetDeployment;
+   private RobotPoseBuffer robotPoseBuffer;
    private DepthDataProcessor depthDataProcessor;
-   
-   private final AtlasPhysicalProperties physicalProperties;
-   private final FootstepParameters footstepParameters;
 
-   public AtlasSensorSuiteManager(URI rosCoreURI, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
-		   AtlasPhysicalProperties physicalProperties, FootstepParameters footstepParameters)
+   public AtlasSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
+         DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepParameters footstepParameters, SDFFullRobotModel sdfFullRobotModel,
+         DRCHandType handType, AtlasTarget targetDeployment)
    {
-      this.rosCoreURI = rosCoreURI;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
-      this.jointMap = jointMap;
-      this.physicalProperties = physicalProperties;
-      this.footstepParameters = footstepParameters;
+      this.sdfFullRobotModel = sdfFullRobotModel;
+      this.targetDeployment = targetDeployment;
+      this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
+      this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
+      this.lidarDataFilter = new DepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
    }
 
    @Override
-   public void initializeSimulatedSensors(PacketCommunicator scsCommunicator, PacketCommunicator fieldObjectCommunicator, RobotPoseBuffer robotPoseBuffer,
-                                          AbstractNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI)
+   public void initializeSimulatedSensors(PacketCommunicator scsSensorsCommunicator)
    {
-      depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
+      robotPoseBuffer = new RobotPoseBuffer(sensorSuitePacketCommunicator, 10000, timestampProvider);
+      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
 
-      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager,
+      this.depthDataProcessor = new DepthDataProcessor(sensorSuitePacketCommunicator, lidarDataFilter);
+      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
             ppsTimestampOffsetProvider);
 
-//      if (sensorInformation.getPointCloudParameters().length > 0)
-//      {
-//         new SCSPointCloudDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator);
-//      }
-      
-      RosMainNode rosMainNode;
-      RosTfPublisher tfPublisher;
-      
-      
-      if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-      {
-         rosMainNode = new RosMainNode(rosCoreURI,
-               "darpaRoboticsChallange/networkProcessor", true);
+      //      if (sensorInformation.getPointCloudParameters().length > 0)
+      //      {
+      //         new SCSPointCloudDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator);
+      //      }
 
-         RosNativeNetworkProcessor rosNativeNetworkProcessor;
-         if (RosNativeNetworkProcessor.hasNativeLibrary())
-         {
-            rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
-            rosNativeNetworkProcessor.connect();
-         } else
-         {
-            rosNativeNetworkProcessor = null;
-         }
-
-         ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
-         rosTransformProvider.connect();
-         tfPublisher = new RosTfPublisher(rosMainNode);
-         new RosRobotPosePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
-         new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, "atlas");
-         new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, networkingManager, ppsTimestampOffsetProvider);
-
-         
-         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties.getAnkleHeight());
-         networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
-         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-         networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-         
-         FootstepPathPlannerService footstepPathPlannerService;
-//         footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-//         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-         footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-         fieldObjectCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
-         
-         ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-         rosMainNode.execute();
-      }
-      
       if (sensorInformation.getLidarParameters().length > 0)
       {
-    	  SCSLidarDataReceiver scsLidarDataReceiver = new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
-               sensorInformation.getLidarParameters());
-    	  Thread lidarThread = new Thread(scsLidarDataReceiver, "scsLidarDataReceiver");
-    	  lidarThread.start();
-         
-         if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-         {
-            new RosSCSLidarPublisher(scsCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
-         }
-      }
-      
-      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
-      {
-         ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(scsCommunicator, networkingManager, jointMap);
-         cameraReceiver.registerCameraListener(armCalibrationHelper);
+         SCSLidarDataReceiver scsLidarDataReceiver = new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsSensorsCommunicator,
+               ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters());
+         Thread lidarThread = new Thread(scsLidarDataReceiver, "scsLidarDataReceiver");
+         lidarThread.start();
       }
 
-//      boolean USE_REAL_MULTISENSE_HEAD=true;
-//      if(DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS && USE_REAL_MULTISENSE_HEAD)
-//      {
-//         IMUBasedHeadPoseCalculatorFactory.create(networkingManager.getControllerStateHandler(), sensorInformation, rosMainNode);
-//      }
-//      else
-//      {
-//    	 IMUBasedHeadPoseCalculatorFactory.create(networkingManager.getControllerStateHandler(), sensorInformation, fieldObjectCommunicator);
-//      }
+      //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
+      //      {
+      //         ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(sensorSuitePacketCommunicator, jointMap);
+      //         cameraReceiver.registerCameraListener(armCalibrationHelper);
+      //      }
+
+      IMUBasedHeadPoseCalculatorFactory.create(scsSensorsCommunicator, sensorInformation);
    }
 
    @Override
-   public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, AbstractNetworkProcessorNetworkingManager networkingManager,
-                                         SDFFullRobotModel sdfFullRobotModel, PacketCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
+   public void initializePhysicalSensors(URI rosCoreURI)
    {
+      robotPoseBuffer = new RobotPoseBuffer(sensorSuitePacketCommunicator, 100000, timestampProvider);
+      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
+
+      this.depthDataProcessor = new DepthDataProcessor(sensorSuitePacketCommunicator, lidarDataFilter);
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
-      depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
 
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
       if (RosNativeNetworkProcessor.hasNativeLibrary())
@@ -166,54 +114,59 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       {
          rosNativeNetworkProcessor = null;
       }
-      ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
+      ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(rosCoreURI);
       rosTransformProvider.connect();
-     
+
       DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
       DRCRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
       DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       DRCRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
-      
-      
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(depthDataProcessor, rosTransformProvider, robotPoseBuffer,
-            rosMainNode, networkingManager, rosNativeNetworkProcessor,
-            ppsTimestampOffsetProvider, sensorURI, multisenseLeftEyeCameraParameters,
+
+      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(depthDataProcessor, rosTransformProvider, robotPoseBuffer, rosMainNode,
+            sensorSuitePacketCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters,
             multisenseLidarParameters, multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
 
-      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, networkingManager,
+      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, sensorSuitePacketCommunicator,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider, sensorInformation.setupROSParameterSetters());
-            
-//      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
-//      networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
-      
-      if(sensorInformation.setupROSLocationService())
-      {
-         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-         networkingManager.getControllerCommandHandler().attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-      }
-      
-      if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-      {
-         RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
-         RosRobotPosePublisher robotPosePublisher = new RosRobotPosePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
-         new RosLocalizationUpdateSubscriber(rosMainNode, objectCommunicator, networkingManager, ppsTimestampOffsetProvider);
-         multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
-         new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider,"atlas");
-      }
-      
+
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-         
-            
-      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
-      {
-         ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(objectCommunicator, networkingManager, jointMap);
-         multiSenseSensorManager.registerCameraListener(armCalibrationHelper);
-      }
-      
+
+      //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
+      //      {
+      //         ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(sensorSuitePacketCommunicator, jointMap);
+      //         multiSenseSensorManager.registerCameraListener(armCalibrationHelper);
+      //      }
+
       multiSenseSensorManager.initializeParameterListeners();
 
-      IMUBasedHeadPoseCalculatorFactory.create(networkingManager.getControllerStateHandler(), sensorInformation, rosMainNode);
-      rosMainNode.execute();     
+      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
+      rosMainNode.execute();
+   }
+
+   public PacketCommunicator createSensorModule(URI sensorURI)
+   {
+      KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.SENSOR_MANAGER.ordinal(), "ATLAS_SENSOR_MANAGER");
+
+      switch (targetDeployment)
+      {
+      case GAZEBO:
+         System.out.println("Not sure what to do about gazebo sensors!!!");
+         break;
+      case REAL_ROBOT:
+         initializePhysicalSensors(sensorURI);
+         break;
+      case SIM:
+         //         initializeSimulatedSensors(sensorSuitePacketCommunicator);
+         break;
+      }
+      return sensorSuitePacketCommunicator;
+   }
+
+   @Override
+   public PacketCommunicator getProcessedSensorsCommunicator()
+   {
+      return sensorSuitePacketCommunicator;
    }
 
 }
