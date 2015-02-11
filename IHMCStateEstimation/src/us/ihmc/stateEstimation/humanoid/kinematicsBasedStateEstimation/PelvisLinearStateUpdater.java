@@ -357,6 +357,7 @@ public class PelvisLinearStateUpdater
       }
       else
       {
+         yoRootJointPosition.getFrameTuple(rootJointPosition);
          kinematicsBasedLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
          yoRootJointPosition.set(rootJointPosition);
          yoRootJointVelocity.set(rootJointVelocity);
@@ -488,6 +489,7 @@ public class PelvisLinearStateUpdater
    private class TrustOneFootState extends State<EstimationState>
    {
       private final RobotSide trustedSide;
+      private final FramePoint tempRootJointPosition = new FramePoint(worldFrame);
 
       public TrustOneFootState(RobotSide trustedSide)
       {
@@ -498,7 +500,8 @@ public class PelvisLinearStateUpdater
       @Override
       public void doAction()
       {
-         kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(rootJointPosition, trustedSide);
+         yoRootJointPosition.getFrameTuple(tempRootJointPosition);
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(tempRootJointPosition, trustedSide);
          imuDriftCompensator.esimtateDriftIfPossible(trustedSide);
       }
       
@@ -543,6 +546,7 @@ public class PelvisLinearStateUpdater
    
    private void computePositionFromMergingMeasurements()
    {
+      yoRootJointPosition.getFrameTuple(rootJointPosition);
       imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
       kinematicsBasedLinearStateCalculator.getPelvisPosition(pelvisPositionKinPart);
 
