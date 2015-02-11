@@ -27,6 +27,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoMatrix;
 
 
 public class PlaneContactWrenchMatrixCalculator
@@ -51,12 +52,19 @@ public class PlaneContactWrenchMatrixCalculator
    private final DenseMatrix64F qRho;
    private final DenseMatrix64F wRhoMatrix;
    private final DenseMatrix64F wRhoSmootherMatrix;
+   
    private final DenseMatrix64F wRhoPenalizerMatrix;
+   
    private final DenseMatrix64F qFeetCoP;
 
    private final DoubleYoVariable rhoTotal;
-   private final DenseMatrix64F rhoMean;
+   
+   private final DenseMatrix64F rhoMeanTemp;
+   private final YoMatrix rhoMeanYoMatrix;
+   
    private final DenseMatrix64F rhoMeanLoadedEndEffectors;
+   private final YoMatrix rhoMeanLoadedEndEffectorsYoMatrix;
+   
    private RobotSide footUnderCoPControl;
    private ReferenceFrame footCoPReferenceFrame; 
 
@@ -97,8 +105,12 @@ public class PlaneContactWrenchMatrixCalculator
       this.wRhoSmoother.set(wRhoSmoother);
       this.wRhoPenalizer.set(wRhoPenalizer);
 
-      rhoMean = new DenseMatrix64F(rhoSize, 1);
+      rhoMeanTemp = new DenseMatrix64F(rhoSize, 1);
+      rhoMeanYoMatrix = new YoMatrix(name + "RhoMean", rhoSize, 1, registry);
+      
       rhoMeanLoadedEndEffectors = new DenseMatrix64F(planeContactStates.size(), 1);
+      rhoMeanLoadedEndEffectorsYoMatrix = new YoMatrix(name + "RhoMeanLoadedEndEffectorsYoMatrix", planeContactStates.size(), 1, registry);
+      
       rhoTotal = new DoubleYoVariable(name + "RhoTotal", registry);
 
       qRho = new DenseMatrix64F(Wrench.SIZE, rhoSize);
@@ -116,7 +128,7 @@ public class PlaneContactWrenchMatrixCalculator
       wRhoPenalizerMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       CommonOps.setIdentity(wRhoPenalizerMatrix);
       CommonOps.scale(wRhoPenalizer, wRhoPenalizerMatrix);
-
+      
       this.planeContactStates = new ArrayList<PlaneContactState>(planeContactStates);
       
       for (int i = 0; i < this.planeContactStates.size(); i++)
@@ -260,14 +272,15 @@ public class PlaneContactWrenchMatrixCalculator
     * @return Map of the wrenches to be applied on each contactable body.
     */
    public Map<RigidBody, Wrench> computeWrenches(DenseMatrix64F rho)
-   {
+   {      
       int iRho = 0;
 
-      rhoMean.zero();
+      rhoMeanTemp.zero();
+      rhoMeanYoMatrix.set(rhoMeanTemp);
+      
       rhoTotal.set(0.0);
 
       rhoMeanLoadedEndEffectors.zero();
-
       // Reinintialize wrenches
       for (int i = 0; i < planeContactStates.size(); i++)
       {
@@ -295,7 +308,8 @@ public class PlaneContactWrenchMatrixCalculator
         	 tempSum.zero();
         	 for (;iRho < iRhoFinal; iRho++)
         	 {
-        		 rhoMean.set(iRho, rhosAverage);
+        		 rhoMeanTemp.set(iRho, rhosAverage);
+        		 rhoMeanYoMatrix.set(rhoMeanTemp);
 
         		 CommonOps.extract(qRho, 0, SpatialForceVector.SIZE, iRho, iRho + 1, tempVector, 0, 0);
         		 MatrixTools.addMatrixBlock(tempSum, 0, 0, tempVector, 0, 0, SpatialForceVector.SIZE, 1, rho.get(iRho));
@@ -314,37 +328,43 @@ public class PlaneContactWrenchMatrixCalculator
         	 iRho = iRho + planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
          }
       }
-
-      iRho = 0;
-      for (int i = 0; i < planeContactStates.size(); i++)
-      {
-    	  PlaneContactState planeContactState = planeContactStates.get(i);
-
-    	  if (planeContactState.inContact())
-    	  {
-    		  double penaltyScaling = 0.0;
-
-    		  if (rhoTotal.getDoubleValue() > 1e-3)
-    			  penaltyScaling = Math.max(0.0, 1.0 - rhoMeanLoadedEndEffectors.get(i) / rhoTotal.getDoubleValue());
-
-    		  int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
-    		  int iRhoFinal = iRho + rhoSizeTotalForOneEndEffector;
-    		  for (;iRho < iRhoFinal; iRho++)
-    			  wRhoPenalizerMatrix.set(iRho, iRho, wRhoPenalizer.getDoubleValue() * penaltyScaling);
-    	  }
-    	  else
-    	  {
-    		  int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
-
-    		  int iRhoFinal = iRho + rhoSizeTotalForOneEndEffector;
-    		  for (;iRho < iRhoFinal; iRho++)
-    			  wRhoPenalizerMatrix.set(iRho, iRho, 0.0);
-    	  }
-      }
-
+      
+      rhoMeanLoadedEndEffectorsYoMatrix.set(rhoMeanLoadedEndEffectors);
       return wrenches;
    }
 
+   private void computeWRhoPenalizerMatrix()
+   {
+      rhoMeanLoadedEndEffectorsYoMatrix.get(rhoMeanLoadedEndEffectors);
+      
+      int iRho = 0;
+      for (int i = 0; i < planeContactStates.size(); i++)
+      {
+         PlaneContactState planeContactState = planeContactStates.get(i);
+
+         if (planeContactState.inContact())
+         {
+            double penaltyScaling = 0.0;
+
+            if (rhoTotal.getDoubleValue() > 1e-3)
+               penaltyScaling = Math.max(0.0, 1.0 - rhoMeanLoadedEndEffectors.get(i) / rhoTotal.getDoubleValue());
+
+            int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
+            int iRhoFinal = iRho + rhoSizeTotalForOneEndEffector;
+            for (;iRho < iRhoFinal; iRho++)
+               wRhoPenalizerMatrix.set(iRho, iRho, wRhoPenalizer.getDoubleValue() * penaltyScaling);
+         }
+         else
+         {
+            int rhoSizeTotalForOneEndEffector = planeContactState.getTotalNumberOfContactPoints() * nSupportVectors;
+
+            int iRhoFinal = iRho + rhoSizeTotalForOneEndEffector;
+            for (;iRho < iRhoFinal; iRho++)
+               wRhoPenalizerMatrix.set(iRho, iRho, 0.0);
+         }
+      }
+   }
+   
    public void setRhoMinScalar(double rhoMinScalar)
    {
       this.rhoMinScalar.set(rhoMinScalar);
@@ -368,6 +388,7 @@ public class PlaneContactWrenchMatrixCalculator
 
    public DenseMatrix64F getWRhoPenalizer()
    {
+      computeWRhoPenalizerMatrix();
       return wRhoPenalizerMatrix;
    }
 
@@ -378,7 +399,8 @@ public class PlaneContactWrenchMatrixCalculator
 
    public DenseMatrix64F getRhoPreviousAverage()
    {
-      return rhoMean;
+      rhoMeanYoMatrix.get(rhoMeanTemp);
+      return rhoMeanTemp;
    }
 
    public DenseMatrix64F getQRho()
