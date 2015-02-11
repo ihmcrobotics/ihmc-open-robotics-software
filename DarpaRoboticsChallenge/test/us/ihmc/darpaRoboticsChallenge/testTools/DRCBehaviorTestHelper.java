@@ -416,13 +416,15 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          while (isRunning)
          {
+            robotDataReceiver.updateRobotModel();
+
             behavior.doControl();
 
             for (Updatable updatable : updatables)
             {
                updatable.update(yoTimeRobot.getDoubleValue());
             }
-            
+                        
             ThreadTools.sleep(1);
          }
       }
@@ -449,6 +451,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          while (isRunning)
          {
+            robotDataReceiver.updateRobotModel();
+
             behavior.doControl();
             
             for (Updatable updatable : updatables)
