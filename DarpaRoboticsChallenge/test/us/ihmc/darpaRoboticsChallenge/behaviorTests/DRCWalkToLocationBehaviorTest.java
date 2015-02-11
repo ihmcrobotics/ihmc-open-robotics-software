@@ -10,7 +10,6 @@ import javax.vecmath.Vector2d;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
