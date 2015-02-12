@@ -308,4 +308,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   //TODO Test when the hand has to roll 180 degrees to grab a debris
+   
+   //TODO test the other hand
 }
