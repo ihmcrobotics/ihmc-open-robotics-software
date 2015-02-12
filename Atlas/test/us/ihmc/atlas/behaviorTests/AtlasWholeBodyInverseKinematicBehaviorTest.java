@@ -13,7 +13,6 @@ public class AtlasWholeBodyInverseKinematicBehaviorTest extends DRCWholeBodyInve
 	public AtlasWholeBodyInverseKinematicBehaviorTest() 
 	{
 		robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
-		robotModel.createHandContactPoints();
 	}
 
 	@Override
