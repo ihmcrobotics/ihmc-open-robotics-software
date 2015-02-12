@@ -249,7 +249,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       drcBehaviorTestHelper.getRobot().computeCenterOfMass(nominalComPosition);
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
-      double trajectoryTime = 1.5;
+      double trajectoryTime = 2.0;
       double desiredHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
 
       ComHeightPacket comHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime);
@@ -274,7 +274,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
       double[] finalHandPose = getCurrentArmPose(handPosePacket.getRobotSide());
 
-      assertArmPosesAreWithinThresholds(initialHandPose, finalHandPose, handPosePacket.getRobotSide());
+      assertArmPosesAreWithinThresholds(initialHandPose, finalHandPose, handPosePacket.getRobotSide(), 2.0 * DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
       assertProperHeightOffset(desiredHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
@@ -632,7 +632,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return armPose;
    }
-
+   
    private void assertArmPosesAreWithinThresholds(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide)
    {
       assertArmPosesAreWithinThresholds(desiredArmPose, actualArmPose, robotSide, DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
