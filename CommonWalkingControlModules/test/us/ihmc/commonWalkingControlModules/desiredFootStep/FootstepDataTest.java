@@ -18,7 +18,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoPacketClient;
+import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -308,7 +308,7 @@ public class FootstepDataTest
    {
 
       
-      KryoPacketServer server = new KryoPacketServer(port, getNetClassList(), 10, getClass().getSimpleName() + "server");
+      KryoPacketServer server = new KryoPacketServer(port, getNetClassList(), PacketDestination.CONTROLLER.ordinal(), getClass().getSimpleName() + "server");
       server.connect();
 //      queueBasedStreamingDataProducer.addConsumer(server);
       return server;
@@ -316,7 +316,7 @@ public class FootstepDataTest
 
    private <T extends Packet> PacketCommunicator createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, int port) throws IOException
    {
-      KryoPacketClient client = new KryoPacketClient("localhost", port, getNetClassList(), 0, 1, getClass().getSimpleName() + "client");
+      KryoPacketClientEndPointCommunicator client = new KryoPacketClientEndPointCommunicator("localhost", port, getNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), getClass().getSimpleName() + "client");
       client.connect();
       client.attachListener(clazz, consumer);
       return client;
