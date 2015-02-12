@@ -19,7 +19,7 @@ public abstract class HandCommandManager //implements HandCommandInterface
 	
 	
 	protected KryoPacketClient packetCommunicator = new KryoPacketClient(SERVER_ADDRESS, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-         new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),PacketDestination.NETWORK_PROCESSOR.ordinal(),"AtlasROSAPINetworkProcessor");
+         new IHMCCommunicationKryoNetClassList(),PacketDestination.HAND_MANAGER.ordinal(),PacketDestination.HAND_MANAGER.ordinal(),"AtlasROSAPINetworkProcessor");
 	
 	public HandCommandManager(Class<? extends Object> clazz)
 	{

@@ -28,7 +28,7 @@ public class AtlasROSAPISimulator
    
    public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
-      PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BROADCAST.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
+      PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
 
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
       simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
