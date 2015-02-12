@@ -481,7 +481,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FramePose2d targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, 0.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue(), yoTime));
       
       pipeLine.requestNewStage();
       
@@ -489,7 +489,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0, 0.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI,footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI,footstepLength.getDoubleValue(), yoTime));
       
       pipeLine.requestNewStage();
       
@@ -497,14 +497,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, -Math.PI/2.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue(), yoTime));
       
       pipeLine.requestNewStage();
       
       targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0,0.0);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2.0,footstepLength.getDoubleValue()));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2.0,footstepLength.getDoubleValue(), yoTime));
 
       pipeLine.requestNewStage();
 //      
@@ -815,7 +815,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       FramePose footPose = new FramePose(desiredFootstepPosition);
 
-      pipeLine.submitSingleTaskStage(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose));
+      pipeLine.submitSingleTaskStage(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime));
    }
 
    private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
@@ -948,7 +948,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    public void enableActions()
    {
    }
-
+   
    @Override
    public void pause()
    {

@@ -6,9 +6,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspPieceOfDebrisBehavior;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.taskExecutor.Task;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class GraspPieceOfDebrisTask implements Task
+public class GraspPieceOfDebrisTask extends BehaviorTask
 {
    private final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior;
    private final RigidBodyTransform debrisTransform;
@@ -17,8 +17,9 @@ public class GraspPieceOfDebrisTask implements Task
    private final RobotSide robotSide;
 
    public GraspPieceOfDebrisTask(GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior, RigidBodyTransform debrisTransform, Point3d graspPosition,
-         Vector3d graspVector, RobotSide robotSide)
+         Vector3d graspVector, RobotSide robotSide, DoubleYoVariable yoTime)
    {
+      super(graspPieceOfDebrisBehavior, yoTime);
       this.graspPieceOfDebrisBehavior = graspPieceOfDebrisBehavior;
       this.debrisTransform = debrisTransform;
       this.graspPosition = graspPosition;
@@ -27,27 +28,9 @@ public class GraspPieceOfDebrisTask implements Task
    }
 
    @Override
-   public void doTransitionIntoAction()
+   protected void setBehaviorInput()
    {
-      graspPieceOfDebrisBehavior.initialize();
       graspPieceOfDebrisBehavior.setGraspPose(debrisTransform, graspPosition, graspVector, robotSide);
    }
 
-   @Override
-   public void doAction()
-   {
-      graspPieceOfDebrisBehavior.doControl();
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      graspPieceOfDebrisBehavior.finalize();
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return graspPieceOfDebrisBehavior.isDone();
-   }
 }

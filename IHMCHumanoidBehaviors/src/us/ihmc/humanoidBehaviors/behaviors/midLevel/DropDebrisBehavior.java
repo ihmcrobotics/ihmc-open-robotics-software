@@ -118,8 +118,8 @@ public class DropDebrisBehavior extends BehaviorInterface
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side.getOppositeSide(), desiredArmJointAngles, yoTime, handPoseBehavior,
             trajectoryTime));
 
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.RESET, fingerStateBehavior));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side.getOppositeSide(), FingerState.RESET, fingerStateBehavior));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.RESET, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side.getOppositeSide(), FingerState.RESET, fingerStateBehavior, yoTime));
 
       pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime),
             yoTime, pelvisPoseBehavior));
@@ -131,7 +131,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    {
       handPoseToPack.setPose(tempPosition, tempOrientation);
       handPoseToPack.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new FingerStateTask(side, FingerState.OPEN, fingerStateBehavior)));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new FingerStateTask(side, FingerState.OPEN, fingerStateBehavior, yoTime)));
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, handPoseToPack, trajectoryTime));
    }
 
@@ -179,7 +179,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    {
       handPoseBehavior.enableActions();
    }
-
+   
    @Override
    public void pause()
    {

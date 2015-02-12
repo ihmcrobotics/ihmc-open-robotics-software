@@ -36,6 +36,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    private final DropDebrisBehavior dropPieceOfDebris;
    private final WalkToLocationBehavior walkCloseToObjectBehavior;
 
+   private final DoubleYoVariable yoTime;
    private final BooleanYoVariable haveInputsBeenSet;
    private final BooleanYoVariable isObjectTooFar;
 
@@ -64,6 +65,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, referenceFrames, wholeBodyControllerParameters, yoTime);
       walkCloseToObjectBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
 
+      this.yoTime = yoTime;
       haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
       isObjectTooFar = new BooleanYoVariable("isObjectTooFar", registry);
 
@@ -81,12 +83,12 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    {
       calculateLocation(graspPosition);
       if (isObjectTooFar.getBooleanValue())
-         taskExecutor.submit(new WalkToLocationTask(targetPose2dInWorld, walkCloseToObjectBehavior, 0.0, walkingControllerParameters.getMaxStepLength()));
+         taskExecutor.submit(new WalkToLocationTask(targetPose2dInWorld, walkCloseToObjectBehavior, 0.0, walkingControllerParameters.getMaxStepLength(), yoTime));
 
       robotSide = determineSideToUse(graspPosition);
 
-      taskExecutor.submit(new GraspPieceOfDebrisTask(graspPieceOfDebris, debrisTransform, graspPosition, graspVector, robotSide));
-      taskExecutor.submit(new DropDebrisTask(dropPieceOfDebris, robotSide));
+      taskExecutor.submit(new GraspPieceOfDebrisTask(graspPieceOfDebris, debrisTransform, graspPosition, graspVector, robotSide, yoTime));
+      taskExecutor.submit(new DropDebrisTask(dropPieceOfDebris, robotSide, yoTime));
 
       haveInputsBeenSet.set(true);
    }
@@ -157,7 +159,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
       dropPieceOfDebris.enableActions();
       walkCloseToObjectBehavior.enableActions();
    }
-
+   
    @Override
    public void pause()
    {

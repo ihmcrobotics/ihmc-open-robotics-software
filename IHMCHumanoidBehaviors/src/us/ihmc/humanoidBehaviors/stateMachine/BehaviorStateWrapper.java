@@ -22,9 +22,30 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    }
 
    @Override
+   public void doTransitionIntoAction()
+   {
+      if (initializeOnTransitionIntoAction)
+      {
+         behavior.initialize();       
+      }
+   }
+   
+   @Override
    public void doAction()
    {
       behavior.doControl();
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      behavior.finalize();
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return behavior.isDone();
    }
    
    public void pause()
@@ -46,31 +67,10 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    {
       behavior.enableActions();
    }
-
+   
    public void finalize()
    {
       behavior.finalize();
-   }
-
-   @Override
-   public void doTransitionIntoAction()
-   {
-      if (initializeOnTransitionIntoAction)
-      {
-         behavior.initialize();       
-      }
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      behavior.finalize();
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return behavior.isDone();
    }
 
    public BehaviorInterface getBehavior()

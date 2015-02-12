@@ -71,4 +71,25 @@ public class HighLevelToroidManipulationState implements Task
    {
       return false;  // TODO: automatically generated code
    }
+
+   @Override
+   public void pause()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void resume()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void stop()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

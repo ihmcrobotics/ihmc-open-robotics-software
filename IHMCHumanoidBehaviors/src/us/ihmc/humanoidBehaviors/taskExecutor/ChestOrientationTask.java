@@ -5,19 +5,22 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class ChestOrientationTask implements Task
+public class ChestOrientationTask extends BehaviorTask
 {
    private static final boolean DEBUG = false;
    private final ChestOrientationPacket chestOrientationPacket;
    private final ChestOrientationBehavior chestOrientationBehavior;
 
-   private final DoubleYoVariable yoTime;
-   private double behaviorDoneTime = Double.NaN;
-   private final double sleepTime;
 
+   public ChestOrientationTask(ChestOrientationPacket chestOrientationPacket, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior)
+   {
+      super(chestOrientationBehavior, yoTime);
+      this.chestOrientationBehavior = chestOrientationBehavior;
+      this.chestOrientationPacket = chestOrientationPacket;
+   }
+   
    public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior,
          double trajectoryTime)
    {
@@ -27,53 +30,16 @@ public class ChestOrientationTask implements Task
    public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior,
          double trajectoryTime, double sleepTime)
    {
+      super(chestOrientationBehavior, yoTime, sleepTime);
       this.chestOrientationBehavior = chestOrientationBehavior;
-      this.yoTime = yoTime;
-      this.sleepTime = sleepTime;
       Quat4d chestOrientation = new Quat4d();
       desiredChestOrientation.getQuaternion(chestOrientation);
       chestOrientationPacket = new ChestOrientationPacket(chestOrientation, false, trajectoryTime);
    }
 
-   public ChestOrientationTask(ChestOrientationPacket chestOrientationPacket, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior)
-   {
-      this.chestOrientationBehavior = chestOrientationBehavior;
-      this.yoTime = yoTime;
-      this.sleepTime = 0.0;
-      this.chestOrientationPacket = chestOrientationPacket;
-   }
-
    @Override
-   public void doTransitionIntoAction()
+   protected void setBehaviorInput()
    {
-      if (DEBUG)
-         System.out.println("Started chest orientation");
-      chestOrientationBehavior.initialize();
       chestOrientationBehavior.setInput(chestOrientationPacket);
-   }
-
-   @Override
-   public void doAction()
-   {
-      chestOrientationBehavior.doControl();
-      if (Double.isNaN(behaviorDoneTime) && chestOrientationBehavior.isDone())
-      {
-         behaviorDoneTime = yoTime.getDoubleValue();
-      }
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      if (DEBUG)
-         System.out.println("Finished chest orientation");
-      chestOrientationBehavior.finalize();
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      boolean sleepTimeAchieved = yoTime.getDoubleValue() > behaviorDoneTime + sleepTime;
-      return chestOrientationBehavior.isDone() && sleepTimeAchieved;
    }
 }
