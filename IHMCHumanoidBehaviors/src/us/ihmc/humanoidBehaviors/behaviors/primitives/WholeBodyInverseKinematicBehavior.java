@@ -83,7 +83,6 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
          }
          else
          {
-            //TODO: ahould be set to false here, hacked so that it works
             hasSolutionBeenFound.set(false);
          }
          if (DEBUG)
@@ -136,8 +135,13 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
       wholeBodyIKSolver.setVerbosityLevel(0);
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(true);
-      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.RIGHT).setErrorTolerance( 0.02, 0.2);
-      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.LEFT).setErrorTolerance( 0.02, 0.2);
+      setPositionAndOrientationErrorTolerance(0.02, 0.2);
+   }
+
+   public void setPositionAndOrientationErrorTolerance(double positionErrorTolerance, double orientationErrorTolerance)
+   {
+      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
    }
 
    @Override
@@ -210,4 +214,5 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       return hasSolutionBeenFound.getBooleanValue();
    }
+   
 }

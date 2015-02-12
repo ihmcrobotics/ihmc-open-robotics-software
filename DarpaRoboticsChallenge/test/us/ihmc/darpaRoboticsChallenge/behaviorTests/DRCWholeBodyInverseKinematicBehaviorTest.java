@@ -39,6 +39,8 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 @UnfinishedTest
 public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiRobotTestInterface
 {
+   private final boolean DEBUG = false;
+
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -67,16 +69,14 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
-   private final boolean DEBUG = true;
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.5;
 
    private final double POSITION_ERROR_MARGIN = 0.03;
-   private final double ANGLE_ERROR_MARGIN = 0.05;
+   private final double ANGLE_ERROR_MARGIN = 0.1;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
@@ -85,10 +85,10 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
    private SDFFullRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
 
-   private final double DELTA_YAW = 0.0;
-   private final double DELTA_PITCH = 0.0;
-   private final double DELTA_ROLL = 0.0;
-   
+   private final double DELTA_YAW = 0.05;
+   private final double DELTA_PITCH = 0.08;
+   private final double DELTA_ROLL = Math.PI;
+
    @Before
    public void setUp()
    {
@@ -98,10 +98,12 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       }
 
       showMemoryUsageBeforeTest();
-      
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
-      
+
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
 
@@ -119,11 +121,11 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       BambooTools.reportTestStartedMessage();
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(EXTRA_SIM_TIME_FOR_SETTLING));
-      
+
       drcBehaviorTestHelper.updateRobotModel();
-      
-      final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), wholeBodyControllerParameters,
-            fullRobotModel, yoTime);
+
+      final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(
+            drcBehaviorTestHelper.getBehaviorCommunicationBridge(), wholeBodyControllerParameters, fullRobotModel, yoTime);
 
       wholeBodyIKBehavior.initialize();
 
@@ -149,21 +151,10 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       }
       wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
-//////////////////////////
-//      ReferenceFrame rightHandHomeReferenceFrame = fullRobotModel.getHandControlFrame(side);
-//      FramePose rightHandHomePose = new FramePose(rightHandHomeReferenceFrame);
-//      rightHandHomePose.changeFrame(worldFrame);
-//      
-//      System.out.println("Home hand pose");
-//      System.out.println(rightHandHomePose);
-//      System.out.println("   ");
-///////////////////////////////////      
 
       wholeBodyIKBehavior.computeSolution();
       assertTrue(wholeBodyIKBehavior.hasSolutionBeenFound());
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholeBodyIKBehavior, trajectoryDuration);
-      
-//      executeBehavior(wholeBodyIKBehavior, trajectoryDuration);
 
       assertTrue(wholeBodyIKBehavior.isDone());
 
@@ -173,11 +164,11 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       rightHandPose.changeFrame(worldFrame);
       if (DEBUG)
       {
-         System.out.println("!!!!!!!!!!!!!!!!!!! MOVEMENT HAPPEND !!!!!!!!!!!!!!!!!!!");
+         System.out.println("!!!!!!!!!!!!!!!!!!! MOVEMENT HAPPENED !!!!!!!!!!!!!!!!!!!");
          System.out.println("desired right hand pose");
          System.out.println(desiredHandPose);
          System.out.println("    ");
-         
+
          System.out.println("right hand pose");
          System.out.println(rightHandPose);
       }
@@ -188,14 +179,14 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
 
    private void generatePositionAndAngleLimits(RobotSide side, double[] xyzMin, double[] xyzMax, double[] yawPitchRollMin, double[] yawPitchRollMax)
    {
-      xyzMin[0] = 0.39; // 0.6
-      xyzMax[0] = 0.39;//+ 0.1; // 0.7
+      xyzMin[0] = 0.39;
+      xyzMax[0] = 0.39 + 0.1;
 
-      xyzMin[1] = side.negateIfRightSide(0.34); //0.3
-      xyzMax[1] = side.negateIfRightSide(0.34);//+0.1); //0.5
+      xyzMin[1] = side.negateIfRightSide(0.34);
+      xyzMax[1] = side.negateIfRightSide(0.34);
 
-      xyzMin[2] = 0.74;//-0.1; //0.7
-      xyzMax[2] = 0.74;//+0.1; //0.9
+      xyzMin[2] = 0.74 - 0.1;
+      xyzMax[2] = 0.74 + 0.1;
 
       yawPitchRollMin[0] = 0.125 - DELTA_YAW;
       yawPitchRollMax[0] = 0.125 + DELTA_YAW;
@@ -203,49 +194,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       yawPitchRollMin[1] = 0.543 - DELTA_PITCH;
       yawPitchRollMax[1] = 0.543 + DELTA_PITCH;
 
-      yawPitchRollMin[2] = side.negateIfRightSide(0.295 - DELTA_ROLL); //-0.29
-      yawPitchRollMax[2] = side.negateIfRightSide(0.295 + DELTA_ROLL); //-0.30
+      yawPitchRollMin[2] = side.negateIfRightSide(0.295);
+      yawPitchRollMax[2] = side.negateIfRightSide(0.295 + DELTA_ROLL);
    }
-
-//   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-//   {
-//      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-//
-//      SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-//
-//      Thread behaviorThread = new Thread()
-//      {
-//         public void run()
-//         {
-//            {
-//               double startTime = Double.NaN;
-//               boolean simStillRunning = true;
-//               boolean initalized = false;
-//
-//               while (simStillRunning)
-//               {
-//                  if (!initalized)
-//                  {
-//                     startTime = yoTime.getDoubleValue();
-//                     initalized = true;
-//                  }
-//
-//                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-//                  simStillRunning = timeSpentSimulating < simulationRunTime;
-//
-//                  behavior.doControl();
-//               }
-//            }
-//         }
-//      };
-//
-//      behaviorThread.start();
-//
-//      boolean ret = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-//
-//      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-//
-//      return ret;
-//   }
-
 }
