@@ -124,7 +124,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       }
       double trajectoryTime = 3.0;
 
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
       Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
 

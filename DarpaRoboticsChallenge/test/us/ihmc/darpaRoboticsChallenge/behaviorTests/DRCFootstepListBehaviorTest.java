@@ -110,7 +110,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
 
-      fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       robot = drcBehaviorTestHelper.getRobot();
 
@@ -290,7 +290,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    private boolean areFootstepsTooFarApart(FootstepListBehavior footstepListBehavior, ArrayList<Footstep> desiredFootsteps)
    {
       ArrayList<Double> footStepLengths = footstepListBehavior.getFootstepLengths(createFootstepDataList(desiredFootsteps),
-            drcBehaviorTestHelper.getFullRobotModel(), getRobotModel().getWalkingControllerParameters());
+            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel().getWalkingControllerParameters());
 
       if(DEBUG)
       for (double footStepLength : footStepLengths)

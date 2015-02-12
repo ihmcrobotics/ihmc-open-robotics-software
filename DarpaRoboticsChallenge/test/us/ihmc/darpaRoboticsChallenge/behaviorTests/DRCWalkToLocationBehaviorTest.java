@@ -412,7 +412,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    private WalkToLocationBehavior createAndSetupWalkToLocationBehavior(FramePose2d desiredMidFeetPose)
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
 

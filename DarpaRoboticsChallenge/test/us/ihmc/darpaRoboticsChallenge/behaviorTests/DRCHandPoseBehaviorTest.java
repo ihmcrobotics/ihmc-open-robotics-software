@@ -115,7 +115,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
 
-      armJointNames = drcBehaviorTestHelper.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
+      armJointNames = drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
 
       for (int i = 0; i < numberOfArmJoints; i++)
@@ -273,7 +273,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double trajectoryTime = 2.0;
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, handPoseTarget);
 
-      ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
+      ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
       double pauseTime = 1.0;
       double resumeTime = 2.0;
       double stopTime = Double.POSITIVE_INFINITY;
@@ -313,7 +313,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       final double simTimeBeforeStop = trajectoryTime / 2.0;
 
-      ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSide);
+      ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
       StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(handPoseBehavior, Double.POSITIVE_INFINITY,
             Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
 
@@ -332,7 +332,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
       {
          ArmJointName jointName = armJointNames[jointNum];
-         double currentAngle = drcBehaviorTestHelper.getFullRobotModel().getArmJoint(robotSide, jointName).getQ();
+         double currentAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, jointName).getQ();
          armPose[jointNum] = currentAngle;
       }
 
@@ -354,7 +354,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
@@ -411,7 +411,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       FramePose ret = new FramePose();
       drcBehaviorTestHelper.updateRobotModel();
-      ret.setToZero(drcBehaviorTestHelper.getFullRobotModel().getHandControlFrame(robotSideToTest));
+      ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideToTest));
       ret.changeFrame(ReferenceFrame.getWorldFrame());
       return ret;
    }

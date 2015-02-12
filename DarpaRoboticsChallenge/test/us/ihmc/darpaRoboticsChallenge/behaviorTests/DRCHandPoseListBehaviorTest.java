@@ -106,7 +106,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
 
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
@@ -232,7 +232,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    private double clipDesiredToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
       double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
@@ -255,7 +255,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
       {
          ArmJointName jointName = armJointNames[jointNum];
-         double currentAngle = drcBehaviorTestHelper.getFullRobotModel().getArmJoint(robotSide, jointName).getQ();
+         double currentAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, jointName).getQ();
          armPose[jointNum] = currentAngle;
       }
 

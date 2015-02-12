@@ -174,7 +174,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
    private LookAtBehavior testLookAtBehavior(double trajectoryTime, Quat4d desiredHeadQuat) throws SimulationExceededMaximumTimeException
    {
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       FramePose initialHeadPose = getCurrentHeadPose(fullRobotModel);
       Point3d desiredLookAtPoint = computeDesiredLookAtPoint(initialHeadPose, desiredHeadQuat);

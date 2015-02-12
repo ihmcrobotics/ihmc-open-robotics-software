@@ -156,7 +156,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       file = new File(ScriptEngineSettings.scriptSavingDirectory + fileName + ScriptEngineSettings.extension);
       System.out.println(file.getAbsolutePath());
 
-      armJointNames = drcBehaviorTestHelper.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
+      armJointNames = drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
 
       for (int i = 0; i < numberOfArmJoints; i++)
@@ -459,7 +459,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private ScriptBehavior setupNewScriptBehavior(File filePath) throws FileNotFoundException
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       BooleanYoVariable yoDoubleSupport = drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport();
 
@@ -500,7 +500,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private HandPosePacket createHandPosePacket(RobotSide robotside)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       ReferenceFrame handFrame = fullRobotModel.getHandControlFrame(robotside);
       FramePose currentHandPose = new FramePose();
@@ -523,7 +523,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, ReferenceFrames referenceFrames)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       FootstepDataList footsepDataList = new FootstepDataList();
 
@@ -584,7 +584,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private double getTotalFingerJointQ(RobotSide robotSide)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
       Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
@@ -606,7 +606,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private double[] getCurrentArmPose(RobotSide robotSide)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       double[] armPose = new double[numberOfArmJoints];
 
@@ -659,7 +659,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
@@ -699,7 +699,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       FramePose framePose = new FramePose();
       framePose.setToZero(frameToCheck);
