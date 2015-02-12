@@ -349,7 +349,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param tToHere Transform3D which transformToNext is based on.
     */
-   protected void recursiveUpdateJoints(RigidBodyTransform tToHere, boolean updatePoints, boolean updateCameraMounts, double time)
+   protected void recursiveUpdateJoints(RigidBodyTransform tToHere, boolean updatePoints, boolean updateCameraMounts, boolean updateIMUMounts, double time)
    {
       this.update();
 
@@ -372,23 +372,17 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          this.updateCameraMounts(this.transformToNext);
       }
 
-      for (int i = 0; i < childrenJoints.size(); i++)
+      if (updateIMUMounts)
       {
-         Joint childJoint = childrenJoints.get(i);
-         childJoint.recursiveUpdateJoints(this.transformToNext, updatePoints, updateCameraMounts, time);
+         this.updateIMUMounts(this.transformToNext);
       }
-
-   }
-   
-   protected void recursiveUpdateIMUMounts()
-   {
-      this.updateIMUMounts(this.transformToNext);
 
       for (int i = 0; i < childrenJoints.size(); i++)
       {
          Joint childJoint = childrenJoints.get(i);
-         childJoint.recursiveUpdateIMUMounts();
+         childJoint.recursiveUpdateJoints(this.transformToNext, updatePoints, updateCameraMounts, updateIMUMounts, time);
       }
+
    }
 
 
