@@ -1,28 +1,33 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import static org.junit.Assert.assertTrue;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.vecmath.Point2d;
+
 import org.junit.Test;
+
 import us.ihmc.plotting.Plotter;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.math.geometry.Line2d;
-
-import javax.swing.*;
-import javax.vecmath.Point2d;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by agrabertilton on 2/9/15.
  */
 
 @BambooAnnotations.UnfinishedTest
+@BambooPlan(planType={BambooPlanType.Unfinished})
 public class DoublePendulumTrajectoryGeneratorTest
 {
    @Test
