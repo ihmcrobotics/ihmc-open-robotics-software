@@ -36,6 +36,15 @@ public abstract class DRCPushRecoveryTest
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   private static String script = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
+   private static double simulationTime = 6.0;
+   
+   private DRCPushRobotController pushRobotController;
+   
+   private double swingTime, transferTime;
+   private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
+   private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -57,18 +66,13 @@ public abstract class DRCPushRecoveryTest
          drcSimulationTestHelper = null;
       }
 
+      singleSupportStartConditions = null;
+      doubleSupportStartConditions = null;
+      pushRobotController = null;
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private static String script = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
-   private static double simulationTime = 6.0;
-   
-   private DRCPushRobotController pushRobotController;
-   
-   private double swingTime, transferTime;
-   private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
-   private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-   
    protected abstract DRCRobotModel getRobotModel();
 
 	@AverageDuration(duration = 20.4)

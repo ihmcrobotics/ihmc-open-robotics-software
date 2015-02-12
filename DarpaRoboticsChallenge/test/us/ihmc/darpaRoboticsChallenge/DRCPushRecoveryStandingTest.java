@@ -28,6 +28,12 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
+
+   private final static boolean VISUALIZE_FORCE = false;
+
+   private DRCPushRobotController pushRobotController;
+   private RobotVisualizer robotVisualizer;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -51,32 +57,10 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
          blockingSimulationRunner = null;
       }
 
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-   }
-   
-  
-   private final static boolean VISUALIZE_FORCE = false;
-
-   private DRCPushRobotController pushRobotController;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-
-
-   @After
-   public void destroyOtherStuff()
-   {
-      // Do this here in case a test fails. That way the memory will be
-      // recycled.
-      if (blockingSimulationRunner != null)
+      if (drcFlatGroundWalkingTrack != null)
       {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
-      }
-
-      if (drcSimulation != null)
-      {
-         drcSimulation.dispose();
-         drcSimulation = null;
+         drcFlatGroundWalkingTrack.destroySimulation();
+         drcFlatGroundWalkingTrack = null;
       }
 
       if (robotVisualizer != null)
@@ -84,16 +68,21 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
          robotVisualizer.close();
          robotVisualizer = null;
       }
-   }
 
+      pushRobotController = null;
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+  
 	@AverageDuration(duration = 24.5)
 	@Test(timeout = 73374)
    public void TestPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       double forceMagnitude = 350.0;
       double forceDuration = 0.15;
@@ -105,7 +94,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(3.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
@@ -122,8 +111,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       double forceMagnitude = 350.0;
       double forceDuration = 0.15;
@@ -135,7 +124,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(3.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
@@ -156,8 +145,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       double forceMagnitude = 350.0;
       double forceDuration = 0.15;
@@ -169,7 +158,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(3.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
@@ -196,8 +185,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       double forceMagnitude = -450.0;
       double forceDuration = 0.15;
@@ -209,7 +198,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(3.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
@@ -230,8 +219,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       double forceMagnitude = -400.0;
       double forceDuration = 0.15;
@@ -243,7 +232,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(3.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
@@ -266,19 +255,19 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   private DRCFlatGroundWalkingTrack setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
+   private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
       DRCSimulationFactory.RUN_MULTI_THREADED = false;
-      DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
+      setupTrack(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
 
       if (VISUALIZE_FORCE)
       {
-         track.getSimulationConstructionSet().addYoGraphic(pushRobotController.getForceVisualizer());
+         drcFlatGroundWalkingTrack.getSimulationConstructionSet().addYoGraphic(pushRobotController.getForceVisualizer());
       }
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecoveryFromDoubleSupport");
@@ -290,11 +279,9 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // enable ICP push recovery planner and disable projection planner
       usePushRecoveryICPPlanner.set(true);
-
-      return track;
    }
 
-   private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
+   private void setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
 
@@ -306,10 +293,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
+      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
             robotModel);
-
-      drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
-      return drcFlatGroundWalkingTrack;
    }
 }

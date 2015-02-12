@@ -7,12 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -28,33 +26,31 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
-   private DRCSimulationTestHelper drcSimulationTestHelper;
-
-   @Before
-   public void showMemoryUsageBeforeTest()
-   {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-   }
+   private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
 
    private final static boolean VISUALIZE_FORCE = false;
    private final static double PUSH_DELAY = 0.5;
 
    protected DRCPushRobotController pushRobotController;
    protected BlockingSimulationRunner blockingSimulationRunner;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
    protected double forceMagnitude;
    protected double forceDuration;
 
    protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
    StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+
+
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -65,23 +61,35 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (drcFlatGroundWalkingTrack != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         drcFlatGroundWalkingTrack.destroySimulation();
+         drcFlatGroundWalkingTrack = null;
+      }
+
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
      
+         pushRobotController = null;
+
+         doubleSupportStartConditions = null;
+
+         pushCondition = null;
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 	@AverageDuration(duration = 36.6)
-	@Test(timeout = 109824)
+	@Test(timeout = 110000)
    public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       setForwardPushParameters();
 
@@ -110,14 +118,14 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 16.5)
-	@Test(timeout = 49561)
+	@AverageDuration(duration = 40.0)
+	@Test(timeout = 110000)
    public void testMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      setupTest(getRobotModel());
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       setBackwardPushParameters();
 
@@ -146,19 +154,19 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
 
-   protected DRCFlatGroundWalkingTrack setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
+   protected void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
       DRCSimulationFactory.RUN_MULTI_THREADED = false;
-      DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
+      setupTrack(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
 
       if (VISUALIZE_FORCE)
       {
-         track.getSimulationConstructionSet().addYoGraphic(pushRobotController.getForceVisualizer());
+         drcFlatGroundWalkingTrack.getSimulationConstructionSet().addYoGraphic(pushRobotController.getForceVisualizer());
       }
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecoveryFromDoubleSupport");
@@ -174,17 +182,15 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
-         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
+         scs.getVariable(prefix + "FootControlModule", prefix
                + "State");
          final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
 
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
-
-      return track;
    }
 
-   private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
+   private void setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
 
@@ -196,11 +202,10 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
+      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
             robotModel);
 
-      drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
-      return drcFlatGroundWalkingTrack;
+      drcFlatGroundWalkingTrack.getDrcSimulation();
    }
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
