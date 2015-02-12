@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.valkyrie.ValkyriePushRecoveryMultiStepTest.class,
-   us.ihmc.valkyrie.ValkyriePushRecoveryStandingTest.class
+   us.ihmc.valkyrie.ValkyriePushRecoveryStandingTest.class,
 })
 
 public class ValkyrieHardwareDriversEFastTestSuite
