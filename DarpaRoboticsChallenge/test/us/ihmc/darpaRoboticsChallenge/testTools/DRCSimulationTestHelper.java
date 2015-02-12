@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
@@ -204,7 +205,8 @@ public class DRCSimulationTestHelper
    {
       if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
          ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendHandPosePacketToListeners(handPosePacket);
-
+      if (networkObjectCommunicator instanceof KryoLocalPacketCommunicator)
+         networkObjectCommunicator.send(handPosePacket);
    }
 
    public void sendBlindWalkingPacketToListeners(BlindWalkingPacket blindWalkingPacket)

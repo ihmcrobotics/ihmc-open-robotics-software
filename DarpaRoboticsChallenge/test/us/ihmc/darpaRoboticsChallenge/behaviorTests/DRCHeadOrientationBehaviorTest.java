@@ -187,10 +187,10 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       headOrientBehavior.setInput(headOrientationPacket);
       assertTrue(headOrientBehavior.hasInputBeenSet());
 
-      FramePose initialHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getFullRobotModel());
+      FramePose initialHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(headOrientBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      FramePose finalHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getFullRobotModel());
+      FramePose finalHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
 
       if (DEBUG)
       {

@@ -2,8 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -13,35 +11,29 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.NetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDebrisEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspPieceOfDebrisBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.UnfinishedTest;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -49,6 +41,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 @UnfinishedTest
 public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface
@@ -61,8 +54,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private ReferenceFrame midFeetZUpFrame;
 
-   @Before
-   public void showMemoryUsageBeforeTest()
+   private void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
@@ -82,39 +74,33 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          drcBehaviorTestHelper = null;
       }
 
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
-
    private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.22;
-   private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 0.89;
-   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.60;
+   private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 0.88;
+   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.62;
 
    private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.22;
    private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 0.90;
-   private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.57;
+   private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.59;
 
-   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.50;
+   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.38;
    private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 0.99;
-   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.19;
+   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.38;
 
-   private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.05;
+   private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.1;
 
    private final double POSITION_ERROR_MARGIN = 0.02;
    private final double ANGLE_ERROR_MARGIN = 0.05;
 
    private final DRCDebrisEnvironment testEnvironment = new DRCDebrisEnvironment();
-   private final KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCGraspPieceOfDebrisBehaviorTestControllerCommunicator");
 
    private DoubleYoVariable yoTime;
-
-   private RobotDataReceiver robotDataReceiver;
-   private ForceSensorDataHolder forceSensorDataHolder;
-
-   private BehaviorCommunicationBridge communicationBridge;
 
    private SDFRobot robot;
    private SDFFullRobotModel fullRobotModel;
@@ -126,7 +112,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       {
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
-
+      
+      showMemoryUsageBeforeTest();
+      
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
          @Override
@@ -139,37 +127,23 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          }
       };
 
-      testEnvironment.addStandingDebris(0.65, -0.35, 0.0); //0.65
+      testEnvironment.addStandingDebris(0.6, -0.35, 0.0); 
       testEnvironment.createDebrisContactController();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null, startingLocation,
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null, startingLocation,
             simulationTestingParameters, getRobotModel(), controllerCommunicator);
 
-      Robot robotToTest = drcBehaviorTestHelper.getRobot();
-      yoTime = robotToTest.getYoTime();
+      yoTime = drcBehaviorTestHelper.getRobot().getYoTime();
 
       robot = drcBehaviorTestHelper.getRobot();
-      fullRobotModel = getRobotModel().createFullRobotModel();
+      fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       midFeetZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
-
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-
-      robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder, true);
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
-      PacketCommunicator networkProcesor = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCComHeightBehaviorTestJunkyCommunicator");
-
-      KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
-      
-      NetworkProcessor networkProcessor = new NetworkProcessor();
-      networkProcessor.attachPacketCommunicator(networkProcesor);
-      networkProcessor.attachPacketCommunicator(controllerCommunicator);
-      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
-      
-      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, robotToTest.getRobotsYoVariableRegistry());
    }
 
    @AverageDuration(duration = 90.0)
@@ -194,15 +168,16 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       jointAngles[4] = 0.0;
       jointAngles[5] = 0.55;
 
-      assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+      assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.2));
 
-      controllerCommunicator.send(new HandPosePacket(RobotSide.RIGHT, jointAngles));
-
+      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.RIGHT, 0.5 , jointAngles));
+      drcBehaviorTestHelper.updateRobotModel();
+      
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(communicationBridge, fullRobotModel, midFeetZUpFrame,
+      drcBehaviorTestHelper.updateRobotModel();
+      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), fullRobotModel, midFeetZUpFrame,
             getRobotModel(), yoTime);
-      communicationBridge.attachGlobalListener(graspPieceOfDebrisBehavior.getControllerGlobalPacketConsumer());
 
       graspPieceOfDebrisBehavior.initialize();
 
@@ -229,8 +204,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       assertTrue(graspPieceOfDebrisBehavior.hasInputBeenSet());
 
-      double graspTime = 20.0;
-      executeBehavior(graspPieceOfDebrisBehavior, graspTime);
+      double graspTime = 16.0;
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(graspPieceOfDebrisBehavior, graspTime);
+      
       assertTrue(graspPieceOfDebrisBehavior.isDone());
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -283,8 +259,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(rightHandPose);
       }
       FramePose rightHandExpectedPose = new FramePose(worldFrame);
-      rightHandExpectedPose.setPosition(0.45, -0.28, 1.21);
-      rightHandExpectedPose.setOrientation(1.27, 0.07, 0.06);
+      rightHandExpectedPose.setPosition(0.36, -0.25, 1.06);
+      rightHandExpectedPose.setOrientation(1.80, 0.0, 0.0);
       assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //Left wrist Position
@@ -297,8 +273,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(leftHandPose);
       }
       FramePose leftHandExpectedPose = new FramePose(worldFrame);
-      leftHandExpectedPose.setPosition(0.33, 0.33, 0.74);
-      leftHandExpectedPose.setOrientation(-1.85, 0.25, -0.53);
+      leftHandExpectedPose.setPosition(0.35, 0.33, 0.75);
+      leftHandExpectedPose.setOrientation(-1.85, 0.25, -0.55);
       assertTrue(leftHandPose.epsilonEquals(leftHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //Chest orientation
@@ -311,7 +287,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(chestPose);
       }
       FramePose chestExpectedPose = new FramePose(worldFrame);
-      chestExpectedPose.setPosition(-0.17, -0.02, 1.28);
+      chestExpectedPose.setPosition(-0.15, -0.02, 1.29);
       chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
       assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
@@ -326,62 +302,10 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       }
 
       FramePose pelvisExpectedPose = new FramePose(worldFrame);
-      pelvisExpectedPose.setPosition(-0.09, -0.02, 0.79);
+      pelvisExpectedPose.setPosition(-0.07, -0.02, 0.79);
       pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
       assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       BambooTools.reportTestFinishedMessage();
    }
-
-   @Test
-   public void testSeveral() throws SimulationExceededMaximumTimeException
-   {
-      for(int i = 0; i<10; i++)
-      {
-         System.out.println(i);
-         testGraspingDebris();
-      }
-   }
-   
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
-   {
-      final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
-
-      SysoutTool.println("\n starting behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-
-      Thread behaviorThread = new Thread()
-      {
-         public void run()
-         {
-            {
-               double startTime = Double.NaN;
-               boolean simStillRunning = true;
-               boolean initalized = false;
-
-               while (simStillRunning)
-               {
-                  if (!initalized)
-                  {
-                     startTime = yoTime.getDoubleValue();
-                     initalized = true;
-                  }
-
-                  double timeSpentSimulating = yoTime.getDoubleValue() - startTime;
-                  simStillRunning = timeSpentSimulating < simulationRunTime;
-
-                  behavior.doControl();
-               }
-            }
-         }
-      };
-
-      behaviorThread.start();
-
-      boolean ret = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
-
-      SysoutTool.println("done simulating behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
-
-      return ret;
-   }
-
 }

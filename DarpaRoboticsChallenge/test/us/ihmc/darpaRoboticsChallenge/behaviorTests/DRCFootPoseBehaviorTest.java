@@ -215,7 +215,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
    private FramePose getCurrentFootPose(RobotSide robotSide)
    {
       drcBehaviorTestHelper.updateRobotModel();
-      ReferenceFrame footFrame = drcBehaviorTestHelper.getFullRobotModel().getFoot(robotSide).getBodyFixedFrame();
+      ReferenceFrame footFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getFoot(robotSide).getBodyFixedFrame();
       FramePose footPose = new FramePose();
       footPose.setToZero(footFrame);
       footPose.changeFrame(ReferenceFrame.getWorldFrame());

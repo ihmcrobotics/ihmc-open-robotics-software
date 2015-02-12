@@ -165,7 +165,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    private TurnValveBehavior createNewTurnValveBehavior()
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();

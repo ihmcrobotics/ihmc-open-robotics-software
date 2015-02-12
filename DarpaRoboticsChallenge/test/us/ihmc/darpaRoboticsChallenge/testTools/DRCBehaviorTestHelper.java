@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.NetworkProcessor;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
@@ -61,7 +62,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
 
    private final DRCRobotModel drcRobotModel;
-   private final FullRobotModel fullRobotModel;
+   private final SDFFullRobotModel fullRobotModel;
 
    private final NetworkProcessor networkProcessor;
    private final KryoPacketCommunicator networkObjectCommunicator;
@@ -139,7 +140,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       referenceFrames = robotDataReceiver.getReferenceFrames();
    }
 
-   public FullRobotModel getFullRobotModel()
+   public SDFFullRobotModel getSDFFullRobotModel()
    {
       boolean robotModelIsUpToDate = yoTimeRobot.getDoubleValue() == yoTimeLastFullRobotModelUpdate.getDoubleValue();
 
@@ -424,7 +425,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             {
                updatable.update(yoTimeRobot.getDoubleValue());
             }
-                        
+
             ThreadTools.sleep(1);
          }
       }
@@ -454,12 +455,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             robotDataReceiver.updateRobotModel();
 
             behavior.doControl();
-            
+
             for (Updatable updatable : updatables)
             {
                updatable.update(yoTimeRobot.getDoubleValue());
             }
-            
+
             stopThreadUpdatable.update(yoTimeRobot.getDoubleValue());
 
             HumanoidBehaviorControlModeEnum requestedControlMode = stopThreadUpdatable.getRequestedBehaviorControlMode();
@@ -484,7 +485,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                behavior.resume();
                currentControlMode = HumanoidBehaviorControlModeEnum.RESUME;
             }
-            
+
             ThreadTools.sleep(1);
          }
       }

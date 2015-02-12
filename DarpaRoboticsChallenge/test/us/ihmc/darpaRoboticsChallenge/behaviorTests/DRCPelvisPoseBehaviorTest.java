@@ -303,7 +303,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
    private FramePose getCurrentPelvisPose()
    {
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getFullRobotModel();
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       drcBehaviorTestHelper.updateRobotModel();
 
       FramePose ret = new FramePose();

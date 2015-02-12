@@ -241,7 +241,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       drcBehaviorTestHelper.updateRobotModel();
 
       FramePose ret = new FramePose();
-      ret.setToZero(drcBehaviorTestHelper.getFullRobotModel().getChest().getBodyFixedFrame());
+      ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getChest().getBodyFixedFrame());
       ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
