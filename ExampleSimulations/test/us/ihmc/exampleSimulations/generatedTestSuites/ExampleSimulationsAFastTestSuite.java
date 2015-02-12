@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.exampleSimulations.springflamingo.SpringFlamingoSimulationTest.class
+   us.ihmc.exampleSimulations.springflamingo.SpringFlamingoSimulationTest.class,
 })
 
 public class ExampleSimulationsAFastTestSuite

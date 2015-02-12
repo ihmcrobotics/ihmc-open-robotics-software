@@ -9,7 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.kalman.imu.QuaternionToolsTest.class,
    us.ihmc.kalman.imu.testCases.KalmanFilterComparisonTest.class,
-   us.ihmc.kalman.YoKalmanFilterTest.class
+   us.ihmc.kalman.YoKalmanFilterTest.class,
 })
 
 public class KalmanProjectAFastTestSuite
