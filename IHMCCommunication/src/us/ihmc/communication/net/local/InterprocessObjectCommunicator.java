@@ -58,9 +58,9 @@ public class InterprocessObjectCommunicator implements ObjectCommunicator
    @SuppressWarnings("unchecked")
    /* package-private */void receiveObject(Object object)
    {
+      Object copy = kryo.copy(object);
       for (GlobalObjectConsumer listener : globalListeners)
       {
-         Object copy = kryo.copy(object);
          listener.consumeObject(copy, false);
       }
 
@@ -70,7 +70,6 @@ public class InterprocessObjectCommunicator implements ObjectCommunicator
          for (@SuppressWarnings("rawtypes")
          ObjectConsumer listener : objectListeners)
          {
-            Object copy = kryo.copy(object);
             listener.consumeObject(copy);
          }
       }
