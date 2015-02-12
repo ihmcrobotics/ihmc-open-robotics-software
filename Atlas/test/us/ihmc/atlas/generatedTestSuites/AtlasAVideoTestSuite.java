@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
-   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class
+   us.ihmc.atlas.AtlasFlatGroundWalkingTest.class,
 })
 
 public class AtlasAVideoTestSuite

@@ -14,7 +14,7 @@ import org.junit.runners.Suite;
    us.ihmc.ihmcPerception.footstepPlanners.SemiCircularStepValidityMetricTest.class,
    us.ihmc.ihmcPerception.footstepSnapper.ConvexHullFootstepSnapperTest.class,
    us.ihmc.ihmcPerception.footstepSnapper.FootstepSnapperTest.class,
-   us.ihmc.ihmcPerception.footstepSnapper.HeightMapBestFitPlaneCalculatorTest.class
+   us.ihmc.ihmcPerception.footstepSnapper.HeightMapBestFitPlaneCalculatorTest.class,
 })
 
 public class IHMCPerceptionAFastTestSuite

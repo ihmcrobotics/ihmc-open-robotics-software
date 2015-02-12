@@ -9,7 +9,8 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.AtlasMultiContactTest.class,
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryStandingTest.class
+   us.ihmc.atlas.AtlasPushRecoveryTest.class,
+   us.ihmc.atlas.AtlasPushRecoveryWalkingTest.class,
 })
 
 public class AtlasBFastTestSuite
