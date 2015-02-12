@@ -13,7 +13,6 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.LinkGraphicsTest;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.FrameCylinder3d;
