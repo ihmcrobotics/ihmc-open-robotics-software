@@ -13,7 +13,7 @@ public class SimulationConstructionSetProcessDataCallTest
    private YoVariableRegistry registry;
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=1000)
    public void testForwardCount()
    {
       Robot robot = new Robot("testRobot");
@@ -69,7 +69,7 @@ public class SimulationConstructionSetProcessDataCallTest
    }
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=1000)
    public void testBackwardCount()
    {
       Robot robot = new Robot("testRobot");
@@ -125,7 +125,7 @@ public class SimulationConstructionSetProcessDataCallTest
    }
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=1000)
    public void testForwardCopy()
    {
       Robot robot = new Robot("testRobot");
@@ -181,7 +181,7 @@ public class SimulationConstructionSetProcessDataCallTest
    }
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=1000)
    public void testBackwardCopy()
    {
       Robot robot = new Robot("testRobot");
@@ -239,8 +239,8 @@ public class SimulationConstructionSetProcessDataCallTest
    
    public static class CopierProcessingFunction implements DataProcessingFunction
    {
-      private DoubleYoVariable copyVariable;
-      private DoubleYoVariable testVariable;
+      private final DoubleYoVariable copyVariable;
+      private final DoubleYoVariable testVariable;
       
       public CopierProcessingFunction(DoubleYoVariable inputData, YoVariableRegistry registry)
       {
@@ -271,7 +271,7 @@ public class SimulationConstructionSetProcessDataCallTest
    
    public static class CounterProcessingFunction implements DataProcessingFunction
    {
-      private DoubleYoVariable countVariable;
+      private final DoubleYoVariable countVariable;
       private int count = 0;
       
       public CounterProcessingFunction(YoVariableRegistry registry)
