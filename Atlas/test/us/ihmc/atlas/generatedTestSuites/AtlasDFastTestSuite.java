@@ -9,8 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.AtlasScriptingTest.class,
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class
 })
 
 public class AtlasDFastTestSuite
