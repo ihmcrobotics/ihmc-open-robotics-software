@@ -30,9 +30,9 @@ public class HandPoseBehavior extends BehaviorInterface
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
-
+   private final DoubleYoVariable trajectoryTimeElapsed;
+   
    private final BooleanYoVariable hasInputBeenSet;
-   private final BooleanYoVariable trajectoryTimeElapsed;
 
    private final BooleanYoVariable hasStatusBeenReceived;
 
@@ -54,8 +54,9 @@ public class HandPoseBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "trajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed.set(Double.NaN);
       hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
-      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
       hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
@@ -80,9 +81,9 @@ public class HandPoseBehavior extends BehaviorInterface
          consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
       }
 
-      double trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue();
+      trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
       if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
-            && trajectoryTimeElapsed > trajectoryTime.getDoubleValue())
+            && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
             SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
@@ -141,7 +142,6 @@ public class HandPoseBehavior extends BehaviorInterface
       }
       inputListeningQueue.clear();
       status = null;
-      trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
       hasStatusBeenReceived.set(false);
       isPaused.set(false);
@@ -158,12 +158,12 @@ public class HandPoseBehavior extends BehaviorInterface
       isPaused.set(false);
       isStopped.set(false);
 
-      trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
       hasStatusBeenReceived.set(false);
 
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);
+      trajectoryTimeElapsed.set(Double.NaN);
       status = null;
       isDone.set(false);
    }
