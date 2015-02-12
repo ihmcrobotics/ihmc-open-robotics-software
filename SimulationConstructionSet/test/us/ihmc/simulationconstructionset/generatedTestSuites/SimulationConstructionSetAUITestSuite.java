@@ -7,7 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.simulationconstructionset.gui.YoEntryBoxTest.class,
    us.ihmc.simulationconstructionset.LinkGraphicsTest.class,
+   us.ihmc.simulationconstructionset.SimulatedLIDARSensorTest.class,
+   us.ihmc.simulationconstructionset.SimulationConstructionSetFestTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetMemoryReclamationTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetSetupTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetUsingDirectCallsTest.class

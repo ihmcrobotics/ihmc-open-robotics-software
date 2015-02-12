@@ -15,7 +15,6 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.gui.actions.ActionsTest.class,
    us.ihmc.simulationconstructionset.gui.BodePlotConstructorTest.class,
    us.ihmc.simulationconstructionset.gui.config.VarGroupTest.class,
-   us.ihmc.simulationconstructionset.gui.YoEntryBoxTest.class,
    us.ihmc.simulationconstructionset.JointWrenchSensorTest.class,
    us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListenerTest.class,
    us.ihmc.simulationconstructionset.KinematicPointTest.class,
@@ -27,9 +26,7 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.RobotTest.class,
    us.ihmc.simulationconstructionset.RobotToolsTest.class,
    us.ihmc.simulationconstructionset.scripts.TimeScriptTest.class,
-   us.ihmc.simulationconstructionset.SimulatedLIDARSensorTest.class,
    us.ihmc.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReaderTest.class,
-   us.ihmc.simulationconstructionset.SimulationConstructionSetFestTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetProcessDataCallTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetRootRegistryTest.class,
    us.ihmc.simulationconstructionset.SimulationRewoundListenerTest.class,
@@ -43,7 +40,10 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.util.globalParameters.IntGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.globalParameters.MultiplicativeDoubleGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.globalParameters.OrBooleanGlobalParameterTest.class,
-   us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfileTest.class
+   us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObjectTest.class,
+   us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObjectTest.class
 })
 
 public class SimulationConstructionSetAFastTestSuite
