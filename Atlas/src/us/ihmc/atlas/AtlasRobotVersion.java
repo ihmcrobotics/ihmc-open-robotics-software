@@ -50,7 +50,7 @@ public enum AtlasRobotVersion
          case ATLAS_DUAL_ROBOTIQ:
             return "models/GFE/atlas_v4_robotiq_hands.sdf";
          case GAZEBO_ATLAS_NO_HANDS:
-            return "models/GFE/gazebo_atlas.sdf";
+            return "models/GFE/atlas_unplugged_v4.sdf";
          default:
             throw new RuntimeException("AtlasRobotVersion: Unimplemented enumeration case : " + this);
       }
