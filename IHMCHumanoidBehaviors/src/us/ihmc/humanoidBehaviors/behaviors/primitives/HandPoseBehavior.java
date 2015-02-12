@@ -84,7 +84,8 @@ public class HandPoseBehavior extends BehaviorInterface
       if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
             && trajectoryTimeElapsed > trajectoryTime.getDoubleValue())
       {
-         SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true", DEBUG);
+         if (DEBUG)
+            SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
       }
 
@@ -106,7 +107,8 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          outgoingHandPosePacket.setDestination(PacketDestination.UI);
 
-         SysoutTool.println("sending handPose packet to controller and network processor", DEBUG);
+         if (DEBUG)
+            SysoutTool.println("sending handPose packet to controller and network processor: " + outgoingHandPosePacket);
          sendPacketToController(outgoingHandPosePacket);
          sendPacketToNetworkProcessor(outgoingHandPosePacket);
 
@@ -224,7 +226,8 @@ public class HandPoseBehavior extends BehaviorInterface
    {
       if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
       {
-         SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide(), DEBUG);
+         if (DEBUG)
+            SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide());
          status = handPoseStatus.getStatus();
          hasStatusBeenReceived.set(true);
       }
