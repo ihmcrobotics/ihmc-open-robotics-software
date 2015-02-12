@@ -89,13 +89,13 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 0.90;
    private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.59;
 
-   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.38;
+   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.41;
    private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 0.99;
-   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.38;
+   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.22;
 
-   private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.1;
+   private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.2;
 
-   private final double POSITION_ERROR_MARGIN = 0.02;
+   private final double POSITION_ERROR_MARGIN = 0.025;
    private final double ANGLE_ERROR_MARGIN = 0.05;
 
    private final DRCDebrisEnvironment testEnvironment = new DRCDebrisEnvironment();
@@ -259,8 +259,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(rightHandPose);
       }
       FramePose rightHandExpectedPose = new FramePose(worldFrame);
-      rightHandExpectedPose.setPosition(0.36, -0.25, 1.06);
-      rightHandExpectedPose.setOrientation(1.80, 0.0, 0.0);
+      rightHandExpectedPose.setPosition(0.47, -0.24, 1.22);
+      rightHandExpectedPose.setOrientation(1.56, 0.0, 0.10);
       assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //Left wrist Position
@@ -287,7 +287,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(chestPose);
       }
       FramePose chestExpectedPose = new FramePose(worldFrame);
-      chestExpectedPose.setPosition(-0.15, -0.02, 1.29);
+      chestExpectedPose.setPosition(-0.16, -0.02, 1.29);
       chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
       assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
