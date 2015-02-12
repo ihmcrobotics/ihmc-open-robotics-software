@@ -157,4 +157,9 @@ public class InterprocessObjectCommunicator implements ObjectCommunicator
       }
    }
 
+   @Override
+   protected void finalize()
+   {
+      close();
+   }
 }
