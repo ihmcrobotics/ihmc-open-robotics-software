@@ -32,4 +32,3 @@ public class Graphics3DAdapterAFastTestSuite
 
    }
 }
-
