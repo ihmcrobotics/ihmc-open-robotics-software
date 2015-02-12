@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
    us.ihmc.communication.net.KryoStreamSerializerTest.class,
+   us.ihmc.communication.net.local.InterprocessObjectCommunicatorTest.class,
    us.ihmc.communication.networkProcessor.NetworkProcessorTest.class,
    us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicatorTest.class,
    us.ihmc.communication.packetCommunicator.KryoPacketCommunicatorTest.class,
