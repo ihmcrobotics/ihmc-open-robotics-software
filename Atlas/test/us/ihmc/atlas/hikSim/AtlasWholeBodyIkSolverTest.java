@@ -30,6 +30,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolverTestHelper;
@@ -405,7 +406,7 @@ public class AtlasWholeBodyIkSolverTest
    
    @Ignore
    @AverageDuration
-   @Test(timeout = 150000)
+   @Test(timeout = 120000)
    public void testLeftHandIn3PModeRegression()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = generatePointsForRegression(5);
@@ -414,13 +415,40 @@ public class AtlasWholeBodyIkSolverTest
    
    @Ignore
    @AverageDuration
-   @Test(timeout = 150000)
+   @Test(timeout = 120000)
    public void testRighttHandIn3PModeRegression()
+   {
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = generatePointsForRegression(5);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true, false);
+   }
+
+   @Ignore
+   @AverageDuration
+   @Test(timeout = 120000)
+   public void testBothtHandsIn3PModeRegression()
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = generatePointsForRegression(5);
       wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, true, false);
    }
-
+   
+   @Ignore
+   @AverageDuration
+   @Test(timeout = 120000)
+   public void testBothtHandsIn3P2RModeRegression()
+   {
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = generatePointsForRegression(5);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, true, false);
+   }
+   
+   @Ignore
+   @AverageDuration
+   @Test(timeout = 120000)
+   public void testBothtHandsIn3P3RModeRegression()
+   {
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = generatePointsForRegression(5);
+      wholeBodyTest.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, true, false);
+   }
+   
    public void initializeFullRobotModelJointAngles(SDFFullRobotModel fullRobotModelToInitialize)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -462,41 +490,28 @@ public class AtlasWholeBodyIkSolverTest
 
       while (handTargetArrayListToReturn.size() < pointsDesired)
       {
-
          Random random = new Random();
          for (RobotSide robotSide : RobotSide.values)
          {
-
             actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(0.0); //leg_hpz
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(
-                  robotSide.negateIfRightSide(0.1)); //leg_hpx
+            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(robotSide.negateIfRightSide(0.1)); //leg_hpx
             actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.5); //leg_hpy
             actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.KNEE)).setQ(1.0); //leg_kny
             actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.5); //leg_aky
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(
-                  robotSide.negateIfRightSide(-0.1)); //leg_akx
-
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(
-                  RandomTools.generateRandomDouble(random, -0.5, 0.5)); //arm_shy
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(
-                  robotSide.negateIfRightSide(RandomTools.generateRandomDouble(random, -1.0, 1.0))); //arm_shx
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(
-                  RandomTools.generateRandomDouble(random, -2.0, 2.0)); //arm_ely
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(
-                  robotSide.negateIfRightSide(RandomTools.generateRandomDouble(random, -0.9, 0.9))); //arm_elx
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(
-                  RandomTools.generateRandomDouble(random, -0.5, 0.5)); //arm_wry
-            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(
-                  robotSide.negateIfRightSide(RandomTools.generateRandomDouble(random, -0.5, 0.5))); //arm_wrx
-
+            actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(robotSide.negateIfRightSide(-0.1)); //leg_akx
+            
+            for(ArmJointName armJointName : atlasRobotModel.getJointMap().getArmJointNames()){
+               OneDoFJoint armJoint = actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, armJointName));
+               double randomJointAngle = RandomTools.generateRandomDouble(random, armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
+               armJoint.setQ(randomJointAngle);
+            }
          }
 
-         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getSpineJointName(SpineJointName.SPINE_YAW)).setQ(
-               RandomTools.generateRandomDouble(random, -0.5, 0.5));
-         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(
-               RandomTools.generateRandomDouble(random, -0.5, 0.5));
-         actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(
-               RandomTools.generateRandomDouble(random, -0.5, 0.5));
+         for(SpineJointName jointName : atlasRobotModel.getJointMap().getSpineJointNames()){
+            OneDoFJoint spineJoint = actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getSpineJointName(jointName));
+            spineJoint.setQ(RandomTools.generateRandomDouble(random, spineJoint.getJointLimitUpper(), spineJoint.getJointLimitLower()));
+         }
+         
          actualRobotModel.updateFrames();
 
          double error = wholeBodySolver.calculateCenterOfMassError(actualRobotModel);
