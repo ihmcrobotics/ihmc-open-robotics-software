@@ -17,7 +17,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.utilities.FileTools;
+import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class JaxbSDFLoader
