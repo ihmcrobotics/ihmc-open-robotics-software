@@ -76,7 +76,7 @@ public class DropDebrisBehavior extends BehaviorInterface
       Point3d tempPosition = new Point3d();
       Quat4d tempOrientation = new Quat4d();
 
-      // turn the hand to lock the debris
+      // turn the hand to put the debris horizontally
       tempPosition.set(0.55, side.negateIfRightSide(0.1), 1.2);
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, 0.0, side.negateIfRightSide((Math.toRadians(90.0))));
       submitSingleTaskStageHandPose(turnHandPoseToCarryDebris, side, tempPosition, tempOrientation);
@@ -96,11 +96,6 @@ public class DropDebrisBehavior extends BehaviorInterface
       tempPosition.set(0.55, side.negateIfRightSide(0.1), 1.2);
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, 0.0, 0.0);
       submitSingleTaskStageHandPose(armInFrontOfRobotPose, side, tempPosition, tempOrientation);
-
-      //put the arm close to home configuration
-      tempPosition.set(0.5, side.negateIfRightSide(0.25), 0.6);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempOrientation, 0.0, Math.toRadians(20.0), 0.0);
-      submitSingleTaskStageHandPose(armCloseToHomePose, side, tempPosition, tempOrientation);
 
       //put the robot in its default position (arm, pelvis and chest)
       submitGoToDefaultPositionTasks(side);
