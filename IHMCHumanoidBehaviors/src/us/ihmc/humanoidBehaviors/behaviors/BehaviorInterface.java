@@ -159,6 +159,11 @@ public abstract class BehaviorInterface implements RobotController
     * The implementation of this method should result in a clean shut down of the behavior.
     */
    public abstract void stop();
+   public void defaultStop()
+   {
+      isStopped.set(true);
+      isPaused.set(false);
+   }
 
    /**
     * Needs to be clarified.
@@ -170,12 +175,20 @@ public abstract class BehaviorInterface implements RobotController
     * The behavior should be resumable.
     */
    public abstract void pause();
+   public void defaultPause()
+   {
+      isPaused.set(true);
+   }
 
    /**
     * The implementation of this method should result in resuming the behavior after being paused.
     * Should not do anything if the behavior has not been paused.
     */
    public abstract void resume();
+   public void defaultResume()
+   {
+      isPaused.set(false);
+   }
 
    
    public BehaviorStatus getBehaviorStatus()
@@ -188,16 +201,37 @@ public abstract class BehaviorInterface implements RobotController
     * @return
     */
    public abstract boolean isDone();
+   public boolean defaultIsDone()
+   {
+      boolean ret = !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
+      return ret;
+   }
 
    /**
     * Clean up method that is called when leaving the behavior for another one.
     */
    public abstract void finalize();
+   public void defaultFinalize()
+   {
+      isPaused.set(false);
+      isStopped.set(false);
+   }
+   
+   protected boolean isPaused()
+   {
+      return isPaused.getBooleanValue() || isStopped.getBooleanValue();
+   }
 
    /**
     * Initialization method called when switching to this behavior.
     */
    public abstract void initialize();
+   public void defaultInitialize()
+   {
+      isPaused.set(false);
+      isStopped.set(false);
+   }
+   
    
    public PacketConsumer getNetworkProcessorGlobalObjectConsumer()
    {

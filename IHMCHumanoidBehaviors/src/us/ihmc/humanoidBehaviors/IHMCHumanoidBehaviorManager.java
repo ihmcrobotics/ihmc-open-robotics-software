@@ -17,6 +17,7 @@ import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
@@ -171,6 +172,8 @@ public class IHMCHumanoidBehaviorManager
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime,
             walkingControllerParameters.getAnkleHeight());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
+      
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE,new ReceiveImageBehavior(outgoingCommunicationBridge));
    }
 
    public PacketCommunicator getCommunicator()
