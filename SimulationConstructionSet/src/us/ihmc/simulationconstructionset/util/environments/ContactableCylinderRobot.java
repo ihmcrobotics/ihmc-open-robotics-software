@@ -18,12 +18,12 @@ import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.FrameCylinder3d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class ContactableCylinderRobot extends ContactableRobot
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    public static final double DEFAULT_RADIUS = 0.2;
    public static final double DEFAULT_THICKNESS = 0.05;
    private static final double DEFAULT_MASS = 1.0;
@@ -32,6 +32,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    private final FrameCylinder3d frameCylinder;
 
    private final FloatingJoint floatingJoint;
+   private final ReferenceFrame afterRootJointFrame;
 
    private final Link link;
    private final Graphics3DObject linkGraphics;
@@ -50,19 +51,26 @@ public class ContactableCylinderRobot extends ContactableRobot
    {
       super(name);
       rootJointTransformToWorld = rootJointTransform;
-      frameCylinder = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), rootJointTransform, height, radius);
+      
+      afterRootJointFrame = new ReferenceFrame("rootJointFrame", worldFrame)
+      {
+         private static final long serialVersionUID = -5359633108342066963L;
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            floatingJoint.getTransformToWorld(transformToParent);
+         }
+      };
+      frameCylinder = new FrameCylinder3d(afterRootJointFrame, height, radius);
 
 
       link = new Link(name + "Link");
       link.setMass(mass);
-      link.setComOffset(new Vector3d());
+      link.setComOffset(new Vector3d(0.0, 0.0, height / 3.0));
 
       Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis.Z);
-      RigidBodyInertia rigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), inertia, mass);
-      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "Frame", ReferenceFrame.getWorldFrame(),
-                                     rootJointTransform);
-      rigidBodyInertia.changeFrame(jointFrame);
-      link.setMomentOfInertia(rigidBodyInertia.getMassMomentOfInertiaPartCopy());
+      link.setMomentOfInertia(inertia);
 
       linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.2);
@@ -102,11 +110,13 @@ public class ContactableCylinderRobot extends ContactableRobot
       }
    }
 
-
-
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
-      return frameCylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
+      afterRootJointFrame.update();
+      frameCylinder.changeFrame(worldFrame);
+      boolean insideOrOnSurface = frameCylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
+      frameCylinder.changeFrame(afterRootJointFrame);
+      return insideOrOnSurface;
    }
 
    public boolean isClose(Point3d pointInWorldToCheck)
@@ -116,7 +126,10 @@ public class ContactableCylinderRobot extends ContactableRobot
 
    public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
+      afterRootJointFrame.update();
+      frameCylinder.changeFrame(worldFrame);
       frameCylinder.getCylinder3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      frameCylinder.changeFrame(afterRootJointFrame);
    }
 
 
