@@ -126,10 +126,8 @@ public class GraspValveBehavior extends BehaviorInterface
 
    private void setTasks(RigidBodyTransform valveTransformToWorld, Point3d pointOnValveToGraspInWorld, Vector3d approachDirectionInWorld)
    {
-//      Quat4d graspOrientation = computeDesiredGraspOrientation(valveTransformToWorld, fullRobotModel.getHandControlFrame(robotSideOfGraspingHand),
-//            approachDirectionInWorld);
-      
-      computeDesiredGraspOrientation(valveTransformToWorld, approachDirectionInWorld, fullRobotModel.getHandControlFrame(robotSideOfGraspingHand), desiredGraspOrientation);
+      computeDesiredGraspOrientation(valveTransformToWorld, approachDirectionInWorld, fullRobotModel.getHandControlFrame(robotSideOfGraspingHand),
+            desiredGraspOrientation);
 
       FramePose midGrabPose = new FramePose(worldFrame, getOffsetPoint3dCopy(pointOnValveToGraspInWorld, approachDirectionInWorld,
             -midPoseOffsetFromFinalPose.getDoubleValue()), desiredGraspOrientation);
@@ -163,85 +161,19 @@ public class GraspValveBehavior extends BehaviorInterface
 
       return ret;
    }
-//
-//   private final Vector3d xAxis = new Vector3d(1, 0, 0);
-//   
-//   private Quat4d computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, ReferenceFrame handFrame, Vector3d approachDirectionInWorld)
-//   {
-//      Matrix3d piRoll = new Matrix3d();
-//      piRoll.rotX(Math.PI);
-//
-//      Vector3d midToFinalGraspVec = new Vector3d(approachDirectionInWorld);
-//
-//      AxisAngle4d rotationFromXAxis = new AxisAngle4d();
-//      GeometryTools.getRotationBasedOnNormal(rotationFromXAxis, midToFinalGraspVec, xAxis);
-//
-//      FramePose handPoseBeforeRotation = new FramePose(worldFrame, new Point3d(0.0, 0.0, 0.0), rotationFromXAxis);
-//      PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", handPoseBeforeRotation);
-//
-//      FramePose debrisPoseInHandBeforeRotationFrame = new FramePose(worldFrame, debrisTransform);
-//      debrisPoseInHandBeforeRotationFrame.changeFrame(handFrameBeforeRotation);
-//
-//      FramePose debrisPoseInHandBeforeRotationFrameWithPiRoll = new FramePose(worldFrame, debrisTransform);
-//      debrisPoseInHandBeforeRotationFrameWithPiRoll.changeFrame(handFrameBeforeRotation);
-//
-//      Matrix3d piRollHandOrientation = new Matrix3d();
-//      debrisPoseInHandBeforeRotationFrameWithPiRoll.getOrientation(piRollHandOrientation);
-//
-//      Matrix3d finalHandOrientation = new Matrix3d();
-//      finalHandOrientation.mul(piRoll, piRollHandOrientation);
-//
-//      Quat4d finalHandQuat = new Quat4d();
-//      RotationFunctions.setQuaternionBasedOnMatrix3d(finalHandQuat, finalHandOrientation);
-//      debrisPoseInHandBeforeRotationFrameWithPiRoll.setOrientation(finalHandQuat);
-//
-//      double debrisPoseInHandBeforeRotationRoll = debrisPoseInHandBeforeRotationFrame.getRoll();
-//      double debrisPoseInHandBeforeRotationWithPiRollRoll = debrisPoseInHandBeforeRotationFrameWithPiRoll.getRoll();
-//
-//      Matrix3d rotationToBePerformedAroundX = new Matrix3d();
-//
-//      if (Math.abs(debrisPoseInHandBeforeRotationRoll) <= Math.abs(debrisPoseInHandBeforeRotationWithPiRollRoll))
-//      {
-//         rotationToBePerformedAroundX.rotX(debrisPoseInHandBeforeRotationRoll);
-//      }
-//      else
-//      {
-//         rotationToBePerformedAroundX.rotX(debrisPoseInHandBeforeRotationWithPiRollRoll);
-//      }
-//
-//      Matrix3d debrisOrientation = new Matrix3d();
-//      debrisPoseInHandBeforeRotationFrame.getOrientation(debrisOrientation);
-//
-//      Matrix3d actualHandRotation = new Matrix3d();
-//      actualHandRotation.mul(rotationToBePerformedAroundX, debrisOrientation);
-//
-//      Quat4d actualHandRotationQuat = new Quat4d();
-//      RotationFunctions.setQuaternionBasedOnMatrix3d(actualHandRotationQuat, actualHandRotation);
-//
-//      FramePose graspPose = new FramePose(handFrameBeforeRotation);
-//      graspPose.setOrientation(actualHandRotationQuat);
-//      graspPose.changeFrame(worldFrame);
-//
-//      Quat4d ret = new Quat4d();
-//      graspPose.getOrientation(ret);
-//
-//      System.out.println(ret);
-//
-//      return ret;
-//   }
-   
-   private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, Vector3d graspVector, ReferenceFrame handFrame,
+
+   private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, Vector3d graspVector, ReferenceFrame handFrameBeforeGrasping,
          Quat4d desiredGraspOrientationToPack)
    {
       PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", worldFrame);
       handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
 
       FramePose handPoseSolution1 = new FramePose(handFrameBeforeRotation);
-      handPoseSolution1.changeFrame(handFrame);
+      handPoseSolution1.changeFrame(handFrameBeforeGrasping);
 
       FramePose handPoseSolution2 = new FramePose(handFrameBeforeRotation);
       handPoseSolution2.setOrientation(0.0, 0.0, Math.PI);
-      handPoseSolution2.changeFrame(handFrame);
+      handPoseSolution2.changeFrame(handFrameBeforeGrasping);
 
       double rollOfSolution1 = handPoseSolution1.getRoll();
       double rollOfSolution2 = handPoseSolution2.getRoll();
@@ -306,7 +238,7 @@ public class GraspValveBehavior extends BehaviorInterface
    {
       handPoseBehavior.enableActions();
    }
-   
+
    @Override
    public void pause()
    {
