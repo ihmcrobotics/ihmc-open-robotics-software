@@ -19,36 +19,31 @@ public class SimpleDoNothingBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      isPaused.set(false);
-      isStopped.set(false);
+      defaultInitialize();
    }
 
    @Override
    public void finalize()
    {
-      isPaused.set(false);
-      isStopped.set(false);
+      defaultFinalize();
    }
 
    @Override
    public void stop()
    {
-      isStopped.set(true);
-      isPaused.set(false);
+      defaultStop();
    }
 
    @Override
    public void pause()
    {
-      isPaused.set(true);
-      isStopped.set(false);
+      defaultPause();
    }
 
    @Override
    public boolean isDone()
    {
-      boolean ret = !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
-      return ret;
+      return defaultIsDone();
    }
 
    @Override
@@ -60,7 +55,7 @@ public class SimpleDoNothingBehavior extends BehaviorInterface
    @Override
    public void resume()
    {
-      isPaused.set(false);
+      defaultResume();
    }
 
    @Override

@@ -4,8 +4,7 @@ import us.ihmc.utilities.ComparableDataObject;
 
 public abstract class Packet<T> implements ComparableDataObject<T>
 {
-   private int destination;
-   
+   private int destination = PacketDestination.BROADCAST.ordinal();
    public void setDestination(PacketDestination destination)
    {
       this.destination = destination.ordinal();
