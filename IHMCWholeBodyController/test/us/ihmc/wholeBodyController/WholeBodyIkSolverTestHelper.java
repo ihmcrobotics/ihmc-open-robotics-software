@@ -4,8 +4,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+//import java.util.HashMap;
+//import java.util.Map;
 import java.util.Random;
 
 import javax.vecmath.Matrix4d;
@@ -15,18 +15,15 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import com.jme3.post.Filter.Pass;
-
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.RandomTools;
+//import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+//import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -54,6 +51,7 @@ public class WholeBodyIkSolverTestHelper
    private double randomRobotPositionY;
    private double randomRobotYaw;
    static private final double minAcceptableSuccessPercentage = 0.95;
+   //   private static final boolean VISUALIZE_RANDOMLY_GENERATED_POSES = true; // commit true to break bamboo
 
    private final double ERROR_TOLERANCE = 0.01;
    private final boolean DEBUG = false;
@@ -61,6 +59,8 @@ public class WholeBodyIkSolverTestHelper
    private SimulationConstructionSet scs;
    private FullRobotModelVisualizer modelVisualizer;
    private BagOfBalls bagOfBalls;
+
+   //   private WholeBodyControllerParameters robotModel;
 
    public void addGraphics(SimulationConstructionSet scs, FullRobotModelVisualizer modelVisualizer)
    {
@@ -76,11 +76,31 @@ public class WholeBodyIkSolverTestHelper
       this.actualRobotModel = actualRobotModel;
       this.desiredRobotModel = robotModel.createFullRobotModel();
       this.hikSolver = solver;
+      //      this.robotModel = robotModel;
+   }
 
+   public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
+         ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased)
+   {
+      executeHandTargetTest(dofToControlLeft, dofToControlRight, handTargetPairsArray, thisTestIsStaticsBased, true);
+   }
+
+   public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
+         ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased, boolean useRandomRobotLocations)
+   {
       Random random = new Random();
-      randomRobotPositionX = maxDistanceFromOriginInCartesianDirection * random.nextDouble();
-      randomRobotPositionY = maxDistanceFromOriginInCartesianDirection * random.nextDouble();
-      randomRobotYaw = 2.0 * Math.PI * random.nextDouble();
+      if (useRandomRobotLocations)
+      {
+         randomRobotPositionX = maxDistanceFromOriginInCartesianDirection * random.nextDouble();
+         randomRobotPositionY = maxDistanceFromOriginInCartesianDirection * random.nextDouble();
+         randomRobotYaw = 2.0 * Math.PI * random.nextDouble();
+      }
+      else
+      {
+         randomRobotPositionX = 0;
+         randomRobotPositionY = 0;
+         randomRobotYaw = 0;
+      }
 
       //  randomRobotPositionX = 0;
       // randomRobotPositionY = 0;
@@ -91,11 +111,6 @@ public class WholeBodyIkSolverTestHelper
       actualRobotModel.getRootJoint().setPosition(rootPosition);
       actualRobotModel.getRootJoint().setRotation(randomRobotYaw, 0.0, 0.0);
 
-   }
-
-   public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
-         ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased)
-   {
       hikSolver.setVerbosityLevel(scs == null ? 0 : 1);
       hikSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(false);
 
@@ -143,8 +158,11 @@ public class WholeBodyIkSolverTestHelper
             e.printStackTrace();
          }
 
-         System.out.println(getClass().getSimpleName() + ": ret(" + hikSolutionExists + ") hik solution "
-               + (hikSolutionExists == ComputeResult.SUCCEEDED ? "found" : "not found"));
+         if (DEBUG)
+         {
+            System.out.println(getClass().getSimpleName() + ": ret(" + hikSolutionExists + ") hik solution "
+                  + (hikSolutionExists == ComputeResult.SUCCEEDED ? "found" : "not found"));
+         }
 
          actualRobotModel.copyAllJointsButKeepOneFootFixed(desiredRobotModel.getOneDoFJoints(), RobotSide.RIGHT);
          actualRobotModel.updateFrames();
@@ -214,10 +232,26 @@ public class WholeBodyIkSolverTestHelper
                      {
                         System.out.println(getClass().getSimpleName() + ": [" + side + "] SUCCESS");
                      }
+
+                     double error = hikSolver.calculateCenterOfMassError(desiredRobotModel);
+                     double EPS = 0.03; // 3 cm tolerance
+
+                     if (error > EPS)
+                     {
+                        System.out.println(getClass().getSimpleName() + ": - ERROR: CoM doesnt match");
+                     }
+
+                     boolean isSelfColliding = hikSolver.checkCollisions(desiredRobotModel);
+
+                     if (isSelfColliding)
+                     {
+                        System.out.println(getClass().getSimpleName() + ": - ERROR: Collisions detected");
+                     }
                   }
                   assertTrue(errorVector.length() < ERROR_TOLERANCE);
                   framesToPlotAsBlueSpheres.add(endEffectorTarget.get(side));
                   successCount++;
+
                }
                else
                {
@@ -289,18 +323,19 @@ public class WholeBodyIkSolverTestHelper
 
    private FramePose moveDesiredFrameToRobotLocation(final FramePose desiredPose)
    {
-      RigidBodyTransform transformFromDesiredToWorld = new RigidBodyTransform();
-      desiredPose.getRigidBodyTransform(transformFromDesiredToWorld);
+      //Note RobotBase is directly on top of Old 
+      RigidBodyTransform transformFromDesiredToOldWorld = new RigidBodyTransform();
+      desiredPose.getRigidBodyTransform(transformFromDesiredToOldWorld);
 
-      RigidBodyTransform transformFromRobotBaseToWorld = new RigidBodyTransform();
-      transformFromRobotBaseToWorld.setTranslation(randomRobotPositionX, randomRobotPositionY, 0.0);
+      RigidBodyTransform transformFromRobotBaseToNewWorld = new RigidBodyTransform();
+      transformFromRobotBaseToNewWorld.setTranslation(randomRobotPositionX, randomRobotPositionY, 0.0);
 
-      Quat4d jointRotation = new Quat4d();
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(jointRotation, randomRobotYaw, 0.0, 0.0);
-      transformFromRobotBaseToWorld.setRotation(jointRotation);
+      Quat4d robotRotation = new Quat4d();
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(robotRotation, randomRobotYaw, 0.0, 0.0);
+      transformFromRobotBaseToNewWorld.setRotation(robotRotation);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.multiply(transformFromRobotBaseToWorld, transformFromDesiredToWorld);
+      transform.multiply(transformFromRobotBaseToNewWorld, transformFromDesiredToOldWorld);
 
       FramePose desiredToReturnFrame = new FramePose(ReferenceFrame.getWorldFrame(), transform);
 
@@ -400,47 +435,82 @@ public class WholeBodyIkSolverTestHelper
       return arrayListToReturn;
    }
 
+   /**
    public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(int pointsDesired)
    {
+
+      Vector3d rootPosition = new Vector3d(0.0, 0.0, 0.93);
+      desiredRobotModel.getRootJoint().setPosition(rootPosition);
+      desiredRobotModel.getRootJoint().setRotation(0.0, 0.0, 0.0);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotModel.createSdfRobot(false));
+      FullRobotModelVisualizer localModelVisualizer = new FullRobotModelVisualizer(scs, desiredRobotModel, 0.01);
+      if (VISUALIZE_RANDOMLY_GENERATED_POSES)
+      {
+         scs.startOnAThread();
+         ThreadTools.sleep(2000);
+      }
+
       ArrayList<Pair<FramePose, FramePose>> handTargetArrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
       Random random = new Random();
 
       while (handTargetArrayListToReturn.size() < pointsDesired)
       {
-         VectorXd Q = new VectorXd(hikSolver.getNumberOfJoints());
+         //         VectorXd Q = new VectorXd(hikSolver.getNumberOfJoints());
 
          // this map will tells us which joint are present both in hikSolver and fullRobotModel.
          HashMap<String, Integer> activeJoints = hikSolver.getHierarchicalSolver().createListOfActiveJoints();
 
-         // set random position for each joint. Store this value both in hikSolver and fullRobotModel.
+         // set random position for each joint. Store this value both in fullRobotModel.
          for (Map.Entry<String, Integer> joint : activeJoints.entrySet())
          {
             String jointName = joint.getKey();
-            int jointIndex = joint.getValue();
+            //            int jointIndex = joint.getValue();
             double val = RandomTools.generateRandomDouble(random, -1.0, 1.0);
-            actualRobotModel.getOneDoFJointByName(jointName).setQ(val);
-            Q.set(jointIndex, val);
+            desiredRobotModel.getOneDoFJointByName(jointName).setQ(val);
+            //            Q.set(jointIndex, val);
          }
 
          // update the forward kinematics of WB model
-         hikSolver.getHierarchicalSolver().getForwardSolver().updateKinematics(Q);
+         //         hikSolver.getHierarchicalSolver().getForwardSolver().updateKinematics(Q);
 
          // update the forward kinematics of the SDF model.
-         actualRobotModel.updateFrames();
+         desiredRobotModel.updateFrames();
+         desiredRobotModel.copyAllJointsButKeepOneFootFixed(desiredRobotModel.getOneDoFJoints(), RobotSide.RIGHT);
+         //         hikSolver.updateWorkingModel(actualRobotModel);
 
-         //verify that the CoM that will result by applying the random joint angles will satisfy the stability requirements of the hikSolver.
-         double error = hikSolver.calculateCenterOfMassError(actualRobotModel);
+         double error = hikSolver.calculateCenterOfMassError(desiredRobotModel);
          double EPS = 0.01; // 1 cm tolerance
 
-         //if CoM is close enough to stable then accept the proposed pose as feasible and add it to the list of targets to try with the IK solver.
-         if (error < EPS)
+         boolean isSelfColliding = hikSolver.checkCollisions(desiredRobotModel);
+
+         //if CoM is close enough to stable and there are no self collisions then accept the proposed pose as feasible and add it to the list of targets to try with the IK solver.
+         if (error < EPS & !isSelfColliding)
          {
-            FramePose rightHandTarget = new FramePose(actualRobotModel.getHandControlFrame(RobotSide.RIGHT));
-            FramePose leftHandTarget = new FramePose(actualRobotModel.getHandControlFrame(RobotSide.LEFT));
+            Vector3d vector = new Vector3d();
+            Quat4d noRotation = new Quat4d();
+
+            ReferenceFrame leftHandFrameDesired = desiredRobotModel.getHandControlFrame(RobotSide.LEFT);
+            ReferenceFrame rightHandFrameDesired = desiredRobotModel.getHandControlFrame(RobotSide.RIGHT);
+
+            leftHandFrameDesired.getTransformToWorldFrame().getTranslation(vector);
+            Point3d point = new Point3d(vector);
+            FramePose leftHandTarget = new FramePose(ReferenceFrame.getWorldFrame(), point, noRotation);
+
+            rightHandFrameDesired.getTransformToWorldFrame().getTranslation(vector);
+            point = new Point3d(vector);
+            FramePose rightHandTarget = new FramePose(ReferenceFrame.getWorldFrame(), point, noRotation);
+
             Pair<FramePose, FramePose> pairToPack = new Pair<FramePose, FramePose>(leftHandTarget, rightHandTarget);
             handTargetArrayListToReturn.add(pairToPack);
+            if (VISUALIZE_RANDOMLY_GENERATED_POSES)
+            {
+               localModelVisualizer.update(0);
+               ThreadTools.sleep(100);
+            }
          }
       }
+      ThreadTools.sleep(1200000);
       return handTargetArrayListToReturn;
    }
 
