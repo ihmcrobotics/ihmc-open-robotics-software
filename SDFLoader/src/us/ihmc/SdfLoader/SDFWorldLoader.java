@@ -14,8 +14,8 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.io.files.FileTools;
 
 public class SDFWorldLoader
 {

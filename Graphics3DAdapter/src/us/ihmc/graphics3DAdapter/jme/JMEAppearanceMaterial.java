@@ -19,8 +19,8 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.utilities.ClassLoaderUtils;
-import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 
