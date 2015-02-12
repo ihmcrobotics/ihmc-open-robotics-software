@@ -49,7 +49,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
    private final ReferenceFrame midZupFrame;
 
-   private final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.85; //0.85
+   private final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.75; //0.85
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
