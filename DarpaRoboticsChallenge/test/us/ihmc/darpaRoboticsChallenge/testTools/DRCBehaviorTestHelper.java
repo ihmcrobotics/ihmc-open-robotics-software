@@ -53,7 +53,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /** 
- * Do not execute seperate behavior threads simulataneously.  Instead, run multiple behaviors in a single thread.
+ * Do not execute more than one behavior thread at a time.  Instead, run multiple behaviors in a single thread.
  * @author cschmidt
  *
  */
