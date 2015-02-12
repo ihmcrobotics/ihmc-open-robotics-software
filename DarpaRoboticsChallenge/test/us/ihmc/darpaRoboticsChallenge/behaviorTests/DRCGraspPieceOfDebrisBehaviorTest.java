@@ -40,6 +40,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -159,18 +160,12 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       robot.getOneDegreeOfFreedomJoint("r_arm_elx").setQ(-2.1);
       robot.getOneDegreeOfFreedomJoint("r_arm_wry").setQ(0.0);
       robot.getOneDegreeOfFreedomJoint("r_arm_wrx").setQ(0.55);
-
-      double[] jointAngles = new double[6];
-      jointAngles[0] = -0.1;
-      jointAngles[1] = 1.6;
-      jointAngles[2] = 1.9;
-      jointAngles[3] = -2.1;
-      jointAngles[4] = 0.0;
-      jointAngles[5] = 0.55;
+      
+      double[] armDefaultJointAngles = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME, RobotSide.RIGHT);
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.2));
 
-      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.RIGHT, 0.5 , jointAngles));
+      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.RIGHT, 0.5 , armDefaultJointAngles));
       drcBehaviorTestHelper.updateRobotModel();
       
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));
