@@ -12,6 +12,7 @@ import org.junit.runners.Suite;
    us.ihmc.communication.networkProcessor.NetworkProcessorTest.class,
    us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicatorTest.class,
    us.ihmc.communication.packetCommunicator.KryoPacketCommunicatorTest.class,
+   us.ihmc.communication.producers.RobotPoseBufferTest.class,
    us.ihmc.communication.remote.serialization.JointConfigurationDataSenderTest.class,
    us.ihmc.communication.serializers.driving.OverheadMapPacketSerializerTest.class,
    us.ihmc.communication.serializers.driving.VehiclePosePacketSerializerTest.class,
