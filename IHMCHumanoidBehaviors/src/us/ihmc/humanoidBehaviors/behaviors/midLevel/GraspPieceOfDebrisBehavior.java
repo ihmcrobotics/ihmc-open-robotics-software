@@ -112,11 +112,11 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 
       pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyIKBehavior, midGrabPose, trajectoryTime));
 
-      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior));
+      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior, yoTime));
 
       pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyIKBehavior, desiredGrabPose, trajectoryTime));
 
-      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior));
+      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior, yoTime));
 
       FramePose prepareToDropPose = new FramePose(midFeetZUpFrame);
       prepareToDropPose.setPosition(0.55, robotSide.negateIfRightSide(0.2), 1.2);
@@ -232,7 +232,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       chestOrientationBehavior.enableActions();
       pelvisPoseBehavior.enableActions();
    }
-
+   
    @Override
    public void pause()
    {

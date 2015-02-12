@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -57,6 +59,8 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private final WalkingControllerParameters walkingControllerParameters;
 
+   private final ArrayList<BehaviorInterface> childBehaviors;
+
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final ComHeightBehavior comHeightBehavior;
    private final GraspValveBehavior graspValveBehavior;
@@ -86,12 +90,20 @@ public class TurnValveBehavior extends BehaviorInterface
 
       this.walkingControllerParameters = walkingControllerParameters;
 
+      childBehaviors = new ArrayList<BehaviorInterface>();
+      
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      childBehaviors.add(walkToLocationBehavior);
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(comHeightBehavior);
       graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      childBehaviors.add(graspValveBehavior);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(handPoseBehavior);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(fingerStateBehavior);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
+      childBehaviors.add(scriptBehavior);
 
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<ScriptBehaviorInputPacket>();
 
@@ -115,7 +127,6 @@ public class TurnValveBehavior extends BehaviorInterface
 
       pipeLine.doControl();
 
-
       //      if (!currentBehavior.equals(walkToLocationBehavior))
       //      {
       //         pauseIfCapturePointErrorIsTooLarge();
@@ -127,8 +138,7 @@ public class TurnValveBehavior extends BehaviorInterface
       if (tippingDetected.getBooleanValue() && !isPaused.getBooleanValue())
       {
          this.pause();
-         SysoutTool.println("TurnValveBehavior: Tipping detected! Pausing behavior.");
-
+         if (DEBUG) SysoutTool.println("TurnValveBehavior: Tipping detected! Pausing behavior.");
       }
    }
 
@@ -146,7 +156,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
          pipeLine.submitSingleTaskStage(new CoMHeightTask(0.5 * ComHeightPacket.MIN_COM_HEIGHT, yoTime, comHeightBehavior, 1.0));
          pipeLine.submitSingleTaskStage(new GraspValveTask(graspValveBehavior, valveType, valveTransformToWorld, graspApproachDirectionInValveFrame,
-               graspValveRim));
+               graspValveRim, yoTime));
 
          if (graspValveBehavior.hasInputBeenSet())
          {
@@ -164,7 +174,7 @@ public class TurnValveBehavior extends BehaviorInterface
             pipeLine.submitSingleTaskStage(new HandPoseTask(createHandPosePacket(trajectoryTime, desiredHandPoseInWorldAfterSecondTurn), handPoseBehavior,
                   yoTime));
             
-            pipeLine.submitSingleTaskStage(new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior));
+            pipeLine.submitSingleTaskStage(new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime));
             
 //            pipeLine.submitSingleTaskStage(new HandPoseTask(createHandPosePacket(trajectoryTime, graspPoseInWorld), handPoseBehavior, yoTime));
 //            
@@ -188,7 +198,7 @@ public class TurnValveBehavior extends BehaviorInterface
       {
          SysoutTool.println("New Script Behavior Input Packet Received.  Script File : " + scriptBehaviorInputPacket.getScriptName(), DEBUG);
 
-         pipeLine.submitSingleTaskStage(new ScriptTask(scriptBehavior, scriptBehaviorInputPacket));
+         pipeLine.submitSingleTaskStage(new ScriptTask(scriptBehavior, scriptBehaviorInputPacket, yoTime));
       }
 
       hasInputBeenSet.set(true);
@@ -201,7 +211,7 @@ public class TurnValveBehavior extends BehaviorInterface
       double valveYaw = valvePose2d.getYaw();
 
       FramePose2d manipulationMidFeetPose = computeDesiredMidFeetPoseForManipulation(valvePose2d);
-      WalkToLocationTask ret = new WalkToLocationTask(manipulationMidFeetPose, walkToLocationBehavior, valveYaw, stepLength);
+      WalkToLocationTask ret = new WalkToLocationTask(manipulationMidFeetPose, walkToLocationBehavior, valveYaw, stepLength, yoTime);
 
       return ret;
    }
@@ -271,27 +281,25 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
-      comHeightBehavior.consumeObjectFromNetworkProcessor(object);
-      graspValveBehavior.consumeObjectFromNetworkProcessor(object);
-      scriptBehavior.consumeObjectFromNetworkProcessor(object);
+      for (BehaviorInterface childBehavior : childBehaviors)
+      {
+         childBehavior.consumeObjectFromNetworkProcessor(object);
+      }
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromController(object);
-      walkToLocationBehavior.consumeObjectFromController(object);
-      comHeightBehavior.consumeObjectFromController(object);
-      graspValveBehavior.consumeObjectFromController(object);
-      scriptBehavior.consumeObjectFromController(object);
+      for (BehaviorInterface childBehavior : childBehaviors)
+      {
+         childBehavior.consumeObjectFromController(object);
+      }
    }
 
    @Override
    public void stop()
    {
-      //      currentBehavior.stop();
+      pipeLine.getCurrentStage().stop();
    }
 
    @Override
@@ -302,18 +310,18 @@ public class TurnValveBehavior extends BehaviorInterface
       SysoutTool.println("max wrist force : " + maxObservedWristForce);
       SysoutTool.println("max capture point error : " + maxObservedCapturePointError);
    }
-
+   
    @Override
    public void pause()
    {
-      //      currentBehavior.pause();
+      pipeLine.getCurrentStage().pause();
       isPaused.set(true);
    }
 
    @Override
    public void resume()
    {
-      //      currentBehavior.resume();
+      pipeLine.getCurrentStage().resume();
       isPaused.set(false);
    }
 
@@ -326,7 +334,6 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
-      //      currentBehavior.finalize();
       hasInputBeenSet.set(false);
       
       handPoseBehavior.finalize();
@@ -340,12 +347,6 @@ public class TurnValveBehavior extends BehaviorInterface
    public void initialize()
    {
       hasInputBeenSet.set(false);
-
-      handPoseBehavior.initialize();
-      walkToLocationBehavior.initialize();
-      comHeightBehavior.initialize();
-      graspValveBehavior.initialize();
-      scriptBehavior.initialize();
    }
 
    @Override

@@ -10,16 +10,17 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.taskExecutor.Task;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
 
-public class FootstepTask implements Task
+public class FootstepTask extends BehaviorTask
 {
    private final FootstepListBehavior footstepListBehavior;
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
-   public FootstepTask(FullRobotModel fullRobotModel, RobotSide robotSide, FootstepListBehavior footstepListBehavior, FramePose footPose)
+   public FootstepTask(FullRobotModel fullRobotModel, RobotSide robotSide, FootstepListBehavior footstepListBehavior, FramePose footPose, DoubleYoVariable yoTime)
    {
+      super(footstepListBehavior, yoTime);
       ReferenceFrame soleFrame;
       RigidBody endEffector;
       
@@ -33,29 +34,15 @@ public class FootstepTask implements Task
    }
 
    @Override
-   public void doTransitionIntoAction()
+   protected void setBehaviorInput()
    {
-      footstepListBehavior.initialize();
-      footstepListBehavior.set(footsteps);
+      footstepListBehavior.set(footsteps);      
    }
-
-   @Override
-   public void doAction()
-   {
-      footstepListBehavior.doControl();
-   }
-
+   
    @Override
    public void doTransitionOutOfAction()
    {
       footstepListBehavior.finalize();
       footsteps.clear();
    }
-
-   @Override
-   public boolean isDone()
-   {
-      return footstepListBehavior.isDone();
-   }
-
 }

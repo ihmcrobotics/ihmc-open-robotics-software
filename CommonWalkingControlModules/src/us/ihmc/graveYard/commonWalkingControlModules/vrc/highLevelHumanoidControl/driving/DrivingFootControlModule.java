@@ -415,5 +415,26 @@ public class DrivingFootControlModule
       {
          return getClass().getSimpleName() + ": targetPosition: " + targetPosition + ", forceToCompensate: " + forceToCompensate;
       }
+
+      @Override
+      public void pause()
+      {
+         // TODO Auto-generated method stub
+         
+      }
+
+      @Override
+      public void resume()
+      {
+         // TODO Auto-generated method stub
+         
+      }
+
+      @Override
+      public void stop()
+      {
+         // TODO Auto-generated method stub
+         
+      }
    }
 }

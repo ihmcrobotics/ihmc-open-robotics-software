@@ -5,9 +5,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RemoveSingleDebrisBehavior;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.taskExecutor.Task;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class RemovePieceOfDebrisTask implements Task
+public class RemovePieceOfDebrisTask extends BehaviorTask
 {
    private final RemoveSingleDebrisBehavior removeSingleDebrisBehavior;
    private final RigidBodyTransform debrisTransform;
@@ -15,8 +15,9 @@ public class RemovePieceOfDebrisTask implements Task
    private final Vector3d graspVector;
 
    public RemovePieceOfDebrisTask(RemoveSingleDebrisBehavior removeSingleDebrisBehavior, RigidBodyTransform debrisTransform, Point3d graspPosition,
-         Vector3d graspVector)
+         Vector3d graspVector, DoubleYoVariable yoTime)
    {
+      super(removeSingleDebrisBehavior, yoTime);
       this.removeSingleDebrisBehavior = removeSingleDebrisBehavior;
       this.debrisTransform = debrisTransform;
       this.graspPosition = graspPosition;
@@ -24,27 +25,8 @@ public class RemovePieceOfDebrisTask implements Task
    }
 
    @Override
-   public void doTransitionIntoAction()
+   protected void setBehaviorInput()
    {
-      removeSingleDebrisBehavior.initialize();
       removeSingleDebrisBehavior.setInputs(debrisTransform, graspPosition, graspVector);
-   }
-
-   @Override
-   public void doAction()
-   {
-      removeSingleDebrisBehavior.doControl();
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      removeSingleDebrisBehavior.finalize();
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return removeSingleDebrisBehavior.isDone();
    }
 }

@@ -8,18 +8,13 @@ import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class PelvisPoseTask implements Task
+public class PelvisPoseTask extends BehaviorTask
 {
    private static final boolean DEBUG = false;
    private final PelvisPosePacket pelvisPosePacket;
    private final PelvisPoseBehavior pelvisPoseBehavior;
-
-   private final DoubleYoVariable yoTime;
-   private double behaviorDoneTime = Double.NaN;
-   private final double sleepTime;
 
    public PelvisPoseTask(FrameOrientation desiredPelvisOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime)
    {
@@ -29,9 +24,8 @@ public class PelvisPoseTask implements Task
    public PelvisPoseTask(FrameOrientation desiredPelvisOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime,
          double sleepTime)
    {
+      super(pelvisPoseBehavior, yoTime, sleepTime);
       this.pelvisPoseBehavior = pelvisPoseBehavior;
-      this.yoTime = yoTime;
-      this.sleepTime = sleepTime;
       Quat4d pelvisOrientation = new Quat4d();
       desiredPelvisOrientation.getQuaternion(pelvisOrientation);
       pelvisPosePacket = PacketControllerTools.createPelvisPosePacketForOrientationOnly(pelvisOrientation, trajectoryTime);
@@ -44,9 +38,8 @@ public class PelvisPoseTask implements Task
 
    public PelvisPoseTask(FramePose desiredPelvisPose, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime, double sleepTime)
    {
+      super(pelvisPoseBehavior, yoTime, sleepTime);
       this.pelvisPoseBehavior = pelvisPoseBehavior;
-      this.yoTime = yoTime;
-      this.sleepTime = sleepTime;
       Point3d pelvisPosition = new Point3d();
       Quat4d pelvisOrientation = new Quat4d();
       desiredPelvisPose.getOrientation(pelvisOrientation);
@@ -56,43 +49,14 @@ public class PelvisPoseTask implements Task
 
    public PelvisPoseTask(PelvisPosePacket pelvisPosePacket, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior)
    {
+      super(pelvisPoseBehavior, yoTime);
       this.pelvisPoseBehavior = pelvisPoseBehavior;
-      this.yoTime = yoTime;
-      this.sleepTime = 0.0;
       this.pelvisPosePacket = pelvisPosePacket;
    }
 
    @Override
-   public void doTransitionIntoAction()
+   protected void setBehaviorInput()
    {
-      if (DEBUG)
-         System.out.println("Started pelvis pose");
-      pelvisPoseBehavior.initialize();
-      pelvisPoseBehavior.setInput(pelvisPosePacket);
-   }
-
-   @Override
-   public void doAction()
-   {
-      pelvisPoseBehavior.doControl();
-      if (Double.isNaN(behaviorDoneTime) && pelvisPoseBehavior.isDone())
-      {
-         behaviorDoneTime = yoTime.getDoubleValue();
-      }
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      if (DEBUG)
-         System.out.println("Finished pelvis pose");
-      pelvisPoseBehavior.finalize();
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      boolean sleepTimeAchieved = yoTime.getDoubleValue() > behaviorDoneTime + sleepTime;
-      return pelvisPoseBehavior.isDone() && sleepTimeAchieved;
+      pelvisPoseBehavior.setInput(pelvisPosePacket); 
    }
 }

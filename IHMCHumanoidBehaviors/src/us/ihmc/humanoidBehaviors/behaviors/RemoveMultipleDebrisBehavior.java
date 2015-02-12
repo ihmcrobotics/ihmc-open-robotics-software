@@ -108,7 +108,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    private void submitRemoveDebrisTasks(DebrisData debrisData)
    {
       pipeLine.submitSingleTaskStage(new RemovePieceOfDebrisTask(removePieceOfDebrisBehavior, debrisData.getDebrisTransform(), debrisData
-            .getGraspVectorPosition(), debrisData.getGraspVector()));
+            .getGraspVectorPosition(), debrisData.getGraspVector(), yoTime));
    }
 
    private void sortDebrisFromCloserToFarther()
@@ -151,14 +151,14 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
       handPoseBehavior.stop();
       removePieceOfDebrisBehavior.stop();
    }
-
+   
    @Override
    public void enableActions()
    {
       handPoseBehavior.enableActions();
       removePieceOfDebrisBehavior.enableActions();
    }
-
+   
    @Override
    public void pause()
    {
