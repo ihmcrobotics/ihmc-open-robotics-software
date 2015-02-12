@@ -182,8 +182,6 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          armPosesLeftAndRightSide.put(robotSide, armPoses);
          behaviors.add(handPoseListBehavior);
       }
-
-      //TODO: Check that each pose executes properly, not just the last pose (tricky, unless motion is very very slow)
       
       for (int poseNumber = 0; poseNumber < numberOfArmPoses; poseNumber ++)
       {
