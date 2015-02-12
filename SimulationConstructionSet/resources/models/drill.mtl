@@ -1,5 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 11.02.2015 16:12:31
+# File Created: 12.02.2015 10:06:13
 
 newmtl Material_0s
 	Ns 0.0000
@@ -8,8 +8,8 @@ newmtl Material_0s
 	Tr 0.0000
 	Tf 1.0000 1.0000 1.0000 
 	illum 2
-	Ka 0.4039 0.4039 0.4039
-	Kd 0.4039 0.4039 0.4039
+	Ka 1.0000 1.0000 1.0000
+	Kd 1.0000 1.0000 1.0000
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
 	map_Ka ./textures/tex_0.jpg
