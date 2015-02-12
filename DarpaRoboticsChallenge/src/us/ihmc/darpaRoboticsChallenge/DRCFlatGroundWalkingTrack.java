@@ -14,8 +14,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.AsyncContinuousExecutor;
+import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class DRCFlatGroundWalkingTrack
 {
@@ -74,5 +77,16 @@ public class DRCFlatGroundWalkingTrack
    public DRCSimulationFactory getDrcSimulation()
    {
       return drcSimulation;
+   }
+
+   public void destroySimulation()
+   {
+      if (drcSimulation != null)
+      {
+         drcSimulation.dispose();
+      }
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
    }
 }

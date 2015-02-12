@@ -36,6 +36,16 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
+   private final static boolean VISUALIZE_FORCE = false;
+
+   private double swingTime, transferTime;
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
+
+   private DRCPushRobotController pushRobotController;
+   private RobotVisualizer robotVisualizer;
+
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -58,10 +68,10 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          blockingSimulationRunner = null;
       }
 
-      if (drcSimulation != null)
+      if (drcFlatGroundWalkingTrack != null)
       {
-         drcSimulation.dispose();
-         drcSimulation = null;
+         drcFlatGroundWalkingTrack.destroySimulation();
+         drcFlatGroundWalkingTrack = null;
       }
 
       if (robotVisualizer != null)
@@ -70,23 +80,15 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          robotVisualizer = null;
       }
       
-      if (pushRobotController != null)
-         pushRobotController = null;
+      pushRobotController = null;
+
+      swingFinishConditions = null;
+
+      swingStartConditions = null;
    
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
- 
-   private final static boolean VISUALIZE_FORCE = false;
-
-   private double swingTime, transferTime;
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
-
-   private DRCPushRobotController pushRobotController;
-   private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
-
    // cropped to 1.5 - 6.3 seconds
    @Ignore
 	@AverageDuration(duration = 50.0)
@@ -301,13 +303,13 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
       DRCSimulationFactory.RUN_MULTI_THREADED = false;
-      DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
+      setupTrack(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
       cameraConfiguration.setCameraFix(0.6, 0.0, 0.6);
       cameraConfiguration.setCameraPosition(10.0, 3.0, 3.0);
@@ -348,7 +350,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-   private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
+   private void setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
       GroundProfile3D groundProfile = new FlatGroundProfile();
@@ -359,11 +361,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
+      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
             robotModel);
-
-      drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
-      return drcFlatGroundWalkingTrack;
    }
 
    private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side, SideDependentList<StateTransitionCondition> condition, double stateTime)

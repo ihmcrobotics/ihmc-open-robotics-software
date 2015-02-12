@@ -286,7 +286,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
 
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, stateMachine, registry,
-            swingTimeCalculationProvider, feet);
+            swingTimeCalculationProvider);
 
       footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime, centerOfMassHeightTrajectoryGenerator,
             swingTimeCalculationProvider, feetManager);
@@ -714,6 +714,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                      transferToSide);
 
                instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+               finalDesiredICPInWorld.set(instantaneousCapturePointPlanner.getFinalDesiredICP());
             }
          }
          else
@@ -847,13 +848,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                if (pushRecoveryModule.isRecoveringFromDoubleSupportFall())
                {
-                  instantaneousCapturePointPlanner.updatePlanForDoubleSupportPush(transferToAndNextFootstepsData, tmpFramePoint, yoTime.getDoubleValue()
-                        - captureTime);
+                  instantaneousCapturePointPlanner.updatePlanForDoubleSupportPush(transferToAndNextFootstepsData, tmpFramePoint, yoTime.getDoubleValue() - captureTime);
                }
                else
                {
                   instantaneousCapturePointPlanner.updatePlanForSingleSupportPush(transferToAndNextFootstepsData, tmpFramePoint, yoTime.getDoubleValue());
                }
+               finalDesiredICPInWorld.set(instantaneousCapturePointPlanner.getFinalDesiredICP());
 
                removeAllUpcomingFootstepsAndStand();
             }
@@ -955,8 +956,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
-         footExplorationControlModule.initialize(nextFootstep, footPolygon, swingSide);
+         if (footExplorationControlModule.isActive())
+         {
+            FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
+            footExplorationControlModule.initialize(nextFootstep, footPolygon, swingSide);
+         }
 
          if (nextFootstep != null)
             feetManager.requestSwing(swingSide, nextFootstep, mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
@@ -1661,6 +1665,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FramePoint2d stanceContactCentroid2d = new FramePoint2d();
    private final FramePoint stanceContactCentroid = new FramePoint();
 
+   /**
+    * Terrible hack that needs to be reassessed
+    */
+   @Deprecated
    private void moveICPToInsideOfFootAtEndOfSwing(RobotSide supportSide, FramePoint2d upcomingFootstepLocation, double swingTime, double swingTimeRemaining,
          FramePoint2d desiredICPToMove)
    {
