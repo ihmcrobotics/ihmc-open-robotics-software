@@ -26,10 +26,10 @@ public class AtlasWallWorldDemo
 
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);
-      networkProcessorParameters.setUseBehaviorModule(automaticallyStartSimulation);
-      networkProcessorParameters.setUsePerceptionModule(automaticallyStartSimulation);
-      networkProcessorParameters.setUseSensorModule(automaticallyStartSimulation);
+      networkProcessorParameters.setUseUiModule(true);
+      networkProcessorParameters.setUseBehaviorModule(true);
+      networkProcessorParameters.setUsePerceptionModule(true);
+      networkProcessorParameters.setUseSensorModule(true);
       
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }
