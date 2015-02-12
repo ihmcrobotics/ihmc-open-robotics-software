@@ -15,10 +15,13 @@ import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
+@BambooPlan(planType = {BambooPlanType.UI})
 public class YoEntryBoxTest
 {
    public enum BadGreekEnum {ALPHA, BETA, GAMMA}
@@ -40,7 +43,7 @@ public class YoEntryBoxTest
       private EnumYoVariable<SmallEnum> smallEnumVariable;
       private DoubleYoVariable numberVariable;
       private DoubleYoVariable time;
-      private String name = "simpleController";
+      private final String name = "simpleController";
 
       public SimpleController()
       {
