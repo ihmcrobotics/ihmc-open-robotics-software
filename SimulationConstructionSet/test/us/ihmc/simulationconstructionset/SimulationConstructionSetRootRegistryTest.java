@@ -16,7 +16,7 @@ public class SimulationConstructionSetRootRegistryTest
    private static final boolean SHOW_GUI = false;
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=20000)
    public void testRootRegistryNothingFancy()
    {
       Robot robot = new Robot("RobotsRootRegistry");
@@ -56,7 +56,7 @@ public class SimulationConstructionSetRootRegistryTest
    }
 
 	@AverageDuration
-	@Test(timeout=300000) 
+	@Test(timeout=20000) 
    public void testVarGroups()
    {
       Robot robot = new Robot("testVarGroups");
@@ -103,7 +103,7 @@ public class SimulationConstructionSetRootRegistryTest
    }
 
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=20000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {
       Robot robot = new Robot("TestAfterConstruction");
