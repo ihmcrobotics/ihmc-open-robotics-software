@@ -68,8 +68,8 @@ public class InterprocessObjectCommunicatorTest
          @Override
          public void consumeObject(MutableInt object)
          {
-            assertEquals(random.nextInt(), object.getValue());
-            assertEquals(reference.get().getValue(), object.getValue());
+            assertEquals(random.nextInt(), object.intValue());
+            assertEquals(reference.get().intValue(), object.intValue());
             assertFalse(object == reference.get());
          }
       });
