@@ -24,8 +24,8 @@ public class GraspValveTask extends BehaviorTask
       super(graspValveBehavior, yoTime);
       this.graspValveBehavior = graspValveBehavior;
       this.valveType = valveType;
-      this.valveTransformToWorld = valveTransformToWorld;
-      this.approachDirection = approachDirection;
+      this.valveTransformToWorld = new RigidBodyTransform(valveTransformToWorld);
+      this.approachDirection = new Vector3d(approachDirection);
       this.graspValveRim = graspValveRim;
    }
 
