@@ -14,6 +14,7 @@ import java.nio.channels.MembershipKey;
 
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
@@ -43,7 +44,7 @@ public class UDPStepprStateReader
       {
          receiveChannel.receive(receiveBuffer);
       }
-      catch(SocketTimeoutException e)
+      catch (SocketTimeoutException e)
       {
          throw new RuntimeException(e);
       }
@@ -62,7 +63,7 @@ public class UDPStepprStateReader
    public void connect() throws IOException
    {
 
-      NetworkInterface iface = NetworkInterface.getByInetAddress(InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.robotController)));
+      NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.robotController));
       System.out.println("Binding to interface: " + iface);
 
       InetSocketAddress receiveAddress = new InetSocketAddress(StepprNetworkParameters.UDP_MULTICAST_STATE_PORT);
