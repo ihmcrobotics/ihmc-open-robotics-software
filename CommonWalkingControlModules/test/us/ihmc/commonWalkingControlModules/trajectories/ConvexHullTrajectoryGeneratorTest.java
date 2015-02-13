@@ -1,15 +1,22 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import org.junit.Test;
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
-import us.ihmc.simulationconstructionset.GroundContactModel;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapGeneratorTools;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
+import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations;
 import us.ihmc.utilities.math.dataStructures.DoubleHashHeightMap;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -19,7 +26,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -29,6 +35,46 @@ import static org.junit.Assert.assertTrue;
  */
 public class ConvexHullTrajectoryGeneratorTest
 {
+   @Test
+   public void testWithHeightMap()
+   {
+      boolean VISUALIZE = true;
+
+      CombinedTerrainObject3D groundProfile = createWalledTerrainProfile();
+      double centerX = 0;
+      double centerY = 0;
+      double halfWidth = 1.0;
+      double resolution = 0.02;
+      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
+
+
+      double horizontalBuffer = .1; //10cm
+      double verticalBuffer = 0.05; //5cm
+      double pathWidth = 0.12; //12cm
+
+      ConvexHullTrajectoryGenerator generator = new ConvexHullTrajectoryGenerator(horizontalBuffer, verticalBuffer, pathWidth);
+      FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
+
+      Point3d startPosition = new Point3d(0.0, 0.0, 0.0);
+      Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      startPose.setPose(startPosition, startOrientation);
+
+      Point3d endPosition = new Point3d(0.5, 0.0, 0.0);
+      Quat4d endOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      endPose.setPose(endPosition, endOrientation);
+
+      List<FramePoint> trajectoryPoints = generator.computeSwingTrajectoryPoints(startPose, endPose, groundMap);
+
+      if (VISUALIZE)
+      {
+         SimulationConstructionSet scs = createSCSNullRobotInstance(groundProfile.getLinkGraphics());
+         visualizeTrajectoryPoints(scs, trajectoryPoints);
+         ThreadTools.sleepForever();
+      }
+   }
+
    @Test
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
@@ -40,7 +86,7 @@ public class ConvexHullTrajectoryGeneratorTest
       ConvexHullTrajectoryGenerator generator = new ConvexHullTrajectoryGenerator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
       FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
-      HeightMap groundMap = new DoubleHashHeightMap(0.01);
+      HeightMapWithPoints groundMap = new DoubleHashHeightMap(0.01);
 
       Point3d startPosition = new Point3d(0.0, 0.0, 0.0);
       Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -65,7 +111,7 @@ public class ConvexHullTrajectoryGeneratorTest
 
       if (VISUALIZE)
       {
-         visualizeTrajectoryPoints(trajectoryPoints);
+         visualizeTrajectoryPoints(createSCSNullRobotInstance(), trajectoryPoints);
          ThreadTools.sleepForever();
       }
    }
@@ -81,7 +127,7 @@ public class ConvexHullTrajectoryGeneratorTest
       ConvexHullTrajectoryGenerator generator = new ConvexHullTrajectoryGenerator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
       FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
-      HeightMap groundMap = new DoubleHashHeightMap(0.01);
+      HeightMapWithPoints groundMap = new DoubleHashHeightMap(0.01);
 
       Point3d startPosition = new Point3d(0.0, 0.0, 0.0);
       Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -106,27 +152,56 @@ public class ConvexHullTrajectoryGeneratorTest
 
       if (VISUALIZE)
       {
-         visualizeTrajectoryPoints(trajectoryPoints);
+         visualizeTrajectoryPoints(createSCSNullRobotInstance(), trajectoryPoints);
          ThreadTools.sleepForever();
       }
    }
 
-   private void visualizeTrajectoryPoints(List<FramePoint> trajectoryPoints){
+   private SimulationConstructionSet createSCSNullRobotInstance(){
+      return createSCSNullRobotInstance(null);
+   }
+
+   private SimulationConstructionSet createSCSNullRobotInstance(Graphics3DObject linkGraphics){
       Robot nullRobot = new Robot("FootstepVisualizerRobot");
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
-      scs.setDT(1, 1);
 
+      if (linkGraphics != null)
+      {
+         scs.setGroundVisible(false);
+         scs.addStaticLinkGraphics(linkGraphics);
+      }
+
+      scs.setDT(1, 1);
+      return scs;
+   }
+
+   private void visualizeTrajectoryPoints(SimulationConstructionSet scs, List<FramePoint> trajectoryPoints){
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("SwingRegistry");
       BagOfBalls bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
-      for (FramePoint point : trajectoryPoints)
-      {
-         bagOfBalls.setBallLoop(point);
-      }
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoVariableRegistry(registry);
-      scs.startOnAThread();
       scs.tickAndUpdate();
+
+      for (FramePoint point : trajectoryPoints)
+      {
+         bagOfBalls.setBallLoop(point);
+         scs.tickAndUpdate();
+      }
+      scs.startOnAThread();
+   }
+
+   private CombinedTerrainObject3D createWalledTerrainProfile()
+   {
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("stairs");
+
+      AppearanceDefinition color = YoAppearance.DarkGray();
+      combinedTerrainObject.addBox(-100.0, -100.0, 100.0, 100.0, 0.001, color);
+
+      combinedTerrainObject.addBox(0.10, -0.5, 0.2, 0.5, 0.1);
+
+      combinedTerrainObject.addBox(0.35, -0.5, 0.4, 0.5, 0.05);
+      return combinedTerrainObject;
    }
 }

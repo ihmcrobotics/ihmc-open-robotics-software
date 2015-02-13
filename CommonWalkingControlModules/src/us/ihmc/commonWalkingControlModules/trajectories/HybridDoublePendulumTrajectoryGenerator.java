@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import org.ejml.data.DenseMatrix64F;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.utilities.math.RungeKuttaSimulation;
-import us.ihmc.utilities.math.trajectories.QuarticParametricSplineTrajectory;
-import us.ihmc.utilities.math.trajectories.QuarticParametricSplineTrajectorySolver;
+import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectory;
+import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectorySolver;
 
 import java.util.Arrays;
 
@@ -53,7 +52,7 @@ public class HybridDoublePendulumTrajectoryGenerator extends RungeKuttaSimulatio
 
    private double dt = 0.001;
    private double[] timeValues;
-   QuarticParametricSplineTrajectory kneeTrajectory;
+   ParametricSplineTrajectory kneeTrajectory;
    private double[] hipPositionValues;
    private double[] hipVelocityValues;
 
@@ -102,7 +101,7 @@ public class HybridDoublePendulumTrajectoryGenerator extends RungeKuttaSimulatio
          timeValues[i] = startTime + i*dtActual;
       }
 
-      QuarticParametricSplineTrajectorySolver kneeSolver = new QuarticParametricSplineTrajectorySolver(6, 1);
+      ParametricSplineTrajectorySolver kneeSolver = new ParametricSplineTrajectorySolver(3,3, 6, 1);
       double[] times = new double[kneeSolver.getNumberOfSplines() + 1];
       for (int i = 0; i < times.length; i++){
          times[i] = Double.NaN;

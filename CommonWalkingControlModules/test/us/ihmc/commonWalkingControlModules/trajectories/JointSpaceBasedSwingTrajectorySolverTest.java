@@ -7,8 +7,8 @@ import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations;
 import us.ihmc.utilities.math.geometry.Line2d;
-import us.ihmc.utilities.math.trajectories.QuarticParametricSplineTrajectory;
-import us.ihmc.utilities.math.trajectories.QuarticParametricSplineTrajectorySolver;
+import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectory;
+import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectorySolver;
 
 import javax.swing.*;
 import javax.vecmath.Point2d;
@@ -48,16 +48,22 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       double[] endVelocity = {0.0};
       double[] endAcceleration = {0.0};
 
+      double middleTime =  startTime + (0.5) * (endTime - startTime);
       double highKneeTime = startTime + (0.75) * (endTime - startTime);
       double[] highKneePosition = {1.0};
 
-      JointSpaceBasedSwingTrajectorySolver solver = new JointSpaceBasedSwingTrajectorySolver(numberOfJoints);
-      solver.setStart(startTime, startPosition, startVelocity, startAcceleration);
-      solver.setEnd(endTime, endPosition, endVelocity, endAcceleration);
-      solver.setMiddle(middlePosition);
-      solver.setHighKnee(highKneeTime, highKneePosition);
+      int numberOfConstraint = 8;
+      ParametricSplineTrajectorySolver solver = new ParametricSplineTrajectorySolver(3,3, numberOfConstraint, numberOfJoints);
+      solver.setPositionConstraint(startTime, startPosition);
+      solver.setVelocityConstraint(startTime, startVelocity);
+      solver.setAccelerationConstraint(startTime, startAcceleration);
+      solver.setPositionConstraint(endTime, endPosition);
+      solver.setVelocityConstraint(endTime, endVelocity);
+      solver.setAccelerationConstraint(endTime, endAcceleration);
+      solver.setPositionConstraint(middleTime, middlePosition);
+      solver.setPositionConstraint(highKneeTime, highKneePosition);
 
-      QuarticParametricSplineTrajectory trajectory = solver.getTrajectory();
+      ParametricSplineTrajectory trajectory = solver.computeTrajectory();
 
       assertArrayEquals(startPosition, trajectory.getPositions(startTime), tolerance);
       assertArrayEquals(startVelocity, trajectory.getVelocities(startTime), tolerance);
@@ -121,7 +127,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       double highKneeBend = Math.PI/2;
       double[] highKneePosition = {-highKneeBend/2.0 + endPosition[0]/2, highKneeBend};
 
-      QuarticParametricSplineTrajectorySolver solver = new QuarticParametricSplineTrajectorySolver(7, numberOfJoints);
+      ParametricSplineTrajectorySolver solver = new ParametricSplineTrajectorySolver(3,3,7, numberOfJoints);
       int numberOfPoints = solver.getNumberOfSplines() + 1;
       double[] times = new double[numberOfPoints];
       for (int i = 0; i < times.length; i++){
@@ -141,7 +147,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       solver.setPositionConstraint(middleTime, middlePosition);
 
 
-      QuarticParametricSplineTrajectory trajectory = solver.computeTrajectory();
+      ParametricSplineTrajectory trajectory = solver.computeTrajectory();
 
       assertArrayEquals(startPosition, trajectory.getPositions(startTime), tolerance);
       assertArrayEquals(startVelocity, trajectory.getVelocities(startTime), tolerance);

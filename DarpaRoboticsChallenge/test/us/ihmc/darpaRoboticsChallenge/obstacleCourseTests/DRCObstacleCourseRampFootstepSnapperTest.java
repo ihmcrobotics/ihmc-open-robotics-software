@@ -40,7 +40,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -177,7 +177,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       int maxSameHeightPointsPerNode = 20;
       double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
       int maxNodes = 1000000;
-      HeightMap heightMap = createHeightMap(inputHeightMap, footstepContainer, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode,
+      HeightMapWithPoints heightMap = createHeightMap(inputHeightMap, footstepContainer, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode,
             maxAllowableXYDistanceForAPointToBeConsideredClose, maxNodes, scs);
 
       SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
@@ -252,7 +252,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return footstepSnapper;
    }
 
-   public HeightMap createHeightMap(us.ihmc.graphics3DAdapter.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public HeightMapWithPoints createHeightMap(us.ihmc.graphics3DAdapter.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
          double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
          int maxNodes, SimulationConstructionSet scs)
    {
@@ -284,7 +284,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
             maxAllowableXYDistanceForAPointToBeConsideredClose, maxNodes);
    }
 
-   public HeightMap createHeightMap(ArrayList<Point3d> listOfPoints, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public HeightMapWithPoints createHeightMap(ArrayList<Point3d> listOfPoints, BoundingBox2d testingRange, double resolution, double heightThreshold,
          double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
          int maxNodes)
    {

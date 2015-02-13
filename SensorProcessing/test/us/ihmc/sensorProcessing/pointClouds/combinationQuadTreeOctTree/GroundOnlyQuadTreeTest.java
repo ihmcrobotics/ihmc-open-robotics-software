@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.dataStructures.AbstractHeightMapTest;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.Plane3d;
@@ -179,7 +179,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    }*/
 
    @Override
-   public HeightMap getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)
+   public HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution)
    {
       return new GroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, HEIGHT_THRESHOLD, 100000);
    }
@@ -977,7 +977,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
    private static class QuadTreeTestHelper
    {
-      private HeightMap heightMap;
+      private HeightMapWithPoints heightMap;
 
       private final BoundingBox2d rangeOfPointsToTest;
 
@@ -997,7 +997,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          this.maxNodes = maxNodes;
       }
 
-      public HeightMap getHeightMap()
+      public HeightMapWithPoints getHeightMap()
       {
          return heightMap;
       }
@@ -1098,7 +1098,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
 
 
-      public HeightMap createHeightMapFromAListOfPoints(YoFramePoint queryPoint, BagOfBalls bagOfBalls, SimulationConstructionSet scs,
+      public HeightMapWithPoints createHeightMapFromAListOfPoints(YoFramePoint queryPoint, BagOfBalls bagOfBalls, SimulationConstructionSet scs,
               ArrayList<Point3d> points, BoundingBox2d testingRange, double resolution, double heightThreshold, int maxNodes)
       {
          double minX = testingRange.getMinPoint().getX();
