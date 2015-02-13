@@ -27,9 +27,6 @@ public class GraspValveTask extends BehaviorTask
       this.valveTransformToWorld = valveTransformToWorld;
       this.approachDirection = approachDirection;
       this.graspValveRim = graspValveRim;
-
-      graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim); // Must do this here, otherwise grasp pose may not be computed before other behaviors reference it
    }
 
    @Override
@@ -41,8 +38,8 @@ public class GraspValveTask extends BehaviorTask
    @Override
    public void doTransitionIntoAction()
    {
-      //      graspValveBehavior.initialize();
-      //      graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);  //FIXME:  For some reason this causes next handPose to be start of approach grasp vector
+            graspValveBehavior.initialize();
+            graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);  //FIXME:  For some reason this causes next handPose to be start of approach grasp vector
       SysoutTool.println("entering graspValveTask", DEBUG);
    }
 }
