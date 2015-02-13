@@ -26,23 +26,6 @@ public class HandPoseTask extends BehaviorTask
    private final double trajectoryTime;
    private final Vector3d desiredHandPoseOffsetFromCurrent;
 
-   public HandPoseTask(RobotSide robotSide, Vector3d directionToMoveInWorld, double distanceToMove, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
-         HandPoseBehavior handPoseBehavior, double trajectoryTime)
-   {
-      super(handPoseBehavior, yoTime);
-      this.handPoseBehavior = handPoseBehavior;
-      this.handPosePacket = new HandPosePacket();
-      
-      doHandPoseRelativeToHandPoseAtTransitionIntoAction = true;
-      this.robotSide = robotSide;
-      this.fullRobotModel = fullRobotModel;
-      this.trajectoryTime = trajectoryTime;
-      if (directionToMoveInWorld.length() > 0.0)
-         directionToMoveInWorld.normalize();
-      directionToMoveInWorld.scale(distanceToMove);
-      this.desiredHandPoseOffsetFromCurrent = directionToMoveInWorld;
-   }
-
    public HandPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime)
    {
       this(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime, 0.0);
@@ -51,49 +34,21 @@ public class HandPoseTask extends BehaviorTask
    public HandPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime,
          double sleepTime)
    {
-      super(handPoseBehavior, yoTime, sleepTime);
-      this.handPoseBehavior = handPoseBehavior;
-      handPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredArmJointAngles);
-
-      doHandPoseRelativeToHandPoseAtTransitionIntoAction = false;
-      this.robotSide = robotSide;
-      this.fullRobotModel = null;
-      this.trajectoryTime = trajectoryTime;
-      this.desiredHandPoseOffsetFromCurrent = null;
+      this(robotSide, new HandPosePacket(robotSide, trajectoryTime, desiredArmJointAngles), handPoseBehavior, yoTime, sleepTime);
    }
 
    public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, RigidBodyTransform pose,
          double trajectoryTime)
    {
-      super(handPoseBehavior, yoTime);
-      this.handPoseBehavior = handPoseBehavior;
-      handPosePacket = PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime);
-
-      doHandPoseRelativeToHandPoseAtTransitionIntoAction = false;
-      this.robotSide = robotSide;
-      this.fullRobotModel = null;
-      this.trajectoryTime = trajectoryTime;
-      this.desiredHandPoseOffsetFromCurrent = null;
-   }
-
-   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, FramePose pose, double trajectoryTime)
-   {
-      super(handPoseBehavior, yoTime);
-      this.handPoseBehavior = handPoseBehavior;
-
-      RigidBodyTransform rigidBodyPose = new RigidBodyTransform();
-      pose.getPose(rigidBodyPose);
-
-      handPosePacket = PacketControllerTools.createHandPosePacket(frame, rigidBodyPose, robotSide, trajectoryTime);
-
-      doHandPoseRelativeToHandPoseAtTransitionIntoAction = false;
-      this.robotSide = robotSide;
-      this.fullRobotModel = null;
-      this.trajectoryTime = trajectoryTime;
-      this.desiredHandPoseOffsetFromCurrent = null;
+      this(robotSide, PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), handPoseBehavior, yoTime);
    }
 
    public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime)
+   {
+      this(robotSide, handPosePacket, handPoseBehavior, yoTime, 0.0);
+   }
+
+   public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime, double sleepTime)
    {
       super(handPoseBehavior, yoTime);
       this.handPoseBehavior = handPoseBehavior;
@@ -106,24 +61,62 @@ public class HandPoseTask extends BehaviorTask
       this.desiredHandPoseOffsetFromCurrent = null;
    }
 
+   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, FramePose pose, double trajectoryTime)
+   {
+      super(handPoseBehavior, yoTime);
+      this.handPoseBehavior = handPoseBehavior;
+
+      RigidBodyTransform poseTransformToWorld = new RigidBodyTransform();
+      pose.getPose(poseTransformToWorld);
+      this.handPosePacket = PacketControllerTools.createHandPosePacket(frame, poseTransformToWorld, robotSide, trajectoryTime);
+
+      doHandPoseRelativeToHandPoseAtTransitionIntoAction = false;
+      this.robotSide = robotSide;
+      this.fullRobotModel = null;
+      this.trajectoryTime = trajectoryTime;
+      this.desiredHandPoseOffsetFromCurrent = null;
+   }
+
+   public HandPoseTask(RobotSide robotSide, Vector3d directionToMoveInWorld, double distanceToMove, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
+         HandPoseBehavior handPoseBehavior, double trajectoryTime)
+   {
+      super(handPoseBehavior, yoTime);
+      this.handPoseBehavior = handPoseBehavior;
+      this.handPosePacket = new HandPosePacket();
+
+      doHandPoseRelativeToHandPoseAtTransitionIntoAction = true;
+      this.robotSide = robotSide;
+      this.fullRobotModel = fullRobotModel;
+      this.trajectoryTime = trajectoryTime;
+      if (directionToMoveInWorld.length() > 0.0)
+         directionToMoveInWorld.normalize();
+      directionToMoveInWorld.scale(distanceToMove);
+      this.desiredHandPoseOffsetFromCurrent = directionToMoveInWorld;
+   }
+
    @Override
    protected void setBehaviorInput()
    {
       if (doHandPoseRelativeToHandPoseAtTransitionIntoAction)
       {
          FramePose desiredHandPose = getCurrentHandPose(robotSide);
+         desiredHandPose.translate(desiredHandPoseOffsetFromCurrent);
+
          RigidBodyTransform desiredHandTransformToWorld = new RigidBodyTransform();
          desiredHandPose.getPose(desiredHandTransformToWorld);
 
          handPoseBehavior.setInput(Frame.WORLD, desiredHandTransformToWorld, robotSide, trajectoryTime);
       }
-      handPoseBehavior.setInput(handPosePacket);
+      else
+      {
+         handPoseBehavior.setInput(handPosePacket);
+      }
    }
 
-   private FramePose getCurrentHandPose(RobotSide robotSideToTest)
+   private FramePose getCurrentHandPose(RobotSide robotSide)
    {
       FramePose ret = new FramePose();
-      ret.setToZero(fullRobotModel.getHandControlFrame(robotSideToTest));
+      ret.setToZero(fullRobotModel.getHandControlFrame(robotSide));
       ret.changeFrame(ReferenceFrame.getWorldFrame());
       return ret;
    }
