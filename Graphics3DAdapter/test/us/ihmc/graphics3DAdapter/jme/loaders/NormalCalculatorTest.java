@@ -29,6 +29,8 @@ import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
@@ -36,6 +38,7 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
  * @author Jesper Smith
  *
  */
+@BambooPlan(planType={BambooPlanType.UI})
 public class NormalCalculatorTest
 {
 

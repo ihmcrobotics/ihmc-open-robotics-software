@@ -8,7 +8,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
+@BambooPlan(planType={BambooPlanType.UI})
 public class SpringFlamingoSimulationTest
 {
    private SimulationGUITestFixture testFixture;
@@ -37,7 +40,7 @@ public class SpringFlamingoSimulationTest
 	@Test(timeout=300000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
-//      testFixture.showWindow();
+      testFixture.showWindow();
 //      testFixture.clickFileMenu();
 //      
 //      testFixture.selectNameSpaceTab();

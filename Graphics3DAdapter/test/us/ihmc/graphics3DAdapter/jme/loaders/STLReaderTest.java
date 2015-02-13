@@ -41,6 +41,7 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
  * @author Jesper Smith
  *
  */
+
 public class STLReaderTest
 {
 

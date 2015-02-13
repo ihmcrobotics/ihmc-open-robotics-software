@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.generatedTestSuites;
+package us.ihmc.atlas.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -7,10 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.exampleSimulations.springflamingo.SpringFlamingoSimulationTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class,
 })
 
-public class ExampleSimulationsAFastTestSuite
+public class AtlasCSlowTestSuite
 {
    public static void main(String[] args)
    {
