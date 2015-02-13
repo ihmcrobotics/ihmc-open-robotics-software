@@ -23,7 +23,6 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.optimization.SimpleSimulationTest.class,
    us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetectorTest.class,
    us.ihmc.simulationconstructionset.physics.collision.gdx.GdxUtilTest.class,
-   us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest.class,
    us.ihmc.simulationconstructionset.RobotTest.class,
    us.ihmc.simulationconstructionset.RobotToolsTest.class,
    us.ihmc.simulationconstructionset.scripts.TimeScriptTest.class,
@@ -42,6 +41,9 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.util.globalParameters.MultiplicativeDoubleGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.globalParameters.OrBooleanGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObjectTest.class,
+   us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObjectTest.class,
 })
 
 public class SimulationConstructionSetAFastTestSuite
