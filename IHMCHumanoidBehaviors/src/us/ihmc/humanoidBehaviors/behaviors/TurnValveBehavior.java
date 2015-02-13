@@ -70,8 +70,8 @@ public class TurnValveBehavior extends BehaviorInterface
    private final BooleanYoVariable tippingDetected;
    private final BooleanYoVariable hasInputBeenSet;
 
-   private double maxObservedWristForce = 0.0;
-   private double maxObservedCapturePointError = 0.0;
+   private final double maxObservedWristForce = 0.0;
+   private final double maxObservedCapturePointError = 0.0;
 
    private final double minDistanceForWalkingBetweenTurns = 0.1;
    private final double minYawDeltaForWalkingBetweenTurns = Math.toRadians(5.0);
@@ -94,7 +94,7 @@ public class TurnValveBehavior extends BehaviorInterface
       childBehaviors.add(rotateGraspedValveBehavior);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(handPoseBehavior);
-      graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, handPoseBehavior, fullRobotModel, yoTime);
+      graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);// removed arguement so it would compile
       childBehaviors.add(graspValveBehavior);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(fingerStateBehavior);
