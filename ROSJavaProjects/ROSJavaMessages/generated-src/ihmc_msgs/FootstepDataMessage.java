@@ -2,7 +2,7 @@ package ihmc_msgs;
 
 public interface FootstepDataMessage extends org.ros.internal.message.Message {
   static final java.lang.String _TYPE = "ihmc_msgs/FootstepDataMessage";
-  static final java.lang.String _DEFINITION = "## FootstepDataMessage\r\n# This message gives the position, orientation and side of a single footstep to the controller.\r\n# If sending a single footstep, position and orientation should be in pelvis frame.\r\n\r\n#Options for enum\r\n# uint8 L = 0\r\n# uint8 R = 1\r\nuint8 robotSide\r\ngeometry_msgs/Vector3 location\r\ngeometry_msgs/Quaternion orientation\r\nPoint2dMessage[] predictedContactPoints\r\n\r\n";
+  static final java.lang.String _DEFINITION = "## FootstepDataMessage\r\n# This message specifies the position, orientation and side (left or right) of a desired footstep in\r\n# world frame\r\n\r\n#Options for robotSide\r\n# uint8 L = 0\r\n# uint8 R = 1\r\nuint8 robotSide\r\n\r\ngeometry_msgs/Vector3 location\r\n\r\ngeometry_msgs/Quaternion orientation\r\n\r\n# predictedContactPoints gives the vertices of the expected contact polygon between the foot and\r\n# the world. A value of null will use the default controller contact points\r\nPoint2dMessage[] predictedContactPoints\r\n\r\n\r\n";
   byte getRobotSide();
   void setRobotSide(byte value);
   geometry_msgs.Vector3 getLocation();
