@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -36,6 +37,8 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
+   private final FullRobotModel fullRobotModel;
+
    private final TaskExecutor taskExecutor;
    private final HandPoseBehavior handPoseBehavior;
 
@@ -46,6 +49,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
+      this.fullRobotModel = fullRobotModel;
       this.taskExecutor = new TaskExecutor();
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       this.yoTime = yoTime;
@@ -61,6 +65,16 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       }
    }
 
+   public void setInput(RobotSide robotSide, RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad,
+         double trajectoryTime)
+   {
+      FramePose currentHandPose = new FramePose();
+      currentHandPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+      currentHandPose.changeFrame(world);
+
+      setInput(robotSide, graspedObjectTransformToWorld, pinJointAxisInGraspedObjectFrame, currentHandPose, turnAngleRad, trajectoryTime);
+   }
+
    public void setInput(RobotSide robotSide, RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame,
          FramePose initialHandPoseInWorld, double turnAngleRad, double trajectoryTime)
    {
@@ -68,26 +82,36 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       initialGraspedObjectFrame.setPoseAndUpdate(graspedObjectTransformToWorld);
 
       int numberOfHandPoses = 5;
-      double turnAnglePerPose = turnAngleRad / numberOfHandPoses;
-      ArrayList<FramePose> desiredHandPoses = new ArrayList<FramePose>(numberOfHandPoses);
-      
-      //TODO: Reduce number of objects created in methods below
-      desiredHandPoses.add( copyCurrentPoseAndRotateAboutPinJointAxis(initialHandPoseInWorld, initialGraspedObjectFrame,
-            pinJointAxisInGraspedObjectFrame, turnAnglePerPose) );
-      
-      for (int i = desiredHandPoses.size(); i<numberOfHandPoses; i++)
-      {
-         desiredHandPoses.add(i, copyCurrentPoseAndRotateAboutPinJointAxis(desiredHandPoses.get(i-1), initialGraspedObjectFrame,
-               pinJointAxisInGraspedObjectFrame, turnAnglePerPose));
-      }
+      ArrayList<FramePose> desiredHandPoses = createMultipleHandposesAlongCurvedTrajectory(pinJointAxisInGraspedObjectFrame, initialHandPoseInWorld,
+            turnAngleRad, initialGraspedObjectFrame, numberOfHandPoses);
 
       for (FramePose desiredHandPose : desiredHandPoses)
       {
-         taskExecutor.submit(new HandPoseTask(createHandPosePacket(robotSide, trajectoryTime, desiredHandPose), handPoseBehavior, yoTime));
-
+         taskExecutor.submit(new HandPoseTask(robotSide, createHandPosePacket(robotSide, trajectoryTime / numberOfHandPoses, desiredHandPose),
+               handPoseBehavior, yoTime));
       }
 
       hasInputBeenSet.set(true);
+   }
+
+   private ArrayList<FramePose> createMultipleHandposesAlongCurvedTrajectory(Axis pinJointAxisInGraspedObjectFrame, FramePose initialHandPoseInWorld,
+         double turnAngleRad, PoseReferenceFrame initialGraspedObjectFrame, int numberOfHandPoses)
+   {
+      double turnAnglePerPose = turnAngleRad / numberOfHandPoses;
+      ArrayList<FramePose> desiredHandPoses = new ArrayList<FramePose>(numberOfHandPoses);
+
+      //TODO: Reduce number of objects created in methods below
+      desiredHandPoses.add(copyCurrentPoseAndRotateAboutPinJointAxis(initialHandPoseInWorld, initialGraspedObjectFrame, pinJointAxisInGraspedObjectFrame,
+            turnAnglePerPose));
+
+      for (int i = desiredHandPoses.size(); i < numberOfHandPoses; i++)
+      {
+         desiredHandPoses.add(
+               i,
+               copyCurrentPoseAndRotateAboutPinJointAxis(desiredHandPoses.get(i - 1), initialGraspedObjectFrame, pinJointAxisInGraspedObjectFrame,
+                     turnAnglePerPose));
+      }
+      return desiredHandPoses;
    }
 
    private FramePose copyCurrentPoseAndRotateAboutPinJointAxis(FramePose initialHandPoseInWorld, ReferenceFrame initialGraspedObjectFrame,
@@ -163,7 +187,6 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       {
          throw new RuntimeException("Hand Pose must be defined in World reference frame.");
       }
-
       HandPosePacket ret = new HandPosePacket(robotSideOfHandToUse, packetFrame, position, orientation, trajectoryTime);
       return ret;
    }
