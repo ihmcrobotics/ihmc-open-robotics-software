@@ -400,7 +400,6 @@ public class FootstepDataTest
          boolean trustHeight = true;
          Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
          reconstructedFootsteps.add(footstep);
-         System.out.println("received packet!!");
       }
 
       public ArrayList<Footstep> getReconstructedFootsteps()
