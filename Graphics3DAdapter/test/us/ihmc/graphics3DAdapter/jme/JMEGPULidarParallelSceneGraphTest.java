@@ -16,12 +16,15 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
+@BambooPlan(planType={BambooPlanType.UI})
 public class JMEGPULidarParallelSceneGraphTest
 {
    /**

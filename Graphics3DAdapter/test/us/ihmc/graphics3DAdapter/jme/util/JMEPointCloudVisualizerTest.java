@@ -9,7 +9,10 @@ import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
+@BambooPlan(planType={BambooPlanType.UI})
 public class JMEPointCloudVisualizerTest
 {
    public static void main(String[] args)

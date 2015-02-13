@@ -13,16 +13,19 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.test.JUnitTools;
 
+@BambooPlan(planType={BambooPlanType.UI})
 public class JMEGPULidarTest implements LidarTestListener
 {
    private static final boolean TEST_MANUALLY = false;
    private JMEGPULidarTestEnviroment lidarTest;
    private LidarTestParameters parameters;
    private boolean stop = false;
-   private LinkedBlockingQueue<ScanPair> scanPairs = new LinkedBlockingQueue<JMEGPULidarTest.ScanPair>();
+   private final LinkedBlockingQueue<ScanPair> scanPairs = new LinkedBlockingQueue<JMEGPULidarTest.ScanPair>();
    private double averageDifference = 0.0;
    private long numScans = 0;
 

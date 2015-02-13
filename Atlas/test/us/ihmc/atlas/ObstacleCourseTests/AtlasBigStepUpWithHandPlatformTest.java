@@ -6,10 +6,10 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCBigStepUpWithHandPlatformTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.Video})
+@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.Video})
 public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlatformTest
 {
    private final AtlasRobotModel robotModel;
