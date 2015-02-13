@@ -27,10 +27,10 @@ import us.ihmc.utilities.math.geometry.Line2d;
  */
 
 @BambooAnnotations.UnfinishedTest
-@BambooPlan(planType={BambooPlanType.Unfinished})
+@BambooPlan(planType={BambooPlanType.Manual})
 public class DoublePendulumTrajectoryGeneratorTest
 {
-   @Test
+   @Test (timeout=600000)
    public void testHybridPendulum()
    {
       double length1 = 1.0;
@@ -86,7 +86,7 @@ public class DoublePendulumTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @Test (timeout=600000)
    public void testNoTorquePendulum()
    {
       double length1 = 1.0;

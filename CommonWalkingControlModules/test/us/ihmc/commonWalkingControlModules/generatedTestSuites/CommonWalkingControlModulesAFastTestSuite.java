@@ -30,7 +30,6 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep2dTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep3dTest.class,
    us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptTest.class,
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerWithSmootherTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjectorTest.class,
