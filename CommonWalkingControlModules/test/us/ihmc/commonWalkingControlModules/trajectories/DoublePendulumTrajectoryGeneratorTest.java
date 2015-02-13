@@ -17,7 +17,6 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.math.geometry.Line2d;
@@ -26,8 +25,7 @@ import us.ihmc.utilities.math.geometry.Line2d;
  * Created by agrabertilton on 2/9/15.
  */
 
-@BambooAnnotations.UnfinishedTest
-@BambooPlan(planType={BambooPlanType.Manual})
+@BambooPlan(planType={BambooPlanType.Unfinished})
 public class DoublePendulumTrajectoryGeneratorTest
 {
    @Test (timeout=600000)

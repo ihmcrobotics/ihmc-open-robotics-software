@@ -30,7 +30,7 @@ import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectorySolver;
  * Created by agrabertilton on 2/5/15.
  */
 @BambooAnnotations.UnfinishedTest
-@BambooPlan(planType={BambooPlanType.Manual})
+@BambooPlan(planType={BambooPlanType.Unfinished})
 public class JointSpaceBasedSwingTrajectorySolverTest
 {
    @Test
