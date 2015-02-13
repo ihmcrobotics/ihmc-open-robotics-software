@@ -1,17 +1,22 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import org.junit.Test;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapGeneratorTools;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
-import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.dataStructures.DoubleHashHeightMap;
@@ -24,21 +29,17 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-
 /**
  * Created by agrabertilton on 2/11/15.
  */
 public class ConvexHullTrajectoryGeneratorTest
 {
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables(); 
+   
    @Test
    public void testWithHeightMap()
    {
-      boolean VISUALIZE = true;
+      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp(); //don't check in true
 
       CombinedTerrainObject3D groundProfile = createWalledTerrainProfile();
       double centerX = 0;
