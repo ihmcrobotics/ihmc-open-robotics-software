@@ -24,7 +24,9 @@ public class PacketCommunicatorMock
 
    public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, int port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new KryoObjectClient(host, port, netClassList));
+      KryoObjectClient objectCommunicator = new KryoObjectClient(host, port, netClassList);
+      objectCommunicator.setReconnectAutomatically(true);
+      return new PacketCommunicatorMock(objectCommunicator);
    }
 
    public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, NetClassList netClassList)
@@ -109,6 +111,11 @@ public class PacketCommunicatorMock
       communicator.connect();
    }
    
+   public void send(Packet packet)
+   {
+      communicator.consumeObject(packet);
+   }
+   
    private static class GlobalPacketObjectConsumer implements GlobalObjectConsumer
    {
       private final GlobalPacketConsumer globalPacketConsumer;
@@ -129,7 +136,7 @@ public class PacketCommunicatorMock
       @Override
       public void consumeObject(Object object, boolean consumeGlobal)
       {
-         throw new RuntimeException();
+         consumeObject(object);
       }
       
    }

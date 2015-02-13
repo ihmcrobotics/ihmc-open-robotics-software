@@ -14,7 +14,11 @@ public enum NetworkParameterKeys
    
    onboard1(false, "IP of first onboard computer"),
    onboard2(false, "IP of second onboard computer"),
-   onboard3(false, "IP of third onboard computer");
+   onboard3(false, "IP of third onboard computer"),
+   
+   packetShaperServer(false, "IP of the packet shaper server"),
+   packetShaperClient(false, "IP of the packet shaper client");
+   
    
    
    private final boolean required;

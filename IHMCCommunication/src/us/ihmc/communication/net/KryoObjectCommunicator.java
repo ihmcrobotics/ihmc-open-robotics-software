@@ -149,7 +149,6 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
          throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
       }
       int bytesSend = sendTCP(object);
-      
       updateDataRateTable(object, bytesSend);
       
    }

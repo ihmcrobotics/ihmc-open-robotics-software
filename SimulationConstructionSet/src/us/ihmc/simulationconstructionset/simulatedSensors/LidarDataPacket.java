@@ -4,9 +4,11 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
 
 
+@HighBandwidthPacket
 public class LidarDataPacket extends Packet<LidarDataPacket>
 {
    public final ArrayList<Point3d> points = new ArrayList<Point3d>();
@@ -16,7 +18,6 @@ public class LidarDataPacket extends Packet<LidarDataPacket>
       
    }
 
-   @Override
    public boolean epsilonEquals(LidarDataPacket other, double epsilon)
    {
       return points.equals(other);
