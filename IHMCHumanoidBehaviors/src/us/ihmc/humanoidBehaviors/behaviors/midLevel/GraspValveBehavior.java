@@ -47,11 +47,16 @@ public class GraspValveBehavior extends BehaviorInterface
 
    public GraspValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
+      this(outgoingCommunicationBridge, new HandPoseBehavior(outgoingCommunicationBridge, yoTime), fullRobotModel, yoTime);
+   }
+   
+   public GraspValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HandPoseBehavior handPoseBehavior, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+   {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
 
       this.yoTime = yoTime;
-      handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      this.handPoseBehavior = handPoseBehavior;
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
 
       pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
@@ -162,31 +167,15 @@ public class GraspValveBehavior extends BehaviorInterface
       return ret;
    }
 
-   private void computeDesiredGraspOrientation(RigidBodyTransform debrisTransform, Vector3d graspVector, ReferenceFrame handFrameBeforeGrasping,
+   private void computeDesiredGraspOrientation(RigidBodyTransform valveTransformToWorld, Vector3d graspVector, ReferenceFrame handFrameBeforeGrasping,
          Quat4d desiredGraspOrientationToPack)
    {
       PoseReferenceFrame handFrameBeforeRotation = new PoseReferenceFrame("handFrameBeforeRotation", worldFrame);
-      handFrameBeforeRotation.setPoseAndUpdate(debrisTransform);
-
-      FramePose handPoseSolution1 = new FramePose(handFrameBeforeRotation);
-      handPoseSolution1.changeFrame(handFrameBeforeGrasping);
-
-      FramePose handPoseSolution2 = new FramePose(handFrameBeforeRotation);
-      handPoseSolution2.setOrientation(0.0, 0.0, Math.PI);
-      handPoseSolution2.changeFrame(handFrameBeforeGrasping);
-
-      double rollOfSolution1 = handPoseSolution1.getRoll();
-      double rollOfSolution2 = handPoseSolution2.getRoll();
+      handFrameBeforeRotation.setPoseAndUpdate(valveTransformToWorld);
 
       FramePose handPose = new FramePose(handFrameBeforeRotation);
-      if (Math.abs(rollOfSolution1) <= Math.abs(rollOfSolution2))
-      {
-         handPose.setPoseIncludingFrame(handPoseSolution1);
-      }
-      else
-      {
-         handPose.setPoseIncludingFrame(handPoseSolution2);
-      }
+      handPose.setOrientation(0.0, 0.0, Math.PI);
+      handPose.changeFrame(handFrameBeforeGrasping);
 
       handPose.changeFrame(worldFrame);
       handPose.getOrientation(desiredGraspOrientationToPack);
