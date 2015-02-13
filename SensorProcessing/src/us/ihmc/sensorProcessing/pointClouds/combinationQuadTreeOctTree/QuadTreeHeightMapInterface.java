@@ -3,9 +3,9 @@ package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 
-public interface QuadTreeHeightMapInterface extends HeightMap
+public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 {
 
 	public abstract void setOctree(Octree octree);

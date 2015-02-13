@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.utilities.math.dataStructures.HeightMap;
+import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.*;
 
 import javax.vecmath.Point2d;
@@ -57,7 +57,7 @@ public class ConvexHullTrajectoryGenerator
       this.pathWidth = pathWidth;
    }
 
-   public List<FramePoint> computeSwingTrajectoryPoints(FramePose startPose, FramePose endPose, HeightMap groundProfile)
+   public List<FramePoint> computeSwingTrajectoryPoints(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile)
    {
       List<FramePoint> trajectoryPoints = new ArrayList<FramePoint>();
 
@@ -102,22 +102,12 @@ public class ConvexHullTrajectoryGenerator
       double x = (bufferedStartPoint.x + bufferedEndPoint.x) / 2.0;
       double y = (bufferedStartPoint.y + bufferedEndPoint.y) / 2.0;
       List<Point3d> innerPoints = groundProfile.getAllPointsWithinArea(x, y, horizonalDistance / 2.0, horizonalDistance / 2.0, inclusionFunction);
-      List<Point3d> newInnerPoints = innerPoints;;
-
-      try
-      {
-         QuickHull3dWrapper quickHull3D = new QuickHull3dWrapper();
-         quickHull3D.build(innerPoints);
-         newInnerPoints = quickHull3D.getVertices();
-      }catch (Exception e){
-
-      }
 
       //project all points onto the vertical plane along direction line from start to end.
       List<Point2d> projectedInnerPoints = new ArrayList<Point2d>();
       Point2d startPoint2d = new Point2d(startPoint.x, startPoint.y);
       Vector2d horizontalVectorToPoint = new Vector2d();
-      for (Point3d point : newInnerPoints)
+      for (Point3d point : innerPoints)
       {
          horizontalVectorToPoint.set(point.x, point.y);
          horizontalVectorToPoint.sub(startPoint2d);
@@ -126,9 +116,31 @@ public class ConvexHullTrajectoryGenerator
             projectedInnerPoints.add(new Point2d(distanceAlongLine, point.z));
       }
 
-      //add buffer to projected points in horizontal and vertical directions
+     //add dummyPoints below to allow bottom removal
+      Point2d dummyPointA = new Point2d(horizontalBuffer, startPoint.z - 100);
+      Point2d dummyPointB = new Point2d(horizonalDistance - horizontalBuffer, startPoint.z - 100);
+      projectedInnerPoints.add(dummyPointA);
+      projectedInnerPoints.add(dummyPointB);
+
+      //find verticesOnConvexHull, then remove bottom points
+      ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d(projectedInnerPoints);
+      convexPolygon2d.update();
+
+      //add all non-dummy points to new list
+      List<Point2d> newInnerPoints = new ArrayList<Point2d>();
+      Point2d currentPoint;
+      int numberOfVertices = convexPolygon2d.getNumberOfVertices();
+      for (int i = 0; i < numberOfVertices; i++){
+         currentPoint = convexPolygon2d.getVertex(i);
+         if (!currentPoint.epsilonEquals(dummyPointA, 1e-13) && !currentPoint.epsilonEquals(dummyPointB, 1e-13))
+         {
+            newInnerPoints.add(currentPoint);
+         }
+      }
+
+      //add buffer to projected inner points in horizontal and vertical directions
       List<Point2d> bufferedPoints = new ArrayList<>();
-      for (Point2d point2d : projectedInnerPoints)
+      for (Point2d point2d : newInnerPoints)
       {
          bufferedPoints.add(new Point2d(point2d.x + horizontalBuffer, point2d.y));
          bufferedPoints.add(new Point2d(point2d.x - horizontalBuffer, point2d.y));
@@ -148,11 +160,11 @@ public class ConvexHullTrajectoryGenerator
       bufferedPoints.add(new Point2d(horizonalDistance - horizontalBuffer, endPoint.z + verticalBuffer));
 
 
-      ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d(bufferedPoints);
+      convexPolygon2d.clear();
+      convexPolygon2d.addVertices(bufferedPoints, bufferedPoints.size());
       convexPolygon2d.update();
 
       int numberOfPoints = convexPolygon2d.getNumberOfVertices();
-      Point2d currentPoint;
       double currentX;
       double currentY;
       for (int i = 0; i < numberOfPoints; i++)

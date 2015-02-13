@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.utilities.math.RungeKuttaSimulation;
-import us.ihmc.utilities.math.trajectories.QuarticParametricSplineTrajectory;
 
 import java.util.Arrays;
 
