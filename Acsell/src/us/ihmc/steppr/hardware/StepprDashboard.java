@@ -66,8 +66,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    {
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-      createLogicButtons(yoVariableHolder);
-      createMotorButtons(yoVariableHolder);
+      createPowerButtons(yoVariableHolder);
       createCalibrationButtons(yoVariableHolder);
       createTable(yoVariableHolder);
       createInitializationButtons(yoVariableHolder);
@@ -118,29 +117,24 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       final DoubleYoVariable leftFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
       final DoubleYoVariable rightFootForce = (DoubleYoVariable)yoVariableHolder.getVariable("r_footStateEstimatorWrenchBasedFootSwitch","r_footStateEstimatorFootForceMag");
             
-      JButton enabledOutputButton = new JButton("Enable torque output");
+      final JButton enabledOutputButton = new JButton("Enable torque output");
       enabledOutputButton.addActionListener(new ActionListener()
       {
          
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            enabledOutput.set(true);
+        	 if(!enabledOutput.getBooleanValue())
+        	 {
+        		 enabledOutput.set(true);
+        		 enabledOutputButton.setText("Disable torque output");
+        	 } else {
+        		 enabledOutput.set(false);
+        		 enabledOutputButton.setText("Enable torque output");        		 
+        	 }
          }
       });
       initializationPanel.add(enabledOutputButton);
-
-      JButton disabledOutputButton = new JButton("Disable torque output");
-      disabledOutputButton.addActionListener(new ActionListener()
-      {
-         
-         @Override
-         public void actionPerformed(ActionEvent e)
-         {
-            enabledOutput.set(false);
-         }
-      });
-      initializationPanel.add(disabledOutputButton);
 
       JButton startStandPrepButton = new JButton("Start StandPrep");
       startStandPrepButton.addActionListener(new ActionListener()
@@ -177,9 +171,15 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          public void variableChanged(YoVariable<?> v)
          {
             if((leftFootForce.getDoubleValue() + rightFootForce.getDoubleValue()) > 600.0)
-               switchToWalk.setBackground(Color.GREEN);
-         else
-               switchToWalk.setBackground(Color.RED);            
+            {	
+            	switchToWalk.setEnabled(true);
+            	switchToWalk.setBackground(Color.GREEN);
+            }
+            else
+            {
+            	switchToWalk.setEnabled(false);
+                switchToWalk.setBackground(Color.RED);
+            }
          }
       };
       leftFootForce.addVariableChangedListener(robotOnGroundChecker);
@@ -189,68 +189,44 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       
       
    }
+   
 
-   private void createLogicButtons(YoVariableHolder yoVariableHolder)
+   private void createPowerButtons(YoVariableHolder yoVariableHolder)
    {
-      JPanel logicPanel = new JPanel();
-      logicPanel.setLayout(new BoxLayout(logicPanel, BoxLayout.X_AXIS));
+      JPanel powerPanel = new JPanel();
+      powerPanel.setLayout(new BoxLayout(powerPanel, BoxLayout.X_AXIS));
       final YoVariable<?> logicPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "logicPowerStateRequest");
-      final JButton logicPowerOn = new JButton("Logic power on");
-      logicPowerOn.addActionListener(new ActionListener()
+      final YoVariable<?> motorPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "motorPowerStateRequest");
+      final JButton btnPowerOn = new JButton("Power on");
+      btnPowerOn.addActionListener(new ActionListener()
       {
 
          @Override
          public void actionPerformed(ActionEvent e)
          {
+        	btnPowerOn.setEnabled(false);
             logicPowerStateRequest.setValueFromDouble(1.0);
-            logicPowerOn.setEnabled(false);
+            ThreadTools.sleep(250);
+            motorPowerStateRequest.setValueFromDouble(1.0);
          }
       });
-      JButton logicPowerOff = new JButton("Logic power off");
-      logicPowerOff.addActionListener(new ActionListener()
+      JButton btnPowerOff = new JButton("Power off");
+      btnPowerOff.addActionListener(new ActionListener()
       {
 
          @Override
          public void actionPerformed(ActionEvent e)
          {
             logicPowerStateRequest.setValueFromDouble(-1);
-         }
-      });
-      logicPanel.add(logicPowerOn);
-      logicPanel.add(logicPowerOff);
-      add(logicPanel);
-   }
-
-   private void createMotorButtons(YoVariableHolder yoVariableHolder)
-   {
-      JPanel motorPanel = new JPanel();
-      motorPanel.setLayout(new BoxLayout(motorPanel, BoxLayout.X_AXIS));
-      final YoVariable<?> motorPowerStateRequest = yoVariableHolder.getVariable("StepprSetup", "motorPowerStateRequest");
-      final JButton motorPowerOn = new JButton("Motor power on");
-      motorPowerOn.addActionListener(new ActionListener()
-      {
-
-         @Override
-         public void actionPerformed(ActionEvent e)
-         {
-            motorPowerStateRequest.setValueFromDouble(1.0);
-            motorPowerOn.setEnabled(false);
-         }
-      });
-      JButton motorPowerOff = new JButton("Motor power off");
-      motorPowerOff.addActionListener(new ActionListener()
-      {
-
-         @Override
-         public void actionPerformed(ActionEvent e)
-         {
+            ThreadTools.sleep(250);
             motorPowerStateRequest.setValueFromDouble(-1);
          }
       });
-      motorPanel.add(motorPowerOn);
-      motorPanel.add(motorPowerOff);
-      add(motorPanel);
+      powerPanel.add(btnPowerOn);
+      powerPanel.add(btnPowerOff);
+      add(powerPanel);
    }
+   
 
    private void createTable(YoVariableHolder yoVariableHolder)
    {
@@ -258,8 +234,8 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       table = new JTable(tableModel);
       table.setFillsViewportHeight(true);
       table.getColumn("Motor Temperature").setCellRenderer(new WarningRenderer());
-      table.getColumn("MCB Temperature 0").setCellRenderer(new WarningRenderer());
-      table.getColumn("MCB Temperture 1").setCellRenderer(new WarningRenderer());
+      table.getColumn("MCB Temperature 0").setCellRenderer(new WarningRenderer(80.0));
+      table.getColumn("MCB Temperture 1").setCellRenderer(new WarningRenderer(80.0));
 
       int row = 0, col = 0;
       for (StepprActuator actuator : StepprActuator.values)
@@ -329,12 +305,22 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    {
 
       private static final long serialVersionUID = -8042596150349794691L;
+      private double max_value;
 
       public WarningRenderer()
       {
          super();
          setFont(new Font(getFont().getName(), Font.BOLD, getFont().getSize()));
          setHorizontalAlignment(JLabel.CENTER);
+         this.max_value = 100.0;
+      }
+      
+      public WarningRenderer(double max_value)
+      {
+         super();
+         setFont(new Font(getFont().getName(), Font.BOLD, getFont().getSize()));
+         setHorizontalAlignment(JLabel.CENTER);
+         this.max_value = 80.0;
       }
       
       public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
@@ -342,15 +328,15 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
          if(!(value instanceof Double))
          {
-            if(Double.valueOf((String)value) > 100.0)
+            if(Double.valueOf((String)value) > 1.0 * max_value)
             {
                c.setBackground(Color.RED);            
             }
-            else if (Double.valueOf((String) value) > 80.0)
+            else if (Double.valueOf((String) value) > 0.8 * max_value)
             {
                c.setBackground(Color.ORANGE);
             }
-            else if (Double.valueOf((String) value) > 60.0)
+            else if (Double.valueOf((String) value) > 0.6 * max_value)
             {
                c.setBackground(Color.GREEN.darker());
             }
