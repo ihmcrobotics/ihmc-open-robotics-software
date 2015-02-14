@@ -12,13 +12,10 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
-import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 /**
  * User: Matt
@@ -29,34 +26,17 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
-   private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
 
    public FootstepPathConsumer(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FootstepPathCoordinator footstepPathCoordinator,
                                HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters)
    {
       this.footstepPathCoordinator = footstepPathCoordinator;
       this.bipedFeet = bipedFeet;
-      this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
    }
 
    public void receivedPacket(FootstepDataList footstepList)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      
-      TrajectoryParameters trajectoryParameters = null;
-      if(footstepList.getTrajectoryWaypointGenerationMethod() != null)
-      {
-         if(footstepList.getTrajectoryWaypointGenerationMethod() == TrajectoryWaypointGenerationMethod.BY_BOX)
-         {
-            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TwoWaypointTrajectoryUtils.getFlatBoxFromSquare(footstepList.getTrajectoryBoxData()));
-         }
-         else
-         {
-            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(footstepList.getTrajectoryWaypointGenerationMethod());
-         }
-      }
-      else
-         System.out.println("trajectory parameters are null");
       
       for (int i = 0; i < footstepList.size(); i++)
       {
@@ -73,7 +53,6 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
          Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
          
          footsteps.add(footstep);
-         mapFromFootstepsToTrajectoryParameters.put(footstep, trajectoryParameters);
 
          if (DEBUG)
          {

@@ -13,8 +13,8 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.FootstepUtils;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 

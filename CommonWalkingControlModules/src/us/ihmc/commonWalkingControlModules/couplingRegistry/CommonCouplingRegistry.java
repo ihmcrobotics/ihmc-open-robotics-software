@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 

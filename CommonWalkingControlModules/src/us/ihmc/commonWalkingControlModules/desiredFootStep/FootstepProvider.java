@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 public interface FootstepProvider
 {

@@ -20,8 +20,8 @@ import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 public class ScriptedFootstepGenerator
 {
@@ -44,7 +44,7 @@ public class ScriptedFootstepGenerator
    
    public FootstepDataList generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double swingTime, double transferTime)
    {
-      FootstepDataList footstepDataList = new FootstepDataList(new SimpleTwoWaypointTrajectoryParameters(), swingTime, transferTime);
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
 
       for (int i = 0; i < robotSides.length; i++)
       {

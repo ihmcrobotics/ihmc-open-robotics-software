@@ -33,14 +33,13 @@ import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
+import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.yoUtilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 /**
  * User: Matt
@@ -121,7 +120,7 @@ public class FootstepDataTest
 
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps,random.nextDouble(), random.nextDouble());
 
       tcpServer.send(footstepsData);
       ThreadTools.sleep(100);
@@ -203,7 +202,7 @@ public class FootstepDataTest
 
       // send test footstep path
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
-      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
+      FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, random.nextDouble(), random.nextDouble());
 
       streamingDataTCPServer.send(footstepsData);
       ThreadTools.sleep(100);
@@ -222,7 +221,7 @@ public class FootstepDataTest
 
       // send another footstep path
       ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
-      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, null, random.nextDouble(), random.nextDouble());
+      footstepsData = convertFootstepsToFootstepData(sentFootsteps2, random.nextDouble(), random.nextDouble());
 
       streamingDataTCPServer.send(footstepsData);
       sentFootsteps.addAll(sentFootsteps2);
@@ -297,7 +296,7 @@ public class FootstepDataTest
       netClassList.registerPacketField(Quat4d.class);
       netClassList.registerPacketField(PacketDestination.class);
       netClassList.registerPacketField(FootstepStatus.Status.class);
-      netClassList.registerPacketField(TrajectoryWaypointGenerationMethod.class);
+      netClassList.registerPacketField(TrajectoryGenerationMethod.class);
       netClassList.registerPacketField(RobotSide.class);
 
       return netClassList;
@@ -366,18 +365,14 @@ public class FootstepDataTest
       }
    }
 
-   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters, double swingTime,
+   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, double swingTime,
          double transferTime)
    {
-      FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters, swingTime, transferTime);
+      FootstepDataList footstepsData = new FootstepDataList(swingTime, transferTime);
 
       for (Footstep footstep : footsteps)
       {
-    	  Point3d location = new Point3d();
-    	  Quat4d orientation = new Quat4d();
-    	  footstep.getPose(location, orientation);
-         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
-         footstepsData.add(footstepData);
+         footstepsData.add(new FootstepData(footstep));
       }
 
       return footstepsData;

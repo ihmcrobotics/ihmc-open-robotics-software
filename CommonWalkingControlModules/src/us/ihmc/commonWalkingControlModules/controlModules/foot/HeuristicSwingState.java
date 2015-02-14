@@ -26,7 +26,7 @@ import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;

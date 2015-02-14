@@ -1,11 +1,11 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 
 public class TrajectoryWaypointGenerationMethodConverter
 {
-   public static TrajectoryWaypointGenerationMethod convertTrajectoryWaypointGenerationMethod(byte b)
+   public static TrajectoryGenerationMethod convertTrajectoryWaypointGenerationMethod(byte b)
    {
-      return TrajectoryWaypointGenerationMethod.values()[(int) b];
+      return TrajectoryGenerationMethod.values()[(int) b];
    }
 }
