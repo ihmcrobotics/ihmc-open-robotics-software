@@ -15,4 +15,20 @@ geometry_msgs/Quaternion orientation
 # the world. A value of null will use the default controller contact points
 Point2dMessage[] predictedContactPoints
 
+# This contains information on what the swing trajectory should be for each step
+# DEFAULT gives the standard IHMC parabolic footstep trajectory
+# LOW_HEIGHT gives a lower-arched trajectory
+# STEP_ON_OR_OFF gives a higher-arched trajectory meant for stepping onto or off obstacles
+# BY_BOX gives a square-wave type trajectory according to the parameters of trajectoryBoxData
+# NO_STEP results in a null footstep. This probably should not be used outside of IHMC source
+#Options for trajectoryGenerationMethod
+# uint8 DEFAULT = 0
+# uint8 LOW_HEIGHT = 1
+# uint8 STEP_ON_OR_OFF = 2
+# uint8 BY_BOX = 3
+uint8 trajectoryGenerationMethod
+
+# Contains information on how high the robot should step
+float64 swingHeight
+
 
