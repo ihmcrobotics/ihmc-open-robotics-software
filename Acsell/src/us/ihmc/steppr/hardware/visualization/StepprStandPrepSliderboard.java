@@ -132,12 +132,27 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       StepprDashboard.createDashboard(scs, registry);
       scs.getDataBuffer().attachIndexChangedListener(this);
 
+      
       setupJoyStick(registry);
    }
    
   public static void setupJoyStick(YoVariableHolder registry)
    {
-      final JoystickUpdater joystickUpdater = new JoystickUpdater();
+	  final JoystickUpdater joystickUpdater;
+	  try
+	  {
+		   joystickUpdater = new JoystickUpdater();
+	  }
+      catch (RuntimeException ex)
+      {
+    	  if (ex.getMessage().equals("joystick not found"))
+    	  {
+    		  System.err.println("Joystick not found. Proceeding without joystick");
+    		  return;
+    	  }    	  
+    	  else
+    		  throw new RuntimeException(ex);
+      }
       Thread thread = new Thread(joystickUpdater);
       thread.start();
 
