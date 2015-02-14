@@ -20,6 +20,7 @@ import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.math.geometry.Line2d;
@@ -33,7 +34,8 @@ import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectorySolver;
 @BambooPlan(planType={BambooPlanType.Unfinished})
 public class JointSpaceBasedSwingTrajectorySolverTest
 {
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
    public void testOneDoFTrajectory()
    {
       boolean VISUALIZE = false;
@@ -100,7 +102,8 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       }
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
    public void testPendulumTrajectory()
    {
       boolean VISUALIZE = false;
