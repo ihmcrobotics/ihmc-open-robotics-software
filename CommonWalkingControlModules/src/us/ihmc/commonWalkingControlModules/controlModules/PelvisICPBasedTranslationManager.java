@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePointWaypoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
@@ -90,7 +91,7 @@ public class PelvisICPBasedTranslationManager
       proportionalGain.set(0.5);
       integralGain.set(1.5);
       maximumIntegralError.set(0.15);
-      
+
       manualMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -138,14 +139,24 @@ public class PelvisICPBasedTranslationManager
          }
          else if (desiredPelvisPoseProvider.checkForNewPosition())
          {
+            FramePointWaypoint[] pelvisPosition = desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame);
+            
+            if( pelvisPosition.length != 1)
+            {
+               System.out.println("ERROR: this code is not updated yet to handle a trajectory");
+            }
+            
+            double trajectortTime = pelvisPosition[0].timeSincePreviousWaypoint;
+
             initialPelvisPositionTime.set(yoTime.getDoubleValue());
-            if (desiredPelvisPoseProvider.getTrajectoryTime() < minTrajectoryTime)
-               pelvisPositionTrajectoryTime.set(minTrajectoryTime);
-            else
-               pelvisPositionTrajectoryTime.set(desiredPelvisPoseProvider.getTrajectoryTime());
+
+            if ( trajectortTime < minTrajectoryTime)  trajectortTime = minTrajectoryTime;
+
+            pelvisPositionTrajectoryTime.set(trajectortTime);
+
             tempPosition.setToZero(pelvisZUpFrame);
             initialPelvisPosition.setAndMatchFrame(tempPosition);
-            finalPelvisPosition.setAndMatchFrame(desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame));
+            finalPelvisPosition.setAndMatchFrame( pelvisPosition[0].point );
             pelvisPositionTrajectoryGenerator.initialize();
             isRunning.set(true);
          }
