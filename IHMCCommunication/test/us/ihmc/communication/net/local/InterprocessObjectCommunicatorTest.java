@@ -17,9 +17,11 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 
 public class InterprocessObjectCommunicatorTest
 {
+   @AverageDuration(duration = 0.1)
    @Test(timeout = 2000)
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
@@ -43,6 +45,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
+   @AverageDuration(duration = 0.1)
    @Test(timeout = 5000)
    public void testSendingObjectsToClients() throws IOException
    {

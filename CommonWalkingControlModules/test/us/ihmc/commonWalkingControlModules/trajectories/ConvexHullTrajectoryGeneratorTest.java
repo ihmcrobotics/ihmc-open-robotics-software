@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.dataStructures.DoubleHashHeightMap;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
@@ -36,7 +37,8 @@ public class ConvexHullTrajectoryGeneratorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables(); 
    
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
    public void testWithHeightMap()
    {
       boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp(); //don't check in true
@@ -76,7 +78,8 @@ public class ConvexHullTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = false;
@@ -117,7 +120,8 @@ public class ConvexHullTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
    public void testBigXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = false;
