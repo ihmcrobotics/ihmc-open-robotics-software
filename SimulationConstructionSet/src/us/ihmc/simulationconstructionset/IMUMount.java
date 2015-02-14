@@ -74,15 +74,11 @@ public class IMUMount
    private final Vector3d tempLinearVelocity = new Vector3d();
    private final Vector3d tempAngularVelocityInBody = new Vector3d();
 
-   private final Vector3d tempGravity = new Vector3d();
-   private final Vector3d tempLinearAcceleration = new Vector3d();
-   private final Vector3d tempAngularAccelerationInBody = new Vector3d();
    private final Matrix3d tempRotationToWorld = new Matrix3d();
-
    private final Vector3d tempIMUOffset = new Vector3d();
    private final Matrix3d tempIMURotation = new Matrix3d();
 
-   protected void updateIMUMount()
+   protected void updateIMUMountPositionAndVelocity()
    {
       // Offsets of IMUMount:
       transformFromMountToJoint.get(tempIMUOffset);
@@ -109,7 +105,26 @@ public class IMUMount
       parentJoint.physics.getAngularVelocityInBody(tempAngularVelocityInBody);
       tempIMURotation.transform(tempAngularVelocityInBody);
       angularVelocityInBody.set(tempAngularVelocityInBody);
+   }
 
+   private final Vector3d tempGravity = new Vector3d();
+   private final Vector3d tempLinearAcceleration = new Vector3d();
+   private final Vector3d tempAngularAccelerationInBody = new Vector3d();
+   
+   protected void updateIMUMountAcceleration()
+   {
+      // We redo some of the things that are already done in updateIMUMountPositionAndVelocity, 
+      // but it is safer that way since updateIMUMountAcceleration might be called by itself sometimes.
+      
+      // Offsets of IMUMount:
+      transformFromMountToJoint.get(tempIMUOffset);
+      transformFromMountToJoint.get(tempIMURotation);
+
+      // Orientation:
+      parentJoint.getRotationToWorld(tempRotationToWorld);
+      tempRotationToWorld.mul(tempIMURotation);
+      tempIMURotation.transpose();
+      
       // Linear Acceleration
       parentJoint.physics.getLinearAccelerationInBody(tempLinearAcceleration, tempIMUOffset);
       tempIMURotation.transform(tempLinearAcceleration);
@@ -125,7 +140,7 @@ public class IMUMount
       parentJoint.physics.getLinearAccelerationInWorld(tempLinearAcceleration, tempIMUOffset);
       robot.getGravity(tempGravity);
       tempGravity.scale(-1.0);
-      
+
       tempLinearAcceleration.add(tempGravity);
       linearAccelerationInWorld.set(tempLinearAcceleration);
 
