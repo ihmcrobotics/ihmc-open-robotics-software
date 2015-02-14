@@ -9,7 +9,6 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class,
 })
 
 public class AtlasGFastTestSuite
