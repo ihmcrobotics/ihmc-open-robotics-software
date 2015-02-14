@@ -54,7 +54,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
          FramePose homePose = new FramePose(chestFrame, desiredHandPosesWithRespectToChestFrame.get(robotSide));
          homePositions.put(robotSide, homePose);
          
-         System.out.println("homePose = " + homePose);
+//         System.out.println("homePose = " + homePose);
 
          desiredHandPoses.put(robotSide, homePose);
 
@@ -80,7 +80,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       desiredHandPoses.put(robotSide, userDesiredHandPose);
       packetReferenceFrames.put(robotSide, userDesiredHandPose.getReferenceFrame());
 
-      System.out.println("userDesiredHandPose = " + userDesiredHandPose);
+//      System.out.println("userDesiredHandPose = " + userDesiredHandPose);
 
       Map<OneDoFJoint, Double> finalDesiredJointAngleMap = finalDesiredJointAngleMaps.get(robotSide);
 
