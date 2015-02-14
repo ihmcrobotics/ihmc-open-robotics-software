@@ -76,7 +76,8 @@ public class DRCNetworkModuleParameters
 
    public void setUseSensorModule(boolean b)
    {
-      useSensorModule = b;      
+      useSensorModule = b;
+      if (b) useController = true;
    }
 
    public void setUseUiModule(boolean b)
@@ -87,6 +88,7 @@ public class DRCNetworkModuleParameters
    public void setUseBehaviorModule(boolean b)
    {
       useBehaviorModule = b;
+      if (b) useController = true;
    }
 
    public void setUseHandModule(boolean b)
@@ -97,6 +99,7 @@ public class DRCNetworkModuleParameters
    public void setUsePerceptionModule(boolean b)
    {
       usePerceptionModule = b;
+      if (b) useController = true;
    }
 
    public void setUseRosModule(boolean b)
@@ -120,5 +123,7 @@ public class DRCNetworkModuleParameters
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
       useSensorModule = true;
       useSimulatedSensors = true;
+      useController = true;
    }
+
 }
