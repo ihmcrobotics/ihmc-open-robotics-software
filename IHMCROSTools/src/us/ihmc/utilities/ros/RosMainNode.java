@@ -138,6 +138,7 @@ public class RosMainNode implements NodeMain
          Subscriber<? extends Message> subscriber = connectedNode.newSubscriber(entry.getKey(), rosTopicSubscriber.getMessageType());
          subscriber.addMessageListener(rosTopicSubscriber);
          rosSubscribers.put(rosTopicSubscriber, subscriber);
+         rosTopicSubscriber.registered(subscriber);
          rosTopicSubscriber.connected();
       }
 
@@ -146,7 +147,7 @@ public class RosMainNode implements NodeMain
       {
          final RosTopicPublisher rosTopicPublisher = entry.getValue();
          Publisher<? extends Message> publisher = connectedNode.newPublisher(entry.getKey(), rosTopicPublisher.getMessageType());
-         rosTopicPublisher.setPublisher(publisher);
+         rosTopicPublisher.registered(publisher);
          rosTopicPublisher.connected();
       }
 
@@ -178,7 +179,6 @@ public class RosMainNode implements NodeMain
       isStarted = true;
       
    }
-   
    
 
    public void onShutdown(Node node)
