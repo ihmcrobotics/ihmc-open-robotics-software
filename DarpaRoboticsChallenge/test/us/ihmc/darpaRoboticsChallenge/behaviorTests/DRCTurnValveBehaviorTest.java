@@ -90,7 +90,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
-   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 8.0;
+   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 60.0;  //79.0
 
    private static final boolean DEBUG = false;
 
