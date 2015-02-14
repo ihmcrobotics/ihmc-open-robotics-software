@@ -8,9 +8,10 @@ public abstract class RosTopicPublisher<T extends Message>
    private final String messageType;
    private final boolean latched;
    private Publisher<T> publisher;
-   private T message;
-   
 
+   private final Object syncObject = new Object();
+   private boolean isRegistered = false;
+   
    public RosTopicPublisher(String messageType, boolean latched)
    {
       this.messageType = messageType;
@@ -21,36 +22,63 @@ public abstract class RosTopicPublisher<T extends Message>
    {
       return messageType;
    }
-   
-   public void setPublisher(Publisher<T> publisher)
+
+   public void registered(Publisher<T> publisher)
    {
       this.publisher = publisher;
-      this.message = publisher.newMessage();
-      
       this.publisher.setLatchMode(latched);
+
+      synchronized (syncObject)
+      {
+         isRegistered = true;
+         syncObject.notify();
+      }
    }
    
+
+   public void waitTillRegistered()
+   {
+      while (!isRegistered)
+      {
+         synchronized (syncObject)
+         {
+            try
+            {
+               syncObject.wait();
+            }
+            catch (InterruptedException e)
+            {
+               e.printStackTrace();
+            }
+         }
+      }
+   }
+
    protected void publish(T message)
    {
       checkInitialized();
       publisher.publish(message);
    }
-   
+
    protected T getMessage()
    {
       checkInitialized();
-      return message;
+
+      return publisher.newMessage();
    }
-   
+
    private void checkInitialized()
    {
-      if(publisher == null)
+      if (publisher == null)
       {
          throw new RuntimeException("RosTopicPublisher is not registered with RosMainNode");
       }
    }
 
+
    public void connected()
    {
    }
+
+
 }
