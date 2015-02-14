@@ -51,7 +51,8 @@ public class StepprControllerFactory
 {
    private static final double gravity = -9.80; // From xsens
 
-   private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
+   //Use DATA_PRODUCER for ui control. Use VELOCITY_HEADING_COMPONENT for joystick control. Use YOVARIABLE for editing step variables by hand.
+   private static final WalkingProvider walkingProvider = WalkingProvider.VELOCITY_HEADING_COMPONENT;
 
    public StepprControllerFactory() throws IOException, JAXBException
    {

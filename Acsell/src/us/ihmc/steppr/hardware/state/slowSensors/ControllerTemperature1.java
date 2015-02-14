@@ -6,6 +6,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class ControllerTemperature1 implements StepprSlowSensor
 {
    private final DoubleYoVariable mcbTemperature1;
+   private final double THERM_B = 3730;
+   private final double THERM_R_25C = 22000;
+   private final double SERIES_RESISTANCE = 100.0e3;
+   private final double V_S = 12.0;
+   private final double MAX_ADC_COUNT = 4096.0;
+   private final double MAX_ADC_VOLTAGE = 3.3;
    
    public ControllerTemperature1(String name, YoVariableRegistry parentRegistry)
    {
@@ -15,13 +21,13 @@ public class ControllerTemperature1 implements StepprSlowSensor
    @Override
    public void update(int value)
    {
-      double therm_div_volt = value * 3.3f / 4096.0f;
-      double therm_r_meas = 10.0e3f / (3.3f / therm_div_volt - 1);
-      double THERM_B = 4288;
-      double THERM_R_25C = 50000;
-      double motor_temp_c = 0;
-      if (therm_div_volt > 0)
-         motor_temp_c = THERM_B / Math.log(therm_r_meas / (THERM_R_25C * Math.exp(-THERM_B / 298.15))) - 273.15;
+	  double motor_temp_c = 0;
+	  if (value > 0)
+	  {
+		  double therm_r_meas = SERIES_RESISTANCE * value / (MAX_ADC_COUNT * V_S / MAX_ADC_VOLTAGE - value);
+    	  double therm_k = THERM_R_25C*Math.exp(-THERM_B/298.15);
+          motor_temp_c = THERM_B / Math.log(therm_r_meas / therm_k) - 273.15;
+      }
       mcbTemperature1.set(motor_temp_c);
    }
    
