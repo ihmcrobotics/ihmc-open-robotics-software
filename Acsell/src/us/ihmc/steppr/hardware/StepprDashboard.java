@@ -129,6 +129,19 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          }
       });
       initializationPanel.add(enabledOutputButton);
+
+      JButton disabledOutputButton = new JButton("Disable torque output");
+      disabledOutputButton.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            enabledOutput.set(false);
+         }
+      });
+      initializationPanel.add(disabledOutputButton);
+
       JButton startStandPrepButton = new JButton("Start StandPrep");
       startStandPrepButton.addActionListener(new ActionListener()
       {
