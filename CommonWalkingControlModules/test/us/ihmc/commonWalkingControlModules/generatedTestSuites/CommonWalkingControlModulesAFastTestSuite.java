@@ -56,6 +56,15 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SmoothenedConstantCoPICPTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SplineBasedCoMHeightTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.StraightUpThenParabolicCartesianTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.TakeoffLandingCartesianTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines1DTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines2DTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.ZeroToOneParabolicVelocityTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculatorTest.class,
+   us.ihmc.commonWalkingControlModules.wrenchDistribution.CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest.class,
+   us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class,
 })
 
 public class CommonWalkingControlModulesAFastTestSuite
