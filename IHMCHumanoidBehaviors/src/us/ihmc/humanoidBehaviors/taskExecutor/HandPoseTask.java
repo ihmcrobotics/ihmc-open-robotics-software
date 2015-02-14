@@ -82,16 +82,16 @@ public class HandPoseTask extends BehaviorTask
    {
       super(handPoseBehavior, yoTime);
       this.handPoseBehavior = handPoseBehavior;
-      this.handPosePacket = new HandPosePacket();
+      this.handPosePacket = null;
 
       doHandPoseRelativeToHandPoseAtTransitionIntoAction = true;
       this.robotSide = robotSide;
       this.fullRobotModel = fullRobotModel;
       this.trajectoryTime = trajectoryTime;
-      if (directionToMoveInWorld.length() > 0.0)
-         directionToMoveInWorld.normalize();
-      directionToMoveInWorld.scale(distanceToMove);
-      this.desiredHandPoseOffsetFromCurrent = directionToMoveInWorld;
+      this.desiredHandPoseOffsetFromCurrent = new Vector3d(directionToMoveInWorld);
+      if (desiredHandPoseOffsetFromCurrent.length() > 0.0)
+         desiredHandPoseOffsetFromCurrent.normalize();
+      desiredHandPoseOffsetFromCurrent.scale(distanceToMove);
    }
 
    @Override

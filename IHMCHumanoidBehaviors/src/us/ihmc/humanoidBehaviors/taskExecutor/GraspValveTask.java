@@ -4,7 +4,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -33,13 +32,5 @@ public class GraspValveTask extends BehaviorTask
    protected void setBehaviorInput()
    {
       graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);
-   }
-
-   @Override
-   public void doTransitionIntoAction()
-   {
-            graspValveBehavior.initialize();
-            graspValveBehavior.setGraspPose(valveType, valveTransformToWorld, approachDirection, graspValveRim);  //FIXME:  For some reason this causes next handPose to be start of approach grasp vector
-      SysoutTool.println("entering graspValveTask", DEBUG);
    }
 }

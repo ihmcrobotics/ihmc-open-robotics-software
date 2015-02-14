@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -24,7 +23,7 @@ public class RotateHandAboutAxisTask extends BehaviorTask
       super(rotateGraspedPinJointBodyBehavior, yoTime);
       this.rotateHandAboutAxisBehavior = rotateGraspedPinJointBodyBehavior;
       this.robotSide = robotSide;
-      this.graspedObjectTransformToWorld = graspedObjectTransformToWorld;
+      this.graspedObjectTransformToWorld = new RigidBodyTransform(graspedObjectTransformToWorld);  // Creating new object here prevents strange behaviors when this task is repeated
       this.pinJointAxisInGraspedObjectFrame = pinJointAxisInGraspedObjectFrame;
       this.turnAngleRad = turnAngleRad;
       this.trajectoryTime = trajectoryTime;
@@ -34,19 +33,5 @@ public class RotateHandAboutAxisTask extends BehaviorTask
    protected void setBehaviorInput()
    {
       rotateHandAboutAxisBehavior.setInput(robotSide, graspedObjectTransformToWorld, pinJointAxisInGraspedObjectFrame, turnAngleRad, trajectoryTime);
-   }
-
-   public void doTransitionIntoAction()
-   {
-      super.doTransitionIntoAction();
-      if (DEBUG)
-         SysoutTool.println("Starting rotateGraspedPinJointBodyTask");
-   }
-
-   public void doTransitionOutOfAction()
-   {
-      super.doTransitionIntoAction();
-      if (DEBUG)
-         SysoutTool.println("Stopping rotateGraspedPinJointBodyTask");
    }
 }

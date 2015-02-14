@@ -30,7 +30,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class GraspValveBehavior extends BehaviorInterface
 {
    private final double MIDPOSE_OFFSET_FROM_FINALPOSE = 0.3;
-   private final double WRIST_OFFSET_FROM_HAND = 0.1; // 0.05
+   private final double WRIST_OFFSET_FROM_HAND = 0.11; // 0.05
    private final double HAND_POSE_TRAJECTORY_TIME = 1.0;//2.0;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -48,7 +48,7 @@ public class GraspValveBehavior extends BehaviorInterface
 
    private RobotSide robotSideOfGraspingHand = null;
 
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 
    public GraspValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
@@ -102,7 +102,6 @@ public class GraspValveBehavior extends BehaviorInterface
    }
 
    
-   private final FramePose finalGrabPose = new FramePose();
    private final Quat4d desiredGraspOrientation = new Quat4d();
    private final Vector3d valveOffsetFromWorld = new Vector3d();
    
@@ -123,7 +122,7 @@ public class GraspValveBehavior extends BehaviorInterface
       RigidBodyTransform midGrabTransform = new RigidBodyTransform();
       midGrabPose.getPose(midGrabTransform);
 
-      finalGrabPose.setPoseIncludingFrame(worldFrame, getOffsetPoint3dCopy(pointToGraspInWorldFrame, approachDirectionInWorld, -WRIST_OFFSET_FROM_HAND),
+      FramePose finalGrabPose = new FramePose(worldFrame, getOffsetPoint3dCopy(pointToGraspInWorldFrame, approachDirectionInWorld, -WRIST_OFFSET_FROM_HAND),
             desiredGraspOrientation);
       RigidBodyTransform finalGraspTransform = new RigidBodyTransform();
       finalGrabPose.getPose(finalGraspTransform);
@@ -139,24 +138,6 @@ public class GraspValveBehavior extends BehaviorInterface
       taskExecutor.submit(new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior, yoTime));
 
       haveInputsBeenSet.set(true);
-   }
-
-   public RobotSide getRobotSideOfGraspingHand()
-   {
-      if (!haveInputsBeenSet.getBooleanValue())
-      {
-         throw new RuntimeException("Must set behavior inputs first!");
-      }
-      return robotSideOfGraspingHand;
-   }
-
-   public void getFinalGraspPose(FramePose poseToPack)
-   {
-      if (!haveInputsBeenSet.getBooleanValue())
-      {
-         throw new RuntimeException("Must set behavior inputs first!");
-      }
-      poseToPack.setPose(finalGrabPose);
    }
 
    private Vector3d tempVec = new Vector3d();
