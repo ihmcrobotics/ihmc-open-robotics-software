@@ -10,7 +10,7 @@ import us.ihmc.utilities.code.unitTesting.BambooPlanType;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.Video})
+@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.Video})
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
 

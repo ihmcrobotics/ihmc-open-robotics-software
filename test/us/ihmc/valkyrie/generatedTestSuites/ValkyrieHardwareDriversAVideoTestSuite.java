@@ -9,7 +9,6 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
-   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class,
 })
 
 public class ValkyrieHardwareDriversAVideoTestSuite
