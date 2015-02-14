@@ -135,7 +135,23 @@ public class StepprOutputWriter implements DRCOutputWriter
       }
       else
       {
+         if(!enableOutput.getBooleanValue())
+         {
+            standPrep.initialize(timestamp);
+            command.disableActuators();
+            controlRatio.set(0.0);
+            outputEnabled = false;
+         }
+         computeOutputCommand(timestamp);
+            
+      }
 
+      outputWriter.write();
+
+   }
+   
+   private void computeOutputCommand(long timestamp)
+   {
          /*
           * StandPrep
           */
@@ -193,10 +209,6 @@ public class StepprOutputWriter implements DRCOutputWriter
             jointCommand.setDamping(kd);
 
          }
-      }
-
-      outputWriter.write();
-
    }
 
    private void initializeJointControlMode(String[] jointNameToIgnore)
