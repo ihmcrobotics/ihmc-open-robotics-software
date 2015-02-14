@@ -351,6 +351,9 @@ public class FootstepDataTest
          Footstep sentFootstep = sentFootsteps.get(i);
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
+         if (!sentFootstep.epsilonEquals(receivedFootstep, 1e-4)){
+            System.out.println("Test Broken");
+         }
          assertTrue(sentFootstep.epsilonEquals(receivedFootstep, 1e-4));
       }
    }
