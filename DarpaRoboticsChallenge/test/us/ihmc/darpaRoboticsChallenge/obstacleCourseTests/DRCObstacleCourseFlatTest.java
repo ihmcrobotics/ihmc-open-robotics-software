@@ -37,6 +37,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
@@ -50,9 +53,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -261,7 +261,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       List<Footstep> desiredFootstepList = turnInPlaceFootstepGenerator.generateDesiredFootstepList();
       double swingTime = 0.6;
       double transferTime = 0.25;
-      FootstepDataList footstepDataList = new FootstepDataList(null, swingTime, transferTime);
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
       
       for (Footstep desiredFootstep : desiredFootstepList)
       {
