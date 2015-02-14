@@ -14,7 +14,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
@@ -49,7 +49,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final int numberOfVisualizationMarkers = 50;
    private final BooleanYoVariable visualize;
 
-   protected final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
+   protected final EnumYoVariable<TrajectoryGenerationMethod> waypointGenerationMethod;
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
@@ -111,8 +111,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          fixedPointBagOfBalls = null;
       }
 
-      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
-            TrajectoryWaypointGenerationMethod.class);
+      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
+            TrajectoryGenerationMethod.class);
 
       this.walkingControllerParameters = walkingControllerParameters;
 

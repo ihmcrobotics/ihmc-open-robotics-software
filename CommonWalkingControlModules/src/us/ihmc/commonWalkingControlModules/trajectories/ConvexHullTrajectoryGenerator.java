@@ -57,6 +57,25 @@ public class ConvexHullTrajectoryGenerator
       this.pathWidth = pathWidth;
    }
 
+   public double getSwingHeight(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile){
+      List<FramePoint> convexHullPoints = computeSwingTrajectoryPoints(startPose, endPose, groundProfile);
+      double maxHeight = Double.NEGATIVE_INFINITY;
+      double currentZ;
+      for (FramePoint framePoint : convexHullPoints){
+         framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         currentZ = framePoint.getZ();
+         if (currentZ > maxHeight){
+            maxHeight = currentZ;
+         }
+      }
+      double startHeight = startPose.getZ();
+      double swingHeight = maxHeight - startHeight;
+      if (swingHeight < 0){
+         throw new RuntimeException(this.getClass().getSimpleName() + ": error in swing height calculation");
+      }
+      return swingHeight;
+   }
+
    public List<FramePoint> computeSwingTrajectoryPoints(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile)
    {
       List<FramePoint> trajectoryPoints = new ArrayList<FramePoint>();

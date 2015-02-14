@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 
 public class CommandPlayer implements TimestampListener
 {
@@ -111,10 +111,6 @@ public class CommandPlayer implements TimestampListener
          else if (object instanceof FootstepDataList)
          {
             FootstepDataList footstepDataList = (FootstepDataList) object;
-            if (footstepDataList.getTrajectoryWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.NO_STEP))
-            {
-               consumeObject = false;
-            }
          }
 
 

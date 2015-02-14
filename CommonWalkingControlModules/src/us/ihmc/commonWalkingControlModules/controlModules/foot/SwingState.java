@@ -18,7 +18,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 import us.ihmc.utilities.math.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentAngularVelocityProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
@@ -34,7 +34,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.TwoViaPointTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
@@ -239,13 +239,13 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       if (worldFrameDeltaZAboveThreshold)
       {
-         trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);
+         trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryGenerationMethod.STEP_ON_OR_OFF);
       }
       else
       {
          if (useLowHeightTrajectory)
          {
-            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.LOW_HEIGHT);
+            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryGenerationMethod.LOW_HEIGHT);
          }
       }
 
