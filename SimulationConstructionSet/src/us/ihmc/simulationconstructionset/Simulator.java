@@ -135,6 +135,7 @@ public class Simulator implements java.io.Serializable
          {
             Robot robot = robots[i];
             robot.doDynamicsAndIntegrate(DT);
+            robot.updateIMUMountAccelerations();
          }
       }
    }

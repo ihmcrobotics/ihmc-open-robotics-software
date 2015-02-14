@@ -2078,10 +2078,20 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          for (Robot robot : robots)
          {
             robot.update();
+            
+            // Do the dynamics one tick to initialize things, but don't integrate them. 
+            // Also needed to initialize the IMUMounts.
+            try
+            {
+               robot.doDynamicsButDoNotIntegrate();
+            }
+            catch (UnreasonableAccelerationException e)
+            {
+            }
+            robot.updateIMUMountAccelerations();
          }
 
          // Do this to force loading of classes so no pauses on integration...
-         // mySimulator.doDynamicsAndIntegrate();
          if (mySimulation != null)
          {
             mySimulation.forceClassLoading();

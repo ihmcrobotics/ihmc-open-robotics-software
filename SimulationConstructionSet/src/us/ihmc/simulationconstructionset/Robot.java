@@ -483,7 +483,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @return VarList of the Robot's variables.
     */
 
-   public synchronized void update()
+   public void update()
    {
       boolean updatePoints = true;
       boolean updateCameraMounts = true;
@@ -492,7 +492,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       update(updatePoints, updateCameraMounts, updateIMUMounts);
    }
 
-   public synchronized void updateForPlayback()
+   public void updateForPlayback()
    {
       boolean updatePoints = false;
       boolean updateCameraMounts = true;
@@ -503,6 +503,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
 
    /**
     * Updates all joint data without updating graphics.
+    * TODO: Not sure if this needs to be synchronized anymore.
     */
    protected synchronized void update(boolean updatePoints, boolean updateCameraMounts, boolean updateIMUMounts)
    {
@@ -510,6 +511,15 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       {
          Joint rootJoint = rootJoints.get(i);
          rootJoint.recursiveUpdateJoints(null, updatePoints, updateCameraMounts, updateIMUMounts, t.getDoubleValue());
+      }
+   }
+   
+   protected void updateIMUMountAccelerations()
+   {
+      for (int i = 0; i < rootJoints.size(); i++)
+      {
+         Joint rootJoint = rootJoints.get(i);
+         rootJoint.recursiveUpdateJointsIMUMountAccelerations();
       }
    }
 

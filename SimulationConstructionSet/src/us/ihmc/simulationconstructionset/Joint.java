@@ -374,7 +374,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
 
       if (updateIMUMounts)
       {
-         this.updateIMUMounts(this.transformToNext);
+         this.updateIMUMountsPositionAndVelocity(this.transformToNext);
       }
 
       for (int i = 0; i < childrenJoints.size(); i++)
@@ -383,6 +383,18 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          childJoint.recursiveUpdateJoints(this.transformToNext, updatePoints, updateCameraMounts, updateIMUMounts, time);
       }
 
+   }
+   
+   
+   protected void recursiveUpdateJointsIMUMountAccelerations()
+   {
+      this.updateIMUMountsAcceleration(this.transformToNext);
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint childJoint = childrenJoints.get(i);
+         childJoint.recursiveUpdateJointsIMUMountAccelerations();
+      }
    }
 
 
@@ -422,14 +434,26 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       }
    }
 
-   protected void updateIMUMounts(RigidBodyTransform tToHere)
+   protected void updateIMUMountsPositionAndVelocity(RigidBodyTransform tToHere)
    {
       if (imuMounts != null)
       {
          for (int i = 0; i < imuMounts.size(); i++)
          {
             IMUMount mount = imuMounts.get(i);
-            mount.updateIMUMount();
+            mount.updateIMUMountPositionAndVelocity();
+         }
+      }
+   }
+   
+   protected void updateIMUMountsAcceleration(RigidBodyTransform tToHere)
+   {
+      if (imuMounts != null)
+      {
+         for (int i = 0; i < imuMounts.size(); i++)
+         {
+            IMUMount mount = imuMounts.get(i);
+            mount.updateIMUMountAcceleration();
          }
       }
    }
