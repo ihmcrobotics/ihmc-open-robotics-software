@@ -89,9 +89,13 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final RigidBody pelvis;
    
-   private final FrameVector unachievedSwingTranslation = new FrameVector();   
-   private final FrameVector unachievedSwingVelocity = new FrameVector(); 
-   private final FrameVector unachievedSwingAcceleration = new FrameVector();
+   private final FrameVector unachievedSwingTranslationTemp = new FrameVector();   
+   private final FrameVector unachievedSwingVelocityTemp = new FrameVector(); 
+   private final FrameVector unachievedSwingAccelerationTemp = new FrameVector();
+   
+   private final YoFrameVector unachievedSwingTranslation;   
+   private final YoFrameVector unachievedSwingVelocity; 
+   private final YoFrameVector unachievedSwingAcceleration;
 
    private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
    private final FramePoint anklePosition = new FramePoint(worldFrame);
@@ -149,6 +153,10 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
+      
+      unachievedSwingTranslation = new YoFrameVector("unachievedSwingTranslation", ReferenceFrame.getWorldFrame(), registry);  
+      unachievedSwingVelocity = new YoFrameVector("unachievedSwingVelocity", ReferenceFrame.getWorldFrame(), registry);  
+      unachievedSwingAcceleration = new YoFrameVector("unachievedSwingAcceleration", ReferenceFrame.getWorldFrame(), registry);  
       
       maximumLegLength = new DoubleYoVariable(namePrefix + "MaxLegLength", registry);
       maximumLegLength.set(walkingControllerParameters.getLegLength());
@@ -368,9 +376,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
 
       alphaSwingSingularityAvoidance.set(0.0);
-      unachievedSwingTranslation.setToZero(unachievedSwingTranslation.getReferenceFrame());
-      unachievedSwingVelocity.setToZero(unachievedSwingVelocity.getReferenceFrame());
-      unachievedSwingAcceleration.setToZero(unachievedSwingAcceleration.getReferenceFrame());
+      unachievedSwingTranslation.setToZero();
+      unachievedSwingVelocity.setToZero();
+      unachievedSwingAcceleration.setToZero();
    }
 
    public void setCheckVelocityForSwingSingularityAvoidance(boolean value)
@@ -505,8 +513,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       double desiredOrMaxLegLength = - Math.min(desiredLegLength.getDoubleValue(), maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() * maximumLegLength.getDoubleValue());
       double correctedDesiredPositionZ = desiredOrMaxLegLength; //(1.0 - alphaSingularityAvoidance.getDoubleValue()) * desiredFootPosition.getZ() + alphaSingularityAvoidance.getDoubleValue() * desiredOrMaxLegLength;
-      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
-      unachievedSwingTranslation.changeFrame(worldFrame);
+      
+      unachievedSwingTranslationTemp.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
+      unachievedSwingTranslationTemp.changeFrame(worldFrame);
+      unachievedSwingTranslation.set(unachievedSwingTranslationTemp);
+      
       yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
       desiredFootPosition.setZ(correctedDesiredPositionZ);
       
@@ -520,13 +531,19 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
          double desiredLinearVelocityZ = (1.0 - alphaSwingSingularityAvoidance.getDoubleValue()) * desiredFootLinearVelocity.getZ() + alphaSwingSingularityAvoidance.getDoubleValue() * pelvisLinearVelocity.getZ();
 
-         unachievedSwingVelocity.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
+         unachievedSwingVelocityTemp.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
+         unachievedSwingVelocityTemp.changeFrame(worldFrame);
+         unachievedSwingVelocity.set(unachievedSwingVelocityTemp);
+         
          desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered, desiredLinearVelocityX, desiredLinearVelocityY, desiredLinearVelocityZ);
       }
       
 //      if (desiredFootLinearAcceleration.getZ() < 0.0) // Check if desired acceleration results in leg extension
       {
-         unachievedSwingAcceleration.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, alphaSwingSingularityAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
+         unachievedSwingAccelerationTemp.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, alphaSwingSingularityAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
+         unachievedSwingAccelerationTemp.changeFrame(worldFrame);
+         unachievedSwingAcceleration.set(unachievedSwingAccelerationTemp);
+         
          desiredFootLinearAcceleration.setZ((1.0 - alphaSwingSingularityAvoidance.getDoubleValue()) * desiredFootLinearAcceleration.getZ());
       }
       
@@ -865,7 +882,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCenterOfMassHeightPoint.changeFrame(worldFrame);
 
-      unachievedSwingTranslation.changeFrame(worldFrame);
       if (unachievedSwingTranslation.getZ() < 0.0)
       {
          isUnreachableFootstepCompensated.set(true);
@@ -879,7 +895,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          unachievedSwingTranslationFiltered.set(0.0);
       }
       
-      unachievedSwingVelocity.changeFrame(worldFrame);
       if (unachievedSwingVelocity.getZ() < 0.0)
       {
          unachievedSwingVelocityFiltered.update(unachievedSwingVelocity.getZ());
