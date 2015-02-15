@@ -9,8 +9,8 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.ManualTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ManualTest;
 
 @ManualTest
 public class SimulationConstructionSetTest

@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public class Graphics3DObjectTest
 {

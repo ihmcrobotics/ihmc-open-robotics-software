@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;

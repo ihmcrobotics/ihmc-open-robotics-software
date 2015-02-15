@@ -10,9 +10,9 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.BambooPlan;
-import us.ihmc.utilities.code.unitTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 

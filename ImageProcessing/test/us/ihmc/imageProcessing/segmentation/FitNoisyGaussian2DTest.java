@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceRandomDraw;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 /**
  * @author Peter Abeles

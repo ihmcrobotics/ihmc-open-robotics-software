@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

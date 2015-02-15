@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public class KalmanFilterComparisonTest
 {

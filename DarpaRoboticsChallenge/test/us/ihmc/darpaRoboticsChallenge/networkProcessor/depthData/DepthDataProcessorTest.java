@@ -22,7 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface

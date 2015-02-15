@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public class StreamingDataTCPServerTest
 {

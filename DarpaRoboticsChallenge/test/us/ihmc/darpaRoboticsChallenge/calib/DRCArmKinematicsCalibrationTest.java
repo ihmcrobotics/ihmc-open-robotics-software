@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 

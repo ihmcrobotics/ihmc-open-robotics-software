@@ -25,8 +25,8 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.DateTools;
-import us.ihmc.utilities.code.unitTesting.youtube.YouTubeCredentials;
-import us.ihmc.utilities.code.unitTesting.youtube.YouTubeUploader;
+import us.ihmc.utilities.code.agileTesting.youtube.YouTubeCredentials;
+import us.ihmc.utilities.code.agileTesting.youtube.YouTubeUploader;
 import us.ihmc.utilities.gui.GUIMessageFrame;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.operatingSystem.OperatingSystemTools;

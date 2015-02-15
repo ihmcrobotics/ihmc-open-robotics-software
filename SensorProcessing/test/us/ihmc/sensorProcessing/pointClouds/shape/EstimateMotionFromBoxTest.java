@@ -20,7 +20,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;

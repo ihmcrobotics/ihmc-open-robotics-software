@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.frictionModels.AsymmetricCoulombViscousFrictionModel;
 import us.ihmc.utilities.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.utilities.frictionModels.FrictionModel;

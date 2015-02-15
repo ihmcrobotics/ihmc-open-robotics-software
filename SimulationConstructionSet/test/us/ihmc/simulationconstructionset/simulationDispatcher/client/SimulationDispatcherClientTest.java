@@ -6,8 +6,8 @@ import java.rmi.registry.Registry;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.ManualTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ManualTest;
 
 @ManualTest
 public class SimulationDispatcherClientTest

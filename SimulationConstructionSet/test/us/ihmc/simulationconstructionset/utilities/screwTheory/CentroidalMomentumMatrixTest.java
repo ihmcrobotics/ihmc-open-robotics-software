@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

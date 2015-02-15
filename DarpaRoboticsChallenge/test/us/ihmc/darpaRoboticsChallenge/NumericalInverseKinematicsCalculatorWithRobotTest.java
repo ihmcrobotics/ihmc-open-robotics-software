@@ -9,7 +9,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;

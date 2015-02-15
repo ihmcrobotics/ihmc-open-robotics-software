@@ -16,7 +16,7 @@ import org.junit.Test;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PolygonArtifact;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.BoundingBoxKDTree2D;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;

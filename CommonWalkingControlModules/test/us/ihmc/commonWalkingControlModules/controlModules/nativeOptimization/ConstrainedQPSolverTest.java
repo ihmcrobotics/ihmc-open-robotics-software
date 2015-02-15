@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 

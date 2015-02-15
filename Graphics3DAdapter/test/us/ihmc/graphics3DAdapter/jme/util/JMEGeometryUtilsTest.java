@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.jme3.math.Quaternion;
