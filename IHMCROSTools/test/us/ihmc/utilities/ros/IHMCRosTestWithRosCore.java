@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import org.junit.After;
 import org.junit.Before;
 import org.ros.RosCore;
-import org.ros.RosTest;
 
 /**
  *
