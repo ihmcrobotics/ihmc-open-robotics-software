@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros;
 
+import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
@@ -82,6 +83,59 @@ public class RosServiceClient<T extends Message, S extends Message>
 
       client.call(request, response);
 
+   }
+   
+   
+   private class BlockingServiceResponseListener<S> implements ServiceResponseListener<S>
+   {
+      
+      boolean responsed = false;
+      S response=null;
+      RemoteException remoteException=null;
+
+      @Override
+      public synchronized void onSuccess(S response)
+      {
+         this.response=response;
+         responsed=true;
+         notify();
+      }
+
+      @Override
+      public synchronized void onFailure(RemoteException e)
+      {
+         this.response=null;
+         this.remoteException=e;
+         notify();
+      }
+      
+      public S getResponse() 
+      {
+         synchronized (this)
+         {
+            while(!responsed)
+            {
+               try{
+                  wait();
+               }
+               catch(InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         }
+         if(response==null)
+            throw this.remoteException;
+
+         return response;
+      }
+      
+   }
+   public S call(T request) 
+   {
+      BlockingServiceResponseListener<S> responseListener= new BlockingServiceResponseListener<S>();
+      call(request, responseListener);
+      return responseListener.getResponse();
    }
 
    public T getMessage()

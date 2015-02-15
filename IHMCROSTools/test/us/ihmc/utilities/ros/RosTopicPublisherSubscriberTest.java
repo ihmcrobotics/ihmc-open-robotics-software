@@ -16,10 +16,10 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 
-public class RosTopicPublisherSubscriberTest extends IHMCRosTest
+public class RosTopicPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
 	@AverageDuration
-	@Test(timeout=300000)
+	@Test(timeout=2000)
    public void testPubSubMultipleMessages() throws URISyntaxException, InterruptedException
    {
       int nPacket=10;
