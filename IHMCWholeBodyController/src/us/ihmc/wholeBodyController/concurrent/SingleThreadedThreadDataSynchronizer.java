@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -26,13 +27,15 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final LongYoVariable estimatorClockStartTime;
    private final LongYoVariable estimatorTick;
    
+   private final FullRobotModelRootJointRewinder fullRobotModelRewinder;
+   
    /**
     * SingleThreadedThreadDataSynchronizer is an alternative to ThreadDataSynchronizer when you want to run on a single thread and have 
     * deterministic rewindable execution. The FullRobotModels and other objects are just shared between the estimator and the controller.
     * @param wholeBodyControlParameters
     * @param registry
     */
-   public SingleThreadedThreadDataSynchronizer(WholeBodyControllerParameters wholeBodyControlParameters, YoVariableRegistry registry)
+   public SingleThreadedThreadDataSynchronizer(SimulationConstructionSet scs, WholeBodyControllerParameters wholeBodyControlParameters, YoVariableRegistry registry)
    {
       timestamp = new LongYoVariable(getClass().getSimpleName() + "Timestamp", registry);
       estimatorClockStartTime = new LongYoVariable(getClass().getSimpleName() + "EstimatorClockStartTime", registry);
@@ -47,6 +50,9 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       controllerForceSensorDataHolder = estimatorForceSensorDataHolder;
       controllerRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
       controllerCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
+      
+      this.fullRobotModelRewinder = new FullRobotModelRootJointRewinder(estimatorFullRobotModel, registry);
+      scs.attachSimulationRewoundListener(fullRobotModelRewinder);
    }
 
    public boolean receiveEstimatorStateForController()
@@ -58,7 +64,10 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    {
       this.timestamp.set(timestamp);
       this.estimatorTick.set(estimatorTick);
-      this.estimatorClockStartTime.set(estimatorClockStartTime);    
+      this.estimatorClockStartTime.set(estimatorClockStartTime); 
+      
+      // Record full robot model here for rewindability.
+      fullRobotModelRewinder.recordCurrentState();
    }
 
    public SDFFullRobotModel getEstimatorFullRobotModel()
