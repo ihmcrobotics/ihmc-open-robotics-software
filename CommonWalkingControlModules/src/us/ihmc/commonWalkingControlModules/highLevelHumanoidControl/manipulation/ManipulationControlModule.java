@@ -147,6 +147,8 @@ public class ManipulationControlModule
 
    private void handleDefaultState(RobotSide robotSide)
    {
+      if (handPoseProvider == null) return;
+      
       if (handPoseProvider.checkForHomePosition(robotSide))
       {
          goToDefaultState(robotSide, handPoseProvider.getTrajectoryTime());
@@ -155,6 +157,8 @@ public class ManipulationControlModule
 
    private void handleHandPoses(RobotSide robotSide)
    {
+      if (handPoseProvider == null) return;
+      
       if (handPoseProvider.checkForNewPose(robotSide))
       {
          if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
@@ -176,6 +180,8 @@ public class ManipulationControlModule
 
    private void handleHandPauses(RobotSide robotSide)
    {
+      if (handPoseProvider == null) return;
+
       if (handPoseProvider.checkForNewPauseCommand(robotSide))
       {
          handPoseProvider.getPauseCommand(robotSide);
