@@ -21,6 +21,8 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -31,9 +33,6 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-
 
 public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 {
@@ -126,7 +125,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       else if (scriptObject instanceof PelvisPosePacket)
       {
          PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
-         desiredPelvisPoseProvider.getSingleTargetConsumer().receivedPacket( pelvisPosePacket );
+         desiredPelvisPoseProvider.receivedPacket(pelvisPosePacket);
          
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }

@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePointWaypoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -49,7 +49,7 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       };
 
       userPelvisOrientation.attachVariableChangedListener(variableChangedListener);
-      
+
       userPelvisPosition.attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -88,19 +88,9 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    {
       return isNewPelvisOrientationInformationAvailable.getBooleanValue();
    }
-   
-   @Override
-   public Double getTrajectoryTimeToHome()
-   {
-   	if( checkForHomeOrientation() || checkForHomePosition())
-   	   return userPelvisTrajectoryTime.getDoubleValue();
-   	else
-   	   return null;
-   }
-
 
    @Override
-   public FrameOrientationWaypoint[] getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
+   public FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
    {
       if (!isNewPelvisOrientationInformationAvailable.getBooleanValue())
          return null;
@@ -108,13 +98,8 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       isNewPelvisOrientationInformationAvailable.set(false);
 
       frameOrientation.setIncludingFrame(desiredPelvisFrame, desiredQuat);
-      
-      FrameOrientationWaypoint singleWaypoint = new FrameOrientationWaypoint( 
-            userPelvisTrajectoryTime.getDoubleValue(),
-            frameOrientation,
-            new FrameVector() // zero velocity at the end
-            );    
-      return new FrameOrientationWaypoint[]{singleWaypoint};
+
+      return frameOrientation;
    }
 
    @Override
@@ -124,22 +109,23 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    }
 
    @Override
-   public FramePointWaypoint[] getDesiredPelvisPosition(ReferenceFrame desiredPelvisFrame)
+   public FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame)
    {
       if (!isNewPelvisPositionInformationAvailable.getBooleanValue())
          return null;
-      
+
       isNewPelvisPositionInformationAvailable.set(false);
-      
-      framePoint.setIncludingFrame(desiredPelvisFrame, desiredPoint);
-      
-      FramePointWaypoint singleWaypoint = new FramePointWaypoint( 
-            userPelvisTrajectoryTime.getDoubleValue(),
-            framePoint,
-            new FrameVector() // zero velocity at the end
-            );    
-      return new FramePointWaypoint[]{singleWaypoint};
-   }  
+
+      framePoint.setIncludingFrame(supportFrame, desiredPoint);
+
+      return framePoint;
+   }
+
+   @Override
+   public double getTrajectoryTime()
+   {
+      return userPelvisTrajectoryTime.getDoubleValue();
+   }
 
    @Override
    public boolean checkForHomePosition()
@@ -163,5 +149,32 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       return false;
    }
 
+   @Override
+   public boolean checkForNewTrajectory()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public void removeLastTrajectory()
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public ReferenceFrame getDesiredPelvisPositionTrajectory(ArrayList<Double> time, ArrayList<Point3d> position, ArrayList<Vector3d> velocity)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getDesiredPelvisOrientationTrajectory(double[] time, Point3d[] position, Vector3d[] velocity)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 
 }

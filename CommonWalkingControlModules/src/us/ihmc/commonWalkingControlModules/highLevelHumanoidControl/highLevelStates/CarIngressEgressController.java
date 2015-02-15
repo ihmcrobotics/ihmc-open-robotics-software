@@ -5,6 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -23,9 +26,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePointWaypoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -40,7 +43,6 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
@@ -354,14 +356,21 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       //   System.out.println(getClass().getSimpleName() );
 
-      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewPosition() )
+      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewTrajectory() )
       {
          System.out.println(getClass().getSimpleName() + ": trajectory packet received. <<<<<<<<<<<");
 
+         ArrayList<Double> time = new ArrayList<Double>();
+         ArrayList<Point3d> position = new ArrayList<Point3d>();  
+         ArrayList<Vector3d> velocity = new ArrayList<Vector3d>();  
+
          //read from here
-         FramePointWaypoint[] desiredPelvisPosition = pelvisPoseProvider.getDesiredPelvisPosition(worldFrame);
+         ReferenceFrame frame = pelvisPoseProvider.getDesiredPelvisPositionTrajectory(time, position, velocity);
+
          //write here
-         pelvisPositionTrajectoryGenerator.initializeTrajectory( desiredPelvisPosition );
+         pelvisPositionTrajectoryGenerator.initializeTrajectory(frame, time, position, velocity );
+         // once you copied it, delete it
+         pelvisPoseProvider.removeLastTrajectory();
 
          pelvisTrajectoryStartTime = yoTime.getDoubleValue();
       }
@@ -382,6 +391,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       yoPelvisLinearAcceleration.setAndMatchFrame(pelvisLinearAcceleration);      
       pelvisLinearAcceleration.changeFrame(pelvis.getBodyFixedFrame());
 
+
+      System.out.println();
+
       if (!requestedPelvisLoadBearing.getBooleanValue())
       {
          pelvisTaskspaceConstraintData.set(elevator, pelvis);
@@ -395,7 +407,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          pelvisTaskspaceConstraintData.setLinearAcceleration(pelvis.getBodyFixedFrame(), elevator.getBodyFixedFrame(), pelvisLinearAcceleration, selectionMatrix);
       }
 
-      momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobianId, pelvisTaskspaceConstraintData);   
+      momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobianId, pelvisTaskspaceConstraintData);
    }
 
    protected void doChestControl()
