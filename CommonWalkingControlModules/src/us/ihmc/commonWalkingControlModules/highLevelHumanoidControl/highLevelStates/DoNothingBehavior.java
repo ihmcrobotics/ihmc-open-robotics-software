@@ -3,14 +3,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class DoNothingBehavior extends HighLevelBehavior
 {
@@ -18,7 +18,7 @@ public class DoNothingBehavior extends HighLevelBehavior
 
    private final MomentumBasedController momentumBasedController;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<>();
+   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
    private final ArrayList<OneDoFJoint> allRobotJoints = new ArrayList<OneDoFJoint>();
 

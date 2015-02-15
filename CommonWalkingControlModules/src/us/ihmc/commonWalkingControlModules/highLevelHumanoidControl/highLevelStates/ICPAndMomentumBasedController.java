@@ -71,7 +71,7 @@ public class ICPAndMomentumBasedController
 
    private final SpatialForceVector admissibleGroundReactionWrench = new SpatialForceVector();
 
-   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<PlaneContactState>();
+   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<YoPlaneContactState>();
 
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 

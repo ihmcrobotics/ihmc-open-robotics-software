@@ -13,7 +13,7 @@ import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -22,6 +22,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
@@ -54,7 +55,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
@@ -159,7 +159,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
    private final CommonHumanoidReferenceFrames referenceFrames;
    
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<>();
+   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    
    private final MomentumBasedController momentumBasedController;
    
