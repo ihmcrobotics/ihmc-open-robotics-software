@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.Differentiator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.Direction;

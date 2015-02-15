@@ -30,7 +30,7 @@ import us.ihmc.loaders.jme.BinarySTLReader;
 import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.

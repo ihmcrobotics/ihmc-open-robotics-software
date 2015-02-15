@@ -1,11 +1,12 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Point3d;
+
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
-
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
 
 /**
  * Created by agrabertilton on 2/12/15.

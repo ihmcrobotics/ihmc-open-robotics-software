@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public class BambooToolsTest
 {

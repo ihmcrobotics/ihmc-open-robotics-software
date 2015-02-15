@@ -16,8 +16,8 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.unitTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 
 import com.thoughtworks.xstream.XStream;
 
