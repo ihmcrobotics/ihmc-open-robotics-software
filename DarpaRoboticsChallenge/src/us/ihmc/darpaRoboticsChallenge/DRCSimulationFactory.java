@@ -156,7 +156,7 @@ public class DRCSimulationFactory
       else
       {
          YoVariableRegistry threadDataSynchronizerRegistry = new YoVariableRegistry("ThreadDataSynchronizerRegistry");
-         threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(drcRobotModel, threadDataSynchronizerRegistry);
+         threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(scs, drcRobotModel, threadDataSynchronizerRegistry);
          scs.addYoVariableRegistry(threadDataSynchronizerRegistry);
       }
 
