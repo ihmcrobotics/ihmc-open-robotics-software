@@ -16,6 +16,7 @@ import org.ros.node.NodeMainExecutor;
 import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -30,6 +31,9 @@ public class RosMainNode implements NodeMain
    private final LinkedHashMap<String, RosTopicPublisher<? extends Message>> publishers = new LinkedHashMap<String, RosTopicPublisher<? extends Message>>();
    private final LinkedHashMap<String, RosServiceClient<? extends Message, ? extends Message>> clients = new LinkedHashMap<String,
                                                                                                             RosServiceClient<? extends Message,
+                                                                                                               ? extends Message>>();
+   private final LinkedHashMap<String, RosServiceServer<? extends Message, ? extends Message>> servers = new LinkedHashMap<String,
+                                                                                                            RosServiceServer<? extends Message,
                                                                                                                ? extends Message>>();
 
    private final LinkedHashMap<String, ParameterListener> parameterListeners = new LinkedHashMap<String, ParameterListener>();
@@ -81,6 +85,12 @@ public class RosMainNode implements NodeMain
       checkNotStarted();
 
       clients.put(topicName, client);
+   }
+
+   public void attachServiceServer(String topicName, RosServiceServer<? extends Message, ? extends Message> server)
+   {
+      checkNotStarted();
+      servers.put(topicName, server);
    }
 
    public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
@@ -150,6 +160,13 @@ public class RosMainNode implements NodeMain
          rosTopicPublisher.registered(publisher);
          rosTopicPublisher.connected();
       }
+      
+      for(Entry<String, RosServiceServer<? extends Message, ? extends Message>> entry: servers.entrySet())
+      {
+            final RosServiceServer<? extends Message, ? extends Message> rosServiceServer= entry.getValue();
+            ServiceServer server =connectedNode.newServiceServer(entry.getKey(), rosServiceServer.getRequestType(), rosServiceServer);
+            rosServiceServer.setServiceServer(server, connectedNode, entry.getKey());
+      }
 
       for (Entry<String, RosServiceClient<? extends Message, ? extends Message>> entry : clients.entrySet())
       {
@@ -170,6 +187,8 @@ public class RosMainNode implements NodeMain
                  }
          }
       }
+      
+   
       
       for(Entry<String, ParameterListener> entry : parameterListeners.entrySet())
       {

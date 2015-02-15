@@ -13,14 +13,12 @@ import org.ros.RosTest;
  * @author tingfan
  * @see RosTest
  */
-public abstract class IHMCRosTest
+public abstract class IHMCRosTestWithRosCore
 {
-   final boolean USE_JAVA_ROSCORE = true;    // when set to false, needs to run a local roscore externally.
-   private RosCore rosCore;
+   private RosCore rosCore=null;
    protected URI rosMasterURI;
 
-   @Before
-   public void setUp() throws URISyntaxException
+   protected void setUp(boolean USE_JAVA_ROSCORE)
    {
       if (USE_JAVA_ROSCORE)
       {
@@ -30,15 +28,28 @@ public abstract class IHMCRosTest
       }
       else
       {
-         rosMasterURI = new URI("http://localhost:11311/");
+         try
+         {
+            rosMasterURI = new URI("http://localhost:11311/");
+         }
+         catch (URISyntaxException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 
+   @Before
+   public void setUp()
+   {
+      setUp(true);
+   }
 
    @After
    public void tearDown()
    {
-      rosCore.shutdown();
+      if(rosCore!=null)
+         rosCore.shutdown();
    }
 
 }
