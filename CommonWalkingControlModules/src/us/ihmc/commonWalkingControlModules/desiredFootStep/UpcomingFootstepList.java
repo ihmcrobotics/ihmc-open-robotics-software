@@ -188,6 +188,8 @@ public class UpcomingFootstepList
    
    public boolean isPaused()
    {
+      if (footstepProvider == null) return false;
+      
       return footstepProvider.isPaused();
    }
 }
