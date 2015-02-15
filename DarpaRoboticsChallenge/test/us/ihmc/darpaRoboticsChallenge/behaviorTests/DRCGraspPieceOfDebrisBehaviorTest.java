@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -37,6 +36,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -48,7 +48,7 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTestInterface
 {
    private final boolean DEBUG = false;
-   
+
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -82,17 +82,17 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.22;
-   private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 0.88;
-   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.62;
+   private final double FINGER1_JOINT_1_EXPECTED_RADIANS = 0.77;
+   private final double FINGER1_JOINT_2_EXPECTED_RADIANS = 1.24;
+   private final double FINGER1_JOINT_3_EXPECTED_RADIANS = 0.21;
 
-   private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.22;
-   private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 0.90;
-   private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.59;
+   private final double FINGER2_JOINT_1_EXPECTED_RADIANS = 0.78;
+   private final double FINGER2_JOINT_2_EXPECTED_RADIANS = 1.26;
+   private final double FINGER2_JOINT_3_EXPECTED_RADIANS = 0.24;
 
-   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.41;
-   private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 0.99;
-   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 0.22;
+   private final double MIDDLEFINGER_JOINT_1_EXPECTED_RADIANS = 0.96;
+   private final double MIDDLEFINGER_JOINT_2_EXPECTED_RADIANS = 1.38;
+   private final double MIDDLEFINGER_JOINT_3_EXPECTED_RADIANS = 1.06;
 
    private final double FINGER_JOINT_ANGLE_ERROR_MARGIN_RADIANS = 0.2;
 
@@ -113,9 +113,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       {
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
-      
+
       showMemoryUsageBeforeTest();
-      
+
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
          @Override
@@ -128,7 +128,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          }
       };
 
-      testEnvironment.addStandingDebris(0.6, -0.35, 0.0); 
+      testEnvironment.addStandingDebris(0.6, -0.35, 0.0);
       testEnvironment.createDebrisContactController();
 
       KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
@@ -154,54 +154,74 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage();
 
       //angles in AtlasDefaultArmConfigurations
+      //angles in AtlasDefaultArmConfigurations
+      //right arm
       robot.getOneDegreeOfFreedomJoint("r_arm_shz").setQ(-0.1);
       robot.getOneDegreeOfFreedomJoint("r_arm_shx").setQ(1.6);
       robot.getOneDegreeOfFreedomJoint("r_arm_ely").setQ(1.9);
       robot.getOneDegreeOfFreedomJoint("r_arm_elx").setQ(-2.1);
       robot.getOneDegreeOfFreedomJoint("r_arm_wry").setQ(0.0);
       robot.getOneDegreeOfFreedomJoint("r_arm_wrx").setQ(0.55);
-      
-      double[] armDefaultJointAngles = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.COMPACT_HOME, RobotSide.RIGHT);
+      //left arm
+      robot.getOneDegreeOfFreedomJoint("l_arm_shz").setQ(0.1);
+      robot.getOneDegreeOfFreedomJoint("l_arm_shx").setQ(-1.6);
+      robot.getOneDegreeOfFreedomJoint("l_arm_ely").setQ(1.9);
+      robot.getOneDegreeOfFreedomJoint("l_arm_elx").setQ(2.1);
+      robot.getOneDegreeOfFreedomJoint("l_arm_wry").setQ(0.0);
+      robot.getOneDegreeOfFreedomJoint("l_arm_wrx").setQ(-0.55);
+
+      double[] rightArmDefaultConfigurationJointAngles = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
+            ArmConfigurations.COMPACT_HOME, RobotSide.RIGHT);
+      double[] leftArmDefaultConfigurationJointAngles = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
+            ArmConfigurations.COMPACT_HOME, RobotSide.LEFT);
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.2));
 
-      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.RIGHT, 0.5 , armDefaultJointAngles));
+      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.RIGHT, 0.5, rightArmDefaultConfigurationJointAngles));
+      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.LEFT, 0.5, leftArmDefaultConfigurationJointAngles));
       drcBehaviorTestHelper.updateRobotModel();
-      
+
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       drcBehaviorTestHelper.updateRobotModel();
-      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), fullRobotModel, midFeetZUpFrame,
-            getRobotModel(), yoTime);
+      final GraspPieceOfDebrisBehavior graspPieceOfDebrisBehavior = new GraspPieceOfDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            fullRobotModel, midFeetZUpFrame, getRobotModel(), yoTime);
 
       graspPieceOfDebrisBehavior.initialize();
 
       // from DebrisTaskBehaviorPanel.storeDebrisDataInList
       ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
 
+      //this offset is very important because debrisTransform sent from the UI have the origin at the bottom of the debris, whereas here the robots have their origin at the center of the debris
+      double zOffsetToHaveOriginAtDebrisBottom = testEnvironment.getDebrisLength() / 2.0;
+
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisRobot.getBodyTransformToWorld(debrisTransform);
-      debrisTransform.applyTranslation(new Vector3d(0.0, 0.0, -testEnvironment.getDebrisLength() / 2.0));
 
-      FrameVector tempGraspVector = new FrameVector(worldFrame);
-      tempGraspVector.set(-1.0, 0.0, 0.0);
-      tempGraspVector.applyTransform(debrisTransform);
-      Vector3d graspVector = new Vector3d();
-      tempGraspVector.get(graspVector);
+      PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", worldFrame);
+      debrisReferenceFrame.setPoseAndUpdate(debrisTransform);
 
-      FramePoint tempGraspVectorPosition = new FramePoint(worldFrame);
-      tempGraspVectorPosition.setZ(0.6);
-      tempGraspVectorPosition.applyTransform(debrisTransform);
-      Point3d graspVectorPosition = new Point3d();
-      tempGraspVectorPosition.get(graspVectorPosition);
+      FramePose debrisPose = new FramePose(debrisReferenceFrame);
+      debrisPose.setZ(-zOffsetToHaveOriginAtDebrisBottom);
+      debrisPose.changeFrame(worldFrame);
 
-      graspPieceOfDebrisBehavior.setGraspPose(debrisTransform, graspVectorPosition, graspVector, RobotSide.RIGHT);
+      FrameVector graspVector = new FrameVector(debrisReferenceFrame);
+      graspVector.set(-1.0, 0.0, 0.0);
+      graspVector.changeFrame(worldFrame);
+
+      FramePoint graspVectorPosition = new FramePoint(debrisReferenceFrame);
+      graspVectorPosition.setZ(0.7 - zOffsetToHaveOriginAtDebrisBottom);
+      graspVectorPosition.changeFrame(worldFrame);
+
+      debrisPose.getRigidBodyTransform(debrisTransform);
+
+      graspPieceOfDebrisBehavior.setGraspPose(debrisTransform, graspVectorPosition.getPointCopy(), graspVector.getVectorCopy(), RobotSide.RIGHT);
 
       assertTrue(graspPieceOfDebrisBehavior.hasInputBeenSet());
 
       double graspTime = 16.0;
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(graspPieceOfDebrisBehavior, graspTime);
-      
+
       assertTrue(graspPieceOfDebrisBehavior.isDone());
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -254,8 +274,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(rightHandPose);
       }
       FramePose rightHandExpectedPose = new FramePose(worldFrame);
-      rightHandExpectedPose.setPosition(0.47, -0.24, 1.22);
-      rightHandExpectedPose.setOrientation(1.56, 0.0, 0.10);
+      rightHandExpectedPose.setPosition(0.47, -0.21, 1.20);
+      rightHandExpectedPose.setOrientation(1.56, 0.0, 0.13);
       assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //Left wrist Position
@@ -268,8 +288,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          System.out.println(leftHandPose);
       }
       FramePose leftHandExpectedPose = new FramePose(worldFrame);
-      leftHandExpectedPose.setPosition(0.35, 0.33, 0.75);
-      leftHandExpectedPose.setOrientation(-1.85, 0.25, -0.55);
+      leftHandExpectedPose.setPosition(0.33, 0.24, 1.06);
+      leftHandExpectedPose.setOrientation(-1.78, 0.0, 0.0);
       assertTrue(leftHandPose.epsilonEquals(leftHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //Chest orientation
@@ -297,14 +317,14 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       }
 
       FramePose pelvisExpectedPose = new FramePose(worldFrame);
-      pelvisExpectedPose.setPosition(-0.07, -0.02, 0.79);
+      pelvisExpectedPose.setPosition(-0.09, -0.01, 0.79);
       pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
       assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    //TODO Test when the hand has to roll 180 degrees to grab a debris
-   
+
    //TODO test the other hand
 }
