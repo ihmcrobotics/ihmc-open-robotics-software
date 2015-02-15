@@ -154,8 +154,9 @@ public class PelvisLinearStateUpdater
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            double valueClipped = MathTools.clipToMinMax(forceZInPercentThresholdToFilterFoot.getDoubleValue(), 0.0, 0.45);
-            forceZInPercentThresholdToFilterFoot.set(valueClipped);
+            double currentValue = forceZInPercentThresholdToFilterFoot.getDoubleValue();
+            if (currentValue < 0.0) forceZInPercentThresholdToFilterFoot.set(0.0);
+            else if (currentValue > 0.45) forceZInPercentThresholdToFilterFoot.set(0.45);
          }
       });
       
