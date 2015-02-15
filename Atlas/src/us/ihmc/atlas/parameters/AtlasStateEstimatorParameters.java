@@ -123,7 +123,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean estimateGravity()
    {
-      return true;
+      return false;
    }
 
    @Override
