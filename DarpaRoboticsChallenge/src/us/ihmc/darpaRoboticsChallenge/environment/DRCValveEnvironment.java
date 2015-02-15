@@ -87,7 +87,7 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
    public void createAndSetContactControllerToARobot()
    {
       ContactController contactController = new ContactController();
-      contactController.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
+      contactController.setContactParameters(1000.0, 100.0, 0.5, 0.3);
       contactController.addContactPoints(contactPoints);
       contactController.addContactables(valveRobot);
       valveRobot.get(0).setController(contactController);
