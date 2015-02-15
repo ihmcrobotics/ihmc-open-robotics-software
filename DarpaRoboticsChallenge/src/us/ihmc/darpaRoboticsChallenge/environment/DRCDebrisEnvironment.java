@@ -73,7 +73,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       debrisRobots.add(createDebrisRobot(debrisPose));
    }
 
-   public void addHorizontalDebrisLeaningOnTwoBoxes(Point3d positionOfCenterOfDebrisWithRespectToRobot, double debrisYaw, double debrisRollRelativeToHorizontal)
+   public void addHorizontalDebrisLeaningOnTwoBoxes(Point3d positionOfCenterOfDebrisWithRespectToRobot, double debrisYaw, double debrisRoll)
    {
       double supportWidth = 0.1;
       double supportLength = 0.2;
@@ -83,22 +83,22 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       double y;
       double z;
 
-      FramePose debrisPose = generateDebrisPose(positionOfCenterOfDebrisWithRespectToRobot, debrisYaw, 0.0, debrisRollRelativeToHorizontal + Math.PI / 2.0);
+      FramePose debrisPose = generateDebrisPose(positionOfCenterOfDebrisWithRespectToRobot, debrisYaw, 0.0, debrisRoll);
       debrisRobots.add(createDebrisRobot(debrisPose));
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.getPose(debrisTransform );
-      TransformTools.rotate(debrisTransform, -debrisRollRelativeToHorizontal -Math.PI/2.0, Axis.X);
+      TransformTools.rotate(debrisTransform, -debrisRoll, Axis.X);
       debrisPose.setPose(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
 
       //add first support
       FramePose firstSupportPose = new FramePose(debrisReferenceFrame);
-      supportHeight = positionOfCenterOfDebrisWithRespectToRobot.getZ() - debrisWidth / 2.0 - debrisLength / 2.0 * Math.sin(debrisRollRelativeToHorizontal);
+      supportHeight = positionOfCenterOfDebrisWithRespectToRobot.getZ() - debrisWidth / 2.0 + debrisLength / 2.0 * Math.cos(debrisRoll);
 
       x = 0.0;
-      y = -debrisLength / 2.0 * Math.cos(debrisRollRelativeToHorizontal);
+      y = -debrisLength / 2.0 * Math.sin(debrisRoll);
       z = supportHeight / 2.0;
       firstSupportPose.setPosition(x, y, z);
       firstSupportPose.changeFrame(constructionWorldFrame);
@@ -108,10 +108,10 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 
       //add second support
       FramePose secondSupportPose = new FramePose(debrisReferenceFrame);
-      supportHeight = positionOfCenterOfDebrisWithRespectToRobot.getZ() - debrisWidth / 2.0 + debrisLength / 2.0 * Math.sin(debrisRollRelativeToHorizontal);
+      supportHeight = positionOfCenterOfDebrisWithRespectToRobot.getZ() - debrisWidth / 2.0 - debrisLength / 2.0 * Math.cos(debrisRoll);
 
       x = 0.0;
-      y = debrisLength / 2.0 * Math.cos(debrisRollRelativeToHorizontal);
+      y = debrisLength / 2.0 * Math.sin(debrisRoll);
       z = supportHeight / 2.0;
       secondSupportPose.setPosition(x, y, z);
       secondSupportPose.changeFrame(constructionWorldFrame);
@@ -176,7 +176,7 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       {
          ContactableSelectableBoxRobot debrisRobot = debrisRobots.get(i);
          GroundContactModel groundContactModel = createGroundContactModel(debrisRobot, combinedTerrainObject);
-         debrisRobot.createAvailableContactPoints(1, 20, forceVectorScale, false);
+         debrisRobot.createAvailableContactPoints(1, 20, forceVectorScale, true);
          debrisRobot.setGroundContactModel(groundContactModel);
       }
    }
@@ -225,8 +225,8 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
    public void createAndSetContactControllerToARobot()
    {
       // add contact controller to any robot so it gets called
-      ContactController contactController = new ContactController();
-      contactController.setContactParameters(10000.0, 1000.0, 0.5, 0.3);
+      ContactController contactController = new ContactController("DebrisContactController");
+      contactController.setContactParameters(1000.0, 100.0, 0.5, 0.3);
       contactController.addContactPoints(contactPoints);
       contactController.addContactables(debrisRobots);
       debrisRobots.get(0).setController(contactController);
