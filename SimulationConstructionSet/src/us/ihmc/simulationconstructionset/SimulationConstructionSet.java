@@ -688,8 +688,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return mySimulation.getAllVariablesArray();
    }
 
-   @Deprecated
-   // Every time you call this an angel loses its wings. Just write a method to get the specific variable you need. Saves tons of work when refactoring later
+   // Every time you call this in a control system, an angel loses its wings. Only call this for reflection and testing type purposes, such as
+   // trying to compare if two simulations ran the same way.
+   // For control systems, write a method to get the specific variable you need. Saves tons of work when refactoring later
    public YoVariable<?> getVariable(String varname)
    {
       return mySimulation.getVariable(varname);
