@@ -8,8 +8,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
@@ -20,16 +18,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class VariablesThatShouldMatchListTest
 {
-   @Before
-   public void setUp() throws Exception
-   {
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-   }
-
 	@AverageDuration
 	@Test(timeout=300000)
    public void testOne()
