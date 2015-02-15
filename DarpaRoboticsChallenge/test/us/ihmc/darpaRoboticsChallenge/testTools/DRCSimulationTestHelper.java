@@ -168,18 +168,7 @@ public class DRCSimulationTestHelper
       {
          ThreadTools.sleep(1000);
 
-         ArrayList<String> stringsToIgnore = new ArrayList<String>();
-         stringsToIgnore.add("nano");
-         stringsToIgnore.add("milli");
-         stringsToIgnore.add("Timer");
-         stringsToIgnore.add("startTime");
-         stringsToIgnore.add("actualEstimatorDT");
-         stringsToIgnore.add("nextExecutionTime");
-         stringsToIgnore.add("totalDelay");
-         stringsToIgnore.add("lastEstimatorClockStartTime");
-         stringsToIgnore.add("lastControllerClockTime");
-         stringsToIgnore.add("controllerStartTime");
-         stringsToIgnore.add("actualControlDT");
+         ArrayList<String> stringsToIgnore = createVariableNamesStringsToIgnore();
 
          boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
 
@@ -314,5 +303,27 @@ public class DRCSimulationTestHelper
       }
    }
 
+   public ArrayList<String> createVariableNamesStringsToIgnore()
+   {
+      ArrayList<String> exceptions = new ArrayList<String>();
+      exceptions.add("nano");
+      exceptions.add("milli");
+      exceptions.add("Timer");
+      exceptions.add("startTime");
+      exceptions.add("actualEstimatorDT");
+      exceptions.add("nextExecutionTime");
+      exceptions.add("totalDelay");
+      exceptions.add("lastEstimatorClockStartTime");
+      exceptions.add("lastControllerClockTime");
+      exceptions.add("controllerStartTime");
+      exceptions.add("actualControlDT");
+      exceptions.add("timePassed");
+      
+//    exceptions.add("gc_");
+//    exceptions.add("toolFrame");
+//    exceptions.add("ef_");
+//    exceptions.add("kp_");
 
+      return exceptions;
+   }
 }
