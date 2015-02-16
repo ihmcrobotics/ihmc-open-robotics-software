@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
 })
 
-public class ValkyrieHardwareDriversAVideoTestSuite
+public class ValkyrieHardwareDriversAVideoATestSuite
 {
    public static void main(String[] args)
    {
