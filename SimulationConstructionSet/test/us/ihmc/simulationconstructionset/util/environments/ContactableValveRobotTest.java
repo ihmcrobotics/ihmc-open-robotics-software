@@ -20,12 +20,14 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -35,8 +37,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ContactableValveRobotTest
 {
-   private boolean showGUI = false;
-
    private Robot[] robots = new Robot[2]; // 0 == floatingRobot ; 1 == valveRobot 
 
    private RobotController floatingRobotController;
@@ -46,11 +46,14 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-	@AverageDuration
-	@Test(timeout=300000)
+   SimulationConstructionSetParameters simulationParameters = new SimulationConstructionSetParameters();
+   SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
+
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testValveIsClosing()
    {
-      boolean isValveClosed = true;
+      boolean isValveClosed = false;
       valveTestRegistry = new YoVariableRegistry("valveTestRegistry");
 
       createValveRobot();
@@ -59,10 +62,7 @@ public class ContactableValveRobotTest
 
       createContactPoints(robots[0]);
 
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setCreateGUI(showGUI);
-      
-      SimulationConstructionSet scs = new SimulationConstructionSet(robots, parameters);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationParameters);
 
       scs.addYoVariableRegistry(valveTestRegistry);
 
@@ -78,31 +78,36 @@ public class ContactableValveRobotTest
       {
          System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
       }
-      
+
       if (robots[1].getVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
          isValveClosed = true;
-      
+
       assertTrue(isValveClosed);
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+   @AverageDuration
+   @Test(timeout = 300000)
    public void testGetValveTransformToWorld()
    {
       Random random = new Random(1235125L);
-      
+
       double valveX = RandomTools.generateRandomDouble(random, -2.0, 2.0);
       double valveY = RandomTools.generateRandomDouble(random, -2.0, 2.0);
       double valveZ = RandomTools.generateRandomDouble(random, 0.1, 2.0);
       double valveYaw_degrees = RandomTools.generateRandomDouble(random, -100, 100);
-            
+
       ContactableValveRobot valveRobot = createValveRobot(valveX, valveY, valveZ, valveYaw_degrees);
-      
+
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
-      
+
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      
+
       assertEquals(valveX, valvePose.getX(), 1e-7);
       assertEquals(valveY, valvePose.getY(), 1e-7);
       assertEquals(valveZ, valvePose.getZ(), 1e-7);
@@ -224,26 +229,26 @@ public class ContactableValveRobotTest
          }
       };
    }
-   
+
    private void createValveRobot()
    {
       ContactableValveRobot valveRobot = createValveRobot(0.0, 0.0, 1.0, 0.0);
       robots[1] = valveRobot;
    }
-   
+
    private ContactableValveRobot createValveRobot(double x, double y, double z, double yaw_degrees)
    {
       double forceVectorScale = 1.0 / 50.0;
-      
+
       FramePose valvePoseInWorld = createFramePose(x, y, z, yaw_degrees);
-     
+
       ContactableValveRobot valveRobot = new ContactableValveRobot("valveRobot", ValveType.SMALL_VALVE, 0.125, valvePoseInWorld);
       valveRobot.createValveRobot();
       valveRobot.createAvailableContactPoints(1, 30, forceVectorScale, true);
 
       return valveRobot;
    }
-   
+
    private FramePose createFramePose(double x, double y, double z, double yaw_degrees)
    {
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -253,7 +258,7 @@ public class ContactableValveRobotTest
 
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       framePose.setPose(position, orientation);
-      
+
       return framePose;
    }
 }
