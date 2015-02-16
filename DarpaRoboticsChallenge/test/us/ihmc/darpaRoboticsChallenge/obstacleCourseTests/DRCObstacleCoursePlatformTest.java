@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -28,6 +29,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifferenc
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -61,6 +63,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Ignore
+   @QuarantinedTest("This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
    @AverageDuration
    @Test(timeout=300000)
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
@@ -69,6 +73,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
+      
       DRCSimulationTestHelper drcSimulationTestHelper1 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
       DRCSimulationTestHelper drcSimulationTestHelper2 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
       
@@ -89,18 +95,28 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
          helper = new SimulationRewindabilityVerifierWithStackTracing(scs1, scs2, exceptions);
          helper.setRecordDifferencesForSimOne(true);
          helper.setRecordDifferencesForSimTwo(true);
-      }
-
-      if (useVariableListenerTestHelper)
-      {
          helper.clearChangesForSimulations();
       }
+      
+      if (useVariableListenerTestHelper)
+      {
+         int numberOfTicks = 10;
+         for (int i=0; i<numberOfTicks ; i++)
+         {
+            System.out.println("Tick : " + i);
+            scs1.simulateOneRecordStepNow();
+            scs2.simulateOneRecordStepNow();
 
+            boolean areTheVariableChangesDifferent = helper.areTheVariableChangesDifferent();
+            if (areTheVariableChangesDifferent) helper.printOutStackTracesOfFirstChangedVariable();
+         }
+      
+      }
+      
       double runTime = 10.18;
 
       boolean success = drcSimulationTestHelper1.simulateAndBlockAndCatchExceptions(runTime);
       success = success && drcSimulationTestHelper2.simulateAndBlockAndCatchExceptions(runTime);
-
 
       if (useVariableListenerTestHelper)
       {
