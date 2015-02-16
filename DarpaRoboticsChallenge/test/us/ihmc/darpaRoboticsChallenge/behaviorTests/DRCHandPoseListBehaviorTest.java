@@ -81,8 +81,9 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    private static final boolean DEBUG = false;
 
-   private final double JOINT_POSITION_THRESHOLD = 0.007;
-   private final double EXTRA_SIM_TIME_FOR_SETTLING = 2.0;
+   private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = 0.007;
+   private final double JOINT_POSITION_THRESHOLD_BETWEEN_POSES = 15.0 * JOINT_POSITION_THRESHOLD_AFTER_SETTLING;
+   private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
@@ -100,8 +101,10 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -117,7 +120,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
-	@AverageDuration(duration = 30.0)
+   @AverageDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testMoveOneRandomJoint90Deg() throws SimulationExceededMaximumTimeException
    {
@@ -155,7 +158,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 65.4)
+   @AverageDuration(duration = 65.4)
    @Test(timeout = 196338)
    public void testWackyInflatableArmFlailingTubeManDance() throws SimulationExceededMaximumTimeException
    {
@@ -182,18 +185,17 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          armPosesLeftAndRightSide.put(robotSide, armPoses);
          behaviors.add(handPoseListBehavior);
       }
-      
-      for (int poseNumber = 0; poseNumber < numberOfArmPoses; poseNumber ++)
+
+      for (int poseNumber = 0; poseNumber < numberOfArmPoses; poseNumber++)
       {
          success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(behaviors, swingTrajectoryTime / numberOfArmPoses);
          assertTrue(success);
-         
+
          for (RobotSide robotSide : RobotSide.values)
          {
-            assertRobotAchievedDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide, poseNumber, 10.0 * JOINT_POSITION_THRESHOLD);           
+            assertRobotAchievedDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide, poseNumber, JOINT_POSITION_THRESHOLD_BETWEEN_POSES);
          }
       }
-
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -342,19 +344,20 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
          double q_desired = desiredArmPose[i];
          double q_actual = actualArmPose[i];
+         double error = Math.abs(q_actual - q_desired);
 
          if (DEBUG)
          {
-            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
+            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".  Error = " + error);
          }
 
          assertEquals(q_desired, q_actual, jointPositionThreshold);
       }
    }
-   
+
    private void assertRobotAchievedFinalDesiredArmPose(double[][] armPoses, RobotSide robotSide)
    {
       int lastPoseIndex = armPoses[0].length - 1;
-      assertRobotAchievedDesiredArmPose(armPoses, robotSide, lastPoseIndex, JOINT_POSITION_THRESHOLD);
+      assertRobotAchievedDesiredArmPose(armPoses, robotSide, lastPoseIndex, JOINT_POSITION_THRESHOLD_AFTER_SETTLING);
    }
 }
