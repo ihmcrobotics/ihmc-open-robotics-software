@@ -303,7 +303,7 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public ArrayList<String> createVariableNamesStringsToIgnore()
+   public static ArrayList<String> createVariableNamesStringsToIgnore()
    {
       ArrayList<String> exceptions = new ArrayList<String>();
       exceptions.add("nano");
