@@ -27,6 +27,7 @@ public class DRCSCSInitialSetup
 
    private int simulationDataBufferSize = 16000;
    private double gravity = -9.81;
+   private boolean runMultiThreaded = true;
    
 //   private SensorNoiseParameters simulatedSensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
    private SensorNoiseParameters simulatedSensorNoiseParameters = null; // Same as zero noise, but doesn't create sensor corruptors
@@ -56,6 +57,18 @@ public class DRCSCSInitialSetup
       this.simulateDT = simulateDT;
    }
 
+   
+   public void setRunMultiThreaded(boolean runMultiThreaded)
+   {
+      this.runMultiThreaded = runMultiThreaded;
+   }
+   
+   public boolean getRunMultiThreaded()
+   {
+      return runMultiThreaded;
+   }
+   
+   
 
    public void initializeRobot(Robot robot, DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -217,4 +230,6 @@ public class DRCSCSInitialSetup
    {
       this.drawGroundProfile = drawGroundProfile;
    }
+
+
 }

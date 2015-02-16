@@ -49,7 +49,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCSimulationFactory
 {
-   public static boolean RUN_MULTI_THREADED = true;
+//   public static boolean RUN_MULTI_THREADED = !true;
 
    public static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = false;
    
@@ -149,7 +149,7 @@ public class DRCSimulationFactory
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, stateEstimatorParameters);
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
-      if (RUN_MULTI_THREADED)
+      if (scsInitialSetup.getRunMultiThreaded())
       {
          threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
       }
@@ -185,7 +185,7 @@ public class DRCSimulationFactory
             globalDataProducer, yoVariableServer, gravity, drcRobotModel.getEstimatorDT());
       
 
-      if (RUN_MULTI_THREADED)
+      if (scsInitialSetup.getRunMultiThreaded())
       {
          multiThreadedRobotController = new MultiThreadedRobotController("DRCSimulation", simulatedRobot.getYoTime(), scs);
       }

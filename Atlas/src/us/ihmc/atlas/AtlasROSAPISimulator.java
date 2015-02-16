@@ -30,7 +30,8 @@ public class AtlasROSAPISimulator
    {
       PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
 
-      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
+      boolean runMultiThreaded = true;
+      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(runMultiThreaded, robotModel);
       simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
       
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();

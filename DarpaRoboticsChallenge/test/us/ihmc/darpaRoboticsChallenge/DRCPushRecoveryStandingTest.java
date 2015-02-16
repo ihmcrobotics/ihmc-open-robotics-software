@@ -257,8 +257,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      DRCSimulationFactory.RUN_MULTI_THREADED = false;
-      setupTrack(robotModel);
+      boolean runMultiThreaded = false;
+      setupTrack(runMultiThreaded, robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
 
@@ -281,7 +281,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       usePushRecoveryICPPlanner.set(true);
    }
 
-   private void setupTrack(DRCRobotModel robotModel)
+   private void setupTrack(boolean runMultiThreaded, DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
 
@@ -290,7 +290,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
       scsInitialSetup.setDrawGroundProfile(true);
-
+      scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
+      
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
       drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,

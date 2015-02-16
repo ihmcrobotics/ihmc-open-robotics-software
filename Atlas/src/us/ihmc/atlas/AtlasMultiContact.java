@@ -91,6 +91,7 @@ public class AtlasMultiContact
       environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, footContactSides, handContactSides,
             contactPointParameters.getHandContactPointTransforms());
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
+      scsInitialSetup.setRunMultiThreaded(true);
 
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(robotModel.getControllerDT() / dt);

@@ -96,7 +96,7 @@ public class DRCSimulationTestHelper
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
-      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(simulationTestingParameters.getRunMultiThreaded(), robotModel, commonAvatarEnvironmentInterface);
       simulationStarter.setScriptFile(scriptFileName);
       simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);

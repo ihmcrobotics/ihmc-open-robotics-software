@@ -45,6 +45,8 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, model.getSimulateDT());
+      scsInitialSetup.setRunMultiThreaded(false);
+      
       scsInitialSetup.setInitializeEstimatorToActual(true);
       robotInitialSetup.setInitialGroundHeight(0.0);
 
@@ -68,10 +70,10 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       drcSimulation.start();
 //      drcSimulation.simulate();
        
-      if (DRCSimulationFactory.RUN_MULTI_THREADED)
-      {
-         throw new RuntimeException("This only works with single threaded right now. Change DRCSimulationFactory.RUN_MULTI_THREADED to false!");
-      }
+//      if (DRCSimulationFactory.RUN_MULTI_THREADED)
+//      {
+//         throw new RuntimeException("This only works with single threaded right now. Change DRCSimulationFactory.RUN_MULTI_THREADED to false!");
+//      }
       
       FullRobotModelCorruptor fullRobotModelCorruptor = drcSimulation.getFullRobotModelCorruptor();
       if(fullRobotModelCorruptor == null)
