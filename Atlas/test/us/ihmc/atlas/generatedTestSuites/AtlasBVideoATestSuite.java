@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class,
 })
 
-public class AtlasBVideoTestSuite
+public class AtlasBVideoATestSuite
 {
    public static void main(String[] args)
    {
