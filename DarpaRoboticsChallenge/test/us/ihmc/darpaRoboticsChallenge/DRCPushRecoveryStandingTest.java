@@ -148,7 +148,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
-      double forceMagnitude = 350.0;
+      //TODO: Increase the force magnitude and do more agressive pushes.
+      double forceMagnitude = 300.0; //350.0;
       double forceDuration = 0.15;
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
 
@@ -222,7 +223,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
-      double forceMagnitude = -400.0;
+      //TODO: Increase the force magnitude and do more agressive pushes.
+      double forceMagnitude = -350.0; //-400.0;
       double forceDuration = 0.15;
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
 
