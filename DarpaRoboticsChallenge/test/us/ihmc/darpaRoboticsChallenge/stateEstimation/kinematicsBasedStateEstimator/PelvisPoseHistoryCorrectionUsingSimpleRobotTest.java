@@ -105,8 +105,6 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private FloatingJoint floatingJoint;
    private ReferenceFrame refFrame;
 
-   private Random random = new Random();
-
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -239,17 +237,19 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
+      Random random = new Random(1984L);
+
       setupRobot();
       setupSim();
       setupCorrector();
       setupYoVariables(registry, "PelvisPoseHistoryCorrection");
-      assertTrue(testInterpolationToRandomTargetsFromOrigin(externalPelvisPoseCreator, registry, 10));
-      assertTrue(testInterpolationToRandomTargetsFromSpecificLocations(externalPelvisPoseCreator, registry, 10));
-      assertTrue(testYaw(externalPelvisPoseCreator, registry, 10));
+      assertTrue(testInterpolationToRandomTargetsFromOrigin(random, externalPelvisPoseCreator, registry, 10));
+      assertTrue(testInterpolationToRandomTargetsFromSpecificLocations(random, externalPelvisPoseCreator, registry, 10));
+      assertTrue(testYaw(random, externalPelvisPoseCreator, registry, 10));
       BambooTools.reportTestFinishedMessage();
    }
 
-   private RigidBodyTransform[] createRandomCorrectionTargets(int numOfTargets)
+   private RigidBodyTransform[] createRandomCorrectionTargets(Random random, int numOfTargets)
    {
       RigidBodyTransform[] targets = new RigidBodyTransform[numOfTargets];
       for (int i = 0; i < 10; i++)
@@ -259,7 +259,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       return targets;
    }
 
-   private RigidBodyTransform[] createYawOnlyCorrectionTargets(int numTargets)
+   private RigidBodyTransform[] createYawOnlyCorrectionTargets(Random random, int numTargets)
    {
       RigidBodyTransform[] targets = new RigidBodyTransform[numTargets];
       Quat4d rot = new Quat4d();
@@ -273,13 +273,13 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
    }
 
-   private boolean testInterpolationToRandomTargetsFromOrigin(ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
+   private boolean testInterpolationToRandomTargetsFromOrigin(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100);
 
-      RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
+      RigidBodyTransform[] targets = createRandomCorrectionTargets(random, numTargets);
       boolean success = true;
 
       Vector4d error = new Vector4d();
@@ -340,13 +340,13 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       return success;
    }
 
-   private boolean testInterpolationToRandomTargetsFromSpecificLocations(ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry,
+   private boolean testInterpolationToRandomTargetsFromSpecificLocations(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry,
          int numTargets) throws SimulationExceededMaximumTimeException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100);
 
-      RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
+      RigidBodyTransform[] targets = createRandomCorrectionTargets(random, numTargets);
       boolean success = true;
 
       Vector4d error = new Vector4d();
@@ -409,13 +409,13 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       return success;
    }
 
-   private boolean testYaw(ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
+   private boolean testYaw(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100);
 
-      RigidBodyTransform[] targets = createYawOnlyCorrectionTargets(numTargets);
+      RigidBodyTransform[] targets = createYawOnlyCorrectionTargets(random, numTargets);
       boolean success = true;
 
       Vector4d error = new Vector4d();
