@@ -15,13 +15,13 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 public class FootstepListBehavior extends BehaviorInterface
 {
@@ -35,7 +35,9 @@ public class FootstepListBehavior extends BehaviorInterface
    private final IntegerYoVariable numberOfFootsteps = new IntegerYoVariable("numberOfFootsteps" + behaviorName, registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final BooleanYoVariable isStopped = new BooleanYoVariable("isStopped", registry);
+   private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
    private final BooleanYoVariable hasLastStepBeenReached = new BooleanYoVariable("hasLastStepBeenReached", registry);
+   private final BooleanYoVariable footStepStatusIsDoneWalking = new BooleanYoVariable("footStepStatusIsDoneWalking", registry);
 
    public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
@@ -99,27 +101,48 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         lastFootstepStatus = footstepStatusQueue.getNewestPacket();
-
-         boolean isLastFootstep = lastFootstepStatus.getFootstepIndex() >= numberOfFootsteps.getIntegerValue() - 1;
-
-         if (isLastFootstep)
+         FootstepStatus newestFootstepStatus = footstepStatusQueue.getNewestPacket();
+         if (newestFootstepStatus != null)
          {
-            hasLastStepBeenReached.set(true);
-            SysoutTool.println("FootstepListBehavior is Done.", DEBUG);
-         }
+            lastFootstepStatus = newestFootstepStatus;
 
-         SysoutTool.println(
-               "isLastFootstep: " + isLastFootstep + ", total nb of footsteps: " + numberOfFootsteps + ", current footstep: "
-                     + lastFootstepStatus.getFootstepIndex(), DEBUG);
+            int currentStepIndex = lastFootstepStatus.getFootstepIndex();
+            int currentStepNumber = currentStepIndex + 1;
+
+            if (currentStepNumber >= numberOfFootsteps.getIntegerValue())
+               hasLastStepBeenReached.set(true);
+
+            if (lastFootstepStatus.isDoneWalking())
+               footStepStatusIsDoneWalking.set(true);
+
+            if (DEBUG)
+            {
+               SysoutTool.println("** \n Recieved new FootStepStatus : " + lastFootstepStatus);
+               SysoutTool.println("current footstep number: " + currentStepNumber + ", total number of footsteps: " + numberOfFootsteps.getIntegerValue());
+               SysoutTool.println("Reached last step? : " + hasLastStepBeenReached.getBooleanValue());
+               SysoutTool.println("FootstepStatus: is done walking? : " + footStepStatusIsDoneWalking.getBooleanValue());
+
+               if (!isDone.getBooleanValue() && isDone())
+               {
+                  SysoutTool.println("*****  Setting isDone = true  *******");
+               }
+               else
+               {
+                  SysoutTool.println("is Behavior done? : " + isDone.getBooleanValue());
+               }
+            }
+         }
       }
    }
 
    @Override
    public void initialize()
    {
+      if (DEBUG)
+         SysoutTool.println("Initialize");
       packetHasBeenSent.set(false);
       hasLastStepBeenReached.set(false);
+      footStepStatusIsDoneWalking.set(false);
 
       isPaused.set(false);
       isStopped.set(false);
@@ -129,6 +152,8 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
+      if (DEBUG)
+         SysoutTool.println("Finalize");
       footstepStatusQueue.clear();
       outgoingFootstepDataList = null;
       packetHasBeenSent.set(false);
@@ -139,6 +164,7 @@ public class FootstepListBehavior extends BehaviorInterface
       isStopped.set(false);
       hasBeenInitialized.set(false);
       hasLastStepBeenReached.set(false);
+      footStepStatusIsDoneWalking.set(false);
    }
 
    @Override
@@ -153,6 +179,8 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       sendPacketToController(new PauseCommand(true));
       isPaused.set(true);
+      if (DEBUG)
+         SysoutTool.println("Pausing Behavior");
    }
 
    @Override
@@ -161,24 +189,28 @@ public class FootstepListBehavior extends BehaviorInterface
       sendPacketToController(new PauseCommand(false));
       isPaused.set(false);
       isStopped.set(false);
+      if (DEBUG)
+         SysoutTool.println("Resuming Behavior");
    }
 
    @Override
    public boolean isDone()
    {
-      if (lastFootstepStatus == null)
-         return false;
-
-      boolean isDone = lastFootstepStatus.isDoneWalking() && hasLastStepBeenReached.getBooleanValue() && !isPaused.getBooleanValue();
-
-      return isDone;
+      boolean ret = footStepStatusIsDoneWalking.getBooleanValue() && hasLastStepBeenReached.getBooleanValue() && !isPaused.getBooleanValue();
+      if (!isDone.getBooleanValue() && ret)
+      {
+         if (DEBUG)
+            SysoutTool.println("*****  Setting isDone = true  *******");
+      }
+      isDone.set(ret);
+      return ret;
    }
 
    @Override
    public void enableActions()
    {
    }
-   
+
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
