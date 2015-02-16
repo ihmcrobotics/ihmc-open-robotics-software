@@ -113,15 +113,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
                initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
                registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
-         PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new PushRecoveryTrajectoryGenerator(namePrefix + "SwingPushRecovery", worldFrame,
-               swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, registry,
-               yoGraphicsListRegistry, swingTrajectoryGenerator);
-
-         pushRecoveryPositionTrajectoryGenerators.add(pushRecoverySwingTrajectoryGenerator);
-         pushRecoveryPositionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
-
-         pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
-               + "PushRecoveryTrajectoryGenerator", registry);
          
          continuousTrajectory = null;
       }
@@ -131,10 +122,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
                yoGraphicsListRegistry);
          continuousTrajectory.setFinalVelocity(Math.abs(walkingControllerParameters.getDesiredTouchdownVelocity()));
          swingTrajectoryGenerator = continuousTrajectory;
-
-         // Needs to be implemented
-         pushRecoveryPositionTrajectoryGenerator = null;
       }
+
+      pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
+            pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
 
       if (USE_NEW_CONTINUOUS_TRAJECTORY)
       {
@@ -163,6 +154,22 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
       hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
+   }
+
+   private PositionTrajectoryGenerator setupPushRecoveryTrajectoryGenerator(DoubleProvider swingTimeProvider, YoVariableRegistry registry, String namePrefix,
+         ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators, YoGraphicsListRegistry yoGraphicsListRegistry,
+         PositionTrajectoryGenerator swingTrajectoryGenerator, PositionTrajectoryGenerator touchdownTrajectoryGenerator)
+   {
+      PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new PushRecoveryTrajectoryGenerator(namePrefix + "SwingPushRecovery", worldFrame,
+            swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, registry,
+            yoGraphicsListRegistry, swingTrajectoryGenerator);
+
+      pushRecoveryPositionTrajectoryGenerators.add(pushRecoverySwingTrajectoryGenerator);
+      pushRecoveryPositionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
+
+      PositionTrajectoryGenerator pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
+            + "PushRecoveryTrajectoryGenerator", registry);
+      return pushRecoveryPositionTrajectoryGenerator;
    }
 
    @Override
@@ -241,12 +248,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       {
          trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryGenerationMethod.STEP_ON_OR_OFF);
       }
-      else
+      else if (useLowHeightTrajectory)
       {
-         if (useLowHeightTrajectory)
-         {
-            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryGenerationMethod.LOW_HEIGHT);
-         }
+         trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryGenerationMethod.LOW_HEIGHT);
       }
 
       trajectoryParametersProvider.set(trajectoryParameters);

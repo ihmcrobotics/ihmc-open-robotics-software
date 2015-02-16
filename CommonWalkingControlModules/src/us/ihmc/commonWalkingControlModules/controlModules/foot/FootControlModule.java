@@ -352,6 +352,7 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
    {
+      // TODO Used to pass the desireds from the toe off state to swing state. Clean that up.
       if (stateMachine.getCurrentStateEnum() == ConstraintType.TOES)
       {
          FrameOrientation initialOrientation = new FrameOrientation();
