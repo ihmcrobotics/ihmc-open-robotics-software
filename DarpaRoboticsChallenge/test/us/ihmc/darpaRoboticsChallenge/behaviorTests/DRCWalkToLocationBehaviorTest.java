@@ -81,7 +81,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCWalkToLocationBehaviorTest.class + " after class.");
    }
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final double POSITION_THRESHOLD = 0.06;   // Atlas typically achieves between 0.02-0.03 position threshold
    private final double ORIENTATION_THRESHOLD = 0.2;  // Atlas typically achieves between .005-0.1 orientation threshold (more accurate when turning in place at final target)
