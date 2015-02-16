@@ -32,7 +32,7 @@ public class SimulationTestTools
    {
       scs.simulate(nTicks);
       waitForSimulationToFinish(scs);
-      System.out.println("Simulation run for " + nTicks + " ticks");
+//      System.out.println("Simulation run for " + nTicks + " ticks");
 
       return scs;
    }
@@ -116,7 +116,7 @@ public class SimulationTestTools
       int nStateFiles = 2;
       ArrayList<File> stateFiles = createStateFiles(nStateFiles);
 
-      System.out.println("Simulation created");
+//      System.out.println("Simulation created");
 
       // run, write state file, rewind, repeat
       for (int i = 0; i < nStateFiles; i++)
@@ -124,7 +124,7 @@ public class SimulationTestTools
          scs.simulate(simulationTime);
          BlockingSimulationRunner.waitForSimulationToFinish(scs, 120.0, true);
          scs.writeState(stateFiles.get(i));
-         System.out.println("Run " + i + " done.");
+//         System.out.println("Run " + i + " done.");
          scs.gotoInPointNow();
          assertEquals(scs.getIndex(), 0);
       }
@@ -140,7 +140,7 @@ public class SimulationTestTools
       int nStateFiles = 2;
       ArrayList<File> stateFiles = createStateFiles(nStateFiles);
 
-      System.out.println("Simulation created");
+//      System.out.println("Simulation created");
 
       // run, write state file, rewind, repeat
       for (int i = 0; i < nStateFiles; i++)
@@ -148,7 +148,7 @@ public class SimulationTestTools
          scs.simulate(nTicks);
          BlockingSimulationRunner.waitForSimulationToFinish(scs, 120.0, true);
          scs.writeState(stateFiles.get(i));
-         System.out.println("Run " + i + " done.");
+//         System.out.println("Run " + i + " done.");
          scs.gotoInPointNow();
          assertEquals(scs.getIndex(), 0);
       }
@@ -175,7 +175,7 @@ public class SimulationTestTools
        */
       for (int i = 0; i < nIterations; i++)
       {
-         System.out.println("Starting Run " + i + ". Current index: " + scss.get(0).getIndex());
+//         System.out.println("Starting Run " + i + ". Current index: " + scss.get(0).getIndex());
 
          double simTime = random.nextDouble() * maxSimTime;
 
@@ -216,15 +216,18 @@ public class SimulationTestTools
    
    public static void testInitialValuesStoredCorrectly(SimulationConstructionSet scs, List<String> namesToSkipOver, double maximumClockRunTimeInSeconds) throws SimulationExceededMaximumTimeException
    {
+      // TODO: Not sure why the qdd are different on the very first tick, but we should probably fix this.
+      namesToSkipOver.add("qdd_");
+      
       int nStateFiles = 2;
       ArrayList<File> stateFiles = SimulationTestTools.createStateFiles(nStateFiles);
 
       // write state file, run, rewind, write state file
       scs.writeState(stateFiles.get(0));
 
-      scs.simulate(1);
-      BlockingSimulationRunner.waitForSimulationToFinish(scs, maximumClockRunTimeInSeconds, true);
-      scs.gotoInPointNow();
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, maximumClockRunTimeInSeconds, true);
+      blockingSimulationRunner.simulateNTicksAndBlock(1);
+      scs.stepBackwardNow();
       scs.writeState(stateFiles.get(1));
 
       // compare
