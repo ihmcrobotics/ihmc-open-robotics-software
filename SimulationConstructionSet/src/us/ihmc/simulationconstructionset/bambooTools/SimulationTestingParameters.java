@@ -6,6 +6,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class SimulationTestingParameters extends SimulationConstructionSetParameters
 {
+   private boolean runMultiThreaded = true;
    private boolean createSCSMovies = false;
    private boolean checkNothingChangedInSimulation = false;
    private boolean keepSCSUp = false;
@@ -25,7 +26,14 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    {
       super.setFromSystemProperties();
 
-      String property = System.getProperty("create.scs.movies");
+      String property = System.getProperty("run.multi.threaded");
+      if (property != null)
+      {
+         Boolean runMultiThreaded = Boolean.parseBoolean(property);
+         setRunMultiThreaded(runMultiThreaded);
+      }
+      
+      property = System.getProperty("create.scs.movies");
       if (property != null)
       {
          Boolean createSCSMovies = Boolean.parseBoolean(property);
@@ -48,6 +56,16 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       System.out.println(toString());
       Properties properties = System.getProperties();
       System.out.println(properties.toString());
+   }
+   
+   public void setRunMultiThreaded(boolean runMultiThreaded)
+   {
+      this.runMultiThreaded = runMultiThreaded;
+   }
+   
+   public boolean getRunMultiThreaded()
+   {
+      return runMultiThreaded;
    }
    
    public boolean getCreateSCSMovies()
@@ -88,7 +106,5 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       st += "keepSCSUp: " + keepSCSUp + "\n";    
       return st;   
    }
-
-
 
 }

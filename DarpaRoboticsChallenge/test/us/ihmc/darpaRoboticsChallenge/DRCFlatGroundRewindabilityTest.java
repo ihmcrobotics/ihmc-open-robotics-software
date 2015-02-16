@@ -37,6 +37,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    public void setUp() throws Exception
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -241,7 +242,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
-
+      scsInitialSetup.setRunMultiThreaded(false);
+      
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
 

@@ -26,7 +26,8 @@ public abstract class DRCDemo03
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(yoGraphicsListRegistry);
       environment.activateDisturbanceControllerOnSteeringWheel(YoFunctionGeneratorMode.SINE);
 
-      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
+      boolean runMultiThreaded = true;
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(runMultiThreaded, robotModel, environment);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setRobotInitialSetup(robotInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);

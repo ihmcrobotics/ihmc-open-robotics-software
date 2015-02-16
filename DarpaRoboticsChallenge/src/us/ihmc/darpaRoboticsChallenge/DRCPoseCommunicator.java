@@ -50,8 +50,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final SideDependentList<ReferenceFrame> wristForceSensorFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ForceSensorDistalMassCompensator> wristForceSensorDistalMassCompensators = new SideDependentList<ForceSensorDistalMassCompensator>();
 
-   private State currentState;
-
    private final ConcurrentRingBuffer<State> stateRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
@@ -189,6 +187,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          {
             if (stateRingBuffer.poll())
             {
+               State currentState;
                while ((currentState = stateRingBuffer.read()) != null)
                {
                   RobotPoseData robotPoseData = currentState.poseData;
@@ -198,7 +197,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   networkProcessorCommunicator.send(robotConfigData);
 
                   AtlasWristFeetSensorPacket wristFeetSensorPacket = new AtlasWristFeetSensorPacket();
-                  setSensorPacketFromRobotConfigData(wristFeetSensorPacket, robotConfigData);
+                  setSensorPacketFromRobotConfigData(wristFeetSensorPacket, robotConfigData);  //DEBUGGING REWINDABILITY!!!
 
                   networkProcessorCommunicator.send(wristFeetSensorPacket);
                }
