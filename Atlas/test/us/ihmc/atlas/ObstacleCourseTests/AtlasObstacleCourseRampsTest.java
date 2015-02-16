@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.Video})
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
 public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);

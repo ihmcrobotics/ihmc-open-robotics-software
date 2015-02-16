@@ -14,7 +14,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
 })
 
-public class AtlasDVideoTestSuite
+public class AtlasDVideoATestSuite
 {
    public static void main(String[] args)
    {

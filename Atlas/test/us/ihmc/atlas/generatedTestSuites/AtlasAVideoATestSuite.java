@@ -14,7 +14,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
 })
 
-public class AtlasAVideoTestSuite
+public class AtlasAVideoATestSuite
 {
    public static void main(String[] args)
    {
