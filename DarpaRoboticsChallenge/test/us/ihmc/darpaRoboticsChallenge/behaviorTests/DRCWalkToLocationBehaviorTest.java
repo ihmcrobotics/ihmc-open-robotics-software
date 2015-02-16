@@ -81,10 +81,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCWalkToLocationBehaviorTest.class + " after class.");
    }
 
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
-   private final double POSITION_THRESHOLD = 0.1;
-   private final double ORIENTATION_THRESHOLD = 0.1;
+   private final double POSITION_THRESHOLD = 0.06;   // Atlas typically achieves between 0.02-0.03 position threshold
+   private final double ORIENTATION_THRESHOLD = 0.2;  // Atlas typically achieves between .005-0.1 orientation threshold (more accurate when turning in place at final target)
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
@@ -273,7 +273,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPoseAtPause, midFeetPoseAtResume, positionThreshold, orientationThreshold);
       assertTrue(walkToLocationBehavior.isDone());
-      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal);
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, 0.9*POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, 0.9*ORIENTATION_THRESHOLD);
+
 
       BambooTools.reportTestFinishedMessage();
    }
