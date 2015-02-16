@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.NetworkProcessor;
+import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -137,7 +137,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
       
-      NetworkProcessor networkProcessor = new NetworkProcessor();
+      PacketRouter networkProcessor = new PacketRouter();
       networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
       networkProcessor.attachPacketCommunicator(controllerCommunicator);
       networkProcessor.attachPacketCommunicator(behaviorCommunicator);

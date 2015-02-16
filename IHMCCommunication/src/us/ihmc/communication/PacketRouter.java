@@ -7,7 +7,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 
-public class NetworkProcessor
+public class PacketRouter
 {
    private boolean DEBUG = false;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
@@ -19,7 +19,7 @@ public class NetworkProcessor
    private final TIntObjectHashMap<PacketConsumer<Packet>> consumers = new TIntObjectHashMap<PacketConsumer<Packet>>();
    private final TIntIntHashMap redirects = new TIntIntHashMap();
 
-   public NetworkProcessor()
+   public PacketRouter()
    {
    }
 

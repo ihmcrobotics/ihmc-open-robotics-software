@@ -13,7 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.NetworkProcessor;
+import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -113,7 +113,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
             PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
       
-      NetworkProcessor networkProcessor = new NetworkProcessor();
+      PacketRouter networkProcessor = new PacketRouter();
       networkProcessor.attachPacketCommunicator(npObjectCommunicator);
       networkProcessor.attachPacketCommunicator(controllerObjectCommunicator);
       networkProcessor.attachPacketCommunicator(behaviorCommunicator);

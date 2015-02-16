@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.communication.NetworkProcessor;
+import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
@@ -69,7 +69,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final DRCRobotModel drcRobotModel;
    private final SDFFullRobotModel fullRobotModel;
 
-   private final NetworkProcessor networkProcessor;
+   private final PacketRouter networkProcessor;
    private final KryoPacketCommunicator networkObjectCommunicator;
    private final KryoPacketCommunicator controllerCommunicator;
    private final KryoLocalPacketCommunicator behaviorCommunicator;
@@ -118,7 +118,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BEHAVIOR_MODULE.ordinal(),
             "behvaiorCommunicator");
 
-      networkProcessor = new NetworkProcessor();
+      networkProcessor = new PacketRouter();
       networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
       networkProcessor.attachPacketCommunicator(controllerCommunicator);
       networkProcessor.attachPacketCommunicator(behaviorCommunicator);

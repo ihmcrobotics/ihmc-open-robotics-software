@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.communication.NetworkProcessor;
+import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
@@ -18,12 +18,12 @@ import us.ihmc.utilities.io.printing.PrintTools;
 
 public class DRCNetworkProcessor
 {
-   private final NetworkProcessor networkProcessor;
+   private final PacketRouter networkProcessor;
    private final boolean DEBUG = false;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      networkProcessor = new NetworkProcessor();
+      networkProcessor = new PacketRouter();
       ArrayList<PacketCommunicator> communicators = createRequestedModules(robotModel, params);
       
       for (int i = 0; i < communicators.size(); i++)
