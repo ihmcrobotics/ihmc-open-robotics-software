@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
+import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
 import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.steppr.hardware.StepprDashboard;
@@ -143,15 +144,10 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 	  {
 		   joystickUpdater = new JoystickUpdater();
 	  }
-      catch (RuntimeException ex)
+      catch (JoyStickNotFoundException ex)
       {
-    	  if (ex.getMessage().equals("joystick not found"))
-    	  {
     		  System.err.println("Joystick not found. Proceeding without joystick");
     		  return;
-    	  }    	  
-    	  else
-    		  throw new RuntimeException(ex);
       }
       Thread thread = new Thread(joystickUpdater);
       thread.start();
