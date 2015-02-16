@@ -792,9 +792,17 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @return Record Frequencuy.
     */
-   public double getRecordFreq()
+   public long getRecordFreq()
    {
       return mySimulation.getRecordFreq();
+   }
+   
+   public double getTimePerRecordTick()
+   {
+      double simulationDT = this.getDT();
+      long recordFrequency = this.getRecordFreq();
+      double timePerRecordTick = ((double) recordFrequency) * simulationDT;
+      return timePerRecordTick;
    }
 
    /**
