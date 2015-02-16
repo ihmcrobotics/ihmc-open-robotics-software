@@ -197,10 +197,13 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          }
       }
 
+      success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(behaviors, EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
+      
       for (RobotSide robotSide : RobotSide.values)
       {
-         assertRobotAchievedFinalDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide);
 
+         assertRobotAchievedFinalDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide);
          assertTrue(behaviors.get(robotSide.ordinal()).isDone());
       }
 
