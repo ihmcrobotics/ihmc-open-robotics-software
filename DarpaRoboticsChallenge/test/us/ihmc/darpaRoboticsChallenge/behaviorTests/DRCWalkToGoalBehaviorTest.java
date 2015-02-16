@@ -15,7 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.NetworkProcessor;
+import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -135,7 +135,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
             PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
       
-      NetworkProcessor networkProcessor = new NetworkProcessor();
+      PacketRouter networkProcessor = new PacketRouter();
       networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
       networkProcessor.attachPacketCommunicator(controllerCommunicator);
       networkProcessor.attachPacketCommunicator(behaviorCommunicator);
