@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class SimulationRewindabilityVerifier
 {
    private static final boolean DEBUG = false;
-   
+
    private final SimulationConstructionSet[] simulations;
    private final ArrayList<String> exceptions;
 
@@ -53,57 +53,39 @@ public class SimulationRewindabilityVerifier
 
 
    public ArrayList<VariableDifference> checkRewindabilityWithSimpleMethod(int numTicksToTest, double maxDifferenceAllowed) throws UnreasonableAccelerationException
-   {
-      return checkRewindabilityWithSimpleMethod(1, numTicksToTest, maxDifferenceAllowed);
+   { 
+      int numTicksToStartComparingAt = 1;
+      return checkRewindabilityWithSimpleMethod(numTicksToStartComparingAt, numTicksToTest, maxDifferenceAllowed);
    }
-   
+
+   public ArrayList<VariableDifference> checkRewindabilityWithSimpleMethod(int numTicksToStartComparingAt, int numTicksToTest, double maxDifferenceAllowed) throws UnreasonableAccelerationException
+   {
+      ArrayList<VariableDifference> variableDifferencesToReturn = new ArrayList<VariableDifference>();
+      checkRewindabilityWithSimpleMethod(numTicksToStartComparingAt, numTicksToTest, maxDifferenceAllowed, variableDifferencesToReturn);
+
+      return variableDifferencesToReturn;
+   }
+         
    /**
     * This is a simple rewindability checker. For the first simulation it ticks it ahead one tick at a time.
     * For the second simulation it ticks it ahead a tick, backs up a tick, and ticks ahead another tick.
     * Then it compares the two simulations. It repeats this for the indicated number of times.
     * Any differences are put in the returned ArrayList.
     */
-   public ArrayList<VariableDifference> checkRewindabilityWithSimpleMethod(int numTicksToStartComparingAt, int numTicksToTest, double maxDifferenceAllowed)
+   public int checkRewindabilityWithSimpleMethod(int numTicksToStartComparingAt, int numTicksToTest, double maxDifferenceAllowed, ArrayList<VariableDifference> variableDifferencesToPack)
            throws UnreasonableAccelerationException
    {
-      YoVariableRegistry registry0 = simulations[0].getRootRegistry();
-      YoVariableRegistry registry1 = simulations[1].getRootRegistry();
-
-      VariablesThatShouldMatchList variablesThatShouldMatchList = new VariablesThatShouldMatchList(registry0, registry1, exceptions);
+      int numTicksToSimulateAhead = 1;
+      return checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt, numTicksToTest, numTicksToSimulateAhead, maxDifferenceAllowed, variableDifferencesToPack);
+   }
+   
+   public ArrayList<VariableDifference> checkRewindabilityWithRigorousMethod(int numTicksToStartComparingAt, int numTicksToTest, int numTicksToSimulateAhead, double maxDifferenceAllowed) throws UnreasonableAccelerationException
+   {
       ArrayList<VariableDifference> variableDifferencesToReturn = new ArrayList<VariableDifference>();
-
-      for (int i=0; i<numTicksToStartComparingAt; i++)
-      {
-         simulations[0].simulateOneRecordStepNow();
-      }   
-      
-      for (int i=0; i<numTicksToStartComparingAt; i++)
-      {
-         simulations[1].simulateOneRecordStepNow();
-      }   
-      
-      for (int i = 0; i < numTicksToTest; i++)
-      {
-         boolean passesTest = verifyMatch(variablesThatShouldMatchList, variableDifferencesToReturn, maxDifferenceAllowed);
-         if (!passesTest)
-         {
-            return variableDifferencesToReturn;
-         }
-         
-         if (DEBUG) System.out.println("SimulationRewindabilityVerifier: Passed sims match test on loop " + i + " of " + numTicksToTest);
-
-         simulations[0].simulateOneRecordStepNow();
-         simulations[1].simulateOneRecordStepNow();
-
-         simulations[1].stepBackwardNow();
-         simulations[1].simulateOneRecordStepNow();
-      }
-
+      checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt, numTicksToTest, numTicksToSimulateAhead, maxDifferenceAllowed, variableDifferencesToReturn);
       return variableDifferencesToReturn;
    }
-
-
-
+   
    /**
     * This is a more rigorous rewindability checker. For the first simulation it ticks it ahead one tick at a time.
     * For the second simulation it ticks it ahead numTicksToSimulateAhead ticks, rewinds it to where it had started,
@@ -111,52 +93,117 @@ public class SimulationRewindabilityVerifier
     * Then it compares the two simulations. It repeats this for the indicated number of numTicksToTest.
     * Any differences are put in the returned ArrayList.
     */
-   public ArrayList<VariableDifference> checkRewindabilityWithRigorousMethod(int numTicksToTest, int numTicksToSimulateAhead, double maxDifferenceAllowed)
+   public int checkRewindabilityWithRigorousMethod(int numTicksToStartComparingAt, int numTicksToTest, int numTicksToSimulateAhead, double maxDifferenceAllowed, ArrayList<VariableDifference> variableDifferencesToPack)
            throws UnreasonableAccelerationException
    {
       YoVariableRegistry registry0 = simulations[0].getRootRegistry();
       YoVariableRegistry registry1 = simulations[1].getRootRegistry();
 
+      variableDifferencesToPack.clear();
       VariablesThatShouldMatchList variablesThatShouldMatchList = new VariablesThatShouldMatchList(registry0, registry1, exceptions);
 
-      ArrayList<VariableDifference> variableDifferencesToReturn = new ArrayList<VariableDifference>();
+      simulateForNumberOfTicks(simulations[0], numTicksToStartComparingAt);
+      simulateForNumberOfTicks(simulations[1], numTicksToStartComparingAt);
 
-      simulations[0].simulateOneRecordStepNow();
-      simulations[1].simulateOneRecordStepNow();
-      
-      for (int i = 0; i < numTicksToTest; i++)
+      for (int tickIndex = 0; tickIndex < numTicksToTest; tickIndex++)
       {
-         boolean passesTest = verifyMatch(variablesThatShouldMatchList, variableDifferencesToReturn, maxDifferenceAllowed);
+         boolean passesTest = verifyMatch(variablesThatShouldMatchList, variableDifferencesToPack, maxDifferenceAllowed);
          if (!passesTest)
          {
-            return variableDifferencesToReturn;
+            System.err.println("Was not rewindable. Failed on tick " + tickIndex);
+            return tickIndex;
          }
 
-         if (DEBUG) System.out.println("SimulationRewindabilityVerifier: Passed sims match test on loop " + i + " of " + numTicksToTest);
-
-         
-         if (DEBUG) System.out.println("SimulationRewindabilityVerifier: Simulating one Record Step on Sim0.");
+         if (DEBUG) System.out.println("SimulationRewindabilityVerifier: Passed sims match test on loop " + tickIndex + " of " + numTicksToTest);
 
          simulations[0].simulateOneRecordStepNow();
-         simulations[1].setInPoint();
-
-         if (DEBUG) System.out.println("SimulationRewindabilityVerifier: Simulating " + numTicksToSimulateAhead + " Record Steps on Sim1.");
-
-         for (int j = 0; j < numTicksToSimulateAhead; j++)
+         
+         for (int i=0; i< numTicksToSimulateAhead; i++)
          {
             simulations[1].simulateOneRecordStepNow();
          }
-
-         if (DEBUG) System.out.println("SimulationRewindabilityVerifier: Going to InPoint and Simulating one Record Step on Sim1.");
-        
-         simulations[1].gotoInPointNow();
+         for (int i=0; i< numTicksToSimulateAhead; i++)
+         {
+            simulations[1].stepBackwardNow();
+         }
+         
          simulations[1].simulateOneRecordStepNow();
       }
 
-      return variableDifferencesToReturn;
+      return numTicksToTest;
+   }
+   
+
+   /**
+    * This is the same rewindability checker as above, but also records each individual YoVariable change using YoVariableListeners 
+    * in the SimulationRewindabilityHelper. Once a difference is found between the simulations, it prints the stack trace of the 
+    * first changes that were made that resulted in variables being different.
+    * 
+    * @param numTicksToStartComparingAt
+    * @param numTicksToTest
+    * @param maxDifferenceAllowed
+    * @return 
+    * @throws UnreasonableAccelerationException
+    */
+   public void checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(int numTicksToStartComparingAt,
+           int numTicksToTest, double maxDifferenceAllowed, ArrayList<VariableDifference> variableDifferencesToPack)
+           throws UnreasonableAccelerationException
+   {
+      variableDifferencesToPack.clear();
+
+      simulateForNumberOfTicks(simulations[0], numTicksToStartComparingAt);
+      simulateForNumberOfTicks(simulations[1], numTicksToStartComparingAt);
+
+      SimulationRewindabilityVerifierWithStackTracing helper = new SimulationRewindabilityVerifierWithStackTracing(simulations[0], simulations[1], exceptions);
+
+      for (int tickIndex = 0; tickIndex < numTicksToTest; tickIndex++)
+      {
+         boolean areTheVariableChangesDifferent = helper.areTheVariableChangesDifferent();
+         if (areTheVariableChangesDifferent)
+         {
+            helper.printOutStackTracesOfFirstChangedVariable();
+            return;  //DEBUG REWINDABILITY
+         }
+
+         if (DEBUG)
+            System.out.println("SimulationRewindabilityVerifier: Passed sims match test on loop " + tickIndex + " of " + numTicksToTest);
+
+         helper.clearChangesForSimulations();
+
+         helper.setRecordDifferencesForSimOne(true);
+         helper.setRecordDifferencesForSimTwo(false);
+         simulations[0].simulateOneRecordStepNow();
+         helper.setRecordDifferencesForSimOne(false);
+
+         int numberOfStepsForward = 1;
+         for (int i=0; i< numberOfStepsForward; i++)
+         {
+            simulations[1].simulateOneRecordStepNow();
+         }
+         for (int i=0; i< numberOfStepsForward; i++)
+         {
+            simulations[1].stepBackwardNow();
+         }
+
+         helper.setRecordDifferencesForSimTwo(true);
+         simulations[1].simulateOneRecordStepNow();
+      }
    }
 
 
+   public void simulateForNumberOfTicks(int numberOfTicks) throws UnreasonableAccelerationException
+   {
+      simulateForNumberOfTicks(simulations[0], numberOfTicks);
+      simulateForNumberOfTicks(simulations[1], numberOfTicks);
+   }
+
+   private static void simulateForNumberOfTicks(SimulationConstructionSet scs, int numberOfTicks) throws UnreasonableAccelerationException
+   {
+      for (int i = 0; i < numberOfTicks; i++)
+      {
+         scs.simulateOneRecordStepNow();
+      }
+   }
 
    private boolean verifyMatch(VariablesThatShouldMatchList variablesThatShouldMatchList, ArrayList<VariableDifference> variableDifferencesToPack,
                                double maxDifferenceAllowed)
@@ -168,19 +215,5 @@ public class SimulationRewindabilityVerifier
       return variablesThatShouldMatchList.doVariableValuesMatch(variableDifferencesToPack, time, maxDifferenceAllowed, checkForPercentDifference);
    }
 
-
-// private void waitForSimulationToFinish(SimulationConstructionSet scs)
-// {
-//    while (scs.isRunning())
-//    {
-//       try
-//       {
-//          Thread.sleep(10);
-//       }
-//       catch (InterruptedException e)
-//       {
-//       }
-//    }
-// }
-
+   
 }
