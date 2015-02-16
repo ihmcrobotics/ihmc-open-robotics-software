@@ -28,7 +28,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
-   private static final long seed = 1391092L;
+   private static final long seed = 1391091L;
    private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
@@ -93,8 +93,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
    }
 
-   @Ignore
-   @QuarantinedTest("Quarantined for now, but Tingfan should fix it by the end of the day today 2/16/2015")
 	@AverageDuration(duration = 17.0)
 	@Test(timeout = 51041)
    public void generateRandomFeasibleRobotPoses()
