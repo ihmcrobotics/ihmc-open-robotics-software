@@ -245,7 +245,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       if (simulationTestingParameters.getCreateSCSMovies())
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 3);
       }
    }
 
