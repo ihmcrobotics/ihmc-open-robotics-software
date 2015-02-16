@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -22,12 +23,18 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class DRCFlatGroundWalkingTrack
 {
-   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false; // Should always be committed as false.
+   // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
    private final DRCSimulationFactory drcSimulation;
-
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
+   {
+      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model, 
+            WalkingProvider.VELOCITY_HEADING_COMPONENT); // should always be committed as VELOCITY_HEADING_COMPONENT
+   }
+
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model, WalkingProvider walkingProvider)
    {
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
@@ -56,11 +63,18 @@ public class DRCFlatGroundWalkingTrack
          heightMapForCheating = scsInitialSetup.getHeightMap();
       }
 
-      VariousWalkingProviderFactory variousWalkingProviderFactory;
-      if (CREATE_YOVARIABLE_WALKING_PROVIDERS)
+      VariousWalkingProviderFactory variousWalkingProviderFactory=null;
+      switch(walkingProvider)
+      {
+      case YOVARIABLE:
          variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-      else         
+         break;
+      case VELOCITY_HEADING_COMPONENT:
          variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(useVelocityAndHeadingScript, heightMapForCheating, model.getControllerDT());
+         break;
+      case  DATA_PRODUCER:
+         throw new RuntimeException("Please run ObstacleCourseDemo instead");
+      }
 
       controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
       

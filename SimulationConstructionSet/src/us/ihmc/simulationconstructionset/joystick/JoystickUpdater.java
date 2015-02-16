@@ -46,6 +46,19 @@ public class JoystickUpdater implements Runnable
       throw new JoyStickNotFoundException();
 
    }
+   
+   public static boolean isJoyStickConnected()
+   {
+      try{
+              findFirstController();
+              return true;
+      }
+      catch(JoyStickNotFoundException e)
+      {
+         return false;
+      }
+      
+   }
 
    
    public void listComponents()
