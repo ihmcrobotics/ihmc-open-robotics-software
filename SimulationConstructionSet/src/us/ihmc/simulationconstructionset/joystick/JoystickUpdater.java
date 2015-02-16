@@ -43,8 +43,10 @@ public class JoystickUpdater implements Runnable
             return controller;
          }
       }
-      throw new RuntimeException("joystick not found");
+      throw new JoyStickNotFoundException();
+
    }
+
    
    public void listComponents()
    {
