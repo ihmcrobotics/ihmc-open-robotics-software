@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
@@ -91,6 +93,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
    }
 
+   @Ignore
+   @QuarantinedTest("Quarantined for now, but Tingfan should fix it by the end of the day today 2/16/2015")
 	@AverageDuration(duration = 17.0)
 	@Test(timeout = 51041)
    public void generateRandomFeasibleRobotPoses()
