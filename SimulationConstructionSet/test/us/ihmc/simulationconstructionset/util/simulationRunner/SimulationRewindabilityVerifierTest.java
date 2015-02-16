@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.Robot;
@@ -25,17 +23,6 @@ public class SimulationRewindabilityVerifierTest
    private static final boolean VERBOSE = false;
    private final double DT = 0.01;
 
-
-   @Before
-   public void setUp() throws Exception
-   {
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-   }
-
 	@AverageDuration
 	@Test(timeout=300000)
    public void testRewindableSimulation() throws UnreasonableAccelerationException
@@ -44,6 +31,7 @@ public class SimulationRewindabilityVerifierTest
       SimulationConstructionSet scs2 = constructRewindableSimulationConstructionSet();
       
       ArrayList<String> exceptions = new ArrayList<String>();
+//      exceptions.add("ticks_till_control");
       SimulationRewindabilityVerifier verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       
       int numTests = 5000;
@@ -64,6 +52,7 @@ public class SimulationRewindabilityVerifierTest
       SimulationConstructionSet scs2 = constructEasilyDetectableNonRewindableSimulationConstructionSet();
       
       ArrayList<String> exceptions = new ArrayList<String>();
+//      exceptions.add("ticks_till_control");
       SimulationRewindabilityVerifier verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       
       int numTests = 5000;
@@ -90,6 +79,7 @@ public class SimulationRewindabilityVerifierTest
       SimulationConstructionSet scs2 = constructDifficultToDetectNonRewindableSimulationConstructionSet();
       
       ArrayList<String> exceptions = new ArrayList<String>();
+//      exceptions.add("ticks_till_control");
       SimulationRewindabilityVerifier verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       
       int numTests = 4000;
@@ -112,7 +102,8 @@ public class SimulationRewindabilityVerifierTest
       scs2 = constructDifficultToDetectNonRewindableSimulationConstructionSet();
       verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
 
-      variableDifferences = verifier.checkRewindabilityWithRigorousMethod(numTests, numTicksAhead, maxDifferenceAllowed);
+      int numTicksToStartComparingAt = 1;
+      variableDifferences = verifier.checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt, numTests, numTicksAhead, maxDifferenceAllowed);
 
       if (VERBOSE)
       {

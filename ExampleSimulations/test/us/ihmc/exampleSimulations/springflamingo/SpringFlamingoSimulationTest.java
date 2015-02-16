@@ -1,12 +1,20 @@
 package us.ihmc.exampleSimulations.springflamingo;
 
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
+import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
@@ -103,6 +111,76 @@ public class SpringFlamingoSimulationTest
 //    ThreadTools.sleep(1000);
 //    ThreadTools.sleepForever();
 //    window.menuItem("foo").
+      
+      testFixture.closeAndDispose();
+      scs.closeAndDispose();
+      scs = null;
+      testFixture = null;
    }
+	
+
+	@AverageDuration
+	@Test(timeout=300000)
+	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+	{
+      int numTicksToTest = 1000;
+	   int numTicksToSimulateAhead = 100; 
+
+	   SimulationConstructionSet scs1 = setupScs();
+	   SimulationConstructionSet scs2 = setupScs();
+
+	   ArrayList<String> exceptions = new ArrayList<String>();
+	   exceptions.add("gc_");
+	   exceptions.add("toolFrame");
+	   exceptions.add("ef_");
+	   exceptions.add("kp_");
+	   exceptions.add("TimeNano");
+	   exceptions.add("DurationMilli");
+	   exceptions.add("startTime");
+	   exceptions.add("timePassed");
+	   exceptions.add("actualEstimatorDT");
+	   exceptions.add("actualControlDT");
+	   exceptions.add("TimerCurrent");
+	   exceptions.add("TimerAverage");
+	   exceptions.add("TimerMovingAverage");
+	   exceptions.add("TimerMaximum");
+	   exceptions.add("nextExecutionTime");
+	   exceptions.add("lastControllerClockTime");
+	   exceptions.add("totalDelay");
+      exceptions.add("TimerStandardDeviation");
+      
+	   SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
+
+	   double maxDifferenceAllowed = 1e-7;
+	   ArrayList<VariableDifference> variableDifferences;getClass();
+	   variableDifferences = checker.checkRewindabilityWithSimpleMethod(numTicksToSimulateAhead, numTicksToTest, maxDifferenceAllowed);
+	   if (!variableDifferences.isEmpty())
+	   {
+	      System.err.println("variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
+	      fail("Found Variable Differences!\n variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
+	   }
+
+	   scs1.closeAndDispose();
+	   scs2.closeAndDispose();
+	}
+
+   private SimulationConstructionSet setupScs() throws SimulationExceededMaximumTimeException
+   {
+      SpringFlamingoRobot springFlamingo = new SpringFlamingoRobot("SpringFlamingo");
+      double gravity = 9.81;
+      SpringFlamingoFastWalkingController controller = new SpringFlamingoFastWalkingController(springFlamingo, gravity , "springFlamingoFastWalkingController");
+      springFlamingo.setController(controller);
+
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(false);
+      parameters.setShowWindows(false);
+      parameters.setShowSplashScreen(false);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(springFlamingo, parameters);
+      scs.setDT(0.0001, 10);
+      
+      return scs;
+   }
+	
 
 }

@@ -1,6 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,22 +18,22 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.AsyncContinuousExecutor;
+import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
+import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierWithStackTracing;
+import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
-{
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+{   
+   private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -54,9 +57,77 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
          drcSimulationTestHelper = null;
       }
 
+      simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @AverageDuration
+   @Test(timeout=300000)
+   public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      DRCSimulationTestHelper drcSimulationTestHelper1 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
+      DRCSimulationTestHelper drcSimulationTestHelper2 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
+      
+      ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
+      
+      SimulationConstructionSet scs1 = drcSimulationTestHelper1.getSimulationConstructionSet();
+      SimulationConstructionSet scs2 = drcSimulationTestHelper2.getSimulationConstructionSet();
+      SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
+      
+//      setupCameraForWalkingOverSmallPlatform(scs1);
+//      setupCameraForWalkingOverSmallPlatform(scs2);
+
+      SimulationRewindabilityVerifierWithStackTracing helper = null;
+      boolean useVariableListenerTestHelper = false; // Make this true if you want to record a history of variable changes and find the first instance where they are different. Don't check in as true though since takes lots of time.
+
+      if (useVariableListenerTestHelper)
+      {
+         helper = new SimulationRewindabilityVerifierWithStackTracing(scs1, scs2, exceptions);
+         helper.setRecordDifferencesForSimOne(true);
+         helper.setRecordDifferencesForSimTwo(true);
+      }
+
+      if (useVariableListenerTestHelper)
+      {
+         helper.clearChangesForSimulations();
+      }
+
+      double runTime = 10.18;
+
+      boolean success = drcSimulationTestHelper1.simulateAndBlockAndCatchExceptions(runTime);
+      success = success && drcSimulationTestHelper2.simulateAndBlockAndCatchExceptions(runTime);
+
+
+      if (useVariableListenerTestHelper)
+      {
+         System.out.println("Checking for variable differences at the end of the run using SimulationRewindabilityHelper");
+
+         boolean areTheVariableChangesDifferent = helper.areTheVariableChangesDifferent();
+         if (areTheVariableChangesDifferent) helper.printOutStackTracesOfFirstChangedVariable();
+      }
+
+      System.out.println("Checking for variable differences at the end of the run using SimulationRewindabilityVerifier");
+      ArrayList<VariableDifference> variableDifferences = checker.verifySimulationsAreSameToStart();
+
+      if (!variableDifferences.isEmpty())
+      {
+         System.err.println("variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
+         if (simulationTestingParameters.getKeepSCSUp())
+            ThreadTools.sleepForever();
+         fail("Found Variable Differences!\n variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
+      }
+
+
+      drcSimulationTestHelper1.destroySimulation();
+      drcSimulationTestHelper2.destroySimulation();
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
 	@AverageDuration(duration = 26.0)
 	@Test(timeout = 78091)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
@@ -64,7 +135,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage();
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
-      
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -73,7 +144,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
       FootstepDataList footstepDataList = createFootstepsForSteppingOntoSmallPlatform(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
@@ -102,6 +173,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
+
 	@AverageDuration(duration = 16.0)
 	@Test(timeout = 48040)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
@@ -109,7 +181,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage();
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM;
-      
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -138,6 +210,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
+
 	@AverageDuration(duration = 14.8)
 	@Test(timeout = 44385)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
@@ -145,7 +218,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage();
       
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
-      
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
    
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
