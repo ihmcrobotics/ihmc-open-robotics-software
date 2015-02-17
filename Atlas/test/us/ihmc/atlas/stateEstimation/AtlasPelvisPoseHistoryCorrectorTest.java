@@ -6,7 +6,10 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.PelvisPoseHistoryCorrectionTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
+@BambooPlan(planType = {BambooPlanType.InDevelopment})
 public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrectionTest
 {
 
