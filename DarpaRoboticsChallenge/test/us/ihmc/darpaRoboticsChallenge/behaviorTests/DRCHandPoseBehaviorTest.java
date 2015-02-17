@@ -283,8 +283,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
             frameToKeepTrackOf);
       SysoutTool.println("Behavior Should Be Done", DEBUG);
 
-      FramePose handPoseAtPauseStart = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.PAUSE);
-      FramePose handPoseAtPauseEnd = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.RESUME);
+      FramePose handPoseAtPauseStart = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.PAUSE);
+      FramePose handPoseAtPauseEnd = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.RESUME);
       assertPosesAreWithinThresholds(handPoseAtPauseStart, handPoseAtPauseEnd, 3.0 * POSITION_THRESHOLD, 3.0 * ORIENTATION_THRESHOLD);
       assertCurrentHandPoseIsWithinThresholds(robotSide, handPoseTarget);
       assertTrue(handPoseBehavior.isDone());
@@ -317,7 +317,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(handPoseBehavior, Double.POSITIVE_INFINITY,
             Double.POSITIVE_INFINITY, simTimeBeforeStop, frameToKeepTrackOf);
 
-      FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum.STOP);
+      FramePose handPoseJustAfterStop = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.STOP);
       FramePose handPoseAfterResting = stopThreadUpdatable.getCurrentTestFramePoseCopy();
       assertPosesAreWithinThresholds(handPoseJustAfterStop, handPoseAfterResting, 3.0 * POSITION_THRESHOLD, 3.0 * ORIENTATION_THRESHOLD);
       assertTrue(!handPoseBehavior.isDone());
@@ -371,19 +371,19 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       return q;
    }
 
+
    private HandPoseBehavior createNewHandPoseBehavior(RobotSide robotSide, double trajectoryTime, FramePose handPoseTarget)
    {
       HandPoseBehavior ret = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
-
+      
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseTarget.getPose(handPoseTargetTransform);
-
+      
       ret.initialize();
       ret.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
-
+      
       return ret;
    }
-
    private HandPoseBehavior createNewHandPoseBehavior(RobotSide robotSide, double trajectoryTime, double[] desiredArmJointAngles)
    {
       final HandPoseBehavior ret = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
