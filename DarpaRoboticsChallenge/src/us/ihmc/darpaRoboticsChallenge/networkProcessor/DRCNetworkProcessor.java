@@ -97,7 +97,7 @@ public class DRCNetworkProcessor
       
       if(params.useBehaviorModule())
       {
-         PacketCommunicator behaviorModuleCommunicator = createBehaviorModule(robotModel);
+         PacketCommunicator behaviorModuleCommunicator = createBehaviorModule(robotModel, params.useBehaviorVisualizer());
          communicators.add(behaviorModuleCommunicator);
          if(DEBUG)
          {
@@ -117,11 +117,11 @@ public class DRCNetworkProcessor
       return communicators;
    }
    
-   private PacketCommunicator createBehaviorModule(DRCRobotModel robotModel)
+   private PacketCommunicator createBehaviorModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
-      IHMCHumanoidBehaviorManager behaviorManager = new IHMCHumanoidBehaviorManager(robotModel , logModelProvider, sensorInformation);
+      IHMCHumanoidBehaviorManager behaviorManager = new IHMCHumanoidBehaviorManager(robotModel , logModelProvider, startYoVariableServer, sensorInformation);
       return behaviorManager.getCommunicator();
    }
 
