@@ -19,6 +19,7 @@ import org.junit.runners.Suite;
    us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
+   us.ihmc.valkyrie.ValkyrieObstacleCourseEveryBuildTest.class,
 })
 
 public class ValkyrieHardwareDriversAFastTestSuite
