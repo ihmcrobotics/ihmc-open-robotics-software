@@ -22,8 +22,8 @@ public class AtlasWallWorldDemo
 //      double stepHeight = 0.2;
 //      CommonAvatarEnvironmentInterface environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
 
-      boolean runMultiThreaded = true;
-      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(runMultiThreaded, robotModel, environment);
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
+      simulationStarter.setRunMultiThreaded(true);
 
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
