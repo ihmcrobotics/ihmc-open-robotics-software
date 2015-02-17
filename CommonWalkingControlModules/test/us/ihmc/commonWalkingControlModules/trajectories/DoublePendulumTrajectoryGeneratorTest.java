@@ -26,7 +26,7 @@ import us.ihmc.utilities.math.geometry.Line2d;
  * Created by agrabertilton on 2/9/15.
  */
 
-@BambooPlan(planType={BambooPlanType.Unfinished})
+@BambooPlan(planType={BambooPlanType.Exclude})
 public class DoublePendulumTrajectoryGeneratorTest
 {
    @AverageDuration(duration = 1.0)
