@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
@@ -116,10 +117,15 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    {
       stopArmMotionIfImpactDetected.set(false);
 
-      yoImpactForceThreshold_N.set(100.0);
-      yoImpactStiffnessThreshold_NperM.set(10000.0);
+      yoImpactForceThreshold_N.set(100.0 / 10.0);
+      yoImpactStiffnessThreshold_NperM.set(10000.0 * 10000.0);
    }
 
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
+   }
+   
    public double getDT()
    {
       return DT;
@@ -223,6 +229,10 @@ public class WristForceSensorFilteredUpdatable implements Updatable
                StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
                pausePacket.setDestination(PacketDestination.CONTROLLER);
                controllerCommunicator.send(pausePacket);
+            }
+            else
+            {
+               controllerCommunicator.send(new HandCollisionDetectedPacket(robotSide));
             }
          }
       }
