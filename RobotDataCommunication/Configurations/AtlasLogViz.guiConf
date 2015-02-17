@@ -3,7 +3,7 @@
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_inlet_pressure</Variables>
 		<GraphConfiguration>
-			<Name>config89</Name>
+			<Name>config57</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -15,7 +15,7 @@
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.remaining_amp_hours</Variables>
 		<GraphConfiguration>
-			<Name>config90</Name>
+			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -27,7 +27,7 @@
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_supply_pressure</Variables>
 		<GraphConfiguration>
-			<Name>config91</Name>
+			<Name>config59</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -39,7 +39,7 @@
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_time_meter</Variables>
 		<GraphConfiguration>
-			<Name>config92</Name>
+			<Name>config60</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -73,7 +73,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_back_bkz.ll_in_back_bkz_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_back_bkz.ll_out_back_bkz_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config93</Name>
+			<Name>config61</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -85,7 +85,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_back_bky.ll_in_back_bky_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_back_bky.ll_out_back_bky_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config94</Name>
+			<Name>config62</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -97,7 +97,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_back_bkx.ll_in_back_bkx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_back_bkx.ll_out_back_bkx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config95</Name>
+			<Name>config63</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -109,7 +109,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_f</Variables>
 		<GraphConfiguration>
-			<Name>config96</Name>
+			<Name>config64</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -121,7 +121,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_hpz.ll_in_l_leg_hpz_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_leg_hpz.ll_out_l_leg_hpz_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config97</Name>
+			<Name>config65</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -133,7 +133,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_hpz.ll_in_r_leg_hpz_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_leg_hpz.ll_out_r_leg_hpz_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config98</Name>
+			<Name>config66</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -145,7 +145,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_hpx.ll_in_l_leg_hpx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_leg_hpx.ll_out_l_leg_hpx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config99</Name>
+			<Name>config67</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -157,7 +157,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_hpx.ll_in_r_leg_hpx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_leg_hpx.ll_out_r_leg_hpx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config100</Name>
+			<Name>config68</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -169,7 +169,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_hpy.ll_in_l_leg_hpy_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_leg_hpy.ll_out_l_leg_hpy_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config101</Name>
+			<Name>config69</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -181,7 +181,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_hpy.ll_in_r_leg_hpy_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_leg_hpy.ll_out_r_leg_hpy_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config102</Name>
+			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -193,7 +193,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_kny.ll_in_l_leg_kny_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_leg_kny.ll_out_l_leg_kny_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config103</Name>
+			<Name>config71</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -205,7 +205,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_kny.ll_in_r_leg_kny_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_leg_kny.ll_out_r_leg_kny_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config104</Name>
+			<Name>config72</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -217,7 +217,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_aky.ll_in_l_leg_aky_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_leg_aky.ll_out_l_leg_aky_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config105</Name>
+			<Name>config73</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -229,7 +229,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_aky.ll_in_r_leg_aky_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_leg_aky.ll_out_r_leg_aky_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config106</Name>
+			<Name>config74</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -241,7 +241,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_akx.ll_in_l_leg_akx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_leg_akx.ll_out_l_leg_akx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config107</Name>
+			<Name>config75</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -253,7 +253,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_akx.ll_in_r_leg_akx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_leg_akx.ll_out_r_leg_akx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config108</Name>
+			<Name>config76</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -272,7 +272,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_arm_shz.ll_in_l_arm_shz_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_arm_shz.ll_out_l_arm_shz_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config109</Name>
+			<Name>config77</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -284,7 +284,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_arm_shz.ll_in_r_arm_shz_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_arm_shz.ll_out_r_arm_shz_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config110</Name>
+			<Name>config78</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -296,7 +296,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_arm_shx.ll_in_l_arm_shx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_arm_shx.ll_out_l_arm_shx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config111</Name>
+			<Name>config79</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -308,7 +308,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_arm_shx.ll_in_r_arm_shx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_arm_shx.ll_out_r_arm_shx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config112</Name>
+			<Name>config80</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -320,7 +320,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_arm_ely.ll_in_l_arm_ely_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_arm_ely.ll_out_l_arm_ely_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config113</Name>
+			<Name>config81</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -332,7 +332,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_arm_ely.ll_in_r_arm_ely_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_arm_ely.ll_out_r_arm_ely_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config114</Name>
+			<Name>config82</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -344,7 +344,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_arm_elx.ll_in_l_arm_elx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_arm_elx.ll_out_l_arm_elx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config115</Name>
+			<Name>config83</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -356,7 +356,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_arm_elx.ll_in_r_arm_elx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_arm_elx.ll_out_r_arm_elx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config116</Name>
+			<Name>config84</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -368,7 +368,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_arm_wry.ll_in_l_arm_wry_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_arm_wry.ll_out_l_arm_wry_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config117</Name>
+			<Name>config85</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -380,7 +380,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_arm_wry.ll_in_r_arm_wry_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_arm_wry.ll_out_r_arm_wry_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config118</Name>
+			<Name>config86</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -392,7 +392,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_arm_wrx.ll_in_l_arm_wrx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_l_arm_wrx.ll_out_l_arm_wrx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config119</Name>
+			<Name>config87</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -404,7 +404,7 @@ Tab
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_arm_wrx.ll_in_r_arm_wrx_f,root.loggedmain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.AtlasOutputWriterWithTorqueLimits.AtlasOutputWriter.ll_out_r_arm_wrx.ll_out_r_arm_wrx_f_d</Variables>
 		<GraphConfiguration>
-			<Name>config120</Name>
+			<Name>config88</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
