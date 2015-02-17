@@ -81,12 +81,17 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
       if (newestPacket != null)
       {
          debrisDataList.addAll(newestPacket.getDebrisDataList());
-         sortDebrisFromCloserToFarther();
-         submitArmsSafePosition();
-         for (int i = 0; i < sortedDebrisDataList.size(); i++)
-            submitRemoveDebrisTasks(sortedDebrisDataList.get(i));
-         haveInputsBeenSet.set(true);
+         setInputs(debrisDataList);
       }
+   }
+
+   public void setInputs(ArrayList<DebrisData> debrisDataList)
+   {
+      sortDebrisFromCloserToFarther(debrisDataList);
+      submitArmsSafePosition();
+      for (int i = 0; i < sortedDebrisDataList.size(); i++)
+         submitRemoveDebrisTasks(sortedDebrisDataList.get(i));
+      haveInputsBeenSet.set(true);
    }
 
    private void submitArmsSafePosition()
@@ -111,14 +116,14 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
             .getGraspVectorPosition(), debrisData.getGraspVector(), yoTime));
    }
 
-   private void sortDebrisFromCloserToFarther()
+   private void sortDebrisFromCloserToFarther(ArrayList<DebrisData> debrisDataListToBeSorted)
    {
       double currentDistanceToObject;
       FramePoint currentObjectPosition = new FramePoint();
 
-      for (int i = 0; i < debrisDataList.size(); i++)
+      for (int i = 0; i < debrisDataListToBeSorted.size(); i++)
       {
-         DebrisData currentDebrisData = debrisDataList.get(i);
+         DebrisData currentDebrisData = debrisDataListToBeSorted.get(i);
          currentObjectPosition.changeFrame(ReferenceFrame.getWorldFrame());
          currentObjectPosition.set(currentDebrisData.getGraspVectorPosition());
          currentObjectPosition.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
@@ -176,7 +181,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      if (pipeLine.isDone())
+      if (pipeLine.isDone() && hasInputBeenSet())
          isDone.set(true);
       return isDone.getBooleanValue();
    }

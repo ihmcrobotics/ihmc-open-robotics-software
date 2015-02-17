@@ -128,7 +128,9 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
          }
       };
 
-      testEnvironment.addStandingDebris(0.6, -0.35, 0.0);
+            testEnvironment.addStandingDebris(0.75, -0.2, 0.0);
+//      testEnvironment.addHorizontalDebrisLeaningOnTwoBoxes(new Point3d(0.75, 0.0, 0.9), Math.toRadians(0.0), Math.toRadians(110.0)); // 20 ,-20
+
       testEnvironment.createDebrisContactController();
 
       KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
@@ -145,6 +147,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       midFeetZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
+      
+     
    }
 
    @AverageDuration(duration = 90.0)
@@ -210,7 +214,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       graspVector.changeFrame(worldFrame);
 
       FramePoint graspVectorPosition = new FramePoint(debrisReferenceFrame);
-      graspVectorPosition.setZ(0.7 - zOffsetToHaveOriginAtDebrisBottom);
+      graspVectorPosition.setZ(0.8 - zOffsetToHaveOriginAtDebrisBottom);
       graspVectorPosition.changeFrame(worldFrame);
 
       debrisPose.getRigidBodyTransform(debrisTransform);

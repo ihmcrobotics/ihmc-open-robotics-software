@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -38,6 +37,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -177,23 +177,30 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       // from DebrisTaskBehaviorPanel.storeDebrisDataInList
       ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
 
+      //this offset is very important because debrisTransform sent from the UI have the origin at the bottom of the debris, whereas here the robots have their origin at the center of the debris
+      double zOffsetToHaveOriginAtDebrisBottom = testEnvironment.getDebrisLength() / 2.0;
+
       RigidBodyTransform debrisTransformBeforeRemove = new RigidBodyTransform();
       debrisRobot.getBodyTransformToWorld(debrisTransformBeforeRemove);
-      debrisTransformBeforeRemove.applyTranslation(new Vector3d(0.0, 0.0, -testEnvironment.getDebrisLength() / 2.0));
 
-      FrameVector tempGraspVector = new FrameVector(worldFrame);
-      tempGraspVector.set(-1.0, 0.0, 0.0);
-      tempGraspVector.applyTransform(debrisTransformBeforeRemove);
-      Vector3d graspVector = new Vector3d();
-      tempGraspVector.get(graspVector);
+      PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", worldFrame);
+      debrisReferenceFrame.setPoseAndUpdate(debrisTransformBeforeRemove);
 
-      FramePoint tempGraspVectorPosition = new FramePoint(worldFrame);
-      tempGraspVectorPosition.setZ(0.6);
-      tempGraspVectorPosition.applyTransform(debrisTransformBeforeRemove);
-      Point3d graspVectorPosition = new Point3d();
-      tempGraspVectorPosition.get(graspVectorPosition);
+      FramePose debrisPose = new FramePose(debrisReferenceFrame);
+      debrisPose.setZ(-zOffsetToHaveOriginAtDebrisBottom);
+      debrisPose.changeFrame(worldFrame);
 
-      removeSingleDebrisBehavior.setInputs(debrisTransformBeforeRemove, graspVectorPosition, graspVector);
+      FrameVector graspVector = new FrameVector(debrisReferenceFrame);
+      graspVector.set(-1.0, 0.0, 0.0);
+      graspVector.changeFrame(worldFrame);
+
+      FramePoint graspVectorPosition = new FramePoint(debrisReferenceFrame);
+      graspVectorPosition.setZ(0.8 - zOffsetToHaveOriginAtDebrisBottom);
+      graspVectorPosition.changeFrame(worldFrame);
+
+      debrisPose.getRigidBodyTransform(debrisTransformBeforeRemove);
+
+      removeSingleDebrisBehavior.setInputs(debrisTransformBeforeRemove, graspVectorPosition.getPointCopy(), graspVector.getVectorCopy());
 
       assertTrue(removeSingleDebrisBehavior.hasInputBeenSet());
 
