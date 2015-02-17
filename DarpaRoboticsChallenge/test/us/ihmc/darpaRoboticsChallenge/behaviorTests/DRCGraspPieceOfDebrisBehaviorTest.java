@@ -274,7 +274,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage();
 
-      testEnvironment.addStandingDebris(0.75, -0.2, Math.toRadians(-20.0));
+      testEnvironment.addStandingDebris(0.77, -0.2, Math.toRadians(-20.0));
       RobotSide testedSide = RobotSide.RIGHT;
       setUpDrcTestHelper();
 
@@ -339,7 +339,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 0.1)
+   @AverageDuration(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingHorizontalDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -370,7 +370,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertChestAndPelvisAreCloseToHomePosition();
    }
 
-   @AverageDuration(duration = 0.1)
+   @AverageDuration(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingLeaningAgainstAWallDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
