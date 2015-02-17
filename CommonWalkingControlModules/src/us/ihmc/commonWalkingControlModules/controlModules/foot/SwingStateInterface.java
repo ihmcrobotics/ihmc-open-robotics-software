@@ -8,7 +8,7 @@ import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 public interface SwingStateInterface
 {
 
-   public abstract void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters, boolean useLowHeightTrajectory);
+   public abstract void setFootstep(Footstep footstep, boolean useLowHeightTrajectory);
 
    public abstract void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory);
 

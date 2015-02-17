@@ -22,7 +22,6 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataTansformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.HandPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PelvisPosePacketTransformerTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.SquareDataTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.TorusPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorToolsTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepDataTest.class,

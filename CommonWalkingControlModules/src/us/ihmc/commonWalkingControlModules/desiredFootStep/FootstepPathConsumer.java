@@ -51,7 +51,9 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
          if (contactPoints !=null && contactPoints.size() == 0)
             throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
          Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
-         
+         footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
+         footstep.swingHeight = footstepData.swingHeight;
+
          footsteps.add(footstep);
 
          if (DEBUG)

@@ -153,7 +153,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final YoFrameVector2d icpAdjustment = new YoFrameVector2d("icpAdjustment", null, registry);
 
-   private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
 
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
@@ -254,7 +253,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.transferTimeCalculationProvider = transferTimeCalculationProvider;
 
-      this.mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
       this.footSwitches = momentumBasedController.getFootSwitches();
 
       this.instantaneousCapturePointPlanner = instantaneousCapturePointPlanner;
@@ -963,7 +961,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          if (nextFootstep != null)
-            feetManager.requestSwing(swingSide, nextFootstep, mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
+            feetManager.requestSwing(swingSide, nextFootstep);
          else if (footPoseProvider != null && footPoseProvider.checkForNewPose(swingSide))
          {
             FramePose nextFootPose = footPoseProvider.getDesiredFootPose(swingSide);

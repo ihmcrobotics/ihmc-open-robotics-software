@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
@@ -48,8 +47,6 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector desiredAcceleration;
-
-   protected TwoWaypointTrajectoryParameters trajectoryParameters;
 
    private final YoPolynomial xPolynomial, yPolynomial;
    private final PositionTrajectoryGenerator nominalTrajectoryGenerator;

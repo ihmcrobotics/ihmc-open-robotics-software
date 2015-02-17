@@ -91,7 +91,7 @@ public class FeetManager
       }
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, TrajectoryParameters trajectoryParameters)
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep)
    {
       if (!footstep.getTrustHeight())
       {
@@ -113,7 +113,7 @@ public class FeetManager
          walkOnTheEdgesManager.modifyFootstepForEdgeTouchdown(footstep, footControlModule.getToeTouchdownInitialAngle());
       }
 
-      footControlModule.setFootstep(footstep, trajectoryParameters);
+      footControlModule.setFootstep(footstep);
       setContactStateForSwing(upcomingSwingSide);
    }
 

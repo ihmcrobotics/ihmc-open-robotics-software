@@ -57,7 +57,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
-		TrajectoryParameters trajectoryParameters = null;
+		TrajectoryParameters trajectoryParameters = new TrajectoryParameters();
 		TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 		
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider,

@@ -127,7 +127,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    }
 
    @Override
-   public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters, boolean useLowHeightTrajectory)
+   public void setFootstep(Footstep footstep, boolean useLowHeightTrajectory)
    {
       footstep.getPose(footPose);
       footPose.changeFrame(worldFrame);
