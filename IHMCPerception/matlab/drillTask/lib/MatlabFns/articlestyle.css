@@ -1,0 +1,40 @@
+body {font-family:"Verdana"; 
+      line-height:150%; 
+      font-size:14px; 
+      width:50em; 
+      margin-left: 10%}
+
+h1 {margin-top: 2em;
+    font-size:24px;
+    line-height:140%}
+
+h2 {margin-top: 1.5em;
+    font-size:20px;
+    line-height:140%}
+
+h3 {font-size:16px;
+    line-height:140%}
+
+p {text-align:justify}
+
+li {margin-top:0.5em}
+
+.figure {margin-left:5em;
+         margin-bottom:2em;
+         font-size: 15px;
+         width:80%}
+
+hr {color: black; 
+    background-color: black; 
+    height: 2px}
+
+# p {text-indent:1.5em}
+# img {border-style:solid; border-width:1px}
+
+#table, th, td {border: 1px solid #C0C0C0; border-collapse:collapse; padding:5px}
+
+table, th, td{border: 1px solid #FFFFFF; padding:2px}
+
+table.noborder3{border-style:none; border-width: 0px; border-collapse:collapse }
+
+#table.noborder{border-style:none}
