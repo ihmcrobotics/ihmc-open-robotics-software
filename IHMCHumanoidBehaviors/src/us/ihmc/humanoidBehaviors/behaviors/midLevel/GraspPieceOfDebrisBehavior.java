@@ -193,7 +193,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       try
       {
          ComputeResult computeResult = wholeBodyIKSolver.compute(actualRobotModel, desiredRobotModelToPack, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
-         System.out.println(computeResult);
       }
       catch (Exception e)
       {
