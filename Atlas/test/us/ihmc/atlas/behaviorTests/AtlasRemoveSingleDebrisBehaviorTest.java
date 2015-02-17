@@ -13,7 +13,8 @@ public class AtlasRemoveSingleDebrisBehaviorTest extends DRCRemoveSingleDebrisBe
 	public AtlasRemoveSingleDebrisBehaviorTest() 
 	{
 		robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
-		robotModel.createHandContactPoints();
+      boolean useHighResolutionContactPointGrid = false;
+		robotModel.createHandContactPoints(useHighResolutionContactPointGrid);
 	}
 
 	@Override

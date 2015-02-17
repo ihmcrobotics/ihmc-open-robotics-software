@@ -15,8 +15,9 @@ public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
    
    public AtlasTurnValveBehaviorTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);      
-      robotModel.createHandContactPoints();
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      boolean useHighResolutionContactPointGrid = true;
+      robotModel.createHandContactPoints(useHighResolutionContactPointGrid);
    }
    
    
