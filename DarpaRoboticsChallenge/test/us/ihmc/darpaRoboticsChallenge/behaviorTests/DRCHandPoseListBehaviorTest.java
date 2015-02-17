@@ -82,7 +82,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    private static final boolean DEBUG = false;
 
    private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = 0.007;
-   private final double JOINT_POSITION_THRESHOLD_BETWEEN_POSES = 15.0 * JOINT_POSITION_THRESHOLD_AFTER_SETTLING;
+   private final double JOINT_POSITION_THRESHOLD_BETWEEN_POSES = 25.0 * JOINT_POSITION_THRESHOLD_AFTER_SETTLING;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
@@ -160,7 +160,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    @AverageDuration(duration = 65.4)
    @Test(timeout = 196338)
-   public void testWackyInflatableArmFlailingTubeManDance() throws SimulationExceededMaximumTimeException
+   public void testMultipleArmPoses() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
