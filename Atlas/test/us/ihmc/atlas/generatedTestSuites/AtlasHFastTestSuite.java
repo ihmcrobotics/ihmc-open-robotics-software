@@ -7,6 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class,
 })
 
