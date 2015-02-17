@@ -27,13 +27,14 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters;
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -51,6 +52,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      simulationTestingParameters = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }

@@ -66,6 +66,7 @@ public class DRCSimulationTestHelper
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
+   private final DRCNetworkModuleParameters networkProcessorParameters;
   
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
@@ -104,7 +105,7 @@ public class DRCSimulationTestHelper
       
       
       
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters = new DRCNetworkModuleParameters();
       if (startNetworkProcessor)
       {
          networkProcessorParameters.setUseSensorModule(startNetworkProcessor);
@@ -237,6 +238,21 @@ public class DRCSimulationTestHelper
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
+      
+      if (networkProcessorParameters != null)
+      {
+         PacketCommunicator simulatedSensorCommunicator = networkProcessorParameters.getSimulatedSensorCommunicator();
+         if (simulatedSensorCommunicator != null)
+         {
+            simulatedSensorCommunicator.close();
+         }
+         
+         PacketCommunicator controllerCommunicator = networkProcessorParameters.getControllerCommunicator();
+         if (controllerCommunicator != null)
+         {
+            controllerCommunicator.close();
+         }
+      }
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
