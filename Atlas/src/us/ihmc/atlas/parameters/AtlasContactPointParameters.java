@@ -419,26 +419,22 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       String thumb_joint_2 = RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2.getJointName(robotSide);
       String thumb_joint_3 = RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3.getJointName(robotSide);
 
+      // Six points in a row, in center of palm
       Vector3d palmContactPoint1 = new Vector3d(0.0, robotSide.negateIfRightSide(0.218), 0.01);
-      Vector3d palmContactPoint1b = new Vector3d(0.0, robotSide.negateIfRightSide(0.218), 0.01 / 2.0);
-
-      Vector3d palmContactPoint2b = new Vector3d(0.0, palmContactPoint1.y, -0.025 / 2.0);
+      Vector3d palmContactPoint1b = new Vector3d(0.0, robotSide.negateIfRightSide(0.218), -0.0075);
       Vector3d palmContactPoint2 = new Vector3d(0.0, palmContactPoint1.y, -0.025);
-
-      Vector3d palmContactPoint3b = new Vector3d(0.0, palmContactPoint1.y, 0.045 / 2.0);
+      Vector3d palmContactPoint2b = new Vector3d(0.0, palmContactPoint1.y, .0275);
       Vector3d palmContactPoint3 = new Vector3d(0.0, palmContactPoint1.y, 0.045);
+      
+      // Pad that sits between the two outer fingers
+      Vector3d palmContactPoint4 = new Vector3d(-0.04, palmContactPoint1.y, palmContactPoint1.z); 
+      Vector3d palmContactPoint4b = new Vector3d(-0.04/2.0, palmContactPoint1.y, palmContactPoint1.z); 
 
-      Vector3d palmContactPoint4b = new Vector3d(-0.04 / 2.0, palmContactPoint1.y, palmContactPoint1.z);
-      Vector3d palmContactPoint4 = new Vector3d(-0.04, palmContactPoint1.y, palmContactPoint1.z);
-
-      Vector3d palmContactPoint5b = new Vector3d(0.035 / 2.0, palmContactPoint1.y, 0.045);
-      Vector3d palmContactPoint5c = new Vector3d(0.035, palmContactPoint1.y, 0.045 / 2.0);
-      Vector3d palmContactPoint5d = new Vector3d(0.035 / 2.0, palmContactPoint1.y, 0.045 / 2.0);
-
+      // Two pads that sandwich middle finger
       Vector3d palmContactPoint5 = new Vector3d(0.035, palmContactPoint1.y, 0.045);
-
-      Vector3d palmContactPoint6b = new Vector3d(palmContactPoint5.x, palmContactPoint1.y, -0.025 / 2.0);
+      Vector3d palmContactPoint5b = new Vector3d(0.035/2.0, palmContactPoint1.y, 0.045);
       Vector3d palmContactPoint6 = new Vector3d(palmContactPoint5.x, palmContactPoint1.y, -0.025);
+      Vector3d palmContactPoint6b = new Vector3d(palmContactPoint5.x / 2.0, palmContactPoint1.y, -0.025);
 
       Vector3d fingersJoint1ContactPoint = new Vector3d(-0.011, robotSide.negateIfRightSide(0.032),0.0);
       Vector3d fingersJoint2ContactPoint1 = new Vector3d( 0.005, robotSide.negateIfRightSide(0.005),0.0);
@@ -451,18 +447,15 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       Vector3d thumbJoint3ContactPoint = new Vector3d (-0.006, robotSide.negateIfRightSide(0.025),0.0 );
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint1));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint1b));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint2));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint2b));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint3));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint4));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint6));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint1b));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint2b));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint3b));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint4b));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5b));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5c));
-      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5d));
+      jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint6));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint6b));
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_1, fingersJoint1ContactPoint));
@@ -479,6 +472,39 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint1));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint2));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(thumb_joint_3, thumbJoint3ContactPoint));
+   }
+   
+   private void createPalmContactPoints(RobotSide robotSide, String nameOfJointBeforeHand)
+   {
+      int numberOfDivisions = 6;
+      
+      double xMin = -0.04;
+      double xMax = 0.035;
+      double deltaX = (xMax-xMin)/numberOfDivisions;
+      ArrayList<Double> xCoordinates = new ArrayList<Double>();
+      
+      for(int i=0; i<=numberOfDivisions; i++)
+      {
+         xCoordinates.add(xMin + deltaX * i);
+      }
+      
+      double zMin = -0.025;
+      double zMax = 0.045;
+      double deltaZ = (zMax-zMin)/numberOfDivisions;
+      ArrayList<Double> zCoordinates = new ArrayList<Double>();
+      
+      for(int i=0; i<=numberOfDivisions; i++)
+      {
+         zCoordinates.add(zMin + deltaZ * i);
+      }
+      
+      for (double xCoordinate : xCoordinates)
+      {
+         for (double zCoordinate : zCoordinates)
+         {
+            jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHand, new Vector3d(xCoordinate, robotSide.negateIfRightSide(0.218), zCoordinate)));
+         }
+      }
    }
 
 
