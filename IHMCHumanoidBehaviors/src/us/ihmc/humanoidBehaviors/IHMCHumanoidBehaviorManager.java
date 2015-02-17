@@ -45,11 +45,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 public class IHMCHumanoidBehaviorManager
 {
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
-   
+
    private final KryoLocalPacketCommunicator behaviorPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.BEHAVIOR_MODULE.ordinal(), "Behavior_Module");
 
@@ -58,14 +59,12 @@ public class IHMCHumanoidBehaviorManager
 
    private YoVariableServer yoVariableServer = null;
 
-   private static final boolean ENABLE_BEHAVIOR_VISUALIZATION = false;
-
-   public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
+   public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
          DRCRobotSensorInformation sensorInfo)
    {
       System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
 
-      if (ENABLE_BEHAVIOR_VISUALIZATION)
+      if (startYoVariableServer)
       {
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
@@ -117,7 +116,7 @@ public class IHMCHumanoidBehaviorManager
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
-      if (ENABLE_BEHAVIOR_VISUALIZATION)
+      if (startYoVariableServer)
       {
          yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
          yoVariableServer.start();
@@ -148,6 +147,7 @@ public class IHMCHumanoidBehaviorManager
       BooleanYoVariable tippingDetectedBoolean = capturePointUpdatable.getTippingDetectedBoolean();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
+      YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
@@ -155,7 +155,7 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            outgoingCommunicationBridge, walkingControllerParameters);
+            outgoingCommunicationBridge, walkingControllerParameters, yoSupportPolygon);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
@@ -172,8 +172,8 @@ public class IHMCHumanoidBehaviorManager
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime,
             walkingControllerParameters.getAnkleHeight());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
-      
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE,new ReceiveImageBehavior(outgoingCommunicationBridge));
+
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
    }
 
    public PacketCommunicator getCommunicator()

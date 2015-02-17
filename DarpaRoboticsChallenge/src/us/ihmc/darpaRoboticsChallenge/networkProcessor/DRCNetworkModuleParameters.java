@@ -10,7 +10,8 @@ public class DRCNetworkModuleParameters
    private boolean useSensorModule;      
    private boolean useSimulatedSensors;  
    private boolean useUiModule;          
-   private boolean useBehaviorModule;    
+   private boolean useBehaviorModule;
+   private boolean useBehaviorVisualizer;
    private boolean useHandModule;        
    private boolean usePerceptionModule;  
    private boolean useRosModule;     
@@ -37,6 +38,11 @@ public class DRCNetworkModuleParameters
    public boolean useBehaviorModule()
    {
       return useBehaviorModule;
+   }
+
+   public boolean useBehaviorVisualizer()
+   {
+      return useBehaviorVisualizer;
    }
 
    public boolean useHandModule()
@@ -91,6 +97,11 @@ public class DRCNetworkModuleParameters
       if (b) useController = true;
    }
 
+   public void setUseBehaviorVisualizer(boolean useBehaviorVisualizer)
+   {
+      this.useBehaviorVisualizer = useBehaviorVisualizer;
+   }
+
    public void setUseHandModule(boolean b)
    {
       useHandModule = b;
@@ -125,5 +136,4 @@ public class DRCNetworkModuleParameters
       useSimulatedSensors = true;
       useController = true;
    }
-
 }

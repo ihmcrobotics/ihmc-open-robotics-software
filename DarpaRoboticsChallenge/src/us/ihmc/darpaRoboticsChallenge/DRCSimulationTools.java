@@ -60,6 +60,7 @@ public abstract class DRCSimulationTools
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
       networkProcessorParameters.setUseUiModule(modulesToStart.contains(Modules.NETWORK_PROCESSOR));
       networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+      networkProcessorParameters.setUseBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
       networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
       networkProcessorParameters.setUsePerceptionModule(true);
       
