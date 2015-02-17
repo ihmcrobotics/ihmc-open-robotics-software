@@ -13,6 +13,8 @@ public interface SensorOutputMapReadOnly
 
    public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint);
    
+   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint);
+   
    public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs();
 
    public long getVisionSensorTimestamp();
