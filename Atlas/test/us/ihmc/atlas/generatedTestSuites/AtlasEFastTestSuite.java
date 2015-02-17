@@ -9,7 +9,6 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class,
 })
 
