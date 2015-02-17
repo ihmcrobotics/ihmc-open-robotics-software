@@ -108,7 +108,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.78</x>
-          <y>0.11493069467915744</y>
+          <y>0.13</y>
           <z>.38</z>
         </location>
         <orientation>
@@ -136,7 +136,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.16</x>
-          <y>0.11091186876083343</y>
+          <y>0.13</y>
           <z>0.5248787307695322</z>
         </location>
         <orientation>
