@@ -5,6 +5,7 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -176,6 +177,17 @@ public class SpringFlamingoController implements RobotController
    }
    
    public void createStateMachineWindow()
+   {
+      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      {
+         public void run()
+         {
+            createStateMachineWindowLocal();
+         }
+      });
+   }
+
+   public void createStateMachineWindowLocal()
    {
       JFrame jFrame = new JFrame("Spring Flamingo State Machines");
       Container contentPane = jFrame.getContentPane();

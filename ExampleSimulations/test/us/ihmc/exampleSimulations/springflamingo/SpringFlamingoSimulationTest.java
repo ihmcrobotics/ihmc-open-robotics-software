@@ -112,10 +112,6 @@ public class SpringFlamingoSimulationTest
 //    ThreadTools.sleepForever();
 //    window.menuItem("foo").
       
-      testFixture.closeAndDispose();
-      scs.closeAndDispose();
-      scs = null;
-      testFixture = null;
    }
 	
 
