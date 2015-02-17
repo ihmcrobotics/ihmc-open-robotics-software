@@ -31,13 +31,15 @@ public class StepprFourbarCalculator extends FourbarCalculator {
 		this.N = new DoubleYoVariable(name + "_TransmissionRatio", registry);
 		
 		beta0.set(2.0);
+		
+		parentRegistry.addChild(registry);
 	}
 	
 	public void update()
 	{
 		q_out.set(joint.getQ()*getBeltRatio());
 		setOutputAngle(q_out.getDoubleValue() + beta0.getDoubleValue()); //External angle from GroundLink to OutputLink
-		updateFourbarKinematicEquations();
+		updateFourbarKinematicEquationsFromOutputAngle();
 		q_in.set(getInputAngle());
 		N.set(getFourbarRatio());		
 	}
