@@ -209,9 +209,9 @@ public class AtlasRobotModel implements DRCRobotModel
       return jointMap.getContactPointParameters();
    }
 
-   public void createHandContactPoints()
+   public void createHandContactPoints(boolean useHighResolutionPointGrid)
    {
-      jointMap.getContactPointParameters().createHandContactPoints();
+      jointMap.getContactPointParameters().createHandContactPoints(useHighResolutionPointGrid);
    }
 
    public void addMoreFootContactPointsSimOnly()
