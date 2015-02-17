@@ -7,12 +7,12 @@ import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class PelvisPoseTask extends BehaviorTask
 {
-   private static final boolean DEBUG = false;
    private final PelvisPosePacket pelvisPosePacket;
    private final PelvisPoseBehavior pelvisPoseBehavior;
 
@@ -21,14 +21,22 @@ public class PelvisPoseTask extends BehaviorTask
       this(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime, 0.0);
    }
 
-   public PelvisPoseTask(FrameOrientation desiredPelvisOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime,
-         double sleepTime)
+   public PelvisPoseTask(FrameOrientation desiredPelvisOrientation, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime, double sleepTime)
    {
       super(pelvisPoseBehavior, yoTime, sleepTime);
       this.pelvisPoseBehavior = pelvisPoseBehavior;
       Quat4d pelvisOrientation = new Quat4d();
       desiredPelvisOrientation.getQuaternion(pelvisOrientation);
       pelvisPosePacket = PacketControllerTools.createPelvisPosePacketForOrientationOnly(pelvisOrientation, trajectoryTime);
+   }
+
+   public PelvisPoseTask(FramePoint desiredPelvisPosition, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime, double sleepTime)
+   {
+      super(pelvisPoseBehavior, yoTime, sleepTime);
+      this.pelvisPoseBehavior = pelvisPoseBehavior;
+      Point3d pelvisPosition = new Point3d();
+      desiredPelvisPosition.get(pelvisPosition);
+      pelvisPosePacket = PacketControllerTools.createPelvisPosePacketForPositionOnly(pelvisPosition, trajectoryTime);
    }
 
    public PelvisPoseTask(FramePose desiredPelvisPose, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double trajectoryTime)
@@ -49,7 +57,12 @@ public class PelvisPoseTask extends BehaviorTask
 
    public PelvisPoseTask(PelvisPosePacket pelvisPosePacket, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior)
    {
-      super(pelvisPoseBehavior, yoTime);
+      this(pelvisPosePacket, yoTime, pelvisPoseBehavior, 0.0);
+   }
+
+   public PelvisPoseTask(PelvisPosePacket pelvisPosePacket, DoubleYoVariable yoTime, PelvisPoseBehavior pelvisPoseBehavior, double sleepTime)
+   {
+      super(pelvisPoseBehavior, yoTime, sleepTime);
       this.pelvisPoseBehavior = pelvisPoseBehavior;
       this.pelvisPosePacket = pelvisPosePacket;
    }

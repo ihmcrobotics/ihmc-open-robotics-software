@@ -71,7 +71,7 @@ public class IHMCHumanoidBehaviorManager
 
       SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
-      
+
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorPacketCommunicator, registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -155,7 +155,7 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            outgoingCommunicationBridge, walkingControllerParameters);
+            outgoingCommunicationBridge, walkingControllerParameters, yoSupportPolygon);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
