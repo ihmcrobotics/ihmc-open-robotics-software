@@ -29,6 +29,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -37,8 +39,13 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.utilities.taskExecutor.NullTask;
 import us.ihmc.utilities.taskExecutor.PipeLine;
@@ -99,6 +106,11 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final double minMaxRoll = Math.toRadians(15.0);
    private final double minMaxYaw = Math.toRadians(30.0);
    private final DoubleYoVariable footstepLength;
+
+   private final SideDependentList<ReferenceFrame> upperArmsFrames = new SideDependentList<>();
+   private final SideDependentList<OneDoFJoint[]> armJointsClone = new SideDependentList<>();
+   private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForUpperArms = new SideDependentList<>();
+   private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForLowerArms = new SideDependentList<>();
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -185,6 +197,41 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);
       pelvisShiftScaleFactor.set(0.6, 0.8);
+
+      double tolerance = 1e-8;
+      int maxIterations = 500;
+      double maxStepSize = 1.0;
+      double minRandomSearchScalar = -0.5;
+      double maxRandomSearchScalar = 1.0;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody chest = fullRobotModel.getChest();
+         RigidBody upperArmBody = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getPredecessor();
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+
+         upperArmsFrames.put(robotSide, upperArmBody.getBodyFixedFrame());
+
+         OneDoFJoint[] upperArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class);
+         OneDoFJoint[] upperArmJointsClone = ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints), OneDoFJoint.class);
+         GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone, upperArmsFrames.get(robotSide));
+         NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         inverseKinematicsForUpperArm.solveForPosition(false);
+         inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
+
+         OneDoFJoint[] lowerArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(upperArmBody, hand), OneDoFJoint.class);
+         OneDoFJoint[] lowerArmJointsClone = ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints), OneDoFJoint.class);
+         GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone, hand.getBodyFixedFrame());
+         NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         inverseKinematicsForLowerArm.solveForPosition(false);
+         inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
+         
+         armJointsClone.put(robotSide, new OneDoFJoint[upperArmJointsClone.length + lowerArmJointsClone.length]);
+         for (int i = 0; i < upperArmJointsClone.length; i++)
+            armJointsClone.get(robotSide)[i] = upperArmJointsClone[i];
+         for (int i = 0; i < lowerArmJointsClone.length; i++)
+            armJointsClone.get(robotSide)[i + upperArmJointsClone.length] = lowerArmJointsClone[i];
+      }
    }
 
    private void sequenceSimpleWarmup()
@@ -835,8 +882,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       double[] temp = ensureJointAnglesSize(desiredJointAngles);
 
       HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, temp, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, temp, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
    }
 
    private double[] ensureJointAnglesSize(double[] desiredJointAngles)
@@ -889,6 +935,64 @@ public class DiagnosticBehavior extends BehaviorInterface
                new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
                      .getDoubleValue()));
       }
+   }
+
+   public void submitSymmetricHandPose(FrameOrientation desiredUpperArmOrientation, FrameOrientation desiredHandOrientation)
+   {
+      desiredUpperArmOrientation.checkReferenceFrameMatch(fullRobotModel.getChest().getBodyFixedFrame());
+      desiredHandOrientation.checkReferenceFrameMatch(upperArmsFrames.get(RobotSide.LEFT));
+      
+      FrameOrientation tempUpperArmFrameOrientation = new FrameOrientation();
+      FrameOrientation tempHandFrameOrientation = new FrameOrientation();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         double[] yawPitchRollForUpperArm = desiredUpperArmOrientation.getYawPitchRoll();
+         yawPitchRollForUpperArm[0] = robotSide.negateIfRightSide(yawPitchRollForUpperArm[0]);
+         yawPitchRollForUpperArm[2] = robotSide.negateIfRightSide(yawPitchRollForUpperArm[2]);
+      
+         tempUpperArmFrameOrientation.setToZero(fullRobotModel.getChest().getBodyFixedFrame());
+         tempUpperArmFrameOrientation.setYawPitchRoll(yawPitchRollForUpperArm);
+         
+         double[] yawPitchRollForHand = desiredHandOrientation.getYawPitchRoll();
+         yawPitchRollForHand[0] = robotSide.negateIfRightSide(yawPitchRollForHand[0]);
+         yawPitchRollForHand[2] = robotSide.negateIfRightSide(yawPitchRollForHand[2]);
+
+         tempHandFrameOrientation.setToZero(upperArmsFrames.get(robotSide));
+         tempHandFrameOrientation.setYawPitchRoll(yawPitchRollForUpperArm);
+         
+         submitHandPose(robotSide, tempUpperArmFrameOrientation, tempHandFrameOrientation);
+      }
+   }
+
+   public void submitHandPose(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, FrameOrientation desiredHandOrientation)
+   {
+      desiredUpperArmOrientation.checkReferenceFrameMatch(fullRobotModel.getChest().getBodyFixedFrame());
+      desiredHandOrientation.checkReferenceFrameMatch(upperArmsFrames.get(robotSide));
+
+      boolean success = true;
+
+      RigidBodyTransform desiredTransform = new RigidBodyTransform();
+      desiredUpperArmOrientation.getTransform3D(desiredTransform);
+      success &= inverseKinematicsForUpperArms.get(robotSide).solve(desiredTransform);
+
+      desiredHandOrientation.getTransform3D(desiredTransform);
+      success &= inverseKinematicsForLowerArms.get(robotSide).solve(desiredTransform);
+
+      if (!success)
+      {
+         System.err.println("Could not find desired joint angles");
+         return;
+      }
+
+      double[] desiredJointAngles = new double[armJointsClone.get(robotSide).length];
+      
+      for (int i = 0; i < armJointsClone.get(robotSide).length; i++)
+      {
+         desiredJointAngles[i] = armJointsClone.get(robotSide)[i].getQ();
+      }
+
+      submitSingleHandPose(robotSide, desiredJointAngles);
    }
 
    private void submitFootPosition(RobotSide robotSide, FramePoint desiredFootPosition)
