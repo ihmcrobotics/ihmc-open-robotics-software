@@ -84,7 +84,6 @@ public class WholeBodyPacketBehavior extends BehaviorInterface
       {
          sendPacketToController(packetsToSend.get(i));
       }
-      System.out.println("WBPacket seeeent");
       hasPacketBeenSent.set(true);
    }
 
