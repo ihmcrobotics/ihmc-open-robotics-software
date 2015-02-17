@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.humanoidBehaviors.behaviors.DrillTaskBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
@@ -174,6 +175,10 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
+      
+      DrillTaskBehavior drillTaskBehavior = new DrillTaskBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
+            walkingControllerParameters, wholeBodyControllerParameters);
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK, drillTaskBehavior);
    }
 
    public PacketCommunicator getCommunicator()
