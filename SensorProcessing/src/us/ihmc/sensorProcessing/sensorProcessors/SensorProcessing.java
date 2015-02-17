@@ -347,7 +347,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
             outputJointVelocities.put(oneDoFJoint, jointVelocity);
       }
       
-      computeJointAccelerations(alphaFilter, jointsToIgnore);
    }
 
    /**
@@ -404,7 +403,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
             outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
       }
       
-      computeJointAccelerations(alphaFilter, jointsToIgnore);
    }
    
    
