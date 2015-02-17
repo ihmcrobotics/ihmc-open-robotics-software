@@ -76,7 +76,10 @@ public class SDFModelLoader implements LogModelLoader
          }
          catch (IOException e)
          {
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
+            System.out.println("Workaround - Jesper will fix this");
+            e.printStackTrace();
+            
          }
          
          try
