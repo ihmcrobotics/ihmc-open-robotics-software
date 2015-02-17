@@ -32,7 +32,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.UnfinishedTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ExcludedTest;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -45,7 +45,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfig
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@UnfinishedTest
+@ExcludedTest
 public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTestInterface
 {
    private final boolean DEBUG = false;

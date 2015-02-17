@@ -30,8 +30,8 @@ import us.ihmc.utilities.math.trajectories.ParametricSplineTrajectorySolver;
 /**
  * Created by agrabertilton on 2/5/15.
  */
-@BambooAnnotations.UnfinishedTest
-@BambooPlan(planType={BambooPlanType.Unfinished})
+@BambooAnnotations.ExcludedTest
+@BambooPlan(planType={BambooPlanType.Exclude})
 public class JointSpaceBasedSwingTrajectorySolverTest
 {
    @AverageDuration(duration = 0.1)

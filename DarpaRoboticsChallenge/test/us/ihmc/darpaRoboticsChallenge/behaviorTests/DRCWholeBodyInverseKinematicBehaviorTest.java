@@ -28,7 +28,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.UnfinishedTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ExcludedTest;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -37,7 +37,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@UnfinishedTest
+@ExcludedTest
 public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiRobotTestInterface
 {
    private final boolean DEBUG = false;
