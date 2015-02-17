@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
 public class AtlasTurnValveBehaviorTest extends DRCTurnValveBehaviorTest
 {
    private final AtlasRobotModel robotModel;
