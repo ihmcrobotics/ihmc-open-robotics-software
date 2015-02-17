@@ -215,16 +215,16 @@ public class DiagnosticBehavior extends BehaviorInterface
          OneDoFJoint[] upperArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class);
          OneDoFJoint[] upperArmJointsClone = ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints), OneDoFJoint.class);
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone, upperArmsFrames.get(robotSide));
-         NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-         inverseKinematicsForUpperArm.solveForPosition(false);
-         inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
+//         NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+//         inverseKinematicsForUpperArm.solveForPosition(false);
+//         inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
          OneDoFJoint[] lowerArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(upperArmBody, hand), OneDoFJoint.class);
          OneDoFJoint[] lowerArmJointsClone = ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints), OneDoFJoint.class);
          GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone, hand.getBodyFixedFrame());
-         NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-         inverseKinematicsForLowerArm.solveForPosition(false);
-         inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
+//         NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+//         inverseKinematicsForLowerArm.solveForPosition(false);
+//         inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
          
          armJointsClone.put(robotSide, new OneDoFJoint[upperArmJointsClone.length + lowerArmJointsClone.length]);
          for (int i = 0; i < upperArmJointsClone.length; i++)
