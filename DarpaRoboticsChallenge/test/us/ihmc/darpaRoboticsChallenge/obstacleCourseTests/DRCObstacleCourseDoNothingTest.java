@@ -28,14 +28,14 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+   private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    }
 
    @After
@@ -52,6 +52,8 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      simulationTestingParameters = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
