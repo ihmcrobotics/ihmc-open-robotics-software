@@ -259,9 +259,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      boolean runMultiThreaded = false;
-      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(runMultiThreaded, robotModel);
-      
+      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
+      simulationStarter.setRunMultiThreaded(false);
+
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
       networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);

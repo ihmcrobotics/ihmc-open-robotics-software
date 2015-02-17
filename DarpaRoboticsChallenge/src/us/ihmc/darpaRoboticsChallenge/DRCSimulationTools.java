@@ -27,9 +27,9 @@ import us.ihmc.utilities.FormattingTools;
 
 public abstract class DRCSimulationTools
 {
-   public static DRCSimulationStarter createObstacleCourseSimulationStarter(boolean runMultiThreaded, DRCRobotModel robotModel)
+   public static DRCSimulationStarter createObstacleCourseSimulationStarter(DRCRobotModel robotModel)
    {
-      return new DRCSimulationStarter(runMultiThreaded, robotModel, new DRCDemo01NavigationEnvironment());
+      return new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
    }
 
    @SuppressWarnings({ "hiding", "unchecked" })
