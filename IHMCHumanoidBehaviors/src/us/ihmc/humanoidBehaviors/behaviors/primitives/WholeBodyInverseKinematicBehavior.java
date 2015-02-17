@@ -60,10 +60,11 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       this.desiredFullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
    }
 
-   public void setInputs(RobotSide robotSide, FramePose endEffectorPose, double trajectoryDuration)
+   public void setInputs(RobotSide robotSide, FramePose endEffectorPose, double trajectoryDuration, int numberOfReseeds, ControlledDoF controlledDofs)
    {
-      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P3R);
+      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, controlledDofs);
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wholeBodyIKSolver.maxNumberOfAutomaticReseeds = numberOfReseeds;
       trajectoryTime.set(trajectoryDuration);
       wholeBodyIKSolver.setGripperAttachmentTarget(actualFullRobotModel, robotSide, endEffectorPose);
 
@@ -74,7 +75,6 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       try
       {
-         wholeBodyIKSolver.maxNumberOfAutomaticReseeds = 0;
          ComputeResult result = wholeBodyIKSolver.compute(actualFullRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
          hasComputationBeenDone.set(true);
          if (result == ComputeResult.SUCCEEDED)
@@ -85,8 +85,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
          {
             hasSolutionBeenFound.set(false);
          }
-         if (DEBUG)
-            System.out.println("solution found = " + hasSolutionBeenFound.getBooleanValue());
+         System.out.println("solution found = " + hasSolutionBeenFound.getBooleanValue());
       }
       catch (Exception e)
       {
@@ -214,5 +213,5 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       return hasSolutionBeenFound.getBooleanValue();
    }
-   
+
 }

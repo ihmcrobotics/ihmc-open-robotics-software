@@ -33,6 +33,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -51,7 +52,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+      @After
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -85,11 +86,11 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
    private SDFFullRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
 
-   private final double DELTA_YAW = 0.05;
-   private final double DELTA_PITCH = 0.08;
+   private final double DELTA_YAW = 0.2;//0.05;
+   private final double DELTA_PITCH = 0.5;//0.08;
    private final double DELTA_ROLL = Math.PI;
 
-   @Before
+      @Before
    public void setUp()
    {
       if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
@@ -129,6 +130,8 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
 
       wholeBodyIKBehavior.initialize();
 
+      wholeBodyIKBehavior.setPositionAndOrientationErrorTolerance(POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN);
+
       RobotSide side = RobotSide.RIGHT;
 
       double trajectoryDuration = 4.0;
@@ -149,7 +152,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
          System.out.println(desiredHandPose);
          System.out.println("  ");
       }
-      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration);
+      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration , 5, ControlledDoF.DOF_3P3R);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
 
       wholeBodyIKBehavior.computeSolution();

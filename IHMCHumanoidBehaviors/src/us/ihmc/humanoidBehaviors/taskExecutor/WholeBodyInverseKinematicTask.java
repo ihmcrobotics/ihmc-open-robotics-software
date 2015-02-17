@@ -4,6 +4,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicB
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WholeBodyInverseKinematicTask extends BehaviorTask
@@ -15,9 +16,11 @@ public class WholeBodyInverseKinematicTask extends BehaviorTask
    private final RobotSide robotSide;
    private final FramePose desiredHandPose;
    private final double trajectoryTime;
+   private final ControlledDoF controlledDofs;
+   private final int numberOfReseeds;
 
    public WholeBodyInverseKinematicTask(RobotSide robotSide, DoubleYoVariable yoTime, WholeBodyInverseKinematicBehavior wholeBodyIKBehavior,
-         FramePose desiredHandPose, double trajectoryTime)
+         FramePose desiredHandPose, double trajectoryTime, int numberOfReseeds, ControlledDoF controlledDofs)
    {
       super(wholeBodyIKBehavior, yoTime);
       this.wholeBodyIKBehavior = wholeBodyIKBehavior;
@@ -25,12 +28,14 @@ public class WholeBodyInverseKinematicTask extends BehaviorTask
       this.trajectoryTime = trajectoryTime;
       desiredHandPose.checkReferenceFrameMatch(worldFrame);
       this.desiredHandPose = desiredHandPose;
+      this.numberOfReseeds = numberOfReseeds;
+      this.controlledDofs = controlledDofs;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime);
+      wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs);
       wholeBodyIKBehavior.computeSolution();      
    }
 
