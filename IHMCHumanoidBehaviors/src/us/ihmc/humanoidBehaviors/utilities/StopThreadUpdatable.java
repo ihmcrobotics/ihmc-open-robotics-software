@@ -75,7 +75,7 @@ public abstract class StopThreadUpdatable implements Updatable
       return testFrameTransformToWorld.get(controlMode);
    }
 
-   public FramePose getTestFramePoseAtTransition(HumanoidBehaviorControlModeEnum controlMode)
+   public FramePose getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum controlMode)
    {
       FramePose ret = new FramePose(ReferenceFrame.getWorldFrame(), getTestFrameTransformToWorldAtTransition(controlMode));
       return ret;
