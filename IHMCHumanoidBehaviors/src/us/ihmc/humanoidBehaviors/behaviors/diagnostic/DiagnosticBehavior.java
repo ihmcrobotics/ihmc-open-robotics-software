@@ -103,13 +103,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
-      trajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
+      trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
       sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
-      sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 2.0);
+      sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 0.5);
 
       minCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MinCoMHeightOffset", registry);
-      minCoMHeightOffset.set(-0.05);
+      minCoMHeightOffset.set(-0.15);
       maxCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxCoMHeightOffset", registry);
       maxCoMHeightOffset.set(0.05);
 
