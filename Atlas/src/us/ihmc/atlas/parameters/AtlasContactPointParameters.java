@@ -333,7 +333,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 
       case ATLAS_DUAL_ROBOTIQ:
          for (RobotSide robotSide : RobotSide.values)
-            if (useSoftGroundContactParameters)
+            if (useHighResolutionPointGrid)
             {
                createHighResolutionRobotiqHandContactPoints(robotSide);
             }
