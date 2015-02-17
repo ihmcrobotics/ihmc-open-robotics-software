@@ -12,6 +12,7 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
@@ -70,7 +71,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final SDFFullRobotModel fullRobotModel;
 
    private final PacketRouter networkProcessor;
-   private final KryoPacketCommunicator networkObjectCommunicator;
+   private final KryoPacketCommunicator mockUIPacketCommunicator;//send packets as if it was sent from the UI
    private final KryoPacketCommunicator controllerCommunicator;
    private final KryoLocalPacketCommunicator behaviorCommunicator;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
@@ -112,7 +113,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       this.fullRobotModel = robotModel.createFullRobotModel();
       yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
 
-      this.networkObjectCommunicator = networkObjectCommunicator;
+      this.mockUIPacketCommunicator = networkObjectCommunicator;
       this.controllerCommunicator = controllerCommunicator;
 
       behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BEHAVIOR_MODULE.ordinal(),
@@ -204,10 +205,19 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       dispatcherThread.start();
 
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = new HumanoidBehaviorTypePacket(testBehaviorType);
-      networkObjectCommunicator.send(requestTestBehaviorPacket);
+      mockUIPacketCommunicator.send(requestTestBehaviorPacket);
 
       boolean success = simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
+   }
+   
+   public void sendBehaviorToDispatcher(BehaviorInterface behaviorToTest) throws SimulationExceededMaximumTimeException
+   {
+      HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
+      behaviorDispatcher.addHumanoidBehavior(testBehaviorType, behaviorToTest);
+      
+      HumanoidBehaviorTypePacket requestTestBehaviorPacket = new HumanoidBehaviorTypePacket(testBehaviorType);
+      mockUIPacketCommunicator.send(requestTestBehaviorPacket);
    }
 
    private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
@@ -265,10 +275,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          behaviorDispatcher.closeAndDispose();
       }
 
-      if (networkObjectCommunicator != null)
+      if (mockUIPacketCommunicator != null)
       {
-         networkObjectCommunicator.close();
-         networkObjectCommunicator.closeAndDispose();
+         mockUIPacketCommunicator.close();
+         mockUIPacketCommunicator.closeAndDispose();
       }
 
       if (behaviorCommunicator != null)
@@ -384,6 +394,25 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       return ret;
    }
+   
+   public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final BehaviorInterface behavior) throws SimulationExceededMaximumTimeException
+   {
+      BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
+      
+      sendBehaviorToDispatcher(behavior);
+      
+      boolean ret = true;
+      while (!behavior.isDone())
+      {
+         ret = simulateAndBlockAndCatchExceptions(1.0);
+      }
+      
+      behaviorRunner.closeAndDispose();
+      
+      return ret;
+   }
+   
+   
 
    private BehaviorRunner startNewBehaviorRunnerThread(final ArrayList<BehaviorInterface> behaviors)
    {
@@ -515,5 +544,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             ThreadTools.sleep(1);
          }
       }
+   }
+
+   public void sendPacketAsIfItWasFromUI(Packet packet)
+   {
+      mockUIPacketCommunicator.send(packet);
    }
 }
