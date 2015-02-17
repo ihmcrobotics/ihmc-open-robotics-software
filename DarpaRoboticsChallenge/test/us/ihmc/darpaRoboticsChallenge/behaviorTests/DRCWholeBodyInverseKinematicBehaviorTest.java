@@ -37,7 +37,6 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@ExcludedTest
 public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiRobotTestInterface
 {
    private final boolean DEBUG = false;

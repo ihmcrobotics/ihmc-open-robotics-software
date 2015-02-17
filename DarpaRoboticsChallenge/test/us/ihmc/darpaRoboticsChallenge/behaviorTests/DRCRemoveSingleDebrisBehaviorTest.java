@@ -45,7 +45,6 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfig
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-@ExcludedTest
 public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTestInterface
 {
    private final boolean DEBUG = false;

@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class,
 })
 
-public class AtlasHFastTestSuite
+public class AtlasFInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

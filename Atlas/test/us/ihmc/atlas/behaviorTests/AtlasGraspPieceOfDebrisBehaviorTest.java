@@ -5,7 +5,11 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCGraspPieceOfDebrisBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
+
+@BambooPlan(planType = {BambooPlanType.InDevelopment})
 public class AtlasGraspPieceOfDebrisBehaviorTest extends DRCGraspPieceOfDebrisBehaviorTest 
 {
 	private final AtlasRobotModel robotModel;
