@@ -1,0 +1,5 @@
+ADDONS
+- add linear time median to the algorithm to obtain O(N LogN) complexity 
+
+BUGS
+- Distances returned by the BALL query seems to be SQUARED!! CHECK IT UP
