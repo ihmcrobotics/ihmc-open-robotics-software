@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHandPoseBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class,
 })
 
 public class AtlasCFastTestSuite
