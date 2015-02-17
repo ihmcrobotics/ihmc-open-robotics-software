@@ -1,0 +1,35 @@
+This file describes changes and the moment they took place.
+
+2 DEC 2008
+- added distances as return parameter to kNN query 
+- corrected distances (reversed) for kNN query 
+- corrected distances (sqrt) for Ball query
+
+12 NOV 2008
+- Added "rules" to makefile instead of specific names
+- Query calls are ubiquitous to column or row vectors [kx1] or [1xk] have same importance
+- Generally improved argument checks
+- SOLVED BUG: kdtree_k_nearest_neighbors crash when passed with only one argument
+- SOLVED BUG: kdtree_build crash when invoked on a structure rather than a matrix
+- addded fulltest script 
+
+
+11 NOV 2008
+- created a new version of the constructor which has a ~10x enhancement in speed
+  along the lines of Steven Michael implementation. The libary now implements the 
+  heapsort based version.
+
+  Here below the comparison of performances which are acheived (seconds)
+  data size:         1000    2000        4000      8000     16000     32000     64000
+  standard:        0.0609    0.0531    0.1913    0.7248    2.8900   11.4816   46.3395
+  no vector copy:  0.0093    0.0175    0.0580    0.2042    0.7716    2.9716   11.8726
+  using heapsort:  0.0048    0.0137    0.0377    0.1183    0.4090    1.4814   5.66588
+
+30 OCT 2008
+- added kdtree destructor to be able to free memory within matlab
+  scripts
+
+15 OCT 2008
+- added "distances" return parameter to kdtree_ball_query
+- created the stub for the dist mode
+- create a memory-freer for the KDTree named kdtree_delete
