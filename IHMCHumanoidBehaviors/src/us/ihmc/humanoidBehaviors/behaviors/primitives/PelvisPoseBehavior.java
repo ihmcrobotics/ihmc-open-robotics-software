@@ -83,22 +83,23 @@ public class PelvisPoseBehavior extends BehaviorInterface
       trajectoryTime.set(Double.NaN);
    }
 
-   @Override
+   @Override //TODO: Not currently implemented for this behavior
    public void stop()
    {
       isStopped.set(true);
    }
 
-   @Override
+   @Override //TODO: Not currently implemented for this behavior
    public void pause()
    {
       isPaused.set(true);
    }
 
-   @Override
+   @Override //TODO: Not currently implemented for this behavior
    public void resume()
    {
       isPaused.set(false);
+      startTime.set(yoTime.getDoubleValue());
    }
 
    @Override
