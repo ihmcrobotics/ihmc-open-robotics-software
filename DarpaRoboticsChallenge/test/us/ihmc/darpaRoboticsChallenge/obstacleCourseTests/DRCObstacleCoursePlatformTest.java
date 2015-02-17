@@ -31,6 +31,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
@@ -146,6 +147,43 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    
 	@AverageDuration(duration = 26.0)
 	@Test(timeout = 78091)
+   public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+
+      setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
+
+      FootstepDataList footstepDataList = createFootstepsForSteppingPastSmallPlatform(scriptedFootstepGenerator);
+      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      Point3d center = new Point3d(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration(duration = 26.0)
+   @Test(timeout = 78091)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -174,18 +212,18 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
-      
+
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      
+
       Point3d center = new Point3d(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -308,6 +346,23 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+   }
+
+   private FootstepDataList createFootstepsForSteppingPastSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   {
+      double[][][] footstepLocationsAndOrientations = new double[][][]
+            {{{-3.3303508964136372, -5.093152916934431, 0.2361869051765919}, {-0.003380023644676521, 0.01519186055257256, 0.9239435001894032, -0.3822122332825927}},
+            {{-3.850667406347062, -5.249955436839419, 0.08402883817600326}, {-0.0036296745847858064, 0.003867481752280881, 0.9236352342329301, -0.38323598752046323}},
+            {{-3.6725725349280296, -5.446807690769805, 0.08552806597763604}, {-6.456929194763128E-5, -0.01561897825296648, 0.9234986484659182, -0.3832835629540643}}
+            };
+
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      FootstepDataList desiredFootsteps = scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+      double zClearHeight = desiredFootsteps.get(0).getLocation().getZ() + 0.07;
+      double swingHeightForClear = zClearHeight - desiredFootsteps.get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
+      desiredFootsteps.get(1).setSwingHeight(swingHeightForClear);
+      desiredFootsteps.get(1).setTrajectoryGenerationMethod(TrajectoryGenerationMethod.OBSTACLE_CLEARANCE);
+      return desiredFootsteps;
    }
    
    

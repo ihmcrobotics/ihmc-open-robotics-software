@@ -48,6 +48,8 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
       Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+      footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
+      footstep.swingHeight = footstepData.swingHeight;
 
       footstepQueue.add(footstep);
 

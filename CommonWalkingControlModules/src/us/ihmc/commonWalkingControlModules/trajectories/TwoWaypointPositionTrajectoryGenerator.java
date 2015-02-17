@@ -3,19 +3,14 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Direction;
-import us.ihmc.utilities.math.geometry.FrameBox3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryGeneratorParameters;
 import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
-import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
@@ -37,22 +32,21 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
    private final static int arcLengthCalculatorDivisionsPerPolynomial = 20;
    private final static double EPSILON = 1e-3;
-   private final static double WAYPOINT_CLOSENESS_FACTOR = .15; // waypoints are considered close together if the distance between them is less than the total
+   private final static double WAYPOINT_CLOSENESS_FACTOR = .15;    // waypoints are considered close together if the distance between them is less than the total
+
    // distance times this fraction; waypoints that are close together are both set to their midpoint and passed through at a velocity of zero
 
-   private final WalkingControllerParameters walkingControllerParameters;
 
-   private final DoubleYoVariable linearSplineLengthFactor;
 
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final int numberOfVisualizationMarkers = 50;
    private final BooleanYoVariable visualize;
 
-   protected final EnumYoVariable<TrajectoryGenerationMethod> waypointGenerationMethod;
-
    private final BagOfBalls trajectoryBagOfBalls;
    private final BagOfBalls fixedPointBagOfBalls;
+
+   private final DoubleYoVariable linearSplineLengthFactor;
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
@@ -60,7 +54,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
-   private final DoubleYoVariable defaultGroundClearance;
 
    private final BooleanYoVariable setInitialSwingVelocityToZero;
 
@@ -74,14 +67,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoFrameVector[] allVelocities = new YoFrameVector[6];
 
    private final TrajectoryParametersProvider trajectoryParametersProvider;
-   protected TwoWaypointTrajectoryParameters trajectoryParameters;
+   protected TrajectoryParameters trajectoryParameters;
 
-   private static final int[] endpointIndices = new int[] { 0, 5 };
-   private static final int[] waypointIndices = new int[] { 2, 3 };
-   private static final int[] oppositeWaypointIndices = new int[] { 3, 2 };
-   private static final int[] accelerationEndpointIndices = new int[] { 1, 4 };
-   private static final int[] nonAccelerationEndpointIndices = new int[] { 0, 2, 3, 5 };
-   private static final int[] allIndices = new int[] { 0, 1, 2, 3, 4, 5 };
+   private static final int[] endpointIndices = new int[] {0, 5};
+   private static final int[] waypointIndices = new int[] {2, 3};
+   private static final int[] oppositeWaypointIndices = new int[] {3, 2};
+   private static final int[] accelerationEndpointIndices = new int[] {1, 4};
+   private static final int[] nonAccelerationEndpointIndices = new int[] {0, 2, 3, 5};
+   private static final int[] allIndices = new int[]
+   {
+      0, 1, 2, 3, 4, 5
+   };
 
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthApproximatedByDistance;
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
@@ -89,19 +85,19 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private boolean waypointsAreTheSamePoint = false;
 
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-         PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
-         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
+           PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
+           VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
+           YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
       setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
       setInitialSwingVelocityToZero.set(false);
+
       if (visualize)
       {
-         trajectoryBagOfBalls = new BagOfBalls(numberOfVisualizationMarkers, 0.01, namePrefix + "TrajectoryBagOfBalls", registry,
-               yoGraphicsListRegistry);
+         trajectoryBagOfBalls = new BagOfBalls(numberOfVisualizationMarkers, 0.01, namePrefix + "TrajectoryBagOfBalls", registry, yoGraphicsListRegistry);
          fixedPointBagOfBalls = new BagOfBalls(6, 0.02, namePrefix + "WaypointBagOfBalls", registry, yoGraphicsListRegistry);
       }
 
@@ -110,11 +106,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          trajectoryBagOfBalls = null;
          fixedPointBagOfBalls = null;
       }
-
-      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
-            TrajectoryGenerationMethod.class);
-
-      this.walkingControllerParameters = walkingControllerParameters;
 
       this.stepTimeProvider = stepTimeProvider;
 
@@ -128,9 +119,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
-
-      defaultGroundClearance = new DoubleYoVariable(namePrefix + "DefaultGroundClearance", registry);
-      defaultGroundClearance.set(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
 
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
@@ -147,10 +135,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          allVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
 
-      concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] { 4, 2, 6, 2, 4 }, referenceFrame,
-            arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
-      concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] { 4, 2, 6, 2, 4 }, referenceFrame, 2, registry, namePrefix
-            + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
+      concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame,
+              arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
+      concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame, 2, registry,
+              namePrefix + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
 
       this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
       this.visualize.set(visualize);
@@ -169,15 +157,15 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredVelocity.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity());
       desiredAcceleration.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getAcceleration());
 
-      //    concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time - stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
-      //    FrameVector previousVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();
+      // concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time - stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
+      // FrameVector previousVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();
       //
-      //    concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time + stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
-      //    FrameVector nextVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();
-      //    
-      //    desiredAcceleration.set(nextVelocity);
-      //    desiredAcceleration.sub(previousVelocity);
-      //    desiredAcceleration.scale(0.5 * (double) numberOfTimeIntervals / stepTime.getDoubleValue());
+      // concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time + stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
+      // FrameVector nextVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();
+      //
+      // desiredAcceleration.set(nextVelocity);
+      // desiredAcceleration.sub(previousVelocity);
+      // desiredAcceleration.scale(0.5 * (double) numberOfTimeIntervals / stepTime.getDoubleValue());
 
    }
 
@@ -243,31 +231,15 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setTrajectoryParameters()
    {
-      TrajectoryParameters trajectoryParameters = trajectoryParametersProvider.getTrajectoryParameters();
-
-      if (trajectoryParameters instanceof TwoWaypointTrajectoryParameters)
-      {
-         this.trajectoryParameters = (TwoWaypointTrajectoryParameters) trajectoryParameters;
-      }
-
-      else if (trajectoryParameters == null)
-      {
-         this.trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters();
-      }
-
-      else
-      {
-         throw new RuntimeException(
-               "trajectoryParametersProvider must provide TwoWaypointPositionTrajectoryGenerator with an instance of TwoWaypointTrajectoryParameters.");
-      }
+      this.trajectoryParameters = trajectoryParametersProvider.getTrajectoryParameters();
    }
 
    private void setLinearSplineLengthFactor(double[] arcLengths)
    {
       double portionOfArcLengthInMiddleSpline = arcLengths[1] / (arcLengths[0] + arcLengths[1] + arcLengths[2]);
       linearSplineLengthFactor.set(2.0
-            * Math.max(SimpleTwoWaypointTrajectoryParameters.getMinimumDesiredProportionOfArcLengthTakenAtConstantSpeed() - portionOfArcLengthInMiddleSpline,
-                  0.0) * (1 / (1 - portionOfArcLengthInMiddleSpline)));
+                                   * Math.max(TwoWaypointTrajectoryGeneratorParameters.getMinimumDesiredProportionOfArcLengthTakenAtConstantSpeed()
+                                      - portionOfArcLengthInMiddleSpline, 0.0) * (1 / (1 - portionOfArcLengthInMiddleSpline)));
    }
 
    private void setWaypointAndAccelerationEndpointTimesAndVelocities(double[] arcLengths)
@@ -308,6 +280,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double[] arcLengths = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
       double totalArcLength = getTotalArcLength(arcLengths);
       double arcLengthOfMiddleSpline = arcLengths[1];
+
       return arcLengthOfMiddleSpline < WAYPOINT_CLOSENESS_FACTOR * totalArcLength;
    }
 
@@ -360,20 +333,20 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double initialSpeed = allVelocities[0].length();
       double finalSpeed = allVelocities[5].length();
 
-      return 2 * arcLengths[0] / (initialSpeed + waypointSpeed) + (arcLengths[1] + arcLengths[2] + arcLengths[3]) / waypointSpeed + 2 * arcLengths[4]
-            / (waypointSpeed + finalSpeed);
+      return 2 * arcLengths[0] / (initialSpeed + waypointSpeed) + (arcLengths[1] + arcLengths[2] + arcLengths[3]) / waypointSpeed
+             + 2 * arcLengths[4] / (waypointSpeed + finalSpeed);
    }
 
    private void setAccelerationEndpointPositions()
    {
-      for (int i : new int[] { 0, 1 })
+      for (int i : new int[] {0, 1})
       {
          FrameVector waypointToEndpoint = getWaypointToEndpoint(i);
 
          FrameVector oppositeWaypointToEndpoint = getOppositeWaypointToEndpoint(i);
 
          double scaleFactor = waypointToEndpoint.dot(oppositeWaypointToEndpoint) / oppositeWaypointToEndpoint.length()
-               * linearSplineLengthFactor.getDoubleValue();
+                              * linearSplineLengthFactor.getDoubleValue();
 
          oppositeWaypointToEndpoint.normalize();
          oppositeWaypointToEndpoint.scale(scaleFactor);
@@ -449,31 +422,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    protected void setWaypointPositions()
    {
-      List<FramePoint> waypoints = null;
-      waypointGenerationMethod.set(trajectoryParameters.getWaypointGenerationMethod());
-
-      switch (waypointGenerationMethod.getEnumValue())
-      {
-      case STEP_ON_OR_OFF:
-         waypoints = getWaypointsForStepOnOrOff();
-
-         break;
-
-      case BY_BOX:
-         waypoints = getWaypointsFromABox(trajectoryParameters.getBox());
-
-         break;
-         
-      case LOW_HEIGHT:
-         waypoints = getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue()/2);
-
-         break;
-
-      default:
-         waypoints = getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue());
-
-         break;
-      }
+      List<FramePoint> waypoints = getWaypointsFromTrajectoryParameters(trajectoryParameters);
 
       for (int i = 0; i < 2; i++)
       {
@@ -506,26 +455,50 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
    }
 
-   private List<FramePoint> getWaypointsForStepOnOrOff()
+   private List<FramePoint> getWaypointsFromTrajectoryParameters(TrajectoryParameters trajectoryParameters)
+   {
+      double swingHeight = trajectoryParameters.getSwingHeight();
+      swingHeight = Math.max(swingHeight, TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+
+      switch (trajectoryParameters.getTrajectoryType())
+      {
+         case OBSTACLE_CLEARANCE :
+            return getWaypointsForObstacleClearance(swingHeight);
+
+         case PUSH_RECOVERY :
+            return getWaypointsAtGroundClearance(TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+
+         case BASIC :
+            return getWaypointsAtGroundClearance(swingHeight);
+
+         case DEFAULT :
+         default :
+            return getWaypointsAtGroundClearance(TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+      }
+   }
+
+   private List<FramePoint> getWaypointsForObstacleClearance(double swingHeight)
    {
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
       waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
       waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
-      int indexOfMaxZ = (waypoints.get(0).getZ() > waypoints.get(1).getZ()) ? 0 : 1;
 
-      double maxZ = waypoints.get(indexOfMaxZ).getZ();
+      double zSwingHeight = waypoints.get(0).getZ() + swingHeight;
+
+      // safety, should always clear the ground for the other end foot
+      zSwingHeight = Math.max(zSwingHeight, waypoints.get(1).getZ() + TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
 
       for (FramePoint waypoint : waypoints)
       {
-         waypoint.setZ(maxZ + defaultGroundClearance.getDoubleValue());
+         waypoint.setZ(zSwingHeight);
       }
 
       FrameVector planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
       planarEndpointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
       planarEndpointOffset.setZ(0.0);
 
-      double[] fractionsOfStepDistanceToMoveWaypointForStepOnOrOff = SimpleTwoWaypointTrajectoryParameters
-            .getStepOnOrOffProportionsThroughTrajectoryForGroundClearance();
+      double[] fractionsOfStepDistanceToMoveWaypointForStepOnOrOff =
+         TwoWaypointTrajectoryGeneratorParameters.getStepOnOrOffProportionsThroughTrajectoryForGroundClearance();
 
       for (int i = 0; i < 2; i++)
       {
@@ -543,7 +516,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private List<FramePoint> getWaypointsAtGroundClearance(double groundClearance)
    {
-      return getWaypointsAtGroundClearance(groundClearance, SimpleTwoWaypointTrajectoryParameters.getDefaultProportionsThroughTrajectoryForGroundClearance());
+      return getWaypointsAtGroundClearance(groundClearance,
+              TwoWaypointTrajectoryGeneratorParameters.getDefaultProportionsThroughTrajectoryForGroundClearance());
    }
 
    private List<FramePoint> getWaypointsAtGroundClearance(double groundClearance, double[] proportionsThroughTrajectoryForGroundClearance)
@@ -556,13 +530,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       finalPosition.changeFrame(referenceFrame);
 
       List<FramePoint> waypoints = getWaypointsAtSpecifiedGroundClearance(initialPosition, finalPosition, groundClearance,
-            proportionsThroughTrajectoryForGroundClearance);
+                                      proportionsThroughTrajectoryForGroundClearance);
 
       return waypoints;
    }
 
    public static List<FramePoint> getWaypointsAtSpecifiedGroundClearance(FramePoint initialPosition, FramePoint finalPosition, double groundClearance,
-         double[] proportionsThroughTrajectoryForGroundClearance)
+           double[] proportionsThroughTrajectoryForGroundClearance)
    {
       List<FramePoint> waypoints = new ArrayList<FramePoint>();
       waypoints.add(new FramePoint(initialPosition.getReferenceFrame()));
@@ -605,7 +579,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
 
       concatenatedSplines.setCubicLinearQuinticLinearCubic(nonAccelerationEndpointTimes, nonAccelerationEndpointPositions, nonAccelerationEndpointVelocities,
-            accelerationEndpointTimes);
+              accelerationEndpointTimes);
    }
 
    private void visualizeSpline()
@@ -634,82 +608,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 
-   // TODO cleanup
-   private List<FramePoint> getWaypointsFromABox(FrameBox3d box)
-   {
-      ReferenceFrame boxFrame = box.getReferenceFrame();
-
-      FramePoint boxFrameInitialPosition = allPositions[endpointIndices[0]].getFramePointCopy();
-      FramePoint boxFrameFinalPosition = allPositions[endpointIndices[1]].getFramePointCopy();
-      boxFrameInitialPosition.changeFrame(boxFrame);
-      boxFrameFinalPosition.changeFrame(boxFrame);
-
-      FramePoint[] xyPlaneBoxIntersections = new FramePoint[2];
-      int index = 0;
-      double a = (boxFrameFinalPosition.getY() - boxFrameInitialPosition.getY()) / (boxFrameFinalPosition.getX() - boxFrameInitialPosition.getX());
-      double b = boxFrameInitialPosition.getY() - a * boxFrameInitialPosition.getX();
-      Vector3d halfSideLengthsXY = new Vector3d(0.5 * box.getDimension(Direction.X), 0.5 * box.getDimension(Direction.Y), 0.0);
-      double zVal = walkingControllerParameters.getAnkleHeight() + SimpleTwoWaypointTrajectoryParameters.getLowStepGroundClearance();
-
-      for (double sign : new double[] { -1.0, 1.0 })
-      {
-         double xEdge = sign * halfSideLengthsXY.x;
-         double yEdge = sign * halfSideLengthsXY.y;
-         double xGuess = (yEdge - b) / a;
-         double yGuess = a * xEdge + b;
-
-         if ((Math.abs(yGuess) <= halfSideLengthsXY.y) && (index < 2))
-         {
-            xyPlaneBoxIntersections[index] = new FramePoint(boxFrame, xEdge, yGuess, zVal);
-            index++;
-         }
-
-         if ((Math.abs(xGuess) <= halfSideLengthsXY.x) && (index < 2))
-         {
-            xyPlaneBoxIntersections[index] = new FramePoint(boxFrame, xGuess, yEdge, zVal);
-            index++;
-         }
-      }
-
-      // return default waypoints at height of box if there are no intersections
-      if (index != 2 || ((boxFrameFinalPosition.getX() > (halfSideLengthsXY.x) == (boxFrameInitialPosition.getX() > (halfSideLengthsXY.x))))
-            || ((boxFrameFinalPosition.getY() > (halfSideLengthsXY.y) == (boxFrameInitialPosition.getY() > (halfSideLengthsXY.y)))))
-      {
-         return getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue());
-      }
-
-      // reorder intersections so closer one to initial position is first
-      if (xyPlaneBoxIntersections[0].distance(boxFrameInitialPosition) > xyPlaneBoxIntersections[1].distance(boxFrameInitialPosition))
-      {
-         FramePoint tempPoint = xyPlaneBoxIntersections[1];
-         xyPlaneBoxIntersections[1] = xyPlaneBoxIntersections[0];
-         xyPlaneBoxIntersections[0] = tempPoint;
-      }
-
-      List<FramePoint> waypoints = new ArrayList<FramePoint>();
-      for (FramePoint intersectionPoint : xyPlaneBoxIntersections)
-      {
-         intersectionPoint.changeFrame(referenceFrame);
-         waypoints.add(intersectionPoint);
-      }
-
-      // shift waypoints away from box by ankle to toe/heel distance
-      FrameVector directionOfFootstep = new FrameVector(boxFrame);
-      directionOfFootstep.sub(boxFrameFinalPosition, boxFrameInitialPosition);
-      directionOfFootstep.changeFrame(referenceFrame);
-      directionOfFootstep.normalize();
-      double[] waypointShiftsToAvoidFootCollision = new double[] { -walkingControllerParameters.getFootForwardOffset(),
-            walkingControllerParameters.getFootBackwardOffset() };
-      for (int i = 0; i < 2; i++)
-      {
-         FrameVector waypointShift = new FrameVector(directionOfFootstep);
-         waypointShift.scale(waypointShiftsToAvoidFootCollision[i]);
-         waypoints.get(i).add(waypointShift);
-      }
-
-      return waypoints;
-   }
-
+   @Override
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       get(positionToPack);

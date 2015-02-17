@@ -350,7 +350,7 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
    }
 
-   public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
+   public void setFootstep(Footstep footstep)
    {
       // TODO Used to pass the desireds from the toe off state to swing state. Clean that up.
       if (stateMachine.getCurrentStateEnum() == ConstraintType.TOES)
@@ -360,7 +360,7 @@ public class FootControlModule
          onToesState.getDesireds(initialOrientation, initialAngularVelocity);
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
-      swingState.setFootstep(footstep, trajectoryParameters, false);
+      swingState.setFootstep(footstep, false);
    }
 
    public void setFootPose(FramePose footPose, double trajectoryTime)
