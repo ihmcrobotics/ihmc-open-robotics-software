@@ -1678,7 +1678,20 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return myEntryBoxArrayPanel.getCurrentPanel(true);
    }
 
-   public void createNewEntryBoxTabFromEntryBoxGroup(String name)
+   
+   public void createNewEntryBoxTabFromEntryBoxGroup(final String name)
+   {
+      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      {
+         public void run()
+         {
+            createNewEntryBoxTabFromEntryBoxGroupLocal(name);
+         }
+      });
+   }
+   
+   
+   public void createNewEntryBoxTabFromEntryBoxGroupLocal(String name)
    {
       //      
       if (myEntryBoxArrayPanel.getTabCount() > 0)
