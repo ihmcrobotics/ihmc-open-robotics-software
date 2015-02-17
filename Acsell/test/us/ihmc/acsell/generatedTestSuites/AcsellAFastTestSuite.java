@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.acsell.BonoFlatGroundWalkingKinematicFootSwitchTest.class,
-   us.ihmc.acsell.BonoFlatGroundWalkingTest.class,
+   us.ihmc.acsell.BonoFlatGroundWalkingTest.class
 })
 
 public class AcsellAFastTestSuite
