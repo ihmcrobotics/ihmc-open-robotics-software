@@ -51,6 +51,9 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame midFeetZUpFrame;
 
+   private RigidBodyTransform debrisTransform;
+   private Point3d graspPosition;
+   private Vector3d graspVector;
    private RobotSide robotSide;
    private final double trajectoryTime = 2.5;
    private final double wristOffset = 0.14;
@@ -65,6 +68,8 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final SDFFullRobotModel graspingDebrisRobot;
    private final SDFFullRobotModel approachingDebrisRobot;
+
+   private final BooleanYoVariable hasTasksBeenSetUp;
 
    public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrame midFeetZUpFrame, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
@@ -83,7 +88,8 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet" + behaviorName, registry);
-
+      hasTasksBeenSetUp = new BooleanYoVariable("hasTasksBeenSetUp" + behaviorName, registry);
+      
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();
       graspingDebrisRobot = wholeBodyControllerParameters.createFullRobotModel();
       approachingDebrisRobot = wholeBodyControllerParameters.createFullRobotModel();
@@ -95,9 +101,11 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       {
          throw new RuntimeException("graspVector has not been set!");
       }
-      this.robotSide = robotSide;
       wholeBodyIKBehavior.setPositionAndOrientationErrorTolerance(0.05, 0.3);
-      setTasks(debrisTransform, graspPosition, graspVector);
+      this.debrisTransform = debrisTransform;
+      this.graspPosition = graspPosition;
+      this.graspVector = graspVector;
+      this.robotSide = robotSide;
       haveInputsBeenSet.set(true);
    }
 
@@ -193,6 +201,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       try
       {
          ComputeResult computeResult = wholeBodyIKSolver.compute(actualRobotModel, desiredRobotModelToPack, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+         System.out.println(computeResult);
       }
       catch (Exception e)
       {
@@ -210,6 +219,13 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      if(!hasTasksBeenSetUp.getBooleanValue())
+      {
+         setTasks(debrisTransform, graspPosition, graspVector);
+         hasTasksBeenSetUp.set(true);
+      }
+      else
+      {
       if (pipeLine.getCurrentStage() instanceof WholeBodyInverseKinematicTask)
       {
          if (!wholeBodyIKBehavior.hasSolutionBeenFound())
@@ -218,6 +234,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
          }
       }
       pipeLine.doControl();
+      }
    }
 
    @Override
@@ -291,6 +308,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    public void finalize()
    {
       haveInputsBeenSet.set(false);
+      hasTasksBeenSetUp.set(false);
    }
 
    @Override
@@ -300,6 +318,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       wholeBodyIKSolver.getHierarchicalSolver().collisionAvoidance.setEnabled(true);
 
       haveInputsBeenSet.set(false);
+      hasTasksBeenSetUp.set(false);
    }
 
    @Override
