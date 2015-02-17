@@ -3,9 +3,9 @@ package us.ihmc.valkyrie;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseEveryBuildTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.UnfinishedTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ExcludedTest;
 
-@UnfinishedTest() // Crashes Bamboo
+@ExcludedTest() // Crashes Bamboo
 public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
 {
 
