@@ -7,8 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasRemoveSingleDebrisBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasRotateHandAboutAxisBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class
 })
 
 public class AtlasDInDevelopmentTestSuite
