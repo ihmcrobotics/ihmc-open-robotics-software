@@ -41,6 +41,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointTaus = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, YoFrameQuaternion> inputOrientations = new LinkedHashMap<>();
@@ -53,6 +54,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointTaus = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedOrientations = new LinkedHashMap<>();
@@ -61,6 +63,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointVelocities = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointTaus = new LinkedHashMap<>();
 
    private final ArrayList<IMUSensor> outputIMUs = new ArrayList<IMUSensor>();
@@ -96,6 +99,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          inputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          outputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          processedJointVelocities.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
+         
+         DoubleYoVariable rawJointAcceleration = new DoubleYoVariable("raw_qdd_" + jointName, registry);
+         inputJointAccelerations.put(oneDoFJoint, rawJointAcceleration);
+         outputJointAccelerations.put(oneDoFJoint, rawJointAcceleration);
+         processedJointAccelerations.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
          DoubleYoVariable rawJointTau = new DoubleYoVariable("raw_tau_" + jointName, registry);
          inputJointTaus.put(oneDoFJoint, rawJointTau);
@@ -148,6 +156,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          
          updateProcessors(processedJointPositions.get(oneDoFJoint));
          updateProcessors(processedJointVelocities.get(oneDoFJoint));
+         updateProcessors(processedJointAccelerations.get(oneDoFJoint));
          updateProcessors(processedJointTaus.get(oneDoFJoint));
       }
       
@@ -278,8 +287,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, jointVelocity);
       }
+      
+      computeJointAccelerations(alphaFilter, jointsToIgnore);
    }
 
+   
    /**
     * Compute the joint velocities by calculating finite-difference on joint positions and applying a backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
@@ -334,6 +346,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, jointVelocity);
       }
+      
+      computeJointAccelerations(alphaFilter, jointsToIgnore);
    }
 
    /**
@@ -389,7 +403,41 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
       }
+      
+      computeJointAccelerations(alphaFilter, jointsToIgnore);
    }
+   
+   
+   /**
+    * Computes the joint accelerations from the joint velocity variables using a FilteredVelocityYoVariable.
+    * @param alphaFilter
+    * @param jointsToIgnore
+    */
+   private void computeJointAccelerations(DoubleYoVariable alphaFilter, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
+         String suffix = ""; //"_sp" + processors.size();
+         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable("filt_qdd_" + jointName + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
+         processors.add(jointAcceleration);
+
+         //         if (!forVizOnly)
+         outputJointAccelerations.put(oneDoFJoint, jointAcceleration);
+      }
+   }
+   
 
    /**
     * Add a low-pass filter stage on the orientations provided by the IMU sensors.
@@ -592,6 +640,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    {
       inputJointVelocities.get(oneDoFJoint).set(value);
    }
+   
+   public void setJointAccelerationSensorValue(OneDoFJoint oneDoFJoint, double value)
+   {
+      inputJointAccelerations.get(oneDoFJoint).set(value);
+   }
 
    public void setJointTauSensorValue(OneDoFJoint oneDoFJoint, double value)
    {
@@ -628,6 +681,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
    {
       return outputJointVelocities.get(oneDoFJoint).getDoubleValue();
+   }
+   
+   @Override
+   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      return outputJointAccelerations.get(oneDoFJoint).getDoubleValue();
    }
 
    public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
