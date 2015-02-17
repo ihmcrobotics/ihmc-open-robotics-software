@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsTerrainTest.class,
 })
 
-public class AtlasBSlowTestSuite
+public class AtlasBFlakyTestSuite
 {
    public static void main(String[] args)
    {
