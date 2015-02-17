@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Slow})
+@BambooPlan(planType = {BambooPlanType.Flaky})
 public class AtlasFingerStateBehaviorTest extends DRCFingerStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
