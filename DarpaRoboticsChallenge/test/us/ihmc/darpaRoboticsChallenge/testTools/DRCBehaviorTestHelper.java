@@ -338,10 +338,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return stopThreadUpdatable;
    }
 
-   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final BehaviorInterface behavior, double pauseTime, double resumeTime, double stopTime,
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final BehaviorInterface behavior, double pauseTime, double pauseDuration, double stopTime,
          ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
    {
-      StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver, behavior, pauseTime, resumeTime, stopTime,
+      StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver, behavior, pauseTime, pauseDuration, stopTime,
             frameToKeepTrackOf);
 
       boolean success = executeBehaviorPauseAndResumeOrStop(behavior, stopThreadUpdatable);

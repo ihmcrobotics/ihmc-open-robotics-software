@@ -19,13 +19,13 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
    private final double resumeTime;
    private final double stopTime;
 
-   public TimeBasedStopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pauseTime, double resumeTime, double stopTime,
+   public TimeBasedStopThreadUpdatable(RobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pauseTime, double pauseDuration, double stopTime,
          ReferenceFrame frameToKeepTrackOf)
    {
       super(robotDataReceiver, behavior, frameToKeepTrackOf);
 
       this.pauseTime = pauseTime;
-      this.resumeTime = resumeTime;
+      this.resumeTime = pauseTime + pauseDuration;
       this.stopTime = stopTime;
    }
 
