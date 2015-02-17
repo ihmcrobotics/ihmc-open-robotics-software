@@ -15,7 +15,7 @@ import org.junit.runners.Suite;
    us.ihmc.imageProcessing.segmentation.GaussianColorClassifierTest.class,
    us.ihmc.imageProcessing.segmentation.LabeledPixelCodecTest.class,
    us.ihmc.imageProcessing.sfm.EstimateGroundPlaneFromFeaturesTest.class,
-   us.ihmc.imageProcessing.sfm.ImageToGroundMapTest.class,
+   us.ihmc.imageProcessing.sfm.ImageToGroundMapTest.class
 })
 
 public class ImageProcessingAFastTestSuite

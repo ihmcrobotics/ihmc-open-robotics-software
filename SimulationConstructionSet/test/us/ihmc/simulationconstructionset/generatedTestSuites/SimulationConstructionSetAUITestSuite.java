@@ -14,7 +14,7 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.SimulationConstructionSetMemoryReclamationTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetRootRegistryTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetSetupTest.class,
-   us.ihmc.simulationconstructionset.SimulationConstructionSetUsingDirectCallsTest.class,
+   us.ihmc.simulationconstructionset.SimulationConstructionSetUsingDirectCallsTest.class
 })
 
 public class SimulationConstructionSetAUITestSuite

@@ -18,7 +18,7 @@ import org.junit.runners.Suite;
    us.ihmc.graphics3DAdapter.jme.lidar.JMEGPULidarTest.class,
    us.ihmc.graphics3DAdapter.jme.loaders.NormalCalculatorTest.class,
    us.ihmc.graphics3DAdapter.jme.util.JMEPointCloudVisualizerTest.class,
-   us.ihmc.graphics3DAdapter.utils.GraphicsDemoToolsTest.class,
+   us.ihmc.graphics3DAdapter.utils.GraphicsDemoToolsTest.class
 })
 
 public class Graphics3DAdapterAUITestSuite

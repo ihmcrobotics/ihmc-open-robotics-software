@@ -9,7 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasGraspPieceOfDebrisBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class
 })
 
 public class AtlasAInDevelopmentTestSuite

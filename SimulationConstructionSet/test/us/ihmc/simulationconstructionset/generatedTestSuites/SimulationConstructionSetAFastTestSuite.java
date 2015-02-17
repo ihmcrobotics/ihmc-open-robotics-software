@@ -69,7 +69,7 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.whiteBoard.YoWhiteBoardTest.class,
    us.ihmc.simulationconstructionset.yoUtilities.math.filters.AccelerationLimitedYoVariableTest.class,
    us.ihmc.simulationconstructionset.YoVariableHolderImplementationNewTest.class,
-   us.ihmc.simulationconstructionset.YoVariableHolderImplementationTest.class,
+   us.ihmc.simulationconstructionset.YoVariableHolderImplementationTest.class
 })
 
 public class SimulationConstructionSetAFastTestSuite

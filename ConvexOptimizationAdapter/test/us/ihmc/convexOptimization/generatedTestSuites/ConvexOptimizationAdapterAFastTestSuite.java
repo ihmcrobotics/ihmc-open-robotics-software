@@ -12,7 +12,7 @@ import org.junit.runners.Suite;
    us.ihmc.convexOptimization.jOptimizer.SimpleJOptimizerTest.class,
    us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class,
-   us.ihmc.convexOptimization.randomSearch.RandomSearchConvexOptimizationAdapterTest.class,
+   us.ihmc.convexOptimization.randomSearch.RandomSearchConvexOptimizationAdapterTest.class
 })
 
 public class ConvexOptimizationAdapterAFastTestSuite
