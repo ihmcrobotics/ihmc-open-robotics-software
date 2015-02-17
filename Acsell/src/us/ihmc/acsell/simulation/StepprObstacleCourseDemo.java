@@ -10,8 +10,9 @@ public class StepprObstacleCourseDemo
    public static void main(String[] args)
    {
       DRCRobotModel robotModel = new BonoRobotModel(false, false);
-      boolean runMultiThreaded = true;
-      DRCSimulationStarter createDRCDemo01SimulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(runMultiThreaded, robotModel);
+      DRCSimulationStarter createDRCDemo01SimulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
+      createDRCDemo01SimulationStarter.setRunMultiThreaded(true);
+      
       DRCSimulationTools.startSimulationWithGraphicSelector(createDRCDemo01SimulationStarter);
    }
 }
