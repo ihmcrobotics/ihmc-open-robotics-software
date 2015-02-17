@@ -27,7 +27,7 @@ import org.junit.runners.Suite;
    us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.PointPositionMeasurementModelElementTest.class,
    us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.PointVelocityMeasurementModelElementTest.class,
    us.ihmc.sensorProcessing.stateEstimation.OrientationAndPositionFullRobotModelUpdaterTest.class,
-   us.ihmc.sensorProcessing.stateEstimation.YoPointPositionDataObjectListOutputPortTest.class,
+   us.ihmc.sensorProcessing.stateEstimation.YoPointPositionDataObjectListOutputPortTest.class
 })
 
 public class SensorProcessingAFastTestSuite

@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class
 })
 
 public class AtlasEInDevelopmentTestSuite

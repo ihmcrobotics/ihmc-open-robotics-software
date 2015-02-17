@@ -8,7 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class
 })
 
 public class AtlasFVideoATestSuite

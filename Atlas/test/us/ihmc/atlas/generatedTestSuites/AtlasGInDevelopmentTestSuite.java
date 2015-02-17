@@ -9,7 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.behaviorTests.AtlasWholeBodyInverseKinematicBehaviorTest.class,
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class
 })
 
 public class AtlasGInDevelopmentTestSuite
