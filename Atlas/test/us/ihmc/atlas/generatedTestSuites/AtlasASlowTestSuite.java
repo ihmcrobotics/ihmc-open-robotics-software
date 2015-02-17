@@ -7,13 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFingerStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFootPoseBehaviorTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class,
 })
 
 public class AtlasASlowTestSuite
