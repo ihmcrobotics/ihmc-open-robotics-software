@@ -18,8 +18,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class PersistentTCPClientTest
 {
 
-	@AverageDuration
-	@Test(timeout=4000)
+	@AverageDuration(duration = 0.6)
+	@Test(timeout = 30000)
    public void test() throws IOException
    {
       String serverIPAddress = "localHost";

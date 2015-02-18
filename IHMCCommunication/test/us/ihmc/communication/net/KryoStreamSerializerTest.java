@@ -14,8 +14,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class KryoStreamSerializerTest
 {
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 0.1)
+	@Test(timeout = 30000)
    public void test() throws IOException
    {
       KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(14);

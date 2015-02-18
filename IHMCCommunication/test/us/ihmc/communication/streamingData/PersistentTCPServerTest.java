@@ -19,8 +19,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class PersistentTCPServerTest
 {
 
-	@AverageDuration
-	@Test(timeout=6000)
+	@AverageDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {
       EstablishedConnectionCounter establishedConnectionCounter = new EstablishedConnectionCounter();
