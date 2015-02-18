@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingHeightTrajectoryCalculatorTest;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(Suite.class)
@@ -50,7 +51,7 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.trajectories.CirclePositionTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmootherTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.Constrained5thOrderPolyForSwingTrajectoryTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ConvexHullTrajectoryGeneratorTest.class,
+   SwingHeightTrajectoryCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.EndPointConstrainedCubicTrajectoryTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SmoothenedConstantCoPICPTrajectoryGeneratorTest.class,
