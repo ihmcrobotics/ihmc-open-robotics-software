@@ -11,7 +11,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
    us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
    us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
    us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
    us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
