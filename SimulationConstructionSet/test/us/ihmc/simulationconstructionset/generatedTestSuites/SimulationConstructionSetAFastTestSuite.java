@@ -45,7 +45,6 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObjectTest.class,
    us.ihmc.simulationconstructionset.util.ground.DoubleStepGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.FlatGroundProfileTest.class,
-   us.ihmc.simulationconstructionset.util.ground.Ramp3dDeleteMeTest.class,
    us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObjectTest.class,
    us.ihmc.simulationconstructionset.util.ground.RotatableRampTerrainObjectTest.class,
    us.ihmc.simulationconstructionset.util.ground.ShipCorridorGroundProfileTest.class,
