@@ -176,9 +176,12 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
       
-      DrillTaskBehavior drillTaskBehavior = new DrillTaskBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
-            walkingControllerParameters, wholeBodyControllerParameters);
-      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK, drillTaskBehavior);
+      if(wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
+      {
+            DrillTaskBehavior drillTaskBehavior = new DrillTaskBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
+               walkingControllerParameters, wholeBodyControllerParameters);
+         dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK, drillTaskBehavior);
+      }
    }
 
    public PacketCommunicator getCommunicator()
