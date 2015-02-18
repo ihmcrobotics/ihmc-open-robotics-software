@@ -9,26 +9,27 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ChestOrientationTask extends BehaviorTask
 {
-   private static final boolean DEBUG = false;
    private final ChestOrientationPacket chestOrientationPacket;
    private final ChestOrientationBehavior chestOrientationBehavior;
 
-
    public ChestOrientationTask(ChestOrientationPacket chestOrientationPacket, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior)
    {
-      super(chestOrientationBehavior, yoTime);
+      this(chestOrientationPacket, yoTime, chestOrientationBehavior, 0.0);
+   }
+
+   public ChestOrientationTask(ChestOrientationPacket chestOrientationPacket, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior, double sleepTime)
+   {
+      super(chestOrientationBehavior, yoTime, sleepTime);
       this.chestOrientationBehavior = chestOrientationBehavior;
       this.chestOrientationPacket = chestOrientationPacket;
    }
    
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior,
-         double trajectoryTime)
+   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior, double trajectoryTime)
    {
       this(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime, 0.0);
    }
 
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior,
-         double trajectoryTime, double sleepTime)
+   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestOrientationBehavior chestOrientationBehavior, double trajectoryTime, double sleepTime)
    {
       super(chestOrientationBehavior, yoTime, sleepTime);
       this.chestOrientationBehavior = chestOrientationBehavior;
