@@ -67,7 +67,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    {
       if( modelLocationPathString == null)
       {
-         String urdf_filename = "models/atlas_v4_robotiq.wb.urdf";
+         String urdf_filename = "models/atlas_unplugged.wb.urdf";
 
          /// load the file. But first copy it on $HOME/.ihmc
          InputStream resource = getClass().getClassLoader().getResourceAsStream(urdf_filename);
@@ -159,7 +159,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       taskJointsPose.setMaximumError(0.6);
 
       this.setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
-      this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_NONE);
+      this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_3P);
 
       //--------------------------------------------------
       // Important: you can't activate a joint in higher priorities and disable it later
