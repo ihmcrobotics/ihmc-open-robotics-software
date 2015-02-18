@@ -1,4 +1,4 @@
-package us.ihmc.communication.generatedTestSuites;
+package us.ihmc.utilities.ros.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -7,11 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
-   us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class
+   us.ihmc.utilities.ros.AddTwoIntsServiceTest.class
 })
 
-public class IHMCCommunicationAFlakyTestSuite
+public class IHMCROSToolsAFlakyTestSuite
 {
    public static void main(String[] args)
    {
