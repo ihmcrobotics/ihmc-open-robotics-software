@@ -1,11 +1,14 @@
 function [cloud color]= getACloud(sub)
 
-    sub.setOnNewMessageListeners({@(x) assignin('base','cloud_',x)});
+    evalin('base','clear cloud_');
+    sub.setOnNewMessageListeners({@(x) assignin('base','cloud_',x), @(x) disp(['cloudCallback ' num2str(x.getHeader.getSeq)])});
     
     %wait for cloud
     while 1
         try
+            drawnow
             cloud_=evalin('base','cloud_;');
+            sub.setOnNewMessageListeners({});
             break;
         catch
             fprintf(1,'.');
@@ -35,4 +38,3 @@ function [cloud color]= getACloud(sub)
     end
         
 
-    sub.setOnNewMessageListeners({});

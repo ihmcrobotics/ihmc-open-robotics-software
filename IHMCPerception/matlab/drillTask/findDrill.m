@@ -12,13 +12,13 @@ function [drillCloud tableCloud]= findDrill(cloud, planeTolerance, clickedPoint)
     planeNormal = planeNormal ./ norm(planeNormal);
     tableCenter = mean(cloud(1:3,inliers),2);
 
-    debug=1
+    debug=0;
     if debug
         cla
         hold on
-        plotCloud(cloud);
-        hInlier=plotCloud(cloud);
-        set(hInlier,'MarkerFaceColor','r');
+        plotCloud(tableCloud);
+        hTable=plotCloud(tableCloud);
+        set(hTable,'MarkerFaceColor','r');
 
         drawLine = @(x,y,c) plot3([x(1) y(1)], [x(2),y(2)], [x(3),y(3)],c,'LineWidth',3);
         drawLine(tableCenter, tableCenter+planeNormal*0.3, 'b');
@@ -26,3 +26,4 @@ function [drillCloud tableCloud]= findDrill(cloud, planeTolerance, clickedPoint)
         plot3(clickedPoint(1),clickedPoint(2),clickedPoint(3),'g.','MarkerSize',100)
         hold off
     end
+    
