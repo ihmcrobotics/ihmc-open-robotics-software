@@ -49,7 +49,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    
-	@AverageDuration
+	@AverageDuration(duration = 15.0)
 	@Test(timeout=300000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
@@ -72,7 +72,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @AverageDuration(duration = 30.0)
    @Test(timeout=300000)
    public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
