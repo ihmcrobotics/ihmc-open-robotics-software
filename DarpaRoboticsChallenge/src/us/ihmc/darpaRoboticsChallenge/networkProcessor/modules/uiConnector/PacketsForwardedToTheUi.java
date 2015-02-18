@@ -31,23 +31,19 @@ public class PacketsForwardedToTheUi
    
    public static Class[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
       FootstepStatus.class,                          
-      CapturabilityBasedStatus.class,                
       ScriptBehaviorStatusPacket.class,
-      CapturabilityBasedStatus.class,
       PelvisPoseErrorPacket.class,                   
       HumanoidBehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,                 
       ControlStatusPacket.class,                     
       FootstepDataList.class,                        
-      HandPosePacket.class,                          
       ComHeightPacket.class,                         
       HeadOrientationPacket.class,                   
       PelvisPosePacket.class,                        
       ChestOrientationPacket.class,                  
       SnapFootstepPacket.class,
       VideoPacket.class,
-      HandJointAnglePacket.class,
-      RobotPoseData.class,
+      HandPosePacket.class,
       SparseLidarScanPacket.class,
       DepthDataClearCommand.class,
 //      HeadPosePacket.class,
@@ -57,6 +53,9 @@ public class PacketsForwardedToTheUi
    
    public static final HashMap<Class, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class, Long>();
    static {
+      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
+      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HandJointAnglePacket.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
+      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotConfigurationData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(AtlasWristFeetSensorPacket.class, UI_WRIST_FEET_SENSORS_UPDATE_MILLIS);
    }
