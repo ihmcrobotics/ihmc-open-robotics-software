@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
@@ -83,11 +84,7 @@ public class FootstepDataTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-    	  Point3d location = new Point3d();
-    	  Quat4d orientation = new Quat4d();
-    	  footstep.getPose(location, orientation);
-    	  
-         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
+         FootstepData footstepData = new FootstepData(footstep);
          tcpServer.send(footstepData);
 //         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
@@ -416,15 +413,9 @@ public class FootstepDataTest
          for (FootstepData footstepData : packet)
          {
             RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
+            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
-            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
-                  ReferenceFrame.getWorldFrame());
-
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
-            PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
-
-            boolean trustHeight = true;
-            Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), footstepData.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+            Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactablePlaneBody);
             reconstructedFootstepPath.add(footstep);
          }
       }
