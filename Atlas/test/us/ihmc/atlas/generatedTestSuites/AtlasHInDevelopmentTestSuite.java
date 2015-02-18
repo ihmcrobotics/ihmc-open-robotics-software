@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasWholeBodyInverseKinematicBehaviorTest.class,
+   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
    us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class
 })
