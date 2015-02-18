@@ -269,12 +269,16 @@ public class DiagnosticBehavior extends BehaviorInterface
       sequencePelvisRotations();
       sequenceMovingChestAndPelvisOnly();
 
-      submitHandPoses(new SideDependentList<double[]>(new double[] { 0.0, -Math.PI / 2.0, 0.0, 0.0 }, HumanoidArmPose.ARM_STRAIGHT_DOWN.getArmJointAngles()));
+      submitHandPoses(new SideDependentList<double[]>(
+            new double[] { 0.0, -Math.PI / 2.0, 0.0, 0.0 }, // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.0, halfPi
+            HumanoidArmPose.ARM_STRAIGHT_DOWN.getArmJointAngles()));
       sequenceChestRotations();
       sequencePelvisRotations();
       sequenceMovingChestAndPelvisOnly();
 
-      submitHandPoses(new SideDependentList<double[]>(HumanoidArmPose.ARM_STRAIGHT_DOWN.getArmJointAngles(), new double[] { 0.0, -Math.PI / 2.0, 0.0, 0.0 }));
+      submitHandPoses(new SideDependentList<double[]>(
+            HumanoidArmPose.ARM_STRAIGHT_DOWN.getArmJointAngles(),
+            new double[] { 0.0, -Math.PI / 2.0, 0.0, 0.0 })); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.0, halfPi
       sequenceChestRotations();
       sequencePelvisRotations();
       sequenceMovingChestAndPelvisOnly();
@@ -443,8 +447,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Go to running man pose:
       SideDependentList<double[]> desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { -Math.PI / 2.0, -0.3, 0.0, -Math.PI / 2.0 });
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { Math.PI / 2.0, -0.3, 0.0, -Math.PI / 2.0 });
+      desiredJointAngles.put(robotSide, new double[] { -Math.PI / 2.0, -0.3, 0.0, -Math.PI / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -Math.PI/2.0, 0.3
+      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { Math.PI / 2.0, -0.3, 0.0, -Math.PI / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, Math.PI/2.0, 0.3
       submitHandPoses(desiredJointAngles);
 
       FramePose footPose = new FramePose(ankleZUpFrame);
@@ -467,7 +471,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new NullTask());
 
       // Do a "Y" stance with the foot outside
-      submitSymmetricHandPose(new double[] { 0.0, -1.5 * Math.PI / 2.0, 0.0, 0.0 });
+      submitSymmetricHandPose(new double[] { 0.0, -1.5 * Math.PI / 2.0, 0.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.0, 2.3561
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.1);
@@ -670,12 +674,12 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Put the arm down
       double halfPi = Math.PI / 2.0;
-      double[] armDown2 = ensureJointAnglesSize(new double[] { 0.0, -0.4, halfPi / 2.0, 0.0 });
-      double[] armIntermediateOnWayUp = ensureJointAnglesSize(new double[] { 0.0, -halfPi, halfPi / 2.0, -halfPi / 2.0 });
-      double[] armUp1 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, halfPi / 2.0, 0.0 });
-      double[] armUp2 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, -halfPi / 2.0, 0.0 });
-      double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 });
-      double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 });
+      double[] armDown2 = ensureJointAnglesSize(new double[] { 0.0, -0.4, halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: -0.7443, 0.2789, 0.2905
+      double[] armIntermediateOnWayUp = ensureJointAnglesSize(new double[] { 0.0, -halfPi, halfPi / 2.0, -halfPi / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.7853, halfPi
+      double[] armUp1 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.6154, 0.5235, 2.5261
+      double[] armUp2 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, -halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: -0.6154, -0.5235, 2.5261
+      double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.7853, halfPi
+      double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.7443, -0.2789, 0.2905
 
       int numberOfHandPoses = 10;
       double[][] armFlyingSequence = new double[numberOfArmJoints][numberOfHandPoses];
@@ -721,8 +725,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
 
       // Put the arms in front
-      double[] armInFront = new double[] { -0.5, -0.6, 1.0, -halfPi };
-      submitSymmetricHandPose(new double[] { 0.0, -0.6, 0.0, -halfPi });
+      double[] armInFront = new double[] { -0.5, -0.6, 1.0, -halfPi }; // Equivalent yawPitchRoll upperArm/Chest: -0.7800, 0.1585, 0.7473
+      submitSymmetricHandPose(new double[] { 0.0, -0.6, 0.0, -halfPi }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.0, 0.6
 
       pipeLine.requestNewStage();
 
@@ -751,8 +755,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Supa powerful back kick!!!!!
       SideDependentList<double[]> desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { -0.8 * Math.PI / 2.0, -0.3, 0.4, -0.3 });
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.8 * Math.PI / 2.0, -0.3, 0.0, -0.3 });
+      desiredJointAngles.put(robotSide, new double[] { -0.8 * Math.PI / 2.0, -0.3, 0.4, -0.3 }); // Equivalent yawPitchRoll upperArm/Chest: -0.7566, -0.9980, 0.9947
+      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.8 * Math.PI / 2.0, -0.3, 0.0, -0.3 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 1.2566, 0.3
       submitHandPoses(desiredJointAngles);
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
@@ -773,8 +777,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // Supa powerful side kick!!!!!
-      desiredJointAngles.put(robotSide, new double[] { 0.0, -halfPi, 0.4, -0.1 });
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.PI / 2.0, -0.3, halfPi, -halfPi });
+      desiredJointAngles.put(robotSide, new double[] { 0.0, -halfPi, 0.4, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.4, halfPi
+      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.PI / 2.0, -0.3, halfPi, -halfPi }); // Equivalent yawPitchRoll upperArm/Chest: -1.2707, 0.0, 0.0
       submitHandPoses(desiredJointAngles);
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.85), 0.3);
