@@ -37,20 +37,21 @@ public class IndividualRobotiqHandController
 
    private final YoPolynomial yoPolynomial;
    private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTrajectoryTime, endTrajectoryTime, trajectoryTime;
-   private final BooleanYoVariable hasTrajectoryTimeChanged;
+   private final DoubleYoVariable startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
+   private final BooleanYoVariable hasTrajectoryTimeChanged, isStopped;
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
 
-   public IndividualRobotiqHandController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFRobot simulatedRobot, YoVariableRegistry parentRegistry)
+   public IndividualRobotiqHandController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFRobot simulatedRobot,
+         YoVariableRegistry parentRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       registry = new YoVariableRegistry(sidePrefix + name);
       parentRegistry.addChild(registry);
       this.robotSide = robotSide;
       this.yoTime = yoTime;
-      
+
       for (RobotiqHandJointNameMinimal jointEnum : RobotiqHandJointNameMinimal.values)
       {
          String jointName = jointEnum.getJointName(robotSide);
@@ -69,30 +70,32 @@ public class IndividualRobotiqHandController
 
          switch (jointEnum.getFinger(robotSide))
          {
-            case INDEX:
-               indexJoints.put(jointEnum, fingerJoint);
-               indexJointEnumValues.add(jointEnum);
-               break;
+         case INDEX:
+            indexJoints.put(jointEnum, fingerJoint);
+            indexJointEnumValues.add(jointEnum);
+            break;
 
-            case MIDDLE:
-               middleJoints.put(jointEnum, fingerJoint);
-               middleJointEnumValues.add(jointEnum);
-               break;
+         case MIDDLE:
+            middleJoints.put(jointEnum, fingerJoint);
+            middleJointEnumValues.add(jointEnum);
+            break;
 
-            case THUMB:
-               thumbJoints.put(jointEnum, fingerJoint);
-               thumbJointEnumValues.add(jointEnum);
-               break;
+         case THUMB:
+            thumbJoints.put(jointEnum, fingerJoint);
+            thumbJointEnumValues.add(jointEnum);
+            break;
 
-            default:
-               break;
+         default:
+            break;
          }
       }
 
       startTrajectoryTime = new DoubleYoVariable(sidePrefix + "StartTrajectoryTime", registry);
+      currentTrajectoryTime = new DoubleYoVariable(sidePrefix + "CurrentTrajectoryTime", registry);
       endTrajectoryTime = new DoubleYoVariable(sidePrefix + "EndTrajectoryTime", registry);
       this.trajectoryTime = trajectoryTime;
       hasTrajectoryTimeChanged = new BooleanYoVariable(sidePrefix + "HasTrajectoryTimeChanged", registry);
+      isStopped = new BooleanYoVariable(sidePrefix + "IsStopped", registry);
       trajectoryTime.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -123,7 +126,8 @@ public class IndividualRobotiqHandController
 
    public void open(double percent, FingerName fingerName)
    {
-      EnumMap<RobotiqHandJointNameMinimal, Double> openFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenHandDesiredConfiguration(robotSide);
+      EnumMap<RobotiqHandJointNameMinimal, Double> openFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations
+            .getOpenHandDesiredConfiguration(robotSide);
       computeOneFingerDesiredAngles(percent, openFingerDesiredConfiguration, fingerName);
    }
 
@@ -134,7 +138,8 @@ public class IndividualRobotiqHandController
 
    public void close(double percent)
    {
-      EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getClosedHandDesiredConfiguration(robotSide);
+      EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
+            .getClosedHandDesiredConfiguration(robotSide);
       computeAllFinalDesiredAngles(percent, closedHandDesiredConfiguration);
    }
 
@@ -145,13 +150,15 @@ public class IndividualRobotiqHandController
 
    public void close(double percent, FingerName fingerName)
    {
-      EnumMap<RobotiqHandJointNameMinimal, Double> closedFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations.getClosedHandDesiredConfiguration(robotSide);
+      EnumMap<RobotiqHandJointNameMinimal, Double> closedFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations
+            .getClosedHandDesiredConfiguration(robotSide);
       computeOneFingerDesiredAngles(percent, closedFingerDesiredConfiguration, fingerName);
    }
 
    public void hook()
    {
-      EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getClosedHandDesiredConfiguration(robotSide);
+      EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
+            .getClosedHandDesiredConfiguration(robotSide);
       EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenHandDesiredConfiguration(robotSide);
 
       computeIndexFinalDesiredAngles(1.0, openHandDesiredConfiguration);
@@ -167,6 +174,14 @@ public class IndividualRobotiqHandController
    public void crush(FingerName fingerName)
    {
       close(fingerName);
+   }
+
+   public void stop()
+   {
+      if (!isStopped.getBooleanValue())
+      {
+         isStopped.set(true);
+      }
    }
 
    public void reset()
@@ -191,18 +206,18 @@ public class IndividualRobotiqHandController
    {
       switch (fingerName)
       {
-         case INDEX:
-            computeIndexFinalDesiredAngles(percent, fingerDesiredConfiguration);
-            break;
+      case INDEX:
+         computeIndexFinalDesiredAngles(percent, fingerDesiredConfiguration);
+         break;
 
-         case MIDDLE:
-            computeMiddleFinalDesiredAngles(percent, fingerDesiredConfiguration);
-            break;
+      case MIDDLE:
+         computeMiddleFinalDesiredAngles(percent, fingerDesiredConfiguration);
+         break;
 
-         case THUMB:
-            computeThumbFinalDesiredAngles(percent, fingerDesiredConfiguration);
-         default:
-            break;
+      case THUMB:
+         computeThumbFinalDesiredAngles(percent, fingerDesiredConfiguration);
+      default:
+         break;
       }
    }
 
@@ -261,7 +276,7 @@ public class IndividualRobotiqHandController
          OneDegreeOfFreedomJoint fingerJoint = allFingerJoints.get(i);
          initialDesiredAngles.get(fingerJoint).set(desiredAngles.get(fingerJoint).getDoubleValue());
       }
-      
+
       startTrajectoryTime.set(yoTime.getDoubleValue());
       endTrajectoryTime.set(startTrajectoryTime.getDoubleValue() + trajectoryTime.getDoubleValue());
 
@@ -274,16 +289,18 @@ public class IndividualRobotiqHandController
 
    public void computeDesiredJointAngles()
    {
-      double currentTrajectoryTime = yoTime.getDoubleValue() - startTrajectoryTime.getDoubleValue();
-      currentTrajectoryTime = MathTools.clipToMinMax(currentTrajectoryTime, 0.0, trajectoryTime.getDoubleValue());
-      yoPolynomial.compute(currentTrajectoryTime);
+      if (!isStopped.getBooleanValue())
+      {
+         currentTrajectoryTime.set(yoTime.getDoubleValue() - startTrajectoryTime.getDoubleValue());
+         currentTrajectoryTime.set(MathTools.clipToMinMax(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
+      }
+      yoPolynomial.compute(currentTrajectoryTime.getDoubleValue());
       double alpha = MathTools.clipToMinMax(yoPolynomial.getPosition(), 0.0, 1.0);
-      
 
       for (int i = 0; i < allFingerJoints.size(); i++)
       {
          OneDegreeOfFreedomJoint fingerJoint = allFingerJoints.get(i);
-         
+
          double q_d_initial = initialDesiredAngles.get(fingerJoint).getDoubleValue();
          double q_d_final = finalDesiredAngles.get(fingerJoint).getDoubleValue();
          double q_d = (1.0 - alpha) * q_d_initial + alpha * q_d_final;
