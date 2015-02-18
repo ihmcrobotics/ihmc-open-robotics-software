@@ -56,7 +56,7 @@ public class ConvexHullTrajectoryGeneratorTest
       double verticalBuffer = 0.05; //5cm
       double pathWidth = 0.12; //12cm
 
-      ConvexHullTrajectoryGenerator generator = new ConvexHullTrajectoryGenerator(horizontalBuffer, verticalBuffer, pathWidth);
+      SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
       FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
 
@@ -87,7 +87,7 @@ public class ConvexHullTrajectoryGeneratorTest
       double verticalBuffer = 0.05; //5cm
       double pathWidth = 0.12; //12cm
 
-      ConvexHullTrajectoryGenerator generator = new ConvexHullTrajectoryGenerator(horizontalBuffer, verticalBuffer, pathWidth);
+      SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
       FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
       HeightMapWithPoints groundMap = new DoubleHashHeightMap(0.01);
@@ -129,7 +129,7 @@ public class ConvexHullTrajectoryGeneratorTest
       double verticalBuffer = 0.05; //5cm
       double pathWidth = 0.12; //12cm
 
-      ConvexHullTrajectoryGenerator generator = new ConvexHullTrajectoryGenerator(horizontalBuffer, verticalBuffer, pathWidth);
+      SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
       FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
       HeightMapWithPoints groundMap = new DoubleHashHeightMap(0.01);

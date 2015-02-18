@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -41,19 +42,8 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
       for (int i = 0; i < footstepList.size(); i++)
       {
          FootstepData footstepData = footstepList.get(i);
-         String id = "footstep_" + i;
-         
          ContactablePlaneBody contactableBody = bipedFeet.get(footstepData.getRobotSide());
-
-         FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
-         PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-         List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-         if (contactPoints !=null && contactPoints.size() == 0)
-            throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
-         Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
-         footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
-         footstep.swingHeight = footstepData.swingHeight;
-
+         Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactableBody, i);
          footsteps.add(footstep);
 
          if (DEBUG)
