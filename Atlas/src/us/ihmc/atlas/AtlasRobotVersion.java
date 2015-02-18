@@ -48,7 +48,7 @@ public enum AtlasRobotVersion
          case DRC_NO_HANDS:
             return "models/GFE/atlas_unplugged_v4.sdf";
          case ATLAS_DUAL_ROBOTIQ:
-            return "models/GFE/atlas_v4_robotiq_hands.sdf";
+            return "models/GFE/atlas_unplugged_v4_dual_robotiq.sdf";
          case GAZEBO_ATLAS_NO_HANDS:
             return "models/GFE/atlas_unplugged_v4.sdf";
          default:
