@@ -64,7 +64,6 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.utilities.screwTheory.CentroidalMomentumMatrixTest.class,
    us.ihmc.simulationconstructionset.utilities.screwTheory.InverseDynamicsCalculatorTest.class,
    us.ihmc.simulationconstructionset.whiteBoard.LocalYoWhiteBoardTest.class,
-   us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoardTest.class,
    us.ihmc.simulationconstructionset.whiteBoard.UDPYoWhiteBoardTest.class,
    us.ihmc.simulationconstructionset.whiteBoard.YoWhiteBoardTest.class,
    us.ihmc.simulationconstructionset.yoUtilities.math.filters.AccelerationLimitedYoVariableTest.class,
