@@ -6,12 +6,16 @@ import java.io.IOException;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+
+@BambooPlan(planType=BambooPlanType.Flaky)
 
 public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
 	@AverageDuration
-	@Test(timeout = 30000l)
+	@Test(timeout = 300000)
    public void testTCPWhiteBoardOne() throws IOException
    {
       String IPAddress = "localHost";
@@ -31,7 +35,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
    }
 
 	@AverageDuration
-	@Test(timeout = 30000l)
+	@Test(timeout = 300000)
    public void testTCPWhiteBoardTwo() throws IOException
    {
       String IPAddress = "localHost";

@@ -17,7 +17,7 @@ public class StreamingDataTCPServerTest
 {
 
 	@AverageDuration
-	@Test(timeout=4000)
+	@Test(timeout=90000)
    public void testTypicalUsage()
    {
       String hostname = "localhost";
@@ -51,7 +51,7 @@ public class StreamingDataTCPServerTest
    }
 
 	@AverageDuration
-	@Test(timeout=4000)
+	@Test(timeout=90000)
    public void testMultipleProducersAndConsumersRobustly()
    {
       String hostname = "localhost";
@@ -104,7 +104,7 @@ public class StreamingDataTCPServerTest
    }
 
 	@AverageDuration
-	@Test(timeout=6000)
+	@Test(timeout=90000)
    public void testPersistentConsumerToServerRestart()
    {
       String hostname = "localhost";
