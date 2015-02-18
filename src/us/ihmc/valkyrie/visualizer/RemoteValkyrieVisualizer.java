@@ -5,21 +5,17 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.ValkyrieSliderBoardType;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
@@ -31,10 +27,12 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    private final ValkyrieRobotModel valkyrieRobotModel;
    private String host;
 
-   public RemoteValkyrieVisualizer(String[] networkArguments, ValkyrieSliderBoardType valkyrieSliderBoardType)
+   public RemoteValkyrieVisualizer(ValkyrieSliderBoardType valkyrieSliderBoardType)
    {
       this.valkyrieSliderBoardType = valkyrieSliderBoardType;
             
+      host = NetworkParameters.getHost(NetworkParameterKeys.logger);
+      
       System.out.println("Connecting to host " + host);
       valkyrieRobotModel = new ValkyrieRobotModel(true, false);
 
@@ -87,6 +85,6 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    
    public static void main(String[] args)
    {
-      new RemoteValkyrieWalkingVisualizer(args);
+      new RemoteValkyrieWalkingVisualizer();
    }
 }

@@ -4,13 +4,13 @@ import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard.ValkyrieSliderBoardType;
 
 public class RemoteValkyrieWalkingVisualizer
 {
-   public RemoteValkyrieWalkingVisualizer(String[] networkArguments)
+   public RemoteValkyrieWalkingVisualizer()
    {
-      new RemoteValkyrieVisualizer(networkArguments, ValkyrieSliderBoardType.WALKING);
+      new RemoteValkyrieVisualizer(ValkyrieSliderBoardType.WALKING);
    }
    
    public static void main(String[] args)
    {
-      new RemoteValkyrieWalkingVisualizer(args);
+      new RemoteValkyrieWalkingVisualizer();
    }
 }

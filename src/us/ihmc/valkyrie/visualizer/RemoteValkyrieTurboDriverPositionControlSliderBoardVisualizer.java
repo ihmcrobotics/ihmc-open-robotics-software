@@ -6,7 +6,7 @@ public class RemoteValkyrieTurboDriverPositionControlSliderBoardVisualizer
 {
    public RemoteValkyrieTurboDriverPositionControlSliderBoardVisualizer(String[] networkArguments)
    {
-      new RemoteValkyrieVisualizer(networkArguments, ValkyrieSliderBoardType.ON_BOARD_POSITION);
+      new RemoteValkyrieVisualizer(ValkyrieSliderBoardType.ON_BOARD_POSITION);
    }
    
    public static void main(String[] args)
