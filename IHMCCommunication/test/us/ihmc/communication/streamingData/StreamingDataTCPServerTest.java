@@ -8,8 +8,11 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
+@BambooPlan(planType = {BambooPlanType.Flaky})
 public class StreamingDataTCPServerTest
 {
 
