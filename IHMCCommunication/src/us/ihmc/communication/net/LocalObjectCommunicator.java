@@ -10,21 +10,9 @@ public class LocalObjectCommunicator implements ObjectCommunicator
    
    private final ArrayList<GlobalObjectConsumer> globalListeners = new ArrayList<GlobalObjectConsumer>();
    
+   @SuppressWarnings("unchecked")
    public synchronized void consumeObject(Object object)
    {
-      consumeObject(object, true);
-   }
-   
-   @SuppressWarnings("unchecked")
-   public synchronized void consumeObject(Object object, boolean consumeGlobal)
-   {
-      if(consumeGlobal)
-      {
-         for(GlobalObjectConsumer consumer : globalListeners)
-         {
-            consumer.consumeObject(object, false);
-         }
-      }
       
       final ArrayList<ObjectConsumer<?>> classListeners = listeners.get(object.getClass());
       if(classListeners != null)

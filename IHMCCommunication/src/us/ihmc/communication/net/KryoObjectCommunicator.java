@@ -21,7 +21,7 @@ import com.esotericsoftware.kryonet.EndPoint;
 import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
 import com.esotericsoftware.kryonet.Listener;
 
-public abstract class KryoObjectCommunicator implements ObjectCommunicator
+public abstract class KryoObjectCommunicator implements NetworkedObjectCommunicator
 {
 
    private final LinkedHashMap<Class<?>, ExecutorService> listenerExecutors = new LinkedHashMap<Class<?>, ExecutorService>();
@@ -138,19 +138,21 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
    @Override
    public synchronized void consumeObject(Object object)
    {
-      consumeObject(object, true);
+      send(object);
    }
-   
+
    @Override
-   public synchronized void consumeObject(Object object, boolean consumeGlobal)
+   public synchronized int send(Object object)
    {
-      if (!consumeGlobal && !listeners.containsKey(object.getClass()))
+
+      if (!listeners.containsKey(object.getClass()))
       {
          throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
       }
       int bytesSend = sendTCP(object);
       updateDataRateTable(object, bytesSend);
       
+      return bytesSend;
    }
 
    private void updateDataRateTable(Object object, int bytesSend)
@@ -190,7 +192,7 @@ public abstract class KryoObjectCommunicator implements ObjectCommunicator
                   {
                      for(GlobalObjectConsumer listener : globalListeners)
                      {
-                        listener.consumeObject(object, false);
+                        listener.consumeObject(object);
                      }
                      
                      ArrayList<ObjectConsumer<?>> objectListeners = listeners.get(classType);
