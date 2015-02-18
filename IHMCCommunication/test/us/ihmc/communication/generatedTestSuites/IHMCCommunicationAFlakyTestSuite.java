@@ -1,4 +1,4 @@
-package us.ihmc.atlas.generatedTestSuites;
+package us.ihmc.communication.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -7,10 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class
+   us.ihmc.communication.net.KryoObjectCommunicatorTest.class
 })
 
-public class AtlasEVideoATestSuite
+public class IHMCCommunicationAFlakyTestSuite
 {
    public static void main(String[] args)
    {
