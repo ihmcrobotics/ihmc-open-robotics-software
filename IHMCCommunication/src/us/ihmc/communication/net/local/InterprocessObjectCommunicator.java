@@ -7,12 +7,12 @@ import java.util.LinkedHashMap;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 
 import com.esotericsoftware.kryo.Kryo;
 
-public class InterprocessObjectCommunicator implements ObjectCommunicator
+public class InterprocessObjectCommunicator implements NetworkedObjectCommunicator
 {
    private final Kryo kryo = new Kryo();
    private final LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>> listeners = new LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>>();
@@ -44,24 +44,24 @@ public class InterprocessObjectCommunicator implements ObjectCommunicator
    }
 
    @Override
-   public void consumeObject(Object object, boolean consumeGlobal)
-   {
-      throw new RuntimeException("TODO: Delete me");
-   }
-
-   @Override
    public void consumeObject(Object object)
    {
-      InterprocessCommunicationNetwork.sendObject(this, port, object);
+      send(object);
    }
-
+   
+   @Override
+   public int send(Object object)
+   {
+      return InterprocessCommunicationNetwork.sendObject(this, port, object);
+   }
+   
    @SuppressWarnings("unchecked")
    /* package-private */void receiveObject(Object object)
    {
       Object copy = kryo.copy(object);
       for (GlobalObjectConsumer listener : globalListeners)
       {
-         listener.consumeObject(copy, false);
+         listener.consumeObject(copy);
       }
 
       ArrayList<ObjectConsumer<?>> objectListeners = listeners.get(object.getClass());

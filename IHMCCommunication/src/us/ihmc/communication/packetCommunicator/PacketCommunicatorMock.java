@@ -2,13 +2,14 @@ package us.ihmc.communication.packetCommunicator;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.KryoObjectClient;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.net.local.InterprocessObjectCommunicator;
@@ -18,30 +19,33 @@ import us.ihmc.communication.packets.Packet;
 public class PacketCommunicatorMock
 {
 
-   private final ObjectCommunicator communicator;
+   private final NetworkedObjectCommunicator communicator;
    private final HashMap<Class<?>, HashMap<PacketConsumer<?>, ObjectConsumer<?>>> consumers = new HashMap<>();
    private final HashMap<GlobalPacketConsumer, GlobalObjectConsumer> globalConsumers = new HashMap<>();
 
+   private final List<Class<?>> registeredClasses;
+   
    public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, int port, NetClassList netClassList)
    {
       KryoObjectClient objectCommunicator = new KryoObjectClient(host, port, netClassList);
       objectCommunicator.setReconnectAutomatically(true);
-      return new PacketCommunicatorMock(objectCommunicator);
+      return new PacketCommunicatorMock(objectCommunicator, netClassList.getPacketClassList());
    }
 
    public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList));
+      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList), netClassList.getPacketClassList());
    }
 
    public static PacketCommunicatorMock createInterprocessPacketCommunicator(int port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new InterprocessObjectCommunicator(port, netClassList));
+      return new PacketCommunicatorMock(new InterprocessObjectCommunicator(port, netClassList), netClassList.getPacketClassList());
    }
 
-   private PacketCommunicatorMock(ObjectCommunicator communicator)
+   private PacketCommunicatorMock(NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
    {
       this.communicator = communicator;
+      this.registeredClasses = registeredClasses;
    }
 
    public void attachStateListener(NetStateListener stateListener)
@@ -49,7 +53,7 @@ public class PacketCommunicatorMock
       communicator.attachStateListener(stateListener);
    }
 
-   public <T extends Packet> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
+   public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
    {
       PacketObjectConsumer<T> objectConsumer = new PacketObjectConsumer<>(listener);
       HashMap<PacketConsumer<?>, ObjectConsumer<?>> clazzConsumers = consumers.get(clazz);
@@ -111,9 +115,14 @@ public class PacketCommunicatorMock
       communicator.connect();
    }
    
-   public void send(Packet packet)
+   /**
+    * 
+    * @param Send a packet to connected receivers. Does not call listeners 
+    * @return
+    */
+   public int send(Packet<?> packet)
    {
-      communicator.consumeObject(packet);
+      return communicator.send(packet);
    }
    
    private static class GlobalPacketObjectConsumer implements GlobalObjectConsumer
@@ -132,16 +141,10 @@ public class PacketCommunicatorMock
             globalPacketConsumer.receivedPacket((Packet<?>) object);
          }
       }
-
-      @Override
-      public void consumeObject(Object object, boolean consumeGlobal)
-      {
-         consumeObject(object);
-      }
       
    }
 
-   private static class PacketObjectConsumer<T extends Packet> implements ObjectConsumer<T>
+   private static class PacketObjectConsumer<T extends Packet<?>> implements ObjectConsumer<T>
    {
       private final PacketConsumer<T> packetConsumer;
 
@@ -155,6 +158,11 @@ public class PacketCommunicatorMock
       {
          packetConsumer.receivedPacket(object);
       }
+   }
+
+   public List<Class<?>> getRegisteredClasses()
+   {
+      return registeredClasses;
    }
 
 }
