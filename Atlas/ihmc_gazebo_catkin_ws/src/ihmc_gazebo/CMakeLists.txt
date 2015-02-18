@@ -26,6 +26,9 @@ include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE
 #target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_subdirectory(gazebo_plugin)
 
+file(COPY model/polaris_ranger_xp900_no_roll_cage DESTINATION $ENV{HOME}/.gazebo/models)
+file(COPY meshes_unplugged DESTINATION $ENV{HOME}/.gazebo/models/ihmc_gazebo)
+
 include(cmake/rospack.cmake)
 
 get_rospack_flags(roscpp)
