@@ -266,6 +266,9 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                case CRUSH_THUMB:
                   individualRobotiqHandController.crush(FingerName.THUMB);
                   break;
+                  
+               case STOP:
+                  individualRobotiqHandController.stop();
 
                default:
                   break;
