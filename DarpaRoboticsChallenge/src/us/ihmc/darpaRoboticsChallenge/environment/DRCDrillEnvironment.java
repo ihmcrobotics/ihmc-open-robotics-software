@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
@@ -25,18 +26,15 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
-
-   public DRCDrillEnvironment()
-   {
-      this(0.5, 0.0, 1.0, 0.0);
-   }
    
-   public DRCDrillEnvironment(double valveX, double valveY, double valveZ, double valveYaw_degrees)
+   private final Vector3d tableCenter = new Vector3d(1.0, 0.0, 0.7);
+   private final Vector2d wallPosition = new Vector2d(0.0, -2.05);
+   
+   public DRCDrillEnvironment()
    {
       double forceVectorScale = 1.0 / 50.0;
 
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-      Vector3d tableCenter = new Vector3d(1.0, 0.0, 0.7);
       combinedTerrainObject.addTerrainObject(setUpGround("Ground", tableCenter, 0.1));
 
       double radius = 0.03;
@@ -65,7 +63,8 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/gridGroundProfile.png");
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, texture);
       combinedTerrainObject.addBox(tableCenter.x-tableLength , tableCenter.y-tableLength, tableCenter.x+tableLength, tableCenter.y+tableLength , tableCenter.z);
-
+      combinedTerrainObject.addBox(wallPosition.x - 1.0, wallPosition.y - 0.05, wallPosition.x + 1.0, wallPosition.y + 0.05, 2.0);
+      
       return combinedTerrainObject;
    }
 
