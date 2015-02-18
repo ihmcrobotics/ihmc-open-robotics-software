@@ -82,7 +82,7 @@ public class HeadOrientationManager
    public void compute()
    {
       checkForNewDesiredOrientationInformation();
-
+      
       if (desiredHeadOrientationProvider != null && isTrackingOrientation.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
@@ -108,11 +108,11 @@ public class HeadOrientationManager
 
       if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
       {
-         orientationTrajectoryGenerator.get(desiredOrientation);
-         initialOrientationProvider.setOrientation(desiredOrientation);
+//         orientationTrajectoryGenerator.get(desiredOrientation);
+//         initialOrientationProvider.setOrientation(desiredOrientation);
          finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
-         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-         orientationTrajectoryGenerator.initialize();
+//         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
+//         orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
       }
       else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
@@ -127,6 +127,7 @@ public class HeadOrientationManager
          orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
       }
+      
    }
 
    public int createJacobian(String[] headOrientationControlJointNames)
