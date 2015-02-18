@@ -5,16 +5,20 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.FilteredPacketSendingForwarder;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkConfigParameters;
 
-public class UiConnectionModule
+public class UiConnectionModule implements PacketConsumer<RobotConfigurationData>
 {
+   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    
    private final FilteredPacketSendingForwarder packetForwarderFromUiModuleToUserInterface;
    private final FilteredPacketSendingForwarder packetForwarderFromUserInterfaceToUiModule;
@@ -30,10 +34,12 @@ public class UiConnectionModule
    public UiConnectionModule()
    {
       //Forward all packets from the User Interface to the network processor
-      packetForwarderFromUserInterfaceToUiModule = new FilteredPacketSendingForwarder(uiKryoPacketServer, uiModuleCommunicator);
+      packetForwarderFromUserInterfaceToUiModule = new FilteredPacketSendingForwarder(uiKryoPacketServer, uiModuleCommunicator, timestampProvider);
       
       //Selective send packets to the User Interface
-      packetForwarderFromUiModuleToUserInterface = new FilteredPacketSendingForwarder(uiModuleCommunicator, uiKryoPacketServer);
+      packetForwarderFromUiModuleToUserInterface = new FilteredPacketSendingForwarder(uiModuleCommunicator, uiKryoPacketServer, timestampProvider);
+      uiModuleCommunicator.attachListener(RobotConfigurationData.class, this);
+      
       setPacketForwardingFilters();
       connect();
    }
@@ -46,7 +52,7 @@ public class UiConnectionModule
       
       for (Entry<Class, Long> entry : packetsAllowedToGotoUserInterfaceWithIntervals.entrySet())
       {
-         packetForwarderFromUiModuleToUserInterface.enableInclusiveForwardingWithMinimumIntervals(entry.getKey(), entry.getValue());
+         packetForwarderFromUiModuleToUserInterface.enableInclusiveForwardingWithMinimumRobotTimeIntervals(entry.getKey(), entry.getValue());
       }
    }
    
@@ -75,5 +81,11 @@ public class UiConnectionModule
    public void close()
    {
       uiKryoPacketServer.close();
+   }
+
+   @Override
+   public void receivedPacket(RobotConfigurationData packet)
+   {
+      timestampProvider.set(packet.getSimTime());
    }
 }
