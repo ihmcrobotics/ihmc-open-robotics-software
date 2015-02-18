@@ -41,7 +41,6 @@ public class SwingHeightTrajectoryCalculatorTest
    @Test(timeout = 300000)
    public void testHeightFromPose()
    {
-
       double boxHeight = 0.2;
       CombinedTerrainObject3D groundProfile = createBoxTerrainProfile(boxHeight);
 
@@ -53,9 +52,9 @@ public class SwingHeightTrajectoryCalculatorTest
       QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
 
 
-      double horizontalBuffer = .1; //10cm
-      double verticalBuffer = 0.05; //5cm
-      double pathWidth = 0.12; //12cm
+      double horizontalBuffer = .1;    // 10cm
+      double verticalBuffer = 0.05;    // 5cm
+      double pathWidth = 0.12;    // 12cm
 
       SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -77,7 +76,7 @@ public class SwingHeightTrajectoryCalculatorTest
    @Test(timeout = 300000)
    public void testWithHeightMap()
    {
-      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp(); //don't check in true
+      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();    // don't check in true
 
       CombinedTerrainObject3D groundProfile = createWalledTerrainProfile();
       double centerX = 0;
@@ -88,9 +87,9 @@ public class SwingHeightTrajectoryCalculatorTest
       QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
 
 
-      double horizontalBuffer = .1; //10cm
-      double verticalBuffer = 0.05; //5cm
-      double pathWidth = 0.12; //12cm
+      double horizontalBuffer = .1;    // 10cm
+      double verticalBuffer = 0.05;    // 5cm
+      double pathWidth = 0.12;    // 12cm
 
       SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -119,9 +118,9 @@ public class SwingHeightTrajectoryCalculatorTest
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
-      double horizontalBuffer = .1; //10cm
-      double verticalBuffer = 0.05; //5cm
-      double pathWidth = 0.12; //12cm
+      double horizontalBuffer = .1;    // 10cm
+      double verticalBuffer = 0.05;    // 5cm
+      double pathWidth = 0.12;    // 12cm
 
       SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -161,9 +160,9 @@ public class SwingHeightTrajectoryCalculatorTest
    public void testBigXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = false;
-      double horizontalBuffer = .1; //10cm
-      double verticalBuffer = 0.05; //5cm
-      double pathWidth = 0.12; //12cm
+      double horizontalBuffer = .1;    // 10cm
+      double verticalBuffer = 0.05;    // 5cm
+      double pathWidth = 0.12;    // 12cm
 
       SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -174,7 +173,7 @@ public class SwingHeightTrajectoryCalculatorTest
       Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       startPose.setPose(startPosition, startOrientation);
 
-      Point3d endPosition = new Point3d(startPosition.x + 3* horizontalBuffer, startPosition.y, startPosition.z);
+      Point3d endPosition = new Point3d(startPosition.x + 3 * horizontalBuffer, startPosition.y, startPosition.z);
       Quat4d endOrientation = startOrientation;
       endPose.setPose(endPosition, endOrientation);
 
@@ -198,11 +197,13 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   private SimulationConstructionSet createSCSNullRobotInstance(){
+   private SimulationConstructionSet createSCSNullRobotInstance()
+   {
       return createSCSNullRobotInstance(null);
    }
 
-   private SimulationConstructionSet createSCSNullRobotInstance(Graphics3DObject linkGraphics){
+   private SimulationConstructionSet createSCSNullRobotInstance(Graphics3DObject linkGraphics)
+   {
       Robot nullRobot = new Robot("FootstepVisualizerRobot");
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
 
@@ -213,10 +214,12 @@ public class SwingHeightTrajectoryCalculatorTest
       }
 
       scs.setDT(1, 1);
+
       return scs;
    }
 
-   private void visualizeTrajectoryPoints(SimulationConstructionSet scs, List<FramePoint> trajectoryPoints){
+   private void visualizeTrajectoryPoints(SimulationConstructionSet scs, List<FramePoint> trajectoryPoints)
+   {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("SwingRegistry");
       BagOfBalls bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
@@ -230,6 +233,7 @@ public class SwingHeightTrajectoryCalculatorTest
          bagOfBalls.setBallLoop(point);
          scs.tickAndUpdate();
       }
+
       scs.startOnAThread();
    }
 
@@ -241,6 +245,7 @@ public class SwingHeightTrajectoryCalculatorTest
       combinedTerrainObject.addBox(-100.0, -100.0, 100.0, 100.0, 0.001, color);
 
       combinedTerrainObject.addBox(0.10, -0.5, 0.4, 0.5, maxZHeight);
+
       return combinedTerrainObject;
    }
 
@@ -254,6 +259,7 @@ public class SwingHeightTrajectoryCalculatorTest
       combinedTerrainObject.addBox(0.10, -0.5, 0.2, 0.5, 0.1);
 
       combinedTerrainObject.addBox(0.35, -0.5, 0.4, 0.5, 0.05);
+
       return combinedTerrainObject;
    }
 }

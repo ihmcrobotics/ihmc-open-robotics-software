@@ -25,16 +25,16 @@ public class DRCNetworkProcessor
    {
       packetRouter = new PacketRouter();
       ArrayList<PacketCommunicator> communicators = createRequestedModules(robotModel, params);
-      
+
       for (int i = 0; i < communicators.size(); i++)
       {
          PacketCommunicator packetCommunicator = communicators.get(i);
-         if(packetCommunicator != null)
+         if (packetCommunicator != null)
          {
             packetRouter.attachPacketCommunicator(packetCommunicator);
             connect(packetCommunicator);
-         } 
-         else if(DEBUG)
+         }
+         else if (DEBUG)
          {
             PrintTools.debug(this, "Null Communicator!");
          }
@@ -44,136 +44,152 @@ public class DRCNetworkProcessor
    private ArrayList<PacketCommunicator> createRequestedModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       ArrayList<PacketCommunicator> communicators = new ArrayList<PacketCommunicator>();
-      
-      if(params.useController())
+
+      if (params.useController())
       {
          PacketCommunicator simulatedControllerCommunicator = params.getControllerCommunicator();
          communicators.add(simulatedControllerCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "useSimulatedController" + simulatedControllerCommunicator.getName() + " " + simulatedControllerCommunicator.getId());
          }
       }
-      
-      if(params.useUiModule())
+
+      if (params.useUiModule())
       {
          PacketCommunicator uiModuleCommunicator = createUiModule(robotModel, params);
          communicators.add(uiModuleCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "useSensorModule" + uiModuleCommunicator.getName() + " " + uiModuleCommunicator.getId());
          }
       }
-      
-      if(params.useSensorModule())
+
+      if (params.useSensorModule())
       {
          PacketCommunicator sensorModuleCommunicator = createSensorModule(robotModel, params);
          communicators.add(sensorModuleCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "useSensorModule" + sensorModuleCommunicator.getName() + " " + sensorModuleCommunicator.getId());
          }
       }
-      
-      if(params.usePerceptionModule())
+
+      if (params.usePerceptionModule())
       {
          PacketCommunicator perceptionModuleCommunicator = createPerceptionModule(robotModel);
          communicators.add(perceptionModuleCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "usePerceptionModule" + perceptionModuleCommunicator.getName() + " " + perceptionModuleCommunicator.getId());
          }
       }
-      
-      if(params.useRosModule())
+
+      if (params.useRosModule())
       {
          PacketCommunicator rosModuleCommunicator = createRosModule(robotModel);
          communicators.add(rosModuleCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "useRosModule" + rosModuleCommunicator.getName() + " " + rosModuleCommunicator.getId());
          }
       }
-      
-      if(params.useBehaviorModule())
+
+      if (params.useBehaviorModule())
       {
          PacketCommunicator behaviorModuleCommunicator = createBehaviorModule(robotModel, params.useBehaviorVisualizer());
          communicators.add(behaviorModuleCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "useBehaviorModule" + behaviorModuleCommunicator.getName() + " " + behaviorModuleCommunicator.getId());
          }
       }
-      
-      if(params.useHandModule())
+
+      if (params.useHandModule())
       {
          PacketCommunicator handModuleCommunicator = createHandModule(robotModel);
          communicators.add(handModuleCommunicator);
-         if(DEBUG)
+
+         if (DEBUG)
          {
             PrintTools.debug(this, "useHandModule" + handModuleCommunicator.getName() + " " + handModuleCommunicator.getId());
          }
       }
+
       return communicators;
    }
-   
+
    private PacketCommunicator createBehaviorModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
-      IHMCHumanoidBehaviorManager behaviorManager = new IHMCHumanoidBehaviorManager(robotModel , logModelProvider, startYoVariableServer, sensorInformation);
+      IHMCHumanoidBehaviorManager behaviorManager = new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, startYoVariableServer, sensorInformation);
+
       return behaviorManager.getCommunicator();
    }
 
    private PacketCommunicator createRosModule(DRCRobotModel robotModel)
    {
       RosModule rosModule = new RosModule();
+
       return rosModule.getCommunicator();
    }
 
    private PacketCommunicator createPerceptionModule(DRCRobotModel robotModel)
    {
       IHMCPerceptionManager perceptionModule = new IHMCPerceptionManager();
+
       return perceptionModule.getPerceptionCommunicator();
    }
 
    private PacketCommunicator createSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
-      if(params.useSimulatedSensors())
+      if (params.useSimulatedSensors())
       {
          sensorSuiteManager.initializeSimulatedSensors(params.getSimulatedSensorCommunicator());
-      } 
-      else 
+      }
+      else
       {
          sensorSuiteManager.initializePhysicalSensors(params.getRosUri());
       }
+
       PacketCommunicator sensorModuleCommunicator = sensorSuiteManager.getProcessedSensorsCommunicator();
+
       return sensorModuleCommunicator;
    }
 
    private PacketCommunicator createUiModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       UiConnectionModule uiConnectionModule = new UiConnectionModule();
+
       return uiConnectionModule.getPacketCommunicator();
    }
 
    private PacketCommunicator createHandModule(DRCRobotModel robotModel)
    {
       HandCommandManager handCommandModule = robotModel.createHandCommandManager();
-      if(handCommandModule != null)
+      if (handCommandModule != null)
       {
          return handCommandModule.getCommunicator();
       }
+
       return null;
-      //      this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
-      //      {
-      //         @Override
-      //         public void receivedPacket(HandJointAnglePacket object)
-      //         {
-      //            networkingManager.getControllerStateHandler().sendPacket(object);
-      //         }
-      //      });
+
+      // this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new PacketConsumer<HandJointAnglePacket>()
+      // {
+      // @Override
+      // public void receivedPacket(HandJointAnglePacket object)
+      // {
+      // networkingManager.getControllerStateHandler().sendPacket(object);
+      // }
+      // });
    }
 
    protected void connect(PacketCommunicator communicator)

@@ -15,28 +15,36 @@ import java.util.List;
  */
 public class FootstepTools
 {
-   public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody, int index){
+   public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody, int index)
+   {
       String id = "footstep_" + index;
       FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
       List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-      if (contactPoints !=null && contactPoints.size() == 0)
-         throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
-      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
+      if ((contactPoints != null) && (contactPoints.size() == 0))
+         throw new RuntimeException(
+             "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
+      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame,
+                                       true, contactPoints);
       footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
       footstep.swingHeight = footstepData.swingHeight;
+
       return footstep;
    }
 
-   public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody){
+   public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody)
+   {
       FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
       List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-      if (contactPoints !=null && contactPoints.size() == 0)
-         throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
-      Footstep footstep = new Footstep(contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true, contactPoints);
+      if ((contactPoints != null) && (contactPoints.size() == 0))
+         throw new RuntimeException(
+             "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
+      Footstep footstep = new Footstep(contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true,
+                                       contactPoints);
       footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
       footstep.swingHeight = footstepData.swingHeight;
+
       return footstep;
    }
 }

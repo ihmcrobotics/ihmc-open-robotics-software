@@ -38,7 +38,7 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
    public void receivedPacket(FootstepDataList footstepList)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      
+
       for (int i = 0; i < footstepList.size(); i++)
       {
          FootstepData footstepData = footstepList.get(i);
@@ -51,7 +51,7 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
             System.out.println("FootstepPathConsumer received " + footstep);
          }
       }
-      
+
       footstepPathCoordinator.setSwingTime(footstepList.swingTime);
       footstepPathCoordinator.setTransferTime(footstepList.transferTime);
       footstepPathCoordinator.updatePath(footsteps);
