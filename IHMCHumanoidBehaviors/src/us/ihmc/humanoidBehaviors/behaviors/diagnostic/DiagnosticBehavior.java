@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
@@ -54,6 +55,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class DiagnosticBehavior extends BehaviorInterface
@@ -88,7 +90,12 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final YoFrameVector2d pelvisShiftScaleFactor;
-
+   
+   private  final SideDependentList<OneDoFJoint[]> upperArmJointsClone = new SideDependentList<OneDoFJoint[]>();
+   private  final SideDependentList<OneDoFJoint[]> lowerArmJointsClone = new SideDependentList<OneDoFJoint[]>();
+   
+   private final SideDependentList<Double> elbowJointSign = new SideDependentList<>();
+   
    private enum DiagnosticTask
    {
       CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATS, SIMPLE_WARMUP
@@ -108,7 +115,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final DoubleYoVariable footstepLength;
 
    private final SideDependentList<ReferenceFrame> upperArmsFrames = new SideDependentList<>();
-   private final SideDependentList<OneDoFJoint[]> armJointsClone = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> lowerArmsFrames = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForUpperArms = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForLowerArms = new SideDependentList<>();
 
@@ -208,33 +215,34 @@ public class DiagnosticBehavior extends BehaviorInterface
       {
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
+         
          // The following one works for Valkyrie but doesn't work for Atlas
 //         RigidBody upperArmBody = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getPredecessor();
          // Pretty hackish but will work for now: Consider the elbow joint to be the fourth joint of the chain
-         InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(chest, hand);
-         RigidBody upperArmBody = armJoints[3].getPredecessor();
+         OneDoFJoint[] armJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
+         OneDoFJoint elbowJoint = armJoints[3];
+         double jointSign = elbowJoint.getJointAxis().getVector().dot(new Vector3d(1.0, 1.0, 1.0));
+         elbowJointSign.put(robotSide, jointSign);
+         
+         RigidBody upperArmBody = elbowJoint.getPredecessor();
+         RigidBody lowerArmBody = elbowJoint.getSuccessor();
 
          upperArmsFrames.put(robotSide, upperArmBody.getBodyFixedFrame());
+         lowerArmsFrames.put(robotSide, lowerArmBody.getBodyFixedFrame());
 
          OneDoFJoint[] upperArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class);
-         OneDoFJoint[] upperArmJointsClone = ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints), OneDoFJoint.class);
-         GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone, upperArmJointsClone[upperArmJointsClone.length - 1].getSuccessor().getBodyFixedFrame());
+         upperArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints), OneDoFJoint.class));
+         GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide), upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length - 1].getSuccessor().getBodyFixedFrame());
          NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          inverseKinematicsForUpperArm.solveForPosition(false);
          inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
-         OneDoFJoint[] lowerArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(upperArmBody, hand), OneDoFJoint.class);
-         OneDoFJoint[] lowerArmJointsClone = ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints), OneDoFJoint.class);
-         GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone, lowerArmJointsClone[lowerArmJointsClone.length - 1].getSuccessor().getBodyFixedFrame());
+         OneDoFJoint[] lowerArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(lowerArmBody, hand), OneDoFJoint.class);
+         lowerArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints), OneDoFJoint.class));
+         GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone.get(robotSide), lowerArmJointsClone.get(robotSide)[lowerArmJointsClone.get(robotSide).length - 1].getSuccessor().getBodyFixedFrame());
          NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          inverseKinematicsForLowerArm.solveForPosition(false);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
-         
-         armJointsClone.put(robotSide, new OneDoFJoint[upperArmJointsClone.length + lowerArmJointsClone.length]);
-         for (int i = 0; i < upperArmJointsClone.length; i++)
-            armJointsClone.get(robotSide)[i] = upperArmJointsClone[i];
-         for (int i = 0; i < lowerArmJointsClone.length; i++)
-            armJointsClone.get(robotSide)[i + upperArmJointsClone.length] = lowerArmJointsClone[i];
       }
    }
 
@@ -446,11 +454,15 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), 0.1));
 
       // Go to running man pose:
-      SideDependentList<double[]> desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { -Math.PI / 2.0, -0.3, 0.0, -Math.PI / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -Math.PI/2.0, 0.3
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { Math.PI / 2.0, -0.3, 0.0, -Math.PI / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, Math.PI/2.0, 0.3
-      submitHandPoses(desiredJointAngles);
-
+      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(RobotSide.LEFT));
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI/2.0, 0.3);
+      desiredHandOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
+      submitHandPose(robotSide,desiredUpperArmOrientation, -Math.PI / 2.0, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.PI/2.0, 0.3);
+      submitHandPose(robotSide.getOppositeSide(),desiredUpperArmOrientation, -Math.PI / 2.0, desiredHandOrientation);
+      
       FramePose footPose = new FramePose(ankleZUpFrame);
       footPose.setPosition(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
       footPose.setOrientation(0.0, 0.8 * Math.PI / 2.0, 0.0);
@@ -471,7 +483,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new NullTask());
 
       // Do a "Y" stance with the foot outside
-      submitSymmetricHandPose(new double[] { 0.0, -1.5 * Math.PI / 2.0, 0.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.0, 2.3561
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.0, 2.3561);
+      submitSymmetricHandPose(desiredUpperArmOrientation, 0.0, desiredHandOrientation);
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.1);
@@ -520,7 +533,9 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void bow(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
-
+      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(RobotSide.LEFT));
+      
       //put the foot forward and prepare the arms
       FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
       Point3d position = new Point3d(0.2, robotSide.negateIfRightSide(0.25), 0.0);
@@ -529,25 +544,29 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPosition(robotSide, desiredFootstepPosition);
 
-      SideDependentList<double[]> desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, 0.0, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.5235, 0.3
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, 0.0, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.5235, 0.3
-      submitHandPoses(desiredJointAngles);
-
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.5235, 0.3);
+      desiredHandOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
       pipeLine.requestNewStage();
 
-      desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: -1.7242, 0.2588, -0.5436
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, Math.PI / 2, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: -1.4173, 0.2588, 0.5436
-      submitHandPoses(desiredJointAngles);
-
+      desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
       pipeLine.requestNewStage();
 
       //bend forward and arms
-      desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -Math.PI / 2 }); // Equivalent yawPitchRoll upperArm/Chest: -1.7242, 0.2588, -0.5436
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, Math.PI / 2, -Math.PI / 2 }); // Equivalent yawPitchRoll upperArm/Chest: -1.4173, 0.2588, 0.5436
-      submitHandPoses(desiredJointAngles);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, desiredHandOrientation);
 
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
       desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(30), 0.0);
@@ -576,10 +595,11 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       pipeLine.requestNewStage();
 
-      desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { Math.toRadians(30), -0.3, Math.PI / 2, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: -1.7242, 0.2588, -0.5436
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.toRadians(30), -0.3, Math.PI / 2, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: -1.4173, 0.2588, 0.5436
-      submitHandPoses(desiredJointAngles);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, desiredHandOrientation);
 
       desiredFootstepPosition = new FramePose(ankleZUpFrame);
       position = new Point3d(0., robotSide.negateIfRightSide(0.25), 0.0);
@@ -593,17 +613,19 @@ public class DiagnosticBehavior extends BehaviorInterface
       // Put the foot back on the ground
       // Put the foot back on the ground
       //arms at good spot
-      desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { 0.0, -0.3, 0.0, -0.2 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.0, 0.3
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.0, -0.3, 0.0, -0.2 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.0, 0.3
-      submitHandPoses(desiredJointAngles);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.2, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.2, desiredHandOrientation);
 
       pipeLine.requestNewStage();
 
-      desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { 0.0, -0.3, 0.0, -Math.PI / 2 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.0, 0.3
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.0, -0.3, 0.0, -Math.PI / 2 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.0, 0.3
-      submitHandPoses(desiredJointAngles);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0 , desiredHandOrientation);
 
       pipeLine.requestNewStage();
    }
@@ -725,12 +747,16 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
 
       // Put the arms in front
-      double[] armInFront = new double[] { -0.5, -0.6, 1.0, -halfPi }; // Equivalent yawPitchRoll upperArm/Chest: -0.7800, 0.1585, 0.7473
-      submitSymmetricHandPose(new double[] { 0.0, -0.6, 0.0, -halfPi }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.0, 0.6
-
+      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(RobotSide.LEFT));
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.0, 0.6);
+      desiredHandOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
+      submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, desiredHandOrientation);
+      
       pipeLine.requestNewStage();
 
-      submitSymmetricHandPose(armInFront);
+      desiredUpperArmOrientation.setYawPitchRoll(-0.7800, 0.1585, 0.7473);
+      submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, desiredHandOrientation);
 
       // Supa powerful front kick!!!!!
       FramePose footPose = new FramePose();
@@ -754,10 +780,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // Supa powerful back kick!!!!!
-      SideDependentList<double[]> desiredJointAngles = new SideDependentList<>();
-      desiredJointAngles.put(robotSide, new double[] { -0.8 * Math.PI / 2.0, -0.3, 0.4, -0.3 }); // Equivalent yawPitchRoll upperArm/Chest: -0.7566, -0.9980, 0.9947
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { 0.8 * Math.PI / 2.0, -0.3, 0.0, -0.3 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 1.2566, 0.3
-      submitHandPoses(desiredJointAngles);
+      desiredUpperArmOrientation.setYawPitchRoll(-0.7566, -0.9980, 0.9947);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.3, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 1.2566, 0.3);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.3, desiredHandOrientation);
+      
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
       footPose.setOrientation(0.0, 0.8 * halfPi, 0.0);
@@ -777,9 +805,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // Supa powerful side kick!!!!!
-      desiredJointAngles.put(robotSide, new double[] { 0.0, -halfPi, 0.4, -0.1 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.4, halfPi
-      desiredJointAngles.put(robotSide.getOppositeSide(), new double[] { -Math.PI / 2.0, -0.3, halfPi, -halfPi }); // Equivalent yawPitchRoll upperArm/Chest: -1.2707, 0.0, 0.0
-      submitHandPoses(desiredJointAngles);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.4, halfPi);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, desiredHandOrientation);
+      
+      desiredUpperArmOrientation.setYawPitchRoll(-1.2707, 0.0, 0.0);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -halfPi, desiredHandOrientation);
+      
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.85), 0.3);
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
@@ -925,7 +956,7 @@ public class DiagnosticBehavior extends BehaviorInterface
                sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
-
+   
    private void submitSymmetricHandPose(double[] desiredJointAngles)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -945,10 +976,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
-   public void submitSymmetricHandPose(FrameOrientation desiredUpperArmOrientation, FrameOrientation desiredHandOrientation)
+   public void submitSymmetricHandPose(FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation)
    {
       desiredUpperArmOrientation.checkReferenceFrameMatch(fullRobotModel.getChest().getBodyFixedFrame());
-      desiredHandOrientation.checkReferenceFrameMatch(upperArmsFrames.get(RobotSide.LEFT));
+      desiredHandOrientation.checkReferenceFrameMatch(lowerArmsFrames.get(RobotSide.LEFT));
       
       FrameOrientation tempUpperArmFrameOrientation = new FrameOrientation();
       FrameOrientation tempHandFrameOrientation = new FrameOrientation();
@@ -966,26 +997,27 @@ public class DiagnosticBehavior extends BehaviorInterface
          yawPitchRollForHand[0] = robotSide.negateIfRightSide(yawPitchRollForHand[0]);
          yawPitchRollForHand[2] = robotSide.negateIfRightSide(yawPitchRollForHand[2]);
 
-         tempHandFrameOrientation.setToZero(upperArmsFrames.get(robotSide));
-         tempHandFrameOrientation.setYawPitchRoll(yawPitchRollForUpperArm);
+         tempHandFrameOrientation.setToZero(lowerArmsFrames.get(robotSide));
+         tempHandFrameOrientation.setYawPitchRoll(yawPitchRollForHand);
          
-         submitHandPose(robotSide, tempUpperArmFrameOrientation, tempHandFrameOrientation);
+         submitHandPose(robotSide, tempUpperArmFrameOrientation, elbowAngle, tempHandFrameOrientation);
       }
    }
 
-   public void submitHandPose(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, FrameOrientation desiredHandOrientation)
+   public void submitHandPose(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, double elbowAngle ,FrameOrientation desiredHandOrientation)
    {
       desiredUpperArmOrientation.checkReferenceFrameMatch(fullRobotModel.getChest().getBodyFixedFrame());
-      desiredHandOrientation.checkReferenceFrameMatch(upperArmsFrames.get(robotSide));
+      desiredHandOrientation.checkReferenceFrameMatch(lowerArmsFrames.get(robotSide));
 
       boolean success = true;
 
-      RigidBodyTransform desiredTransform = new RigidBodyTransform();
-      desiredUpperArmOrientation.getTransform3D(desiredTransform);
-      success &= inverseKinematicsForUpperArms.get(robotSide).solve(desiredTransform);
+      RigidBodyTransform desiredTransformForUpperArm = new RigidBodyTransform();
+      desiredUpperArmOrientation.getTransform3D(desiredTransformForUpperArm);
+      success &= inverseKinematicsForUpperArms.get(robotSide).solve(desiredTransformForUpperArm);
 
-      desiredHandOrientation.getTransform3D(desiredTransform);
-      success &= inverseKinematicsForLowerArms.get(robotSide).solve(desiredTransform);
+      RigidBodyTransform desiredTransformForLowerArm = new RigidBodyTransform();
+      desiredHandOrientation.getTransform3D(desiredTransformForLowerArm);
+      success &= inverseKinematicsForLowerArms.get(robotSide).solve(desiredTransformForLowerArm);
 
       if (!success)
       {
@@ -993,13 +1025,25 @@ public class DiagnosticBehavior extends BehaviorInterface
          return;
       }
 
-      double[] desiredJointAngles = new double[armJointsClone.get(robotSide).length];
-      
-      for (int i = 0; i < armJointsClone.get(robotSide).length; i++)
-      {
-         desiredJointAngles[i] = armJointsClone.get(robotSide)[i].getQ();
-      }
+      int numberOfOneDoFjoints = upperArmJointsClone.get(robotSide).length + lowerArmJointsClone.get(robotSide).length + 1;
+      int jointIndex = 0;
+      double[] desiredJointAngles = new double[numberOfOneDoFjoints];
 
+      for (int i = 0; i < upperArmJointsClone.get(robotSide).length; i++)
+      {
+         desiredJointAngles[jointIndex] = upperArmJointsClone.get(robotSide)[i].getQ();
+         jointIndex++;
+      }
+      
+      desiredJointAngles[jointIndex] = elbowAngle * elbowJointSign.get(robotSide);
+      jointIndex++;
+      
+      for (int i = 0; i < lowerArmJointsClone.get(robotSide).length; i++)
+      {
+         desiredJointAngles[jointIndex] = lowerArmJointsClone.get(robotSide)[i].getQ();
+         jointIndex++;
+      }  
+      
       submitSingleHandPose(robotSide, desiredJointAngles);
    }
 
