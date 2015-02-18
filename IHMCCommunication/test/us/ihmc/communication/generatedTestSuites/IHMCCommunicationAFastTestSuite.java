@@ -7,7 +7,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
    us.ihmc.communication.net.KryoStreamSerializerTest.class,
    us.ihmc.communication.net.local.InterprocessObjectCommunicatorTest.class,
    us.ihmc.communication.networkProcessor.NetworkProcessorTest.class,

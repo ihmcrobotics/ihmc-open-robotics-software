@@ -17,9 +17,12 @@ import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 import com.esotericsoftware.minlog.Log;
 
+@BambooPlan(planType = {BambooPlanType.Flaky})
 public class KryoObjectCommunicatorTest
 {
 
