@@ -59,6 +59,8 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -75,8 +77,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
@@ -147,8 +147,10 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -250,11 +252,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       nominalComHeightAboveGround = nominalComPosition.getZ();
 
       double trajectoryTime = 2.0;
-      double desiredHeightOffset = ComHeightPacket.MIN_COM_HEIGHT;
+      double desiredHeightOffset = -0.10;
 
       ComHeightPacket comHeightPacket = new ComHeightPacket(desiredHeightOffset, trajectoryTime);
       RobotSide handPoseSide = RobotSide.LEFT;
-      double[] desiredArmPose = createRandomArmPose(handPoseSide);
+      double[] desiredArmPose = createArmPoseAtJointLimits(handPoseSide);
       HandPosePacket handPosePacket = new HandPosePacket(handPoseSide, trajectoryTime, desiredArmPose);
 
       ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
@@ -272,9 +274,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      double[] finalHandPose = getCurrentArmPose(handPosePacket.getRobotSide());
 
-      assertArmPosesAreWithinThresholds(initialHandPose, finalHandPose, handPosePacket.getRobotSide(), 2.0 * DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
+      assertHandPosePacketDidNotExecute(handPoseSide, initialHandPose, handPosePacket);
       assertProperHeightOffset(desiredHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
@@ -317,9 +318,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
       assertTrue(success);
-      double[] intermediateArmPose = getCurrentArmPose(handPoseSide);
       assertProperHeightOffset(desiredIntermediateHeightOffset);
-      assertArmPosesAreWithinThresholds(initialArmPose, intermediateArmPose, handPoseSide, 3.0 * DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
+      assertHandPosePacketDidNotExecute(handPoseSide, initialArmPose, handPosePacket);
       assertTrue(!scriptBehavior.isDone());
 
       scriptBehavior.resume();
@@ -620,6 +620,19 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       return armPose;
    }
 
+   private double[] createArmPoseAtJointLimits(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         double qDesired = clipDesiredJointQToJointLimits(robotSide, armJointNames[jointNum], Double.POSITIVE_INFINITY);
+         armPose[jointNum] = qDesired;
+      }
+
+      return armPose;
+   }
+
    private double[] createRandomArmPose(RobotSide robotSide)
    {
       double[] armPose = new double[numberOfArmJoints];
@@ -632,10 +645,41 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       return armPose;
    }
-   
+
    private void assertArmPosesAreWithinThresholds(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide)
    {
       assertArmPosesAreWithinThresholds(desiredArmPose, actualArmPose, robotSide, DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
+   }
+
+   private void assertArmPoseDidNotChange(double[] initialArmPose, RobotSide robotSide, double jointPositionThreshold)
+   {
+      assertArmPosesAreWithinThresholds(initialArmPose, getCurrentArmPose(robotSide), robotSide, jointPositionThreshold);
+   }
+
+   private void assertHandPosePacketDidNotExecute(RobotSide robotSide, double[] initialArmPose, HandPosePacket handPosePacket)
+   {
+      double[] currentArmPose = getCurrentArmPose(robotSide);
+      double[] desiredArmPose = handPosePacket.getJointAngles();
+
+      double armPoseChangeFromInitial = computeTotalArmJointError(initialArmPose, currentArmPose);
+      double armPoseChangeToHandPosePacket = computeTotalArmJointError(desiredArmPose, currentArmPose);
+
+      boolean armPoseIsCloserToInitalThanToHandPosePacketTarget = armPoseChangeFromInitial < armPoseChangeToHandPosePacket;
+
+      assertTrue(armPoseIsCloserToInitalThanToHandPosePacketTarget);
+   }
+
+   private double computeTotalArmJointError(double[] desiredArmPose, double[] actualArmPose)
+   {
+      double ret = 0;
+
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         double q_desired = desiredArmPose[i];
+         double q_actual = actualArmPose[i];
+         ret += Math.abs(q_desired - q_actual);
+      }
+      return ret;
    }
 
    private void assertArmPosesAreWithinThresholds(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide, double jointPositionThreshold)
