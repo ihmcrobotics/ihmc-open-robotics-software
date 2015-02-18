@@ -18,12 +18,12 @@ import us.ihmc.utilities.io.printing.PrintTools;
 
 public class DRCNetworkProcessor
 {
-   private final PacketRouter networkProcessor;
+   private final PacketRouter packetRouter;
    private final boolean DEBUG = false;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      networkProcessor = new PacketRouter();
+      packetRouter = new PacketRouter();
       ArrayList<PacketCommunicator> communicators = createRequestedModules(robotModel, params);
       
       for (int i = 0; i < communicators.size(); i++)
@@ -31,7 +31,7 @@ public class DRCNetworkProcessor
          PacketCommunicator packetCommunicator = communicators.get(i);
          if(packetCommunicator != null)
          {
-            networkProcessor.attachPacketCommunicator(packetCommunicator);
+            packetRouter.attachPacketCommunicator(packetCommunicator);
             connect(packetCommunicator);
          } 
          else if(DEBUG)
@@ -190,7 +190,7 @@ public class DRCNetworkProcessor
 
    public void addPacketCommunicatorToRouter(PacketCommunicator packetCommunicator)
    {
-      networkProcessor.attachPacketCommunicator(packetCommunicator);
+      packetRouter.attachPacketCommunicator(packetCommunicator);
       connect(packetCommunicator);
    }
 }

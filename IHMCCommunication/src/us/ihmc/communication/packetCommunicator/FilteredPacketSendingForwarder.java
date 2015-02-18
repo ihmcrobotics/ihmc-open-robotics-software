@@ -3,6 +3,7 @@ package us.ihmc.communication.packetCommunicator;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -22,13 +23,16 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
    private final HashSet<Class> classesToInclude = new HashSet<Class>();
    private final HashSet<Class> classesToExclude = new HashSet<Class>();
    private enum ForwarderMode { INCLUSIVE, EXCLUSIVE, DISABLED };
+   private final AtomicSettableTimestampProvider timestampProvider;
    private ForwarderMode mode;
+
    
-   public FilteredPacketSendingForwarder(PacketCommunicator communicatorToForwardFrom, PacketCommunicator communicatorToForwardTo)
+   public FilteredPacketSendingForwarder(PacketCommunicator communicatorToForwardFrom, PacketCommunicator communicatorToForwardTo, AtomicSettableTimestampProvider timestampProvider)
    {
       this.communicatorToForwardFrom = communicatorToForwardFrom;
       this.communicatorToForwardTo = communicatorToForwardTo;
       communicatorToForwardFrom.attacthGlobalReceiveListener(this);
+      this.timestampProvider = timestampProvider;
    }
 
    /**
@@ -73,7 +77,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
     * @param minimumTimeBetweenForwardInNanos
     * @throws IllegalArgumentException If the class type was already added to the inclusive not intervaled list 
     */
-   public void enableInclusiveForwardingWithMinimumIntervals(Class clazz, long minimumTimeBetweenForwardInNanos)
+   public void enableInclusiveForwardingWithMinimumRobotTimeIntervals(Class clazz, long minimumTimeBetweenForwardInNanos)
    {
       if(classesToInclude.contains(clazz))
       {
@@ -160,15 +164,15 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
       private long startTime;
       private final long triggerTimeInNanoSeconds;
       
-      public TimedElapsedChecker(long timeInNanoSeconds)
+      public TimedElapsedChecker(long timeInMilliSeconds)
       {
-         startTime = System.nanoTime();
-         triggerTimeInNanoSeconds = timeInNanoSeconds;
+         startTime = timestampProvider.getTimestamp();
+         triggerTimeInNanoSeconds = timeInMilliSeconds * 1000000L;
       }
       
       public boolean getAndResetTimeElapsedIfElapsed()
       {
-         long currentTime = System.nanoTime();
+         long currentTime = timestampProvider.getTimestamp();
          if(currentTime - startTime >= triggerTimeInNanoSeconds)
          {
             startTime = currentTime;
