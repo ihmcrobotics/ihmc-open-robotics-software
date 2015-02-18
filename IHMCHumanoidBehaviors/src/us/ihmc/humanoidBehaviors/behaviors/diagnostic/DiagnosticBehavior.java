@@ -120,14 +120,18 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final double minPitch = Math.toRadians(40.0);
    private final double minMaxRoll = Math.toRadians(15.0);
    private final double minMaxYaw = Math.toRadians(30.0);
+   
    private final DoubleYoVariable footstepLength;
+   private final DoubleYoVariable swingTime;
+   private final DoubleYoVariable transferTime;
 
+   private final DoubleYoVariable maxFootPoseHeight;
+   private final DoubleYoVariable maxFootPoseDisplacement;
+   
    private final SideDependentList<ReferenceFrame> upperArmsFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> lowerArmsFrames = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForUpperArms = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForLowerArms = new SideDependentList<>();
-   private final DoubleYoVariable swingTime;
-   private final DoubleYoVariable transferTime;
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -153,6 +157,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());
       transferTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TransferTime", registry);
       transferTime.set(walkingControllerParameters.getDefaultTransferTime());
+      
+      maxFootPoseHeight = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxFootPoseHeight", registry);
+      maxFootPoseHeight.set(0.1);
+      maxFootPoseDisplacement = new DoubleYoVariable(behaviorNameFirstLowerCase + "maxFootPoseDisplacement", registry);
+      maxFootPoseDisplacement.set(0.2);
       
       trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
@@ -206,7 +215,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       requestedSingleArmPose = new EnumYoVariable<>("requestedSingleArmPose", registry, HumanoidArmPose.class, true);
       requestedSingleArmPose.set(null);
 
-      activeSideForFootControl = new EnumYoVariable<>("activeSideForFootControl", registry, RobotSide.class);
+      activeSideForFootControl = new EnumYoVariable<>("activeSideForFootControl", registry, RobotSide.class, true);
       activeSideForFootControl.set(RobotSide.LEFT);
 
       activeSideForHandControl = new EnumYoVariable<>("activeSideForHandControl", registry, RobotSide.class);
@@ -449,26 +458,119 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceFootPoseShort()
    {
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
+      if(robotSide == null)
+      {
+         for (RobotSide side : RobotSide.values())
+         {
+            submitFootPosesShort(side);
+         }
+      }
+      else
+      {
+         submitFootPosesShort(robotSide);
+      }
+      
+      submitHandPoseHomeCommand();
+   }
+   
+   private void submitFootPosesShort(RobotSide robotSide)
+   {
+      
+      double outsideFootDisplacement = maxFootPoseDisplacement.getDoubleValue();
+      double insideFootDisplacement = 0.4 * maxFootPoseDisplacement.getDoubleValue();
+      double footPoseHeight = maxFootPoseHeight.getDoubleValue();
+      
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
-
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.1, 0.0, 0.1));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -0.1, 0.0, 0.1));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
+      //foot remains flas
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      
+      //footOrientation changes
+      
+      
+      
+      //put the foot back on the ground
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
    }
    
    private void sequenceFootPoseLong()
    {
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
+      if(robotSide == null)
+      {
+         for (RobotSide side : RobotSide.values())
+         {
+            submitFootPosesLong(side);
+         }
+      }
+      else
+      {
+         submitFootPosesLong(robotSide);
+      }
+      
+      submitHandPoseHomeCommand();
+   }
+
+   private void submitFootPosesLong(RobotSide robotSide)
+   {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
       
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.1, 0.0, 0.1));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -0.1, 0.0, 0.1));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
+      double outsideFootDisplacement = maxFootPoseDisplacement.getDoubleValue();
+      double insideFootDisplacement = 0.2 * maxFootPoseDisplacement.getDoubleValue();
+      
+      double higherFootPoseHeight = maxFootPoseHeight.getDoubleValue();
+      double midFootPoseHeight = 0.5 * maxFootPoseHeight.getDoubleValue();
+      
+      
+      ///////////////////     good     ////////////////////////////
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, midFootPoseHeight));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
+      
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, midFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      ////////////////////////////////////////////////////////
+      
+      //put the foot back on the ground
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      
    }
 
    private void sequenceRunningMan()
@@ -554,7 +656,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceBow()
    {
-      bow(activeSideForFootControl.getEnumValue());
+      bow(RobotSide.LEFT);
    }
 
    private void bow(RobotSide LEFTSide)
@@ -1235,15 +1337,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
       submitFootPose(robotSide, desiredFootPose);
    }
-
-   private void submitFootstepPosition(RobotSide robotSide, FramePose desiredFootstepPosition)
-   {
-
-      FramePose footPose = new FramePose(desiredFootstepPosition);
-
-      pipeLine.submitSingleTaskStage(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime));
-   }
-
+   
    private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
    {
       //      desiredFootPose.checkReferenceFrameMatch(ankleZUpFrames.get(robotSide));
@@ -1253,6 +1347,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
       pipeLine.submitSingleTaskStage(new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime
             .getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+   }
+   
+   private void submitFootstepPosition(RobotSide robotSide, FramePose desiredFootstepPosition)
+   {
+
+      FramePose footPose = new FramePose(desiredFootstepPosition);
+
+      pipeLine.submitSingleTaskStage(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime));
    }
 
    @Override
