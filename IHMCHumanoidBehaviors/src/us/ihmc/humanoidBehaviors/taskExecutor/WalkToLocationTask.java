@@ -27,8 +27,8 @@ public class WalkToLocationTask extends BehaviorTask
    @Override
    protected void setBehaviorInput()
    {
-      walkToLocationBehavior.setTarget(targetPoseInWorld);
       walkToLocationBehavior.setwalkingYawOrientationAngle(walkingYawOrientationAngle);
       walkToLocationBehavior.setFootstepLength(footstepLength);
+      walkToLocationBehavior.setTarget(targetPoseInWorld);
    }
 }
