@@ -33,10 +33,46 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 /**
  * Created by agrabertilton on 2/11/15.
  */
-public class ConvexHullTrajectoryGeneratorTest
+public class SwingHeightTrajectoryCalculatorTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables(); 
-   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
+   public void testHeightFromPose()
+   {
+
+      double boxHeight = 0.2;
+      CombinedTerrainObject3D groundProfile = createBoxTerrainProfile(boxHeight);
+
+      double centerX = 0;
+      double centerY = 0;
+      double halfWidth = 1.0;
+      double resolution = 0.02;
+      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
+
+
+      double horizontalBuffer = .1; //10cm
+      double verticalBuffer = 0.05; //5cm
+      double pathWidth = 0.12; //12cm
+
+      SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth);
+      FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
+
+      Point3d startPosition = new Point3d(0.0, 0.0, 0.0);
+      Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      startPose.setPose(startPosition, startOrientation);
+
+      Point3d endPosition = new Point3d(0.5, 0.0, 0.0);
+      Quat4d endOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      endPose.setPose(endPosition, endOrientation);
+
+      double swingHeight = generator.getSwingHeight(startPose, endPose, groundMap);
+      assertTrue(swingHeight >= boxHeight + verticalBuffer);
+   }
+
    @AverageDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testWithHeightMap()
@@ -82,7 +118,7 @@ public class ConvexHullTrajectoryGeneratorTest
    @Test(timeout = 300000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
-      boolean VISUALIZE = false;
+      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
       double horizontalBuffer = .1; //10cm
       double verticalBuffer = 0.05; //5cm
       double pathWidth = 0.12; //12cm
@@ -195,6 +231,17 @@ public class ConvexHullTrajectoryGeneratorTest
          scs.tickAndUpdate();
       }
       scs.startOnAThread();
+   }
+
+   private CombinedTerrainObject3D createBoxTerrainProfile(double maxZHeight)
+   {
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("stairs");
+
+      AppearanceDefinition color = YoAppearance.DarkGray();
+      combinedTerrainObject.addBox(-100.0, -100.0, 100.0, 100.0, 0.001, color);
+
+      combinedTerrainObject.addBox(0.10, -0.5, 0.4, 0.5, maxZHeight);
+      return combinedTerrainObject;
    }
 
    private CombinedTerrainObject3D createWalledTerrainProfile()
