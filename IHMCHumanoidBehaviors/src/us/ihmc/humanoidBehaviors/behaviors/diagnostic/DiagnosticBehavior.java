@@ -9,6 +9,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -24,6 +26,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
@@ -32,7 +35,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -101,7 +104,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private enum DiagnosticTask
    {
-      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATATHON, SIMPLE_WARMUP
+      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATATHON, SIMPLE_WARMUP, STEPS_IN_PLACE
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -121,6 +124,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<ReferenceFrame> lowerArmsFrames = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForUpperArms = new SideDependentList<>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> inverseKinematicsForLowerArms = new SideDependentList<>();
+   private final DoubleYoVariable swingTime;
+   private final DoubleYoVariable transferTime;
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -142,6 +147,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
 
+      swingTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "SwingTime", registry);
+      swingTime.set(walkingControllerParameters.getDefaultSwingTime());
+      transferTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TransferTime", registry);
+      transferTime.set(walkingControllerParameters.getDefaultTransferTime());
+      
       trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
       sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
@@ -689,6 +699,32 @@ public class DiagnosticBehavior extends BehaviorInterface
       //      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2,footstepLength.getDoubleValue()));
    }
 
+   private void sequenceStepsInPlace()
+   {
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FramePose footstepPose = new FramePose();
+      
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+      {
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            footstepPose.setToZero(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
+            footstepPose.changeFrame(worldFrame);
+
+            Point3d footLocation = new Point3d();
+            Quat4d footOrientation = new Quat4d();
+
+            footstepPose.getPosition(footLocation);
+            footstepPose.getOrientation(footOrientation);
+
+            FootstepData footstepData = new FootstepData(robotSide, footLocation, footOrientation);
+
+            footstepDataList.add(footstepData);
+         }
+      }
+      pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
+   }
+   
    private void karateKid(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
@@ -1237,6 +1273,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                break;
             case SIMPLE_WARMUP:
                sequenceSimpleWarmup();
+               break;
+            case STEPS_IN_PLACE:
+               sequenceStepsInPlace();
                break;
             default:
                break;
