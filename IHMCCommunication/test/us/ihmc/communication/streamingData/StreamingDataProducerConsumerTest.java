@@ -8,8 +8,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class StreamingDataProducerConsumerTest
 {
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 1.7)
+	@Test(timeout = 30000)
    public void testTypicalUsage()
    {
       SimpleStreamingDataProducer simpleStreamingDataProducer = new SimpleStreamingDataProducer();
@@ -24,8 +24,8 @@ public class StreamingDataProducerConsumerTest
       }
    }
 
-	@AverageDuration
-	@Test(timeout=300000)
+	@AverageDuration(duration = 1.7)
+	@Test(timeout = 30000)
    public void testMultipleProducersAndConsumers()
    {
       SimpleStreamingDataProducer simpleStreamingDataProducerA = new SimpleStreamingDataProducer();

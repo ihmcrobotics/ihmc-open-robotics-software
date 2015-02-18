@@ -3,6 +3,8 @@ package us.ihmc.communication.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import us.ihmc.utilities.code.agileTesting.runner.BambooTestSuiteRunner;
+
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(Suite.class)
 @Suite.SuiteClasses
@@ -47,6 +49,6 @@ public class IHMCCommunicationAFastTestSuite
 {
    public static void main(String[] args)
    {
-
+      new BambooTestSuiteRunner(IHMCCommunicationAFastTestSuite.class);
    }
 }

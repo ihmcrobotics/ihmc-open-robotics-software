@@ -21,8 +21,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public class InterprocessObjectCommunicatorTest
 {
-   @AverageDuration(duration = 0.1)
-   @Test(timeout = 2000)
+	@AverageDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
       TestNetClassList classList = new TestNetClassList();
@@ -45,8 +45,8 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-   @AverageDuration(duration = 0.1)
-   @Test(timeout = 5000)
+	@AverageDuration(duration = 0.7)
+   @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {
       InterprocessObjectCommunicator port128ClientA = new InterprocessObjectCommunicator(128, new TestNetClassList());
