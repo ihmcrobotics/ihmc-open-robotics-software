@@ -96,6 +96,7 @@ public class IndividualRobotiqHandController
       this.trajectoryTime = trajectoryTime;
       hasTrajectoryTimeChanged = new BooleanYoVariable(sidePrefix + "HasTrajectoryTimeChanged", registry);
       isStopped = new BooleanYoVariable(sidePrefix + "IsStopped", registry);
+      isStopped.set(false);
       trajectoryTime.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -115,6 +116,7 @@ public class IndividualRobotiqHandController
 
    public void open(double percent)
    {
+      isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenHandDesiredConfiguration(robotSide);
       computeAllFinalDesiredAngles(percent, openHandDesiredConfiguration);
    }
@@ -126,6 +128,7 @@ public class IndividualRobotiqHandController
 
    public void open(double percent, FingerName fingerName)
    {
+      isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> openFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations
             .getOpenHandDesiredConfiguration(robotSide);
       computeOneFingerDesiredAngles(percent, openFingerDesiredConfiguration, fingerName);
@@ -138,6 +141,7 @@ public class IndividualRobotiqHandController
 
    public void close(double percent)
    {
+      isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
             .getClosedHandDesiredConfiguration(robotSide);
       computeAllFinalDesiredAngles(percent, closedHandDesiredConfiguration);
@@ -150,6 +154,7 @@ public class IndividualRobotiqHandController
 
    public void close(double percent, FingerName fingerName)
    {
+      isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> closedFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations
             .getClosedHandDesiredConfiguration(robotSide);
       computeOneFingerDesiredAngles(percent, closedFingerDesiredConfiguration, fingerName);
@@ -157,6 +162,7 @@ public class IndividualRobotiqHandController
 
    public void hook()
    {
+      isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
             .getClosedHandDesiredConfiguration(robotSide);
       EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenHandDesiredConfiguration(robotSide);
@@ -186,6 +192,7 @@ public class IndividualRobotiqHandController
 
    public void reset()
    {
+      isStopped.set(false);
       for (int i = 0; i < allFingerJoints.size(); i++)
       {
          OneDegreeOfFreedomJoint fingerJoint = allFingerJoints.get(i);
