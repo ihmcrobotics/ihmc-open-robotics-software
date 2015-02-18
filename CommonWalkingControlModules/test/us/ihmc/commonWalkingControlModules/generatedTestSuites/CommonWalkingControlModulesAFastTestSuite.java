@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingHeightTrajectoryCalculatorTest;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(Suite.class)
@@ -51,12 +50,12 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingHeightTrajectoryCal
    us.ihmc.commonWalkingControlModules.trajectories.CirclePositionTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmootherTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.Constrained5thOrderPolyForSwingTrajectoryTest.class,
-   SwingHeightTrajectoryCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.EndPointConstrainedCubicTrajectoryTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SmoothenedConstantCoPICPTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SplineBasedCoMHeightTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.StraightUpThenParabolicCartesianTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.SwingHeightTrajectoryCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.TakeoffLandingCartesianTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines1DTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines2DTest.class,
