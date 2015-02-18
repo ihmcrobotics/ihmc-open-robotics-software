@@ -62,7 +62,10 @@ public class LogControlClient implements NetStateListener
    
    public void close()
    {
-      client.close();
+      if(client.isConnected())
+      {
+         client.close();  
+      }
    }
    
    public void connect()

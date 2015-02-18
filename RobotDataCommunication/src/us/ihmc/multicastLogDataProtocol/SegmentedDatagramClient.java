@@ -53,6 +53,11 @@ public class SegmentedDatagramClient extends Thread
          return false;
       }
    }
+   
+   public boolean isRunning()
+   {
+      return running;
+   }
 
    private void updateBuffer(SegmentHeader header, ByteBuffer buffer)
    {
