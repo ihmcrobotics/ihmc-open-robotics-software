@@ -123,7 +123,7 @@ public class FingerStateBehavior extends BehaviorInterface
       else
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
    }
 
    @Override
