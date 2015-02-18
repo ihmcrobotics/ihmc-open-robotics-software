@@ -74,8 +74,8 @@ public class AtlasMultiContactTest
       }
    }
 
-	@AverageDuration(duration = 21.8)
-	@Test(timeout = 65420)
+	@AverageDuration(duration = 38.4)
+	@Test(timeout = 192109)
    public void testMultiContactLocomotion() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
