@@ -11,7 +11,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.behaviorTests.AtlasRotateHandAboutAxisBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
 })
