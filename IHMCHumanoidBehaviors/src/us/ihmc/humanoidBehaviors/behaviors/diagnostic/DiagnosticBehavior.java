@@ -9,6 +9,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
@@ -104,7 +106,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private enum DiagnosticTask
    {
-      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATATHON, SIMPLE_WARMUP, STEPS_IN_PLACE
+      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES_SHORT, FOOT_POSES_LONG, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS_SHORT,STEPS_LONG,SQUATATHON, SIMPLE_WARMUP, STEPS_IN_PLACE
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -445,11 +447,23 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_STRAIGHT_DOWN);
    }
 
-   private void sequenceFootPose()
+   private void sequenceFootPoseShort()
    {
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
 
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.1, 0.0, 0.1));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -0.1, 0.0, 0.1));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+   }
+   
+   private void sequenceFootPoseLong()
+   {
+      RobotSide robotSide = activeSideForFootControl.getEnumValue();
+      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
+      
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, 0.1));
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.1, 0.0, 0.1));
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -0.1, 0.0, 0.1));
@@ -641,62 +655,82 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
    }
 
-   private void sequenceSteps()
+   private void sequenceStepsLong()
    {
       pipeLine.requestNewStage();
 
+      double distanceToWalk = 0.5;
+      
+      /////////// normal stance ///////////
       // forward
-      FramePose2d targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, 0.0);
-      targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0, footstepLength.getDoubleValue(), yoTime));
-
-      pipeLine.requestNewStage();
-
+      submitWalkToLocation(distanceToWalk, 0.0, 0.0,0.0);
       //backward
-      targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0, 0.0);
-      targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI, footstepLength.getDoubleValue(), yoTime));
-
-      pipeLine.requestNewStage();
-
+      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
       //sideWalk
-      targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.5, 0.0, -Math.PI / 2.0);
-      targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI / 2, footstepLength.getDoubleValue(), yoTime));
+      submitWalkToLocation(distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
+      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+      //turn in place
+      submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      
+      /////////// arms out ///////////
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
+      
+      // forward
+      submitWalkToLocation(distanceToWalk, 0.0, 0.0,0.0);
+      //backward
+      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+      //sideWalk
+      submitWalkToLocation(distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
+      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+      //turn in place
+      submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      
+      submitHandPoseHomeCommand();
+      
+      /////////// chest bending backward///////////
+      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame);
+      desiredChestOrientation.setYawPitchRoll(0.0, Math.toRadians(-10.0), 0.0);
+      submitDesiredChestOrientation(desiredChestOrientation);
+      
+      // forward
+      submitWalkToLocation(distanceToWalk, 0.0, 0.0,0.0);
+      //backward
+      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+      //sideWalk
+      submitWalkToLocation(distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
+      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+      //turn in place
+      submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      
+      submitChestHomeCommand();
+   }
 
+   private void sequenceStepsShort()
+   {
       pipeLine.requestNewStage();
 
-      targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, 0.0, 0.0, 0.0);
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+      {
+         // forward
+         submitWalkToLocation(0.5, 0.0, 0.0, 0.0);
+         //backward
+         submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+         //sideWalk
+         submitWalkToLocation(0.5, 0.0, -Math.PI / 2.0, -Math.PI / 2.0);
+         submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+         //turn in place
+         submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      }
+   }
+
+   private void submitWalkToLocation(double x, double y, double robotYaw,double angleRelativeToPath)
+   {
+      FramePose2d targetPoseInWorld = new FramePose2d();
+      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI / 2.0, footstepLength.getDoubleValue(), yoTime));
-
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue(),
+            yoTime));
       pipeLine.requestNewStage();
-      //      
-      //      targetPoseInWorld = new FramePose2d();
-      //      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, 0.0);
-      //      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0,footstepLength.getDoubleValue()));
-      //      
-      //      pipeLine.requestNextStage();
-
-      //      pipeLine.requestNextStage();
-      //      
-      //      targetPoseInWorld = new FramePose2d();
-      //      targetPoseInWorld.setPose(worldFrame, 0.01, 0.0, Math.PI/4.0);
-      //      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, 0.0,footstepLength.getDoubleValue()));
-      //      //sideWalk 180degrees
-      //      targetPoseInWorld = new FramePose2d();
-      //      targetPoseInWorld.setPose(worldFrame, 0.5, 0.0, -Math.PI/2);
-      //      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, -Math.PI/2,footstepLength.getDoubleValue()));
-      //      
-      //      pipeLine.requestNextStage();
-      //      
-      //      targetPoseInWorld = new FramePose2d();
-      //      targetPoseInWorld.setPose(worldFrame, 0.0, 0.0, -Math.PI/2);
-      //      pipeLine.submit(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, Math.PI/2,footstepLength.getDoubleValue()));
    }
 
    private void sequenceStepsInPlace()
@@ -960,6 +994,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue()));
    }
+   
+   private void submitChestHomeCommand()
+   {
+      ChestOrientationPacket chestHomeOrientationPacket =  PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime.getDoubleValue());
+      pipeLine.submitSingleTaskStage(new ChestOrientationTask(chestHomeOrientationPacket, yoTime, chestOrientationBehavior));
+   }
 
    private void submitDesiredCoMHeightOffset(double offsetHeight)
    {
@@ -1053,6 +1093,16 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
+   private void submitHandPoseHomeCommand()
+   {
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         HandPosePacket handPosePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime.getDoubleValue());
+         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+      }
+   }
+   
    private FrameOrientation computeUpperArmOrientationForRightSideGivenLeft(FrameOrientation leftOrientation)
    {
       if (leftOrientation == null) return null;
@@ -1243,8 +1293,11 @@ public class DiagnosticBehavior extends BehaviorInterface
             case UPPER_BODY:
                sequenceUpperBody();
                break;
-            case FOOT_POSES:
-               sequenceFootPose();
+            case FOOT_POSES_SHORT:
+               sequenceFootPoseShort();
+               break;
+            case FOOT_POSES_LONG:
+               sequenceFootPoseLong();
                break;
             case RUNNING_MAN:
                sequenceRunningMan();
@@ -1255,11 +1308,14 @@ public class DiagnosticBehavior extends BehaviorInterface
             case KARATE_KID:
                karateKid(activeSideForFootControl.getEnumValue());
                break;
-            case STEPS:
-               sequenceSteps();
+            case STEPS_SHORT:
+               sequenceStepsShort();
+               break;
+            case STEPS_LONG:
+               sequenceStepsLong();
                break;
             case WHOLE_SCHEBANG:
-               sequenceSteps();
+               sequenceStepsLong();
                sequenceRunningMan();
                karateKid(activeSideForFootControl.getEnumValue());
                sequenceBow();
