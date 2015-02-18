@@ -11,7 +11,7 @@
       
       <gravity>0 0 -9.81</gravity>
       <real_time_update_rate>2000</real_time_update_rate>
-      <max_step_size>0.0005</max_step_size>
+      <max_step_size>0.00066</max_step_size>
       
       <ode>
         <solver>
@@ -57,6 +57,10 @@
       </drc_fire_hose>
     </plugin>
     <plugin filename="libVRCScoringPlugin.so" name="vrc_scoring" />
+    
+    <include>
+    	<uri>model://polaris_ranger_xp900_no_roll_cage</uri>
+    <include>
     
   </world>
 </sdf>

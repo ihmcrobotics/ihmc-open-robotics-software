@@ -3,11 +3,11 @@
   <arg name="gzname" default="gazebo"/>
   <arg name="gzworld" default="'$(find ihmc_gazebo)/worlds/atlas_default.world'"/>
   <arg name="hand_suffix" default=""/>
-  <arg name="extra_gazebo_args" default="-q" />
+  <arg name="extra_gazebo_args" default="-q -e dart" />
   <arg name="model_args" default="" />
 
-  <param name="/atlas/time_to_unpin" type="double" value="500.0"/>
-  <param name="/atlas/startup_mode" type="string" value="bdi_stand"/>
+  <param name="/atlas/time_to_unpin" type="double" value="0.5"/>
+  <param name="/atlas/startup_mode" type="string" value="standing"/>
 
   <!-- start gazebo with the Atlas -->
   <include file="$(find ihmc_gazebo)/launch/atlas_no_controllers.launch">
@@ -18,12 +18,12 @@
 
   <!-- Robot Description -->
   <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v4.urdf.xacro'" />
-  <param name="robot_initial_pose/x"     value="0" type="double"/>
-  <param name="robot_initial_pose/y"     value="0" type="double"/>
-  <param name="robot_initial_pose/z"     value="0.86" type="double"/>
-  <param name="robot_initial_pose/roll"  value="0" type="double"/>
-  <param name="robot_initial_pose/pitch" value="0" type="double"/>
-  <param name="robot_initial_pose/yaw"   value="0" type="double"/>  
+  <param name="robot_initial_pose/x"     value="0.10" type="double"/>
+  <param name="robot_initial_pose/y"     value="-0.45" type="double"/>
+  <param name="robot_initial_pose/z"     value="0.87" type="double"/>
+  <param name="robot_initial_pose/roll"  value="0.0" type="double"/>
+  <param name="robot_initial_pose/pitch" value="-0.0" type="double"/>
+  <param name="robot_initial_pose/yaw"   value="-0.0" type="double"/>  
     
   <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v4_bringup.launch"/>
 </launch>

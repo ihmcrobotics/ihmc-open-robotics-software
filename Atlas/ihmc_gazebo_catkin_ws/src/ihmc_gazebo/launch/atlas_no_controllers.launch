@@ -1,7 +1,7 @@
 <launch>
   <arg name="gzname" default="gazebo"/>
   <arg name="gzworld" default="atlas.world"/>
-  <arg name="extra_gazebo_args" default="" />
+  <arg name="extra_gazebo_args" default="-e dart" />
 
   <param name="/use_sim_time" type="bool" value="true"/>
 
