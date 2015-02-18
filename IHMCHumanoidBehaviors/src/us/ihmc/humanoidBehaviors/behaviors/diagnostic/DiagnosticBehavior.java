@@ -501,7 +501,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       
       //footOrientation changes
-      
+//      submitFootPose(robotSide, ankleZUpFrame, 0.0, 0.0, footPoseHeight, yaw, pitch, roll);
       
       
       //put the foot back on the ground
@@ -1341,6 +1341,19 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
    {
       //      desiredFootPose.checkReferenceFrameMatch(ankleZUpFrames.get(robotSide));
+      desiredFootPose.changeFrame(worldFrame);
+      Point3d desiredFootPosition = new Point3d();
+      Quat4d desiredFootOrientation = new Quat4d();
+      desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
+      pipeLine.submitSingleTaskStage(new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime
+            .getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+   }
+   
+   private void submitFootPose(RobotSide robotSide, ReferenceFrame referenceFrame, double x, double y, double z, double yaw, double pitch, double roll)
+   {
+      FramePoint framePosition = new FramePoint(referenceFrame, x, y, z);
+      FrameOrientation frameOrientation = new FrameOrientation(referenceFrame, yaw, pitch, roll);
+      FramePose desiredFootPose = new FramePose(framePosition, frameOrientation);
       desiredFootPose.changeFrame(worldFrame);
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
