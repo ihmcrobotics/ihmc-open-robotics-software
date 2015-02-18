@@ -1,32 +1,32 @@
-package us.ihmc.humanoidBehviors.behaviors.primitives;
+package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.walking.FootStatePacket;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
+import us.ihmc.communication.packets.walking.ThighStatePacket;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ThighStateBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-public class FootStateBehaviorTest
+public class ThighStateBehaviorTest
 {
    @AverageDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testSetInput()
    {
       OutgoingCommunicationBridgeInterface outgoingCommunicationBridge = null;
-      FootStateBehavior footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
+      ThighStateBehavior thighStateBehavior = new ThighStateBehavior(outgoingCommunicationBridge);
       
-      FootStatePacket footStatePacket = new FootStatePacket(RobotSide.LEFT, true);
+      ThighStatePacket thighStatePacket = new ThighStatePacket(RobotSide.LEFT, true);
       
       PacketDestination destination = PacketDestination.UI;
-      footStatePacket.setDestination(destination);
+      thighStatePacket.setDestination(destination);
       
-      footStateBehavior.setInput(footStatePacket);
+      thighStateBehavior.setInput(thighStatePacket);
       
-      assertTrue("Input was not set correctly.", footStateBehavior.hasInputBeenSet());
+      assertTrue("Input was not set correctly.", thighStateBehavior.hasInputBeenSet());
    }
 }
