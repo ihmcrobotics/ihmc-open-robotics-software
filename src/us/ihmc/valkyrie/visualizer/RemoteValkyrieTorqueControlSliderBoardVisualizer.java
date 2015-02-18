@@ -6,7 +6,7 @@ public class RemoteValkyrieTorqueControlSliderBoardVisualizer
 {
    public RemoteValkyrieTorqueControlSliderBoardVisualizer(String[] networkArguments)
    {
-      new RemoteValkyrieVisualizer(networkArguments, ValkyrieSliderBoardType.TORQUE_PD_CONTROL);
+      new RemoteValkyrieVisualizer(ValkyrieSliderBoardType.TORQUE_PD_CONTROL);
    }
    
    public static void main(String[] args)
