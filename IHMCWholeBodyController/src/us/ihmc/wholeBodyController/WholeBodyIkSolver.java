@@ -473,8 +473,9 @@ abstract public class WholeBodyIkSolver
             Vector64F target = handTask.getTarget();
             Matrix3d rot = new Matrix3d();
             rot.set( new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) ) );
-            handTask.disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m02, rot.m12, rot.m22)); 
-
+            
+            handTask.disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m01, rot.m11, rot.m21));  
+            
             break;
          case DOF_3P3R:
             handTask.setEnabled(true);
