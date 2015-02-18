@@ -32,6 +32,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -100,7 +101,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private enum DiagnosticTask
    {
-      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATS, SIMPLE_WARMUP
+      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS, SQUATATHON, SIMPLE_WARMUP
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -140,6 +141,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
+
       trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
       sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
@@ -868,8 +870,43 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceSquats()
    {
-      submitDesiredCoMHeightOffset(minCoMHeightOffset.getDoubleValue());
-      submitDesiredCoMHeightOffset(maxCoMHeightOffset.getDoubleValue());
+	   FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
+	      desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(15), 0.0);
+	      desiredPelvisOrientation.changeFrame(worldFrame);
+	      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+	            sleepTimeBetweenPoses.getDoubleValue()));
+
+	      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(15.0), 0.0);
+	      desiredChestOrientation.changeFrame(worldFrame);
+	      pipeLine.submitTaskForPallelPipesStage(
+	            chestOrientationBehavior,
+	            new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
+	                  .getDoubleValue()));
+	      
+	      submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_WAY_FORWARD);
+	      
+	      pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, new CoMHeightTask(minCoMHeightOffset.getDoubleValue(), yoTime, comHeightBehavior, 
+	    		  trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      
+	      pipeLine.requestNewStage();
+	      
+      desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0);
+      desiredChestOrientation.changeFrame(worldFrame);
+      pipeLine.submitTaskForPallelPipesStage(
+            chestOrientationBehavior,
+            new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
+                  .getDoubleValue()));
+
+      desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
+      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
+      desiredPelvisOrientation.changeFrame(worldFrame);
+      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
+            sleepTimeBetweenPoses.getDoubleValue()));
+      
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      
+      pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, new CoMHeightTask(maxCoMHeightOffset.getDoubleValue(), yoTime, comHeightBehavior, 
+            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
    }
 
    private ReferenceFrame findFixedFrameForPelvisOrientation()
@@ -1191,7 +1228,7 @@ public class DiagnosticBehavior extends BehaviorInterface
                karateKid(activeSideForFootControl.getEnumValue());
                sequenceBow();
                break;
-            case SQUATS:
+            case SQUATATHON:
                for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
                   sequenceSquats();
                break;
