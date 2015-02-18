@@ -50,7 +50,7 @@ public class HandPoseTask extends BehaviorTask
 
    public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime, double sleepTime)
    {
-      super(handPoseBehavior, yoTime);
+      super(handPoseBehavior, yoTime,sleepTime);
       this.handPoseBehavior = handPoseBehavior;
       this.handPosePacket = handPosePacket;
 
