@@ -153,8 +153,11 @@ public class YoVariableConsumer implements LogPacketHandler
 
    public void close()
    {
-      client.close();
-      updateHandler.shutdown();
+      if(client.isRunning())
+      {
+         client.close();
+         updateHandler.shutdown();  
+      }
    }
 
    @Override
