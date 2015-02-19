@@ -142,8 +142,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final EnumYoVariable<RobotSide> activeSideForFootControl;
    private final EnumYoVariable<RobotSide> supportLeg;
 
-   private final double maxPitch = Math.toRadians(-5.0);
-   private final double minPitch = Math.toRadians(40.0);
+   private final double maxPitchBackward = Math.toRadians(-5.0);
+   private final double maxPitchForward = Math.toRadians(40.0);
    private final double minMaxRoll = Math.toRadians(15.0);
    private final double minMaxYaw = Math.toRadians(30.0);
    
@@ -386,7 +386,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
    }
-   
+
    private void sequenceGoHome()
    {
       submitPelvisHomeCommand(true);
@@ -398,11 +398,11 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       double percentOfJointLimit = 0.55;
       double roll = percentOfJointLimit * minMaxRoll;
-      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * minPitch, 0.0);
+      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredChestOrientation(false, minMaxYaw, percentOfJointLimit * minPitch, 0.0);
-         submitDesiredChestOrientation(false, -minMaxYaw, percentOfJointLimit * minPitch, 0.0);
+         submitDesiredChestOrientation(false, minMaxYaw, percentOfJointLimit * maxPitchForward, 0.0);
+         submitDesiredChestOrientation(false, -minMaxYaw, percentOfJointLimit * maxPitchForward, 0.0);
       }
       submitDesiredChestOrientation(false, 0.0, 0.0, roll);
       if (doPelvisAndChestYaw.getBooleanValue())
@@ -416,8 +416,8 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitDesiredChestOrientation(false, minMaxYaw, 0.0, -roll);
          submitDesiredChestOrientation(false, -minMaxYaw, 0.0, -roll);
       }
-      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * minPitch, roll);
-      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * minPitch, -roll);
+      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, roll);
+      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, -roll);
 
       submitDesiredChestOrientation(false, 0.0, 0.0, 0.0);
    }
@@ -427,11 +427,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       double percentOfJointLimit = 0.3;
       double roll = percentOfJointLimit * minMaxRoll;
       double yaw = percentOfJointLimit * minMaxYaw;
-      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * minPitch, 0.0);
+      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredPelvisOrientation(false, yaw, percentOfJointLimit * minPitch, 0.0);
-         submitDesiredPelvisOrientation(false, -yaw, percentOfJointLimit * minPitch, 0.0);
+         submitDesiredPelvisOrientation(false, yaw, percentOfJointLimit * maxPitchForward, 0.0);
+         submitDesiredPelvisOrientation(false, -yaw, percentOfJointLimit * maxPitchForward, 0.0);
       }
       submitDesiredPelvisOrientation(false, 0.0, 0.0, roll);
       if (doPelvisAndChestYaw.getBooleanValue())
@@ -445,8 +445,8 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitDesiredPelvisOrientation(false, yaw, 0.0, -roll);
          submitDesiredPelvisOrientation(false, -yaw, 0.0, -roll);
       }
-      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * minPitch, roll);
-      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * minPitch, -roll);
+      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, roll);
+      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, -roll);
 
       submitPelvisHomeCommand(false);
    }
@@ -478,11 +478,11 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       double percentOfJointLimit = 0.8;
       double percentOfJointLimitForPelvis = 0.5;
-      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * minPitch, 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * minPitch, 0.0);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchForward, 0.0);
       
-      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitch, 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitch, 0.0);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchBackward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchBackward, 0.0);
       
       submitDesiredChestOrientation(true, 0.0, 0.0, percentOfJointLimit * minMaxRoll);
       submitDesiredPelvisOrientation(true, 0.0, 0.0, percentOfJointLimitForPelvis * minMaxRoll);
@@ -490,17 +490,17 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredChestOrientation(true, 0.0, 0.0, -percentOfJointLimit * minMaxRoll);
       submitDesiredPelvisOrientation(true, 0.0, 0.0, -percentOfJointLimitForPelvis * minMaxRoll);
       
-      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * minPitch, 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * minPitch, percentOfJointLimitForPelvis * minMaxRoll);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchForward, percentOfJointLimitForPelvis * minMaxRoll);
       
-      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * minPitch, 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * minPitch, -percentOfJointLimitForPelvis * minMaxRoll);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchForward, -percentOfJointLimitForPelvis * minMaxRoll);
       
-      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitch, 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitch, -percentOfJointLimitForPelvis * minMaxRoll);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchBackward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchBackward, -percentOfJointLimitForPelvis * minMaxRoll);
       
-      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitch, 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitch, percentOfJointLimitForPelvis * minMaxRoll);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchBackward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchBackward, percentOfJointLimitForPelvis * minMaxRoll);
       
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
